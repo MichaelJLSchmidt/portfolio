@@ -5,11 +5,18 @@ topographic contour map. Projects are presented as original "Summit Cards".
 
 This repository currently holds the foundation plus three technical spikes for the signature effects:
 
-1. **Persistent contour field**: one WebGL canvas behind all routes. It draws real swisstopo contours with a
-   pointer "headlamp", an intro sweep and terrain morphs.
-2. **Summit Card**: tilt, contour foil and flip, fully data-driven and accessible.
-3. **Card → case study transition**: a view-transition morph from the deck into `/work/[slug]`, synchronised
-   with the field.
+1. **Persistent contour field**: one WebGL canvas behind all routes. It draws real swisstopo contours with:
+   - a pointer "headlamp" and loupe;
+   - a rising alpenglow pulse;
+   - parallax and click pings;
+   - an intro sweep and terrain morphs.
+2. **Summit Card**: spring tilt and contour foil. Fully data-driven and accessible; the whole card links to its
+   case study.
+3. **Card → case study transition**: a choreographed view-transition morph from the deck into `/work/[slug]`
+   and back, synchronised with the field. Durations and their reasoning are in `src/app/globals.css`.
+
+Headlines use kinetic variable-font type (`src/components/type/KineticText.tsx`). The About page is planned in
+`docs/about-plan.md`.
 
 ## Stack
 
@@ -143,14 +150,16 @@ When it's time:
 ## Accessibility and motion
 
 - Semantic HTML first. The hero name is server-rendered text, so LCP is text, not the canvas.
-- All interactions work with the keyboard. Cards are real toggle buttons (`aria-pressed`) with a separate link
-  on the back, and flips are announced through a polite live region. Focus returns to the originating card after
-  navigating back.
+- All interactions work with the keyboard. Each card is a single link, named by the card's title, with the focus
+  ring around the card. Focus returns to the originating card after navigating back.
+- Kinetic headlines keep a hidden rest-state copy of each letter, so the animation never changes layout (no CLS).
+  The accessible name is the plain text.
 - Every effect has a reduced-motion twin, triggered by `prefers-reduced-motion` or the Calm map toggle (stored
   in localStorage):
   - the field becomes the static poster;
   - tilt is off;
   - the foil is static;
-  - the flip becomes a 150 ms crossfade;
-  - the route morph becomes a short crossfade.
+  - headlines don't animate;
+  - the deck doesn't deal in;
+  - the route morph becomes a 150 ms crossfade.
 - WCAG AA contrast is checked by `npm run check:contrast`.
