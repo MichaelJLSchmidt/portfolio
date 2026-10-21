@@ -1,17 +1,6 @@
-/* Registered so the touch shimmer can animate the foil and glare position. */
-@property --px {
-  syntax: "<percentage>";
-  inherits: true;
-  initial-value: 50%;
-}
-
-@property --py {
-  syntax: "<percentage>";
-  inherits: true;
-  initial-value: 50%;
-}
-
 .card {
+  --px: 50%;
+  --py: 50%;
   --rarity: var(--color-contour);
   --radius: 4.2cqi;
   position: relative;
@@ -472,25 +461,30 @@
   opacity: 1;
 }
 
-/* Touch without gyroscope: a slow shimmer instead of tilt. */
+/* Touch without gyroscope: a slow shimmer instead of tilt. It moves an oversized glare
+   layer with transform only, so it runs on the compositor (animating --px/--py would
+   repaint the blended gradients on the main thread every frame). */
 @keyframes shimmer {
   from {
-    --px: 18%;
-    --py: 12%;
+    transform: translate3d(-22%, -26%, 0);
   }
   to {
-    --px: 82%;
-    --py: 88%;
+    transform: translate3d(22%, 26%, 0);
   }
 }
 
 @media (any-pointer: coarse) {
-  .card[data-shimmer="true"] {
-    animation: shimmer 7s var(--ease-summit) infinite alternate;
-  }
-
   .card[data-shimmer="true"] .glare {
-    opacity: 0.6;
+    inset: -50%;
+    background: radial-gradient(
+      closest-side circle at 50% 50%,
+      rgb(255 255 255 / 0.4) 0%,
+      rgb(255 255 255 / 0.1) 45%,
+      rgb(255 255 255 / 0) 100%
+    );
+    opacity: 0.7;
+    animation: shimmer 7s var(--ease-summit) infinite alternate;
+    will-change: transform;
   }
 }
 
@@ -590,6 +584,9 @@
 :root[data-motion="reduced"] .card {
   --px: 50%;
   --py: 38%;
+}
+
+:root[data-motion="reduced"] .card .glare {
   animation: none;
 }
 
