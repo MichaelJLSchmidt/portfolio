@@ -29,7 +29,7 @@ export function encodeRgbPng(rgb, width, height) {
   for (let y = 0; y < height; y++) {
     const row = rgb.subarray(y * stride, (y + 1) * stride);
     const prev = y > 0 ? rgb.subarray((y - 1) * stride, y * stride) : null;
-    let best = -1, bestScore = Infinity;
+    let bestScore = Infinity;
     for (let f = 0; f <= 4; f++) {
       let score = 0;
       for (let i = 0; i < stride; i++) {
@@ -43,7 +43,6 @@ export function encodeRgbPng(rgb, width, height) {
       }
       if (score < bestScore) {
         bestScore = score;
-        best = f;
         out[y * (stride + 1)] = f;
         candidate.copy(out, y * (stride + 1) + 1);
       }

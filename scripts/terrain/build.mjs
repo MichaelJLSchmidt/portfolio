@@ -106,7 +106,7 @@ fillGaps(grid.data, grid.width, grid.height);
 const [minElev, maxElev] = minMax(grid.data);
 log(`  grid ${grid.width}×${grid.height} @ ${grid.resolution} m, elevation ${minElev.toFixed(1)}–${maxElev.toFixed(1)} m`);
 
-const [gMinE, gMinN, gMaxE, gMaxN] = grid.bbox;
+const [gMinE, , gMaxE, gMaxN] = grid.bbox;
 const toGridPx = (lon, lat) => {
   const [e, n] = wgs84ToLv95(lon, lat);
   return [(e - gMinE) / grid.resolution, (gMaxN - n) / grid.resolution];
@@ -151,13 +151,14 @@ for (const lake of cfg.lakes) {
 // 4. Contour poster (first paint, reduced motion, no-WebGL fallback)
 // ---------------------------------------------------------------------------
 const { intervalM, indexEvery } = cfg.contours;
+let poster;
 {
   const w = cfg.poster.gridWidth;
   const h = Math.round(w / aspect);
   const values = gaussianBlur(resampleArea(grid.data, grid.width, grid.height, w, h), w, h, cfg.poster.blurSigma);
   const mask = resampleArea(lakeMask, grid.width, grid.height, w, h);
   const thresholds = range(Math.ceil(minElev / intervalM) * intervalM, maxElev, intervalM);
-  var posterSize = write(
+  const posterSize = write(
     "contours.svg",
     contourSvg(values, w, h, {
       thresholds,
@@ -167,7 +168,7 @@ const { intervalM, indexEvery } = cfg.contours;
       lakeOpacity: 0.08,
     }),
   );
-  var poster = { file: "/terrain/contours.svg", width: w, height: h, ...posterSize };
+  poster = { file: "/terrain/contours.svg", width: w, height: h, ...posterSize };
 }
 
 // ---------------------------------------------------------------------------
