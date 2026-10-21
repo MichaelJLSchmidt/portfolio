@@ -487,6 +487,11 @@
   }
 }
 
+.card[data-opening="true"] .openChip {
+  opacity: 0;
+  transition: none;
+}
+
 /* -------------------------------------------------------- reduced motion */
 
 :root[data-motion="reduced"] .tilt {

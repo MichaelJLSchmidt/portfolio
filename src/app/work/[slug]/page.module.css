@@ -1,4 +1,6 @@
 .main {
+  /* Text reveals start once the shared artwork is mid-flight (see globals.css). */
+  --reveal-base: 520ms;
   display: grid;
   gap: clamp(40px, 5vw, 80px);
   padding-top: 96px;

@@ -5,8 +5,8 @@
 .kinetic {
   --kt-rest-wdth: calc(var(--type-display-wdth) * 1%);
   --kt-rest-wght: var(--type-display-wght);
-  --kt-from-wdth: 118%;
-  --kt-from-wght: 140;
+  --kt-from-wdth: 84%;
+  --kt-from-wght: 100;
   --kt-dur: var(--dur-cinematic);
   --kt-stagger: 38ms;
 }

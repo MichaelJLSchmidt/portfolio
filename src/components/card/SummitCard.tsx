@@ -47,6 +47,7 @@ export function SummitCard({
   linkToCaseStudy = true,
 }: SummitCardProps) {
   const [active, setActive] = useState(false);
+  const [opening, setOpening] = useState(false);
   const reduced = useReducedMotion();
   const gyro = useGyroStatus();
   const rootRef = useRef<HTMLElement>(null);
@@ -62,7 +63,11 @@ export function SummitCard({
 
   const morph = (part: "art" | "title", node: ReactNode) =>
     transitionNames ? (
-      <MorphTarget name={morphName(part, card.slug)} className={part === "art" ? styles.artSlot : undefined}>
+      <MorphTarget
+        name={morphName(part, card.slug)}
+        variant={part}
+        className={part === "art" ? styles.artSlot : undefined}
+      >
         {node}
       </MorphTarget>
     ) : (
@@ -77,6 +82,7 @@ export function SummitCard({
       data-rarity={card.rarity}
       data-size={size}
       data-active={active}
+      data-opening={opening}
       data-link={linkToCaseStudy}
       data-shimmer={!reduced && (gyro === "off" || gyro === "resume")}
       aria-labelledby={nameId}
@@ -148,7 +154,11 @@ export function SummitCard({
                 href={`/work/${card.slug}/`}
                 className={styles.cardLink}
                 aria-labelledby={nameId}
-                onClick={onOpen}
+                onClick={() => {
+                  // Hide hover-only chrome before the view transition snapshots the card.
+                  setOpening(true);
+                  onOpen?.();
+                }}
               />
             )}
           </div>

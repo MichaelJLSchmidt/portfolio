@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import meta from "@terrain/terrain.json";
 import type { Artwork } from "@/content/cards";
 import { asset } from "@/lib/asset";
@@ -26,11 +26,13 @@ export function CardArtwork({
   artwork,
   alt,
   className,
+  style,
   children,
 }: {
   artwork: Artwork;
   alt: string;
   className?: string;
+  style?: CSSProperties;
   /** Optional overlay (e.g. the "Open expedition log" chip). */
   children?: ReactNode;
 }) {
@@ -60,7 +62,7 @@ export function CardArtwork({
   }
 
   return (
-    <div className={className ? `${styles.artwork} ${className}` : styles.artwork} role="img" aria-label={alt}>
+    <div className={className ? `${styles.artwork} ${className}` : styles.artwork} style={style} role="img" aria-label={alt}>
       {/* eslint-disable-next-line @next/next/no-img-element -- static SVG, no optimisation needed */}
       <img className={styles.terrain} src={asset(terrain.svg)} alt="" width={w} height={h} decoding="async" />
       <svg className={styles.overlay} viewBox={vb.join(" ")} preserveAspectRatio="xMidYMid slice" aria-hidden="true">

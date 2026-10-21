@@ -21,6 +21,7 @@ export type KineticTextProps = {
   delay?: number;
   /** Letters near a fine pointer open up (wider and lighter), like a loupe over the map. */
   proximity?: boolean;
+  style?: CSSProperties;
 };
 
 /**
@@ -36,6 +37,7 @@ export function KineticText({
   play = "mount",
   delay = 0,
   proximity = false,
+  style,
 }: KineticTextProps) {
   const ref = useRef<HTMLElement>(null);
   const [inView, setInView] = useState(play === "mount");
@@ -127,7 +129,7 @@ export function KineticText({
       id={id}
       className={className ? `${styles.kinetic} ${className}` : styles.kinetic}
       data-play={inView ? "true" : "false"}
-      style={{ "--kt-delay": `${delay}ms` } as CSSProperties}
+      style={{ ...style, "--kt-delay": `${delay}ms` } as CSSProperties}
     >
       <span className="visually-hidden">{text}</span>
       <span className={styles.letters} aria-hidden="true">
