@@ -1,0 +1,86 @@
+{
+  "$comment": "Input for scripts/terrain. Region and card terrains; generated outputs land in public/terrain.",
+  "region": {
+    "name": "Thun – Interlaken – Grindelwald – Lauterbrunnen – Jungfrau",
+    "bboxWgs84": [
+      7.55,
+      46.47,
+      8.25,
+      46.8
+    ],
+    "focus": {
+      "label": "Interlaken",
+      "lon": 7.8632,
+      "lat": 46.6863
+    }
+  },
+  "source": {
+    "stacApi": "https://data.geo.admin.ch/api/stac/v1",
+    "collection": "ch.swisstopo.swissaltiregio",
+    "item": "swissaltiregio",
+    "nativeResolutionM": 10
+  },
+  "heightmaps": [
+    {
+      "name": "heightmap-2048",
+      "width": 2048,
+      "use": "desktop"
+    },
+    {
+      "name": "heightmap-1024",
+      "width": 1024,
+      "use": "mobile"
+    }
+  ],
+  "quantisationM": 1,
+  "contours": {
+    "intervalM": 100,
+    "indexEvery": 5
+  },
+  "poster": {
+    "gridWidth": 900,
+    "blurSigma": 1.1,
+    "simplifyTolerance": 0.45
+  },
+  "lakes": [
+    {
+      "name": "Thunersee",
+      "lon": 7.705,
+      "lat": 46.705
+    },
+    {
+      "name": "Brienzersee",
+      "lon": 7.96,
+      "lat": 46.725
+    }
+  ],
+  "cards": [
+    {
+      "id": "ikn-000",
+      "kind": "crop",
+      "center": {
+        "lon": 7.905,
+        "lat": 46.618
+      },
+      "widthKm": 33,
+      "aspect": 1.5,
+      "contourIntervalM": 200,
+      "indexEvery": 5,
+      "morphWidth": 512
+    },
+    {
+      "id": "dvb-001",
+      "kind": "seeded",
+      "seed": 1,
+      "lines": 20,
+      "indexEvery": 4,
+      "aspect": 1.5,
+      "elevationRangeM": [
+        520,
+        2380
+      ],
+      "morphWidth": 512
+    }
+  ],
+  "heightmapBlurSigma": 1
+}
