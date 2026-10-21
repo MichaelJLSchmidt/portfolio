@@ -9,10 +9,11 @@
   "scripts": {
     "dev": "node scripts/dev.mjs",
     "build": "next build",
-    "start": "node scripts/serve-out.mjs",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
-    "terrain": "node scripts/terrain/build.mjs"
+    "terrain": "node scripts/terrain/build.mjs",
+    "report:size": "node scripts/report-sizes.mjs",
+    "preview": "node scripts/serve-out.mjs"
   },
   "dependencies": {
     "@react-three/drei": "10.7.9",
