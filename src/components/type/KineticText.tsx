@@ -128,10 +128,10 @@ export function KineticText({
       ref={ref as never}
       id={id}
       className={className ? `${styles.kinetic} ${className}` : styles.kinetic}
+      aria-label={text}
       data-play={inView ? "true" : "false"}
       style={{ ...style, "--kt-delay": `${delay}ms` } as CSSProperties}
     >
-      <span className="visually-hidden">{text}</span>
       <span className={styles.letters} aria-hidden="true">
         {words.map((word, w) => (
           <span key={w}>
