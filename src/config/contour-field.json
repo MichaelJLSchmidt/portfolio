@@ -9,7 +9,7 @@
   "indexColor": "contour",
   "glowColor": "glacier",
   "headlampRadiusPx": 180,
-  "headlampFade": "long",
+  "headlampFadeMs": 600,
   "glowWidthPx": 7,
   "glowStrength": 0.3,
   "driftCyclesPerSecond": 0.02,

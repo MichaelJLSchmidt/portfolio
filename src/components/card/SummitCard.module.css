@@ -376,7 +376,7 @@
   margin: 0;
   color: var(--color-sheet);
   font-family: var(--font-martian), ui-monospace, monospace;
-  font-size: max(15px, 5cqi);
+  font-size: max(20px, 5cqi);
   font-variation-settings: "wdth" 87.5;
   font-weight: 700;
   line-height: 1.1;

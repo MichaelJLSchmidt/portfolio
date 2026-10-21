@@ -27,7 +27,7 @@ export default function DevTuning() {
     indexColor: { value: fieldConfig.indexColor, options: colorTokens },
     glowColor: { value: fieldConfig.glowColor, options: colorTokens },
     headlampRadiusPx: { value: fieldConfig.headlampRadiusPx, min: 40, max: 400, step: 10 },
-    headlampFade: { value: fieldConfig.headlampFade, options: durationTokens },
+    headlampFadeMs: { value: fieldConfig.headlampFadeMs, min: 0, max: 2000, step: 20 },
     glowWidthPx: { value: fieldConfig.glowWidthPx, min: 1, max: 20, step: 0.5 },
     glowStrength: { value: fieldConfig.glowStrength, min: 0, max: 1, step: 0.05 },
     driftCyclesPerSecond: { value: fieldConfig.driftCyclesPerSecond, min: 0, max: 0.2, step: 0.005 },

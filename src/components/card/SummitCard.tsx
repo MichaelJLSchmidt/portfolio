@@ -87,7 +87,7 @@ export function SummitCard({
       data-size={size}
       data-flipped={flipped}
       data-active={active}
-      data-shimmer={!reduced && gyro === "off"}
+      data-shimmer={!reduced && (gyro === "off" || gyro === "resume")}
       aria-labelledby={nameId}
       onPointerEnter={() => {
         setActive(true);

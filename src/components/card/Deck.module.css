@@ -55,6 +55,12 @@
   }
 }
 
+/* Without JavaScript the card can't flip, so every device gets the direct link.
+   (data-motion is set by the inline head script, so its absence means no JS.) */
+:root:not([data-motion]) .open {
+  display: inline-flex;
+}
+
 .tilt {
   justify-self: start;
   min-height: 44px;

@@ -354,7 +354,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       wake();
     };
     const onPointerOut = (e: PointerEvent) => {
-      if (!e.relatedTarget && e.pointerType !== "touch") fade(0, msOf(cfg().headlampFade));
+      if (!e.relatedTarget && e.pointerType !== "touch") fade(0, cfg().headlampFadeMs);
     };
     const onTouch = (e: TouchEvent) => {
       const t = e.touches[0];
@@ -364,7 +364,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       wake();
     };
     const onTouchEnd = (e: TouchEvent) => {
-      if (e.touches.length === 0) fade(0, msOf(cfg().headlampFade));
+      if (e.touches.length === 0) fade(0, cfg().headlampFadeMs);
     };
     const opts = { passive: true } as const;
     window.addEventListener("pointermove", onPointerMove, opts);
