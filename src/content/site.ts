@@ -30,4 +30,10 @@ export const site = {
     note: "Contours drawn from swissALTIRegio. Built as a static site.",
   },
   skipLink: "Skip to content",
+  notFound: {
+    eyebrow: "404 · Off the map",
+    heading: "No trail here",
+    body: "This page isn't on the map. The deck is a safer route.",
+    back: "Back to the deck",
+  },
 } as const;
