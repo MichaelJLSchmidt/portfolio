@@ -6,6 +6,8 @@ import { motionPreferenceScript } from "@/lib/motion-preference";
 import { TerrainBackdrop } from "@/components/terrain/TerrainBackdrop";
 import { Hud } from "@/components/hud/Hud";
 import { SiteFooter } from "@/components/SiteFooter";
+import { SmoothScroll } from "@/components/SmoothScroll";
+import { HistoryTransitions } from "@/components/transition/HistoryTransitions";
 import "./globals.css";
 
 const isPreview = process.env.NEXT_PUBLIC_PREVIEW === "1";
@@ -34,6 +36,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           {site.skipLink}
         </a>
         <TerrainBackdrop />
+        <SmoothScroll />
+        <HistoryTransitions />
         <Hud />
         <div className="page">
           {children}

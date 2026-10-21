@@ -21,7 +21,7 @@ const pathFrom = (pts: [number, number][]) =>
  * Card artwork window: the generated terrain SVG plus an overlay with a dotted glacier
  * trail, four waypoint pins and map labels, all positioned from content data.
  */
-export function CardArtwork({ artwork, alt }: { artwork: Artwork; alt: string }) {
+export function CardArtwork({ artwork, alt, className }: { artwork: Artwork; alt: string; className?: string }) {
   const terrain = terrainFor(artwork.terrainId);
   if (!terrain) return null;
   const vb = terrain.viewBox;
@@ -48,7 +48,7 @@ export function CardArtwork({ artwork, alt }: { artwork: Artwork; alt: string })
   }
 
   return (
-    <div className={styles.artwork} role="img" aria-label={alt}>
+    <div className={className ? `${styles.artwork} ${className}` : styles.artwork} role="img" aria-label={alt}>
       {/* eslint-disable-next-line @next/next/no-img-element -- static SVG, no optimisation needed */}
       <img className={styles.terrain} src={asset(terrain.svg)} alt="" width={w} height={h} decoding="async" />
       <svg className={styles.overlay} viewBox={vb.join(" ")} preserveAspectRatio="xMidYMid slice" aria-hidden="true">

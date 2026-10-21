@@ -5,6 +5,8 @@ import { useId, useRef, useState, type ReactNode } from "react";
 import { cardLabels, type SummitCardData } from "@/content/cards";
 import { useReducedMotion } from "@/lib/motion-preference";
 import { prefetchTerrain } from "@/components/terrain/field-store";
+import { MorphTarget } from "@/components/transition/MorphTarget";
+import { morphName } from "@/lib/morph";
 import { CardArtwork } from "./CardArtwork";
 import { CostBadge, RarityPip, SetSymbol } from "./CardMarks";
 import { useGyroStatus } from "./gyro";
@@ -18,21 +20,28 @@ export type SummitCardProps = {
   /** Heading level of the card name within the page outline. */
   headingLevel?: 2 | 3;
   /**
-   * Wraps the elements that morph into the case-study page (artwork, name).
-   * Provided by the deck so the card stays free of routing concerns.
+   * Give the artwork and name view-transition names so they morph into the case-study
+   * header. Only one element per name may exist on a page, so the deck opts in.
    */
-  morph?: (part: "art" | "title", visible: boolean, node: ReactNode) => ReactNode;
+  transitionNames?: boolean;
   /** Called before navigating to the case study (e.g. to remember the origin for focus return). */
   onOpen?: () => void;
+  /** Show the "Open expedition log" link on the back (off when already on the case study). */
+  linkToCaseStudy?: boolean;
 };
-
-const identity = (_part: "art" | "title", _visible: boolean, node: ReactNode) => node;
 
 /**
  * A data-driven trading-card-style project card: tilt, contour foil (R and M only) and a
  * 3D flip. The flip control is a real toggle button; the back link is a separate anchor.
  */
-export function SummitCard({ card, size = "deck", headingLevel = 3, morph = identity, onOpen }: SummitCardProps) {
+export function SummitCard({
+  card,
+  size = "deck",
+  headingLevel = 3,
+  transitionNames = false,
+  onOpen,
+  linkToCaseStudy = true,
+}: SummitCardProps) {
   const [flipped, setFlipped] = useState(false);
   const [announcement, setAnnouncement] = useState("");
   const [active, setActive] = useState(false);
@@ -53,10 +62,21 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, morph = iden
 
   const intent = () => prefetchTerrain(card.artwork.terrainId);
 
+  // Only the face currently showing carries the names, so the morph starts from what is visible.
+  const morph = (part: "art" | "title", visible: boolean, node: ReactNode) =>
+    transitionNames && visible ? (
+      <MorphTarget name={morphName(part, card.slug)} className={part === "art" ? styles.artSlot : undefined}>
+        {node}
+      </MorphTarget>
+    ) : (
+      node
+    );
+
   return (
     <article
       ref={rootRef}
       className={styles.card}
+      data-slug={card.slug}
       data-rarity={card.rarity}
       data-size={size}
       data-flipped={flipped}
@@ -148,14 +168,16 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, morph = iden
                   </p>,
                 )}
                 <p className={styles.backSummary}>{card.back.summary}</p>
-                <Link
-                  href={href}
-                  className={styles.backLink}
-                  onClick={onOpen}
-                  aria-label={`${card.back.linkLabel}: ${card.name}`}
-                >
-                  {card.back.linkLabel} <span aria-hidden="true">→</span>
-                </Link>
+                {linkToCaseStudy && (
+                  <Link
+                    href={href}
+                    className={styles.backLink}
+                    onClick={onOpen}
+                    aria-label={`${card.back.linkLabel}: ${card.name}`}
+                  >
+                    {card.back.linkLabel} <span aria-hidden="true">→</span>
+                  </Link>
+                )}
               </div>
               <div className={styles.glare} aria-hidden="true" />
             </div>

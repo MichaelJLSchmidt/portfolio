@@ -217,6 +217,20 @@
   background: var(--color-ground);
 }
 
+/* Wrapper only used by the layoutId fallback (browsers without View Transitions). */
+.artSlot {
+  display: flex;
+  flex: 0 1 44%;
+  flex-direction: column;
+  min-height: 24%;
+}
+
+.artSlot > .artwork,
+.backArt .artSlot {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
 .terrain,
 .overlay {
   position: absolute;
