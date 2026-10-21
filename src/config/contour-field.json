@@ -1,0 +1,21 @@
+{
+  "intervalM": 100,
+  "indexEvery": 5,
+  "lineWidthPx": 1,
+  "indexLineWidthPx": 1.5,
+  "lineOpacity": 0.55,
+  "indexOpacity": 0.9,
+  "lineColor": "contour",
+  "indexColor": "contour",
+  "glowColor": "glacier",
+  "headlampRadiusPx": 180,
+  "headlampFade": "long",
+  "glowWidthPx": 7,
+  "glowStrength": 0.3,
+  "driftCyclesPerSecond": 0.02,
+  "intro": "cinematic",
+  "morph": "scenic",
+  "desktop": { "dprMax": 2, "heightmap": "desktop", "glow": true, "idleFps": 10 },
+  "mobile": { "dprMax": 1.5, "heightmap": "mobile", "glow": false, "idleFps": 5 },
+  "frameBudgetMs": 22
+}

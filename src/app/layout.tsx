@@ -3,6 +3,7 @@ import { archivo, archivoItalic, martianMono } from "./fonts";
 import { site } from "@/content/site";
 import { color, tokensToCss } from "@/styles/tokens";
 import { motionPreferenceScript } from "@/lib/motion-preference";
+import { TerrainBackdrop } from "@/components/terrain/TerrainBackdrop";
 import { Hud } from "@/components/hud/Hud";
 import { SiteFooter } from "@/components/SiteFooter";
 import "./globals.css";
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <a className="skip-link" href="#main">
           {site.skipLink}
         </a>
+        <TerrainBackdrop />
         <Hud />
         <div className="page">
           {children}
