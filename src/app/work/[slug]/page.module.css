@@ -1,0 +1,222 @@
+.main {
+  display: grid;
+  gap: 48px;
+  max-width: 1200px;
+  padding: 96px 16px 64px;
+}
+
+.crumbs a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  min-height: 44px;
+  color: var(--color-glacier);
+  text-decoration: none;
+}
+
+.crumbs a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.header {
+  display: grid;
+  gap: 24px;
+}
+
+.artSlot,
+.art {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  border-radius: 12px;
+}
+
+.art {
+  height: auto;
+  border-color: var(--color-contour-dim);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.45);
+}
+
+.titleBlock {
+  display: grid;
+  gap: 14px;
+  align-content: end;
+}
+
+.coords {
+  color: var(--color-contour);
+}
+
+.title {
+  font-size: clamp(3rem, 12vw, 8.5rem);
+  overflow-wrap: anywhere;
+}
+
+.type {
+  font-size: 1.125rem;
+  font-weight: 600;
+  font-stretch: 88%;
+  font-variation-settings: "wdth" 88;
+}
+
+.lede {
+  max-width: 38ch;
+  font-size: clamp(1.0625rem, 1.6vw, 1.3rem);
+}
+
+/* Summit summary: sheet colour, so only sheet-safe inks. */
+.summary {
+  display: grid;
+  gap: 20px;
+  padding: 24px;
+  border-radius: 12px;
+  background: var(--color-sheet);
+  color: var(--color-ground);
+}
+
+.summaryHeading {
+  color: var(--color-moss-ink);
+  font-weight: 700;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px 24px;
+  margin: 0;
+}
+
+.summaryGrid > div {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+  padding-top: 12px;
+  border-top: 1px solid rgb(90 92 82 / 0.45);
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.summaryGrid dt {
+  color: var(--color-sheet-ink);
+  font-family: var(--font-martian), ui-monospace, monospace;
+  font-size: var(--type-hud-size);
+  font-variation-settings: "wdth" var(--type-hud-wdth);
+  letter-spacing: var(--type-hud-tracking);
+  text-transform: uppercase;
+}
+
+.summaryGrid dd {
+  margin: 0;
+}
+
+.stat {
+  font-family: var(--font-martian), ui-monospace, monospace;
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-variation-settings: "wdth" 87.5;
+}
+
+.jump {
+  display: grid;
+  gap: 12px;
+}
+
+.jump h2 {
+  color: var(--color-contour);
+}
+
+.jump ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--color-contour);
+  border-radius: 999px;
+  background: rgb(27 28 24 / 0.75);
+  color: var(--color-sheet);
+  text-decoration: none;
+}
+
+.chip:hover {
+  border-color: var(--color-glacier);
+  color: var(--color-glacier);
+}
+
+.sections {
+  display: grid;
+  gap: 40px;
+}
+
+.section {
+  display: grid;
+  gap: 12px;
+  max-width: 40rem;
+  scroll-margin-top: 96px;
+}
+
+.sectionHeading {
+  font-size: clamp(2rem, 6vw, 3.5rem);
+}
+
+.inspect {
+  display: grid;
+}
+
+/* Cards use inline-size containment, so they need a definite width: centre with margins. */
+.inspect > * {
+  margin-inline: auto;
+}
+
+.next {
+  padding-top: 32px;
+  border-top: 1px solid var(--color-contour-dim);
+}
+
+.nextLink {
+  display: inline-grid;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--color-glacier);
+  text-decoration: none;
+}
+
+.nextLink > span {
+  flex-direction: column;
+  align-items: flex-start !important;
+}
+
+.nextName {
+  color: var(--color-sheet);
+  font-size: clamp(2.5rem, 9vw, 5rem);
+}
+
+.nextLink:hover .nextName {
+  color: var(--color-glacier);
+}
+
+@media (min-width: 900px) {
+  .main {
+    padding-inline: 48px;
+  }
+
+  .header {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    align-items: end;
+    gap: 40px;
+  }
+
+  .summary {
+    padding: 32px 36px;
+  }
+}

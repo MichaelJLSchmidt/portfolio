@@ -1,0 +1,202 @@
+/* Colour, type and motion custom properties come from src/styles/tokens.ts (injected in the root layout). */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background: var(--color-ground);
+  color: var(--color-sheet);
+  font-family: var(--font-archivo), system-ui, sans-serif;
+  font-size: 100%;
+  font-variation-settings: "wdth" 100;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+  font-weight: 400;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd {
+  margin: 0;
+}
+
+img,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-glacier);
+  outline-offset: 4px;
+}
+
+.display {
+  font-family: var(--font-archivo), system-ui, sans-serif;
+  font-weight: var(--type-display-wght);
+  font-variation-settings: "wdth" var(--type-display-wdth);
+  font-stretch: 62%;
+  line-height: var(--type-display-lh);
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+
+.hud-label {
+  font-family: var(--font-martian), ui-monospace, monospace;
+  font-size: var(--type-hud-size);
+  letter-spacing: var(--type-hud-tracking);
+  font-variation-settings: "wdth" var(--type-hud-wdth);
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  z-index: 100;
+  padding: 0.5rem 0.875rem;
+  background: var(--color-sheet);
+  color: var(--color-ground);
+  transform: translateY(-200%);
+}
+
+.skip-link:focus-visible {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+}
+
+em,
+i,
+.italic {
+  font-family: var(--font-archivo-italic), var(--font-archivo), system-ui, sans-serif;
+  font-style: italic;
+}
+
+.page {
+  position: relative;
+  z-index: 1;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page > main {
+  flex: 1;
+}
+
+/* Cartographic label halo: keeps small text legible over contour lines. */
+.map-halo {
+  text-shadow:
+    0 0 2px var(--color-ground),
+    0 0 6px var(--color-ground),
+    0 0 14px var(--color-ground);
+}
+
+/* ------------------------------------------------------------------------------------
+   View transitions (React <ViewTransition> on route changes).
+   Named card parts morph (share="morph"); everything else dissolves quickly.
+   ------------------------------------------------------------------------------------ */
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-old(root) {
+  animation: var(--dur-short) var(--ease-trail) both vt-fade-out;
+}
+
+::view-transition-new(root) {
+  animation: var(--dur-short) var(--ease-trail) both vt-fade-in;
+}
+
+::view-transition-group(.morph) {
+  animation-duration: var(--dur-long);
+  animation-timing-function: var(--ease-drop);
+}
+
+::view-transition-old(.morph),
+::view-transition-new(.morph) {
+  height: 100%;
+  object-fit: cover;
+  animation-duration: var(--dur-long);
+  animation-timing-function: var(--ease-drop);
+}
+
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Reduced motion: no travelling morph, only a short crossfade. */
+html[data-motion="reduced"]::view-transition-group(*) {
+  animation-duration: 0s;
+}
+
+html[data-motion="reduced"]::view-transition-old(*),
+html[data-motion="reduced"]::view-transition-new(*) {
+  animation-duration: 150ms;
+}
+
+/* Lenis (fine-pointer desktop only). */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}

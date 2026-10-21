@@ -1,0 +1,60 @@
+# Preview deployment: builds the static export for the GitHub Pages sub-path
+# (https://<user>.github.io/<repo>/) and deploys it with the official Pages actions.
+name: Deploy preview to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v6
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          MOTION_TOKEN: ${{ secrets.MOTION_TOKEN }}
+
+      - name: Build static export
+        run: npm run build
+        env:
+          # "/<repo>" for a project site (empty if a custom domain is configured).
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          # Preview builds are never indexed: noindex meta + disallow-all robots.txt.
+          NEXT_PUBLIC_PREVIEW: "1"
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

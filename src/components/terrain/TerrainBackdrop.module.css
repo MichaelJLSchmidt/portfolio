@@ -1,0 +1,91 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--color-ground);
+  contain: strict;
+}
+
+.poster,
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.poster {
+  object-fit: cover;
+  transition: opacity var(--dur-medium) var(--ease-trail);
+}
+
+.canvas {
+  opacity: 0;
+  transition: opacity var(--dur-medium) var(--ease-trail);
+}
+
+.backdrop[data-field="on"] .canvas {
+  opacity: 1;
+}
+
+/* First visit: the poster waits dimmed while the field loads and draws the map on.
+   If the field never arrives, the animation brings the poster back by itself. */
+:root[data-intro="pending"] .poster {
+  opacity: 0.3;
+  animation: poster-fallback var(--dur-medium) var(--ease-trail) 4s both;
+}
+
+@keyframes poster-fallback {
+  to {
+    opacity: 1;
+  }
+}
+
+.backdrop[data-field="on"] .poster {
+  animation: none;
+  opacity: 0;
+  transition-delay: var(--dur-medium);
+}
+
+/* Keeps text legible over the map without hiding it. */
+.scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgb(27 28 24 / 0.5), rgb(27 28 24 / 0) 18%),
+    linear-gradient(to top, rgb(27 28 24 / 0.75), rgb(27 28 24 / 0) 55%);
+}
+
+@media (min-width: 900px) {
+  .scrim {
+    background:
+      linear-gradient(to bottom, rgb(27 28 24 / 0.5), rgb(27 28 24 / 0) 18%),
+      linear-gradient(to right, rgb(27 28 24 / 0.7), rgb(27 28 24 / 0.15) 60%, rgb(27 28 24 / 0));
+  }
+}
+
+.skip {
+  position: fixed;
+  right: 16px;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 40;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--color-contour);
+  border-radius: 999px;
+  background: rgb(27 28 24 / 0.8);
+  color: var(--color-sheet);
+  cursor: pointer;
+}
+
+.skip:hover {
+  border-color: var(--color-glacier);
+  color: var(--color-glacier);
+}
+
+:root[data-motion="reduced"] .poster,
+:root[data-motion="reduced"] .canvas {
+  transition: none;
+}

@@ -1,0 +1,115 @@
+.hud {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 30;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: max(12px, env(safe-area-inset-top)) 16px 12px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgb(27 28 24 / 0.92), rgb(27 28 24 / 0));
+}
+
+.cluster {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+.right {
+  align-items: flex-end;
+}
+
+.mark {
+  color: var(--color-glacier);
+  font-weight: 700;
+}
+
+.credit,
+.coords {
+  color: var(--color-contour);
+}
+
+.coords {
+  display: none;
+  padding-top: 2px;
+}
+
+@media (min-width: 900px) {
+  .coords {
+    display: block;
+  }
+}
+
+.clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-sheet);
+}
+
+.live {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-signal);
+  animation: pulse 2.4s var(--ease-summit) infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-contour);
+  cursor: pointer;
+}
+
+.toggle:hover,
+.toggle[aria-pressed="true"] {
+  color: var(--color-glacier);
+}
+
+.switch {
+  position: relative;
+  width: 22px;
+  height: 12px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+}
+
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  transition: transform var(--dur-micro) var(--ease-trail);
+}
+
+.toggle[aria-pressed="true"] .switch::after {
+  transform: translateX(10px);
+}
+
+:root[data-motion="reduced"] .live {
+  animation: none;
+}
+
+:root[data-motion="reduced"] .switch::after {
+  transition: none;
+}

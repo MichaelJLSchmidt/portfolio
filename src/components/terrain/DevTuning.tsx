@@ -1,0 +1,63 @@
+"use client";
+
+import { Leva, button, useControls } from "leva";
+import { useEffect } from "react";
+import { color, duration } from "@/styles/tokens";
+import { fieldConfig, type FieldConfig } from "./field-settings";
+import { fieldStore } from "./field-store";
+
+/**
+ * Dev-only leva panel for the contour field. "Save to config" writes the current values
+ * to src/config/contour-field.json through the tuning server started by `npm run dev`.
+ * Never shipped: imported behind a NODE_ENV === "development" check.
+ */
+const TUNING_URL = "http://localhost:4319/contour-field";
+const colorTokens = Object.keys(color);
+const durationTokens = Object.keys(duration);
+
+export default function DevTuning() {
+  const values = useControls("Contour field", {
+    intervalM: { value: fieldConfig.intervalM, min: 20, max: 500, step: 10 },
+    indexEvery: { value: fieldConfig.indexEvery, min: 2, max: 10, step: 1 },
+    lineWidthPx: { value: fieldConfig.lineWidthPx, min: 0.5, max: 4, step: 0.25 },
+    indexLineWidthPx: { value: fieldConfig.indexLineWidthPx, min: 0.5, max: 5, step: 0.25 },
+    lineOpacity: { value: fieldConfig.lineOpacity, min: 0, max: 1, step: 0.05 },
+    indexOpacity: { value: fieldConfig.indexOpacity, min: 0, max: 1, step: 0.05 },
+    lineColor: { value: fieldConfig.lineColor, options: colorTokens },
+    indexColor: { value: fieldConfig.indexColor, options: colorTokens },
+    glowColor: { value: fieldConfig.glowColor, options: colorTokens },
+    headlampRadiusPx: { value: fieldConfig.headlampRadiusPx, min: 40, max: 400, step: 10 },
+    headlampFadeMs: { value: fieldConfig.headlampFadeMs, min: 0, max: 2000, step: 20 },
+    glowWidthPx: { value: fieldConfig.glowWidthPx, min: 1, max: 20, step: 0.5 },
+    glowStrength: { value: fieldConfig.glowStrength, min: 0, max: 1, step: 0.05 },
+    driftCyclesPerSecond: { value: fieldConfig.driftCyclesPerSecond, min: 0, max: 0.2, step: 0.005 },
+    intro: { value: fieldConfig.intro, options: durationTokens },
+    morph: { value: fieldConfig.morph, options: durationTokens },
+    frameBudgetMs: { value: fieldConfig.frameBudgetMs, min: 12, max: 40, step: 1 },
+  });
+
+  useControls("Contour field", {
+    "Replay intro": button(() => fieldStore.set((s) => ({ replayIntro: s.replayIntro + 1 }))),
+    "Toggle morph (kiBon)": button(() =>
+      fieldStore.set((s) => ({ morphTarget: s.morphTarget ? null : "dvb-001" })),
+    ),
+    "Save to config": button(async () => {
+      const body = JSON.stringify(fieldStore.get().config, null, 2);
+      try {
+        const res = await fetch(TUNING_URL, { method: "POST", headers: { "content-type": "application/json" }, body });
+        if (!res.ok) throw new Error(String(res.status));
+        console.info("[tuning] saved src/config/contour-field.json");
+      } catch {
+        await navigator.clipboard?.writeText(body);
+        console.warn("[tuning] tuning server not reachable (run `npm run dev`); JSON copied to the clipboard instead.");
+      }
+    }),
+  });
+
+  useEffect(() => {
+    const next: FieldConfig = { ...fieldStore.get().config, ...values };
+    fieldStore.set({ config: next });
+  }, [values]);
+
+  return <Leva collapsed titleBar={{ title: "Tuning (dev only)" }} />;
+}

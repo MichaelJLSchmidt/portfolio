@@ -1,0 +1,25 @@
+# dependencies
+/node_modules
+
+# build output
+/.next/
+/out/
+/build
+*.tsbuildinfo
+next-env.d.ts
+
+# terrain pipeline: raw downloads and intermediate rasters
+/scripts/terrain/.cache/
+
+# env files (MOTION_TOKEN and friends never get committed)
+.env
+.env.*
+!.env.example
+
+# tooling
+/coverage
+/.netlify
+/.vercel
+.DS_Store
+*.pem
+npm-debug.log*

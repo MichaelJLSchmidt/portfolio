@@ -1,0 +1,78 @@
+.deck {
+  display: grid;
+  gap: 32px;
+  padding-block: 48px 96px;
+}
+
+.header {
+  display: grid;
+  gap: 12px;
+  max-width: 40rem;
+}
+
+.heading {
+  font-size: clamp(2.5rem, 9vw, 5.5rem);
+}
+
+.intro {
+  color: var(--color-sheet);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 420px));
+  gap: 56px 48px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.slot {
+  display: grid;
+  justify-items: start;
+  gap: 16px;
+}
+
+/* One click to the case study on devices with a fine pointer; touch flips first. */
+.open {
+  display: none;
+  align-items: center;
+  gap: 0.6em;
+  min-height: 44px;
+  padding: 0 4px;
+  color: var(--color-glacier);
+  text-decoration: none;
+}
+
+.open:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .open {
+    display: inline-flex;
+  }
+}
+
+/* Without JavaScript the card can't flip, so every device gets the direct link.
+   (data-motion is set by the inline head script, so its absence means no JS.) */
+:root:not([data-motion]) .open {
+  display: inline-flex;
+}
+
+.tilt {
+  justify-self: start;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--color-glacier);
+  border-radius: 999px;
+  background: rgb(27 28 24 / 0.8);
+  color: var(--color-glacier);
+  cursor: pointer;
+}
+
+.tilt[aria-pressed="true"] {
+  background: var(--color-glacier);
+  color: var(--color-ground);
+}
