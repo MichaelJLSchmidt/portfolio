@@ -39,6 +39,7 @@ function onOrientation(e: DeviceOrientationEvent) {
   let [x, y] = [e.beta, e.gamma];
   if (angle === 90) [x, y] = [-e.gamma, e.beta];
   else if (angle === 270 || angle === -90) [x, y] = [e.gamma, -e.beta];
+  else if (angle === 180) [x, y] = [-e.beta, -e.gamma];
   if (!baseline) baseline = [x, y];
   // Drift the neutral pose slowly so a new grip settles back to flat.
   baseline = [baseline[0] + (x - baseline[0]) * 0.01, baseline[1] + (y - baseline[1]) * 0.01];

@@ -7,7 +7,7 @@ import meta from "@terrain/terrain.json";
 import { asset } from "@/lib/asset";
 import { color, easing } from "@/styles/tokens";
 import { coverTransform, createContourMaterial } from "./contour-material";
-import { INTRO_STORAGE_KEY } from "@/lib/motion-preference";
+import { INTRO_STORAGE_KEY, cancelPendingIntro } from "@/lib/motion-preference";
 import { colorOf, hexToRgb, msOf, type DeviceProfile, type FieldConfig } from "./field-settings";
 import { fieldStore } from "./field-store";
 
@@ -91,6 +91,8 @@ function loadHeightTexture(file: string): Promise<THREE.Texture> {
     }
   });
   textureCache.set(url, pending);
+  // A failed load must not be cached, so a later request can retry.
+  pending.catch(() => textureCache.delete(url));
   return pending;
 }
 
@@ -118,7 +120,8 @@ type Tween = { from: number; to: number; start: number; dur: number; ease: (x: n
 const tweenValue = (t: Tween | null, now: number, fallback: number) => {
   if (!t) return fallback;
   const p = t.dur <= 0 ? 1 : Math.min(Math.max((now - t.start) / t.dur, 0), 1);
-  return t.from + (t.to - t.from) * t.ease(p);
+  // Land exactly on the target: eased endpoints can be off by a rounding error.
+  return p >= 1 ? t.to : t.from + (t.to - t.from) * t.ease(p);
 };
 const tweenDone = (t: Tween | null, now: number) => !t || now - t.start >= t.dur;
 
@@ -127,6 +130,9 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
   const invalidate = useThree((s) => s.invalidate);
   const size = useThree((s) => s.size);
   const dpr = useThree((s) => s.viewport.dpr);
+  // Async callbacks (texture loads, morphs) must use the current size, not the first render's.
+  const sizeRef = useRef(size);
+  sizeRef.current = size;
 
   const anim = useRef({
     sweep: null as Tween | null,
@@ -138,13 +144,15 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     lampPos: [-1e4, -1e4] as [number, number],
     lastInput: 0,
     region: null as TerrainSource | null,
+    /** Terrain currently loaded into texture slot B, and its id. */
     target: null as TerrainSource | null,
+    slotId: null as string | null,
+    /** Terrain the field is heading to (null = the region). */
     targetId: null as string | null,
     ready: false,
     readyNotified: false,
     capped: false,
     frameTimes: [] as number[],
-    lastFrame: 0,
     t0: performance.now(),
   });
 
@@ -195,6 +203,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     const region = regionSource(profile);
     loadHeightTexture(region.file).then((tex) => {
       if (cancelled) return;
+      const size = sizeRef.current;
       const a = anim.current;
       const u = material.uniforms;
       a.region = region;
@@ -221,6 +230,9 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       if (!played && !paused) startIntro(msOf("medium"));
       a.ready = true;
       wake();
+    }, () => {
+      // Heightmap unavailable (offline, decode error): stay on the static poster.
+      cancelPendingIntro();
     });
     return () => {
       cancelled = true;
@@ -287,32 +299,39 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       const u = material.uniforms;
       const dur = msOf(fieldStore.get().config.morph);
       const now = () => performance.now();
-      if (a.targetId === id) return;
-      // Leaving one target for another: settle back to the region first.
-      if (a.targetId && id) {
-        a.morph = { from: tweenValue(a.morph, now(), a.morphValue), to: 0, start: now(), dur: dur / 2, ease: easeSummit };
+      const current = () => tweenValue(a.morph, now(), a.morphValue);
+      const tweenTo = (to: number, ms: number) => {
+        a.morph = { from: current(), to, start: now(), dur: ms, ease: easeSummit };
         wake();
-        await new Promise((r) => setTimeout(r, dur / 2));
+      };
+      a.targetId = id;
+      if (!id) return tweenTo(0, dur);
+      // Already loaded in slot B (e.g. A → B → A before B arrived): just head back to it.
+      if (a.slotId === id) return tweenTo(1, dur);
+      // Slot B still shows another terrain: settle back to the region before swapping it.
+      if (a.slotId && current() > 0.001) {
+        const settle = (dur / 2) * current();
+        tweenTo(0, settle);
+        await new Promise((r) => setTimeout(r, settle));
         if (my !== token) return;
-      }
-      if (!id) {
-        a.targetId = null;
-        a.morph = { from: tweenValue(a.morph, now(), a.morphValue), to: 0, start: now(), dur, ease: easeSummit };
-        wake();
-        return;
       }
       const src = cardSource(id);
       if (!src) return;
-      const tex = await loadHeightTexture(src.file);
+      let tex: THREE.Texture;
+      try {
+        tex = await loadHeightTexture(src.file);
+      } catch {
+        return;
+      }
       if (my !== token) return;
+      const size = sizeRef.current;
       a.target = src;
-      a.targetId = id;
+      a.slotId = id;
       u.uHeightB.value = tex;
       u.uEncB.value.set(src.offset, src.scale);
       u.uRangeB.value.set(src.min, src.max);
       coverTransform(u.uUvB.value, size.width, size.height, src.width, src.height, src.posX, src.posY);
-      a.morph = { from: tweenValue(a.morph, now(), a.morphValue), to: 1, start: now(), dur, ease: easeSummit };
-      wake();
+      tweenTo(1, dur);
     };
     morphTo(fieldStore.get().morphTarget);
     let last = fieldStore.get().morphTarget;
@@ -385,7 +404,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
   }, [dpr]);
 
   // --- frame scheduler --------------------------------------------------------------
-  const sched = useRef({ raf: 0, timer: 0 as ReturnType<typeof setTimeout> | 0, lastRender: 0, paused });
+  const sched = useRef({ raf: 0, timer: 0 as ReturnType<typeof setTimeout> | 0, lastRender: 0, lastTick: 0, paused });
   sched.current.paused = paused;
 
   const isBusy = (now: number) => {
@@ -395,16 +414,29 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       !tweenDone(a.morph, now) ||
       !tweenDone(a.lamp, now) ||
       now - a.lastInput < 120 ||
-      !a.readyNotified
+      (a.ready && !a.readyNotified)
     );
   };
 
   function tick(t: number) {
     const s = sched.current;
+    const a = anim.current;
     s.raf = 0;
     if (document.hidden || s.paused) return;
     if (isBusy(t)) {
-      const minGap = anim.current.capped ? 1000 / 30 - 2 : 1000 / 60 - 2;
+      // Frame budget: rAF intervals stretch when frames are too expensive. If they average
+      // over ~22 ms for a second of continuous animation, cap rendering at 30 fps.
+      if (!a.capped && s.lastTick && t - s.lastTick < 100) {
+        a.frameTimes.push(t - s.lastTick);
+        const total = a.frameTimes.reduce((sum, v) => sum + v, 0);
+        if (total >= 1000) {
+          if (total / a.frameTimes.length > fieldStore.get().config.frameBudgetMs) a.capped = true;
+          a.frameTimes.length = 0;
+        }
+      }
+      s.lastTick = t;
+      // At most ~60–80 fps: every vsync on 60/75 Hz, every other one on 120/144 Hz.
+      const minGap = a.capped ? 1000 / 30 - 4 : 1000 / 80;
       if (t - s.lastRender >= minGap) {
         s.lastRender = t;
         invalidate();
@@ -413,8 +445,9 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     } else {
       // Idle: one more frame to settle, then the slow drift at a low frame rate.
       s.lastRender = t;
+      s.lastTick = 0;
       invalidate();
-      anim.current.frameTimes.length = 0;
+      a.frameTimes.length = 0;
       if (s.timer) clearTimeout(s.timer);
       s.timer = setTimeout(() => {
         s.timer = 0;
@@ -425,7 +458,8 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
 
   function wake() {
     const s = sched.current;
-    if (s.raf || document.hidden || s.paused) return;
+    // Nothing to draw until the region heightmap is in (or if it never arrives).
+    if (s.raf || document.hidden || s.paused || !anim.current.ready) return;
     if (s.timer) {
       clearTimeout(s.timer);
       s.timer = 0;
@@ -488,13 +522,14 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       fieldStore.set({ introPlaying: false });
       document.documentElement.setAttribute("data-intro", "none");
     }
-    if (a.morph && tweenDone(a.morph, now) && a.morphValue === 0 && !a.targetId && a.region) {
+    if (a.morph && tweenDone(a.morph, now) && a.morphValue === 0 && !a.targetId && a.slotId && a.region) {
       // Back on the region: point B at A again and release the target texture slot.
       u.uHeightB.value = u.uHeightA.value;
       u.uEncB.value.copy(u.uEncA.value);
       u.uRangeB.value.copy(u.uRangeA.value);
       u.uUvB.value.copy(u.uUvA.value);
       a.target = null;
+      a.slotId = null;
       a.morph = null;
     }
 
@@ -503,17 +538,6 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     u.uHeadlampStrength.value = a.lampValue;
     u.uHeadlampPos.value.set(a.lampPos[0], a.lampPos[1]);
     u.uTime.value = (now - a.t0) / 1000;
-
-    // Frame budget: if busy frames average over ~22 ms for a second, cap at 30 fps.
-    if (!a.capped && a.lastFrame && now - a.lastFrame < 100) {
-      a.frameTimes.push(now - a.lastFrame);
-      const total = a.frameTimes.reduce((s, v) => s + v, 0);
-      if (total >= 1000) {
-        if (total / a.frameTimes.length > fieldStore.get().config.frameBudgetMs) a.capped = true;
-        a.frameTimes.length = 0;
-      }
-    }
-    a.lastFrame = now;
 
     if (!a.readyNotified) {
       a.readyNotified = true;

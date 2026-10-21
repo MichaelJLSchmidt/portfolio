@@ -57,7 +57,9 @@ export function TerrainBackdrop() {
   }, [pathname]);
 
   useEffect(() => {
-    if (reduced) cancelPendingIntro();
+    // `reduced` is true during hydration (server snapshot), so read the resolved attribute
+    // before cancelling the intro; otherwise every first visit would lose it.
+    if (document.documentElement.getAttribute("data-motion") === "reduced") cancelPendingIntro();
     if (reduced || field) return;
     let cancelled = false;
     whenIdle(() => {
