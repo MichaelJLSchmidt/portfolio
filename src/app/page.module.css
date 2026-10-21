@@ -1,37 +1,105 @@
 .main {
-  padding: 112px 16px 64px;
+  padding-top: 96px;
 }
 
+/* Full-width composition: meta row, a name that fills the measure, lede offset right. */
 .hero {
   display: grid;
-  gap: 16px;
-  max-width: 1200px;
-  min-height: min(78svh, 760px);
+  grid-template-rows: auto auto auto;
   align-content: end;
-  padding-bottom: 8svh;
+  gap: clamp(16px, 2.5vw, 40px);
+  min-height: min(92svh, 1100px);
+  padding-bottom: clamp(32px, 8svh, 96px);
+}
+
+.heroMeta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
 }
 
 .eyebrow {
   color: var(--color-glacier);
 }
 
-.name {
-  font-size: clamp(3.5rem, 17vw, 13rem);
-  overflow-wrap: anywhere;
-}
-
 .origin {
   color: var(--color-contour);
 }
 
-.lede {
-  max-width: 34ch;
-  font-size: clamp(1.0625rem, 1.6vw, 1.25rem);
-  color: var(--color-sheet);
+.name {
+  margin-inline: -0.02em;
+  font-size: clamp(3.5rem, 17.5vw, 26rem);
 }
 
-@media (min-width: 900px) {
-  .main {
-    padding-inline: 48px;
+.heroFoot {
+  display: grid;
+  gap: 32px;
+}
+
+.lede {
+  max-width: 34ch;
+  font-size: clamp(1.0625rem, 1.5vw, 1.375rem);
+  line-height: 1.55;
+}
+
+.cue {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  justify-self: start;
+  min-height: 44px;
+  color: var(--color-contour);
+  text-decoration: none;
+}
+
+.cue:hover {
+  color: var(--color-glacier);
+}
+
+.cueLine {
+  position: relative;
+  width: 1px;
+  height: 36px;
+  overflow: hidden;
+  background: var(--color-contour-dim);
+}
+
+.cueLine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--color-glacier);
+  animation: cue 2.4s var(--ease-summit) infinite;
+}
+
+@keyframes cue {
+  from {
+    transform: translateY(-100%);
   }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@media (min-width: 1000px) {
+  .heroFoot {
+    grid-template-columns: 1fr minmax(0, 34ch);
+    align-items: end;
+  }
+
+  .lede {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .cue {
+    grid-column: 1;
+    grid-row: 1;
+  }
+}
+
+:root[data-motion="reduced"] .cueLine::after {
+  animation: none;
+  transform: none;
 }

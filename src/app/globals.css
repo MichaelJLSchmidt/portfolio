@@ -13,11 +13,12 @@ html {
   color: var(--color-sheet);
   font-family: var(--font-archivo), system-ui, sans-serif;
   font-size: 100%;
-  font-variation-settings: "wdth" 100;
+  font-stretch: 100%;
 }
 
 body {
   margin: 0;
+  overflow-x: clip;
   min-height: 100svh;
   font-size: var(--type-body-size);
   line-height: var(--type-body-lh);
@@ -62,8 +63,7 @@ button {
 .display {
   font-family: var(--font-archivo), system-ui, sans-serif;
   font-weight: var(--type-display-wght);
-  font-variation-settings: "wdth" var(--type-display-wdth);
-  font-stretch: 62%;
+  font-stretch: calc(var(--type-display-wdth) * 1%);
   line-height: var(--type-display-lh);
   text-transform: uppercase;
   letter-spacing: -0.01em;
@@ -73,7 +73,7 @@ button {
   font-family: var(--font-martian), ui-monospace, monospace;
   font-size: var(--type-hud-size);
   letter-spacing: var(--type-hud-tracking);
-  font-variation-settings: "wdth" var(--type-hud-wdth);
+  font-stretch: calc(var(--type-hud-wdth) * 1%);
   text-transform: uppercase;
   line-height: 1.4;
 }
@@ -118,6 +118,32 @@ i,
 .italic {
   font-family: var(--font-archivo-italic), var(--font-archivo), system-ui, sans-serif;
   font-style: italic;
+}
+
+:root {
+  --page-max: 1680px;
+  --gutter: clamp(16px, 4vw, 72px);
+}
+
+/* Centred page measure with fluid gutters; content no longer hugs the left edge on wide screens. */
+.container {
+  width: 100%;
+  max-width: calc(var(--page-max) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Staggered entrance for supporting text (pure CSS; no-op with reduced motion). */
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+:root[data-motion="full"] .reveal {
+  animation: reveal-in var(--dur-long) var(--ease-trail) backwards;
+  animation-delay: calc(var(--reveal-base, 260ms) + var(--reveal-i, 0) * 90ms);
 }
 
 .page {

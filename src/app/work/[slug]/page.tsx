@@ -5,6 +5,7 @@ import { CardArtwork } from "@/components/card/CardArtwork";
 import { SummitCard } from "@/components/card/SummitCard";
 import { MagneticLink } from "@/components/transition/MagneticLink";
 import { MorphTarget } from "@/components/transition/MorphTarget";
+import { KineticText } from "@/components/type/KineticText";
 import { morphName } from "@/lib/morph";
 import { caseStudyLabels as L, cardBySlug, cards } from "@/content/cards";
 import { site } from "@/content/site";
@@ -28,7 +29,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
   const next = cards[(cards.indexOf(card) + 1) % cards.length];
 
   return (
-    <main id="main" className={styles.main} data-rarity={card.rarity}>
+    <main id="main" className={`${styles.main} container`} data-rarity={card.rarity}>
       <nav className={styles.crumbs} aria-label={L.back}>
         <Link href="/" className="hud-label">
           <span aria-hidden="true">←</span> {L.back}
@@ -40,16 +41,20 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
           <CardArtwork artwork={card.artwork} alt={card.artworkAlt} className={styles.art} />
         </MorphTarget>
         <div className={styles.titleBlock}>
-          <p className={`${styles.coords} hud-label map-halo`}>{card.coordinates}</p>
+          <p className={`${styles.coords} hud-label map-halo reveal`}>{card.coordinates}</p>
           <MorphTarget name={morphName("title", card.slug)}>
-            <h1 className={`${styles.title} display`}>{card.name}</h1>
+            <KineticText as="h1" text={card.name} className={`${styles.title} display`} delay={420} proximity />
           </MorphTarget>
-          <p className={`${styles.type} map-halo`}>{card.type}</p>
-          <p className={`${styles.lede} map-halo`}>{card.caseStudy.lede}</p>
+          <p className={`${styles.type} map-halo reveal`} style={{ "--reveal-i": 1 } as React.CSSProperties}>
+            {card.type}
+          </p>
+          <p className={`${styles.lede} map-halo reveal`} style={{ "--reveal-i": 2 } as React.CSSProperties}>
+            {card.caseStudy.lede}
+          </p>
         </div>
       </header>
 
-      <section className={styles.summary} aria-labelledby="summary-heading">
+      <section className={`${styles.summary} reveal`} style={{ "--reveal-i": 3 } as React.CSSProperties} aria-labelledby="summary-heading">
         <h2 id="summary-heading" className={`${styles.summaryHeading} hud-label`}>
           {L.summaryHeading}
         </h2>
@@ -85,6 +90,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
         </dl>
       </section>
 
+      <div className={styles.body}>
       <nav className={styles.jump} aria-labelledby="jump-heading">
         <h2 id="jump-heading" className="hud-label">
           {L.jumpTo}
@@ -103,12 +109,11 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
       <div className={styles.sections}>
         {card.caseStudy.sections.map((s) => (
           <section key={s.id} id={s.id} className={styles.section} aria-labelledby={`${s.id}-heading`}>
-            <h2 id={`${s.id}-heading`} className={`${styles.sectionHeading} display`}>
-              {s.title}
-            </h2>
+            <KineticText as="h2" id={`${s.id}-heading`} text={s.title} className={`${styles.sectionHeading} display`} play="inview" />
             <p>{s.body}</p>
           </section>
         ))}
+      </div>
       </div>
 
       <aside className={styles.inspect} aria-label={card.name}>
@@ -118,8 +123,11 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
       <nav className={styles.next} aria-label={L.next}>
         <MagneticLink href={`/work/${next.slug}/`} className={styles.nextLink}>
           <span className="hud-label">{L.next}</span>
-          <span className={`${styles.nextName} display`}>
-            {next.name} <span aria-hidden="true">→</span>
+          <span className={styles.nextRow}>
+            <KineticText text={next.name} className={`${styles.nextName} display`} play="inview" proximity />
+            <span className={`${styles.nextArrow} display`} aria-hidden="true">
+              →
+            </span>
           </span>
         </MagneticLink>
       </nav>

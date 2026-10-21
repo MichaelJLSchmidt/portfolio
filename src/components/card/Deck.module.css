@@ -1,27 +1,33 @@
 .deck {
   display: grid;
-  gap: 32px;
-  padding-block: 48px 96px;
+  gap: clamp(32px, 5vw, 72px);
+  padding-block: clamp(48px, 10vw, 140px) clamp(64px, 10vw, 160px);
 }
 
 .header {
   display: grid;
-  gap: 12px;
-  max-width: 40rem;
+  gap: 16px;
+  justify-items: center;
+  text-align: center;
 }
 
 .heading {
-  font-size: clamp(2.5rem, 9vw, 5.5rem);
+  font-size: clamp(2.75rem, 10vw, 9rem);
+  scroll-margin-top: 96px;
 }
 
 .intro {
+  max-width: 40ch;
   color: var(--color-sheet);
 }
 
+/* Cards sit centred on the page, a little offset from each other like a dealt hand. */
 .cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 420px));
-  gap: 56px 48px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: clamp(40px, 5vw, 96px);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -29,19 +35,26 @@
 
 .slot {
   display: grid;
-  justify-items: start;
-  gap: 16px;
+  justify-items: center;
+  gap: 20px;
+  width: min(100%, 420px);
+}
+
+@media (min-width: 900px) {
+  .slot:nth-child(even) {
+    margin-top: clamp(40px, 6vw, 120px);
+  }
 }
 
 .summary {
-  max-width: 420px;
+  max-width: 42ch;
   color: var(--color-sheet);
   font-size: 0.9375rem;
-  line-height: 1.55;
+  line-height: 1.6;
+  text-align: center;
 }
 
 .tilt {
-  justify-self: start;
   min-height: 44px;
   padding: 0 18px;
   border: 1px solid var(--color-glacier);
