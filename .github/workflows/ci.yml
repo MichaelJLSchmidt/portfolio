@@ -26,6 +26,7 @@ jobs:
 
       - run: npm run lint
       - run: npm run typecheck
+      - run: npm run check:contrast
 
       - name: Build with the Pages base path
         run: npm run build

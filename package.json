@@ -13,7 +13,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "terrain": "node scripts/terrain/build.mjs",
     "report:size": "node scripts/report-sizes.mjs",
-    "preview": "node scripts/serve-out.mjs"
+    "preview": "node scripts/serve-out.mjs",
+    "check:contrast": "node scripts/check-contrast.mjs"
   },
   "dependencies": {
     "@react-three/drei": "10.7.9",
