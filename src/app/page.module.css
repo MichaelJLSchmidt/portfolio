@@ -1,0 +1,37 @@
+.main {
+  padding: 112px 16px 64px;
+}
+
+.hero {
+  display: grid;
+  gap: 16px;
+  max-width: 1200px;
+  min-height: min(78svh, 760px);
+  align-content: end;
+  padding-bottom: 8svh;
+}
+
+.eyebrow {
+  color: var(--color-glacier);
+}
+
+.name {
+  font-size: clamp(3.5rem, 17vw, 13rem);
+  overflow-wrap: anywhere;
+}
+
+.origin {
+  color: var(--color-contour);
+}
+
+.lede {
+  max-width: 34ch;
+  font-size: clamp(1.0625rem, 1.6vw, 1.25rem);
+  color: var(--color-sheet);
+}
+
+@media (min-width: 900px) {
+  .main {
+    padding-inline: 48px;
+  }
+}

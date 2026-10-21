@@ -3,6 +3,8 @@ import { archivo, archivoItalic, martianMono } from "./fonts";
 import { site } from "@/content/site";
 import { color, tokensToCss } from "@/styles/tokens";
 import { motionPreferenceScript } from "@/lib/motion-preference";
+import { Hud } from "@/components/hud/Hud";
+import { SiteFooter } from "@/components/SiteFooter";
 import "./globals.css";
 
 const isPreview = process.env.NEXT_PUBLIC_PREVIEW === "1";
@@ -30,7 +32,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <a className="skip-link" href="#main">
           {site.skipLink}
         </a>
-        {children}
+        <Hud />
+        <div className="page">
+          {children}
+          <SiteFooter />
+        </div>
       </body>
     </html>
   );

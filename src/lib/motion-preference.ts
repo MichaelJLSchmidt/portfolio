@@ -8,10 +8,18 @@ import { useSyncExternalStore } from "react";
  * and an inline script sets it before first paint (see `motionPreferenceScript`).
  */
 export const CALM_STORAGE_KEY = "summit:calm-map";
+export const INTRO_STORAGE_KEY = "summit:intro-played";
 const CHANGE_EVENT = "summit:motion-change";
 const QUERY = "(prefers-reduced-motion: reduce)";
 
-export const motionPreferenceScript = `(function(){var c=false;try{c=localStorage.getItem("${CALM_STORAGE_KEY}")==="1"}catch(e){}var r=false;try{r=matchMedia("${QUERY}").matches}catch(e){}var d=document.documentElement;d.setAttribute("data-calm",c?"1":"0");d.setAttribute("data-motion",c||r?"reduced":"full")})()`;
+// Also flags a pending intro (first visit this session, full motion) so the poster starts dimmed
+// and the contour sweep can draw the map on, instead of the map vanishing and redrawing.
+export const motionPreferenceScript = `(function(){var c=false,p=false,r=false;try{c=localStorage.getItem("${CALM_STORAGE_KEY}")==="1"}catch(e){}try{p=sessionStorage.getItem("${INTRO_STORAGE_KEY}")==="1"}catch(e){}try{r=matchMedia("${QUERY}").matches}catch(e){}var d=document.documentElement;d.setAttribute("data-calm",c?"1":"0");d.setAttribute("data-motion",c||r?"reduced":"full");d.setAttribute("data-intro",c||r||p?"none":"pending")})()`;
+
+/** Called when the intro will not play after all (no WebGL, low-spec device, reduced motion). */
+export function cancelPendingIntro() {
+  document.documentElement.setAttribute("data-intro", "none");
+}
 
 function readCalm(): boolean {
   try {
