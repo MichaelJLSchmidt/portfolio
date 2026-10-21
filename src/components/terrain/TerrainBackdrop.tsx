@@ -7,6 +7,7 @@ import meta from "@terrain/terrain.json";
 import { terrainIdForPath } from "@/content/cards";
 import { site } from "@/content/site";
 import { asset } from "@/lib/asset";
+import { whenIdle } from "@/lib/idle";
 import { cancelPendingIntro, useReducedMotion } from "@/lib/motion-preference";
 import { deviceProfile, type DeviceProfile } from "./field-settings";
 import { fieldStore, useFieldStore } from "./field-store";
@@ -38,14 +39,6 @@ function canRunField(): boolean {
   }
 }
 
-const whenIdle = (cb: () => void) => {
-  const run = () => {
-    if (typeof window.requestIdleCallback === "function") window.requestIdleCallback(cb, { timeout: 1500 });
-    else setTimeout(cb, 200);
-  };
-  if (document.readyState === "complete") run();
-  else window.addEventListener("load", run, { once: true });
-};
 
 /**
  * Fixed backdrop behind all content. First paint is the static contour poster (also the

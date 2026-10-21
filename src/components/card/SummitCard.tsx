@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useId, useRef, useState, type ReactNode } from "react";
+import { Suspense, lazy, useId, useRef, useState, type ReactNode } from "react";
 import { cardLabels, type SummitCardData } from "@/content/cards";
+import { useFinePointer, useIdle } from "@/lib/idle";
 import { useReducedMotion } from "@/lib/motion-preference";
 import { prefetchTerrain } from "@/components/terrain/field-store";
 import { MorphTarget } from "@/components/transition/MorphTarget";
@@ -10,8 +11,10 @@ import { morphName } from "@/lib/morph";
 import { CardArtwork } from "./CardArtwork";
 import { CostBadge, RarityPip, SetSymbol } from "./CardMarks";
 import { useGyroStatus } from "./gyro";
-import { useTilt } from "./useTilt";
 import styles from "./SummitCard.module.css";
+
+// Tilt springs (Motion) load after the page is idle on fine pointers, or when gyro tilt is on.
+const TiltDriver = lazy(() => import("./TiltDriver"));
 
 export type SummitCardProps = {
   card: SummitCardData;
@@ -48,7 +51,10 @@ export function SummitCard({
   const reduced = useReducedMotion();
   const gyro = useGyroStatus();
   const rootRef = useRef<HTMLElement>(null);
-  const { onPointerMove, onPointerLeave } = useTilt(rootRef, { reduced, gyro });
+  const stageRef = useRef<HTMLDivElement>(null);
+  const finePointer = useFinePointer();
+  const idle = useIdle();
+  const tilt = !reduced && ((finePointer && idle) || gyro === "on");
   const nameId = useId();
   const Heading = `h${headingLevel}` as const;
   const foil = card.rarity === "R" || card.rarity === "M";
@@ -89,14 +95,7 @@ export function SummitCard({
       }}
       onFocus={intent}
     >
-      <div
-        className={styles.stage}
-        onPointerMove={onPointerMove}
-        onPointerLeave={() => {
-          setActive(false);
-          onPointerLeave();
-        }}
-      >
+      <div ref={stageRef} className={styles.stage} onPointerLeave={() => setActive(false)}>
         <div className={styles.tilt}>
           <button
             type="button"
@@ -184,6 +183,11 @@ export function SummitCard({
           </div>
         </div>
       </div>
+      {tilt && (
+        <Suspense fallback={null}>
+          <TiltDriver rootRef={rootRef} stageRef={stageRef} gyro={gyro} />
+        </Suspense>
+      )}
       <p className="visually-hidden" aria-live="polite">
         {announcement}
       </p>
