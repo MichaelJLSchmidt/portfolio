@@ -13,6 +13,9 @@ export type DeviceProfile = {
   /** Below this many device pixels on the long edge, the 1024 heightmap is enough. */
   heightmapMinDevicePx?: number;
   glow: boolean;
+  /** Frame rate for the ambient animation (pulse, drift) while the visitor is around. */
+  ambientFps: number;
+  /** Frame rate once nobody has touched the page for `dormantAfterMs`. */
   idleFps: number;
 };
 

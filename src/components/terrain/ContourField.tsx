@@ -142,7 +142,14 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     lamp: null as Tween | null,
     lampValue: 0,
     lampPos: [-1e4, -1e4] as [number, number],
-    lastInput: 0,
+    lastInput: performance.now(),
+    /** Map offset (UV), eased towards the pointer/scroll target: terrain moves slowly. */
+    pan: [0, 0] as [number, number],
+    panPointer: [0, 0] as [number, number],
+    panScroll: 0,
+    ripplePos: [0, 0] as [number, number],
+    rippleStart: -1,
+    lastFrame: 0,
     region: null as TerrainSource | null,
     /** Terrain currently loaded into texture slot B, and its id. */
     target: null as TerrainSource | null,
@@ -170,6 +177,8 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       u.uGlowColor.value.set(...hexToRgb(colorOf(cfg.glowColor)));
       u.uGlow.value = profile.glow ? cfg.glowStrength / 0.3 : 0;
       u.uDrift.value = cfg.driftCyclesPerSecond;
+      u.uPulse.value.set(cfg.pulsePeriodS, cfg.pulseStrength);
+      u.uPulseColor.value.set(...hexToRgb(colorOf(cfg.pulseColor)));
       invalidate();
     };
     apply(fieldStore.get().config);
@@ -191,6 +200,9 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     u.uIndexWidth.value = cfg.indexLineWidthPx * dpr;
     u.uHeadlampRadius.value = cfg.headlampRadiusPx * dpr;
     u.uGlowWidth.value = cfg.glowWidthPx * dpr;
+    u.uLens.value.set(cfg.lensRadiusPx * dpr, cfg.lensStrength);
+    u.uRippleSpeed.value = cfg.rippleSpeedPxS * dpr;
+    u.uResolution.value.set(size.width * dpr, size.height * dpr);
     const a = anim.current;
     if (a.region) coverTransform(u.uUvA.value, size.width, size.height, a.region.width, a.region.height, a.region.posX, a.region.posY);
     if (a.target) coverTransform(u.uUvB.value, size.width, size.height, a.target.width, a.target.height, a.target.posX, a.target.posY);
@@ -369,6 +381,9 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     const onPointerMove = (e: PointerEvent) => {
       if (e.pointerType === "touch") return;
       setPos(e.clientX, e.clientY);
+      // Parallax: the map leans away from the pointer, a little.
+      const k = cfg().parallax;
+      a.panPointer = [(e.clientX / window.innerWidth - 0.5) * k, -(e.clientY / window.innerHeight - 0.5) * k];
       if (a.lamp?.to !== 1) fade(1, msOf("micro"));
       wake();
     };
@@ -385,6 +400,20 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     const onTouchEnd = (e: TouchEvent) => {
       if (e.touches.length === 0) fade(0, cfg().headlampFadeMs);
     };
+    // Click or tap: an altimeter ping rings out from the point of contact.
+    const onPointerDown = (e: PointerEvent) => {
+      a.ripplePos = [e.clientX * dpr, (window.innerHeight - e.clientY) * dpr];
+      a.rippleStart = performance.now();
+      a.lastInput = a.rippleStart;
+      wake();
+    };
+    // Scrolling descends the map slowly (slower than the content).
+    const onScroll = () => {
+      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      a.panScroll = -(window.scrollY / max) * cfg().scrollParallax;
+      a.lastInput = performance.now();
+      wake();
+    };
     const opts = { passive: true } as const;
     window.addEventListener("pointermove", onPointerMove, opts);
     document.addEventListener("pointerout", onPointerOut, opts);
@@ -392,7 +421,12 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     window.addEventListener("touchmove", onTouch, opts);
     window.addEventListener("touchend", onTouchEnd, opts);
     window.addEventListener("touchcancel", onTouchEnd, opts);
+    window.addEventListener("pointerdown", onPointerDown, opts);
+    window.addEventListener("scroll", onScroll, opts);
+    onScroll();
     return () => {
+      window.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointerMove);
       document.removeEventListener("pointerout", onPointerOut);
       window.removeEventListener("touchstart", onTouch);
@@ -414,6 +448,8 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       !tweenDone(a.morph, now) ||
       !tweenDone(a.lamp, now) ||
       now - a.lastInput < 120 ||
+      (a.rippleStart >= 0 && now - a.rippleStart < 1800) ||
+      Math.abs(a.pan[0] - a.panPointer[0]) + Math.abs(a.pan[1] - a.panPointer[1] - a.panScroll) > 2e-4 ||
       (a.ready && !a.readyNotified)
     );
   };
@@ -452,7 +488,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       s.timer = setTimeout(() => {
         s.timer = 0;
         wake();
-      }, 1000 / profile.idleFps);
+      }, 1000 / (performance.now() - a.lastInput < fieldStore.get().config.dormantAfterMs ? profile.ambientFps : profile.idleFps));
     }
   }
 
@@ -535,6 +571,19 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
 
     u.uSweep.value = a.sweepValue;
     u.uMorph.value = a.morphValue;
+    const cfg = fieldStore.get().config;
+    // Camera: push in while morphing to a card's terrain.
+    u.uZoom.value = cfg.zoomBase + a.morphValue * cfg.morphZoom;
+    // Pan eases towards pointer + scroll targets, plus a very slow autonomous drift.
+    const dt = a.lastFrame ? Math.min(0.1, (now - a.lastFrame) / 1000) : 0;
+    a.lastFrame = now;
+    const ease = 1 - Math.exp(-dt * 2.2);
+    a.pan[0] += (a.panPointer[0] - a.pan[0]) * ease;
+    a.pan[1] += (a.panPointer[1] + a.panScroll - a.pan[1]) * ease;
+    const t = (now - a.t0) / 1000;
+    u.uPan.value.set(a.pan[0] + Math.sin(t * 0.05) * 0.008, a.pan[1] + Math.cos(t * 0.037) * 0.008);
+    const age = a.rippleStart >= 0 ? (now - a.rippleStart) / 1000 : -1;
+    u.uRipple.value.set(a.ripplePos[0], a.ripplePos[1], age >= 0 && age < 1.8 ? age : -1);
     u.uHeadlampStrength.value = a.lampValue;
     u.uHeadlampPos.value.set(a.lampPos[0], a.lampPos[1]);
     u.uTime.value = (now - a.t0) / 1000;

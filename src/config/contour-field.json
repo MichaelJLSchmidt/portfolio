@@ -12,21 +12,34 @@
   "headlampFadeMs": 600,
   "glowWidthPx": 7,
   "glowStrength": 0.3,
-  "driftCyclesPerSecond": 0.02,
+  "lensRadiusPx": 220,
+  "lensStrength": 0.32,
+  "parallax": 0.022,
+  "scrollParallax": 0.05,
+  "driftCyclesPerSecond": 0.05,
+  "pulsePeriodS": 9,
+  "pulseStrength": 0.55,
+  "pulseColor": "alpenglow",
+  "rippleSpeedPxS": 900,
+  "zoomBase": 1.06,
+  "morphZoom": 0.14,
   "intro": "cinematic",
-  "morph": "scenic",
+  "morph": "cinematic",
   "desktop": {
     "dprMax": 2,
     "heightmap": "desktop",
     "heightmapMinDevicePx": 1800,
     "glow": true,
-    "idleFps": 10
+    "idleFps": 10,
+    "ambientFps": 30
   },
   "mobile": {
     "dprMax": 1.5,
     "heightmap": "mobile",
     "glow": false,
-    "idleFps": 5
+    "idleFps": 5,
+    "ambientFps": 24
   },
-  "frameBudgetMs": 22
+  "frameBudgetMs": 22,
+  "dormantAfterMs": 60000
 }

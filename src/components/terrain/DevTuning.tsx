@@ -30,10 +30,21 @@ export default function DevTuning() {
     headlampFadeMs: { value: fieldConfig.headlampFadeMs, min: 0, max: 2000, step: 20 },
     glowWidthPx: { value: fieldConfig.glowWidthPx, min: 1, max: 20, step: 0.5 },
     glowStrength: { value: fieldConfig.glowStrength, min: 0, max: 1, step: 0.05 },
+    lensRadiusPx: { value: fieldConfig.lensRadiusPx, min: 0, max: 500, step: 10 },
+    lensStrength: { value: fieldConfig.lensStrength, min: 0, max: 0.8, step: 0.02 },
+    parallax: { value: fieldConfig.parallax, min: 0, max: 0.08, step: 0.002 },
+    scrollParallax: { value: fieldConfig.scrollParallax, min: 0, max: 0.2, step: 0.005 },
     driftCyclesPerSecond: { value: fieldConfig.driftCyclesPerSecond, min: 0, max: 0.2, step: 0.005 },
+    pulsePeriodS: { value: fieldConfig.pulsePeriodS, min: 2, max: 30, step: 0.5 },
+    pulseStrength: { value: fieldConfig.pulseStrength, min: 0, max: 1, step: 0.05 },
+    pulseColor: { value: fieldConfig.pulseColor, options: colorTokens },
+    rippleSpeedPxS: { value: fieldConfig.rippleSpeedPxS, min: 200, max: 2000, step: 50 },
+    zoomBase: { value: fieldConfig.zoomBase, min: 1, max: 1.3, step: 0.01 },
+    morphZoom: { value: fieldConfig.morphZoom, min: 0, max: 0.5, step: 0.01 },
     intro: { value: fieldConfig.intro, options: durationTokens },
     morph: { value: fieldConfig.morph, options: durationTokens },
     frameBudgetMs: { value: fieldConfig.frameBudgetMs, min: 12, max: 40, step: 1 },
+    dormantAfterMs: { value: fieldConfig.dormantAfterMs, min: 5000, max: 300000, step: 5000 },
   });
 
   useControls("Contour field", {
