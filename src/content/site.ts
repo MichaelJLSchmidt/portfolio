@@ -10,7 +10,7 @@ export const site = {
     origin: "Interlaken · 566 m · Swiss Alps",
     lede: "I lead a UX team that designs public-sector platforms, runs the workshops that shape them, and ships the design system they are built with.",
     deckHeading: "The Summit Deck",
-    deckIntro: "Each project is a card. Flip it for the summary, open it for the full expedition log.",
+    deckIntro: "Each project is a card. Open one for the full expedition log.",
   },
   hud: {
     mark: "Höhenlinie",

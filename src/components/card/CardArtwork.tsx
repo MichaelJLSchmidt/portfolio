@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import meta from "@terrain/terrain.json";
 import type { Artwork } from "@/content/cards";
 import { asset } from "@/lib/asset";
@@ -21,7 +22,18 @@ const pathFrom = (pts: [number, number][]) =>
  * Card artwork window: the generated terrain SVG plus an overlay with a dotted glacier
  * trail, four waypoint pins and map labels, all positioned from content data.
  */
-export function CardArtwork({ artwork, alt, className }: { artwork: Artwork; alt: string; className?: string }) {
+export function CardArtwork({
+  artwork,
+  alt,
+  className,
+  children,
+}: {
+  artwork: Artwork;
+  alt: string;
+  className?: string;
+  /** Optional overlay (e.g. the "Open expedition log" chip). */
+  children?: ReactNode;
+}) {
   const terrain = terrainFor(artwork.terrainId);
   if (!terrain) return null;
   const vb = terrain.viewBox;
@@ -75,6 +87,7 @@ export function CardArtwork({ artwork, alt, className }: { artwork: Artwork; alt
           </g>
         ))}
       </svg>
+      {children}
     </div>
   );
 }

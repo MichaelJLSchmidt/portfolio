@@ -33,32 +33,11 @@
   gap: 16px;
 }
 
-/* One click to the case study on devices with a fine pointer; touch flips first. */
-.open {
-  display: none;
-  align-items: center;
-  gap: 0.6em;
-  min-height: 44px;
-  padding: 0 4px;
-  color: var(--color-glacier);
-  text-decoration: none;
-}
-
-.open:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .open {
-    display: inline-flex;
-  }
-}
-
-/* Without JavaScript the card can't flip, so every device gets the direct link.
-   (data-motion is set by the inline head script, so its absence means no JS.) */
-:root:not([data-motion]) .open {
-  display: inline-flex;
+.summary {
+  max-width: 420px;
+  color: var(--color-sheet);
+  font-size: 0.9375rem;
+  line-height: 1.55;
 }
 
 .tilt {

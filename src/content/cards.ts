@@ -65,14 +65,12 @@ export type SummitCardData = {
   stats: [Stat, Stat, Stat];
   artwork: Artwork;
   artworkAlt: string;
-  back: { summary: string; linkLabel: string };
+  /** Two-sentence summary shown under the card in the deck. */
+  summary: string;
   caseStudy: CaseStudy;
 };
 
 export const cardLabels = {
-  flipToBack: (name: string) => `Flip card: ${name}`,
-  announceBack: (name: string) => `${name}: showing the back of the card`,
-  announceFront: (name: string) => `${name}: showing the front of the card`,
   openLog: "Open expedition log",
   costPrefix: "Summit cost",
   stats: "Card stats",
@@ -144,11 +142,8 @@ export const cards: SummitCardData[] = [
     },
     artworkAlt:
       "Contour map from Interlaken between Lake Thun and Lake Brienz up to the Jungfrau, with a dotted trail and four waypoints.",
-    back: {
-      summary:
-        "UX Team Lead at DV Bern AG for more than eight years. Runs the workshops, drives the central Angular Material design system and designs straight into code. [SUMMARY]",
-      linkLabel: "Open expedition log",
-    },
+    summary:
+      "UX Team Lead at DV Bern AG for more than eight years. Runs the workshops, drives the central Angular Material design system and designs straight into code. [SUMMARY]",
     caseStudy: {
       lede: "[LEDE] How a team of four designers works across public-sector platforms at DV Bern AG.",
       summary: {
@@ -190,11 +185,8 @@ export const cards: SummitCardData[] = [
     ],
     artwork: { kind: "seeded", terrainId: "dvb-001" },
     artworkAlt: "Contour map of a fictional massif generated for this project, with a dotted trail to the summit.",
-    back: {
-      summary:
-        "kiBon brings childcare subsidies for the Canton of Bern into one platform for parents, providers and the administration. Version 2.0 was planned with User Story Mapping. [SUMMARY]",
-      linkLabel: "Open expedition log",
-    },
+    summary:
+      "kiBon brings childcare subsidies for the Canton of Bern into one platform for parents, providers and the administration. Version 2.0 was planned with User Story Mapping. [SUMMARY]",
     caseStudy: {
       lede: "[LEDE] Planning and designing the second generation of the Canton of Bern's childcare-subsidy platform.",
       summary: {

@@ -29,13 +29,14 @@ export type SummitCardProps = {
   transitionNames?: boolean;
   /** Called before navigating to the case study (e.g. to remember the origin for focus return). */
   onOpen?: () => void;
-  /** Show the "Open expedition log" link on the back (off when already on the case study). */
+  /** The whole card links to its case study (off when already on that page). */
   linkToCaseStudy?: boolean;
 };
 
 /**
- * A data-driven trading-card-style project card: tilt, contour foil (R and M only) and a
- * 3D flip. The flip control is a real toggle button; the back link is a separate anchor.
+ * A data-driven trading-card-style project card with spring tilt and contour foil
+ * (rarity R and M). The whole card is one link to the case study: a transparent anchor
+ * covers the face and takes its accessible name from the card name.
  */
 export function SummitCard({
   card,
@@ -45,8 +46,6 @@ export function SummitCard({
   onOpen,
   linkToCaseStudy = true,
 }: SummitCardProps) {
-  const [flipped, setFlipped] = useState(false);
-  const [announcement, setAnnouncement] = useState("");
   const [active, setActive] = useState(false);
   const reduced = useReducedMotion();
   const gyro = useGyroStatus();
@@ -58,19 +57,11 @@ export function SummitCard({
   const nameId = useId();
   const Heading = `h${headingLevel}` as const;
   const foil = card.rarity === "R" || card.rarity === "M";
-  const href = `/work/${card.slug}/`;
-
-  const toggle = () => {
-    const next = !flipped;
-    setFlipped(next);
-    setAnnouncement(next ? cardLabels.announceBack(card.name) : cardLabels.announceFront(card.name));
-  };
 
   const intent = () => prefetchTerrain(card.artwork.terrainId);
 
-  // Only the face currently showing carries the names, so the morph starts from what is visible.
-  const morph = (part: "art" | "title", visible: boolean, node: ReactNode) =>
-    transitionNames && visible ? (
+  const morph = (part: "art" | "title", node: ReactNode) =>
+    transitionNames ? (
       <MorphTarget name={morphName(part, card.slug)} className={part === "art" ? styles.artSlot : undefined}>
         {node}
       </MorphTarget>
@@ -85,8 +76,8 @@ export function SummitCard({
       data-slug={card.slug}
       data-rarity={card.rarity}
       data-size={size}
-      data-flipped={flipped}
       data-active={active}
+      data-link={linkToCaseStudy}
       data-shimmer={!reduced && (gyro === "off" || gyro === "resume")}
       aria-labelledby={nameId}
       onPointerEnter={() => {
@@ -97,89 +88,69 @@ export function SummitCard({
     >
       <div ref={stageRef} className={styles.stage} onPointerLeave={() => setActive(false)}>
         <div className={styles.tilt}>
-          <button
-            type="button"
-            className={styles.hit}
-            aria-pressed={flipped}
-            aria-label={cardLabels.flipToBack(card.name)}
-            onClick={toggle}
-          />
-          <div className={styles.flipper}>
-            <div className={`${styles.face} ${styles.front}`} inert={flipped}>
-              <header className={styles.nameBar}>
-                {morph(
-                  "title",
-                  !flipped,
-                  <Heading id={nameId} className={styles.name}>
-                    {card.name}
-                  </Heading>,
-                )}
-                <CostBadge value={card.cost} label={`${cardLabels.costPrefix}: ${card.costLabel}`} />
-              </header>
-              <p className={styles.coords}>{card.coordinates}</p>
-              {morph("art", !flipped, <CardArtwork artwork={card.artwork} alt={card.artworkAlt} />)}
-              <p className={styles.typeLine}>
-                <span>{card.type}</span>
-                <SetSymbol symbol={card.set.symbol} label={cardLabels.setSymbol(`${card.set.code} ${card.set.name}`)} />
-              </p>
-              <div className={styles.rules}>
-                <ul className={styles.keywords}>
-                  {card.keywords.map((k) => (
-                    <li key={k.term}>
-                      <strong>{k.term}</strong> <em className={styles.reminder}>— {k.reminder}</em>
-                    </li>
-                  ))}
-                </ul>
-                <hr className={styles.hairline} />
-                <p className={`${styles.flavor} italic`}>{card.flavor}</p>
-              </div>
-              <dl className={styles.stats} aria-label={cardLabels.stats}>
-                {card.stats.map((s) => (
-                  <div key={s.label} className={styles.stat}>
-                    <dt>{s.label}</dt>
-                    <dd>{s.value}</dd>
-                  </div>
-                ))}
-              </dl>
-              <p className={styles.collector} aria-label={cardLabels.collector}>
-                <span>{card.set.code}</span>
-                <span aria-hidden="true">·</span>
-                <span>{card.collector.number}</span>
-                <span aria-hidden="true">·</span>
-                <RarityPip rarity={card.rarity} label={cardLabels.rarity(card.rarity)} />
-                <span aria-hidden="true">·</span>
-                <span>{card.collector.language}</span>
-              </p>
-              {foil && <div className={styles.foil} aria-hidden="true" />}
-              <div className={styles.glare} aria-hidden="true" />
-            </div>
-
-            <div className={`${styles.face} ${styles.back}`} inert={!flipped}>
-              <div className={styles.backArt} aria-hidden="true">
-                {morph("art", flipped, <CardArtwork artwork={card.artwork} alt="" />)}
-              </div>
-              <div className={styles.backBody}>
-                {morph(
-                  "title",
-                  flipped,
-                  <p className={styles.backName} aria-hidden="true">
-                    {card.name}
-                  </p>,
-                )}
-                <p className={styles.backSummary}>{card.back.summary}</p>
+          <div className={styles.face}>
+            <header className={styles.nameBar}>
+              {morph(
+                "title",
+                <Heading id={nameId} className={styles.name}>
+                  {card.name}
+                </Heading>,
+              )}
+              <CostBadge value={card.cost} label={`${cardLabels.costPrefix}: ${card.costLabel}`} />
+            </header>
+            <p className={styles.coords}>{card.coordinates}</p>
+            {morph(
+              "art",
+              <CardArtwork artwork={card.artwork} alt={card.artworkAlt}>
                 {linkToCaseStudy && (
-                  <Link
-                    href={href}
-                    className={styles.backLink}
-                    onClick={onOpen}
-                    aria-label={`${card.back.linkLabel}: ${card.name}`}
-                  >
-                    {card.back.linkLabel} <span aria-hidden="true">→</span>
-                  </Link>
+                  <span className={`${styles.openChip} hud-label`} aria-hidden="true">
+                    {cardLabels.openLog} →
+                  </span>
                 )}
-              </div>
-              <div className={styles.glare} aria-hidden="true" />
+              </CardArtwork>,
+            )}
+            <p className={styles.typeLine}>
+              <span>{card.type}</span>
+              <SetSymbol symbol={card.set.symbol} label={cardLabels.setSymbol(`${card.set.code} ${card.set.name}`)} />
+            </p>
+            <div className={styles.rules}>
+              <ul className={styles.keywords}>
+                {card.keywords.map((k) => (
+                  <li key={k.term}>
+                    <strong>{k.term}</strong> <em className={styles.reminder}>— {k.reminder}</em>
+                  </li>
+                ))}
+              </ul>
+              <hr className={styles.hairline} />
+              <p className={`${styles.flavor} italic`}>{card.flavor}</p>
             </div>
+            <dl className={styles.stats} aria-label={cardLabels.stats}>
+              {card.stats.map((s) => (
+                <div key={s.label} className={styles.stat}>
+                  <dt>{s.label}</dt>
+                  <dd>{s.value}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className={styles.collector} aria-label={cardLabels.collector}>
+              <span>{card.set.code}</span>
+              <span aria-hidden="true">·</span>
+              <span>{card.collector.number}</span>
+              <span aria-hidden="true">·</span>
+              <RarityPip rarity={card.rarity} label={cardLabels.rarity(card.rarity)} />
+              <span aria-hidden="true">·</span>
+              <span>{card.collector.language}</span>
+            </p>
+            {foil && <div className={styles.foil} aria-hidden="true" />}
+            <div className={styles.glare} aria-hidden="true" />
+            {linkToCaseStudy && (
+              <Link
+                href={`/work/${card.slug}/`}
+                className={styles.cardLink}
+                aria-labelledby={nameId}
+                onClick={onOpen}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -188,9 +159,6 @@ export function SummitCard({
           <TiltDriver rootRef={rootRef} stageRef={stageRef} gyro={gyro} />
         </Suspense>
       )}
-      <p className="visually-hidden" aria-live="polite">
-        {announcement}
-      </p>
     </article>
   );
 }
