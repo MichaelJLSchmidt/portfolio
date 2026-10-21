@@ -98,16 +98,16 @@
       "contourIntervalM": 200,
       "indexEvery": 5,
       "bboxLv95": [
-        2619222,
-        1152078,
-        2652222,
-        1174078
+        2617335,
+        1151854,
+        2653335,
+        1175854
       ],
       "trail": null,
       "pins": null,
       "svgBytes": {
-        "bytes": 34950,
-        "gzipBytes": 13023
+        "bytes": 36747,
+        "gzipBytes": 13733
       },
       "morph": {
         "file": "/terrain/morph/ikn-000.png",
@@ -115,15 +115,15 @@
         "height": 341,
         "elevation": {
           "min": 557.6,
-          "max": 4076.3
+          "max": 4160.2
         },
         "encoding": {
           "channels": "RG",
           "offset": 557.5,
           "scale": 1
         },
-        "bytes": 168275,
-        "gzipBytes": 168348
+        "bytes": 171450,
+        "gzipBytes": 171523
       }
     },
     "dvb-001": {

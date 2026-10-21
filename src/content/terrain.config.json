@@ -1,7 +1,7 @@
 {
   "$comment": "Input for scripts/terrain. Region and card terrains; generated outputs land in public/terrain.",
   "region": {
-    "name": "Thun – Interlaken – Grindelwald – Lauterbrunnen – Jungfrau",
+    "name": "Thun \u2013 Interlaken \u2013 Grindelwald \u2013 Lauterbrunnen \u2013 Jungfrau",
     "bboxWgs84": [
       7.55,
       46.47,
@@ -59,10 +59,10 @@
       "id": "ikn-000",
       "kind": "crop",
       "center": {
-        "lon": 7.905,
-        "lat": 46.618
+        "lon": 7.9,
+        "lat": 46.625
       },
-      "widthKm": 33,
+      "widthKm": 36,
       "aspect": 1.5,
       "contourIntervalM": 200,
       "indexEvery": 5,
