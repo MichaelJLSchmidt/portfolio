@@ -1,3 +1,4 @@
+import { Deck } from "@/components/card/Deck";
 import { site } from "@/content/site";
 import styles from "./page.module.css";
 
@@ -12,6 +13,7 @@ export default function Home() {
         <p className={`${styles.origin} hud-label map-halo`}>{site.hero.origin}</p>
         <p className={`${styles.lede} map-halo`}>{site.hero.lede}</p>
       </section>
+      <Deck />
     </main>
   );
 }

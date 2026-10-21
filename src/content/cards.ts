@@ -138,8 +138,8 @@ export const cards: SummitCardData[] = [
         { lon: 7.9625, lat: 46.5372, label: "Jungfrau", elevation: "4158 m" },
       ],
       labels: [
-        { lon: 7.745, lat: 46.703, text: "Thunersee", elevation: "558" },
-        { lon: 7.952, lat: 46.71, text: "Brienzersee", elevation: "564" },
+        { lon: 7.76, lat: 46.697, text: "Thunersee", elevation: "558" },
+        { lon: 7.94, lat: 46.708, text: "Brienzersee", elevation: "564" },
       ],
     },
     artworkAlt:
