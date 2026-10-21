@@ -3,7 +3,8 @@
 import { setCalmMap, useCalmMap } from "@/lib/motion-preference";
 import styles from "./Hud.module.css";
 
-export function CalmToggle({ on, off }: { on: string; off: string }) {
+/** Switch state is shown by the knob and announced through aria-pressed. */
+export function CalmToggle({ label }: { label: string }) {
   const calm = useCalmMap();
   return (
     <button
@@ -13,7 +14,7 @@ export function CalmToggle({ on, off }: { on: string; off: string }) {
       onClick={() => setCalmMap(!calm)}
     >
       <span className={styles.switch} aria-hidden="true" />
-      {calm ? on : off}
+      {label}
     </button>
   );
 }

@@ -17,7 +17,7 @@ export function Hud() {
           <span className={styles.live} aria-hidden="true" />
           <BernClock label={site.hud.clockLabel} />
         </span>
-        <CalmToggle on={site.hud.calmOn} off={site.hud.calmOff} />
+        <CalmToggle label={site.hud.calm} />
       </div>
     </header>
   );
