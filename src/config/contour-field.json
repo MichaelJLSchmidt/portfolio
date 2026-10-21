@@ -15,7 +15,18 @@
   "driftCyclesPerSecond": 0.02,
   "intro": "cinematic",
   "morph": "scenic",
-  "desktop": { "dprMax": 2, "heightmap": "desktop", "glow": true, "idleFps": 10 },
-  "mobile": { "dprMax": 1.5, "heightmap": "mobile", "glow": false, "idleFps": 5 },
+  "desktop": {
+    "dprMax": 2,
+    "heightmap": "desktop",
+    "heightmapMinDevicePx": 1800,
+    "glow": true,
+    "idleFps": 10
+  },
+  "mobile": {
+    "dprMax": 1.5,
+    "heightmap": "mobile",
+    "glow": false,
+    "idleFps": 5
+  },
   "frameBudgetMs": 22
 }

@@ -10,6 +10,8 @@ export type FieldConfig = typeof config;
 export type DeviceProfile = {
   dprMax: number;
   heightmap: "desktop" | "mobile";
+  /** Below this many device pixels on the long edge, the 1024 heightmap is enough. */
+  heightmapMinDevicePx?: number;
   glow: boolean;
   idleFps: number;
 };
@@ -33,5 +35,9 @@ export function isMobileProfile(): boolean {
 }
 
 export function deviceProfile(cfg: FieldConfig = fieldConfig): DeviceProfile {
-  return (isMobileProfile() ? cfg.mobile : cfg.desktop) as DeviceProfile;
+  const profile = { ...((isMobileProfile() ? cfg.mobile : cfg.desktop) as DeviceProfile) };
+  // The 2048 heightmap is ~3× the bytes of the 1024 one: only fetch it when the screen can show it.
+  const devicePx = Math.max(window.innerWidth, window.innerHeight) * Math.min(window.devicePixelRatio || 1, profile.dprMax);
+  if (profile.heightmap === "desktop" && devicePx < (profile.heightmapMinDevicePx ?? 0)) profile.heightmap = "mobile";
+  return profile;
 }
