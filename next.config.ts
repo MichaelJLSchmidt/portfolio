@@ -21,6 +21,8 @@ const nextConfig: NextConfig = {
   images: { unoptimized: true },
   reactStrictMode: true,
   poweredByHeader: false,
+  // CLAUDE.md is the single agent guide for this repo; don't let `next dev` write AGENTS.md.
+  agentRules: false,
   env: {
     // Re-export the normalised value so client code and next.config agree.
     NEXT_PUBLIC_BASE_PATH: basePath,
