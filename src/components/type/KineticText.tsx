@@ -50,7 +50,8 @@ export function KineticText({
     if (!el) return;
     const io = new IntersectionObserver(
       (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
+        // Play when it scrolls into view, or right away if the reader already jumped past it.
+        if (entries.some((e) => e.isIntersecting || e.boundingClientRect.bottom < 0)) {
           setInView(true);
           io.disconnect();
         }

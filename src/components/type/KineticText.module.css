@@ -64,7 +64,7 @@
 :root[data-motion="full"] .kinetic[data-play="false"] .glyph {
   font-stretch: var(--kt-from-wdth);
   font-weight: var(--kt-from-wght);
-  opacity: 0.35;
+  opacity: 0.6;
 }
 
 .kinetic[data-play="true"] .glyph {
