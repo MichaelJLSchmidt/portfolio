@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { site } from "@/content/site";
 import { BernClock } from "./BernClock";
 import { CalmToggle } from "./CalmToggle";
@@ -8,7 +9,9 @@ export function Hud() {
   return (
     <header className={styles.hud}>
       <div className={styles.cluster}>
-        <span className={`${styles.mark} hud-label`}>{site.hud.mark}</span>
+        <Link href="/" className={`${styles.mark} hud-label`} aria-label={site.hud.markHome}>
+          {site.hud.mark}
+        </Link>
         <span className={`${styles.credit} hud-label`}>{site.hud.credit}</span>
       </div>
       <span className={`${styles.coords} hud-label`}>{site.hud.coordinates}</span>
@@ -17,7 +20,12 @@ export function Hud() {
           <span className={styles.live} aria-hidden="true" />
           <BernClock label={site.hud.clockLabel} />
         </span>
-        <CalmToggle label={site.hud.calm} />
+        <span className={styles.row}>
+          <Link href="/about/" className={`${styles.navLink} hud-label`}>
+            {site.hud.about}
+          </Link>
+          <CalmToggle label={site.hud.calm} />
+        </span>
       </div>
     </header>
   );

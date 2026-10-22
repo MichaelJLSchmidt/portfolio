@@ -26,6 +26,25 @@
 .mark {
   color: var(--color-glacier);
   font-weight: 700;
+  text-decoration: none;
+}
+
+.row {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.navLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  color: var(--color-sheet);
+  text-decoration: none;
+}
+
+.navLink:hover {
+  color: var(--color-glacier);
 }
 
 .credit,

@@ -15,6 +15,8 @@ export const site = {
   },
   hud: {
     mark: "Höhenlinie",
+    markHome: "Höhenlinie, back to the deck",
+    about: "Basecamp",
     clockLabel: "Bern",
     coordinates: "N 46°41′ · E 7°52′",
     calm: "Calm map",
@@ -28,6 +30,7 @@ export const site = {
     credit: "Terrain data © swisstopo",
     creditHref: "https://www.swisstopo.admin.ch/en/terms-of-use-free-geodata-and-geoservices",
     note: "Contours drawn from swissALTIRegio. Built as a static site.",
+    about: "About · Basecamp",
   },
   skipLink: "Skip to content",
   notFound: {
