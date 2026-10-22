@@ -7,6 +7,7 @@ import { TerrainBackdrop } from "@/components/terrain/TerrainBackdrop";
 import { Hud } from "@/components/hud/Hud";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SmoothScroll } from "@/components/SmoothScroll";
+import { CalmRouteFade } from "@/components/transition/CalmRouteFade";
 import { HistoryTransitions } from "@/components/transition/HistoryTransitions";
 import "./globals.css";
 
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <TerrainBackdrop />
         <SmoothScroll />
         <HistoryTransitions />
+        <CalmRouteFade />
         <Hud />
         <div className="page">
           {children}

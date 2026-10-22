@@ -193,7 +193,8 @@ When it's time:
   - the foil is static;
   - headlines don't animate;
   - the deck doesn't deal in;
-  - the route morph becomes a 150 ms crossfade.
+  - no View Transition runs at all: pages change directly and the incoming page fades in over 150 ms (opacity
+    only); focus return and scroll restoration work as in full motion.
 - WCAG AA contrast is checked by `npm run check:contrast`, including sheet and glacier text over the faded
   lines of a quiet zone. Contour-coloured labels keep their halo (`.keep-halo`), and the poster fallback keeps
   all halos and its vignette.
