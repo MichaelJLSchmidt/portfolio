@@ -97,6 +97,8 @@ export function KineticText({
   }, [settleOnArrival]);
 
   // Pointer proximity: write a 0..1 "--p" per glyph, eased towards its target each frame.
+  // Fine pointers only; the easing runs on Motion's frame loop (loaded lazily), the page's
+  // single animation loop.
   useEffect(() => {
     const el = ref.current;
     if (!el || !proximity || reduced || !finePointer) return;
@@ -105,7 +107,9 @@ export function KineticText({
     let radius = 160;
     const current = new Float32Array(chars.length);
     const target = new Float32Array(chars.length);
-    let raf = 0;
+    let loop: Pick<typeof import("motion"), "frame" | "cancelFrame"> | null = null;
+    let queued: import("motion").Process | null = null;
+    let disposed = false;
 
     const measure = () => {
       centres = chars.map((c) => {
@@ -115,7 +119,7 @@ export function KineticText({
       radius = Math.max(120, parseFloat(getComputedStyle(el).fontSize) * 1.6);
     };
     const step = () => {
-      raf = 0;
+      queued = null;
       let moving = false;
       for (let i = 0; i < chars.length; i++) {
         const next = current[i] + (target[i] - current[i]) * 0.16;
@@ -123,10 +127,10 @@ export function KineticText({
         current[i] = Math.abs(target[i] - next) < 0.002 ? target[i] : next;
         chars[i].style.setProperty("--p", current[i].toFixed(3));
       }
-      if (moving) raf = requestAnimationFrame(step);
+      if (moving) kick();
     };
     const kick = () => {
-      if (!raf) raf = requestAnimationFrame(step);
+      if (!queued && loop) queued = loop.frame.render(step);
     };
     const onMove = (e: PointerEvent) => {
       if (e.pointerType === "touch") return;
@@ -141,13 +145,18 @@ export function KineticText({
       target.fill(0);
       kick();
     };
-    measure();
-    window.addEventListener("pointermove", onMove, { passive: true });
-    document.addEventListener("pointerleave", onLeave);
-    window.addEventListener("scroll", measure, { passive: true });
-    window.addEventListener("resize", measure);
+    import("motion").then(({ frame, cancelFrame }) => {
+      if (disposed) return;
+      loop = { frame, cancelFrame };
+      measure();
+      window.addEventListener("pointermove", onMove, { passive: true });
+      document.addEventListener("pointerleave", onLeave);
+      window.addEventListener("scroll", measure, { passive: true });
+      window.addEventListener("resize", measure);
+    });
     return () => {
-      cancelAnimationFrame(raf);
+      disposed = true;
+      if (queued) loop?.cancelFrame(queued);
       window.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerleave", onLeave);
       window.removeEventListener("scroll", measure);

@@ -1,6 +1,7 @@
 "use client";
 
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, advance, useFrame, useThree } from "@react-three/fiber";
+import { cancelFrame, frame, type Process } from "motion";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import meta from "@terrain/terrain.json";
@@ -17,6 +18,10 @@ import { watchQuietZones, type QuietRect } from "./quiet-zones";
  * Three/R3F), so it never remounts on route changes. Renders on demand: continuous
  * frames only while something animates, a low idle rate for the slow drift, nothing
  * while the tab is hidden or reduced motion is on.
+ *
+ * One animation loop: the scheduler runs on Motion's frame loop (which also drives Lenis
+ * and the springs) and renders with R3F's advance() (frameloop "never"), so the page has
+ * a single requestAnimationFrame loop while scrolling.
  */
 
 type TerrainSource = {
@@ -137,7 +142,6 @@ const tweenDone = (t: Tween | null, now: number) => !t || now - t.start >= t.dur
 
 function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: boolean; onReady: () => void }) {
   const material = useMemo(() => createContourMaterial(), []);
-  const invalidate = useThree((s) => s.invalidate);
   const size = useThree((s) => s.size);
   const dpr = useThree((s) => s.viewport.dpr);
   // Async callbacks (texture loads, morphs) must use the current size, not the first render's.
@@ -197,7 +201,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       u.uPulseColor.value.set(...hexToRgb(colorOf(cfg.pulseColor)));
       u.uQuietParams.value.set(cfg.quietFeatherPx * dprRef.current, cfg.quietStrength);
       updateIntervals(true);
-      invalidate();
+      wake();
     };
     apply(fieldStore.get().config);
     let last = fieldStore.get().config;
@@ -210,7 +214,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     });
     // updateIntervals reads refs only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [material, profile, invalidate]);
+  }, [material, profile]);
 
   // Pixel-based uniforms depend on the device pixel ratio.
   useEffect(() => {
@@ -228,9 +232,9 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     if (a.region) coverTransform(u.uUvA.value, size.width, size.height, a.region.width, a.region.height, a.region.posX, a.region.posY);
     if (a.target) coverTransform(u.uUvB.value, size.width, size.height, a.target.width, a.target.height, a.target.posX, a.target.posY);
     updateIntervals(true);
-    invalidate();
+    wake();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [material, dpr, size.width, size.height, invalidate]);
+  }, [material, dpr, size.width, size.height]);
 
   // --- quiet zones behind text -------------------------------------------------------
   useEffect(() => {
@@ -503,7 +507,17 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
   }, [dpr]);
 
   // --- frame scheduler --------------------------------------------------------------
-  const sched = useRef({ raf: 0, timer: 0 as ReturnType<typeof setTimeout> | 0, lastRender: 0, lastTick: 0, paused });
+  const sched = useRef({
+    scheduled: false,
+    timer: 0 as ReturnType<typeof setTimeout> | 0,
+    lastRender: 0,
+    lastTick: 0,
+    paused,
+    // The callbacks actually queued on Motion's loop (this component's functions are
+    // recreated on every render), so they can be cancelled.
+    queuedTick: null as Process | null,
+    queuedRender: null as Process | null,
+  });
   sched.current.paused = paused;
 
   const isBusy = (now: number) => {
@@ -520,10 +534,13 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     );
   };
 
-  function tick(t: number) {
+  // Renders after this frame's updates (Lenis, springs) have run.
+  const render = ({ timestamp }: { timestamp: number }) => advance(timestamp);
+
+  function tick({ timestamp: t }: { timestamp: number }) {
     const s = sched.current;
     const a = anim.current;
-    s.raf = 0;
+    s.scheduled = false;
     if (document.hidden || s.paused) return;
     if (isBusy(t)) {
       // Frame budget: rAF intervals stretch when frames are too expensive. If they average
@@ -541,14 +558,15 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       const minGap = a.capped ? 1000 / 30 - 4 : 1000 / 80;
       if (t - s.lastRender >= minGap) {
         s.lastRender = t;
-        invalidate();
+        s.queuedRender = frame.render(render);
       }
-      s.raf = requestAnimationFrame(tick);
+      s.scheduled = true;
+      s.queuedTick = frame.update(tick);
     } else {
       // Idle: one more frame to settle, then the slow drift at a low frame rate.
       s.lastRender = t;
       s.lastTick = 0;
-      invalidate();
+      s.queuedRender = frame.render(render);
       a.frameTimes.length = 0;
       if (s.timer) clearTimeout(s.timer);
       s.timer = setTimeout(() => {
@@ -561,25 +579,29 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
   function wake() {
     const s = sched.current;
     // Nothing to draw until the region heightmap is in (or if it never arrives).
-    if (s.raf || document.hidden || s.paused || !anim.current.ready) return;
+    if (s.scheduled || document.hidden || s.paused || !anim.current.ready) return;
     if (s.timer) {
       clearTimeout(s.timer);
       s.timer = 0;
     }
-    s.raf = requestAnimationFrame(tick);
+    s.scheduled = true;
+    s.queuedTick = frame.update(tick);
+  }
+
+  function stop() {
+    const s = sched.current;
+    if (s.queuedTick) cancelFrame(s.queuedTick);
+    if (s.queuedRender) cancelFrame(s.queuedRender);
+    s.queuedTick = s.queuedRender = null;
+    s.scheduled = false;
+    if (s.timer) clearTimeout(s.timer);
+    s.timer = 0;
   }
 
   useEffect(() => {
     const onVisibility = () => {
-      const s = sched.current;
-      if (document.hidden) {
-        cancelAnimationFrame(s.raf);
-        s.raf = 0;
-        if (s.timer) clearTimeout(s.timer);
-        s.timer = 0;
-      } else {
-        wake();
-      }
+      if (document.hidden) stop();
+      else wake();
     };
     document.addEventListener("visibilitychange", onVisibility);
     return () => document.removeEventListener("visibilitychange", onVisibility);
@@ -587,12 +609,8 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
   }, []);
 
   useEffect(() => {
-    const s = sched.current;
     if (paused) {
-      cancelAnimationFrame(s.raf);
-      s.raf = 0;
-      if (s.timer) clearTimeout(s.timer);
-      s.timer = 0;
+      stop();
       finishIntro(false);
     } else {
       wake();
@@ -602,9 +620,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
 
   useEffect(
     () => () => {
-      const s = sched.current;
-      cancelAnimationFrame(s.raf);
-      if (s.timer) clearTimeout(s.timer);
+      stop();
       material.dispose();
     },
     [material],
@@ -664,7 +680,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     if (!a.readyNotified) {
       a.readyNotified = true;
       // Reveal once this frame has actually been drawn.
-      requestAnimationFrame(() => onReady());
+      frame.postRender(() => onReady());
     }
   });
 
@@ -687,7 +703,7 @@ export default function ContourField({
   return (
     <Canvas
       orthographic
-      frameloop="demand"
+      frameloop="never"
       dpr={[1, profile.dprMax]}
       flat
       linear
