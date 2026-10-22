@@ -88,6 +88,7 @@ export const about = {
   principles: {
     heading: "Rope team",
     intro: "How I lead: a few trail markers the team can follow without me.",
+    // `metric` is optional: add one per principle once there is a real number.
     items: [
       {
         title: "Facilitate, don't dictate",
@@ -97,12 +98,10 @@ export const about = {
       {
         title: "Systems over screens",
         body: "One shared Angular Material system instead of a hundred one-off screens. [EXAMPLE]",
-        metric: "[#] components",
       },
       {
         title: "Design in the medium",
         body: "Figma for thinking, code for deciding: prototypes that ship. [EXAMPLE]",
-        metric: "[#] releases",
       },
     ],
   },
@@ -110,14 +109,11 @@ export const about = {
     heading: "Craft",
     intro: "The three keywords on the leader card, with the evidence behind them.",
     // Same wording as the leader card, so the card and this page never drift apart.
+    // Stats are optional: add them per keyword once there are real numbers (1–3 each).
     items: leader.keywords.map((k, i) => ({
       ...k,
       evidence: ["[WORKSHOP FORMATS AND OUTCOMES]", "[DESIGN SYSTEM SCOPE AND ADOPTION]", "[SHIPPED COMPONENTS, STORYBOOK]"][i],
-      stats: [
-        [{ label: "Workshops", value: "[#]" }, { label: "Formats", value: "[#]" }],
-        [{ label: "Components", value: "[#]" }, { label: "Products", value: "[#]" }],
-        [{ label: "Repos", value: "[#]" }, { label: "Releases", value: "[#]" }],
-      ][i] as Stat[],
+      stats: ([[{ label: "Workshops", value: "[#]" }], [], []] as Stat[][])[i],
     })),
   },
   offTrail: {

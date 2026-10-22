@@ -31,20 +31,22 @@ export type Artwork =
     };
 
 export type Keyword = { term: string; reminder: string };
-export type Stat = { label: string; value: string };
+/** Leave `value` out (or the whole stat) until there is a real number: empty stats don't render. */
+export type Stat = { label: string; value?: string };
 
 export type SetSymbol = "peak" | "grid";
 
 export type CaseStudy = {
   lede: string;
+  /** Every field is optional: the summary shows only the ones with a value. */
   summary: {
-    problem: string;
-    role: string;
-    team: string;
-    duration: string;
-    reach: string;
-    keyDecision: string;
-    outcome: string;
+    problem?: string;
+    role?: string;
+    team?: string;
+    duration?: string;
+    reach?: string;
+    keyDecision?: string;
+    outcome?: string;
   };
   sections: { id: string; title: string; body: string }[];
 };
@@ -62,7 +64,8 @@ export type SummitCardData = {
   collector: { number: string; language: string };
   keywords: Keyword[];
   flavor: string;
-  stats: [Stat, Stat, Stat];
+  /** Up to three; the row adapts to the stats that have a value and disappears without any. */
+  stats?: Stat[];
   artwork: Artwork;
   artworkAlt: string;
   /** Two-sentence summary shown under the card in the deck. */

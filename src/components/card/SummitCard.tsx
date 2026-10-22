@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Suspense, lazy, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { Suspense, lazy, useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { cardHref, cardLabels, type SummitCardData } from "@/content/cards";
+import { withValues } from "@/lib/content";
 import { useFinePointer, useIdle } from "@/lib/idle";
 import { useReducedMotion } from "@/lib/motion-preference";
 import { prefetchTerrain } from "@/components/terrain/field-store";
@@ -66,6 +67,7 @@ export function SummitCard({
   // "opening" state so the chip shows again after navigating back.
   useEffect(() => () => setOpening(false), []);
   const foil = card.rarity === "R" || card.rarity === "M";
+  const stats = withValues(card.stats).slice(0, 3);
 
   const intent = () => prefetchTerrain(card.artwork.terrainId);
 
@@ -138,14 +140,16 @@ export function SummitCard({
               <hr className={styles.hairline} />
               <p className={`${styles.flavor} italic`}>{card.flavor}</p>
             </div>
-            <dl className={styles.stats} aria-label={cardLabels.stats}>
-              {card.stats.map((s) => (
-                <div key={s.label} className={styles.stat}>
-                  <dt>{s.label}</dt>
-                  <dd>{s.value}</dd>
-                </div>
-              ))}
-            </dl>
+            {stats.length > 0 && (
+              <dl className={styles.stats} aria-label={cardLabels.stats} style={{ "--cells": stats.length } as CSSProperties}>
+                {stats.map((s) => (
+                  <div key={s.label} className={styles.stat}>
+                    <dt>{s.label}</dt>
+                    <dd>{s.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
             <p className={styles.collector} aria-label={cardLabels.collector}>
               <span>{card.set.code}</span>
               <span aria-hidden="true">·</span>

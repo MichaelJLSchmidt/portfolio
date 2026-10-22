@@ -10,6 +10,7 @@ import { MorphTarget } from "@/components/transition/MorphTarget";
 import { KineticText } from "@/components/type/KineticText";
 import { about } from "@/content/about";
 import { caseStudyLabels as L, cardBySlug } from "@/content/cards";
+import { hasValue, withValues } from "@/lib/content";
 import { morphName } from "@/lib/morph";
 import styles from "./page.module.css";
 
@@ -80,7 +81,7 @@ export default function About() {
               <span className={styles.blaze} aria-hidden="true" />
               <h3 className={`${styles.markerTitle} display`}>{p.title}</h3>
               <p>{p.body}</p>
-              <p className={`${styles.metric} hud-label`}>{p.metric}</p>
+              {hasValue(p.metric) && <p className={`${styles.metric} hud-label`}>{p.metric}</p>}
             </li>
           ))}
         </ol>
@@ -92,21 +93,26 @@ export default function About() {
           <p className="map-halo">{about.craft.intro}</p>
         </div>
         <ul className={styles.plaques}>
-          {about.craft.items.map((c) => (
-            <li key={c.term} className={styles.plaque}>
-              <h3 className={`${styles.plaqueTerm} display`}>{c.term}</h3>
-              <p className={`${styles.reminder} italic`}>{c.reminder}</p>
-              <p className={styles.evidence}>{c.evidence}</p>
-              <dl className={styles.plaqueStats}>
-                {c.stats.map((s) => (
-                  <div key={s.label}>
-                    <dt>{s.label}</dt>
-                    <dd>{s.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </li>
-          ))}
+          {about.craft.items.map((c) => {
+            const stats = withValues(c.stats);
+            return (
+              <li key={c.term} className={styles.plaque}>
+                <h3 className={`${styles.plaqueTerm} display`}>{c.term}</h3>
+                <p className={`${styles.reminder} italic`}>{c.reminder}</p>
+                <p className={styles.evidence}>{c.evidence}</p>
+                {stats.length > 0 && (
+                  <dl className={styles.plaqueStats} style={{ "--cells": stats.length } as CSSProperties}>
+                    {stats.map((s) => (
+                      <div key={s.label}>
+                        <dt>{s.label}</dt>
+                        <dd>{s.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </section>
 

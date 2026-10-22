@@ -1,9 +1,11 @@
 import type { CSSProperties } from "react";
+import { withValues } from "@/lib/content";
 import styles from "./SummitSummary.module.css";
 
 export type SummaryRow = {
   label: string;
-  value: string;
+  /** Rows without a value are left out. */
+  value?: string;
   /** Spans the full width (sentences). */
   wide?: boolean;
   /** Rendered as a mono stat value. */
@@ -30,7 +32,7 @@ export function SummitSummary({
         {heading}
       </h2>
       <dl className={styles.grid}>
-        {rows.map((row) => (
+        {withValues(rows).map((row) => (
           <div key={row.label} className={row.wide ? styles.wide : undefined}>
             <dt>{row.label}</dt>
             <dd className={row.stat ? styles.stat : undefined}>{row.value}</dd>

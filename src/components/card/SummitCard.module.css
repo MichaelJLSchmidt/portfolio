@@ -290,7 +290,7 @@
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(var(--cells, 3), 1fr);
   border-block: 1px solid var(--color-contour-dim);
 }
 
