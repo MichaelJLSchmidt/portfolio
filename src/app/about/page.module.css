@@ -1,0 +1,265 @@
+.main {
+  /* Text reveals start once the leader card's artwork is mid-flight (see globals.css). */
+  --reveal-base: 520ms;
+  display: grid;
+  gap: clamp(56px, 8vw, 128px);
+  padding-top: 96px;
+  padding-bottom: 64px;
+}
+
+.crumbs a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  min-height: 44px;
+  color: var(--color-glacier);
+  text-decoration: none;
+}
+
+.crumbs a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* ------------------------------------------------------------- header */
+
+.header {
+  display: grid;
+  gap: 28px;
+  margin-top: calc(-1 * clamp(32px, 5vw, 96px));
+}
+
+.artSlot,
+.art {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  border-radius: 12px;
+}
+
+.art {
+  height: auto;
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.45);
+}
+
+.intro {
+  display: grid;
+  gap: 16px;
+  align-content: end;
+}
+
+.eyebrow {
+  color: var(--color-glacier);
+}
+
+.name {
+  font-size: clamp(3rem, 11vw, 9rem);
+}
+
+.role {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  font-size: 1.125rem;
+  font-stretch: 88%;
+  font-weight: 600;
+}
+
+.place {
+  color: var(--color-contour);
+  font-weight: 400;
+}
+
+.statement {
+  max-width: 38ch;
+  font-size: clamp(1.0625rem, 1.6vw, 1.3rem);
+  line-height: 1.55;
+}
+
+@media (min-width: 900px) {
+  .header {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    align-items: end;
+    gap: clamp(32px, 4vw, 72px);
+  }
+}
+
+/* ------------------------------------------------------------ sections */
+
+.section {
+  display: grid;
+  gap: clamp(24px, 4vw, 48px);
+}
+
+.sectionHead {
+  display: grid;
+  gap: 12px;
+  max-width: 46rem;
+}
+
+.sectionHeading {
+  font-size: clamp(2.5rem, 9vw, 7rem);
+}
+
+/* Rope team: principles as trail markers (a stylised mountain-trail blaze). */
+.markers {
+  display: grid;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.marker {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 24px 0 0;
+  border-top: 1px solid var(--color-contour-dim);
+}
+
+.blaze {
+  display: block;
+  width: 42px;
+  height: 18px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--color-sheet) 0 33%,
+    var(--color-alpenglow) 33% 67%,
+    var(--color-sheet) 67%
+  );
+}
+
+.markerTitle {
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+}
+
+.metric {
+  color: var(--color-glacier);
+}
+
+@media (min-width: 900px) {
+  .markers {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(24px, 3vw, 56px);
+  }
+}
+
+/* Craft: plaques in the card's language (neatline, keyword, reminder text, mono stats). */
+.plaques {
+  display: grid;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plaque {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  padding: 28px;
+  border: 1px solid var(--color-contour-dim);
+  border-radius: 16px;
+  background:
+    radial-gradient(130% 70% at 50% 0%, var(--color-ground-raised), transparent 75%),
+    var(--color-ground);
+}
+
+.plaque::before {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border: 1px solid var(--color-summit-gold);
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.plaqueTerm {
+  font-size: clamp(2rem, 3.4vw, 2.75rem);
+  font-stretch: 72%;
+}
+
+.reminder {
+  color: var(--color-contour);
+}
+
+.evidence {
+  color: var(--color-sheet);
+}
+
+.plaqueStats {
+  display: grid;
+  grid-template-columns: repeat(var(--cells, 2), minmax(0, 1fr));
+  margin: 8px 0 0;
+  border-top: 1px solid var(--color-contour-dim);
+}
+
+.plaqueStats > div {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 2px;
+  padding-top: 12px;
+}
+
+.plaqueStats dt {
+  color: var(--color-contour);
+  font-family: var(--font-martian), ui-monospace, monospace;
+  font-size: var(--type-hud-size);
+  font-stretch: calc(var(--type-hud-wdth) * 1%);
+  letter-spacing: var(--type-hud-tracking);
+  text-transform: uppercase;
+}
+
+.plaqueStats dd {
+  margin: 0;
+  font-family: var(--font-martian), ui-monospace, monospace;
+  font-size: 1.375rem;
+  font-stretch: 87.5%;
+  font-weight: 700;
+}
+
+@media (min-width: 900px) {
+  .plaques {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Off the trail. */
+.offTrailBody {
+  display: grid;
+  gap: 20px;
+  max-width: 46rem;
+}
+
+.flavor {
+  color: var(--color-glacier);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  line-height: 1.25;
+}
+
+@media (min-width: 900px) {
+  .offTrail {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    align-items: start;
+  }
+}
+
+/* Contact. */
+.contact {
+  display: grid;
+  gap: 20px;
+  justify-items: center;
+  padding-block: clamp(32px, 6vw, 96px);
+  text-align: center;
+}
+
+.contactHeading {
+  font-size: clamp(2.75rem, 10vw, 8.5rem);
+}
+
+.contact > ul {
+  justify-content: center;
+}

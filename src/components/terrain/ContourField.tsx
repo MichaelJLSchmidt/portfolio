@@ -1,21 +1,27 @@
 "use client";
 
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, advance, useFrame, useThree } from "@react-three/fiber";
+import { cancelFrame, frame, type Process } from "@/lib/frameloop";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import meta from "@terrain/terrain.json";
 import { asset } from "@/lib/asset";
 import { color, easing } from "@/styles/tokens";
-import { coverTransform, createContourMaterial } from "./contour-material";
+import { MAX_QUIET_ZONES, coverTransform, createContourMaterial } from "./contour-material";
 import { INTRO_STORAGE_KEY, cancelPendingIntro } from "@/lib/motion-preference";
-import { colorOf, hexToRgb, msOf, type DeviceProfile, type FieldConfig } from "./field-settings";
+import { colorOf, contourInterval, hexToRgb, msOf, type DeviceProfile, type FieldConfig } from "./field-settings";
 import { fieldStore } from "./field-store";
+import { watchQuietZones, type QuietRect } from "./quiet-zones";
 
 /**
  * The persistent contour field. Mounted once from the root layout (lazy chunk with
  * Three/R3F), so it never remounts on route changes. Renders on demand: continuous
  * frames only while something animates, a low idle rate for the slow drift, nothing
  * while the tab is hidden or reduced motion is on.
+ *
+ * One animation loop: the scheduler runs on Motion's frame loop (which also drives Lenis
+ * and the springs) and renders with R3F's advance() (frameloop "never"), so the page has
+ * a single requestAnimationFrame loop while scrolling.
  */
 
 type TerrainSource = {
@@ -28,10 +34,15 @@ type TerrainSource = {
   max: number;
   posX: number;
   posY: number;
+  /** Gradient percentiles (metres per texel), for the screen-adaptive contour interval. */
+  gradientM: Record<string, number>;
 };
 
 const regionSource = (profile: DeviceProfile): TerrainSource => {
-  const hm = meta.heightmaps.find((h) => h.use === profile.heightmap) ?? meta.heightmaps[0];
+  const hm =
+    meta.heightmaps.find((h) => h.width === profile.heightmapWidth) ??
+    meta.heightmaps.find((h) => h.use === profile.heightmap) ??
+    meta.heightmaps[0];
   return {
     file: hm.file,
     width: hm.width,
@@ -42,6 +53,7 @@ const regionSource = (profile: DeviceProfile): TerrainSource => {
     max: meta.elevation.max,
     posX: meta.region.focus.u,
     posY: meta.region.focus.v,
+    gradientM: hm.gradientM,
   };
 };
 
@@ -59,6 +71,7 @@ const cardSource = (id: string): TerrainSource | null => {
     max: m.elevation.max,
     posX: 0.5,
     posY: 0.5,
+    gradientM: m.gradientM,
   };
 };
 
@@ -71,7 +84,9 @@ function loadHeightTexture(file: string): Promise<THREE.Texture> {
   pending = new Promise<THREE.Texture>((resolve, reject) => {
     const done = (image: ImageBitmap | HTMLImageElement) => {
       const tex = new THREE.Texture(image);
-      // Raw data, not colour: no colour-space conversion, no flipping, no mipmaps.
+      // Raw data, not colour: no colour-space conversion, no premultiplied alpha, no mipmaps,
+      // and no flip anywhere (the bitmap keeps the file's row order, flipY stays false, the
+      // shader samples top-down). `npm run verify:terrain -- --browser` checks this path.
       tex.colorSpace = THREE.NoColorSpace;
       tex.flipY = false;
       tex.premultiplyAlpha = false;
@@ -127,12 +142,13 @@ const tweenDone = (t: Tween | null, now: number) => !t || now - t.start >= t.dur
 
 function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: boolean; onReady: () => void }) {
   const material = useMemo(() => createContourMaterial(), []);
-  const invalidate = useThree((s) => s.invalidate);
   const size = useThree((s) => s.size);
   const dpr = useThree((s) => s.viewport.dpr);
   // Async callbacks (texture loads, morphs) must use the current size, not the first render's.
   const sizeRef = useRef(size);
   sizeRef.current = size;
+  const dprRef = useRef(dpr);
+  dprRef.current = dpr;
 
   const anim = useRef({
     sweep: null as Tween | null,
@@ -142,13 +158,25 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     lamp: null as Tween | null,
     lampValue: 0,
     lampPos: [-1e4, -1e4] as [number, number],
-    lastInput: 0,
+    lastInput: performance.now(),
+    /** Map offset (UV), eased towards the pointer/scroll target: terrain moves slowly. */
+    pan: [0, 0] as [number, number],
+    panPointer: [0, 0] as [number, number],
+    panScroll: 0,
+    ripplePos: [0, 0] as [number, number],
+    rippleStart: -1,
+    lastFrame: 0,
     region: null as TerrainSource | null,
     /** Terrain currently loaded into texture slot B, and its id. */
     target: null as TerrainSource | null,
     slotId: null as string | null,
     /** Terrain the field is heading to (null = the region). */
     targetId: null as string | null,
+    /** Contour interval (m) for the region and the target terrain at the current screen size. */
+    intervalA: 100,
+    intervalB: 100,
+    /** Region interval changes (resize, tuning) glide in log space instead of popping. */
+    intervalTween: null as Tween | null,
     ready: false,
     readyNotified: false,
     capped: false,
@@ -160,7 +188,6 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
   useEffect(() => {
     const apply = (cfg: FieldConfig) => {
       const u = material.uniforms;
-      u.uInterval.value = cfg.intervalM;
       u.uIndexEvery.value = cfg.indexEvery;
       u.uLineOpacity.value = cfg.lineOpacity;
       u.uIndexOpacity.value = cfg.indexOpacity;
@@ -170,7 +197,11 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       u.uGlowColor.value.set(...hexToRgb(colorOf(cfg.glowColor)));
       u.uGlow.value = profile.glow ? cfg.glowStrength / 0.3 : 0;
       u.uDrift.value = cfg.driftCyclesPerSecond;
-      invalidate();
+      u.uPulse.value.set(cfg.pulsePeriodS, cfg.pulseStrength);
+      u.uPulseColor.value.set(...hexToRgb(colorOf(cfg.pulseColor)));
+      u.uQuietParams.value.set(cfg.quietFeatherPx * dprRef.current, cfg.quietStrength);
+      updateIntervals(true);
+      wake();
     };
     apply(fieldStore.get().config);
     let last = fieldStore.get().config;
@@ -181,7 +212,9 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
         apply(cfg);
       }
     });
-  }, [material, profile, invalidate]);
+    // updateIntervals reads refs only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [material, profile]);
 
   // Pixel-based uniforms depend on the device pixel ratio.
   useEffect(() => {
@@ -191,11 +224,57 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     u.uIndexWidth.value = cfg.indexLineWidthPx * dpr;
     u.uHeadlampRadius.value = cfg.headlampRadiusPx * dpr;
     u.uGlowWidth.value = cfg.glowWidthPx * dpr;
+    u.uLens.value.set(cfg.lensRadiusPx * dpr, cfg.lensStrength);
+    u.uRippleSpeed.value = cfg.rippleSpeedPxS * dpr;
+    u.uQuietParams.value.set(cfg.quietFeatherPx * dpr, cfg.quietStrength);
+    u.uResolution.value.set(size.width * dpr, size.height * dpr);
     const a = anim.current;
     if (a.region) coverTransform(u.uUvA.value, size.width, size.height, a.region.width, a.region.height, a.region.posX, a.region.posY);
     if (a.target) coverTransform(u.uUvB.value, size.width, size.height, a.target.width, a.target.height, a.target.posX, a.target.posY);
-    invalidate();
-  }, [material, dpr, size.width, size.height, invalidate]);
+    updateIntervals(true);
+    wake();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [material, dpr, size.width, size.height]);
+
+  // --- quiet zones behind text -------------------------------------------------------
+  useEffect(() => {
+    const u = material.uniforms;
+    const write = (rects: readonly QuietRect[]) => {
+      // Viewport CSS px → device px with the origin at the bottom-left, like gl_FragCoord.
+      const h = sizeRef.current.height;
+      const n = Math.min(rects.length, MAX_QUIET_ZONES);
+      for (let i = 0; i < n; i++) {
+        const r = rects[i];
+        (u.uQuiet.value as THREE.Vector4[])[i].set(r.left * dpr, (h - r.bottom) * dpr, r.right * dpr, (h - r.top) * dpr);
+      }
+      u.uQuietCount.value = n;
+      wake();
+    };
+    return watchQuietZones(write);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [material, dpr]);
+
+  // --- contour interval from the on-screen scale -----------------------------------
+  function updateIntervals(animate: boolean) {
+    const a = anim.current;
+    const cfg = fieldStore.get().config;
+    const view = sizeRef.current;
+    if (a.region) {
+      const next = contourInterval(a.region, view, cfg.zoomBase, cfg);
+      if (next !== a.intervalA) {
+        const now = performance.now();
+        const shown = Math.exp(tweenValue(a.intervalTween, now, Math.log(a.intervalA)));
+        a.intervalTween = animate
+          ? { from: Math.log(shown), to: Math.log(next), start: now, dur: msOf("long"), ease: easeTrail }
+          : null;
+        a.intervalA = next;
+        wake();
+      }
+    }
+    if (a.target) a.intervalB = contourInterval(a.target, view, cfg.zoomBase + cfg.morphZoom, cfg);
+    const intervalM = a.slotId ? a.intervalB : a.intervalA;
+    if (fieldStore.get().intervalM !== intervalM) fieldStore.set({ intervalM });
+  }
 
   // --- region heightmap + intro ---------------------------------------------------
   useEffect(() => {
@@ -218,6 +297,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       }
       coverTransform(u.uUvA.value, size.width, size.height, region.width, region.height, region.posX, region.posY);
       if (!a.target) u.uUvB.value.copy(u.uUvA.value);
+      updateIntervals(false);
 
       let played = false;
       try {
@@ -331,6 +411,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       u.uEncB.value.set(src.offset, src.scale);
       u.uRangeB.value.set(src.min, src.max);
       coverTransform(u.uUvB.value, size.width, size.height, src.width, src.height, src.posX, src.posY);
+      updateIntervals(false);
       tweenTo(1, dur);
     };
     morphTo(fieldStore.get().morphTarget);
@@ -369,6 +450,9 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     const onPointerMove = (e: PointerEvent) => {
       if (e.pointerType === "touch") return;
       setPos(e.clientX, e.clientY);
+      // Parallax: the map leans away from the pointer, a little.
+      const k = cfg().parallax;
+      a.panPointer = [(e.clientX / window.innerWidth - 0.5) * k, -(e.clientY / window.innerHeight - 0.5) * k];
       if (a.lamp?.to !== 1) fade(1, msOf("micro"));
       wake();
     };
@@ -385,6 +469,20 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     const onTouchEnd = (e: TouchEvent) => {
       if (e.touches.length === 0) fade(0, cfg().headlampFadeMs);
     };
+    // Click or tap: an altimeter ping rings out from the point of contact.
+    const onPointerDown = (e: PointerEvent) => {
+      a.ripplePos = [e.clientX * dpr, (window.innerHeight - e.clientY) * dpr];
+      a.rippleStart = performance.now();
+      a.lastInput = a.rippleStart;
+      wake();
+    };
+    // Scrolling descends the map slowly (slower than the content).
+    const onScroll = () => {
+      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      a.panScroll = -(window.scrollY / max) * cfg().scrollParallax;
+      a.lastInput = performance.now();
+      wake();
+    };
     const opts = { passive: true } as const;
     window.addEventListener("pointermove", onPointerMove, opts);
     document.addEventListener("pointerout", onPointerOut, opts);
@@ -392,7 +490,12 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     window.addEventListener("touchmove", onTouch, opts);
     window.addEventListener("touchend", onTouchEnd, opts);
     window.addEventListener("touchcancel", onTouchEnd, opts);
+    window.addEventListener("pointerdown", onPointerDown, opts);
+    window.addEventListener("scroll", onScroll, opts);
+    onScroll();
     return () => {
+      window.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointerMove);
       document.removeEventListener("pointerout", onPointerOut);
       window.removeEventListener("touchstart", onTouch);
@@ -404,7 +507,17 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
   }, [dpr]);
 
   // --- frame scheduler --------------------------------------------------------------
-  const sched = useRef({ raf: 0, timer: 0 as ReturnType<typeof setTimeout> | 0, lastRender: 0, lastTick: 0, paused });
+  const sched = useRef({
+    scheduled: false,
+    timer: 0 as ReturnType<typeof setTimeout> | 0,
+    lastRender: 0,
+    lastTick: 0,
+    paused,
+    // The callbacks actually queued on Motion's loop (this component's functions are
+    // recreated on every render), so they can be cancelled.
+    queuedTick: null as Process | null,
+    queuedRender: null as Process | null,
+  });
   sched.current.paused = paused;
 
   const isBusy = (now: number) => {
@@ -413,15 +526,21 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       !tweenDone(a.sweep, now) ||
       !tweenDone(a.morph, now) ||
       !tweenDone(a.lamp, now) ||
+      !tweenDone(a.intervalTween, now) ||
       now - a.lastInput < 120 ||
+      (a.rippleStart >= 0 && now - a.rippleStart < 1800) ||
+      Math.abs(a.pan[0] - a.panPointer[0]) + Math.abs(a.pan[1] - a.panPointer[1] - a.panScroll) > 2e-4 ||
       (a.ready && !a.readyNotified)
     );
   };
 
-  function tick(t: number) {
+  // Renders after this frame's updates (Lenis, springs) have run.
+  const render = ({ timestamp }: { timestamp: number }) => advance(timestamp);
+
+  function tick({ timestamp: t }: { timestamp: number }) {
     const s = sched.current;
     const a = anim.current;
-    s.raf = 0;
+    s.scheduled = false;
     if (document.hidden || s.paused) return;
     if (isBusy(t)) {
       // Frame budget: rAF intervals stretch when frames are too expensive. If they average
@@ -439,45 +558,50 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       const minGap = a.capped ? 1000 / 30 - 4 : 1000 / 80;
       if (t - s.lastRender >= minGap) {
         s.lastRender = t;
-        invalidate();
+        s.queuedRender = frame.render(render);
       }
-      s.raf = requestAnimationFrame(tick);
+      s.scheduled = true;
+      s.queuedTick = frame.update(tick);
     } else {
       // Idle: one more frame to settle, then the slow drift at a low frame rate.
       s.lastRender = t;
       s.lastTick = 0;
-      invalidate();
+      s.queuedRender = frame.render(render);
       a.frameTimes.length = 0;
       if (s.timer) clearTimeout(s.timer);
       s.timer = setTimeout(() => {
         s.timer = 0;
         wake();
-      }, 1000 / profile.idleFps);
+      }, 1000 / (performance.now() - a.lastInput < fieldStore.get().config.dormantAfterMs ? profile.ambientFps : profile.idleFps));
     }
   }
 
   function wake() {
     const s = sched.current;
     // Nothing to draw until the region heightmap is in (or if it never arrives).
-    if (s.raf || document.hidden || s.paused || !anim.current.ready) return;
+    if (s.scheduled || document.hidden || s.paused || !anim.current.ready) return;
     if (s.timer) {
       clearTimeout(s.timer);
       s.timer = 0;
     }
-    s.raf = requestAnimationFrame(tick);
+    s.scheduled = true;
+    s.queuedTick = frame.update(tick);
+  }
+
+  function stop() {
+    const s = sched.current;
+    if (s.queuedTick) cancelFrame(s.queuedTick);
+    if (s.queuedRender) cancelFrame(s.queuedRender);
+    s.queuedTick = s.queuedRender = null;
+    s.scheduled = false;
+    if (s.timer) clearTimeout(s.timer);
+    s.timer = 0;
   }
 
   useEffect(() => {
     const onVisibility = () => {
-      const s = sched.current;
-      if (document.hidden) {
-        cancelAnimationFrame(s.raf);
-        s.raf = 0;
-        if (s.timer) clearTimeout(s.timer);
-        s.timer = 0;
-      } else {
-        wake();
-      }
+      if (document.hidden) stop();
+      else wake();
     };
     document.addEventListener("visibilitychange", onVisibility);
     return () => document.removeEventListener("visibilitychange", onVisibility);
@@ -485,12 +609,8 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
   }, []);
 
   useEffect(() => {
-    const s = sched.current;
     if (paused) {
-      cancelAnimationFrame(s.raf);
-      s.raf = 0;
-      if (s.timer) clearTimeout(s.timer);
-      s.timer = 0;
+      stop();
       finishIntro(false);
     } else {
       wake();
@@ -500,9 +620,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
 
   useEffect(
     () => () => {
-      const s = sched.current;
-      cancelAnimationFrame(s.raf);
-      if (s.timer) clearTimeout(s.timer);
+      stop();
       material.dispose();
     },
     [material],
@@ -531,10 +649,30 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       a.target = null;
       a.slotId = null;
       a.morph = null;
+      updateIntervals(false);
     }
 
     u.uSweep.value = a.sweepValue;
     u.uMorph.value = a.morphValue;
+    // Contour interval: the region's (gliding after a resize) blended in log space towards
+    // the target terrain's while morphing, with the same smoothstep the shader uses.
+    const lnA = tweenValue(a.intervalTween, now, Math.log(a.intervalA));
+    const lnB = a.target ? Math.log(a.intervalB) : lnA;
+    const mm = a.morphValue * a.morphValue * (3 - 2 * a.morphValue);
+    u.uInterval.value = Math.exp(lnA + (lnB - lnA) * mm);
+    const cfg = fieldStore.get().config;
+    // Camera: push in while morphing to a card's terrain.
+    u.uZoom.value = cfg.zoomBase + a.morphValue * cfg.morphZoom;
+    // Pan eases towards pointer + scroll targets, plus a very slow autonomous drift.
+    const dt = a.lastFrame ? Math.min(0.1, (now - a.lastFrame) / 1000) : 0;
+    a.lastFrame = now;
+    const ease = 1 - Math.exp(-dt * 2.2);
+    a.pan[0] += (a.panPointer[0] - a.pan[0]) * ease;
+    a.pan[1] += (a.panPointer[1] + a.panScroll - a.pan[1]) * ease;
+    const t = (now - a.t0) / 1000;
+    u.uPan.value.set(a.pan[0] + Math.sin(t * 0.05) * 0.008, a.pan[1] + Math.cos(t * 0.037) * 0.008);
+    const age = a.rippleStart >= 0 ? (now - a.rippleStart) / 1000 : -1;
+    u.uRipple.value.set(a.ripplePos[0], a.ripplePos[1], age >= 0 && age < 1.8 ? age : -1);
     u.uHeadlampStrength.value = a.lampValue;
     u.uHeadlampPos.value.set(a.lampPos[0], a.lampPos[1]);
     u.uTime.value = (now - a.t0) / 1000;
@@ -542,7 +680,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     if (!a.readyNotified) {
       a.readyNotified = true;
       // Reveal once this frame has actually been drawn.
-      requestAnimationFrame(() => onReady());
+      frame.postRender(() => onReady());
     }
   });
 
@@ -565,7 +703,7 @@ export default function ContourField({
   return (
     <Canvas
       orthographic
-      frameloop="demand"
+      frameloop="never"
       dpr={[1, profile.dprMax]}
       flat
       linear

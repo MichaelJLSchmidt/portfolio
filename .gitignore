@@ -10,6 +10,8 @@ next-env.d.ts
 
 # terrain pipeline: raw downloads and intermediate rasters
 /scripts/terrain/.cache/
+# optional PNG copies of the heightmaps (npm run terrain -- --png)
+/public/terrain/**/*.png
 
 # env files (MOTION_TOKEN and friends never get committed)
 .env

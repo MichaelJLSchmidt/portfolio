@@ -31,20 +31,22 @@ export type Artwork =
     };
 
 export type Keyword = { term: string; reminder: string };
-export type Stat = { label: string; value: string };
+/** Leave `value` out (or the whole stat) until there is a real number: empty stats don't render. */
+export type Stat = { label: string; value?: string };
 
 export type SetSymbol = "peak" | "grid";
 
 export type CaseStudy = {
   lede: string;
+  /** Every field is optional: the summary shows only the ones with a value. */
   summary: {
-    problem: string;
-    role: string;
-    team: string;
-    duration: string;
-    reach: string;
-    keyDecision: string;
-    outcome: string;
+    problem?: string;
+    role?: string;
+    team?: string;
+    duration?: string;
+    reach?: string;
+    keyDecision?: string;
+    outcome?: string;
   };
   sections: { id: string; title: string; body: string }[];
 };
@@ -62,17 +64,19 @@ export type SummitCardData = {
   collector: { number: string; language: string };
   keywords: Keyword[];
   flavor: string;
-  stats: [Stat, Stat, Stat];
+  /** Up to three; the row adapts to the stats that have a value and disappears without any. */
+  stats?: Stat[];
   artwork: Artwork;
   artworkAlt: string;
-  back: { summary: string; linkLabel: string };
-  caseStudy: CaseStudy;
+  /** Two-sentence summary shown under the card in the deck. */
+  summary: string;
+  /** Where the card leads. Defaults to its case study at /work/<slug>/. */
+  href?: string;
+  /** Project cards have a case study; the leader card leads to the About page instead. */
+  caseStudy?: CaseStudy;
 };
 
 export const cardLabels = {
-  flipToBack: (name: string) => `Flip card: ${name}`,
-  announceBack: (name: string) => `${name}: showing the back of the card`,
-  announceFront: (name: string) => `${name}: showing the front of the card`,
   openLog: "Open expedition log",
   costPrefix: "Summit cost",
   stats: "Card stats",
@@ -144,28 +148,9 @@ export const cards: SummitCardData[] = [
     },
     artworkAlt:
       "Contour map from Interlaken between Lake Thun and Lake Brienz up to the Jungfrau, with a dotted trail and four waypoints.",
-    back: {
-      summary:
-        "UX Team Lead at DV Bern AG for more than eight years. Runs the workshops, drives the central Angular Material design system and designs straight into code. [SUMMARY]",
-      linkLabel: "Open expedition log",
-    },
-    caseStudy: {
-      lede: "[LEDE] How a team of four designers works across public-sector platforms at DV Bern AG.",
-      summary: {
-        problem: "[PROBLEM]",
-        role: "UX Team Lead — [ROLE DETAILS]",
-        team: "4 FTE",
-        duration: "8+ yrs",
-        reach: "[REACH]",
-        keyDecision: "[KEY DECISION]",
-        outcome: "[OUTCOME]",
-      },
-      sections: [
-        { id: "team", title: "The team", body: "[TEAM STORY]" },
-        { id: "design-system", title: "Design system", body: "[DESIGN SYSTEM STORY]" },
-        { id: "workshops", title: "Workshops", body: "[WORKSHOP STORY]" },
-      ],
-    },
+    summary:
+      "UX Team Lead at DV Bern AG for more than eight years. Runs the workshops, drives the central Angular Material design system and designs straight into code. [SUMMARY]",
+    href: "/about/",
   },
   {
     slug: "kibon",
@@ -190,11 +175,8 @@ export const cards: SummitCardData[] = [
     ],
     artwork: { kind: "seeded", terrainId: "dvb-001" },
     artworkAlt: "Contour map of a fictional massif generated for this project, with a dotted trail to the summit.",
-    back: {
-      summary:
-        "kiBon brings childcare subsidies for the Canton of Bern into one platform for parents, providers and the administration. Version 2.0 was planned with User Story Mapping. [SUMMARY]",
-      linkLabel: "Open expedition log",
-    },
+    summary:
+      "kiBon brings childcare subsidies for the Canton of Bern into one platform for parents, providers and the administration. Version 2.0 was planned with User Story Mapping. [SUMMARY]",
     caseStudy: {
       lede: "[LEDE] Planning and designing the second generation of the Canton of Bern's childcare-subsidy platform.",
       summary: {
@@ -218,7 +200,16 @@ export const cards: SummitCardData[] = [
 
 export const cardBySlug = (slug: string) => cards.find((c) => c.slug === slug);
 
+export const cardHref = (card: SummitCardData) => card.href ?? `/work/${card.slug}/`;
+
+/** Cards that have a case study page under /work/. */
+export const caseStudyCards = cards.filter((c): c is SummitCardData & { caseStudy: CaseStudy } => !!c.caseStudy);
+
+const withSlash = (path: string) => (path.endsWith("/") ? path : `${path}/`);
+
+/** The terrain the contour field should morph to on a given route (a card's own terrain). */
 export const terrainIdForPath = (pathname: string | null): string | null => {
-  const match = pathname?.match(/\/work\/([^/]+)\/?$/);
-  return match ? (cardBySlug(match[1])?.artwork.terrainId ?? null) : null;
+  if (!pathname || pathname === "/") return null;
+  const path = withSlash(pathname);
+  return cards.find((c) => withSlash(cardHref(c)) === path)?.artwork.terrainId ?? null;
 };

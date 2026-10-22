@@ -3,20 +3,23 @@
 //   npm run terrain              build from the cached download (fetches once if missing)
 //   npm run terrain -- --refresh re-download the elevation window
 //   npm run terrain -- --placeholder  skip the network and use procedural terrain
+//   npm run terrain -- --png     also write PNG copies of every heightmap (not used by the site)
 //
-// Outputs (public/terrain): heightmap-2048.png, heightmap-1024.png, contours.svg,
-// cards/*.svg, morph/*.png and terrain.json (metadata the site imports).
+// Outputs (public/terrain): heightmap-{1024,1536,2048}.webp (lossless), contours.svg,
+// cards/*.svg, morph/*.webp and terrain.json (metadata the site imports).
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
 import { color } from "../../src/styles/tokens.ts";
+import { cards as cardContent } from "../../src/content/cards.ts";
 import { bboxToLv95, wgs84ToLv95 } from "./lib/lv95.mjs";
 import { readWindow, resolveCogUrl } from "./lib/source.mjs";
 import { cropToBbox, fillGaps, floodFlat, gaussianBlur, minMax, resampleArea, sampleBilinear } from "./lib/grid.mjs";
 import { isobands, maskToPathData, ringsToLines, toPathData } from "./lib/contours.mjs";
 import { autoTrail, seededTerrain } from "./lib/noise.mjs";
-import { packHeightPng } from "./lib/png.mjs";
+import { encodeLosslessWebp, gradientPercentiles, packHeightRgb, rasterHash } from "./lib/heightmap.mjs";
+import { encodeRgbPng } from "./lib/png.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const cfg = JSON.parse(readFileSync(join(root, "src/content/terrain.config.json"), "utf8"));
@@ -61,6 +64,21 @@ function contourSvg(values, w, h, { thresholds, indexOf, lakesMask, tolerance, l
   }
   const lakes = lakesMask ? maskToPathData(lakesMask, w, h, { tolerance: tolerance * 1.5 }) : "";
   return svg({ w, h, regular, index, lakes, lakeOpacity });
+}
+
+/** Writes a heightmap as lossless WebP (plus a PNG copy with --png) and returns its metadata. */
+async function writeHeightmap(name, data, width, height, encoding) {
+  const rgb = packHeightRgb(data, width, height, encoding);
+  const size = write(`${name}.webp`, await encodeLosslessWebp(rgb, width, height));
+  if (args.has("--png")) write(`${name}.png`, encodeRgbPng(rgb, width, height));
+  return {
+    file: `/terrain/${name}.webp`,
+    width,
+    height,
+    sha256: rasterHash(rgb),
+    gradientM: gradientPercentiles(data, width, height),
+    ...size,
+  };
 }
 
 const range = (from, to, step) => {
@@ -114,18 +132,17 @@ const toGridPx = (lon, lat) => {
 const aspect = grid.width / grid.height;
 
 // ---------------------------------------------------------------------------
-// 2. Heightmaps (RG-packed 16-bit)
+// 2. Heightmaps (RG-packed 16-bit, lossless WebP)
 // ---------------------------------------------------------------------------
 const encoding = { channels: "RG", offset: round(Math.floor(minElev * 4) / 4), scale: cfg.quantisationM };
 const heightmaps = [];
 for (const hm of cfg.heightmaps) {
   const w = hm.width;
   const h = Math.round(w / aspect);
-  // A light blur removes sub-pixel micro-relief: smoother lines and a much smaller PNG.
+  // A light blur removes sub-pixel micro-relief: smoother lines and a much smaller file.
   const data = gaussianBlur(resampleArea(grid.data, grid.width, grid.height, w, h), w, h, cfg.heightmapBlurSigma ?? 0);
-  const file = `${hm.name}.png`;
-  const size = write(file, packHeightPng(data, w, h, encoding));
-  heightmaps.push({ file: `/terrain/${file}`, width: w, height: h, metersPerPixel: round((gMaxE - gMinE) / w, 1), use: hm.use, ...size });
+  const { file, ...rest } = await writeHeightmap(hm.name, data, w, h, encoding);
+  heightmaps.push({ file, use: hm.use, metersPerPixel: round((gMaxE - gMinE) / w, 1), ...rest });
 }
 
 // ---------------------------------------------------------------------------
@@ -148,28 +165,33 @@ for (const lake of cfg.lakes) {
 }
 
 // ---------------------------------------------------------------------------
-// 4. Contour poster (first paint, reduced motion, no-WebGL fallback)
+// 4. Contour posters (first paint, reduced motion, no-WebGL fallback), one per interval
+//    the field uses at page scale: 100 m for large screens, 200 m for phones and laptops.
 // ---------------------------------------------------------------------------
 const { intervalM, indexEvery } = cfg.contours;
-let poster;
+const posters = [];
 {
   const w = cfg.poster.gridWidth;
   const h = Math.round(w / aspect);
   const values = gaussianBlur(resampleArea(grid.data, grid.width, grid.height, w, h), w, h, cfg.poster.blurSigma);
   const mask = resampleArea(lakeMask, grid.width, grid.height, w, h);
-  const thresholds = range(Math.ceil(minElev / intervalM) * intervalM, maxElev, intervalM);
-  const posterSize = write(
-    "contours.svg",
-    contourSvg(values, w, h, {
-      thresholds,
-      indexOf: (v) => v % (intervalM * indexEvery) === 0,
-      lakesMask: mask,
-      tolerance: cfg.poster.simplifyTolerance,
-      lakeOpacity: 0.08,
-    }),
-  );
-  poster = { file: "/terrain/contours.svg", width: w, height: h, ...posterSize };
+  for (const interval of cfg.poster.intervalsM) {
+    const thresholds = range(Math.ceil(minElev / interval) * interval, maxElev, interval);
+    const file = interval === intervalM ? "contours.svg" : `contours-${interval}.svg`;
+    const size = write(
+      file,
+      contourSvg(values, w, h, {
+        thresholds,
+        indexOf: (v) => v % (interval * indexEvery) === 0,
+        lakesMask: mask,
+        tolerance: cfg.poster.simplifyTolerance,
+        lakeOpacity: 0.08,
+      }),
+    );
+    posters.push({ file: `/terrain/${file}`, intervalM: interval, width: w, height: h, ...size });
+  }
 }
+const poster = posters.find((p) => p.intervalM === intervalM) ?? posters[0];
 
 // ---------------------------------------------------------------------------
 // 5. Card terrains (artwork SVG + morph heightmap for the contour field)
@@ -216,8 +238,7 @@ for (const card of cfg.cards) {
 
   const [mMin, mMax] = minMax(morph);
   const morphEncoding = { channels: "RG", offset: round(Math.floor(mMin * 4) / 4), scale: cfg.quantisationM };
-  const morphFile = `morph/${card.id}.png`;
-  const morphSize = write(morphFile, packHeightPng(morph, morphW, morphH, morphEncoding));
+  const morphMap = await writeHeightmap(`morph/${card.id}`, morph, morphW, morphH, morphEncoding);
 
   const pins = trail
     ? [0, 0.4, 0.72, 1].map((t) => {
@@ -237,18 +258,74 @@ for (const card of cfg.cards) {
     pins,
     svgBytes: svgSize,
     morph: {
-      file: `/terrain/${morphFile}`,
-      width: morphW,
-      height: morphH,
+      ...morphMap,
       elevation: { min: round(mMin, 1), max: round(mMax, 1) },
       encoding: morphEncoding,
-      ...morphSize,
     },
   };
 }
 
 // ---------------------------------------------------------------------------
-// 6. Metadata
+// 6. Ascent profile along the leader card's trail (About page)
+// ---------------------------------------------------------------------------
+{
+  const leader = cardContent.find((c) => c.artwork.kind === "crop");
+  if (leader && leader.artwork.kind === "crop") {
+    const { trail, waypoints } = leader.artwork;
+    const pts = trail.map((p) => wgs84ToLv95(p.lon, p.lat));
+    const STEP = 25; // metres between DEM samples
+    const raw = [];
+    const vertexKm = [0];
+    let total = 0;
+    for (let i = 1; i < pts.length; i++) {
+      const [e0, n0] = pts[i - 1];
+      const [e1, n1] = pts[i];
+      const len = Math.hypot(e1 - e0, n1 - n0);
+      const steps = Math.max(1, Math.round(len / STEP));
+      for (let k = i === 1 ? 0 : 1; k <= steps; k++) {
+        const t = k / steps;
+        const e = e0 + (e1 - e0) * t, n = n0 + (n1 - n0) * t;
+        raw.push([(total + len * t) / 1000, sampleBilinear(grid.data, grid.width, grid.height, (e - gMinE) / grid.resolution, (gMaxN - n) / grid.resolution)]);
+      }
+      total += len;
+      vertexKm.push(total / 1000);
+    }
+    // Light smoothing (±75 m), then ~240 evenly spaced points.
+    const smooth = raw.map((p, i) => {
+      const win = raw.slice(Math.max(0, i - 3), i + 4);
+      return [p[0], win.reduce((s, q) => s + q[1], 0) / win.length];
+    });
+    const OUT = 240;
+    const points = Array.from({ length: OUT }, (_, i) => {
+      const p = smooth[Math.round((i / (OUT - 1)) * (smooth.length - 1))];
+      return [round(p[0], 2), Math.round(p[1])];
+    });
+    const elevations = points.map((p) => p[1]);
+    const stops = waypoints.map((w) => {
+      const [we, wn] = wgs84ToLv95(w.lon, w.lat);
+      let best = 0;
+      pts.forEach(([e, n], i) => {
+        if (Math.hypot(e - we, n - wn) < Math.hypot(pts[best][0] - we, pts[best][1] - wn)) best = i;
+      });
+      const km = vertexKm[best];
+      const nearest = points.reduce((a, b) => (Math.abs(b[0] - km) < Math.abs(a[0] - km) ? b : a));
+      return { km: round(km, 2), elevationM: nearest[1], label: w.label ?? null };
+    });
+    const profile = {
+      attribution: "Terrain data © swisstopo",
+      trail: leader.artwork.terrainId,
+      lengthKm: round(total / 1000, 2),
+      elevation: { min: Math.min(...elevations), max: Math.max(...elevations) },
+      points,
+      stops,
+    };
+    write("profile.json", `${JSON.stringify(profile)}\n`);
+    log(`  ascent profile: ${profile.lengthKm} km, ${profile.elevation.min}–${profile.elevation.max} m`);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 7. Metadata
 // ---------------------------------------------------------------------------
 const [fx, fy] = toGridPx(cfg.region.focus.lon, cfg.region.focus.lat);
 const meta = {
@@ -267,6 +344,7 @@ const meta = {
   heightmaps,
   contours: { intervalM, indexEvery },
   poster,
+  posters,
   lakes,
   cards,
 };

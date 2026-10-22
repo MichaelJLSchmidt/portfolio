@@ -1,34 +1,46 @@
-"use client";
-
-import { Suspense, ViewTransition, lazy, useSyncExternalStore, type ReactNode } from "react";
+import { cloneElement, isValidElement, type CSSProperties, type ReactElement, type ReactNode } from "react";
+import { MorphSwitch } from "./MorphSwitch";
 
 /**
- * Names an element that morphs between the deck and a case study.
+ * Names an element that morphs between the deck and a case study (or Basecamp).
  *
- * Browsers with the View Transitions API get React's <ViewTransition> (stable in the
- * installed React and wired into Next.js navigations). Others fall back to a Motion
- * layoutId shared-layout animation, loaded only when needed.
+ * The name and class are also set inline: Next keeps visited pages alive in hidden
+ * <Activity> boundaries, and React does not pair names inside a page that is re-shown on
+ * back navigation, so the browser pairs them by the inline name instead. Hidden pages are
+ * display:none and are never captured. Browsers without view transitions ignore the
+ * inline properties.
+ *
+ * No "use client" on purpose: in a server page the clone happens before the child crosses
+ * into the client, so the style travels as a real prop. A client component receiving the
+ * child can get a lazy reference instead, which isValidElement rejects.
  */
-const LayoutMorph = lazy(() => import("./LayoutMorph"));
+type Styled = ReactElement<{ style?: CSSProperties }>;
 
-const supportsViewTransitions = () => typeof document.startViewTransition === "function";
-const noop = () => () => {};
-
-export function MorphTarget({ name, className, children }: { name: string; className?: string; children: ReactNode }) {
-  // Server snapshot assumes support, so capable browsers hydrate without a re-render.
-  const native = useSyncExternalStore(noop, supportsViewTransitions, () => true);
-  if (native) {
-    return (
-      <ViewTransition name={name} share="morph" default="none">
-        {children}
-      </ViewTransition>
-    );
-  }
+export function MorphTarget({
+  name,
+  variant,
+  className,
+  children,
+}: {
+  name: string;
+  /** Picks the choreography in globals.css (::view-transition-*(.morph-art|.morph-title)). */
+  variant: "art" | "title";
+  className?: string;
+  children: ReactNode;
+}) {
+  const share = `morph morph-${variant}`;
+  const named = isValidElement(children)
+    ? cloneElement(children as Styled, {
+        style: {
+          ...(children as Styled).props.style,
+          viewTransitionName: name,
+          viewTransitionClass: share,
+        } as CSSProperties,
+      })
+    : children;
   return (
-    <Suspense fallback={<div className={className}>{children}</div>}>
-      <LayoutMorph layoutId={name} className={className}>
-        {children}
-      </LayoutMorph>
-    </Suspense>
+    <MorphSwitch name={name} share={share} className={className}>
+      {named}
+    </MorphSwitch>
   );
 }

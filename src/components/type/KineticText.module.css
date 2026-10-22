@@ -1,0 +1,107 @@
+/*
+ * Rest state comes from the surrounding display style; override per use with
+ * --kt-rest-wdth / --kt-rest-wght. The entrance starts wide and light (--kt-from-*).
+ */
+.kinetic {
+  --kt-rest-wdth: calc(var(--type-display-wdth) * 1%);
+  --kt-rest-wght: var(--type-display-wght);
+  /* Arrival through a page transition: just off the rest axes, then a short settle. */
+  --kt-arrive-wdth: calc(var(--kt-rest-wdth) + 6%);
+  --kt-arrive-wght: calc(var(--kt-rest-wght) - 150);
+  --kt-from-wdth: 84%;
+  --kt-from-wght: 100;
+  --kt-dur: var(--dur-cinematic);
+  --kt-stagger: 38ms;
+}
+
+.letters {
+  display: inline;
+}
+
+.word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.char {
+  position: relative;
+  display: inline-block;
+}
+
+.ghost,
+.glyph {
+  font-stretch: var(--kt-rest-wdth);
+  font-weight: var(--kt-rest-wght);
+}
+
+/* Fixes the letter's box at its rest width. */
+.ghost {
+  visibility: hidden;
+}
+
+/* The visible letter, centred over its ghost; free to change width without reflow. */
+.glyph {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% 0;
+  white-space: nowrap;
+  /* Pointer proximity: --p (0..1) opens the letter up. */
+  font-stretch: calc(var(--kt-rest-wdth) + var(--p, 0) * 40%);
+  font-weight: calc(var(--kt-rest-wght) - var(--p, 0) * 420);
+}
+
+@keyframes kt-condense {
+  from {
+    font-stretch: var(--kt-from-wdth);
+    font-weight: var(--kt-from-wght);
+    transform: translateY(0.14em);
+    color: var(--color-glacier);
+  }
+  55% {
+    color: var(--color-glacier);
+  }
+}
+
+/* With JS and full motion, letters wait in the "from" state until they play. */
+:root[data-motion="full"] .kinetic[data-play="false"] .glyph {
+  font-stretch: var(--kt-from-wdth);
+  font-weight: var(--kt-from-wght);
+  opacity: 0.6;
+}
+
+.kinetic[data-play="true"] .glyph {
+  animation: kt-condense var(--kt-dur) var(--ease-trail) backwards;
+  animation-delay: calc(var(--kt-delay, 0ms) + var(--i) * var(--kt-stagger));
+}
+
+/* Arriving with a page transition (KineticText sets data-arrive): no entrance; the title
+   flies just off its rest axes, then settles once the transition has landed. "done" keeps
+   the entrance from replaying. */
+.kinetic[data-arrive] .glyph {
+  animation: none;
+  opacity: 1;
+}
+
+.kinetic[data-arrive="hold"] .glyph {
+  font-stretch: var(--kt-arrive-wdth);
+  font-weight: var(--kt-arrive-wght);
+}
+
+.kinetic[data-arrive="settle"] .glyph {
+  animation: kt-settle var(--dur-medium) var(--ease-trail);
+}
+
+@keyframes kt-settle {
+  from {
+    font-stretch: var(--kt-arrive-wdth);
+    font-weight: var(--kt-arrive-wght);
+  }
+}
+
+:root[data-motion="reduced"] .glyph {
+  animation: none !important;
+  font-stretch: var(--kt-rest-wdth);
+  font-weight: var(--kt-rest-wght);
+  opacity: 1;
+}

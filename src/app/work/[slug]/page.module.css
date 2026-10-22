@@ -1,8 +1,10 @@
 .main {
+  /* Text reveals start once the shared artwork is mid-flight (see globals.css). */
+  --reveal-base: 520ms;
   display: grid;
-  gap: 48px;
-  max-width: 1200px;
-  padding: 96px 16px 64px;
+  gap: clamp(40px, 5vw, 80px);
+  padding-top: 96px;
+  padding-bottom: 64px;
 }
 
 .crumbs a {
@@ -56,66 +58,11 @@
   font-size: 1.125rem;
   font-weight: 600;
   font-stretch: 88%;
-  font-variation-settings: "wdth" 88;
 }
 
 .lede {
   max-width: 38ch;
   font-size: clamp(1.0625rem, 1.6vw, 1.3rem);
-}
-
-/* Summit summary: sheet colour, so only sheet-safe inks. */
-.summary {
-  display: grid;
-  gap: 20px;
-  padding: 24px;
-  border-radius: 12px;
-  background: var(--color-sheet);
-  color: var(--color-ground);
-}
-
-.summaryHeading {
-  color: var(--color-moss-ink);
-  font-weight: 700;
-}
-
-.summaryGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px 24px;
-  margin: 0;
-}
-
-.summaryGrid > div {
-  display: grid;
-  gap: 4px;
-  align-content: start;
-  padding-top: 12px;
-  border-top: 1px solid rgb(90 92 82 / 0.45);
-}
-
-.wide {
-  grid-column: 1 / -1;
-}
-
-.summaryGrid dt {
-  color: var(--color-sheet-ink);
-  font-family: var(--font-martian), ui-monospace, monospace;
-  font-size: var(--type-hud-size);
-  font-variation-settings: "wdth" var(--type-hud-wdth);
-  letter-spacing: var(--type-hud-tracking);
-  text-transform: uppercase;
-}
-
-.summaryGrid dd {
-  margin: 0;
-}
-
-.stat {
-  font-family: var(--font-martian), ui-monospace, monospace;
-  font-size: 1.3rem;
-  font-weight: 700;
-  font-variation-settings: "wdth" 87.5;
 }
 
 .jump {
@@ -196,27 +143,52 @@
   align-items: flex-start !important;
 }
 
-.nextName {
-  color: var(--color-sheet);
-  font-size: clamp(2.5rem, 9vw, 5rem);
+.nextRow {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25em;
+  font-size: clamp(2.5rem, 9vw, 7rem);
 }
 
-.nextLink:hover .nextName {
+.nextName {
+  color: var(--color-sheet);
+}
+
+.nextArrow {
   color: var(--color-glacier);
+  transition: transform var(--dur-medium) var(--ease-trail);
+}
+
+.nextLink:hover .nextArrow {
+  transform: translateX(0.15em);
+}
+
+.body {
+  display: grid;
+  gap: 40px;
 }
 
 @media (min-width: 900px) {
-  .main {
-    padding-inline: 48px;
-  }
-
   .header {
-    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
     align-items: end;
-    gap: 40px;
+    gap: clamp(32px, 4vw, 72px);
   }
 
-  .summary {
-    padding: 32px 36px;
+  /* Jump-to rail stays beside the sections while reading. */
+  .body {
+    grid-template-columns: minmax(180px, 1fr) minmax(0, 3fr);
+    align-items: start;
+    gap: clamp(32px, 5vw, 96px);
+  }
+
+  .jump {
+    position: sticky;
+    top: 96px;
+  }
+
+  .jump ul {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

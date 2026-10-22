@@ -5,11 +5,21 @@ topographic contour map. Projects are presented as original "Summit Cards".
 
 This repository currently holds the foundation plus three technical spikes for the signature effects:
 
-1. **Persistent contour field**: one WebGL canvas behind all routes. It draws real swisstopo contours with a
-   pointer "headlamp", an intro sweep and terrain morphs.
-2. **Summit Card**: tilt, contour foil and flip, fully data-driven and accessible.
-3. **Card → case study transition**: a view-transition morph from the deck into `/work/[slug]`, synchronised
-   with the field.
+1. **Persistent contour field**: one WebGL canvas behind all routes. It draws real swisstopo contours with:
+   - a pointer "headlamp" and loupe;
+   - a rising alpenglow pulse;
+   - parallax and click pings;
+   - an intro sweep and terrain morphs;
+   - quiet zones: elements marked `data-quiet-zone` (hero text, page headers, Basecamp headings) fade the lines
+     behind them to 25% with a 48 px feather, so that text needs no halo or scrim while the field runs.
+2. **Summit Card**: spring tilt and contour foil. Fully data-driven and accessible; the whole card links to its
+   case study.
+3. **Card → case study transition**: a choreographed view-transition morph from the deck into `/work/[slug]`
+   and back, synchronised with the field. Durations and their reasoning are in `src/app/globals.css`.
+
+Headlines use kinetic variable-font type (`src/components/type/KineticText.tsx`). The About page ("Basecamp",
+`/about/`) opens from the leader card and tells the career as the real climb from Interlaken to the Jungfrau; its
+plan and the content still needed are in `docs/about-plan.md`.
 
 ## Stack
 
@@ -52,8 +62,10 @@ Never commit the token. `.env*` files are git-ignored; `.env.example` lists the 
 | `npm run lint`           | ESLint (Next.js core-web-vitals + TypeScript rules)                               |
 | `npm run typecheck`      | Generates route types, then `tsc --noEmit`                                        |
 | `npm run check:contrast` | WCAG contrast of the token colour pairs                                            |
+| `npm run check:content`  | Lists every content placeholder still to fill, with file, line and field          |
 | `npm run report:size`    | Initial JS/CSS/fonts per route, lazy chunks, terrain assets (gzip)               |
 | `npm run terrain`        | Regenerates `public/terrain` from swisstopo data                                  |
+| `npm run verify:terrain` | Checks that the committed heightmaps decode to the exact source heights          |
 
 To test the GitHub Pages sub-path locally:
 
@@ -72,10 +84,25 @@ automatically. Every other runtime URL (heightmaps, terrain SVGs, textures, fetc
 `NEXT_PUBLIC_PREVIEW=1` adds `<meta name="robots" content="noindex, nofollow">` and a disallow-all
 `robots.txt`. Production builds leave it unset.
 
+### Content and placeholders
+
+All copy lives in `src/content`. Facts still to confirm are written as `[PLACEHOLDERS]` (links as `href: null`);
+they stay visible in preview builds so gaps are easy to spot. Stats are optional everywhere (cards, case-study
+summary, Basecamp): a stat row shows only the stats that have a value and disappears when none has one.
+`npm run check:content` lists every remaining placeholder with file, line and field. It also runs before
+`npm run build` (`prebuild`): preview builds only warn, production builds fail while any placeholder remains.
+
 ### Tuning the contour field
 
-In `npm run dev`, a collapsed "Tuning (dev only)" leva panel controls every uniform: interval, index lines,
-line widths and opacities, colour tokens, headlamp, glow, drift, intro and morph durations. "Save to config"
+In `npm run dev`, a collapsed "Tuning (dev only)" leva panel controls every uniform: contour spacing, index
+lines, line widths and opacities, colour tokens, headlamp, glow, drift, intro and morph durations.
+
+The contour interval adapts to the screen. It is the smallest of 50, 100, 200, 250 and 500 m that keeps lines on
+steep terrain (the map's 95th-percentile gradient) at least `minSpacingPx` CSS pixels apart at the map's
+on-screen scale; every 5th line is an index line. With the committed `minSpacingPx: 3` phones in portrait get
+200 m (250 m on 320 px wide screens), 1280–1440 px laptops 200 m, tablets and 1920+ px desktops 100 m. The panel
+shows the interval in use; resizes glide to the new interval, and morphs blend between the two terrains'
+intervals. "Save to config"
 writes the values to `src/config/contour-field.json`, which is committed. Colours and durations are stored as
 token names. Leva is never part of the production build. Add `?field=force` to a URL to skip the low-spec check,
 which is useful in headless browsers.
@@ -111,18 +138,30 @@ It also needs the `MOTION_TOKEN` secret.
   That is ~100 MB, downloaded once into the git-ignored `scripts/terrain/.cache/`. DHM25 is not in the STAC
   catalogue; swissALTI3D would mean thousands of 1 km tiles.
 - **Outputs** (`public/terrain`, committed):
-  - `heightmap-2048.png` (26 m/px) and `heightmap-1024.png` (53 m/px): elevation packed into R (high byte) and
-    G (low byte), 1 m steps, light σ=1 blur. Decoded in the shader as
-    `h = offset + (R·65280 + G·255)·scale`. Phones and smaller desktops load the 1024 map; large and high-DPI
-    screens load the 2048 map.
+  - `heightmap-1024.webp` (53 m/px, 382 KB), `heightmap-1536.webp` (35 m/px, 710 KB) and
+    `heightmap-2048.webp` (26 m/px, 1.1 MB): elevation packed into R (high byte) and G (low byte), 1 m steps,
+    light σ=1 blur, stored as **lossless WebP** (about 40% smaller than PNG). Decoded in the shader as
+    `h = offset + (R·65280 + G·255)·scale`. Phones and small screens load the 1024 map, desktops the 1536 map.
+    The 2048 map is only used in preview builds with `?hm=2048` (also `?hm=1024` / `?hm=1536`), to compare
+    them side by side.
   - `terrain.json`: elevation range, LV95/WGS84 bbox, pixel scale, encoding, lakes and card metadata.
-  - `contours.svg`: the first-paint, reduced-motion and no-WebGL poster. It has 100 m lines with every 5th as an
-    index line, and the lakes are filled shapes found as flat surfaces in the DTM. About 67 KB gzipped.
+  - `contours.svg` (100 m, 67 KB gzipped) and `contours-200.svg` (200 m, 35 KB gzipped): the first-paint,
+    reduced-motion and no-WebGL posters, every 5th line an index line, lakes as filled shapes found as flat
+    surfaces in the DTM. A media query computed from the same spacing rule as the field picks one, so the
+    poster and the field show the same interval (100 m on large screens and tablets, 200 m on phones and
+    laptops).
   - `cards/*.svg`: the leader card's Interlaken → Jungfrau crop (200 m lines) and seeded-noise terrains for
     project cards (seed = collector number, ~20 lines, every 4th an index line).
-  - `morph/*.png`: per-card heightmaps the field morphs to on case-study pages.
+  - `morph/*.webp`: per-card heightmaps the field morphs to on case-study pages and Basecamp.
+  - `profile.json`: the elevation profile along the leader trail (240 points, ~1 KB gzipped) for the About
+    page's ascent chart.
 - `npm run terrain -- --refresh` re-downloads; `-- --placeholder` builds from procedural terrain without the
-  network.
+  network; `-- --png` also writes PNG copies (git-ignored, not used by the site).
+- **Exact heights:** every WebP is decoded again right after encoding and must match byte for byte, and its
+  SHA-256 is recorded in `terrain.json`. `npm run verify:terrain` re-checks the committed files with libwebp;
+  `npm run verify:terrain -- --browser` also decodes them in Chromium the way the site does
+  (`createImageBitmap` without colour-space conversion or premultiplied alpha, no flip, WebGL2 read-back).
+  The browser check needs Playwright.
 
 Attribution: "Terrain data © swisstopo" appears in the HUD and the footer.
 
@@ -143,14 +182,18 @@ When it's time:
 ## Accessibility and motion
 
 - Semantic HTML first. The hero name is server-rendered text, so LCP is text, not the canvas.
-- All interactions work with the keyboard. Cards are real toggle buttons (`aria-pressed`) with a separate link
-  on the back, and flips are announced through a polite live region. Focus returns to the originating card after
-  navigating back.
+- All interactions work with the keyboard. Each card is a single link, named by the card's title, with the focus
+  ring around the card. Focus returns to the originating card after navigating back.
+- Kinetic headlines keep a hidden rest-state copy of each letter, so the animation never changes layout (no CLS).
+  The accessible name is the plain text.
 - Every effect has a reduced-motion twin, triggered by `prefers-reduced-motion` or the Calm map toggle (stored
   in localStorage):
   - the field becomes the static poster;
   - tilt is off;
   - the foil is static;
-  - the flip becomes a 150 ms crossfade;
-  - the route morph becomes a short crossfade.
-- WCAG AA contrast is checked by `npm run check:contrast`.
+  - headlines don't animate;
+  - the deck doesn't deal in;
+  - the route morph becomes a 150 ms crossfade.
+- WCAG AA contrast is checked by `npm run check:contrast`, including sheet and glacier text over the faded
+  lines of a quiet zone. Contour-coloured labels keep their halo (`.keep-halo`), and the poster fallback keeps
+  all halos and its vignette.

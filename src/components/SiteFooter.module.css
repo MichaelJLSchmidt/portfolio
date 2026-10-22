@@ -4,7 +4,7 @@
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 8px 24px;
-  padding: 48px 16px max(24px, env(safe-area-inset-bottom));
+  padding: 48px var(--gutter) max(24px, env(safe-area-inset-bottom));
   color: var(--color-contour);
   border-top: 1px solid var(--color-contour-dim);
 }
@@ -16,10 +16,4 @@
 
 .note {
   color: var(--color-contour);
-}
-
-@media (min-width: 900px) {
-  .footer {
-    padding-inline: 48px;
-  }
 }

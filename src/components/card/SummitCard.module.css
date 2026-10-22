@@ -34,49 +34,22 @@
 .tilt {
   position: relative;
   aspect-ratio: 63 / 88;
-  transform-style: preserve-3d;
   transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-}
-
-/* The real control: a toggle button under the visual faces, which ignore the pointer. */
-.hit {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-radius: var(--radius);
-  background: transparent;
-  cursor: pointer;
-}
-
-.hit:focus-visible {
-  outline: 2px solid var(--color-glacier);
-  outline-offset: 4px;
-}
-
-.flipper {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  transform-style: preserve-3d;
-  transition: transform var(--dur-long) var(--ease-summit);
-  pointer-events: none;
-}
-
-.card[data-flipped="true"] .flipper {
-  transform: rotateY(180deg);
 }
 
 .face {
   position: absolute;
   inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25cqi;
   overflow: hidden;
+  padding: 3.4cqi;
   border: 1px solid var(--color-contour-dim);
   border-radius: var(--radius);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
+  background:
+    radial-gradient(130% 70% at 50% 0%, var(--color-ground-raised), transparent 75%),
+    var(--color-ground);
   box-shadow:
     0 1.5cqi 5cqi rgb(0 0 0 / 0.5),
     0 0 0 1px rgb(0 0 0 / 0.4);
@@ -92,28 +65,6 @@
   border: 1px solid var(--rarity);
   border-radius: calc(var(--radius) - 1.6cqi);
   pointer-events: none;
-}
-
-.front {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25cqi;
-  padding: 3.4cqi;
-  transform: rotateY(0deg);
-  background:
-    radial-gradient(130% 70% at 50% 0%, var(--color-ground-raised), transparent 75%),
-    var(--color-ground);
-}
-
-.back {
-  display: flex;
-  flex-direction: column;
-  gap: 3cqi;
-  padding: 3.4cqi;
-  transform: rotateY(180deg);
-  background:
-    radial-gradient(130% 70% at 50% 100%, var(--color-ground-raised), transparent 75%),
-    var(--color-ground);
 }
 
 /* -------------------------------------------------------------- anatomy */
@@ -143,7 +94,6 @@
   font-size: max(18px, 7.4cqi);
   font-weight: 800;
   font-stretch: 72%;
-  font-variation-settings: "wdth" 72;
   line-height: 0.86;
   text-transform: uppercase;
   text-wrap: balance;
@@ -177,7 +127,7 @@
   font-family: var(--font-martian), ui-monospace, monospace;
   font-size: 9.5px;
   font-weight: 700;
-  font-variation-settings: "wdth" 87.5;
+  font-stretch: 87.5%;
 }
 
 .coords {
@@ -187,7 +137,7 @@
   color: var(--color-contour);
   font-family: var(--font-martian), ui-monospace, monospace;
   font-size: max(9.5px, 2.5cqi);
-  font-variation-settings: "wdth" 87.5;
+  font-stretch: 87.5%;
   letter-spacing: 0.14em;
   line-height: 1.5;
   text-overflow: ellipsis;
@@ -214,8 +164,7 @@
   min-height: 24%;
 }
 
-.artSlot > .artwork,
-.backArt .artSlot {
+.artSlot > .artwork {
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -290,7 +239,6 @@
   background: var(--color-ground-raised);
   font-size: max(11.5px, 3.2cqi);
   font-stretch: 88%;
-  font-variation-settings: "wdth" 88;
   font-weight: 600;
   line-height: 1.2;
 }
@@ -342,7 +290,7 @@
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(var(--cells, 3), 1fr);
   border-block: 1px solid var(--color-contour-dim);
 }
 
@@ -365,7 +313,7 @@
   color: var(--color-contour);
   font-family: var(--font-martian), ui-monospace, monospace;
   font-size: max(8.5px, 2.25cqi);
-  font-variation-settings: "wdth" 87.5;
+  font-stretch: 87.5%;
   letter-spacing: 0.14em;
   text-overflow: ellipsis;
   text-transform: uppercase;
@@ -377,7 +325,7 @@
   color: var(--color-sheet);
   font-family: var(--font-martian), ui-monospace, monospace;
   font-size: max(20px, 5cqi);
-  font-variation-settings: "wdth" 87.5;
+  font-stretch: 87.5%;
   font-weight: 700;
   line-height: 1.1;
   white-space: nowrap;
@@ -391,7 +339,7 @@
   color: var(--color-contour);
   font-family: var(--font-martian), ui-monospace, monospace;
   font-size: max(9px, 2.3cqi);
-  font-variation-settings: "wdth" 87.5;
+  font-stretch: 87.5%;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -488,96 +436,66 @@
   }
 }
 
-/* ----------------------------------------------------------------- back */
+/* ------------------------------------------------------------- the link */
 
-.backArt {
-  position: relative;
+/* One transparent anchor over the whole face: the card is a single link. */
+.cardLink {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  border-radius: var(--radius);
+}
+
+.cardLink:focus-visible {
+  outline: 2px solid var(--color-glacier);
+  outline-offset: 4px;
+}
+
+.card[data-link="true"] .stage {
+  cursor: pointer;
+}
+
+/* "Open expedition log" chip: on hover/focus with a mouse, always on touch. */
+.openChip {
+  position: absolute;
+  right: 2cqi;
+  bottom: 2cqi;
   z-index: 2;
-  display: flex;
-  height: 38%;
-}
-
-.backArt > .artwork {
-  flex: 1;
-}
-
-.backBody {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 3cqi;
-  padding: 1cqi 2.4cqi 3cqi;
-}
-
-.backName {
-  font-size: max(20px, 8cqi);
-  font-stretch: 72%;
-  font-variation-settings: "wdth" 72;
-  font-weight: 800;
-  line-height: 0.86;
-  text-transform: uppercase;
-}
-
-.backSummary {
-  font-size: max(13px, 3.8cqi);
-  line-height: 1.45;
-}
-
-.backLink {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  gap: 0.5em;
-  min-height: 44px;
-  margin-top: auto;
-  padding: 0 1.1em;
+  padding: 0.55em 0.9em;
   border-radius: 999px;
   background: var(--color-glacier);
   color: var(--color-ground);
-  font-size: max(14px, 3.6cqi);
+  font-size: max(10px, 2.5cqi);
   font-weight: 700;
-  text-decoration: none;
-  pointer-events: auto;
-  transition: transform var(--dur-micro) var(--ease-trail);
+  opacity: 0;
+  transform: translateY(0.6em);
+  transition:
+    opacity var(--dur-short) var(--ease-trail),
+    transform var(--dur-medium) var(--ease-trail);
 }
 
-.backLink:hover {
-  transform: translateX(3px);
+.card[data-active="true"] .openChip,
+.card:focus-within .openChip {
+  opacity: 1;
+  transform: none;
 }
 
-.backLink:focus-visible {
-  outline: 2px solid var(--color-glacier);
-  outline-offset: 4px;
+@media (hover: none) {
+  .openChip {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.card[data-opening="true"] .openChip {
+  opacity: 0;
+  transition: none;
 }
 
 /* -------------------------------------------------------- reduced motion */
 
 :root[data-motion="reduced"] .tilt {
   transform: none;
-}
-
-:root[data-motion="reduced"] .flipper,
-:root[data-motion="reduced"] .card[data-flipped="true"] .flipper {
-  transform: none;
-  transition: none;
-}
-
-:root[data-motion="reduced"] .face {
-  transform: none;
-  backface-visibility: visible;
-  -webkit-backface-visibility: visible;
-  transition: opacity 150ms linear;
-}
-
-:root[data-motion="reduced"] .back,
-:root[data-motion="reduced"] .card[data-flipped="true"] .front {
-  opacity: 0;
-}
-
-:root[data-motion="reduced"] .card[data-flipped="true"] .back {
-  opacity: 1;
 }
 
 /* Static foil, no pointer tracking, no shimmer. */
@@ -597,7 +515,7 @@
 }
 
 :root[data-motion="reduced"] .glare,
-:root[data-motion="reduced"] .backLink {
+:root[data-motion="reduced"] .openChip {
   transition: none;
 }
 

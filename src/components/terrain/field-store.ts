@@ -16,6 +16,8 @@ export type FieldState = {
   skipIntro: number;
   /** Incremented by the dev panel to replay the intro. */
   replayIntro: number;
+  /** Contour interval the field settled on for this screen (shown in the dev panel). */
+  intervalM: number | null;
   config: FieldConfig;
 };
 
@@ -26,6 +28,7 @@ let state: FieldState = {
   introPlaying: false,
   skipIntro: 0,
   replayIntro: 0,
+  intervalM: null,
   config: fieldConfig,
 };
 const listeners = new Set<() => void>();

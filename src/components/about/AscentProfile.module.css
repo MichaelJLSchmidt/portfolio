@@ -1,0 +1,304 @@
+.ascent {
+  --p: 1;
+  display: grid;
+  gap: clamp(24px, 4vw, 48px);
+}
+
+.header {
+  display: grid;
+  gap: 12px;
+  max-width: 46rem;
+}
+
+.heading {
+  font-size: clamp(2.5rem, 9vw, 7rem);
+}
+
+.intro {
+  color: var(--color-sheet);
+}
+
+.stage {
+  position: relative;
+}
+
+/* The chart stays pinned under the HUD while the plaques scroll beneath it. */
+.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding-block: 88px 36px;
+  /* Opaque under the HUD and behind the chart, so plaques disappear beneath it... */
+  background: var(--color-ground);
+}
+
+/* ...through a short fade below the panel. */
+.sticky::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  inset-inline: 0;
+  height: 28px;
+  background: linear-gradient(to bottom, var(--color-ground), transparent);
+  pointer-events: none;
+}
+
+.chart {
+  position: relative;
+  height: clamp(200px, 32vh, 340px);
+}
+
+.svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.grid,
+.gridIndex {
+  stroke: var(--color-contour-dim);
+  vector-effect: non-scaling-stroke;
+}
+
+.grid {
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+.gridIndex {
+  stroke-width: 1;
+}
+
+.area {
+  fill: var(--color-ground-raised);
+  opacity: 0.85;
+}
+
+.base {
+  fill: none;
+  stroke: var(--color-contour);
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Climbed part of the trail, revealed from the left up to --p. */
+.climbed {
+  clip-path: inset(-24px calc((1 - var(--p)) * 100%) -24px 0);
+}
+
+.trail {
+  fill: none;
+  stroke: var(--color-glacier);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.gridLabel {
+  position: absolute;
+  left: 0;
+  color: var(--color-contour);
+  translate: 0 -130%;
+}
+
+.stop {
+  position: absolute;
+  color: var(--color-sheet);
+  white-space: nowrap;
+  translate: -4px -190%;
+}
+
+.stop[data-end] {
+  translate: calc(-100% + 4px) -190%;
+}
+
+/* The start sits low on the chart: label it below the line, clear of the grid labels. */
+.stop[data-start] {
+  translate: -4px 70%;
+}
+
+.stopElevation {
+  color: var(--color-contour);
+}
+
+/* Milestone pins: lit once the climber has passed them (--p ≥ --at), pure CSS. */
+.pin {
+  --r: clamp(0, (var(--p) - var(--at) + 0.004) * 1000, 1);
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  border: 1.5px solid color-mix(in srgb, var(--color-glacier) calc(var(--r) * 100%), var(--color-contour));
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-glacier) calc(var(--r) * 100%), var(--color-ground));
+  color: color-mix(in srgb, var(--color-ground) calc(var(--r) * 100%), var(--color-contour));
+  font-family: var(--font-martian), ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.climber,
+.readout {
+  display: none;
+}
+
+.ascent[data-live] .climber {
+  position: absolute;
+  left: var(--cx, 100%);
+  top: var(--cy, 0%);
+  display: block;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  background: var(--color-glacier);
+  box-shadow:
+    0 0 0 6px rgb(200 245 176 / 0.18),
+    0 0 24px var(--color-glacier);
+}
+
+.ascent[data-live] .readout {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 4px);
+  display: block;
+  margin: 0;
+  color: var(--color-glacier);
+}
+
+/* Milestones: real content, in order. Each one sits in its own stretch of scroll. */
+.steps {
+  display: grid;
+  margin: 0;
+  padding: 4vh 0 22vh;
+  list-style: none;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  min-height: 46vh;
+}
+
+.plaque {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  max-width: 32rem;
+  padding: 24px 28px;
+  border: 1px solid var(--color-contour-dim);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-ground-raised) 92%, transparent);
+  /* Not reached yet: offset, dim border and an open badge. Text keeps full contrast. */
+  transform: translateY(18px);
+  transition:
+    transform var(--dur-long) var(--ease-trail),
+    border-color var(--dur-medium) var(--ease-trail);
+}
+
+.step[data-reached] .plaque {
+  border-color: var(--color-contour);
+  transform: none;
+}
+
+.year {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-glacier);
+}
+
+.index {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px var(--color-glacier);
+  color: var(--color-glacier);
+  font-weight: 700;
+  letter-spacing: 0;
+  transition:
+    background-color var(--dur-medium) var(--ease-trail),
+    color var(--dur-medium) var(--ease-trail);
+}
+
+.step[data-reached] .index {
+  background: var(--color-glacier);
+  color: var(--color-ground);
+}
+
+.title {
+  font-size: clamp(1.75rem, 3.2vw, 2.75rem);
+}
+
+.org {
+  color: var(--color-contour);
+}
+
+.note {
+  color: var(--color-sheet);
+}
+
+@media (min-width: 900px) {
+  .step:nth-child(even) {
+    justify-content: flex-end;
+  }
+}
+
+/* Phones: the pinned panel (HUD clearance + readout + chart) takes at most ~38% of the
+   visible height, so the plaques keep most of the screen. */
+@media (max-width: 700px) {
+  .sticky {
+    padding-block: 106px 22px;
+  }
+
+  .chart {
+    height: clamp(92px, calc(38svh - 128px), 240px);
+  }
+
+  /* Clear of the summit label on narrow charts. */
+  .ascent[data-live] .readout {
+    bottom: calc(100% + 16px);
+  }
+
+  .step {
+    min-height: 44svh;
+  }
+}
+
+/* Short landscape phones: no room to pin. The chart sits inline above the plaques. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .sticky {
+    position: relative;
+    padding-block: 40px 22px;
+    background: none;
+  }
+
+  .sticky::after {
+    content: none;
+  }
+
+  .chart {
+    height: clamp(140px, 52svh, 220px);
+  }
+
+  .step {
+    min-height: 60svh;
+  }
+}
+
+:root[data-motion="reduced"] .plaque {
+  transform: none;
+  transition: none;
+}
+
+:root[data-motion="reduced"] .index {
+  transition: none;
+}

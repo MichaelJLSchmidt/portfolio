@@ -13,11 +13,12 @@ html {
   color: var(--color-sheet);
   font-family: var(--font-archivo), system-ui, sans-serif;
   font-size: 100%;
-  font-variation-settings: "wdth" 100;
+  font-stretch: 100%;
 }
 
 body {
   margin: 0;
+  overflow-x: clip;
   min-height: 100svh;
   font-size: var(--type-body-size);
   line-height: var(--type-body-lh);
@@ -62,8 +63,7 @@ button {
 .display {
   font-family: var(--font-archivo), system-ui, sans-serif;
   font-weight: var(--type-display-wght);
-  font-variation-settings: "wdth" var(--type-display-wdth);
-  font-stretch: 62%;
+  font-stretch: calc(var(--type-display-wdth) * 1%);
   line-height: var(--type-display-lh);
   text-transform: uppercase;
   letter-spacing: -0.01em;
@@ -73,7 +73,7 @@ button {
   font-family: var(--font-martian), ui-monospace, monospace;
   font-size: var(--type-hud-size);
   letter-spacing: var(--type-hud-tracking);
-  font-variation-settings: "wdth" var(--type-hud-wdth);
+  font-stretch: calc(var(--type-hud-wdth) * 1%);
   text-transform: uppercase;
   line-height: 1.4;
 }
@@ -120,6 +120,32 @@ i,
   font-style: italic;
 }
 
+:root {
+  --page-max: 1680px;
+  --gutter: clamp(16px, 4vw, 72px);
+}
+
+/* Centred page measure with fluid gutters; content no longer hugs the left edge on wide screens. */
+.container {
+  width: 100%;
+  max-width: calc(var(--page-max) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Staggered entrance for supporting text (pure CSS; no-op with reduced motion). */
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+:root[data-motion="full"] .reveal {
+  animation: reveal-in var(--dur-long) var(--ease-trail) backwards;
+  animation-delay: calc(var(--reveal-base, 260ms) + var(--reveal-i, 0) * 90ms);
+}
+
 .page {
   position: relative;
   z-index: 1;
@@ -140,55 +166,130 @@ i,
     0 0 14px var(--color-ground);
 }
 
+/* Inside a quiet zone ([data-quiet-zone]) the running field fades its lines to ~25%, so
+   sheet and glacier text needs no halo there (checked by npm run check:contrast).
+   Contour-coloured labels (.keep-halo) keep theirs: even faded lines would take them
+   below AA. The poster (reduced motion, no WebGL) has no quiet zones, so halos stay. */
+:root:has([data-field="on"]) [data-quiet-zone].map-halo:not(.keep-halo),
+:root:has([data-field="on"]) [data-quiet-zone] .map-halo:not(.keep-halo) {
+  text-shadow: none;
+}
+
 /* ------------------------------------------------------------------------------------
-   View transitions (React <ViewTransition> on route changes).
-   Named card parts morph (share="morph"); everything else dissolves quickly.
+   View transitions (React <ViewTransition> on route changes)
+
+   Durations follow Material 3's scale (medium 250–400 ms, long 450–600 ms, extra-long
+   700–1000 ms) and the rule that duration grows with travel distance and size change:
+   - exit:   the old page dissolves in --dur-medium (360 ms), a plus-lighter crossfade;
+   - travel: the card artwork and title fly to the header in --dur-scenic (900 ms) with a
+             strong decelerate, the longest move on screen;
+   - enter:  the new page's text reveals over --dur-long (560 ms) in a stagger once the
+             artwork is mid-flight (--reveal-base), so entering takes longer than leaving;
+   - field:  the background terrain morphs over --dur-cinematic (1.4 s) with a camera push.
    ------------------------------------------------------------------------------------ */
 ::view-transition {
   pointer-events: none;
 }
 
+/* Root: a true crossfade (matched linear curves, plus-lighter), so the shared map and
+   HUD keep constant brightness; the new page's text arrives later via its reveals. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: plus-lighter;
+}
+
 ::view-transition-old(root) {
-  animation: var(--dur-short) var(--ease-trail) both vt-fade-out;
+  animation: vt-exit var(--dur-medium) linear both;
 }
 
 ::view-transition-new(root) {
-  animation: var(--dur-short) var(--ease-trail) both vt-fade-in;
+  animation: vt-enter var(--dur-medium) linear both;
 }
 
-::view-transition-group(.morph) {
-  animation-duration: var(--dur-long);
-  animation-timing-function: var(--ease-drop);
-}
-
-::view-transition-old(.morph),
-::view-transition-new(.morph) {
-  height: 100%;
-  object-fit: cover;
-  animation-duration: var(--dur-long);
-  animation-timing-function: var(--ease-drop);
-}
-
-@keyframes vt-fade-out {
+@keyframes vt-exit {
   to {
     opacity: 0;
   }
 }
 
-@keyframes vt-fade-in {
+@keyframes vt-enter {
   from {
     opacity: 0;
   }
 }
 
-/* Reduced motion: no travelling morph, only a short crossfade. */
+/* Shared elements travel on one curve. */
+::view-transition-group(.morph) {
+  animation-duration: var(--dur-scenic);
+  animation-timing-function: var(--ease-drop);
+}
+
+/* Artwork: same terrain at a similar aspect, so a long, even crossfade is seamless. */
+::view-transition-old(.morph-art),
+::view-transition-new(.morph-art) {
+  height: 100%;
+  object-fit: cover;
+  animation-duration: var(--dur-scenic);
+  animation-timing-function: var(--ease-drop);
+}
+
+/* Title: the box travels, the text does not scale. Both snapshots keep their own size,
+   anchored top-left in the moving box, and cross-fade early, so the text stays sharp in
+   flight; the heading then settles on its axes once it has landed (KineticText). */
+::view-transition-old(.morph-title),
+::view-transition-new(.morph-title) {
+  inline-size: auto;
+  block-size: auto;
+  object-fit: none;
+}
+
+::view-transition-old(.morph-title) {
+  animation: vt-title-old var(--dur-scenic) linear both;
+}
+
+::view-transition-new(.morph-title) {
+  animation: vt-title-new var(--dur-scenic) linear both;
+}
+
+@keyframes vt-title-old {
+  30%,
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-title-new {
+  from,
+  18% {
+    opacity: 0;
+  }
+  48%,
+  to {
+    opacity: 1;
+  }
+}
+
+/* Named parts without a partner (the other cards) leave and arrive with the page. */
+::view-transition-old(.morph):only-child {
+  animation: vt-exit var(--dur-medium) var(--ease-scree) both;
+}
+
+::view-transition-new(.morph):only-child {
+  animation: vt-enter var(--dur-long) var(--ease-trail) both;
+}
+
+/* Reduced motion: nothing travels; a short crossfade only. */
 html[data-motion="reduced"]::view-transition-group(*) {
   animation-duration: 0s;
 }
 
 html[data-motion="reduced"]::view-transition-old(*),
 html[data-motion="reduced"]::view-transition-new(*) {
-  animation-duration: 150ms;
+  animation: vt-enter 150ms linear both;
+}
+
+html[data-motion="reduced"]::view-transition-old(*) {
+  animation-name: vt-exit;
 }
 
 /* Lenis (fine-pointer desktop only). */

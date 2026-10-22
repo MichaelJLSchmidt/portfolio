@@ -9,11 +9,14 @@ export const site = {
     name: "[FULL NAME]",
     origin: "Interlaken · 566 m · Swiss Alps",
     lede: "I lead a UX team that designs public-sector platforms, runs the workshops that shape them, and ships the design system they are built with.",
+    scrollCue: "Descend to the deck",
     deckHeading: "The Summit Deck",
-    deckIntro: "Each project is a card. Flip it for the summary, open it for the full expedition log.",
+    deckIntro: "Each project is a card. Open one for the full expedition log.",
   },
   hud: {
     mark: "Höhenlinie",
+    markHome: "Höhenlinie, back to the deck",
+    about: "Basecamp",
     clockLabel: "Bern",
     coordinates: "N 46°41′ · E 7°52′",
     calm: "Calm map",
@@ -27,6 +30,7 @@ export const site = {
     credit: "Terrain data © swisstopo",
     creditHref: "https://www.swisstopo.admin.ch/en/terms-of-use-free-geodata-and-geoservices",
     note: "Contours drawn from swissALTIRegio. Built as a static site.",
+    about: "About · Basecamp",
   },
   skipLink: "Skip to content",
   notFound: {

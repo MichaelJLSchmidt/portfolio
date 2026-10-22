@@ -49,21 +49,32 @@
   transition-delay: var(--dur-medium);
 }
 
-/* Keeps text legible over the map without hiding it. */
-.scrim {
+/* The band under the HUD. */
+.scrim,
+.vignette {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(to bottom, rgb(27 28 24 / 0.5), rgb(27 28 24 / 0) 18%),
-    linear-gradient(to top, rgb(27 28 24 / 0.75), rgb(27 28 24 / 0) 55%);
+}
+
+.scrim {
+  background: linear-gradient(to bottom, rgb(27 28 24 / 0.5), rgb(27 28 24 / 0) 18%);
+}
+
+/* Keeps text legible over the static poster. The running field fades its lines behind
+   text instead (quiet zones), so the vignette fades out with the poster. */
+.vignette {
+  background: linear-gradient(to top, rgb(27 28 24 / 0.75), rgb(27 28 24 / 0) 55%);
+  transition: opacity var(--dur-medium) var(--ease-trail);
 }
 
 @media (min-width: 900px) {
-  .scrim {
-    background:
-      linear-gradient(to bottom, rgb(27 28 24 / 0.5), rgb(27 28 24 / 0) 18%),
-      linear-gradient(to right, rgb(27 28 24 / 0.7), rgb(27 28 24 / 0.15) 60%, rgb(27 28 24 / 0));
+  .vignette {
+    background: linear-gradient(to right, rgb(27 28 24 / 0.7), rgb(27 28 24 / 0.15) 60%, rgb(27 28 24 / 0));
   }
+}
+
+.backdrop[data-field="on"] .vignette {
+  opacity: 0;
 }
 
 .skip {
@@ -85,7 +96,30 @@
   color: var(--color-glacier);
 }
 
+/* Without the WebGL field the poster still breathes: a slow, compositor-only drift. */
+@keyframes poster-drift {
+  from {
+    transform: scale(1.06) translate3d(-1%, 0.6%, 0);
+  }
+  to {
+    transform: scale(1.1) translate3d(1%, -0.8%, 0);
+  }
+}
+
+:root[data-motion="full"] .backdrop[data-field="off"] .poster {
+  animation: poster-drift 48s var(--ease-summit) infinite alternate;
+  will-change: transform;
+}
+
+/* First visit: keep the "field never arrived" fallback alongside the drift. */
+:root[data-motion="full"][data-intro="pending"] .backdrop[data-field="off"] .poster {
+  animation:
+    poster-fallback var(--dur-medium) var(--ease-trail) 4s both,
+    poster-drift 48s var(--ease-summit) infinite alternate;
+}
+
 :root[data-motion="reduced"] .poster,
-:root[data-motion="reduced"] .canvas {
+:root[data-motion="reduced"] .canvas,
+:root[data-motion="reduced"] .vignette {
   transition: none;
 }

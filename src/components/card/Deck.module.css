@@ -1,27 +1,33 @@
 .deck {
   display: grid;
-  gap: 32px;
-  padding-block: 48px 96px;
+  gap: clamp(32px, 5vw, 72px);
+  padding-block: clamp(48px, 10vw, 140px) clamp(64px, 10vw, 160px);
 }
 
 .header {
   display: grid;
-  gap: 12px;
-  max-width: 40rem;
+  gap: 16px;
+  justify-items: center;
+  text-align: center;
 }
 
 .heading {
-  font-size: clamp(2.5rem, 9vw, 5.5rem);
+  font-size: clamp(2.75rem, 10vw, 9rem);
+  scroll-margin-top: 96px;
 }
 
 .intro {
+  max-width: 40ch;
   color: var(--color-sheet);
 }
 
+/* Cards sit centred on the page, a little offset from each other like a dealt hand. */
 .cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 420px));
-  gap: 56px 48px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: clamp(40px, 5vw, 96px);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -29,40 +35,39 @@
 
 .slot {
   display: grid;
-  justify-items: start;
-  gap: 16px;
+  justify-items: center;
+  gap: 20px;
+  width: min(100%, 420px);
 }
 
-/* One click to the case study on devices with a fine pointer; touch flips first. */
-.open {
-  display: none;
-  align-items: center;
-  gap: 0.6em;
-  min-height: 44px;
-  padding: 0 4px;
-  color: var(--color-glacier);
-  text-decoration: none;
-}
-
-.open:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .open {
-    display: inline-flex;
+@media (min-width: 900px) {
+  .slot:nth-child(even) {
+    margin-top: clamp(40px, 6vw, 120px);
   }
 }
 
-/* Without JavaScript the card can't flip, so every device gets the direct link.
-   (data-motion is set by the inline head script, so its absence means no JS.) */
-:root:not([data-motion]) .open {
-  display: inline-flex;
+/* Deal-in: cards slide up from the deck, slightly turned, one after another. */
+.cards[data-deal="pending"] .slot {
+  opacity: 0;
+  transform: translate3d(0, 22vh, 0) rotate(calc(-7deg + var(--deal-i) * 14deg)) scale(0.9);
+}
+
+.cards[data-deal="dealt"] .slot {
+  transition:
+    opacity var(--dur-long) var(--ease-trail),
+    transform var(--dur-scenic) var(--ease-drop);
+  transition-delay: calc(var(--deal-i) * 160ms);
+}
+
+.summary {
+  max-width: 42ch;
+  color: var(--color-sheet);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  text-align: center;
 }
 
 .tilt {
-  justify-self: start;
   min-height: 44px;
   padding: 0 18px;
   border: 1px solid var(--color-glacier);

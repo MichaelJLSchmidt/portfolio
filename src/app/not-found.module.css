@@ -3,7 +3,8 @@
   gap: 16px;
   align-content: center;
   min-height: 80svh;
-  padding: 112px 16px 64px;
+  padding-top: 112px;
+  padding-bottom: 64px;
 }
 
 .eyebrow {
@@ -27,10 +28,4 @@
 .back:hover {
   text-decoration: underline;
   text-underline-offset: 4px;
-}
-
-@media (min-width: 900px) {
-  .main {
-    padding-inline: 48px;
-  }
 }

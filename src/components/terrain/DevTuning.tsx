@@ -1,6 +1,6 @@
 "use client";
 
-import { Leva, button, useControls } from "leva";
+import { Leva, button, monitor, useControls } from "leva";
 import { useEffect } from "react";
 import { color, duration } from "@/styles/tokens";
 import { fieldConfig, type FieldConfig } from "./field-settings";
@@ -17,7 +17,10 @@ const durationTokens = Object.keys(duration);
 
 export default function DevTuning() {
   const values = useControls("Contour field", {
-    intervalM: { value: fieldConfig.intervalM, min: 20, max: 500, step: 10 },
+    // Contour interval: the smallest of 50/100/200/250/500 m that keeps lines on the
+    // steepest terrain (gradient percentile) at least minSpacingPx apart on this screen.
+    minSpacingPx: { value: fieldConfig.minSpacingPx, min: 1, max: 12, step: 0.25 },
+    steepPercentile: { value: fieldConfig.steepPercentile, options: [50, 90, 95, 99] },
     indexEvery: { value: fieldConfig.indexEvery, min: 2, max: 10, step: 1 },
     lineWidthPx: { value: fieldConfig.lineWidthPx, min: 0.5, max: 4, step: 0.25 },
     indexLineWidthPx: { value: fieldConfig.indexLineWidthPx, min: 0.5, max: 5, step: 0.25 },
@@ -30,13 +33,28 @@ export default function DevTuning() {
     headlampFadeMs: { value: fieldConfig.headlampFadeMs, min: 0, max: 2000, step: 20 },
     glowWidthPx: { value: fieldConfig.glowWidthPx, min: 1, max: 20, step: 0.5 },
     glowStrength: { value: fieldConfig.glowStrength, min: 0, max: 1, step: 0.05 },
+    lensRadiusPx: { value: fieldConfig.lensRadiusPx, min: 0, max: 500, step: 10 },
+    lensStrength: { value: fieldConfig.lensStrength, min: 0, max: 0.8, step: 0.02 },
+    parallax: { value: fieldConfig.parallax, min: 0, max: 0.08, step: 0.002 },
+    scrollParallax: { value: fieldConfig.scrollParallax, min: 0, max: 0.2, step: 0.005 },
     driftCyclesPerSecond: { value: fieldConfig.driftCyclesPerSecond, min: 0, max: 0.2, step: 0.005 },
+    pulsePeriodS: { value: fieldConfig.pulsePeriodS, min: 2, max: 30, step: 0.5 },
+    pulseStrength: { value: fieldConfig.pulseStrength, min: 0, max: 1, step: 0.05 },
+    pulseColor: { value: fieldConfig.pulseColor, options: colorTokens },
+    rippleSpeedPxS: { value: fieldConfig.rippleSpeedPxS, min: 200, max: 2000, step: 50 },
+    // Quiet zones behind text: line strength inside, feather outside (CSS px).
+    quietStrength: { value: fieldConfig.quietStrength, min: 0, max: 1, step: 0.05 },
+    quietFeatherPx: { value: fieldConfig.quietFeatherPx, min: 0, max: 160, step: 4 },
+    zoomBase: { value: fieldConfig.zoomBase, min: 1, max: 1.3, step: 0.01 },
+    morphZoom: { value: fieldConfig.morphZoom, min: 0, max: 0.5, step: 0.01 },
     intro: { value: fieldConfig.intro, options: durationTokens },
     morph: { value: fieldConfig.morph, options: durationTokens },
     frameBudgetMs: { value: fieldConfig.frameBudgetMs, min: 12, max: 40, step: 1 },
+    dormantAfterMs: { value: fieldConfig.dormantAfterMs, min: 5000, max: 300000, step: 5000 },
   });
 
   useControls("Contour field", {
+    "Interval (m)": monitor(() => fieldStore.get().intervalM ?? 0, { interval: 250 }),
     "Replay intro": button(() => fieldStore.set((s) => ({ replayIntro: s.replayIntro + 1 }))),
     "Toggle morph (kiBon)": button(() =>
       fieldStore.set((s) => ({ morphTarget: s.morphTarget ? null : "dvb-001" })),
