@@ -82,9 +82,11 @@ export function KineticText({
     if (document.documentElement.getAttribute("data-motion") === "reduced") return;
     let live = true;
     el.setAttribute("data-arrive", "hold");
-    transition.finished.then(() => {
+    // Settle when the transition lands, or right away if it was aborted.
+    const settle = () => {
       if (live) el.setAttribute("data-arrive", "settle");
-    });
+    };
+    transition.finished.then(settle, settle);
     const onEnd = (e: AnimationEvent) => {
       if (e.animationName.includes("kt-settle")) el.setAttribute("data-arrive", "done");
     };

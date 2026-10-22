@@ -13,9 +13,11 @@ if (typeof document !== "undefined" && typeof document.startViewTransition === "
   Document.prototype.startViewTransition = function (this: Document, ...args: Parameters<typeof start>) {
     const transition = start.apply(this, args);
     active = transition;
-    transition.finished.finally(() => {
+    // `finished` rejects when the update fails or times out; either way it is over.
+    const clear = () => {
       if (active === transition) active = null;
-    });
+    };
+    transition.finished.then(clear, clear);
     return transition;
   } as typeof start;
 }
