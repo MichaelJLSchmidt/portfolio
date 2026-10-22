@@ -15,7 +15,7 @@ export function SmoothScroll() {
     if (reduced || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
     let destroyed = false;
     let stop: (() => void) | null = null;
-    Promise.all([import("lenis"), import("motion")]).then(([{ default: Lenis }, { frame, cancelFrame }]) => {
+    Promise.all([import("lenis"), import("@/lib/frameloop")]).then(([{ default: Lenis }, { frame, cancelFrame }]) => {
       if (destroyed) return;
       const lenis = new Lenis({ autoRaf: false, anchors: true, lerp: 0.14, stopInertiaOnNavigate: true });
       const update = frame.update(({ timestamp }) => lenis.raf(timestamp), true);

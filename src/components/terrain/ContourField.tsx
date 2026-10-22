@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, advance, useFrame, useThree } from "@react-three/fiber";
-import { cancelFrame, frame, type Process } from "motion";
+import { cancelFrame, frame, type Process } from "@/lib/frameloop";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import meta from "@terrain/terrain.json";

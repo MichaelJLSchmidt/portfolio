@@ -107,8 +107,8 @@ export function KineticText({
     let radius = 160;
     const current = new Float32Array(chars.length);
     const target = new Float32Array(chars.length);
-    let loop: Pick<typeof import("motion"), "frame" | "cancelFrame"> | null = null;
-    let queued: import("motion").Process | null = null;
+    let loop: typeof import("@/lib/frameloop") | null = null;
+    let queued: import("@/lib/frameloop").Process | null = null;
     let disposed = false;
 
     const measure = () => {
@@ -145,9 +145,9 @@ export function KineticText({
       target.fill(0);
       kick();
     };
-    import("motion").then(({ frame, cancelFrame }) => {
+    import("@/lib/frameloop").then((m) => {
       if (disposed) return;
-      loop = { frame, cancelFrame };
+      loop = m;
       measure();
       window.addEventListener("pointermove", onMove, { passive: true });
       document.addEventListener("pointerleave", onLeave);
