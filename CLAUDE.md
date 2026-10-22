@@ -8,7 +8,7 @@ contour field, Motion (and Motion+) for springs and gestures, React `<ViewTransi
 - `npm run dev` — dev server plus the local endpoint the dev-only tuning panel saves through
 - `npm run build` — static export to `out/` (set `NEXT_PUBLIC_BASE_PATH=/<repo>` to mimic GitHub Pages)
 - `npm run preview` — serve `out/` like a static host (honours `NEXT_PUBLIC_BASE_PATH`)
-- `npm run lint` · `npm run typecheck` · `npm run check:contrast` · `npm run report:size`
+- `npm run lint` · `npm run typecheck` · `npm run check:contrast` · `npm run check:content` · `npm run report:size`
 - `npm run terrain` — regenerate `public/terrain` from swisstopo data (downloads ~100 MB once into a git-ignored cache)
 
 Installing needs `MOTION_TOKEN` in the environment (see README). Never write the token into a file.
@@ -17,7 +17,9 @@ Installing needs `MOTION_TOKEN` in the environment (see README). Never write the
 
 - `src/app` — routes (`/`, `/work/[slug]`, `/about`), root layout, global CSS
 - `src/components` — `terrain/` (contour field), `card/` (Summit Card, deck), `transition/`, `hud/`, `about/`
-- `src/content` — all copy and card data (`cards.ts`, `site.ts`, `about.ts`); components never hardcode copy
+- `src/content` — all copy and card data (`cards.ts`, `site.ts`, `about.ts`); components never hardcode copy.
+  Unfilled facts are `[PLACEHOLDERS]` (or `href: null`); stats are optional and render only with a value.
+  `check:content` lists placeholders; production builds (no `NEXT_PUBLIC_PREVIEW=1`) fail while any remain.
 - `src/styles/tokens.ts` — design tokens
 - `src/config` — committed tuning values written by the dev panel
 - `scripts/` — Node scripts only (must run on Windows, macOS and Linux)

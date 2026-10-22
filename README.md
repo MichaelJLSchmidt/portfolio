@@ -62,6 +62,7 @@ Never commit the token. `.env*` files are git-ignored; `.env.example` lists the 
 | `npm run lint`           | ESLint (Next.js core-web-vitals + TypeScript rules)                               |
 | `npm run typecheck`      | Generates route types, then `tsc --noEmit`                                        |
 | `npm run check:contrast` | WCAG contrast of the token colour pairs                                            |
+| `npm run check:content`  | Lists every content placeholder still to fill, with file, line and field          |
 | `npm run report:size`    | Initial JS/CSS/fonts per route, lazy chunks, terrain assets (gzip)               |
 | `npm run terrain`        | Regenerates `public/terrain` from swisstopo data                                  |
 | `npm run verify:terrain` | Checks that the committed heightmaps decode to the exact source heights          |
@@ -82,6 +83,14 @@ automatically. Every other runtime URL (heightmaps, terrain SVGs, textures, fetc
 
 `NEXT_PUBLIC_PREVIEW=1` adds `<meta name="robots" content="noindex, nofollow">` and a disallow-all
 `robots.txt`. Production builds leave it unset.
+
+### Content and placeholders
+
+All copy lives in `src/content`. Facts still to confirm are written as `[PLACEHOLDERS]` (links as `href: null`);
+they stay visible in preview builds so gaps are easy to spot. Stats are optional everywhere (cards, case-study
+summary, Basecamp): a stat row shows only the stats that have a value and disappears when none has one.
+`npm run check:content` lists every remaining placeholder with file, line and field. It also runs before
+`npm run build` (`prebuild`): preview builds only warn, production builds fail while any placeholder remains.
 
 ### Tuning the contour field
 

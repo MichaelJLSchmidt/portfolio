@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "node scripts/dev.mjs",
+    "prebuild": "node scripts/check-content.mjs --build",
     "build": "next build",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
@@ -15,7 +16,8 @@
     "verify:terrain": "node scripts/terrain/verify.mjs",
     "report:size": "node scripts/report-sizes.mjs",
     "preview": "node scripts/serve-out.mjs",
-    "check:contrast": "node scripts/check-contrast.mjs"
+    "check:contrast": "node scripts/check-contrast.mjs",
+    "check:content": "node scripts/check-content.mjs"
   },
   "dependencies": {
     "@react-three/drei": "10.7.9",
