@@ -5,8 +5,9 @@
 //   npm run terrain -- --placeholder  skip the network and use procedural terrain
 //   npm run terrain -- --png     also write PNG copies of every heightmap (not used by the site)
 //
-// Outputs (public/terrain): heightmap-{1024,1536,2048}.webp (lossless), contours.svg,
-// cards/*.svg, morph/*.webp and terrain.json (metadata the site imports).
+// Outputs (public/terrain): heightmap-{1024,1536,2048}.webp (lossless) with .bin raw-height
+// fallbacks, contours*.svg, cards/*.svg, morph/*.webp (+ .bin) and terrain.json (metadata the
+// site imports, including reference texels for the runtime decode check).
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -18,7 +19,7 @@ import { readWindow, resolveCogUrl } from "./lib/source.mjs";
 import { cropToBbox, fillGaps, floodFlat, gaussianBlur, minMax, resampleArea, sampleBilinear } from "./lib/grid.mjs";
 import { isobands, maskToPathData, ringsToLines, toPathData } from "./lib/contours.mjs";
 import { autoTrail, seededTerrain } from "./lib/noise.mjs";
-import { encodeLosslessWebp, gradientPercentiles, packHeightRgb, rasterHash } from "./lib/heightmap.mjs";
+import { decodeRawHeights, encodeLosslessWebp, encodeRawHeights, gradientPercentiles, packHeightRgb, probeTexels, rasterHash } from "./lib/heightmap.mjs";
 import { encodeRgbPng } from "./lib/png.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -66,10 +67,18 @@ function contourSvg(values, w, h, { thresholds, indexOf, lakesMask, tolerance, l
   return svg({ w, h, regular, index, lakes, lakeOpacity });
 }
 
-/** Writes a heightmap as lossless WebP (plus a PNG copy with --png) and returns its metadata. */
+/**
+ * Writes a heightmap as lossless WebP, its raw-height fallback (.bin) and, with --png, a PNG
+ * copy; returns its metadata with reference texels for the runtime decode check.
+ */
 async function writeHeightmap(name, data, width, height, encoding) {
   const rgb = packHeightRgb(data, width, height, encoding);
   const size = write(`${name}.webp`, await encodeLosslessWebp(rgb, width, height));
+  const raw = encodeRawHeights(rgb, width, height);
+  if (Buffer.compare(Buffer.from(decodeRawHeights(raw, width, height)), Buffer.from(rgb)) !== 0) {
+    throw new Error(`raw height fallback for ${name} does not round-trip`);
+  }
+  const rawSize = write(`${name}.bin`, raw);
   if (args.has("--png")) write(`${name}.png`, encodeRgbPng(rgb, width, height));
   return {
     file: `/terrain/${name}.webp`,
@@ -77,6 +86,8 @@ async function writeHeightmap(name, data, width, height, encoding) {
     height,
     sha256: rasterHash(rgb),
     gradientM: gradientPercentiles(data, width, height),
+    probe: probeTexels(rgb, width, height),
+    raw: { file: `/terrain/${name}.bin`, bytes: rawSize.bytes },
     ...size,
   };
 }

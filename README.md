@@ -158,8 +158,11 @@ It also needs the `MOTION_TOKEN` secret.
     page's ascent chart.
 - `npm run terrain -- --refresh` re-downloads; `-- --placeholder` builds from procedural terrain without the
   network; `-- --png` also writes PNG copies (git-ignored, not used by the site).
-- **Exact heights:** every WebP is decoded again right after encoding and must match byte for byte, and its
-  SHA-256 is recorded in `terrain.json`. `npm run verify:terrain` re-checks the committed files with libwebp;
+- `*.bin` next to every heightmap: the same heights as raw 16-bit values (gradient-predicted, zigzag-coded,
+  gzipped by the pipeline), about 10% smaller than the WebP. The site only fetches them in a session where a
+  browser decoded a WebP to different values (see "Heightmap decode check").
+- **Exact heights:** every WebP and `.bin` is decoded again right after encoding and must match byte for byte;
+  the raster's SHA-256 and 16 reference texels are recorded in `terrain.json`. `npm run verify:terrain` re-checks the committed files with libwebp;
   `npm run verify:terrain -- --browser` also decodes them in Chromium the way the site does
   (`createImageBitmap` without colour-space conversion or premultiplied alpha, no flip, WebGL2 read-back).
   The browser check needs Playwright.
