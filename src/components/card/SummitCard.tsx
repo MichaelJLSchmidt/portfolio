@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, lazy, useId, useRef, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { Suspense, lazy, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { cardHref, cardLabels, type SummitCardData } from "@/content/cards";
 import { useFinePointer, useIdle } from "@/lib/idle";
 import { useReducedMotion } from "@/lib/motion-preference";
@@ -12,6 +13,7 @@ import { CardArtwork } from "./CardArtwork";
 import { CostBadge, RarityPip, SetSymbol } from "./CardMarks";
 import { useGyroStatus } from "./gyro";
 import styles from "./SummitCard.module.css";
+import type { SettleTilt } from "./TiltDriver";
 
 // Tilt springs (Motion) load after the page is idle on fine pointers, or when gyro tilt is on.
 const TiltDriver = lazy(() => import("./TiltDriver"));
@@ -56,7 +58,13 @@ export function SummitCard({
   const idle = useIdle();
   const tilt = !reduced && ((finePointer && idle) || gyro === "on");
   const nameId = useId();
+  const settleRef = useRef<SettleTilt | null>(null);
+  const router = useRouter();
   const Heading = `h${headingLevel}` as const;
+
+  // The deck stays alive (hidden) while a case study is open: when it is hidden, clear the
+  // "opening" state so the chip shows again after navigating back.
+  useEffect(() => () => setOpening(false), []);
   const foil = card.rarity === "R" || card.rarity === "M";
 
   const intent = () => prefetchTerrain(card.artwork.terrainId);
@@ -154,10 +162,17 @@ export function SummitCard({
                 href={cardHref(card)}
                 className={styles.cardLink}
                 aria-labelledby={nameId}
-                onClick={() => {
+                onClick={(e) => {
                   // Hide hover-only chrome before the view transition snapshots the card.
                   setOpening(true);
                   onOpen?.();
+                  if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                  // A tilted card springs flat first (≤120 ms), so the morph never starts tilted.
+                  const settled = settleRef.current?.();
+                  if (!settled) return;
+                  e.preventDefault();
+                  const href = cardHref(card);
+                  settled.then(() => router.push(href));
                 }}
               />
             )}
@@ -166,7 +181,7 @@ export function SummitCard({
       </div>
       {tilt && (
         <Suspense fallback={null}>
-          <TiltDriver rootRef={rootRef} stageRef={stageRef} gyro={gyro} />
+          <TiltDriver rootRef={rootRef} stageRef={stageRef} settleRef={settleRef} gyro={gyro} />
         </Suspense>
       )}
     </article>

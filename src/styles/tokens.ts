@@ -69,6 +69,8 @@ export const spring = {
   card: { stiffness: 260, damping: 24, mass: 0.9 },
   tilt: { stiffness: 150, damping: 18, mass: 0.6 },
   magnet: { stiffness: 320, damping: 28 },
+  /** Tilt springs back flat before a card's view transition snapshots it (seconds, no bounce). */
+  settle: { visualDuration: 0.12, bounce: 0 },
 } as const;
 
 export const cubicBezier = (e: EasingToken) => `cubic-bezier(${easing[e].join(",")})`;
