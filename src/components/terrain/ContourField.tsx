@@ -31,7 +31,10 @@ type TerrainSource = {
 };
 
 const regionSource = (profile: DeviceProfile): TerrainSource => {
-  const hm = meta.heightmaps.find((h) => h.use === profile.heightmap) ?? meta.heightmaps[0];
+  const hm =
+    meta.heightmaps.find((h) => h.width === profile.heightmapWidth) ??
+    meta.heightmaps.find((h) => h.use === profile.heightmap) ??
+    meta.heightmaps[0];
   return {
     file: hm.file,
     width: hm.width,
@@ -71,7 +74,9 @@ function loadHeightTexture(file: string): Promise<THREE.Texture> {
   pending = new Promise<THREE.Texture>((resolve, reject) => {
     const done = (image: ImageBitmap | HTMLImageElement) => {
       const tex = new THREE.Texture(image);
-      // Raw data, not colour: no colour-space conversion, no flipping, no mipmaps.
+      // Raw data, not colour: no colour-space conversion, no premultiplied alpha, no mipmaps,
+      // and no flip anywhere (the bitmap keeps the file's row order, flipY stays false, the
+      // shader samples top-down). `npm run verify:terrain -- --browser` checks this path.
       tex.colorSpace = THREE.NoColorSpace;
       tex.flipY = false;
       tex.premultiplyAlpha = false;

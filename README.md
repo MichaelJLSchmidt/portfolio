@@ -62,6 +62,7 @@ Never commit the token. `.env*` files are git-ignored; `.env.example` lists the 
 | `npm run check:contrast` | WCAG contrast of the token colour pairs                                            |
 | `npm run report:size`    | Initial JS/CSS/fonts per route, lazy chunks, terrain assets (gzip)               |
 | `npm run terrain`        | Regenerates `public/terrain` from swisstopo data                                  |
+| `npm run verify:terrain` | Checks that the committed heightmaps decode to the exact source heights          |
 
 To test the GitHub Pages sub-path locally:
 
@@ -119,20 +120,27 @@ It also needs the `MOTION_TOKEN` secret.
   That is ~100 MB, downloaded once into the git-ignored `scripts/terrain/.cache/`. DHM25 is not in the STAC
   catalogue; swissALTI3D would mean thousands of 1 km tiles.
 - **Outputs** (`public/terrain`, committed):
-  - `heightmap-2048.png` (26 m/px) and `heightmap-1024.png` (53 m/px): elevation packed into R (high byte) and
-    G (low byte), 1 m steps, light σ=1 blur. Decoded in the shader as
-    `h = offset + (R·65280 + G·255)·scale`. Phones and smaller desktops load the 1024 map; large and high-DPI
-    screens load the 2048 map.
+  - `heightmap-1024.webp` (53 m/px, 382 KB), `heightmap-1536.webp` (35 m/px, 710 KB) and
+    `heightmap-2048.webp` (26 m/px, 1.1 MB): elevation packed into R (high byte) and G (low byte), 1 m steps,
+    light σ=1 blur, stored as **lossless WebP** (about 40% smaller than PNG). Decoded in the shader as
+    `h = offset + (R·65280 + G·255)·scale`. Phones and small screens load the 1024 map, desktops the 1536 map.
+    The 2048 map is only used in preview builds with `?hm=2048` (also `?hm=1024` / `?hm=1536`), to compare
+    them side by side.
   - `terrain.json`: elevation range, LV95/WGS84 bbox, pixel scale, encoding, lakes and card metadata.
   - `contours.svg`: the first-paint, reduced-motion and no-WebGL poster. It has 100 m lines with every 5th as an
     index line, and the lakes are filled shapes found as flat surfaces in the DTM. About 67 KB gzipped.
   - `cards/*.svg`: the leader card's Interlaken → Jungfrau crop (200 m lines) and seeded-noise terrains for
     project cards (seed = collector number, ~20 lines, every 4th an index line).
-  - `morph/*.png`: per-card heightmaps the field morphs to on case-study pages and Basecamp.
+  - `morph/*.webp`: per-card heightmaps the field morphs to on case-study pages and Basecamp.
   - `profile.json`: the elevation profile along the leader trail (240 points, ~1 KB gzipped) for the About
     page's ascent chart.
 - `npm run terrain -- --refresh` re-downloads; `-- --placeholder` builds from procedural terrain without the
-  network.
+  network; `-- --png` also writes PNG copies (git-ignored, not used by the site).
+- **Exact heights:** every WebP is decoded again right after encoding and must match byte for byte, and its
+  SHA-256 is recorded in `terrain.json`. `npm run verify:terrain` re-checks the committed files with libwebp;
+  `npm run verify:terrain -- --browser` also decodes them in Chromium the way the site does
+  (`createImageBitmap` without colour-space conversion or premultiplied alpha, no flip, WebGL2 read-back).
+  The browser check needs Playwright.
 
 Attribution: "Terrain data © swisstopo" appears in the HUD and the footer.
 

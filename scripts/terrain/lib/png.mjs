@@ -1,9 +1,6 @@
-// Packs elevations into the R and G channels of an 8-bit RGB PNG (16 bits, no banding).
-// value = round((h - offset) / scale); R = value >> 8, G = value & 255.
-// Shader: h = offset + (R * 65280 + G * 255) * scale, with R and G sampled as 0..1.
-//
-// A tiny encoder with per-row adaptive filtering: smooth terrain compresses several
+// A tiny RGB PNG encoder with per-row adaptive filtering: smooth terrain compresses several
 // times better with Paeth/Sub filters than with the unfiltered rows most JS encoders write.
+// Heightmaps ship as lossless WebP; PNG copies are only written with `npm run terrain -- --png`.
 import { constants, crc32, deflateSync } from "node:zlib";
 
 function chunk(type, data) {
@@ -59,14 +56,4 @@ export function encodeRgbPng(rgb, width, height) {
     chunk("IDAT", deflateSync(out, { level: 9, memLevel: 9, strategy: constants.Z_FILTERED })),
     chunk("IEND", Buffer.alloc(0)),
   ]);
-}
-
-export function packHeightPng(data, width, height, { offset, scale }) {
-  const rgb = new Uint8Array(width * height * 3);
-  for (let i = 0; i < width * height; i++) {
-    const v = Math.max(0, Math.min(65535, Math.round((data[i] - offset) / scale)));
-    rgb[i * 3] = v >> 8;
-    rgb[i * 3 + 1] = v & 255;
-  }
-  return encodeRgbPng(rgb, width, height);
 }

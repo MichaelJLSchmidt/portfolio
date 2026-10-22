@@ -24,6 +24,11 @@
     {
       "name": "heightmap-2048",
       "width": 2048,
+      "use": "preview"
+    },
+    {
+      "name": "heightmap-1536",
+      "width": 1536,
       "use": "desktop"
     },
     {

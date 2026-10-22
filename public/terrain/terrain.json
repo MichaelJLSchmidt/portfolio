@@ -1,6 +1,6 @@
 {
   "attribution": "Terrain data © swisstopo",
-  "generatedAt": "2026-10-21",
+  "generatedAt": "2026-10-22",
   "source": {
     "product": "swissALTIRegio",
     "collection": "ch.swisstopo.swissaltiregio",
@@ -44,22 +44,52 @@
   },
   "heightmaps": [
     {
-      "file": "/terrain/heightmap-2048.png",
+      "file": "/terrain/heightmap-2048.webp",
+      "use": "preview",
+      "metersPerPixel": 26.3,
       "width": 2048,
       "height": 1408,
-      "metersPerPixel": 26.3,
-      "use": "desktop",
-      "bytes": 1914055,
-      "gzipBytes": 1914641
+      "sha256": "791b0ace29c559ba5b94c191b54fbef15652134f09a265839a1e68f5fecf25f6",
+      "gradientM": {
+        "p50": 11.99,
+        "p90": 26.27,
+        "p95": 32.13,
+        "p99": 46.49
+      },
+      "bytes": 1137264,
+      "gzipBytes": 1135726
     },
     {
-      "file": "/terrain/heightmap-1024.png",
+      "file": "/terrain/heightmap-1536.webp",
+      "use": "desktop",
+      "metersPerPixel": 35,
+      "width": 1536,
+      "height": 1056,
+      "sha256": "35da998060bfe8fc8e64e4d2f87afccd31450efd96e086a1d2e84daa64513e62",
+      "gradientM": {
+        "p50": 15.66,
+        "p90": 33.91,
+        "p95": 41.01,
+        "p99": 57.92
+      },
+      "bytes": 726850,
+      "gzipBytes": 727005
+    },
+    {
+      "file": "/terrain/heightmap-1024.webp",
+      "use": "mobile",
+      "metersPerPixel": 52.6,
       "width": 1024,
       "height": 704,
-      "metersPerPixel": 52.6,
-      "use": "mobile",
-      "bytes": 627944,
-      "gzipBytes": 628157
+      "sha256": "949643e8d9343d9b8da1fe835b38e950506ec326f753c345aea0701619140295",
+      "gradientM": {
+        "p50": 22.7,
+        "p90": 48.08,
+        "p95": 57.28,
+        "p99": 78.63
+      },
+      "bytes": 391356,
+      "gzipBytes": 391310
     }
   ],
   "contours": {
@@ -110,9 +140,18 @@
         "gzipBytes": 13733
       },
       "morph": {
-        "file": "/terrain/morph/ikn-000.png",
+        "file": "/terrain/morph/ikn-000.webp",
         "width": 512,
         "height": 341,
+        "sha256": "dbdbe31f8322db5e02613f8ca5800ac86b89db0027c68b7c0198d99b122bc7a6",
+        "gradientM": {
+          "p50": 31.31,
+          "p90": 63.94,
+          "p95": 76.06,
+          "p99": 104.42
+        },
+        "bytes": 108890,
+        "gzipBytes": 108943,
         "elevation": {
           "min": 557.6,
           "max": 4160.2
@@ -121,9 +160,7 @@
           "channels": "RG",
           "offset": 557.5,
           "scale": 1
-        },
-        "bytes": 171450,
-        "gzipBytes": 171523
+        }
       }
     },
     "dvb-001": {
@@ -299,9 +336,18 @@
         "gzipBytes": 4298
       },
       "morph": {
-        "file": "/terrain/morph/dvb-001.png",
+        "file": "/terrain/morph/dvb-001.webp",
         "width": 512,
         "height": 341,
+        "sha256": "415d21940546c02588e2612082aac51c4d42a68764af7e75aa1b0c544a847fb7",
+        "gradientM": {
+          "p50": 5.88,
+          "p90": 14.98,
+          "p95": 18.5,
+          "p99": 26.73
+        },
+        "bytes": 42788,
+        "gzipBytes": 42037,
         "elevation": {
           "min": 520,
           "max": 2380
@@ -310,9 +356,7 @@
           "channels": "RG",
           "offset": 520,
           "scale": 1
-        },
-        "bytes": 69089,
-        "gzipBytes": 69132
+        }
       }
     }
   }

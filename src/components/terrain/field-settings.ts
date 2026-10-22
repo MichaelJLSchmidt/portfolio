@@ -12,6 +12,8 @@ export type DeviceProfile = {
   heightmap: "desktop" | "mobile";
   /** Below this many device pixels on the long edge, the 1024 heightmap is enough. */
   heightmapMinDevicePx?: number;
+  /** Preview builds and dev only: a heightmap picked by width with ?hm=1024|1536|2048, for comparisons. */
+  heightmapWidth?: number;
   glow: boolean;
   /** Frame rate for the ambient animation (pulse, drift) while the visitor is around. */
   ambientFps: number;
@@ -39,8 +41,12 @@ export function isMobileProfile(): boolean {
 
 export function deviceProfile(cfg: FieldConfig = fieldConfig): DeviceProfile {
   const profile = { ...((isMobileProfile() ? cfg.mobile : cfg.desktop) as DeviceProfile) };
-  // The 2048 heightmap is ~3× the bytes of the 1024 one: only fetch it when the screen can show it.
+  // The 1536 heightmap is ~1.9× the bytes of the 1024 one: only fetch it when the screen can show it.
   const devicePx = Math.max(window.innerWidth, window.innerHeight) * Math.min(window.devicePixelRatio || 1, profile.dprMax);
   if (profile.heightmap === "desktop" && devicePx < (profile.heightmapMinDevicePx ?? 0)) profile.heightmap = "mobile";
+  if (process.env.NEXT_PUBLIC_PREVIEW === "1" || process.env.NODE_ENV === "development") {
+    const hm = Number(new URLSearchParams(window.location.search).get("hm"));
+    if (hm > 0) profile.heightmapWidth = hm;
+  }
   return profile;
 }

@@ -3,9 +3,10 @@
 //   npm run terrain              build from the cached download (fetches once if missing)
 //   npm run terrain -- --refresh re-download the elevation window
 //   npm run terrain -- --placeholder  skip the network and use procedural terrain
+//   npm run terrain -- --png     also write PNG copies of every heightmap (not used by the site)
 //
-// Outputs (public/terrain): heightmap-2048.png, heightmap-1024.png, contours.svg,
-// cards/*.svg, morph/*.png and terrain.json (metadata the site imports).
+// Outputs (public/terrain): heightmap-{1024,1536,2048}.webp (lossless), contours.svg,
+// cards/*.svg, morph/*.webp and terrain.json (metadata the site imports).
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -17,7 +18,8 @@ import { readWindow, resolveCogUrl } from "./lib/source.mjs";
 import { cropToBbox, fillGaps, floodFlat, gaussianBlur, minMax, resampleArea, sampleBilinear } from "./lib/grid.mjs";
 import { isobands, maskToPathData, ringsToLines, toPathData } from "./lib/contours.mjs";
 import { autoTrail, seededTerrain } from "./lib/noise.mjs";
-import { packHeightPng } from "./lib/png.mjs";
+import { encodeLosslessWebp, gradientPercentiles, packHeightRgb, rasterHash } from "./lib/heightmap.mjs";
+import { encodeRgbPng } from "./lib/png.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const cfg = JSON.parse(readFileSync(join(root, "src/content/terrain.config.json"), "utf8"));
@@ -62,6 +64,21 @@ function contourSvg(values, w, h, { thresholds, indexOf, lakesMask, tolerance, l
   }
   const lakes = lakesMask ? maskToPathData(lakesMask, w, h, { tolerance: tolerance * 1.5 }) : "";
   return svg({ w, h, regular, index, lakes, lakeOpacity });
+}
+
+/** Writes a heightmap as lossless WebP (plus a PNG copy with --png) and returns its metadata. */
+async function writeHeightmap(name, data, width, height, encoding) {
+  const rgb = packHeightRgb(data, width, height, encoding);
+  const size = write(`${name}.webp`, await encodeLosslessWebp(rgb, width, height));
+  if (args.has("--png")) write(`${name}.png`, encodeRgbPng(rgb, width, height));
+  return {
+    file: `/terrain/${name}.webp`,
+    width,
+    height,
+    sha256: rasterHash(rgb),
+    gradientM: gradientPercentiles(data, width, height),
+    ...size,
+  };
 }
 
 const range = (from, to, step) => {
@@ -115,18 +132,17 @@ const toGridPx = (lon, lat) => {
 const aspect = grid.width / grid.height;
 
 // ---------------------------------------------------------------------------
-// 2. Heightmaps (RG-packed 16-bit)
+// 2. Heightmaps (RG-packed 16-bit, lossless WebP)
 // ---------------------------------------------------------------------------
 const encoding = { channels: "RG", offset: round(Math.floor(minElev * 4) / 4), scale: cfg.quantisationM };
 const heightmaps = [];
 for (const hm of cfg.heightmaps) {
   const w = hm.width;
   const h = Math.round(w / aspect);
-  // A light blur removes sub-pixel micro-relief: smoother lines and a much smaller PNG.
+  // A light blur removes sub-pixel micro-relief: smoother lines and a much smaller file.
   const data = gaussianBlur(resampleArea(grid.data, grid.width, grid.height, w, h), w, h, cfg.heightmapBlurSigma ?? 0);
-  const file = `${hm.name}.png`;
-  const size = write(file, packHeightPng(data, w, h, encoding));
-  heightmaps.push({ file: `/terrain/${file}`, width: w, height: h, metersPerPixel: round((gMaxE - gMinE) / w, 1), use: hm.use, ...size });
+  const { file, ...rest } = await writeHeightmap(hm.name, data, w, h, encoding);
+  heightmaps.push({ file, use: hm.use, metersPerPixel: round((gMaxE - gMinE) / w, 1), ...rest });
 }
 
 // ---------------------------------------------------------------------------
@@ -217,8 +233,7 @@ for (const card of cfg.cards) {
 
   const [mMin, mMax] = minMax(morph);
   const morphEncoding = { channels: "RG", offset: round(Math.floor(mMin * 4) / 4), scale: cfg.quantisationM };
-  const morphFile = `morph/${card.id}.png`;
-  const morphSize = write(morphFile, packHeightPng(morph, morphW, morphH, morphEncoding));
+  const morphMap = await writeHeightmap(`morph/${card.id}`, morph, morphW, morphH, morphEncoding);
 
   const pins = trail
     ? [0, 0.4, 0.72, 1].map((t) => {
@@ -238,12 +253,9 @@ for (const card of cfg.cards) {
     pins,
     svgBytes: svgSize,
     morph: {
-      file: `/terrain/${morphFile}`,
-      width: morphW,
-      height: morphH,
+      ...morphMap,
       elevation: { min: round(mMin, 1), max: round(mMax, 1) },
       encoding: morphEncoding,
-      ...morphSize,
     },
   };
 }

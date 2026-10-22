@@ -28,7 +28,7 @@
   "desktop": {
     "dprMax": 2,
     "heightmap": "desktop",
-    "heightmapMinDevicePx": 1800,
+    "heightmapMinDevicePx": 1400,
     "glow": true,
     "idleFps": 10,
     "ambientFps": 30

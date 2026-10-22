@@ -12,6 +12,7 @@
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
     "terrain": "node scripts/terrain/build.mjs",
+    "verify:terrain": "node scripts/terrain/verify.mjs",
     "report:size": "node scripts/report-sizes.mjs",
     "preview": "node scripts/serve-out.mjs",
     "check:contrast": "node scripts/check-contrast.mjs"
@@ -37,6 +38,7 @@
     "eslint-config-next": "16.4.2",
     "geotiff": "3.0.5",
     "leva": "0.10.1",
+    "sharp": "0.35.5",
     "typescript": "5.9.3"
   }
 }
