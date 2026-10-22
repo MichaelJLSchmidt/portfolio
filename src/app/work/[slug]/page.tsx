@@ -3,29 +3,33 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CardArtwork } from "@/components/card/CardArtwork";
 import { SummitCard } from "@/components/card/SummitCard";
+import { SummitSummary } from "@/components/SummitSummary";
 import { MagneticLink } from "@/components/transition/MagneticLink";
 import { MorphTarget } from "@/components/transition/MorphTarget";
 import { KineticText } from "@/components/type/KineticText";
 import { morphName } from "@/lib/morph";
-import { caseStudyLabels as L, cardBySlug, cards } from "@/content/cards";
+import { caseStudyLabels as L, cardHref, caseStudyCards, cards } from "@/content/cards";
 import { site } from "@/content/site";
 import styles from "./page.module.css";
 
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return cards.map((card) => ({ slug: card.slug }));
+  return caseStudyCards.map((card) => ({ slug: card.slug }));
 }
 
+const caseStudyBySlug = (slug: string) => caseStudyCards.find((c) => c.slug === slug);
+
 export async function generateMetadata({ params }: PageProps<"/work/[slug]">): Promise<Metadata> {
-  const card = cardBySlug((await params).slug);
+  const card = caseStudyBySlug((await params).slug);
   return card ? { title: `${card.name} — Expedition log · ${site.hero.name}`, description: card.caseStudy.lede } : {};
 }
 
 export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
-  const card = cardBySlug((await params).slug);
+  const card = caseStudyBySlug((await params).slug);
   if (!card) notFound();
   const { summary } = card.caseStudy;
+  // The next card in the deck, wherever it leads (another case study or the About page).
   const next = cards[(cards.indexOf(card) + 1) % cards.length];
 
   return (
@@ -54,41 +58,21 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
         </div>
       </header>
 
-      <section className={`${styles.summary} reveal`} style={{ "--reveal-i": 3 } as React.CSSProperties} aria-labelledby="summary-heading">
-        <h2 id="summary-heading" className={`${styles.summaryHeading} hud-label`}>
-          {L.summaryHeading}
-        </h2>
-        <dl className={styles.summaryGrid}>
-          <div className={styles.wide}>
-            <dt>{L.problem}</dt>
-            <dd>{summary.problem}</dd>
-          </div>
-          <div className={styles.wide}>
-            <dt>{L.role}</dt>
-            <dd>{summary.role}</dd>
-          </div>
-          <div>
-            <dt>{L.team}</dt>
-            <dd className={styles.stat}>{summary.team}</dd>
-          </div>
-          <div>
-            <dt>{L.duration}</dt>
-            <dd className={styles.stat}>{summary.duration}</dd>
-          </div>
-          <div>
-            <dt>{L.reach}</dt>
-            <dd className={styles.stat}>{summary.reach}</dd>
-          </div>
-          <div className={styles.wide}>
-            <dt>{L.keyDecision}</dt>
-            <dd>{summary.keyDecision}</dd>
-          </div>
-          <div className={styles.wide}>
-            <dt>{L.outcome}</dt>
-            <dd>{summary.outcome}</dd>
-          </div>
-        </dl>
-      </section>
+      <SummitSummary
+        id="summary-heading"
+        heading={L.summaryHeading}
+        className="reveal"
+        style={{ "--reveal-i": 3 } as React.CSSProperties}
+        rows={[
+          { label: L.problem, value: summary.problem, wide: true },
+          { label: L.role, value: summary.role, wide: true },
+          { label: L.team, value: summary.team, stat: true },
+          { label: L.duration, value: summary.duration, stat: true },
+          { label: L.reach, value: summary.reach, stat: true },
+          { label: L.keyDecision, value: summary.keyDecision, wide: true },
+          { label: L.outcome, value: summary.outcome, wide: true },
+        ]}
+      />
 
       <div className={styles.body}>
       <nav className={styles.jump} aria-labelledby="jump-heading">
@@ -121,7 +105,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
       </aside>
 
       <nav className={styles.next} aria-label={L.next}>
-        <MagneticLink href={`/work/${next.slug}/`} className={styles.nextLink}>
+        <MagneticLink href={cardHref(next)} className={styles.nextLink}>
           <span className="hud-label">{L.next}</span>
           <span className={styles.nextRow}>
             <KineticText text={next.name} className={`${styles.nextName} display`} play="inview" proximity />

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Suspense, lazy, useId, useRef, useState, type ReactNode } from "react";
-import { cardLabels, type SummitCardData } from "@/content/cards";
+import { cardHref, cardLabels, type SummitCardData } from "@/content/cards";
 import { useFinePointer, useIdle } from "@/lib/idle";
 import { useReducedMotion } from "@/lib/motion-preference";
 import { prefetchTerrain } from "@/components/terrain/field-store";
@@ -151,7 +151,7 @@ export function SummitCard({
             <div className={styles.glare} aria-hidden="true" />
             {linkToCaseStudy && (
               <Link
-                href={`/work/${card.slug}/`}
+                href={cardHref(card)}
                 className={styles.cardLink}
                 aria-labelledby={nameId}
                 onClick={() => {
