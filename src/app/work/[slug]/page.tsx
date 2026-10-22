@@ -44,8 +44,8 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
         <MorphTarget name={morphName("art", card.slug)} variant="art" className={styles.artSlot}>
           <CardArtwork artwork={card.artwork} alt={card.artworkAlt} className={styles.art} />
         </MorphTarget>
-        <div className={styles.titleBlock}>
-          <p className={`${styles.coords} hud-label map-halo reveal`}>{card.coordinates}</p>
+        <div className={styles.titleBlock} data-quiet-zone>
+          <p className={`${styles.coords} hud-label map-halo keep-halo reveal`}>{card.coordinates}</p>
           <MorphTarget name={morphName("title", card.slug)} variant="title">
             <KineticText as="h1" text={card.name} className={`${styles.title} display`} delay={420} proximity />
           </MorphTarget>

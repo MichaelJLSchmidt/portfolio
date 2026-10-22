@@ -110,6 +110,7 @@ export function TerrainBackdrop() {
           </div>
         )}
         <div className={styles.scrim} />
+        <div className={styles.vignette} />
       </div>
       {introPlaying && showField && (
         <button

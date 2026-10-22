@@ -166,6 +166,15 @@ i,
     0 0 14px var(--color-ground);
 }
 
+/* Inside a quiet zone ([data-quiet-zone]) the running field fades its lines to ~25%, so
+   sheet and glacier text needs no halo there (checked by npm run check:contrast).
+   Contour-coloured labels (.keep-halo) keep theirs: even faded lines would take them
+   below AA. The poster (reduced motion, no WebGL) has no quiet zones, so halos stay. */
+:root:has([data-field="on"]) [data-quiet-zone].map-halo:not(.keep-halo),
+:root:has([data-field="on"]) [data-quiet-zone] .map-halo:not(.keep-halo) {
+  text-shadow: none;
+}
+
 /* ------------------------------------------------------------------------------------
    View transitions (React <ViewTransition> on route changes)
 

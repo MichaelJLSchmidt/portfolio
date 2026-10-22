@@ -21,6 +21,8 @@ export type KineticTextProps = {
   delay?: number;
   /** Letters near a fine pointer open up (wider and lighter), like a loupe over the map. */
   proximity?: boolean;
+  /** Marks the heading as a quiet zone: the contour field fades its lines behind it. */
+  quiet?: boolean;
   style?: CSSProperties;
 };
 
@@ -37,6 +39,7 @@ export function KineticText({
   play = "mount",
   delay = 0,
   proximity = false,
+  quiet = false,
   style,
 }: KineticTextProps) {
   const ref = useRef<HTMLElement>(null);
@@ -131,6 +134,7 @@ export function KineticText({
       className={className ? `${styles.kinetic} ${className}` : styles.kinetic}
       aria-label={text}
       data-play={inView ? "true" : "false"}
+      data-quiet-zone={quiet ? "" : undefined}
       style={{ ...style, "--kt-delay": `${delay}ms` } as CSSProperties}
     >
       <span className={styles.letters} aria-hidden="true">

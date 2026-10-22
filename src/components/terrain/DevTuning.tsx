@@ -42,6 +42,9 @@ export default function DevTuning() {
     pulseStrength: { value: fieldConfig.pulseStrength, min: 0, max: 1, step: 0.05 },
     pulseColor: { value: fieldConfig.pulseColor, options: colorTokens },
     rippleSpeedPxS: { value: fieldConfig.rippleSpeedPxS, min: 200, max: 2000, step: 50 },
+    // Quiet zones behind text: line strength inside, feather outside (CSS px).
+    quietStrength: { value: fieldConfig.quietStrength, min: 0, max: 1, step: 0.05 },
+    quietFeatherPx: { value: fieldConfig.quietFeatherPx, min: 0, max: 160, step: 4 },
     zoomBase: { value: fieldConfig.zoomBase, min: 1, max: 1.3, step: 0.01 },
     morphZoom: { value: fieldConfig.morphZoom, min: 0, max: 0.5, step: 0.01 },
     intro: { value: fieldConfig.intro, options: durationTokens },

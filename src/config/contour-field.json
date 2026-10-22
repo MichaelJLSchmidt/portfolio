@@ -22,6 +22,8 @@
   "pulseStrength": 0.55,
   "pulseColor": "alpenglow",
   "rippleSpeedPxS": 900,
+  "quietStrength": 0.25,
+  "quietFeatherPx": 48,
   "zoomBase": 1.06,
   "morphZoom": 0.14,
   "intro": "cinematic",

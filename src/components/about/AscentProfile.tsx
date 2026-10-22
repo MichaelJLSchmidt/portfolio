@@ -136,7 +136,7 @@ export function AscentProfile({
 
   return (
     <section ref={rootRef} className={styles.ascent} aria-labelledby="ascent-heading" style={{ "--p": 1 } as CSSProperties}>
-      <header className={styles.header}>
+      <header className={styles.header} data-quiet-zone>
         <KineticText as="h2" id="ascent-heading" text={labels.heading} className={`${styles.heading} display`} play="inview" />
         <p className={`${styles.intro} map-halo`}>{labels.intro}</p>
       </header>

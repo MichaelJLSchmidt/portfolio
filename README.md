@@ -9,7 +9,9 @@ This repository currently holds the foundation plus three technical spikes for t
    - a pointer "headlamp" and loupe;
    - a rising alpenglow pulse;
    - parallax and click pings;
-   - an intro sweep and terrain morphs.
+   - an intro sweep and terrain morphs;
+   - quiet zones: elements marked `data-quiet-zone` (hero text, page headers, Basecamp headings) fade the lines
+     behind them to 25% with a 48 px feather, so that text needs no halo or scrim while the field runs.
 2. **Summit Card**: spring tilt and contour foil. Fully data-driven and accessible; the whole card links to its
    case study.
 3. **Card → case study transition**: a choreographed view-transition morph from the deck into `/work/[slug]`
@@ -183,4 +185,6 @@ When it's time:
   - headlines don't animate;
   - the deck doesn't deal in;
   - the route morph becomes a 150 ms crossfade.
-- WCAG AA contrast is checked by `npm run check:contrast`.
+- WCAG AA contrast is checked by `npm run check:contrast`, including sheet and glacier text over the faded
+  lines of a quiet zone. Contour-coloured labels keep their halo (`.keep-halo`), and the poster fallback keeps
+  all halos and its vignette.

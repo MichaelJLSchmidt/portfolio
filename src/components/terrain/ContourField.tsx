@@ -6,10 +6,11 @@ import * as THREE from "three";
 import meta from "@terrain/terrain.json";
 import { asset } from "@/lib/asset";
 import { color, easing } from "@/styles/tokens";
-import { coverTransform, createContourMaterial } from "./contour-material";
+import { MAX_QUIET_ZONES, coverTransform, createContourMaterial } from "./contour-material";
 import { INTRO_STORAGE_KEY, cancelPendingIntro } from "@/lib/motion-preference";
 import { colorOf, contourInterval, hexToRgb, msOf, type DeviceProfile, type FieldConfig } from "./field-settings";
 import { fieldStore } from "./field-store";
+import { watchQuietZones, type QuietRect } from "./quiet-zones";
 
 /**
  * The persistent contour field. Mounted once from the root layout (lazy chunk with
@@ -142,6 +143,8 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
   // Async callbacks (texture loads, morphs) must use the current size, not the first render's.
   const sizeRef = useRef(size);
   sizeRef.current = size;
+  const dprRef = useRef(dpr);
+  dprRef.current = dpr;
 
   const anim = useRef({
     sweep: null as Tween | null,
@@ -192,6 +195,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       u.uDrift.value = cfg.driftCyclesPerSecond;
       u.uPulse.value.set(cfg.pulsePeriodS, cfg.pulseStrength);
       u.uPulseColor.value.set(...hexToRgb(colorOf(cfg.pulseColor)));
+      u.uQuietParams.value.set(cfg.quietFeatherPx * dprRef.current, cfg.quietStrength);
       updateIntervals(true);
       invalidate();
     };
@@ -218,6 +222,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     u.uGlowWidth.value = cfg.glowWidthPx * dpr;
     u.uLens.value.set(cfg.lensRadiusPx * dpr, cfg.lensStrength);
     u.uRippleSpeed.value = cfg.rippleSpeedPxS * dpr;
+    u.uQuietParams.value.set(cfg.quietFeatherPx * dpr, cfg.quietStrength);
     u.uResolution.value.set(size.width * dpr, size.height * dpr);
     const a = anim.current;
     if (a.region) coverTransform(u.uUvA.value, size.width, size.height, a.region.width, a.region.height, a.region.posX, a.region.posY);
@@ -226,6 +231,24 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     invalidate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [material, dpr, size.width, size.height, invalidate]);
+
+  // --- quiet zones behind text -------------------------------------------------------
+  useEffect(() => {
+    const u = material.uniforms;
+    const write = (rects: readonly QuietRect[]) => {
+      // Viewport CSS px → device px with the origin at the bottom-left, like gl_FragCoord.
+      const h = sizeRef.current.height;
+      const n = Math.min(rects.length, MAX_QUIET_ZONES);
+      for (let i = 0; i < n; i++) {
+        const r = rects[i];
+        (u.uQuiet.value as THREE.Vector4[])[i].set(r.left * dpr, (h - r.bottom) * dpr, r.right * dpr, (h - r.top) * dpr);
+      }
+      u.uQuietCount.value = n;
+      wake();
+    };
+    return watchQuietZones(write);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [material, dpr]);
 
   // --- contour interval from the on-screen scale -----------------------------------
   function updateIntervals(animate: boolean) {

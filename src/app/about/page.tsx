@@ -43,14 +43,14 @@ export default function About() {
         <MorphTarget name={morphName("art", leader.slug)} variant="art" className={styles.artSlot}>
           <CardArtwork artwork={leader.artwork} alt={leader.artworkAlt} className={styles.art} />
         </MorphTarget>
-        <div className={styles.intro}>
+        <div className={styles.intro} data-quiet-zone>
           <p className={`${styles.eyebrow} hud-label map-halo reveal`}>{about.header.eyebrow}</p>
           <MorphTarget name={morphName("title", leader.slug)} variant="title">
             <KineticText as="h1" text={about.header.name} className={`${styles.name} display`} delay={420} proximity />
           </MorphTarget>
           <p className={`${styles.role} map-halo reveal`} style={reveal(1)}>
             {about.header.role}
-            <span className={`${styles.place} hud-label`}>{about.header.place}</span>
+            <span className={`${styles.place} hud-label map-halo keep-halo`}>{about.header.place}</span>
           </p>
           <p className={`${styles.statement} map-halo reveal`} style={reveal(2)}>
             {about.header.statement}
@@ -70,7 +70,7 @@ export default function About() {
       <AscentProfile labels={about.ascent} milestones={about.ascent.milestones} stops={stops} />
 
       <section className={styles.section} aria-labelledby="rope-team-heading">
-        <div className={styles.sectionHead}>
+        <div className={styles.sectionHead} data-quiet-zone>
           <KineticText as="h2" id="rope-team-heading" text={about.principles.heading} className={`${styles.sectionHeading} display`} play="inview" />
           <p className="map-halo">{about.principles.intro}</p>
         </div>
@@ -87,7 +87,7 @@ export default function About() {
       </section>
 
       <section className={styles.section} aria-labelledby="craft-heading">
-        <div className={styles.sectionHead}>
+        <div className={styles.sectionHead} data-quiet-zone>
           <KineticText as="h2" id="craft-heading" text={about.craft.heading} className={`${styles.sectionHeading} display`} play="inview" />
           <p className="map-halo">{about.craft.intro}</p>
         </div>
@@ -111,14 +111,14 @@ export default function About() {
       </section>
 
       <section className={`${styles.section} ${styles.offTrail}`} aria-labelledby="off-trail-heading">
-        <KineticText as="h2" id="off-trail-heading" text={about.offTrail.heading} className={`${styles.sectionHeading} display`} play="inview" />
+        <KineticText as="h2" id="off-trail-heading" text={about.offTrail.heading} className={`${styles.sectionHeading} display`} play="inview" quiet />
         <div className={styles.offTrailBody}>
           <p className="map-halo">{about.offTrail.body}</p>
           <p className={`${styles.flavor} italic map-halo`}>{about.offTrail.flavor}</p>
         </div>
       </section>
 
-      <section className={styles.contact} aria-labelledby="contact-heading">
+      <section className={styles.contact} aria-labelledby="contact-heading" data-quiet-zone>
         <KineticText as="h2" id="contact-heading" text={about.contact.heading} className={`${styles.contactHeading} display`} play="inview" proximity />
         <p className="map-halo">{about.contact.body}</p>
         <Actions actions={about.actions} />

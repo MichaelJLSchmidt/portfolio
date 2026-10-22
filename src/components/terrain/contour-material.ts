@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 /**
- * Full-screen contour shader. Heights come from RG-packed 16-bit PNGs; lines are drawn
+ * Full-screen contour shader. Heights come from RG-packed 16-bit WebPs; lines are drawn
  * at constant pixel width with fwidth(), so they stay crisp at any zoom or DPR.
  */
 const vertexShader = /* glsl */ `
@@ -58,6 +58,11 @@ uniform vec2 uPulse;       // rising alpenglow band: period (s), strength
 uniform vec3 uPulseColor;
 uniform vec3 uRipple;      // click ping: x, y (device px), age (s); age < 0 = none
 uniform float uRippleSpeed; // device px per second
+
+#define MAX_QUIET 8
+uniform vec4 uQuiet[MAX_QUIET]; // quiet zones behind text: left, bottom, right, top (device px)
+uniform int uQuietCount;
+uniform vec2 uQuietParams;      // feather (device px), line strength inside a zone (0..1)
 
 float decodeHeight(sampler2D tex, vec2 uv, vec2 enc) {
   vec2 rg = texture(tex, uv).rg;
@@ -122,9 +127,19 @@ void main() {
     ripple = exp(-abs(rr - radius) / (0.06 * uRippleSpeed)) * (1.0 - smoothstep(0.2, 1.6, uRipple.z));
   }
 
+  // Quiet zones: lines fade to uQuietParams.y inside the rectangles, feathered outwards.
+  float quiet = 0.0;
+  for (int i = 0; i < MAX_QUIET; i++) {
+    if (i >= uQuietCount) break;
+    vec4 r = uQuiet[i];
+    vec2 outside = max(max(r.xy - gl_FragCoord.xy, gl_FragCoord.xy - r.zw), 0.0);
+    quiet = max(quiet, 1.0 - smoothstep(0.0, uQuietParams.x, length(outside)));
+  }
+  float keep = mix(1.0, uQuietParams.y, quiet);
+
   float light = max(max(lit, front), ripple);
-  float aReg = reg * mix(uLineOpacity, 1.0, max(light, pulse));
-  float aInd = ind * mix(uIndexOpacity, 1.0, max(light, pulse));
+  float aReg = reg * mix(uLineOpacity, 1.0, max(light, pulse)) * keep;
+  float aInd = ind * mix(uIndexOpacity, 1.0, max(light, pulse)) * keep;
   vec3 cReg = mix(mix(uLineColor, uPulseColor, pulse), uGlowColor, light);
   vec3 cInd = mix(mix(uIndexColor, uPulseColor, pulse), uGlowColor, light);
 
@@ -134,12 +149,15 @@ void main() {
 
   // Soft halo around lit lines (desktop only).
   float halo = max(lineMask(dReg, uGlowWidth) * crowdReg, lineMask(dIdx, uGlowWidth * 1.3) * crowdIdx);
-  col += uGlowColor * halo * max(lit, ripple) * uGlow * 0.18 * revealed;
-  col += uPulseColor * halo * pulse * uGlow * 0.08 * revealed;
+  col += uGlowColor * halo * max(lit, ripple) * uGlow * 0.18 * revealed * keep;
+  col += uPulseColor * halo * pulse * uGlow * 0.08 * revealed * keep;
 
   fragColor = vec4(col, 1.0);
 }
 `;
+
+/** Must match MAX_QUIET in the fragment shader. */
+export const MAX_QUIET_ZONES = 8;
 
 export type ContourUniforms = {
   [K in
@@ -177,7 +195,10 @@ export type ContourUniforms = {
     | "uPulse"
     | "uPulseColor"
     | "uRipple"
-    | "uRippleSpeed"]: THREE.IUniform;
+    | "uRippleSpeed"
+    | "uQuiet"
+    | "uQuietCount"
+    | "uQuietParams"]: THREE.IUniform;
 };
 
 export function createContourMaterial(): THREE.ShaderMaterial & { uniforms: ContourUniforms } {
@@ -217,6 +238,9 @@ export function createContourMaterial(): THREE.ShaderMaterial & { uniforms: Cont
     uPulseColor: { value: new THREE.Vector3() },
     uRipple: { value: new THREE.Vector3(0, 0, -1) },
     uRippleSpeed: { value: 900 },
+    uQuiet: { value: Array.from({ length: MAX_QUIET_ZONES }, () => new THREE.Vector4()) },
+    uQuietCount: { value: 0 },
+    uQuietParams: { value: new THREE.Vector2(48, 0.25) },
   };
   return new THREE.ShaderMaterial({
     glslVersion: THREE.GLSL3,
