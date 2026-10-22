@@ -15,8 +15,9 @@ This repository currently holds the foundation plus three technical spikes for t
 3. **Card → case study transition**: a choreographed view-transition morph from the deck into `/work/[slug]`
    and back, synchronised with the field. Durations and their reasoning are in `src/app/globals.css`.
 
-Headlines use kinetic variable-font type (`src/components/type/KineticText.tsx`). The About page is planned in
-`docs/about-plan.md`.
+Headlines use kinetic variable-font type (`src/components/type/KineticText.tsx`). The About page ("Basecamp",
+`/about/`) opens from the leader card and tells the career as the real climb from Interlaken to the Jungfrau; its
+plan and the content still needed are in `docs/about-plan.md`.
 
 ## Stack
 
@@ -127,7 +128,9 @@ It also needs the `MOTION_TOKEN` secret.
     index line, and the lakes are filled shapes found as flat surfaces in the DTM. About 67 KB gzipped.
   - `cards/*.svg`: the leader card's Interlaken → Jungfrau crop (200 m lines) and seeded-noise terrains for
     project cards (seed = collector number, ~20 lines, every 4th an index line).
-  - `morph/*.png`: per-card heightmaps the field morphs to on case-study pages.
+  - `morph/*.png`: per-card heightmaps the field morphs to on case-study pages and Basecamp.
+  - `profile.json`: the elevation profile along the leader trail (240 points, ~1 KB gzipped) for the About
+    page's ascent chart.
 - `npm run terrain -- --refresh` re-downloads; `-- --placeholder` builds from procedural terrain without the
   network.
 

@@ -1,5 +1,8 @@
 # About page plan: "Basecamp"
 
+**Status: built** (`src/app/about`, `src/components/about`). The placeholders listed under "Content still needed"
+are marked `[LIKE THIS]` in `src/content/about.ts`; actions without a URL render as visible, inert placeholders.
+
 The About page continues the night hike. If case studies are expeditions, About is the **basecamp**: where you
 learn who leads the rope team, what they carry and how they climb. It uses the same map, tokens, type and
 motion rules as the rest of the site, and the facts a hiring manager needs come first.
@@ -92,8 +95,10 @@ DESKTOP (≥ 1000 px)                                   PHONE
 | Principles, plaques | Kinetic headings in view, staggered reveals (`--dur-long`)           | Static                                     |
 | Background         | Headlamp, loupe, alpenglow pulse continue                             | Poster                                     |
 
-Scroll-driven parts use CSS `animation-timeline: view()` / `scroll()` where supported, with an
-IntersectionObserver fallback. Durations and easings come from `tokens.ts` only.
+The ascent is driven by a passive scroll listener rather than `animation-timeline`: the climb has to land on
+each milestone's position on the trail, which depends on where its plaque sits, so a small rAF loop measures the
+plaques and eases towards the target (it jumps with reduced motion). Kinetic headings use an
+IntersectionObserver. Durations and easings come from `tokens.ts` only.
 
 ## Content still needed
 
@@ -107,8 +112,9 @@ IntersectionObserver fallback. Durations and easings come from `tokens.ts` only.
 ## Technical notes
 
 - **Content:** `src/content/about.ts` (typed; no copy in components).
-- **Terrain pipeline:** a `profile` step samples the DEM along the leader trail and writes
-  `public/terrain/profile.json` (~200 points, under 5 KB) plus a pre-built SVG path.
+- **Terrain pipeline:** a `profile` step samples the DEM every 25 m along the leader trail and writes
+  `public/terrain/profile.json` (240 points, ~1 KB gzipped). The page imports it at build time, so the chart is
+  part of the static HTML.
 - **Leader card:** gets an optional `href` override (`/about/`); `/work/profile/` is no longer generated.
 - **CV:** stored in `public/` and linked through `asset()` (a plain `<a href>` does not get the base path).
 - **Performance:** no new dependencies; about +3 KB of initial JS. The profile SVG is inline (a few KB).

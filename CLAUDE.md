@@ -15,9 +15,9 @@ Installing needs `MOTION_TOKEN` in the environment (see README). Never write the
 
 ## Structure
 
-- `src/app` — routes (`/`, `/work/[slug]`), root layout, global CSS
-- `src/components` — `terrain/` (contour field), `card/` (Summit Card, deck), `transition/`, `hud/`
-- `src/content` — all copy and card data (`cards.ts`, `site.ts`); components never hardcode copy
+- `src/app` — routes (`/`, `/work/[slug]`, `/about`), root layout, global CSS
+- `src/components` — `terrain/` (contour field), `card/` (Summit Card, deck), `transition/`, `hud/`, `about/`
+- `src/content` — all copy and card data (`cards.ts`, `site.ts`, `about.ts`); components never hardcode copy
 - `src/styles/tokens.ts` — design tokens
 - `src/config` — committed tuning values written by the dev panel
 - `scripts/` — Node scripts only (must run on Windows, macOS and Linux)
