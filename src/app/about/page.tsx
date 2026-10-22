@@ -46,7 +46,7 @@ export default function About() {
         <div className={styles.intro} data-quiet-zone>
           <p className={`${styles.eyebrow} hud-label map-halo reveal`}>{about.header.eyebrow}</p>
           <MorphTarget name={morphName("title", leader.slug)} variant="title">
-            <KineticText as="h1" text={about.header.name} className={`${styles.name} display`} delay={420} proximity />
+            <KineticText as="h1" text={about.header.name} className={`${styles.name} display`} delay={420} proximity settleOnArrival />
           </MorphTarget>
           <p className={`${styles.role} map-halo reveal`} style={reveal(1)}>
             {about.header.role}

@@ -233,8 +233,16 @@ i,
   animation-timing-function: var(--ease-drop);
 }
 
-/* Title: hand over to the large, crisp headline early, so the flight never shows a
-   blurry upscaled snapshot; the letters then condense into place (KineticText). */
+/* Title: the box travels, the text does not scale. Both snapshots keep their own size,
+   anchored top-left in the moving box, and cross-fade early, so the text stays sharp in
+   flight; the heading then settles on its axes once it has landed (KineticText). */
+::view-transition-old(.morph-title),
+::view-transition-new(.morph-title) {
+  inline-size: auto;
+  block-size: auto;
+  object-fit: none;
+}
+
 ::view-transition-old(.morph-title) {
   animation: vt-title-old var(--dur-scenic) linear both;
 }

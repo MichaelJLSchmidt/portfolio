@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { useFinePointer } from "@/lib/idle";
 import { useReducedMotion } from "@/lib/motion-preference";
+import { activeViewTransition } from "@/lib/view-transition";
 import styles from "./KineticText.module.css";
 
 type Tag = "h1" | "h2" | "h3" | "p" | "span";
@@ -23,6 +24,12 @@ export type KineticTextProps = {
   proximity?: boolean;
   /** Marks the heading as a quiet zone: the contour field fades its lines behind it. */
   quiet?: boolean;
+  /**
+   * For a heading that morphs in from a card: when it mounts inside a page transition, it
+   * skips its entrance, flies just off its rest axes and settles on them (~360 ms) once
+   * the transition has landed. Direct loads keep the entrance.
+   */
+  settleOnArrival?: boolean;
   style?: CSSProperties;
 };
 
@@ -40,6 +47,7 @@ export function KineticText({
   delay = 0,
   proximity = false,
   quiet = false,
+  settleOnArrival = false,
   style,
 }: KineticTextProps) {
   const ref = useRef<HTMLElement>(null);
@@ -64,6 +72,29 @@ export function KineticText({
     io.observe(el);
     return () => io.disconnect();
   }, [play, inView]);
+
+  // Arrival through a page transition. Layout effects run inside the transition's update,
+  // before the new state is captured, so the entrance never shows in the morph.
+  useLayoutEffect(() => {
+    const el = ref.current;
+    const transition = activeViewTransition();
+    if (!el || !settleOnArrival || !transition) return;
+    if (document.documentElement.getAttribute("data-motion") === "reduced") return;
+    let live = true;
+    el.setAttribute("data-arrive", "hold");
+    transition.finished.then(() => {
+      if (live) el.setAttribute("data-arrive", "settle");
+    });
+    const onEnd = (e: AnimationEvent) => {
+      if (e.animationName.includes("kt-settle")) el.setAttribute("data-arrive", "done");
+    };
+    el.addEventListener("animationend", onEnd);
+    return () => {
+      live = false;
+      el.removeEventListener("animationend", onEnd);
+      if (el.getAttribute("data-arrive") !== "done") el.setAttribute("data-arrive", "done");
+    };
+  }, [settleOnArrival]);
 
   // Pointer proximity: write a 0..1 "--p" per glyph, eased towards its target each frame.
   useEffect(() => {

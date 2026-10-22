@@ -47,7 +47,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
         <div className={styles.titleBlock} data-quiet-zone>
           <p className={`${styles.coords} hud-label map-halo keep-halo reveal`}>{card.coordinates}</p>
           <MorphTarget name={morphName("title", card.slug)} variant="title">
-            <KineticText as="h1" text={card.name} className={`${styles.title} display`} delay={420} proximity />
+            <KineticText as="h1" text={card.name} className={`${styles.title} display`} delay={420} proximity settleOnArrival />
           </MorphTarget>
           <p className={`${styles.type} map-halo reveal`} style={{ "--reveal-i": 1 } as React.CSSProperties}>
             {card.type}
