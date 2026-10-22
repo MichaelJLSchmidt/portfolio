@@ -4,12 +4,14 @@ import { useEffect, useRef, type CSSProperties } from "react";
 import profile from "@terrain/profile.json";
 import type { Milestone } from "@/content/about";
 import { KineticText } from "@/components/type/KineticText";
+import { useReducedMotion } from "@/lib/motion-preference";
 import styles from "./AscentProfile.module.css";
 
 /**
  * The career as the real climb from Interlaken to the Jungfrau. The chart (sticky) is the
  * terrain sampled along the leader card's trail; milestone plaques scroll beneath it, and
- * the climbed part of the line, a climber marker and an altitude readout follow the scroll.
+ * the climbed part of the line, a climber marker and an altitude readout follow the scroll
+ * directly (painted in the scroll handler, no easing, so they never trail the finger).
  * The ordered list is the content; the chart is decorative. Without JS or with reduced
  * motion the whole line is drawn and every milestone is shown.
  */
@@ -63,18 +65,16 @@ export function AscentProfile({
   const stepsRef = useRef<HTMLOListElement>(null);
   const altRef = useRef<HTMLSpanElement>(null);
   const kmRef = useRef<HTMLSpanElement>(null);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
     const root = rootRef.current;
     const list = stepsRef.current;
-    if (!root || !list) return;
+    // Reduced motion keeps the static state from the server: full line, every milestone.
+    // (The hook reports reduced during hydration; the resolved attribute decides.)
+    if (!root || !list || reduced || document.documentElement.getAttribute("data-motion") === "reduced") return;
     const steps = [...list.querySelectorAll<HTMLLIElement>(":scope > li")];
-    const reduced = () => document.documentElement.getAttribute("data-motion") === "reduced";
-    let shown = 0;
-    let target = 0;
-    let raf = 0;
-
-    const measure = () => {
+    const progress = () => {
       // Focus line: halfway down the space left below the pinned chart.
       const below = stickyRef.current?.getBoundingClientRect().bottom ?? 0;
       const top = Math.min(Math.max(below, 0), window.innerHeight * 0.6);
@@ -96,7 +96,7 @@ export function AscentProfile({
           p = milestones[i].at + Math.min(Math.max(t, 0), 1) * (milestones[i + 1].at - milestones[i].at);
         }
       }
-      target = p;
+      return p;
     };
 
     const paint = (p: number) => {
@@ -108,31 +108,21 @@ export function AscentProfile({
       steps.forEach((s, i) => s.toggleAttribute("data-reached", milestones[i].at <= p + 0.004));
     };
 
-    const frame = () => {
-      raf = 0;
-      shown = reduced() ? target : shown + (target - shown) * 0.14;
-      if (Math.abs(target - shown) < 0.0005) shown = target;
-      paint(shown);
-      if (shown !== target) raf = requestAnimationFrame(frame);
-    };
-    const onScroll = () => {
-      measure();
-      if (!raf) raf = requestAnimationFrame(frame);
-    };
+    // Scroll events arrive once per frame before rendering: painting here is scroll-linked.
+    const onScroll = () => paint(progress());
 
     root.setAttribute("data-live", "true");
-    measure();
-    shown = reduced() ? target : 0;
-    paint(shown);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
     return () => {
-      cancelAnimationFrame(raf);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      // Back to the static state (e.g. Calm map switched on).
+      root.removeAttribute("data-live");
+      paint(1);
     };
-  }, [milestones]);
+  }, [milestones, reduced]);
 
   return (
     <section ref={rootRef} className={styles.ascent} aria-labelledby="ascent-heading" style={{ "--p": 1 } as CSSProperties}>

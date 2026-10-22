@@ -27,9 +27,20 @@
   position: sticky;
   top: 0;
   z-index: 2;
-  padding-block: 88px 44px;
-  /* Opaque under the HUD and behind the chart, so plaques disappear beneath it. */
-  background: linear-gradient(to bottom, var(--color-ground) 80%, transparent);
+  padding-block: 88px 36px;
+  /* Opaque under the HUD and behind the chart, so plaques disappear beneath it... */
+  background: var(--color-ground);
+}
+
+/* ...through a short fade below the panel. */
+.sticky::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  inset-inline: 0;
+  height: 28px;
+  background: linear-gradient(to bottom, var(--color-ground), transparent);
+  pointer-events: none;
 }
 
 .chart {
@@ -241,13 +252,45 @@
   }
 }
 
+/* Phones: the pinned panel (HUD clearance + readout + chart) takes at most ~38% of the
+   visible height, so the plaques keep most of the screen. */
 @media (max-width: 700px) {
+  .sticky {
+    padding-block: 106px 22px;
+  }
+
   .chart {
-    height: clamp(170px, 28vh, 240px);
+    height: clamp(92px, calc(38svh - 128px), 240px);
+  }
+
+  /* Clear of the summit label on narrow charts. */
+  .ascent[data-live] .readout {
+    bottom: calc(100% + 16px);
   }
 
   .step {
-    min-height: 44vh;
+    min-height: 44svh;
+  }
+}
+
+/* Short landscape phones: no room to pin. The chart sits inline above the plaques. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .sticky {
+    position: relative;
+    padding-block: 40px 22px;
+    background: none;
+  }
+
+  .sticky::after {
+    content: none;
+  }
+
+  .chart {
+    height: clamp(140px, 52svh, 220px);
+  }
+
+  .step {
+    min-height: 60svh;
   }
 }
 
