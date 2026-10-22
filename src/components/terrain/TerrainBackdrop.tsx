@@ -9,7 +9,7 @@ import { site } from "@/content/site";
 import { asset } from "@/lib/asset";
 import { whenIdle } from "@/lib/idle";
 import { cancelPendingIntro, useReducedMotion } from "@/lib/motion-preference";
-import { deviceProfile, type DeviceProfile } from "./field-settings";
+import { deviceProfile, fieldConfig, posterMedia, type DeviceProfile } from "./field-settings";
 import { fieldStore, useFieldStore } from "./field-store";
 import styles from "./TerrainBackdrop.module.css";
 
@@ -39,6 +39,11 @@ function canRunField(): boolean {
   }
 }
 
+
+// Posters at 100 m and 200 m, chosen by the same spacing rule as the field (see posterMedia).
+const finePoster = meta.posters.find((p) => p.intervalM === 100) ?? meta.poster;
+const coarsePoster = meta.posters.find((p) => p.intervalM === 200) ?? meta.poster;
+const finePosterMedia = posterMedia(meta.heightmaps, finePoster.intervalM, fieldConfig);
 
 /**
  * Fixed backdrop behind all content. First paint is the static contour poster (also the
@@ -83,16 +88,18 @@ export function TerrainBackdrop() {
   return (
     <>
       <div className={styles.backdrop} data-field={showField ? "on" : "off"} aria-hidden="true">
-        {/* eslint-disable-next-line @next/next/no-img-element -- static SVG poster, no optimisation needed */}
-        <img
-          className={styles.poster}
-          src={asset(meta.poster.file)}
-          alt=""
-          width={meta.poster.width}
-          height={meta.poster.height}
-          decoding="async"
-          style={{ objectPosition: `${focus.u * 100}% ${focus.v * 100}%` }}
-        />
+        <picture>
+          <source media={finePosterMedia} srcSet={asset(finePoster.file)} />
+          <img
+            className={styles.poster}
+            src={asset(coarsePoster.file)}
+            alt=""
+            width={coarsePoster.width}
+            height={coarsePoster.height}
+            decoding="async"
+            style={{ objectPosition: `${focus.u * 100}% ${focus.v * 100}%` }}
+          />
+        </picture>
         {field && (
           <div className={styles.canvas}>
             <field.Component

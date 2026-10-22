@@ -23,6 +23,30 @@ export type DeviceProfile = {
 
 export const fieldConfig: FieldConfig = config;
 
+/** Contour intervals the field may use (metres). The index line is every `indexEvery`-th. */
+export const CONTOUR_INTERVALS = [50, 100, 200, 250, 500] as const;
+
+/**
+ * Contour interval for a heightmap as it is drawn on screen. On-screen scale is texels per
+ * CSS pixel (cover-fitted, zoomed); steepness is the map's gradient at the configured
+ * percentile (metres per texel). The interval is the smallest clean value that keeps lines
+ * on that slope at least `minSpacingPx` apart.
+ */
+export function contourInterval(
+  map: { width: number; height: number; gradientM: Record<string, number> },
+  view: { width: number; height: number },
+  zoom: number,
+  cfg: Pick<FieldConfig, "minSpacingPx" | "steepPercentile">,
+): number {
+  const va = view.width / view.height;
+  const ta = map.width / map.height;
+  const visibleTexels = map.width * (va > ta ? 1 : va / ta);
+  const texelsPerPx = visibleTexels / (zoom * Math.max(view.width, 1));
+  const slope = map.gradientM[`p${cfg.steepPercentile}`] ?? map.gradientM.p95;
+  const needed = cfg.minSpacingPx * slope * texelsPerPx;
+  return CONTOUR_INTERVALS.find((i) => i >= needed) ?? CONTOUR_INTERVALS[CONTOUR_INTERVALS.length - 1];
+}
+
 export const colorOf = (token: string): string => color[token as ColorToken] ?? token;
 export const msOf = (token: string): number => duration[token as DurationToken] ?? Number(token);
 
@@ -30,6 +54,27 @@ export const msOf = (token: string): number => duration[token as DurationToken] 
 export function hexToRgb(hex: string): [number, number, number] {
   const n = parseInt(hex.replace("#", ""), 16);
   return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+}
+
+/**
+ * Media query for the poster drawn at `intervalM`: true where `contourInterval` would pick
+ * that interval (or finer) for the region map, so first paint and the fallback match the
+ * field. Landscape screens see the full map width (desktop map), portrait screens its
+ * full height (phone map). Pure arithmetic, so it renders the same on the server.
+ */
+export function posterMedia(
+  maps: { width: number; height: number; gradientM: Record<string, number>; use: string }[],
+  intervalM: number,
+  cfg: Pick<FieldConfig, "minSpacingPx" | "steepPercentile" | "zoomBase">,
+): string {
+  const slope = (m: (typeof maps)[number]) => m.gradientM[`p${cfg.steepPercentile}`] ?? m.gradientM.p95;
+  const desktop = maps.find((m) => m.use === "desktop") ?? maps[0];
+  const mobile = maps.find((m) => m.use === "mobile") ?? maps[0];
+  const k = cfg.minSpacingPx / (cfg.zoomBase * intervalM);
+  const minWidth = Math.ceil(k * slope(desktop) * desktop.width);
+  const minHeight = Math.ceil(k * slope(mobile) * mobile.height);
+  const ratio = `${desktop.width}/${desktop.height}`;
+  return `(min-aspect-ratio: ${ratio}) and (min-width: ${minWidth}px), (max-aspect-ratio: ${ratio}) and (min-height: ${minHeight}px)`;
 }
 
 export function isMobileProfile(): boolean {

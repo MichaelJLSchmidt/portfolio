@@ -83,8 +83,15 @@ automatically. Every other runtime URL (heightmaps, terrain SVGs, textures, fetc
 
 ### Tuning the contour field
 
-In `npm run dev`, a collapsed "Tuning (dev only)" leva panel controls every uniform: interval, index lines,
-line widths and opacities, colour tokens, headlamp, glow, drift, intro and morph durations. "Save to config"
+In `npm run dev`, a collapsed "Tuning (dev only)" leva panel controls every uniform: contour spacing, index
+lines, line widths and opacities, colour tokens, headlamp, glow, drift, intro and morph durations.
+
+The contour interval adapts to the screen. It is the smallest of 50, 100, 200, 250 and 500 m that keeps lines on
+steep terrain (the map's 95th-percentile gradient) at least `minSpacingPx` CSS pixels apart at the map's
+on-screen scale; every 5th line is an index line. With the committed `minSpacingPx: 3` phones in portrait get
+200 m (250 m on 320 px wide screens), 1280–1440 px laptops 200 m, tablets and 1920+ px desktops 100 m. The panel
+shows the interval in use; resizes glide to the new interval, and morphs blend between the two terrains'
+intervals. "Save to config"
 writes the values to `src/config/contour-field.json`, which is committed. Colours and durations are stored as
 token names. Leva is never part of the production build. Add `?field=force` to a URL to skip the low-spec check,
 which is useful in headless browsers.
@@ -127,8 +134,11 @@ It also needs the `MOTION_TOKEN` secret.
     The 2048 map is only used in preview builds with `?hm=2048` (also `?hm=1024` / `?hm=1536`), to compare
     them side by side.
   - `terrain.json`: elevation range, LV95/WGS84 bbox, pixel scale, encoding, lakes and card metadata.
-  - `contours.svg`: the first-paint, reduced-motion and no-WebGL poster. It has 100 m lines with every 5th as an
-    index line, and the lakes are filled shapes found as flat surfaces in the DTM. About 67 KB gzipped.
+  - `contours.svg` (100 m, 67 KB gzipped) and `contours-200.svg` (200 m, 35 KB gzipped): the first-paint,
+    reduced-motion and no-WebGL posters, every 5th line an index line, lakes as filled shapes found as flat
+    surfaces in the DTM. A media query computed from the same spacing rule as the field picks one, so the
+    poster and the field show the same interval (100 m on large screens and tablets, 200 m on phones and
+    laptops).
   - `cards/*.svg`: the leader card's Interlaken → Jungfrau crop (200 m lines) and seeded-noise terrains for
     project cards (seed = collector number, ~20 lines, every 4th an index line).
   - `morph/*.webp`: per-card heightmaps the field morphs to on case-study pages and Basecamp.

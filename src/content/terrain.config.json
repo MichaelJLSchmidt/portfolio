@@ -43,6 +43,10 @@
     "indexEvery": 5
   },
   "poster": {
+    "intervalsM": [
+      100,
+      200
+    ],
     "gridWidth": 900,
     "blurSigma": 1.1,
     "simplifyTolerance": 0.45

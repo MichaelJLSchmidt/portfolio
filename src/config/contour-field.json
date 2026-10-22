@@ -1,5 +1,6 @@
 {
-  "intervalM": 100,
+  "minSpacingPx": 3,
+  "steepPercentile": 95,
   "indexEvery": 5,
   "lineWidthPx": 1,
   "indexLineWidthPx": 1.5,

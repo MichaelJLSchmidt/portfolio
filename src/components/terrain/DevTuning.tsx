@@ -1,6 +1,6 @@
 "use client";
 
-import { Leva, button, useControls } from "leva";
+import { Leva, button, monitor, useControls } from "leva";
 import { useEffect } from "react";
 import { color, duration } from "@/styles/tokens";
 import { fieldConfig, type FieldConfig } from "./field-settings";
@@ -17,7 +17,10 @@ const durationTokens = Object.keys(duration);
 
 export default function DevTuning() {
   const values = useControls("Contour field", {
-    intervalM: { value: fieldConfig.intervalM, min: 20, max: 500, step: 10 },
+    // Contour interval: the smallest of 50/100/200/250/500 m that keeps lines on the
+    // steepest terrain (gradient percentile) at least minSpacingPx apart on this screen.
+    minSpacingPx: { value: fieldConfig.minSpacingPx, min: 1, max: 12, step: 0.25 },
+    steepPercentile: { value: fieldConfig.steepPercentile, options: [50, 90, 95, 99] },
     indexEvery: { value: fieldConfig.indexEvery, min: 2, max: 10, step: 1 },
     lineWidthPx: { value: fieldConfig.lineWidthPx, min: 0.5, max: 4, step: 0.25 },
     indexLineWidthPx: { value: fieldConfig.indexLineWidthPx, min: 0.5, max: 5, step: 0.25 },
@@ -48,6 +51,7 @@ export default function DevTuning() {
   });
 
   useControls("Contour field", {
+    "Interval (m)": monitor(() => fieldStore.get().intervalM ?? 0, { interval: 250 }),
     "Replay intro": button(() => fieldStore.set((s) => ({ replayIntro: s.replayIntro + 1 }))),
     "Toggle morph (kiBon)": button(() =>
       fieldStore.set((s) => ({ morphTarget: s.morphTarget ? null : "dvb-001" })),

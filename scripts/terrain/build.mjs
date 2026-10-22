@@ -165,28 +165,33 @@ for (const lake of cfg.lakes) {
 }
 
 // ---------------------------------------------------------------------------
-// 4. Contour poster (first paint, reduced motion, no-WebGL fallback)
+// 4. Contour posters (first paint, reduced motion, no-WebGL fallback), one per interval
+//    the field uses at page scale: 100 m for large screens, 200 m for phones and laptops.
 // ---------------------------------------------------------------------------
 const { intervalM, indexEvery } = cfg.contours;
-let poster;
+const posters = [];
 {
   const w = cfg.poster.gridWidth;
   const h = Math.round(w / aspect);
   const values = gaussianBlur(resampleArea(grid.data, grid.width, grid.height, w, h), w, h, cfg.poster.blurSigma);
   const mask = resampleArea(lakeMask, grid.width, grid.height, w, h);
-  const thresholds = range(Math.ceil(minElev / intervalM) * intervalM, maxElev, intervalM);
-  const posterSize = write(
-    "contours.svg",
-    contourSvg(values, w, h, {
-      thresholds,
-      indexOf: (v) => v % (intervalM * indexEvery) === 0,
-      lakesMask: mask,
-      tolerance: cfg.poster.simplifyTolerance,
-      lakeOpacity: 0.08,
-    }),
-  );
-  poster = { file: "/terrain/contours.svg", width: w, height: h, ...posterSize };
+  for (const interval of cfg.poster.intervalsM) {
+    const thresholds = range(Math.ceil(minElev / interval) * interval, maxElev, interval);
+    const file = interval === intervalM ? "contours.svg" : `contours-${interval}.svg`;
+    const size = write(
+      file,
+      contourSvg(values, w, h, {
+        thresholds,
+        indexOf: (v) => v % (interval * indexEvery) === 0,
+        lakesMask: mask,
+        tolerance: cfg.poster.simplifyTolerance,
+        lakeOpacity: 0.08,
+      }),
+    );
+    posters.push({ file: `/terrain/${file}`, intervalM: interval, width: w, height: h, ...size });
+  }
 }
+const poster = posters.find((p) => p.intervalM === intervalM) ?? posters[0];
 
 // ---------------------------------------------------------------------------
 // 5. Card terrains (artwork SVG + morph heightmap for the contour field)
@@ -339,6 +344,7 @@ const meta = {
   heightmaps,
   contours: { intervalM, indexEvery },
   poster,
+  posters,
   lakes,
   cards,
 };

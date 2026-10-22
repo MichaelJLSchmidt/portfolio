@@ -98,11 +98,30 @@
   },
   "poster": {
     "file": "/terrain/contours.svg",
+    "intervalM": 100,
     "width": 900,
     "height": 619,
     "bytes": 187189,
     "gzipBytes": 68880
   },
+  "posters": [
+    {
+      "file": "/terrain/contours.svg",
+      "intervalM": 100,
+      "width": 900,
+      "height": 619,
+      "bytes": 187189,
+      "gzipBytes": 68880
+    },
+    {
+      "file": "/terrain/contours-200.svg",
+      "intervalM": 200,
+      "width": 900,
+      "height": 619,
+      "bytes": 94458,
+      "gzipBytes": 35314
+    }
+  ],
   "lakes": [
     {
       "name": "Thunersee",

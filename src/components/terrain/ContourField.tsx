@@ -8,7 +8,7 @@ import { asset } from "@/lib/asset";
 import { color, easing } from "@/styles/tokens";
 import { coverTransform, createContourMaterial } from "./contour-material";
 import { INTRO_STORAGE_KEY, cancelPendingIntro } from "@/lib/motion-preference";
-import { colorOf, hexToRgb, msOf, type DeviceProfile, type FieldConfig } from "./field-settings";
+import { colorOf, contourInterval, hexToRgb, msOf, type DeviceProfile, type FieldConfig } from "./field-settings";
 import { fieldStore } from "./field-store";
 
 /**
@@ -28,6 +28,8 @@ type TerrainSource = {
   max: number;
   posX: number;
   posY: number;
+  /** Gradient percentiles (metres per texel), for the screen-adaptive contour interval. */
+  gradientM: Record<string, number>;
 };
 
 const regionSource = (profile: DeviceProfile): TerrainSource => {
@@ -45,6 +47,7 @@ const regionSource = (profile: DeviceProfile): TerrainSource => {
     max: meta.elevation.max,
     posX: meta.region.focus.u,
     posY: meta.region.focus.v,
+    gradientM: hm.gradientM,
   };
 };
 
@@ -62,6 +65,7 @@ const cardSource = (id: string): TerrainSource | null => {
     max: m.elevation.max,
     posX: 0.5,
     posY: 0.5,
+    gradientM: m.gradientM,
   };
 };
 
@@ -161,6 +165,11 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     slotId: null as string | null,
     /** Terrain the field is heading to (null = the region). */
     targetId: null as string | null,
+    /** Contour interval (m) for the region and the target terrain at the current screen size. */
+    intervalA: 100,
+    intervalB: 100,
+    /** Region interval changes (resize, tuning) glide in log space instead of popping. */
+    intervalTween: null as Tween | null,
     ready: false,
     readyNotified: false,
     capped: false,
@@ -172,7 +181,6 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
   useEffect(() => {
     const apply = (cfg: FieldConfig) => {
       const u = material.uniforms;
-      u.uInterval.value = cfg.intervalM;
       u.uIndexEvery.value = cfg.indexEvery;
       u.uLineOpacity.value = cfg.lineOpacity;
       u.uIndexOpacity.value = cfg.indexOpacity;
@@ -184,6 +192,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       u.uDrift.value = cfg.driftCyclesPerSecond;
       u.uPulse.value.set(cfg.pulsePeriodS, cfg.pulseStrength);
       u.uPulseColor.value.set(...hexToRgb(colorOf(cfg.pulseColor)));
+      updateIntervals(true);
       invalidate();
     };
     apply(fieldStore.get().config);
@@ -195,6 +204,8 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
         apply(cfg);
       }
     });
+    // updateIntervals reads refs only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [material, profile, invalidate]);
 
   // Pixel-based uniforms depend on the device pixel ratio.
@@ -211,8 +222,32 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     const a = anim.current;
     if (a.region) coverTransform(u.uUvA.value, size.width, size.height, a.region.width, a.region.height, a.region.posX, a.region.posY);
     if (a.target) coverTransform(u.uUvB.value, size.width, size.height, a.target.width, a.target.height, a.target.posX, a.target.posY);
+    updateIntervals(true);
     invalidate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [material, dpr, size.width, size.height, invalidate]);
+
+  // --- contour interval from the on-screen scale -----------------------------------
+  function updateIntervals(animate: boolean) {
+    const a = anim.current;
+    const cfg = fieldStore.get().config;
+    const view = sizeRef.current;
+    if (a.region) {
+      const next = contourInterval(a.region, view, cfg.zoomBase, cfg);
+      if (next !== a.intervalA) {
+        const now = performance.now();
+        const shown = Math.exp(tweenValue(a.intervalTween, now, Math.log(a.intervalA)));
+        a.intervalTween = animate
+          ? { from: Math.log(shown), to: Math.log(next), start: now, dur: msOf("long"), ease: easeTrail }
+          : null;
+        a.intervalA = next;
+        wake();
+      }
+    }
+    if (a.target) a.intervalB = contourInterval(a.target, view, cfg.zoomBase + cfg.morphZoom, cfg);
+    const intervalM = a.slotId ? a.intervalB : a.intervalA;
+    if (fieldStore.get().intervalM !== intervalM) fieldStore.set({ intervalM });
+  }
 
   // --- region heightmap + intro ---------------------------------------------------
   useEffect(() => {
@@ -235,6 +270,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       }
       coverTransform(u.uUvA.value, size.width, size.height, region.width, region.height, region.posX, region.posY);
       if (!a.target) u.uUvB.value.copy(u.uUvA.value);
+      updateIntervals(false);
 
       let played = false;
       try {
@@ -348,6 +384,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       u.uEncB.value.set(src.offset, src.scale);
       u.uRangeB.value.set(src.min, src.max);
       coverTransform(u.uUvB.value, size.width, size.height, src.width, src.height, src.posX, src.posY);
+      updateIntervals(false);
       tweenTo(1, dur);
     };
     morphTo(fieldStore.get().morphTarget);
@@ -452,6 +489,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       !tweenDone(a.sweep, now) ||
       !tweenDone(a.morph, now) ||
       !tweenDone(a.lamp, now) ||
+      !tweenDone(a.intervalTween, now) ||
       now - a.lastInput < 120 ||
       (a.rippleStart >= 0 && now - a.rippleStart < 1800) ||
       Math.abs(a.pan[0] - a.panPointer[0]) + Math.abs(a.pan[1] - a.panPointer[1] - a.panScroll) > 2e-4 ||
@@ -572,10 +610,17 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       a.target = null;
       a.slotId = null;
       a.morph = null;
+      updateIntervals(false);
     }
 
     u.uSweep.value = a.sweepValue;
     u.uMorph.value = a.morphValue;
+    // Contour interval: the region's (gliding after a resize) blended in log space towards
+    // the target terrain's while morphing, with the same smoothstep the shader uses.
+    const lnA = tweenValue(a.intervalTween, now, Math.log(a.intervalA));
+    const lnB = a.target ? Math.log(a.intervalB) : lnA;
+    const mm = a.morphValue * a.morphValue * (3 - 2 * a.morphValue);
+    u.uInterval.value = Math.exp(lnA + (lnB - lnA) * mm);
     const cfg = fieldStore.get().config;
     // Camera: push in while morphing to a card's terrain.
     u.uZoom.value = cfg.zoomBase + a.morphValue * cfg.morphZoom;
