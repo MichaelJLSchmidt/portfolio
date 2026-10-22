@@ -17,7 +17,8 @@
     "report:size": "node scripts/report-sizes.mjs",
     "preview": "node scripts/serve-out.mjs",
     "check:contrast": "node scripts/check-contrast.mjs",
-    "check:content": "node scripts/check-content.mjs"
+    "check:content": "node scripts/check-content.mjs",
+    "test:e2e": "node scripts/e2e.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "9.8.2",

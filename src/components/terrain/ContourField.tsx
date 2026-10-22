@@ -651,6 +651,11 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       a.morph = null;
       updateIntervals(false);
     }
+    // Report the terrain on screen once a morph has landed (backdrop data-terrain).
+    if (!a.morph || tweenDone(a.morph, now)) {
+      const shown = a.morphValue >= 1 ? a.slotId : a.morphValue <= 0 ? null : undefined;
+      if (shown !== undefined && fieldStore.get().shownTerrain !== shown) fieldStore.set({ shownTerrain: shown });
+    }
 
     u.uSweep.value = a.sweepValue;
     u.uMorph.value = a.morphValue;

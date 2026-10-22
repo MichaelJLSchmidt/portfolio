@@ -55,6 +55,7 @@ export function TerrainBackdrop() {
   const pathname = usePathname();
   const mode = useFieldStore((s) => s.mode);
   const introPlaying = useFieldStore((s) => s.introPlaying);
+  const shownTerrain = useFieldStore((s) => s.shownTerrain);
   const [field, setField] = useState<{ Component: FieldComponent; profile: DeviceProfile } | null>(null);
 
   useEffect(() => {
@@ -87,7 +88,12 @@ export function TerrainBackdrop() {
 
   return (
     <>
-      <div className={styles.backdrop} data-field={showField ? "on" : "off"} aria-hidden="true">
+      <div
+        className={styles.backdrop}
+        data-field={showField ? "on" : "off"}
+        data-terrain={showField ? (shownTerrain ?? "region") : undefined}
+        aria-hidden="true"
+      >
         <picture>
           <source media={finePosterMedia} srcSet={asset(finePoster.file)} />
           <img

@@ -63,6 +63,7 @@ Never commit the token. `.env*` files are git-ignored; `.env.example` lists the 
 | `npm run typecheck`      | Generates route types, then `tsc --noEmit`                                        |
 | `npm run check:contrast` | WCAG contrast of the token colour pairs                                            |
 | `npm run check:content`  | Lists every content placeholder still to fill, with file, line and field          |
+| `npm run test:e2e`       | Chromium checks against `out/`: aborted view transitions, calm navigation, decode |
 | `npm run report:size`    | Initial JS/CSS/fonts per route, lazy chunks, terrain assets (gzip)               |
 | `npm run terrain`        | Regenerates `public/terrain` from swisstopo data                                  |
 | `npm run verify:terrain` | Checks that the committed heightmaps decode to the exact source heights          |
@@ -195,6 +196,11 @@ When it's time:
   - the deck doesn't deal in;
   - no View Transition runs at all: pages change directly and the incoming page fades in over 150 ms (opacity
     only); focus return and scroll restoration work as in full motion.
+- Navigation finishes cleanly even when a view transition is skipped, times out or fails: React commits the
+  route change anyway, and the arriving heading settles. `npm run test:e2e -- transitions` simulates all three
+  (forward, back, forward again) plus Calm map and reduced motion, and checks the page, focus, the field's
+  terrain (`data-terrain` on the backdrop) and that nothing is left hidden. It needs Playwright with Chromium
+  and a build in `out/`.
 - WCAG AA contrast is checked by `npm run check:contrast`, including sheet and glacier text over the faded
   lines of a quiet zone. Contour-coloured labels keep their halo (`.keep-halo`), and the poster fallback keeps
   all halos and its vignette.

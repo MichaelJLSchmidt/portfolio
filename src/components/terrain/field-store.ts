@@ -18,6 +18,8 @@ export type FieldState = {
   replayIntro: number;
   /** Contour interval the field settled on for this screen (shown in the dev panel). */
   intervalM: number | null;
+  /** Terrain the field is showing once a morph has landed (null = the region). */
+  shownTerrain: string | null;
   config: FieldConfig;
 };
 
@@ -29,6 +31,7 @@ let state: FieldState = {
   skipIntro: 0,
   replayIntro: 0,
   intervalM: null,
+  shownTerrain: null,
   config: fieldConfig,
 };
 const listeners = new Set<() => void>();
