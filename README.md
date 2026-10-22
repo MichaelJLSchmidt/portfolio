@@ -167,6 +167,23 @@ It also needs the `MOTION_TOKEN` secret.
   (`createImageBitmap` without colour-space conversion or premultiplied alpha, no flip, WebGL2 read-back).
   The browser check needs Playwright.
 
+### Heightmap decode check
+
+The WebPs are decoded as raw data (no colour-space conversion, no premultiplied alpha, no flip), but a browser
+could still alter the values, for example by ignoring `colorSpaceConversion: "none"` for WebP. So the field
+checks every heightmap once per session (`src/components/terrain/heightmap-loader.ts`):
+
+1. After the texture is uploaded, exactly as the shader samples it, its 16 reference texels from `terrain.json`
+   are copied from the texture through a throwaway framebuffer into a pixel-pack buffer and read once a fence
+   says the GPU is done. No shader, no draw, no main-thread wait; it runs after first paint, before the field
+   fades in, and the result is remembered for the session.
+2. On a mismatch the session switches to the raw 16-bit heights (`*.bin`, decoded with `DecompressionStream`
+   into a `DataTexture`, which nothing can colour-manage) and checks those the same way.
+3. If that is unavailable or fails too, the field stays on the SVG poster for the session.
+
+One console warning names the browser and the first differing texel. `npm run test:e2e -- decode` simulates
+a colour-managing browser (a gamma curve on decoded pixels) with and without `DecompressionStream`.
+
 Attribution: "Terrain data © swisstopo" appears in the HUD and the footer.
 
 ## Production later: Netlify

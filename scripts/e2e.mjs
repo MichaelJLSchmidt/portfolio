@@ -216,7 +216,98 @@ async function transitions() {
   }
 }
 
-const scenarios = { transitions };
+// --- heightmap decode check -----------------------------------------------------------------------
+// Simulates a browser that colour-manages the WebP (a gamma curve on the decoded R and G values)
+// and checks the session fallback: raw heights when DecompressionStream exists, else the poster.
+const colourManaged = ({ noDecompression }) => {
+  if (noDecompression) delete window.DecompressionStream;
+  const original = window.createImageBitmap.bind(window);
+  window.createImageBitmap = async (source, ...rest) => {
+    const bitmap = await original(source, ...rest);
+    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(bitmap, 0, 0);
+    const img = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+    for (let i = 0; i < img.data.length; i += 4) for (const k of [0, 1]) img.data[i + k] = Math.round(255 * (img.data[i + k] / 255) ** 0.9);
+    ctx.putImageData(img, 0, 0);
+    return original(canvas);
+  };
+};
+// Counts and times readPixels: the decode check is the field's only read-back.
+const timeReadPixels = () => {
+  window.__readPixels = { calls: 0, ms: 0 };
+  const original = WebGL2RenderingContext.prototype.readPixels;
+  WebGL2RenderingContext.prototype.readPixels = function (...args) {
+    const t = performance.now();
+    const result = original.apply(this, args);
+    window.__readPixels.calls++;
+    window.__readPixels.ms += performance.now() - t;
+    return result;
+  };
+};
+
+async function decode() {
+  const modes = [
+    { name: "WebP decodes exactly", expect: "image" },
+    { name: "WebP colour-managed: raw heights", expect: "raw", simulate: {} },
+    { name: "WebP colour-managed, no DecompressionStream: poster", expect: "none", simulate: { noDecompression: true } },
+  ];
+  for (const mode of modes) {
+    console.log(`\n${mode.name}`);
+    const { context, page, errors } = await open({ init: timeReadPixels });
+    if (mode.simulate) await context.addInitScript(colourManaged, mode.simulate);
+    const warnings = [];
+    const files = [];
+    page.on("console", (m) => m.type() === "warning" && m.text().includes("[terrain]") && warnings.push(m.text()));
+    page.on("request", (r) => /\/terrain\/.*\.(webp|bin)$/.test(r.url()) && files.push(r.url().replace(/.*\/terrain\//, "")));
+    const state = () =>
+      page.evaluate(() => ({
+        field: document.querySelector("[data-field]")?.dataset.field,
+        terrain: document.querySelector("[data-field]")?.dataset.terrain ?? null,
+        path: sessionStorage.getItem("summit:hm-decode") ?? "image",
+        readPixels: window.__readPixels,
+      }));
+
+    await page.goto(`${base}/?field=force`, { waitUntil: "networkidle" });
+    await page.waitForFunction(() => document.querySelector("[data-field]")?.dataset.terrain || sessionStorage.getItem("summit:hm-decode") === "none", null, { timeout: 20000 }).catch(() => {});
+    let s = await state();
+    check(`decode path: ${mode.expect}`, s.path === mode.expect, `path=${s.path}`);
+    if (mode.expect === "none") {
+      await page.waitForTimeout(1500);
+      s = await state();
+      check("field stays on the poster", s.field === "off", `data-field=${s.field}`);
+      check("no raw heights fetched", !files.some((f) => f.endsWith(".bin")), files.join(", "));
+    } else {
+      check("field shows the region", s.field === "on" && s.terrain === "region", `data-field=${s.field} data-terrain=${s.terrain}`);
+      const want = mode.expect === "raw" ? ".bin" : ".webp";
+      check(`region heightmap via ${want}`, files.some((f) => f.startsWith("heightmap-") && f.endsWith(want)), files.join(", "));
+      // 16 reference texels per checked heightmap: the image path, plus the raw one after a mismatch.
+      const want16 = mode.expect === "raw" ? 32 : 16;
+      check("reference texels read back once", s.readPixels.calls === want16, `${s.readPixels.calls} readPixels`);
+      check("read-back never blocks the main thread", s.readPixels.ms < 5, `${s.readPixels.ms.toFixed(2)} ms in readPixels`);
+      // A card's terrain goes through the same path.
+      await page.locator('article[data-slug="kibon"] a').first().click();
+      const r = await settle(page, { path: "/work/kibon/", terrain: "dvb-001" });
+      check("card terrain shown after navigation", r.terrain === "dvb-001", `data-terrain=${r.terrain}`);
+      check(`card heightmap via ${want}`, files.includes(`morph/dvb-001${want}`), files.join(", "));
+    }
+    check(mode.expect === "image" ? "no warning" : "one console warning naming the browser", mode.expect === "image" ? warnings.length === 0 : warnings.length === 1 && /\] (Chrome|Edge|Firefox|Safari|Opera) \d/.test(warnings[0]), warnings.join(" | "));
+
+    // Same session, next page load: the result is remembered, nothing is checked or warned again.
+    files.length = 0;
+    warnings.length = 0;
+    await page.goto(`${base}/?field=force`, { waitUntil: "networkidle" });
+    await page.waitForTimeout(mode.expect === "none" ? 2500 : 0);
+    if (mode.expect !== "none") await page.waitForFunction(() => document.querySelector("[data-field]")?.dataset.terrain === "region", null, { timeout: 20000 }).catch(() => {});
+    s = await state();
+    check("reload: no new warning, no repeated read-back", warnings.length === 0 && s.readPixels.calls === 0, `${warnings.length} warning(s), ${s.readPixels.calls} read-back(s)`);
+    if (mode.expect === "raw") check("reload: WebP not fetched again", !files.some((f) => f.endsWith(".webp")), files.join(", "));
+    check("no page errors", errors.length === 0, errors.join("; "));
+    await context.close();
+  }
+}
+
+const scenarios = { transitions, decode };
 try {
   for (const [name, run] of Object.entries(scenarios)) if (!only || only === name) await run();
 } finally {
