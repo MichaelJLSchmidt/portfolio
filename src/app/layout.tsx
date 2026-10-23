@@ -16,7 +16,7 @@ const isPreview = process.env.NEXT_PUBLIC_PREVIEW === "1";
 export const metadata: Metadata = {
   title: site.title,
   description: site.description,
-  // Preview deployments (GitHub Pages) must never be indexed; production must.
+  // Preview builds (Basecamp branch deploys, Deploy Previews) must never be indexed; production must.
   robots: isPreview ? { index: false, follow: false } : undefined,
 };
 

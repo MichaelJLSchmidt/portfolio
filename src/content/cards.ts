@@ -102,7 +102,7 @@ export const caseStudyLabels = {
 export const cards: SummitCardData[] = [
   {
     slug: "profile",
-    name: "[FULL NAME]",
+    name: "Michael JL Schmidt",
     rarity: "M",
     cost: "566",
     costLabel: "Birth altitude 566 m",

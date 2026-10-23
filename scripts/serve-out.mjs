@@ -1,4 +1,4 @@
-// Serves the static export in ./out the way GitHub Pages does, including the base path.
+// Serves the static export in ./out the way a static host does, including the base path.
 // Usage: node scripts/serve-out.mjs [--port 3000]   (reads NEXT_PUBLIC_BASE_PATH)
 import { createServer } from "node:http";
 import { createReadStream, existsSync, statSync } from "node:fs";
@@ -25,7 +25,7 @@ const types = {
 
 const compressible = new Set([".html", ".js", ".css", ".json", ".txt", ".svg"]);
 
-// Gzip text like GitHub Pages and Netlify do, so local measurements are realistic.
+// Gzip text like static hosts (Netlify included) do, so local measurements are realistic.
 function send(res, status, file, req) {
   const headers = { "content-type": types[extname(file)] || "application/octet-stream" };
   const gzip = compressible.has(extname(file)) && /\bgzip\b/.test(req.headers["accept-encoding"] || "");

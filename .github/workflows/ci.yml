@@ -1,8 +1,10 @@
-# Pull-request checks: lint, types and a production build under the Pages sub-path.
+# Pull-request checks for the integration branch (basecamp) and production (main): lint, types,
+# contrast, the gate's unit tests, and the builds Netlify runs for each deploy context.
 name: CI
 
 on:
   pull_request:
+    branches: [basecamp, main]
   workflow_dispatch:
 
 permissions:
@@ -27,15 +29,46 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run check:contrast
+      - run: npm test
 
-      # Lists the content placeholders still to fill (informational; production builds fail on them).
+      # Lists the content placeholders still to fill (informational).
       - run: npm run check:content
 
-      - name: Build with the Pages base path
+      # Production (main): the under-construction page. A pull request into main must pass its
+      # content check as the Netlify build will; into basecamp a preview build is enough.
+      - name: Build the under-construction page
         run: npm run build
         env:
-          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+          SITE_MODE: construction
+          NEXT_PUBLIC_PREVIEW: ${{ github.base_ref == 'main' && '0' || '1' }}
+
+      - name: Report the under-construction page's size
+        run: npm run report:size
+
+      # Branch deploys and Deploy Previews: the full site behind the gate.
+      - name: Build the gated site
+        run: npm run build && test -f .netlify/v1/edge-functions/basecamp-gate.ts
+        env:
+          SITE_MODE: basecamp
           NEXT_PUBLIC_PREVIEW: "1"
 
       - name: Report bundle and asset sizes
         run: npm run report:size
+
+  hosting:
+    # The deploys under Netlify's own CLI: build pipeline, edge runtime (Deno), redirects.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci && npm install --global netlify-cli@27.14.2
+        env:
+          MOTION_TOKEN: ${{ secrets.MOTION_TOKEN }}
+
+      - run: npm run test:hosting
