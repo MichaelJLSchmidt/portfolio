@@ -5,12 +5,12 @@ import { cancelFrame, frame, type Process } from "@/lib/frameloop";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import meta from "@terrain/terrain.json";
-import { asset } from "@/lib/asset";
 import { color, easing } from "@/styles/tokens";
 import { MAX_QUIET_ZONES, coverTransform, createContourMaterial } from "./contour-material";
 import { INTRO_STORAGE_KEY, cancelPendingIntro } from "@/lib/motion-preference";
 import { colorOf, contourInterval, hexToRgb, msOf, type DeviceProfile, type FieldConfig } from "./field-settings";
 import { fieldStore } from "./field-store";
+import { loadHeightmap, type HeightmapMeta } from "./heightmap-loader";
 import { watchQuietZones, type QuietRect } from "./quiet-zones";
 
 /**
@@ -25,7 +25,8 @@ import { watchQuietZones, type QuietRect } from "./quiet-zones";
  */
 
 type TerrainSource = {
-  file: string;
+  /** The heightmap (WebP, raw fallback and reference texels). */
+  map: HeightmapMeta;
   width: number;
   height: number;
   offset: number;
@@ -44,7 +45,7 @@ const regionSource = (profile: DeviceProfile): TerrainSource => {
     meta.heightmaps.find((h) => h.use === profile.heightmap) ??
     meta.heightmaps[0];
   return {
-    file: hm.file,
+    map: hm,
     width: hm.width,
     height: hm.height,
     offset: meta.encoding.offset,
@@ -62,7 +63,7 @@ const cardSource = (id: string): TerrainSource | null => {
   if (!card) return null;
   const m = card.morph;
   return {
-    file: m.file,
+    map: m,
     width: m.width,
     height: m.height,
     offset: m.encoding.offset,
@@ -74,42 +75,6 @@ const cardSource = (id: string): TerrainSource | null => {
     gradientM: m.gradientM,
   };
 };
-
-const textureCache = new Map<string, Promise<THREE.Texture>>();
-
-function loadHeightTexture(file: string): Promise<THREE.Texture> {
-  const url = asset(file);
-  let pending = textureCache.get(url);
-  if (pending) return pending;
-  pending = new Promise<THREE.Texture>((resolve, reject) => {
-    const done = (image: ImageBitmap | HTMLImageElement) => {
-      const tex = new THREE.Texture(image);
-      // Raw data, not colour: no colour-space conversion, no premultiplied alpha, no mipmaps,
-      // and no flip anywhere (the bitmap keeps the file's row order, flipY stays false, the
-      // shader samples top-down). `npm run verify:terrain -- --browser` checks this path.
-      tex.colorSpace = THREE.NoColorSpace;
-      tex.flipY = false;
-      tex.premultiplyAlpha = false;
-      tex.generateMipmaps = false;
-      tex.minFilter = THREE.LinearFilter;
-      tex.magFilter = THREE.LinearFilter;
-      tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
-      tex.needsUpdate = true;
-      resolve(tex);
-    };
-    if (typeof createImageBitmap === "function") {
-      const loader = new THREE.ImageBitmapLoader();
-      loader.setOptions({ imageOrientation: "from-image", premultiplyAlpha: "none", colorSpaceConversion: "none" });
-      loader.load(url, done, undefined, reject);
-    } else {
-      new THREE.ImageLoader().load(url, done, undefined, reject);
-    }
-  });
-  textureCache.set(url, pending);
-  // A failed load must not be cached, so a later request can retry.
-  pending.catch(() => textureCache.delete(url));
-  return pending;
-}
 
 const bezier = (p: readonly number[]) => {
   // Cubic-bezier easing (x→y) solved with a few Newton steps; fine for UI tweens.
@@ -142,6 +107,7 @@ const tweenDone = (t: Tween | null, now: number) => !t || now - t.start >= t.dur
 
 function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: boolean; onReady: () => void }) {
   const material = useMemo(() => createContourMaterial(), []);
+  const gl = useThree((s) => s.gl);
   const size = useThree((s) => s.size);
   const dpr = useThree((s) => s.viewport.dpr);
   // Async callbacks (texture loads, morphs) must use the current size, not the first render's.
@@ -280,7 +246,9 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
   useEffect(() => {
     let cancelled = false;
     const region = regionSource(profile);
-    loadHeightTexture(region.file).then((tex) => {
+    // Verified once per session; a browser that alters the decoded heights gets the raw
+    // fallback, and the poster stays if neither decodes exactly (heightmap-loader.ts).
+    loadHeightmap(gl, region.map).then((tex) => {
       if (cancelled) return;
       const size = sizeRef.current;
       const a = anim.current;
@@ -399,7 +367,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       if (!src) return;
       let tex: THREE.Texture;
       try {
-        tex = await loadHeightTexture(src.file);
+        tex = await loadHeightmap(gl, src.map);
       } catch {
         return;
       }
@@ -427,7 +395,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
         lastPrefetch = s.prefetch;
         for (const id of s.prefetch) {
           const src = cardSource(id);
-          if (src) loadHeightTexture(src.file).catch(() => {});
+          if (src) loadHeightmap(gl, src.map).catch(() => {});
         }
       }
     });
@@ -650,6 +618,11 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       a.slotId = null;
       a.morph = null;
       updateIntervals(false);
+    }
+    // Report the terrain on screen once a morph has landed (backdrop data-terrain).
+    if (!a.morph || tweenDone(a.morph, now)) {
+      const shown = a.morphValue >= 1 ? a.slotId : a.morphValue <= 0 ? null : undefined;
+      if (shown !== undefined && fieldStore.get().shownTerrain !== shown) fieldStore.set({ shownTerrain: shown });
     }
 
     u.uSweep.value = a.sweepValue;

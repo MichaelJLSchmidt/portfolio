@@ -278,18 +278,16 @@ i,
   animation: vt-enter var(--dur-long) var(--ease-trail) both;
 }
 
-/* Reduced motion: nothing travels; a short crossfade only. */
-html[data-motion="reduced"]::view-transition-group(*) {
-  animation-duration: 0s;
+/* Calm map / reduced motion: no view transition at all (src/lib/view-transition.ts). The
+   page changes directly and the incoming page fades in, opacity only (CalmRouteFade). */
+@keyframes route-fade-in {
+  from {
+    opacity: 0;
+  }
 }
 
-html[data-motion="reduced"]::view-transition-old(*),
-html[data-motion="reduced"]::view-transition-new(*) {
-  animation: vt-enter 150ms linear both;
-}
-
-html[data-motion="reduced"]::view-transition-old(*) {
-  animation-name: vt-exit;
+:root[data-motion="reduced"][data-route-fade] main {
+  animation: route-fade-in var(--dur-calm) linear both;
 }
 
 /* Lenis (fine-pointer desktop only). */

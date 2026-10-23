@@ -63,6 +63,7 @@ Never commit the token. `.env*` files are git-ignored; `.env.example` lists the 
 | `npm run typecheck`      | Generates route types, then `tsc --noEmit`                                        |
 | `npm run check:contrast` | WCAG contrast of the token colour pairs                                            |
 | `npm run check:content`  | Lists every content placeholder still to fill, with file, line and field          |
+| `npm run test:e2e`       | Chromium checks against `out/`: aborted view transitions, calm navigation, decode |
 | `npm run report:size`    | Initial JS/CSS/fonts per route, lazy chunks, terrain assets (gzip)               |
 | `npm run terrain`        | Regenerates `public/terrain` from swisstopo data                                  |
 | `npm run verify:terrain` | Checks that the committed heightmaps decode to the exact source heights          |
@@ -157,11 +158,31 @@ It also needs the `MOTION_TOKEN` secret.
     page's ascent chart.
 - `npm run terrain -- --refresh` re-downloads; `-- --placeholder` builds from procedural terrain without the
   network; `-- --png` also writes PNG copies (git-ignored, not used by the site).
-- **Exact heights:** every WebP is decoded again right after encoding and must match byte for byte, and its
-  SHA-256 is recorded in `terrain.json`. `npm run verify:terrain` re-checks the committed files with libwebp;
+- `*.bin` next to every heightmap: the same heights as raw 16-bit values (gradient-predicted, zigzag-coded,
+  gzipped by the pipeline), about 10% smaller than the WebP. The site only fetches them in a session where a
+  browser decoded a WebP to different values (see "Heightmap decode check").
+- **Exact heights:** every WebP and `.bin` is decoded again right after encoding and must match byte for byte;
+  the raster's SHA-256 and 16 reference texels are recorded in `terrain.json`. `npm run verify:terrain` re-checks the committed files with libwebp;
   `npm run verify:terrain -- --browser` also decodes them in Chromium the way the site does
   (`createImageBitmap` without colour-space conversion or premultiplied alpha, no flip, WebGL2 read-back).
   The browser check needs Playwright.
+
+### Heightmap decode check
+
+The WebPs are decoded as raw data (no colour-space conversion, no premultiplied alpha, no flip), but a browser
+could still alter the values, for example by ignoring `colorSpaceConversion: "none"` for WebP. So the field
+checks every heightmap once per session (`src/components/terrain/heightmap-loader.ts`):
+
+1. After the texture is uploaded, exactly as the shader samples it, its 16 reference texels from `terrain.json`
+   are copied from the texture through a throwaway framebuffer into a pixel-pack buffer and read once a fence
+   says the GPU is done. No shader, no draw, no main-thread wait; it runs after first paint, before the field
+   fades in, and the result is remembered for the session.
+2. On a mismatch the session switches to the raw 16-bit heights (`*.bin`, decoded with `DecompressionStream`
+   into a `DataTexture`, which nothing can colour-manage) and checks those the same way.
+3. If that is unavailable or fails too, the field stays on the SVG poster for the session.
+
+One console warning names the browser and the first differing texel. `npm run test:e2e -- decode` simulates
+a colour-managing browser (a gamma curve on decoded pixels) with and without `DecompressionStream`.
 
 Attribution: "Terrain data © swisstopo" appears in the HUD and the footer.
 
@@ -193,7 +214,13 @@ When it's time:
   - the foil is static;
   - headlines don't animate;
   - the deck doesn't deal in;
-  - the route morph becomes a 150 ms crossfade.
+  - no View Transition runs at all: pages change directly and the incoming page fades in over 150 ms (opacity
+    only); focus return and scroll restoration work as in full motion.
+- Navigation finishes cleanly even when a view transition is skipped, times out or fails: React commits the
+  route change anyway, and the arriving heading settles. `npm run test:e2e -- transitions` simulates all three
+  (forward, back, forward again) plus Calm map and reduced motion, and checks the page, focus, the field's
+  terrain (`data-terrain` on the backdrop) and that nothing is left hidden. It needs Playwright with Chromium
+  and a build in `out/`.
 - WCAG AA contrast is checked by `npm run check:contrast`, including sheet and glacier text over the faded
   lines of a quiet zone. Contour-coloured labels keep their halo (`.keep-halo`), and the poster fallback keeps
   all halos and its vignette.

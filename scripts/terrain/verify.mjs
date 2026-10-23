@@ -13,7 +13,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { decodeRgb, rasterHash } from "./lib/heightmap.mjs";
+import { decodeRawHeights, decodeRgb, rasterHash } from "./lib/heightmap.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const publicDir = join(root, "public");
@@ -33,6 +33,11 @@ for (const map of maps) {
   else if (rasterHash(rgb) !== map.sha256) fail(`${map.file}: decoded raster does not match the recorded SHA-256`);
   else if (rgb.some((v, i) => i % 3 === 2 && v !== 0)) fail(`${map.file}: blue channel is not empty`);
   else console.log(`  ✓ ${map.file}  ${width}×${height}`);
+  if (map.raw) {
+    const raw = decodeRawHeights(readFileSync(join(publicDir, map.raw.file)), map.width, map.height);
+    if (rasterHash(raw) !== map.sha256) fail(`${map.raw.file}: raw fallback does not match the WebP's heights`);
+    else console.log(`  ✓ ${map.raw.file}  raw fallback matches`);
+  }
   const png = file.replace(/\.webp$/, ".png");
   if (existsSync(png)) {
     const copy = await decodeRgb(readFileSync(png));

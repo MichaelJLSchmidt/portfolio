@@ -46,6 +46,8 @@ export const type = {
 export const duration = {
   instant: 80,
   micro: 140,
+  /** Calm map / reduced motion: the incoming page fades in (no view transition). */
+  calm: 150,
   short: 220,
   medium: 360,
   long: 560,
