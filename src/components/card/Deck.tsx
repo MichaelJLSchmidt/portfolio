@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { cards } from "@/content/cards";
 import { site } from "@/content/site";
 import { rememberOrigin, takeOrigin } from "@/components/transition/return-focus";
@@ -16,14 +16,23 @@ export function Deck() {
   const listRef = useRef<HTMLUListElement>(null);
   const [deal, setDeal] = useState<"none" | "pending" | "dealt">("none");
 
-  // Coming back from a case study: return focus to the card that opened it (no deal-in).
-  useEffect(() => {
+  // Coming back from a card's page: that card is in view and focused (no deal-in). A layout
+  // effect, so it happens before a view transition captures the deck, which then rebuilds the
+  // card where the reader sees it (return-transition.ts).
+  const returned = useRef(false);
+  useLayoutEffect(() => {
     const slug = takeOrigin();
-    if (slug) {
-      const link = document.querySelector<HTMLAnchorElement>(`article[data-slug="${CSS.escape(slug)}"] a`);
-      link?.focus({ preventScroll: false });
-      return;
-    }
+    returned.current = Boolean(slug);
+    if (!slug) return;
+    const card = document.querySelector<HTMLElement>(`article[data-slug="${CSS.escape(slug)}"]`);
+    if (!card) return;
+    const r = card.getBoundingClientRect();
+    if (r.top < 0 || r.bottom > window.innerHeight) card.scrollIntoView({ block: "center" });
+    card.querySelector("a")?.focus({ preventScroll: true });
+  }, []);
+
+  useEffect(() => {
+    if (returned.current) return;
     // First visit this session: deal the cards in when the deck scrolls into view.
     const list = listRef.current;
     // Read the resolved attribute: the hook still reports its SSR snapshot during this effect.

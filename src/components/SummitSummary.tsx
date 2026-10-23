@@ -19,15 +19,23 @@ export function SummitSummary({
   rows,
   className,
   style,
+  exitOnReturn = false,
 }: {
   id: string;
   heading: string;
   rows: SummaryRow[];
   className?: string;
   style?: CSSProperties;
+  /** Leaves first when going back to the deck (return-transition.ts). */
+  exitOnReturn?: boolean;
 }) {
   return (
-    <section className={className ? `${styles.summary} ${className}` : styles.summary} style={style} aria-labelledby={id}>
+    <section
+      className={className ? `${styles.summary} ${className}` : styles.summary}
+      style={style}
+      aria-labelledby={id}
+      data-vt-exit={exitOnReturn ? "" : undefined}
+    >
       <h2 id={id} className={`${styles.heading} hud-label`}>
         {heading}
       </h2>

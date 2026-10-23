@@ -7,6 +7,7 @@ import { AscentProfile } from "@/components/about/AscentProfile";
 import { CardArtwork } from "@/components/card/CardArtwork";
 import { SummitSummary } from "@/components/SummitSummary";
 import { MorphTarget } from "@/components/transition/MorphTarget";
+import { RememberCard } from "@/components/transition/RememberCard";
 import { KineticText } from "@/components/type/KineticText";
 import { about } from "@/content/about";
 import { caseStudyLabels as L, cardBySlug } from "@/content/cards";
@@ -33,9 +34,12 @@ export default function About() {
   );
 
   return (
-    <main id="main" className={`${styles.main} container`}>
-      <nav className={styles.crumbs} aria-label={L.back}>
-        <Link href="/" className="hud-label">
+    <main id="main" className={`${styles.main} container`} data-card={leader.slug}>
+      {/* data-vt-exit: the page's own content, which leaves first on the way back (return-transition.ts). */}
+      <RememberCard slug={leader.slug} />
+      <nav className={styles.crumbs} aria-label={L.back} data-vt-exit>
+        {/* No scroll to the top: the deck brings the card back into view itself (Deck). */}
+        <Link href="/" scroll={false} className="hud-label">
           <span aria-hidden="true">←</span> {L.back}
         </Link>
       </nav>
@@ -45,18 +49,20 @@ export default function About() {
           <CardArtwork artwork={leader.artwork} alt={leader.artworkAlt} className={styles.art} />
         </MorphTarget>
         <div className={styles.intro} data-quiet-zone>
-          <p className={`${styles.eyebrow} hud-label map-halo reveal`}>{about.header.eyebrow}</p>
+          <p className={`${styles.eyebrow} hud-label map-halo reveal`} data-vt-exit>
+            {about.header.eyebrow}
+          </p>
           <MorphTarget name={morphName("title", leader.slug)} variant="title">
             <KineticText as="h1" text={about.header.name} className={`${styles.name} display`} delay={420} proximity settleOnArrival />
           </MorphTarget>
-          <p className={`${styles.role} map-halo reveal`} style={reveal(1)}>
+          <p className={`${styles.role} map-halo reveal`} style={reveal(1)} data-vt-exit>
             {about.header.role}
             <span className={`${styles.place} hud-label map-halo keep-halo`}>{about.header.place}</span>
           </p>
-          <p className={`${styles.statement} body-copy reveal`} style={reveal(2)}>
+          <p className={`${styles.statement} body-copy reveal`} style={reveal(2)} data-vt-exit>
             {about.header.statement}
           </p>
-          <Actions actions={about.actions} className="reveal" />
+          <Actions actions={about.actions} className="reveal" exitOnReturn />
         </div>
       </header>
 
@@ -66,11 +72,12 @@ export default function About() {
         rows={about.summary.rows}
         className="reveal"
         style={reveal(3)}
+        exitOnReturn
       />
 
       <AscentProfile labels={about.ascent} milestones={about.ascent.milestones} stops={stops} />
 
-      <section className={styles.section} aria-labelledby="rope-team-heading">
+      <section className={styles.section} aria-labelledby="rope-team-heading" data-vt-exit>
         <div className={styles.sectionHead} data-quiet-zone>
           <KineticText as="h2" id="rope-team-heading" text={about.principles.heading} className={`${styles.sectionHeading} display`} play="inview" />
           <p className="body-copy">{about.principles.intro}</p>
@@ -87,7 +94,7 @@ export default function About() {
         </ol>
       </section>
 
-      <section className={styles.section} aria-labelledby="craft-heading">
+      <section className={styles.section} aria-labelledby="craft-heading" data-vt-exit>
         <div className={styles.sectionHead} data-quiet-zone>
           <KineticText as="h2" id="craft-heading" text={about.craft.heading} className={`${styles.sectionHeading} display`} play="inview" />
           <p className="body-copy">{about.craft.intro}</p>
@@ -116,7 +123,7 @@ export default function About() {
         </ul>
       </section>
 
-      <section className={`${styles.section} ${styles.offTrail}`} aria-labelledby="off-trail-heading">
+      <section className={`${styles.section} ${styles.offTrail}`} aria-labelledby="off-trail-heading" data-vt-exit>
         <KineticText as="h2" id="off-trail-heading" text={about.offTrail.heading} className={`${styles.sectionHeading} display`} play="inview" quiet />
         <div className={`${styles.offTrailBody} legend`}>
           <p className="body-copy">{about.offTrail.body}</p>
@@ -124,7 +131,7 @@ export default function About() {
         </div>
       </section>
 
-      <section className={styles.contact} aria-labelledby="contact-heading" data-quiet-zone>
+      <section className={styles.contact} aria-labelledby="contact-heading" data-quiet-zone data-vt-exit>
         <KineticText as="h2" id="contact-heading" text={about.contact.heading} className={`${styles.contactHeading} display`} play="inview" proximity />
         <p className="body-copy">{about.contact.body}</p>
         <Actions actions={about.actions} />

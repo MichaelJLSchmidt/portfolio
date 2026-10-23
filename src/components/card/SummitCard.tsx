@@ -160,6 +160,10 @@ export function SummitCard({
               <span>{card.collector.language}</span>
             </p>
             {foil && <div className={styles.foil} aria-hidden="true" />}
+            {/* Drawn on when the card is rebuilt on the way back from its page (data-reassemble). */}
+            <svg className={styles.neatline} aria-hidden="true">
+              <rect pathLength={1} />
+            </svg>
             <div className={styles.glare} aria-hidden="true" />
             {linkToCaseStudy && (
               <Link

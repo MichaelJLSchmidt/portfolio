@@ -330,6 +330,39 @@ i,
   animation: vt-enter var(--dur-long) var(--ease-trail) both;
 }
 
+/* Back into the deck: "card reassembly" (html[data-vt="return"], return-transition.ts).
+   1. 0–220 ms: the page's own content leaves first, fading and dropping a few pixels (scree);
+   2. 100–800 ms: the artwork travels back into the card's window, cropped and never stretched
+      (object-fit: cover above), and the title flies into the name slot with the sharp
+      cross-fade of the forward direction;
+   3. 450–1080 ms: the card rebuilds itself around them (SummitCard.module.css).
+   The forward direction keeps its timing. */
+:root[data-vt="return"]::view-transition-old(.vt-exit) {
+  animation: vt-exit-drop var(--dur-short) var(--ease-scree) both;
+}
+
+@keyframes vt-exit-drop {
+  to {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+:root[data-vt="return"]::view-transition-group(.morph),
+:root[data-vt="return"]::view-transition-old(.morph-art),
+:root[data-vt="return"]::view-transition-new(.morph-art) {
+  animation-delay: 100ms;
+  animation-duration: calc(var(--dur-scenic) - 200ms);
+}
+
+:root[data-vt="return"]::view-transition-old(.morph-title) {
+  animation: vt-title-old calc(var(--dur-scenic) - 200ms) linear 100ms both;
+}
+
+:root[data-vt="return"]::view-transition-new(.morph-title) {
+  animation: vt-title-new calc(var(--dur-scenic) - 200ms) linear 100ms both;
+}
+
 /* Calm map / reduced motion: no view transition at all (src/lib/view-transition.ts). The
    page changes directly and the incoming page fades in, opacity only (CalmRouteFade). */
 @keyframes route-fade-in {

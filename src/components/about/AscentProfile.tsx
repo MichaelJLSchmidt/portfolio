@@ -125,7 +125,7 @@ export function AscentProfile({
   }, [milestones, reduced]);
 
   return (
-    <section ref={rootRef} className={styles.ascent} aria-labelledby="ascent-heading" style={{ "--p": 1 } as CSSProperties}>
+    <section ref={rootRef} className={styles.ascent} aria-labelledby="ascent-heading" style={{ "--p": 1 } as CSSProperties} data-vt-exit>
       <header className={styles.header} data-quiet-zone>
         <KineticText as="h2" id="ascent-heading" text={labels.heading} className={`${styles.heading} display`} play="inview" />
         <p className="body-copy">{labels.intro}</p>
