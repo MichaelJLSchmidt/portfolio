@@ -335,6 +335,7 @@ production builds compile them out:
 - Body text is measured as rendered: `npm run check:legibility` screenshots every `.body-copy` block (and the
   footer) on the home page, a case study and Basecamp, at 1440×900 and 390×844, over the field with the
   headlamp lit right on the text and over the poster. It requires at least 7:1 against the brightest
-  background pixel under or next to a glyph, and lines under the glyphs at most 15% of a lit line.
+  background pixel under or next to a glyph, and lines under the glyphs at most 15% of a lit line. It also
+  fails when a page is wider than the phone (it would pan sideways).
 - The HUD clock always shows the live Bern time, Calm map and reduced motion included (a changing time is
   content, not motion); only its pulsing dot stops.
