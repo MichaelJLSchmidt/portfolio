@@ -192,7 +192,8 @@ describe("gate handler", () => {
     const { calls, request } = harness();
     for (const path of ["/", "/work/kibon/", "/_next/static/chunks/app.js", "/terrain/heightmap-1536.webp", "/index.txt?_rsc=1", "/_basecamp/x.css"]) {
       const res = await request(path);
-      assert.equal(res.status, 403, path);
+      assert.equal(res.status, 401, path);
+      assert.match(res.headers.get("WWW-Authenticate")!, /^Cookie realm="Basecamp"/);
       assert.equal(res.headers.get("Cache-Control"), "no-store");
       assert.equal(res.headers.get("X-Robots-Tag"), "noindex, nofollow");
       assert.match(res.headers.get("Content-Type")!, /^text\/html/);
@@ -243,7 +244,7 @@ describe("gate handler", () => {
     const { calls, unlock } = harness();
     const res = await unlock({ password: "wrong", next: "/about/" });
     assert.deepEqual(calls.waits, [gate.failureDelayMs]);
-    assert.equal(res.status, 403);
+    assert.equal(res.status, 401);
     assert.equal(res.headers.get("Set-Cookie"), null);
     assert.equal(res.headers.get("Cache-Control"), "no-store");
     const html = await res.text();
@@ -285,7 +286,7 @@ describe("gate handler", () => {
     const cookie = cookieFrom(await before.unlock({ password: PASSWORD, next: "/" }));
     const after = harness({ password: `${PASSWORD}-rotated` });
     const res = await after.request("/", { headers: { Cookie: cookie } });
-    assert.equal(res.status, 403);
+    assert.equal(res.status, 401);
     assert.equal(after.calls.next, 0);
   });
 

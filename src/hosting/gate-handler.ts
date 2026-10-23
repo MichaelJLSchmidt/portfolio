@@ -18,7 +18,7 @@ import { deserialize, renderPage, type FormState, type PageModel, type Serialize
  *
  * - Every path is protected except the gate's own assets (/.basecamp/assets/*) and
  *   robots.txt, which the gate answers itself with "Disallow: /".
- * - No valid cookie: the gate page (no-store).
+ * - No valid cookie: the gate page, 401 with a Cookie challenge (no-store).
  * - POST /.basecamp/unlock: password check, cookie, 303 to `next`; a wrong password waits,
  *   then shows the gate page with an error.
  * - GET /.basecamp/lock: clears the cookie, shows the gate page.
@@ -44,6 +44,8 @@ export type GateDeps = {
 };
 
 const ROBOTS = "noindex, nofollow";
+/** 401 needs a challenge; this names the form and the cookie (the "Cookie" scheme draft). */
+const CHALLENGE = `Cookie realm="Basecamp", form-action="${gate.unlock}", cookie-name="${gate.cookie}"`;
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 let warnedClosed = false;
 
@@ -123,14 +125,14 @@ export async function handleGate(request: Request, options: GateOptions, deps: G
       });
     }
     await (deps.wait ?? sleep)(gate.failureDelayMs);
-    return show({ next, state: "error" }, 403);
+    return show({ next, state: "error" }, 401, { "WWW-Authenticate": CHALLENGE });
   }
 
   if (await verifyCookie(password, readCookie(request.headers.get("Cookie"), gate.cookie), now)) {
     return gated(await deps.next());
   }
   const back = request.method === "GET" || request.method === "HEAD" ? safeNext(`${url.pathname}${url.search}`, url) : "/";
-  return show({ next: back, state: "idle" }, 403);
+  return show({ next: back, state: "idle" }, 401, { "WWW-Authenticate": CHALLENGE });
 }
 
 /** Netlify Edge Function handler (the build generates the entry that calls this). */
