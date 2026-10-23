@@ -3,6 +3,10 @@
  * --kt-rest-wdth / --kt-rest-wght. The entrance starts wide and light (--kt-from-*).
  */
 .kinetic {
+  /* Rest colour of the letters (the hover shine mixes from it towards glacier). Explicit, not
+     currentColor: Chrome mis-interpolates the entrance's colour keyframes against a
+     color-mix() that contains currentColor. */
+  --kt-color: var(--color-sheet);
   --kt-rest-wdth: calc(var(--type-display-wdth) * 1%);
   --kt-rest-wght: var(--type-display-wght);
   /* Arrival through a page transition: just off the rest axes, then a short settle. */
@@ -46,9 +50,11 @@
   left: 50%;
   translate: -50% 0;
   white-space: nowrap;
-  /* Pointer proximity: --p (0..1) opens the letter up. */
-  font-stretch: calc(var(--kt-rest-wdth) + var(--p, 0) * 40%);
-  font-weight: calc(var(--kt-rest-wght) - var(--p, 0) * 420);
+  /* Hover shine: --p (0..1, pointer proximity) mixes the rest colour towards glacier and adds
+     a very soft glacier glow. Paint only: no axis or layout change. Any mix of the rest colours
+     used (sheet, glacier) and glacier stays well above AA on ground. */
+  color: color-mix(in oklab, var(--kt-color), var(--color-glacier) calc(var(--p, 0) * 100%));
+  text-shadow: 0 0 0.3em color-mix(in oklab, var(--color-glacier) calc(var(--p, 0) * 28%), transparent);
 }
 
 @keyframes kt-condense {
@@ -104,4 +110,6 @@
   font-stretch: var(--kt-rest-wdth);
   font-weight: var(--kt-rest-wght);
   opacity: 1;
+  color: var(--kt-color);
+  text-shadow: none;
 }
