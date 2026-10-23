@@ -1,12 +1,18 @@
 /**
- * Quiet zones: elements marked `data-quiet-zone` (hero text, page headers, headings) ask the
- * contour field to fade its lines behind them. The field reads their viewport rectangles,
- * kept current with a ResizeObserver (size and layout changes), scroll and resize events,
- * and a MutationObserver for zones that arrive or leave with a route change.
+ * Quiet zones ask the contour field to fade its lines behind text, the way contour lines
+ * break under the labels of a printed map. Two strengths:
+ * - "heading": elements marked `data-quiet-zone` (display type, page headers), lines at ~25%;
+ * - "body": running text (`.body-copy`) and other text blocks (`.knockout`), lines at ~9%
+ *   with a wider feather, so they visibly break around the copy.
+ * The field reads their viewport rectangles, kept current with a ResizeObserver (size and
+ * layout changes), scroll and resize events, and a MutationObserver for zones that arrive or
+ * leave with a route change.
  */
-export type QuietRect = { left: number; top: number; right: number; bottom: number };
+export type QuietKind = "heading" | "body";
+export type QuietRect = { left: number; top: number; right: number; bottom: number; kind: QuietKind };
 
-export const QUIET_ZONE_SELECTOR = "[data-quiet-zone]";
+const BODY_SELECTOR = ".body-copy, .knockout";
+export const QUIET_ZONE_SELECTOR = `[data-quiet-zone], ${BODY_SELECTOR}`;
 
 export function watchQuietZones(onChange: (rects: readonly QuietRect[]) => void): () => void {
   let elements: Element[] = [];
@@ -20,8 +26,11 @@ export function watchQuietZones(onChange: (rects: readonly QuietRect[]) => void)
       // Zero-sized: hidden, e.g. a visited page Next keeps alive with display: none.
       if (r.width === 0 || r.height === 0) continue;
       if (r.bottom < -margin || r.top > window.innerHeight + margin) continue;
-      rects.push({ left: r.left, top: r.top, right: r.right, bottom: r.bottom });
+      rects.push({ left: r.left, top: r.top, right: r.right, bottom: r.bottom, kind: el.matches(BODY_SELECTOR) ? "body" : "heading" });
     }
+    // More zones than the shader holds: the ones on screen first.
+    const onScreen = (r: QuietRect) => (r.bottom > 0 && r.top < window.innerHeight ? 0 : 1);
+    rects.sort((a, b) => onScreen(a) - onScreen(b));
     onChange(rects);
   };
 
@@ -47,7 +56,7 @@ export function watchQuietZones(onChange: (rects: readonly QuietRect[]) => void)
       collect();
     });
   });
-  mutations.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-quiet-zone"] });
+  mutations.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-quiet-zone", "class"] });
   window.addEventListener("scroll", measure, { passive: true });
   window.addEventListener("resize", measure);
   collect();

@@ -45,6 +45,8 @@ export default function DevTuning() {
     // Quiet zones behind text: line strength inside, feather outside (CSS px).
     quietStrength: { value: fieldConfig.quietStrength, min: 0, max: 1, step: 0.05 },
     quietFeatherPx: { value: fieldConfig.quietFeatherPx, min: 0, max: 160, step: 4 },
+    bodyQuietStrength: { value: fieldConfig.bodyQuietStrength, min: 0, max: 1, step: 0.01 },
+    bodyQuietFeatherPx: { value: fieldConfig.bodyQuietFeatherPx, min: 0, max: 160, step: 4 },
     zoomBase: { value: fieldConfig.zoomBase, min: 1, max: 1.3, step: 0.01 },
     morphZoom: { value: fieldConfig.morphZoom, min: 0, max: 0.5, step: 0.01 },
     intro: { value: fieldConfig.intro, options: durationTokens },

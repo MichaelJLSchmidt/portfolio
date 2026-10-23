@@ -24,6 +24,8 @@
   "rippleSpeedPxS": 900,
   "quietStrength": 0.25,
   "quietFeatherPx": 48,
+  "bodyQuietStrength": 0.09,
+  "bodyQuietFeatherPx": 64,
   "zoomBase": 1.06,
   "morphZoom": 0.14,
   "intro": "cinematic",

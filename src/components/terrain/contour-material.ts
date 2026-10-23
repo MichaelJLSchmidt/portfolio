@@ -59,10 +59,10 @@ uniform vec3 uPulseColor;
 uniform vec3 uRipple;      // click ping: x, y (device px), age (s); age < 0 = none
 uniform float uRippleSpeed; // device px per second
 
-#define MAX_QUIET 8
-uniform vec4 uQuiet[MAX_QUIET]; // quiet zones behind text: left, bottom, right, top (device px)
+#define MAX_QUIET 24
+uniform vec4 uQuiet[MAX_QUIET];     // quiet zones behind text: left, bottom, right, top (device px)
+uniform vec2 uQuietKind[MAX_QUIET]; // per zone: feather (device px), line strength inside (0..1)
 uniform int uQuietCount;
-uniform vec2 uQuietParams;      // feather (device px), line strength inside a zone (0..1)
 
 float decodeHeight(sampler2D tex, vec2 uv, vec2 enc) {
   vec2 rg = texture(tex, uv).rg;
@@ -127,15 +127,17 @@ void main() {
     ripple = exp(-abs(rr - radius) / (0.06 * uRippleSpeed)) * (1.0 - smoothstep(0.2, 1.6, uRipple.z));
   }
 
-  // Quiet zones: lines fade to uQuietParams.y inside the rectangles, feathered outwards.
-  float quiet = 0.0;
+  // Quiet zones: lines fade to the zone's strength inside its rectangle, feathered outwards,
+  // like contours interrupted under a map's labels. Headings keep ~25% of a line, body text
+  // ~9%; where zones overlap, the stronger knockout wins.
+  float keep = 1.0;
   for (int i = 0; i < MAX_QUIET; i++) {
     if (i >= uQuietCount) break;
     vec4 r = uQuiet[i];
     vec2 outside = max(max(r.xy - gl_FragCoord.xy, gl_FragCoord.xy - r.zw), 0.0);
-    quiet = max(quiet, 1.0 - smoothstep(0.0, uQuietParams.x, length(outside)));
+    float q = 1.0 - smoothstep(0.0, uQuietKind[i].x, length(outside));
+    keep = min(keep, mix(1.0, uQuietKind[i].y, q));
   }
-  float keep = mix(1.0, uQuietParams.y, quiet);
 
   float light = max(max(lit, front), ripple);
   float aReg = reg * mix(uLineOpacity, 1.0, max(light, pulse)) * keep;
@@ -157,7 +159,7 @@ void main() {
 `;
 
 /** Must match MAX_QUIET in the fragment shader. */
-export const MAX_QUIET_ZONES = 8;
+export const MAX_QUIET_ZONES = 24;
 
 export type ContourUniforms = {
   [K in
@@ -197,8 +199,8 @@ export type ContourUniforms = {
     | "uRipple"
     | "uRippleSpeed"
     | "uQuiet"
-    | "uQuietCount"
-    | "uQuietParams"]: THREE.IUniform;
+    | "uQuietKind"
+    | "uQuietCount"]: THREE.IUniform;
 };
 
 export function createContourMaterial(): THREE.ShaderMaterial & { uniforms: ContourUniforms } {
@@ -239,8 +241,8 @@ export function createContourMaterial(): THREE.ShaderMaterial & { uniforms: Cont
     uRipple: { value: new THREE.Vector3(0, 0, -1) },
     uRippleSpeed: { value: 900 },
     uQuiet: { value: Array.from({ length: MAX_QUIET_ZONES }, () => new THREE.Vector4()) },
+    uQuietKind: { value: Array.from({ length: MAX_QUIET_ZONES }, () => new THREE.Vector2(48, 0.25)) },
     uQuietCount: { value: 0 },
-    uQuietParams: { value: new THREE.Vector2(48, 0.25) },
   };
   return new THREE.ShaderMaterial({
     glslVersion: THREE.GLSL3,
