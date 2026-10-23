@@ -171,6 +171,13 @@ for (const mode of pick(modes)) {
       await page.goto(`${base}${p.path}${mode.reduced ? "" : "?field=force"}`, { waitUntil: "networkidle" });
       if (!mode.reduced) await page.waitForSelector('[data-field="on"]', { timeout: 20000 });
       await page.waitForTimeout(1500);
+      // Content wider than a phone widens its layout viewport: the page pans sideways, and the
+      // screenshots (taken by the visual viewport) no longer line up with the element boxes.
+      const layoutWidth = await page.evaluate(() => window.innerWidth);
+      if (layoutWidth !== vp.viewport.width) {
+        failures++;
+        console.log(`FAIL  page is ${layoutWidth} px wide at ${vp.viewport.width} px · ${mode.name} · ${vp.name} · ${p.name}`);
+      }
       const count = await page.evaluate(
         ({ BODY, LEGACY }) => {
           const selector = document.querySelector(BODY) ? BODY : LEGACY;
