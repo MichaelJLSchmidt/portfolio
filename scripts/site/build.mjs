@@ -38,6 +38,7 @@ const run = (args, env = {}) => {
 // The gate exists only where this build creates it; a stale entry from an earlier local
 // build must never reach another mode's deploy.
 rmSync(edgeEntry, { force: true });
+rmSync(out, { recursive: true, force: true });
 run([join(root, "scripts/check-content.mjs"), "--build", `--mode=${mode}`]);
 
 const lines = (...rows) => `${rows.flat().join("\n")}\n`;
@@ -62,15 +63,15 @@ const siteHeaders = [
 
 if (mode === "construction") {
   const { contentSecurityPolicy, copyAssets, pageModel } = await import("./holding.mjs");
-  rmSync(out, { recursive: true, force: true });
   const assets = copyAssets(join(out, "assets"), "/assets/");
   // A local preview build (NEXT_PUBLIC_PREVIEW=1, placeholders allowed) is noindex.
   const preview = process.env.NEXT_PUBLIC_PREVIEW === "1";
   const model = pageModel(assets, { canonical: preview ? null : `https://${PRIMARY_DOMAIN}/` });
   write("index.html", renderPage(model, { action: `https://${BASECAMP_HOST}${gate.unlock}`, next: "/", state: "idle" }));
   write("robots.txt", lines("User-agent: *", "Allow: /"));
-  // Every other path goes back to the page (shadowing: existing files are served as they are).
-  write("_redirects", lines(generated, domainRedirects, "/*  /  302"));
+  // Every other path goes back to the page. Not "/*": Netlify drops a splat rule that would also
+  // match its own target "/". Not forced, so existing files are served as they are.
+  write("_redirects", lines(generated, domainRedirects, "/:segment  /  302", "/:segment/*  /  302"));
   write(
     "_headers",
     lines(
