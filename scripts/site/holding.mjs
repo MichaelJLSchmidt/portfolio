@@ -68,6 +68,9 @@ function css({ fonts, poster }) {
     `.lamp.on{opacity:1;transition-duration:var(--dur-short)}`,
     `.terrain::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgb(27 28 24/.9),transparent 18%,transparent 82%,rgb(27 28 24/.9)),radial-gradient(130% 85% at 0% 55%,rgb(27 28 24/.88) 0,rgb(27 28 24/.6) 45%,rgb(27 28 24/0) 80%)}`,
     `@media (prefers-reduced-motion:reduce){.lamp{display:none}}`,
+    // The site's cartographic halo (.map-halo): text stays legible over any line, lit or not.
+    `.hud,main,footer{text-shadow:0 0 2px var(--color-ground),0 0 6px var(--color-ground),0 0 14px var(--color-ground)}`,
+    `input,button{text-shadow:none}`,
     `.label{${label}}`,
     `.hud{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 20px;margin:0;padding:max(14px,env(safe-area-inset-top)) max(var(--gutter),env(safe-area-inset-right)) 14px max(var(--gutter),env(safe-area-inset-left));color:var(--color-contour)}`,
     `.hud p{margin:0}.hud .clock{margin-left:auto}.hud [hidden]{display:none}`,
