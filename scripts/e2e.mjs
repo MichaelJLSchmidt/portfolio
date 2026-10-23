@@ -5,7 +5,7 @@
 //   npm run test:e2e -- transitions   aborted view transitions; Calm map and reduced motion
 //   npm run test:e2e -- decode        heightmap decode check and its fallbacks
 //
-// Serves ./out like GitHub Pages (base path read from the build) and drives Chromium with
+// Serves ./out like a static host (base path read from the build) and drives Chromium with
 // Playwright, which is not a dependency: `npm i -D playwright && npx playwright install chromium`,
 // or NODE_PATH pointing at a global install. WebGL runs on SwiftShader, so the field is forced on
 // with ?field=force.

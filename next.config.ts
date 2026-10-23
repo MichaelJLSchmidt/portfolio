@@ -1,9 +1,9 @@
 import type { NextConfig } from "next";
 
 /**
- * The site is a pure static export. It is served from a sub-path on GitHub Pages
- * ("/<repo>") and from the root on the production host, so the base path comes
- * from the environment and defaults to empty.
+ * The site is a pure static export, served from the domain root on Netlify. A build for a
+ * sub-path still works (NEXT_PUBLIC_BASE_PATH, e.g. "/portfolio" to test asset() locally),
+ * so the base path comes from the environment and defaults to empty.
  */
 function normaliseBasePath(value: string | undefined): string {
   const trimmed = (value ?? "").trim().replace(/\/+$/, "");
