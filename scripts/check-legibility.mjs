@@ -1,7 +1,8 @@
 // Body text against what is actually behind it, measured on rendered screenshots in Chromium:
-// every running-text element (.body-copy) on the home page, a case study and Basecamp, at a
-// desktop and a phone size, over the moving contour field at its worst (the headlamp lit right
-// on the text) and over the static poster (reduced motion, no WebGL).
+// every running-text element (.body-copy, and .knockout blocks such as the footer) on the home
+// page, a case study and Basecamp, at a desktop and a phone size, over the moving contour field
+// at its worst (the headlamp lit right on the text) and over the static poster (reduced motion,
+// no WebGL).
 //
 // For each element, three screenshots of its box: background (text fill transparent, halos
 // kept), text, background again. Glyph pixels are where the text shot is much brighter than
@@ -65,8 +66,9 @@ for (let i = 0; i < 50; i++) {
   await new Promise((r) => setTimeout(r, 100));
 }
 
-// Running text. Builds from before the shared class name the same elements by their modules.
-const BODY = ".body-copy";
+// Running text and other knocked-out text blocks (the footer). Builds from before the shared
+// class names: the same elements by their modules.
+const BODY = ".body-copy, .knockout";
 const LEGACY = [
   "p[class*='_lede']",
   "p[class*='_intro']",
@@ -186,7 +188,6 @@ for (const mode of pick(modes)) {
         const info = await page.evaluate((i) => {
           const el = document.querySelector(`[data-legibility="${i}"]`);
           el.scrollIntoView({ block: "center" });
-          const r = el.getBoundingClientRect();
           // Darkest text colour among the element and its text-bearing descendants.
           const lin = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
           let textL = 1;
@@ -195,40 +196,56 @@ for (const mode of pick(modes)) {
             const [r2, g, b] = getComputedStyle(node).color.match(/[\d.]+/g).map(Number);
             textL = Math.min(textL, 0.2126 * lin(r2 / 255) + 0.7152 * lin(g / 255) + 0.0722 * lin(b / 255));
           }
-          return { textL, label: el.textContent.trim().replace(/\s+/g, " ").slice(0, 44), x: r.left, y: r.top, w: r.width, h: r.height };
+          return { textL, label: el.textContent.trim().replace(/\s+/g, " ").slice(0, 44) };
         }, i);
-        await page.waitForTimeout(400);
-        const box = await page.evaluate((i) => {
-          const r = document.querySelector(`[data-legibility="${i}"]`).getBoundingClientRect();
-          return { x: r.left, y: r.top, w: r.width, h: r.height };
-        }, i);
-        const clip = {
-          x: Math.max(0, Math.floor(box.x) - 2),
-          y: Math.max(0, Math.floor(box.y) - 2),
-          width: Math.min(vp.viewport.width, Math.ceil(box.x + box.w) + 2) - Math.max(0, Math.floor(box.x) - 2),
-          height: Math.min(vp.viewport.height, Math.ceil(box.y + box.h) + 2) - Math.max(0, Math.floor(box.y) - 2),
-        };
-        if (clip.width < 4 || clip.height < 4) continue;
-        // The headlamp, right on the text: the pointer, or a finger held down on a phone.
-        const cx = clip.x + clip.width / 2;
-        const cy = clip.y + clip.height / 2;
-        if (!mode.reduced) {
-          if (cdp) await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: cx, y: cy }] });
-          else await page.mouse.move(cx, cy);
-          await page.waitForTimeout(700);
+        // The box is taken once the element has settled (an entrance or a plaque still rising
+        // would shift it under the clip), and checked again after the shots.
+        const boxOf = () =>
+          page.evaluate((i) => {
+            const r = document.querySelector(`[data-legibility="${i}"]`).getBoundingClientRect();
+            return { x: r.left, y: r.top, w: r.width, h: r.height };
+          }, i);
+        const same = (a, b) => Math.abs(a.x - b.x) < 1 && Math.abs(a.y - b.y) < 1 && Math.abs(a.w - b.w) < 1 && Math.abs(a.h - b.h) < 1;
+        let shots = null;
+        let clip = null;
+        for (let attempt = 0; attempt < 4 && !shots; attempt++) {
+          await page.waitForTimeout(400);
+          const box = await boxOf();
+          clip = {
+            x: Math.max(0, Math.floor(box.x) - 2),
+            y: Math.max(0, Math.floor(box.y) - 2),
+            width: Math.min(vp.viewport.width, Math.ceil(box.x + box.w) + 2) - Math.max(0, Math.floor(box.x) - 2),
+            height: Math.min(vp.viewport.height, Math.ceil(box.y + box.h) + 2) - Math.max(0, Math.floor(box.y) - 2),
+          };
+          if (clip.width < 4 || clip.height < 4) break;
+          // The headlamp, right on the text: the pointer, or a finger held down on a phone.
+          const cx = clip.x + clip.width / 2;
+          const cy = clip.y + clip.height / 2;
+          if (!mode.reduced) {
+            if (cdp) await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: cx, y: cy }] });
+            else await page.mouse.move(cx, cy);
+            await page.waitForTimeout(700);
+          }
+          const shot = (bg) =>
+            page
+              .evaluate(({ i, bg }) => document.querySelector(`[data-legibility="${i}"]`).toggleAttribute("data-legibility-bg", bg), { i, bg })
+              .then(() => page.waitForTimeout(60))
+              .then(() => page.screenshot({ clip }))
+              .then(decode);
+          const settled = same(box, await boxOf());
+          const b1 = await shot(true);
+          const t = await shot(false);
+          const b2 = await shot(true);
+          await shot(false);
+          // Cancel, not end: a lifted finger would tap whatever link is under it.
+          if (cdp && !mode.reduced) await cdp.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] });
+          if (settled && same(box, await boxOf())) shots = { b1, t, b2 };
         }
-        const shot = (bg) =>
-          page
-            .evaluate(({ i, bg }) => document.querySelector(`[data-legibility="${i}"]`).toggleAttribute("data-legibility-bg", bg), { i, bg })
-            .then(() => page.waitForTimeout(60))
-            .then(() => page.screenshot({ clip }))
-            .then(decode);
-        const b1 = await shot(true);
-        const t = await shot(false);
-        const b2 = await shot(true);
-        await shot(false);
-        // Cancel, not end: a lifted finger would tap whatever link is under it.
-        if (cdp && !mode.reduced) await cdp.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] });
+        if (!shots) {
+          if (clip && clip.width >= 4 && clip.height >= 4) console.warn(`  (skipped, never settled: ${info.label})`);
+          continue;
+        }
+        const { b1, t, b2 } = shots;
         if (process.env.LEGIBILITY_DEBUG && info.label.includes(process.env.LEGIBILITY_DEBUG)) {
           for (const [name, img] of [["bg1", b1], ["text", t], ["bg2", b2]]) {
             await sharp(img.data, { raw: { width: img.width, height: img.height, channels: 3 } }).png().toFile(`legibility-${name}.png`);
