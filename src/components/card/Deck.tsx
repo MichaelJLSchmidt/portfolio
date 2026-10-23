@@ -57,14 +57,13 @@ export function Deck() {
     <section className={styles.deck} aria-labelledby="deck-heading">
       <div className={styles.header}>
         <KineticText as="h2" id="deck-heading" text={site.hero.deckHeading} className={`${styles.heading} display`} play="inview" proximity />
-        <p className={`${styles.intro} map-halo`}>{site.hero.deckIntro}</p>
+        <p className={`${styles.intro} body-copy`}>{site.hero.deckIntro}</p>
         <TiltControl labels={{ enable: site.hud.tiltEnable, resume: site.hud.tiltResume, on: site.hud.tiltOn }} />
       </div>
       <ul ref={listRef} className={styles.cards} data-deal={deal}>
         {cards.map((card, i) => (
           <li key={card.slug} className={styles.slot} style={{ "--deal-i": i } as React.CSSProperties}>
             <SummitCard card={card} transitionNames onOpen={() => rememberOrigin(card.slug)} />
-            <p className={`${styles.summary} map-halo`}>{card.summary}</p>
           </li>
         ))}
       </ul>

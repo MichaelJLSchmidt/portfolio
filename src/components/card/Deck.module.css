@@ -1,7 +1,8 @@
+/* The top padding is small: the heading has to peek into the first screen (see the hero). */
 .deck {
   display: grid;
-  gap: clamp(32px, 5vw, 72px);
-  padding-block: clamp(48px, 10vw, 140px) clamp(64px, 10vw, 160px);
+  gap: clamp(32px, 4.5vw, 72px);
+  padding-block: clamp(20px, 3vw, 40px) clamp(64px, 10vw, 160px);
 }
 
 .header {
@@ -18,16 +19,16 @@
 
 .intro {
   max-width: 40ch;
-  color: var(--color-sheet);
 }
 
-/* Cards sit centred on the page, a little offset from each other like a dealt hand. */
+/* Cards sit centred on the page, a little offset from each other like a dealt hand. Without
+   captions each slot is just its card, so the offset is a fraction of a card's height. */
 .cards {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   align-items: flex-start;
-  gap: clamp(40px, 5vw, 96px);
+  gap: clamp(36px, 5vw, 104px);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -36,13 +37,12 @@
 .slot {
   display: grid;
   justify-items: center;
-  gap: 20px;
   width: min(100%, 420px);
 }
 
 @media (min-width: 900px) {
   .slot:nth-child(even) {
-    margin-top: clamp(40px, 6vw, 120px);
+    margin-top: clamp(48px, 6.5vw, 112px);
   }
 }
 
@@ -57,14 +57,6 @@
     opacity var(--dur-long) var(--ease-trail),
     transform var(--dur-scenic) var(--ease-drop);
   transition-delay: calc(var(--deal-i) * 160ms);
-}
-
-.summary {
-  max-width: 42ch;
-  color: var(--color-sheet);
-  font-size: 0.9375rem;
-  line-height: 1.6;
-  text-align: center;
 }
 
 .tilt {
