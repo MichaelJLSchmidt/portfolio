@@ -494,6 +494,116 @@
 
 /* -------------------------------------------------------- reduced motion */
 
+/* ------------------------------------------------- return: card reassembly
+   Coming back from the card's page, the card is rebuilt around its landed artwork
+   (data-reassemble, set by return-transition.ts once the deck is back in the DOM; the art and
+   title are still flying in until ~800 ms):
+   450–810 ms  the neatline draws on along the outline in the rarity colour;
+   450–870 ms  name bar, type line, rules, stats and collector line rise in, 50 ms apart;
+   720 ms      a single glacier shine sweeps across the card name. */
+.neatline {
+  display: none;
+  position: absolute;
+  inset: 1.6cqi;
+  z-index: 3;
+  width: calc(100% - 3.2cqi);
+  height: calc(100% - 3.2cqi);
+  overflow: visible;
+  pointer-events: none;
+}
+
+.neatline rect {
+  x: 0.5px;
+  y: 0.5px;
+  width: calc(100% - 1px);
+  height: calc(100% - 1px);
+  rx: calc(var(--radius) - 1.6cqi);
+  fill: none;
+  stroke: var(--rarity);
+  stroke-width: 1px;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.card[data-reassemble] .neatline {
+  display: block;
+}
+
+/* The waiting states are base styles, not animation fill: a CSS animation applies nothing until
+   its start time resolves, which can be a frame after the deck is captured. */
+.card[data-reassemble] .neatline rect {
+  animation: neatline-draw var(--dur-medium) var(--ease-summit) 450ms forwards;
+}
+
+/* The static neatline takes over once the drawn one has closed. */
+.card[data-reassemble] .face::before {
+  opacity: 0;
+  animation: neatline-handover 0s calc(450ms + var(--dur-medium)) forwards;
+}
+
+.card[data-reassemble] :is(.nameBar, .coords, .typeLine, .rules, .stats, .collector) {
+  opacity: 0;
+  transform: translateY(6px);
+  animation: card-part-rise var(--dur-short) var(--ease-drop) forwards;
+  animation-delay: calc(450ms + var(--part, 0) * 50ms);
+}
+
+.card[data-reassemble] .typeLine {
+  --part: 1;
+}
+
+.card[data-reassemble] .rules {
+  --part: 2;
+}
+
+.card[data-reassemble] .stats {
+  --part: 3;
+}
+
+.card[data-reassemble] .collector {
+  --part: 4;
+}
+
+.card[data-reassemble] .name {
+  background: linear-gradient(100deg, var(--color-sheet) 42%, var(--color-glacier) 50%, var(--color-sheet) 58%) 100% 0 / 300% 100% no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: card-name-shine var(--dur-medium) var(--ease-trail) 720ms both;
+}
+
+@keyframes neatline-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes neatline-handover {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes card-part-rise {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes card-name-shine {
+  to {
+    background-position: 0 0;
+  }
+}
+
+:root[data-motion="reduced"] .card[data-reassemble] *,
+:root[data-motion="reduced"] .card[data-reassemble] .face::before {
+  animation: none !important;
+  opacity: 1;
+  transform: none;
+}
+
 :root[data-motion="reduced"] .tilt {
   transform: none;
 }

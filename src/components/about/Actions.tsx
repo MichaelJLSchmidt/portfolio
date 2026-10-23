@@ -3,9 +3,9 @@ import { asset } from "@/lib/asset";
 import styles from "./Actions.module.css";
 
 /** Contact actions. Until a URL exists, an action shows as a visible, inert [PLACEHOLDER]. */
-export function Actions({ actions, className }: { actions: Action[]; className?: string }) {
+export function Actions({ actions, className, exitOnReturn = false }: { actions: Action[]; className?: string; exitOnReturn?: boolean }) {
   return (
-    <ul className={className ? `${styles.actions} ${className}` : styles.actions}>
+    <ul className={className ? `${styles.actions} ${className}` : styles.actions} data-vt-exit={exitOnReturn ? "" : undefined}>
       {actions.map((a, i) => (
         <li key={a.kind}>
           {a.href ? (

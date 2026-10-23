@@ -4,7 +4,7 @@ import styles from "./SiteFooter.module.css";
 
 export function SiteFooter() {
   return (
-    <footer className={styles.footer}>
+    <footer className={`${styles.footer} knockout`}>
       <p className="hud-label">
         <a href={site.footer.creditHref} rel="noopener">
           {site.footer.credit}
@@ -13,7 +13,7 @@ export function SiteFooter() {
       <p className="hud-label">
         <Link href="/about/">{site.footer.about}</Link>
       </p>
-      <p className={`${styles.note} hud-label`}>{site.footer.note}</p>
+      <p className="hud-label">{site.footer.note}</p>
     </footer>
   );
 }

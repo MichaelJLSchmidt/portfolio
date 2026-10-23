@@ -5,15 +5,11 @@
   justify-content: space-between;
   gap: 8px 24px;
   padding: 48px var(--gutter) max(24px, env(safe-area-inset-bottom));
-  color: var(--color-contour);
+  color: var(--color-sheet);
   border-top: 1px solid var(--color-contour-dim);
 }
 
 .footer a {
   color: var(--color-sheet);
   text-underline-offset: 3px;
-}
-
-.note {
-  color: var(--color-contour);
 }

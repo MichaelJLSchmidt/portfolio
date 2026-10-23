@@ -1,11 +1,12 @@
 // Serves the static export in ./out the way a static host does, including the base path.
-// Usage: node scripts/serve-out.mjs [--port 3000]   (reads NEXT_PUBLIC_BASE_PATH)
+// Usage: node scripts/serve-out.mjs [--port 3000] [--dir out]   (reads NEXT_PUBLIC_BASE_PATH)
 import { createServer } from "node:http";
 import { createReadStream, existsSync, statSync } from "node:fs";
 import { extname, join, normalize, resolve } from "node:path";
 import { createGzip } from "node:zlib";
 
-const root = resolve("out");
+const dirArg = process.argv.indexOf("--dir");
+const root = resolve(dirArg > -1 ? process.argv[dirArg + 1] : "out");
 const portArg = process.argv.indexOf("--port");
 const port = Number(portArg > -1 ? process.argv[portArg + 1] : process.env.PORT || 3000);
 const base = (process.env.NEXT_PUBLIC_BASE_PATH || "").replace(/\/+$/, "");

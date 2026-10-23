@@ -1,5 +1,5 @@
 import { Deck } from "@/components/card/Deck";
-import { KineticText } from "@/components/type/KineticText";
+import { HeroName } from "@/components/HeroName";
 import { site } from "@/content/site";
 import styles from "./page.module.css";
 
@@ -19,9 +19,9 @@ export default function Home() {
             {site.hero.origin}
           </p>
         </div>
-        <KineticText as="h1" id="hero-name" text={site.hero.name} className={`${styles.name} display`} delay={120} proximity quiet />
-        <div className={styles.heroFoot}>
-          <p className={`${styles.lede} map-halo`} data-quiet-zone>
+        <HeroName name={site.hero.name} className={`${styles.name} display`} />
+        <div className={styles.aside}>
+          <p className="body-copy reveal" style={{ "--reveal-i": 2 } as React.CSSProperties}>
             {site.hero.lede}
           </p>
           <a

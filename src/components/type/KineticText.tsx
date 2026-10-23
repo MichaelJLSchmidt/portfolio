@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { fieldConfig, msOf } from "@/components/terrain/field-settings";
 import { useFinePointer } from "@/lib/idle";
 import { useReducedMotion } from "@/lib/motion-preference";
 import { activeViewTransition } from "@/lib/view-transition";
@@ -8,7 +9,15 @@ import styles from "./KineticText.module.css";
 
 type Tag = "h1" | "h2" | "h3" | "p" | "span";
 
+/** The contour field's headlamp falloff (contour-material.ts), for a distance in radii. */
+function headlampFalloff(d: number): number {
+  const x = Math.min(1, d);
+  const lit = 1 - x * x * (3 - 2 * x);
+  return lit * lit * (3 - 2 * lit);
+}
+
 export type KineticTextProps = {
+  /** The text; "\n" breaks the line (read as a space). */
   text: string;
   as?: Tag;
   id?: string;
@@ -20,7 +29,11 @@ export type KineticTextProps = {
   play?: "mount" | "inview";
   /** Extra delay before the first letter, in ms. */
   delay?: number;
-  /** Letters near a fine pointer open up (wider and lighter), like a loupe over the map. */
+  /**
+   * Letters near a fine pointer shine towards glacier, like contours under the field's
+   * headlamp: the same falloff, a quick rise and a ~600 ms glide back. Colour only; the
+   * axes never move on hover.
+   */
   proximity?: boolean;
   /** Marks the heading as a quiet zone: the contour field fades its lines behind it. */
   quiet?: boolean;
@@ -34,9 +47,10 @@ export type KineticTextProps = {
 };
 
 /**
- * Variable-font headline. Each letter condenses from wide and light into the display cut.
- * Every letter keeps a hidden rest-state "ghost" that fixes its box, and the visible glyph
- * is positioned over it, so the axis animation never changes layout (no CLS).
+ * Variable-font headline. Each letter condenses from wide and light into the display cut,
+ * with a glacier shine. Every letter keeps a hidden rest-state "ghost" that fixes its box,
+ * and the visible glyph is positioned over it, so the axis animation never changes layout
+ * (no CLS). On hover the same shine follows a fine pointer; the axes stay at rest.
  */
 export function KineticText({
   text,
@@ -98,15 +112,15 @@ export function KineticText({
     };
   }, [settleOnArrival]);
 
-  // Pointer proximity: write a 0..1 "--p" per glyph, eased towards its target each frame.
-  // Fine pointers only; the easing runs on Motion's frame loop (loaded lazily), the page's
-  // single animation loop.
+  // Pointer proximity: a 0..1 "--p" per glyph drives the shine (KineticText.module.css).
+  // Fine pointers only; it eases on Motion's frame loop (loaded lazily), the page's single
+  // animation loop, and writes only the glyphs whose value changed.
   useEffect(() => {
     const el = ref.current;
     if (!el || !proximity || reduced || !finePointer) return;
     const chars = [...el.querySelectorAll<HTMLElement>(`.${styles.char}`)];
     let centres: { x: number; y: number }[] = [];
-    let radius = 160;
+    let radius = fieldConfig.headlampRadiusPx;
     const current = new Float32Array(chars.length);
     const target = new Float32Array(chars.length);
     let loop: typeof import("@/lib/frameloop") | null = null;
@@ -118,16 +132,26 @@ export function KineticText({
         const r = c.getBoundingClientRect();
         return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
       });
-      radius = Math.max(120, parseFloat(getComputedStyle(el).fontSize) * 1.6);
+      // The field's headlamp radius, wide enough to light a few letters of large type.
+      radius = Math.max(fieldConfig.headlampRadiusPx, parseFloat(getComputedStyle(el).fontSize) * 1.2);
     };
-    const step = () => {
+    const step = ({ delta }: { delta: number }) => {
       queued = null;
+      const dt = Math.min(delta || 16, 250);
       let moving = false;
       for (let i = 0; i < chars.length; i++) {
-        const next = current[i] + (target[i] - current[i]) * 0.16;
-        if (Math.abs(next - current[i]) > 0.002) moving = true;
-        current[i] = Math.abs(target[i] - next) < 0.002 ? target[i] : next;
-        chars[i].style.setProperty("--p", current[i].toFixed(3));
+        const rising = target[i] > current[i];
+        // Time constants: up in ~micro, back over headlampFadeMs (each ≈ 3 τ).
+        const tau = (rising ? msOf("micro") : fieldConfig.headlampFadeMs) / 3;
+        let next = current[i] + (target[i] - current[i]) * (1 - Math.exp(-dt / tau));
+        if (Math.abs(target[i] - next) < 0.004) next = target[i];
+        if (next !== current[i]) {
+          if (Math.abs(next - current[i]) > 0.0005 || next === target[i]) {
+            chars[i].style.setProperty("--p", next.toFixed(3));
+          }
+          current[i] = next;
+          if (next !== target[i]) moving = true;
+        }
       }
       if (moving) kick();
     };
@@ -137,9 +161,7 @@ export function KineticText({
     const onMove = (e: PointerEvent) => {
       if (e.pointerType === "touch") return;
       for (let i = 0; i < centres.length; i++) {
-        const d = Math.hypot(e.clientX - centres[i].x, e.clientY - centres[i].y);
-        const t = Math.max(0, 1 - d / radius);
-        target[i] = t * t * (3 - 2 * t);
+        target[i] = headlampFalloff(Math.hypot(e.clientX - centres[i].x, e.clientY - centres[i].y) / radius);
       }
       kick();
     };
@@ -165,36 +187,41 @@ export function KineticText({
       window.removeEventListener("resize", measure);
       chars.forEach((c) => c.style.removeProperty("--p"));
     };
-  }, [proximity, reduced, finePointer]);
+  }, [proximity, reduced, finePointer, text]);
 
   let index = 0;
-  const words = text.split(" ");
+  const lines = text.split("\n");
   return (
     <Tag
       ref={ref as never}
       id={id}
       className={className ? `${styles.kinetic} ${className}` : styles.kinetic}
-      aria-label={text}
+      aria-label={text.replace(/\n/g, " ")}
       data-play={inView ? "true" : "false"}
       data-quiet-zone={quiet ? "" : undefined}
       style={{ ...style, "--kt-delay": `${delay}ms` } as CSSProperties}
     >
       <span className={styles.letters} aria-hidden="true">
-        {words.map((word, w) => (
-          <span key={w}>
-            <span className={styles.word}>
-              {[...word].map((ch) => {
-                const i = index++;
-                return (
-                  <span key={i} className={styles.char} style={{ "--i": i } as CSSProperties}>
-                    <span className={styles.ghost}>{ch}</span>
-                    <span className={styles.glyph}>{ch}</span>
-                  </span>
-                );
-              })}
-            </span>
-            {w < words.length - 1 ? " " : null}
-          </span>
+        {lines.map((line, l) => (
+          <Fragment key={l}>
+            {l > 0 && <br />}
+            {line.split(" ").map((word, w, words) => (
+              <span key={w}>
+                <span className={styles.word}>
+                  {[...word].map((ch) => {
+                    const i = index++;
+                    return (
+                      <span key={i} className={styles.char} style={{ "--i": i } as CSSProperties}>
+                        <span className={styles.ghost}>{ch}</span>
+                        <span className={styles.glyph}>{ch}</span>
+                      </span>
+                    );
+                  })}
+                </span>
+                {w < words.length - 1 ? " " : null}
+              </span>
+            ))}
+          </Fragment>
         ))}
       </span>
     </Tag>

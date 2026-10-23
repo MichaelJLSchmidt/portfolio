@@ -45,6 +45,13 @@
   margin: 0;
 }
 
+/* Three columns are narrow on the smallest phones: a long word wraps inside its column
+   instead of widening the page. */
+.grid dt,
+.grid dd {
+  overflow-wrap: anywhere;
+}
+
 .stat {
   font-family: var(--font-martian), ui-monospace, monospace;
   font-size: 1.3rem;

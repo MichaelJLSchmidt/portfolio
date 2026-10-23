@@ -6,6 +6,7 @@ import { SummitCard } from "@/components/card/SummitCard";
 import { SummitSummary } from "@/components/SummitSummary";
 import { MagneticLink } from "@/components/transition/MagneticLink";
 import { MorphTarget } from "@/components/transition/MorphTarget";
+import { RememberCard } from "@/components/transition/RememberCard";
 import { KineticText } from "@/components/type/KineticText";
 import { morphName } from "@/lib/morph";
 import { caseStudyLabels as L, cardHref, caseStudyCards, cards } from "@/content/cards";
@@ -33,9 +34,12 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
   const next = cards[(cards.indexOf(card) + 1) % cards.length];
 
   return (
-    <main id="main" className={`${styles.main} container`} data-rarity={card.rarity}>
-      <nav className={styles.crumbs} aria-label={L.back}>
-        <Link href="/" className="hud-label">
+    <main id="main" className={`${styles.main} container`} data-rarity={card.rarity} data-card={card.slug}>
+      {/* data-vt-exit: the page's own content, which leaves first on the way back (return-transition.ts). */}
+      <RememberCard slug={card.slug} />
+      <nav className={styles.crumbs} aria-label={L.back} data-vt-exit>
+        {/* No scroll to the top: the deck brings the card back into view itself (Deck). */}
+        <Link href="/" scroll={false} className="hud-label">
           <span aria-hidden="true">←</span> {L.back}
         </Link>
       </nav>
@@ -45,14 +49,16 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
           <CardArtwork artwork={card.artwork} alt={card.artworkAlt} className={styles.art} />
         </MorphTarget>
         <div className={styles.titleBlock} data-quiet-zone>
-          <p className={`${styles.coords} hud-label map-halo keep-halo reveal`}>{card.coordinates}</p>
+          <p className={`${styles.coords} hud-label map-halo keep-halo reveal`} data-vt-exit>
+            {card.coordinates}
+          </p>
           <MorphTarget name={morphName("title", card.slug)} variant="title">
             <KineticText as="h1" text={card.name} className={`${styles.title} display`} delay={420} proximity settleOnArrival />
           </MorphTarget>
-          <p className={`${styles.type} map-halo reveal`} style={{ "--reveal-i": 1 } as React.CSSProperties}>
+          <p className={`${styles.type} map-halo reveal`} style={{ "--reveal-i": 1 } as React.CSSProperties} data-vt-exit>
             {card.type}
           </p>
-          <p className={`${styles.lede} map-halo reveal`} style={{ "--reveal-i": 2 } as React.CSSProperties}>
+          <p className="body-copy reveal" style={{ "--reveal-i": 2 } as React.CSSProperties} data-vt-exit>
             {card.caseStudy.lede}
           </p>
         </div>
@@ -63,6 +69,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
         heading={L.summaryHeading}
         className="reveal"
         style={{ "--reveal-i": 3 } as React.CSSProperties}
+        exitOnReturn
         rows={[
           { label: L.problem, value: summary.problem, wide: true },
           { label: L.role, value: summary.role, wide: true },
@@ -74,7 +81,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
         ]}
       />
 
-      <div className={styles.body}>
+      <div className={styles.body} data-vt-exit>
       <nav className={styles.jump} aria-labelledby="jump-heading">
         <h2 id="jump-heading" className="hud-label">
           {L.jumpTo}
@@ -92,19 +99,19 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
 
       <div className={styles.sections}>
         {card.caseStudy.sections.map((s) => (
-          <section key={s.id} id={s.id} className={styles.section} aria-labelledby={`${s.id}-heading`}>
+          <section key={s.id} id={s.id} className={`${styles.section} legend`} aria-labelledby={`${s.id}-heading`}>
             <KineticText as="h2" id={`${s.id}-heading`} text={s.title} className={`${styles.sectionHeading} display`} play="inview" />
-            <p>{s.body}</p>
+            <p className="body-copy">{s.body}</p>
           </section>
         ))}
       </div>
       </div>
 
-      <aside className={styles.inspect} aria-label={card.name}>
+      <aside className={styles.inspect} aria-label={card.name} data-vt-exit>
         <SummitCard card={card} size="inspect" headingLevel={2} linkToCaseStudy={false} />
       </aside>
 
-      <nav className={styles.next} aria-label={L.next}>
+      <nav className={styles.next} aria-label={L.next} data-vt-exit>
         <MagneticLink href={cardHref(next)} className={styles.nextLink}>
           <span className="hud-label">{L.next}</span>
           <span className={styles.nextRow}>
