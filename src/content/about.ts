@@ -126,3 +126,30 @@ export const about = {
     body: "Hiring for a UX lead, a design-system owner or a workshop facilitator? Let's talk.",
   },
 };
+
+/**
+ * The under-construction page production serves until launch, and the Basecamp password
+ * gate, which shares its design. `npm run check:content` in construction mode requires only
+ * the facts used here: the name and the email and LinkedIn links.
+ */
+export const holding = {
+  name: leader.name,
+  role: "UX Team Lead · Senior UX Designer · Bern",
+  status: "Basecamp is being set up. The expedition starts soon.",
+  /** Title and meta description, built from the name and role. */
+  meta: {
+    title: (name: string) => `${name} · UX Team Lead · Senior UX Designer`,
+    description: (name: string) =>
+      `${name}, UX Team Lead and Senior UX Designer in Bern, Switzerland. The portfolio is being set up; get in touch by email or on LinkedIn.`,
+  },
+  contact: actions.filter((a) => a.kind === "email" || a.kind === "linkedin"),
+  hud: { coordinates: "46.6863° N · 7.8632° E", altitude: "ALT 566 M", clock: "Bern" },
+  access: {
+    heading: "Basecamp access",
+    label: "Password",
+    submit: "Enter basecamp →",
+    error: "Wrong password. Try again.",
+    closed: "Basecamp is closed for now.",
+    username: "basecamp",
+  },
+};
