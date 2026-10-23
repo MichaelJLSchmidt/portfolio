@@ -214,6 +214,12 @@ i,
   pointer-events: none;
 }
 
+/* A knockout block is a whole region with its own padding (the full-width footer): its plate
+   keeps to its box, so it never widens the page. */
+.knockout:not(.legend *)::before {
+  inset: 0;
+}
+
 :root:not(:has([data-field="on"])) :is(.body-copy, .knockout):not(.legend *)::before {
   opacity: 0.94;
 }
