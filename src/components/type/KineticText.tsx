@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { fieldConfig, msOf } from "@/components/terrain/field-settings";
 import { useFinePointer } from "@/lib/idle";
 import { useReducedMotion } from "@/lib/motion-preference";
@@ -17,6 +17,7 @@ function headlampFalloff(d: number): number {
 }
 
 export type KineticTextProps = {
+  /** The text; "\n" breaks the line (read as a space). */
   text: string;
   as?: Tag;
   id?: string;
@@ -186,36 +187,41 @@ export function KineticText({
       window.removeEventListener("resize", measure);
       chars.forEach((c) => c.style.removeProperty("--p"));
     };
-  }, [proximity, reduced, finePointer]);
+  }, [proximity, reduced, finePointer, text]);
 
   let index = 0;
-  const words = text.split(" ");
+  const lines = text.split("\n");
   return (
     <Tag
       ref={ref as never}
       id={id}
       className={className ? `${styles.kinetic} ${className}` : styles.kinetic}
-      aria-label={text}
+      aria-label={text.replace(/\n/g, " ")}
       data-play={inView ? "true" : "false"}
       data-quiet-zone={quiet ? "" : undefined}
       style={{ ...style, "--kt-delay": `${delay}ms` } as CSSProperties}
     >
       <span className={styles.letters} aria-hidden="true">
-        {words.map((word, w) => (
-          <span key={w}>
-            <span className={styles.word}>
-              {[...word].map((ch) => {
-                const i = index++;
-                return (
-                  <span key={i} className={styles.char} style={{ "--i": i } as CSSProperties}>
-                    <span className={styles.ghost}>{ch}</span>
-                    <span className={styles.glyph}>{ch}</span>
-                  </span>
-                );
-              })}
-            </span>
-            {w < words.length - 1 ? " " : null}
-          </span>
+        {lines.map((line, l) => (
+          <Fragment key={l}>
+            {l > 0 && <br />}
+            {line.split(" ").map((word, w, words) => (
+              <span key={w}>
+                <span className={styles.word}>
+                  {[...word].map((ch) => {
+                    const i = index++;
+                    return (
+                      <span key={i} className={styles.char} style={{ "--i": i } as CSSProperties}>
+                        <span className={styles.ghost}>{ch}</span>
+                        <span className={styles.glyph}>{ch}</span>
+                      </span>
+                    );
+                  })}
+                </span>
+                {w < words.length - 1 ? " " : null}
+              </span>
+            ))}
+          </Fragment>
         ))}
       </span>
     </Tag>
