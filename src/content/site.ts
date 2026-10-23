@@ -1,12 +1,12 @@
 /** Site-wide copy. Components read from here; nothing user-facing is hardcoded in components. */
 export const site = {
-  title: "[FULL NAME] — UX Team Lead",
+  title: "Michael JL Schmidt — UX Team Lead",
   description:
     "Portfolio of a UX Team Lead and Senior UX Designer from Interlaken in the Swiss Alps: design systems, facilitation and front-end craft.",
   lang: "en",
   hero: {
     eyebrow: "UX Team Lead · Senior UX Designer",
-    name: "[FULL NAME]",
+    name: "Michael JL Schmidt",
     origin: "Interlaken · 566 m · Swiss Alps",
     lede: "I lead a UX team that designs public-sector platforms, runs the workshops that shape them, and ships the design system they are built with.",
     scrollCue: "Descend to the deck",

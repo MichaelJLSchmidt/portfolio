@@ -20,8 +20,8 @@ export type Milestone = {
 const leader = cardBySlug("profile")!;
 
 const actions: Action[] = [
-  { label: "Email", href: null, kind: "email" },
-  { label: "LinkedIn", href: null, kind: "linkedin" },
+  { label: "Email", href: "mailto:michael.jl.schmidt@bluewin.ch", kind: "email" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/michaeljlschmidt/", kind: "linkedin" },
   { label: "Download CV (PDF)", href: null, kind: "cv" },
 ];
 
@@ -50,7 +50,7 @@ export const about = {
   /** The card that opens this page; its artwork and name morph into the header. */
   cardSlug: leader.slug,
   meta: {
-    title: "Basecamp — [FULL NAME], UX Team Lead",
+    title: "Basecamp — Michael JL Schmidt, UX Team Lead",
     description:
       "About a UX Team Lead from Interlaken: facilitation, design systems and front-end craft, told as an ascent from 566 m to the Jungfrau.",
   },
