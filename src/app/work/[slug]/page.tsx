@@ -52,7 +52,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
           <p className={`${styles.type} map-halo reveal`} style={{ "--reveal-i": 1 } as React.CSSProperties}>
             {card.type}
           </p>
-          <p className={`${styles.lede} map-halo reveal`} style={{ "--reveal-i": 2 } as React.CSSProperties}>
+          <p className="body-copy reveal" style={{ "--reveal-i": 2 } as React.CSSProperties}>
             {card.caseStudy.lede}
           </p>
         </div>
@@ -92,9 +92,9 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
 
       <div className={styles.sections}>
         {card.caseStudy.sections.map((s) => (
-          <section key={s.id} id={s.id} className={styles.section} aria-labelledby={`${s.id}-heading`}>
+          <section key={s.id} id={s.id} className={`${styles.section} legend`} aria-labelledby={`${s.id}-heading`}>
             <KineticText as="h2" id={`${s.id}-heading`} text={s.title} className={`${styles.sectionHeading} display`} play="inview" />
-            <p>{s.body}</p>
+            <p className="body-copy">{s.body}</p>
           </section>
         ))}
       </div>

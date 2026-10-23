@@ -176,6 +176,58 @@ i,
 }
 
 /* ------------------------------------------------------------------------------------
+   Body text over the map, after cartographic conventions:
+   - knockout: the field interrupts its lines behind running text (quiet zone of "body"
+     strength, ~9% with a 64 px feather; quiet-zones.ts), like contours under a map label;
+   - legend panels: longer reading blocks sit on a map-legend surface.
+   .body-copy is running text (typography and knockout); .knockout gives another text block
+   the knockout alone. npm run check:legibility measures the result on rendered screenshots,
+   over the field and over the poster: at least 7:1, lines under the glyphs at most 15%.
+   ------------------------------------------------------------------------------------ */
+.body-copy {
+  max-width: 62ch;
+  color: var(--color-sheet);
+  /* 17 px on phones, 18 px on desktop; a touch heavier reads better light-on-dark. */
+  font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.125rem);
+  font-weight: 430;
+  line-height: 1.6;
+  text-shadow: none;
+}
+
+/* The static poster (reduced motion, no WebGL) has no quiet zones: there a ground plate with a
+   soft edge sits behind knocked-out text, so the poster's lines break around it the same way. It
+   fades out when the field takes over. */
+:is(.body-copy, .knockout):not(.legend *) {
+  position: relative;
+}
+
+:is(.body-copy, .knockout):not(.legend *)::before {
+  content: "";
+  position: absolute;
+  inset: -0.25em -0.5em;
+  z-index: -1;
+  border-radius: 0.75em;
+  background: var(--color-ground);
+  box-shadow: 0 0 24px 16px var(--color-ground);
+  opacity: 0;
+  transition: opacity var(--dur-medium) var(--ease-trail);
+  pointer-events: none;
+}
+
+:root:not(:has([data-field="on"])) :is(.body-copy, .knockout):not(.legend *)::before {
+  opacity: 0.94;
+}
+
+/* Map legend: raised ground at 88% with the contour-dim border and corners of the existing
+   panels. No backdrop blur: opacity alone stays cheap on mid-range phones. */
+.legend {
+  padding: clamp(18px, 2.4vw, 28px) clamp(18px, 2.6vw, 32px);
+  border: 1px solid var(--color-contour-dim);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-ground-raised) 88%, transparent);
+}
+
+/* ------------------------------------------------------------------------------------
    View transitions (React <ViewTransition> on route changes)
 
    Durations follow Material 3's scale (medium 250–400 ms, long 450–600 ms, extra-long

@@ -71,9 +71,7 @@
 }
 
 .statement {
-  max-width: 38ch;
-  font-size: clamp(1.0625rem, 1.6vw, 1.3rem);
-  line-height: 1.55;
+  max-width: 44ch;
 }
 
 @media (min-width: 900px) {
@@ -110,12 +108,11 @@
   list-style: none;
 }
 
+/* Each marker is a map-legend panel (globals.css). */
 .marker {
   display: grid;
   gap: 10px;
   align-content: start;
-  padding: 24px 0 0;
-  border-top: 1px solid var(--color-contour-dim);
 }
 
 .blaze {
@@ -184,10 +181,6 @@
 
 .reminder {
   color: var(--color-contour);
-}
-
-.evidence {
-  color: var(--color-sheet);
 }
 
 .plaqueStats {

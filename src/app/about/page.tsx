@@ -53,7 +53,7 @@ export default function About() {
             {about.header.role}
             <span className={`${styles.place} hud-label map-halo keep-halo`}>{about.header.place}</span>
           </p>
-          <p className={`${styles.statement} map-halo reveal`} style={reveal(2)}>
+          <p className={`${styles.statement} body-copy reveal`} style={reveal(2)}>
             {about.header.statement}
           </p>
           <Actions actions={about.actions} className="reveal" />
@@ -73,14 +73,14 @@ export default function About() {
       <section className={styles.section} aria-labelledby="rope-team-heading">
         <div className={styles.sectionHead} data-quiet-zone>
           <KineticText as="h2" id="rope-team-heading" text={about.principles.heading} className={`${styles.sectionHeading} display`} play="inview" />
-          <p className="map-halo">{about.principles.intro}</p>
+          <p className="body-copy">{about.principles.intro}</p>
         </div>
         <ol className={styles.markers}>
           {about.principles.items.map((p) => (
-            <li key={p.title} className={styles.marker}>
+            <li key={p.title} className={`${styles.marker} legend`}>
               <span className={styles.blaze} aria-hidden="true" />
               <h3 className={`${styles.markerTitle} display`}>{p.title}</h3>
-              <p>{p.body}</p>
+              <p className="body-copy">{p.body}</p>
               {hasValue(p.metric) && <p className={`${styles.metric} hud-label`}>{p.metric}</p>}
             </li>
           ))}
@@ -90,7 +90,7 @@ export default function About() {
       <section className={styles.section} aria-labelledby="craft-heading">
         <div className={styles.sectionHead} data-quiet-zone>
           <KineticText as="h2" id="craft-heading" text={about.craft.heading} className={`${styles.sectionHeading} display`} play="inview" />
-          <p className="map-halo">{about.craft.intro}</p>
+          <p className="body-copy">{about.craft.intro}</p>
         </div>
         <ul className={styles.plaques}>
           {about.craft.items.map((c) => {
@@ -99,7 +99,7 @@ export default function About() {
               <li key={c.term} className={styles.plaque}>
                 <h3 className={`${styles.plaqueTerm} display`}>{c.term}</h3>
                 <p className={`${styles.reminder} italic`}>{c.reminder}</p>
-                <p className={styles.evidence}>{c.evidence}</p>
+                <p className="body-copy">{c.evidence}</p>
                 {stats.length > 0 && (
                   <dl className={styles.plaqueStats} style={{ "--cells": stats.length } as CSSProperties}>
                     {stats.map((s) => (
@@ -118,15 +118,15 @@ export default function About() {
 
       <section className={`${styles.section} ${styles.offTrail}`} aria-labelledby="off-trail-heading">
         <KineticText as="h2" id="off-trail-heading" text={about.offTrail.heading} className={`${styles.sectionHeading} display`} play="inview" quiet />
-        <div className={styles.offTrailBody}>
-          <p className="map-halo">{about.offTrail.body}</p>
-          <p className={`${styles.flavor} italic map-halo`}>{about.offTrail.flavor}</p>
+        <div className={`${styles.offTrailBody} legend`}>
+          <p className="body-copy">{about.offTrail.body}</p>
+          <p className={`${styles.flavor} italic`}>{about.offTrail.flavor}</p>
         </div>
       </section>
 
       <section className={styles.contact} aria-labelledby="contact-heading" data-quiet-zone>
         <KineticText as="h2" id="contact-heading" text={about.contact.heading} className={`${styles.contactHeading} display`} play="inview" proximity />
-        <p className="map-halo">{about.contact.body}</p>
+        <p className="body-copy">{about.contact.body}</p>
         <Actions actions={about.actions} />
       </section>
     </main>

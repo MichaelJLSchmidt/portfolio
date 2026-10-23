@@ -128,7 +128,7 @@ export function AscentProfile({
     <section ref={rootRef} className={styles.ascent} aria-labelledby="ascent-heading" style={{ "--p": 1 } as CSSProperties}>
       <header className={styles.header} data-quiet-zone>
         <KineticText as="h2" id="ascent-heading" text={labels.heading} className={`${styles.heading} display`} play="inview" />
-        <p className={`${styles.intro} map-halo`}>{labels.intro}</p>
+        <p className="body-copy">{labels.intro}</p>
       </header>
 
       <div className={styles.stage}>
@@ -200,7 +200,7 @@ export function AscentProfile({
                 </p>
                 <h3 className={`${styles.title} display`}>{m.title}</h3>
                 {m.org && <p className={`${styles.org} hud-label`}>{m.org}</p>}
-                <p className={styles.note}>{m.note}</p>
+                <p className="body-copy">{m.note}</p>
               </article>
             </li>
           ))}
