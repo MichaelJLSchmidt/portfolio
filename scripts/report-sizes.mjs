@@ -24,6 +24,25 @@ function walk(dir) {
   });
 }
 
+// The under-construction page (SITE_MODE=construction): one HTML file with inline CSS and
+// script, three fonts and one of two posters, picked by a media query.
+if (!existsSync(join(out, "_next")) && existsSync(join(out, "index.html"))) {
+  const html = readFileSync(join(out, "index.html"), "utf8");
+  const urls = (re) => [...new Set([...html.matchAll(re)].map((m) => m[1]))];
+  const fonts = urls(/url\(([^)]+\.woff2)\)/g);
+  const [coarse, fine] = urls(/--poster:url\(([^)]+)\)/g);
+  const size = (url) => (url.endsWith(".woff2") ? statSync(toFile(url)).size : gz(toFile(url)));
+  const htmlGz = gz(join(out, "index.html"));
+  const fontBytes = fonts.reduce((s, u) => s + size(u), 0);
+  console.log("Under-construction page (gzip; WOFF2 as is):");
+  console.log(`  ${"HTML with inline CSS and script".padEnd(42)}  ${kb(htmlGz)}`);
+  for (const u of fonts) console.log(`  ${u.padEnd(42)}  ${kb(size(u))}`);
+  for (const u of [coarse, fine]) console.log(`  ${u.padEnd(42)}  ${kb(size(u))}`);
+  console.log(`  ${"Phone visit (200 m poster)".padEnd(42)}  ${kb(htmlGz + fontBytes + size(coarse))}`);
+  console.log(`  ${"Large-screen visit (100 m poster)".padEnd(42)}  ${kb(htmlGz + fontBytes + size(fine))}`);
+  process.exit(0);
+}
+
 const files = walk(out);
 const pages = files.filter((f) => f.endsWith("index.html") || f === join(out, "404.html"));
 const referenced = new Set();

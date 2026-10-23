@@ -1,7 +1,18 @@
-# Production (later): static deploy of the Next.js export at a root domain.
-# Do not deploy until the site is ready; each production deploy costs credits,
-# branch deploys and Deploy Previews are free.
-# MOTION_TOKEN must be added as an environment variable in the Netlify UI (never here).
+# Netlify: continuous deployment from this repository. README → "Hosting on Netlify" lists the
+# settings this file relies on. Domain names live in src/hosting/config.ts only.
+#
+# What each deploy context builds (SITE_MODE, see scripts/site/build.mjs):
+#   production (main)       construction: the under-construction page only, at PRIMARY_DOMAIN
+#   branch deploys          basecamp: the full site behind the password gate; the basecamp
+#                           branch is served at BASECAMP_HOST
+#   Deploy Previews         basecamp, gated the same way
+# Launch: set SITE_MODE = "live" under [context.production.environment] (full site, no gate),
+# then merge basecamp into main.
+#
+# Environment variables set in the Netlify UI, never here:
+#   MOTION_TOKEN        Builds scope, all contexts (npm install of Motion+)
+#   BASECAMP_PASSWORD   Functions scope, branch deploys and Deploy Previews (the gate reads it at
+#                       runtime; variables in this file never reach edge functions)
 
 [build]
   command = "npm run build"
@@ -9,24 +20,28 @@
 
 [build.environment]
   NODE_VERSION = "22"
-  # Root domain: no base path. NEXT_PUBLIC_PREVIEW stays unset so production is indexable.
+  # Served from the domain root, so no base path.
   NEXT_PUBLIC_BASE_PATH = ""
+  # Plain static files: Netlify's automatic Next.js runtime would add its own handling of the
+  # export (and fail on the construction build, which has no Next.js output). Every hook of
+  # @netlify/plugin-nextjs returns early when this is "true".
+  NETLIFY_NEXT_PLUGIN_SKIP = "true"
+  # Any context not listed below builds the gated site, never an open one.
+  SITE_MODE = "basecamp"
+  NEXT_PUBLIC_PREVIEW = "1"
 
-# Deploy Previews and branch deploys are previews: keep them out of search engines.
+[context.production.environment]
+  SITE_MODE = "construction"
+  # Indexable once live; the construction page ignores it.
+  NEXT_PUBLIC_PREVIEW = ""
+
 [context.deploy-preview.environment]
+  SITE_MODE = "basecamp"
   NEXT_PUBLIC_PREVIEW = "1"
 
 [context.branch-deploy.environment]
+  SITE_MODE = "basecamp"
   NEXT_PUBLIC_PREVIEW = "1"
 
-# Hashed build assets never change.
-[[headers]]
-  for = "/_next/static/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# Terrain data changes only when the pipeline is re-run.
-[[headers]]
-  for = "/terrain/*"
-  [headers.values]
-    Cache-Control = "public, max-age=604800, stale-while-revalidate=86400"
+# Headers and redirects differ per mode, so the build writes them into out/ (_headers,
+# _redirects); [[headers]] and [[redirects]] here would apply to every context alike.

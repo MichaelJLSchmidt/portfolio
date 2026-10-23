@@ -1,36 +1,33 @@
 // Lists every content placeholder still in src/content: "[LIKE THIS]" text and links that are
 // still null. Each is reported with its file, line and field.
 //
-//   npm run check:content            list them (exit 0)
-//   node scripts/check-content.mjs --build
-//                                    run before `npm run build` (prebuild): fails a production
-//                                    build while any remain; preview builds
-//                                    (NEXT_PUBLIC_PREVIEW=1) only warn, so the placeholders
-//                                    stay visible there.
-import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { registerHooks } from "node:module";
+//   npm run check:content                     list them all (exit 0)
+//   npm run check:content -- --mode=construction
+//                                             list only those the under-construction page uses
+//   node scripts/check-content.mjs --build    run by `npm run build` for its SITE_MODE
+//                                             (--mode=… or the SITE_MODE variable):
+//     construction  fails while the under-construction page's own facts (name, email,
+//                   LinkedIn) are placeholders; nothing else matters there
+//     basecamp      warns only: the placeholders stay visible on the gated site
+//     live          fails on any placeholder
+//                   (construction and live only warn in a local preview, NEXT_PUBLIC_PREVIEW=1)
+import { readFileSync, readdirSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import "./lib/ts-hooks.mjs";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const contentDir = join(root, "src/content");
 
-// Content modules are TypeScript with the app's import style ("@/…", extensionless relative
-// paths). Node strips the types; this hook only resolves those two specifier forms.
-registerHooks({
-  resolve(specifier, context, nextResolve) {
-    const withTs = (path) => [path, `${path}.ts`, join(path, "index.ts")].find((p) => existsSync(p) && !p.endsWith("/"));
-    if (specifier.startsWith("@/")) {
-      const file = withTs(join(root, "src", specifier.slice(2)));
-      if (file) return nextResolve(pathToFileURL(file).href, context);
-    }
-    if (specifier.startsWith(".") && context.parentURL?.startsWith("file:") && !/\.[cm]?[jt]sx?$|\.json$/.test(specifier)) {
-      const file = withTs(fileURLToPath(new URL(specifier, context.parentURL)));
-      if (file) return nextResolve(pathToFileURL(file).href, context);
-    }
-    return nextResolve(specifier, context);
-  },
-});
+const MODES = ["construction", "basecamp", "live"];
+const build = process.argv.includes("--build");
+const mode = process.argv.find((a) => a.startsWith("--mode="))?.slice(7) ?? (build ? process.env.SITE_MODE || "live" : null);
+if (mode !== null && !MODES.includes(mode)) {
+  console.error(`Unknown mode "${mode}" (expected ${MODES.join(", ")}).`);
+  process.exit(1);
+}
+// The under-construction page reads only this export of about.ts.
+const scope = mode === "construction" ? { file: "about.ts", exports: ["holding"] } : null;
 
 const PLACEHOLDER = /\[[A-Z0-9#][A-Z0-9#\s'’.,&/+-]*\]/g;
 const files = readdirSync(contentDir).filter((f) => f.endsWith(".ts"));
@@ -57,9 +54,12 @@ function walk(value, path, parent, file) {
 }
 
 for (const f of files) {
+  if (scope && f !== scope.file) continue;
   const mod = await import(pathToFileURL(join(contentDir, f)).href);
   const file = sources.find((s) => s.file.endsWith(`/${f}`)).file;
-  for (const [name, value] of Object.entries(mod)) if (typeof value !== "function") walk(value, [name], null, file);
+  for (const [name, value] of Object.entries(mod)) {
+    if (typeof value !== "function" && (!scope || scope.exports.includes(name))) walk(value, [name], null, file);
+  }
 }
 
 // Every placeholder as written in the source: one site per token per line.
@@ -109,25 +109,27 @@ for (const { item, site } of pairs) {
 }
 const fieldOf = (site) => site.text.match(/(\w+):\s*(?:["'`]|null)/)?.[1] ?? "(value)";
 const list = sites
+  // In a scoped check only the sites behind the scoped fields count.
+  .filter((site) => !scope || site.fields.length)
   .map((site) => ({ where: `${site.file}:${site.line}`, value: site.token === "href: null" ? null : site.token, fields: site.fields.length ? site.fields : [fieldOf(site)] }))
   .sort((a, b) => a.where.localeCompare(b.where, "en", { numeric: true }));
 
-const build = process.argv.includes("--build");
 const preview = process.env.NEXT_PUBLIC_PREVIEW === "1";
+const what = scope ? "the under-construction page" : "the site";
 if (!list.length) {
-  console.log("Content: no placeholders left.");
+  console.log(`Content: no placeholders left${scope ? ` on ${what}` : ""}.`);
   process.exit(0);
 }
-if (build && preview) {
-  console.warn(`Content: ${list.length} placeholder(s) remain (shown in this preview build). npm run check:content lists them.`);
+if (build && (mode === "basecamp" || preview)) {
+  console.warn(`Content: ${list.length} placeholder(s) remain (shown in this ${mode === "basecamp" ? "Basecamp" : "preview"} build). npm run check:content lists them.`);
   process.exit(0);
 }
-console.log(`Content placeholders (${list.length}):`);
+console.log(`Content placeholders${scope ? ` on ${what}` : ""} (${list.length}):`);
 const width = Math.max(...list.map((r) => r.where.length));
 for (const r of list) {
   console.log(`  ${r.where.padEnd(width)}  ${(r.value ?? "(no URL yet)").padEnd(34)}  ${r.fields.join(", ")}`);
 }
 if (build) {
-  console.error(`\nProduction build stopped: replace the ${list.length} placeholder(s) above, or build a preview with NEXT_PUBLIC_PREVIEW=1.`);
+  console.error(`\n${mode[0].toUpperCase()}${mode.slice(1)} build stopped: replace the ${list.length} placeholder(s) above, or build a preview with NEXT_PUBLIC_PREVIEW=1.`);
   process.exit(1);
 }

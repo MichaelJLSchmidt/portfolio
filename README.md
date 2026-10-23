@@ -17,6 +17,9 @@ This repository currently holds the foundation plus three technical spikes for t
 3. **Card → case study transition**: a choreographed view-transition morph from the deck into `/work/[slug]`
    and back, synchronised with the field. Durations and their reasoning are in `src/app/globals.css`.
 
+Production currently serves a static under-construction page; the full site lives on the `basecamp` branch behind
+a password gate (see "Hosting on Netlify").
+
 Headlines use kinetic variable-font type (`src/components/type/KineticText.tsx`). The About page ("Basecamp",
 `/about/`) opens from the leader card and tells the career as the real climb from Interlaken to the Jungfrau; its
 plan and the content still needed are in `docs/about-plan.md`.
@@ -30,6 +33,7 @@ plan and the content still needed are in `docs/about-plan.md`.
 | Motion                     | `motion` (springs, gestures), Motion+ (`useMagneticPull`), React `<ViewTransition>` |
 | Smooth scroll              | Lenis, fine-pointer desktop only                                                    |
 | Fonts                      | Archivo (wdth + wght, italic) and Martian Mono via `next/font/google`, self-hosted  |
+| Hosting                    | Netlify: static files, plus one Edge Function (the Basecamp gate) off production   |
 | Terrain                    | Node scripts with geotiff.js and d3-contour                                         |
 
 ## Local development
@@ -57,18 +61,22 @@ Never commit the token. `.env*` files are git-ignored; `.env.example` lists the 
 | Script                   | What it does                                                                       |
 | ------------------------ | ---------------------------------------------------------------------------------- |
 | `npm run dev`            | Next dev server plus the local save endpoint for the tuning panel (port 4319)     |
-| `npm run build`          | Static export to `out/`                                                            |
+| `npm run build`          | Builds the deploy for `SITE_MODE` into `out/` (see "Hosting on Netlify")          |
 | `npm run preview`        | Serves `out/` like a static host, including the base path and gzip               |
 | `npm run lint`           | ESLint (Next.js core-web-vitals + TypeScript rules)                               |
 | `npm run typecheck`      | Generates route types, then `tsc --noEmit`                                        |
 | `npm run check:contrast` | WCAG contrast of the token colour pairs                                            |
 | `npm run check:content`  | Lists every content placeholder still to fill, with file, line and field          |
+| `npm test`               | Unit tests of the Basecamp gate (`node:test`)                                      |
 | `npm run test:e2e`       | Chromium checks against `out/`: aborted view transitions, calm navigation, decode |
+| `npm run test:hosting`   | Gated and production deploys under netlify-cli (build, edge runtime, redirects)   |
 | `npm run report:size`    | Initial JS/CSS/fonts per route, lazy chunks, terrain assets (gzip)               |
 | `npm run terrain`        | Regenerates `public/terrain` from swisstopo data                                  |
 | `npm run verify:terrain` | Checks that the committed heightmaps decode to the exact source heights          |
+| `npm run fonts:subset`   | Regenerates the under-construction page's WOFF2 subsets in `src/hosting/fonts`    |
 
-To test the GitHub Pages sub-path locally:
+Without `SITE_MODE`, `npm run build` builds the full site (`live`). To check that every asset goes through
+`asset()`, build for a sub-path:
 
 ```sh
 # macOS / Linux (on Windows set the variables first, as above)
@@ -90,8 +98,15 @@ automatically. Every other runtime URL (heightmaps, terrain SVGs, textures, fetc
 All copy lives in `src/content`. Facts still to confirm are written as `[PLACEHOLDERS]` (links as `href: null`);
 they stay visible in preview builds so gaps are easy to spot. Stats are optional everywhere (cards, case-study
 summary, Basecamp): a stat row shows only the stats that have a value and disappears when none has one.
-`npm run check:content` lists every remaining placeholder with file, line and field. It also runs before
-`npm run build` (`prebuild`): preview builds only warn, production builds fail while any placeholder remains.
+`npm run check:content` lists every remaining placeholder with file, line and field. `npm run build` runs it for
+its `SITE_MODE`:
+
+- `construction` requires only what the under-construction page shows: the name and the email and LinkedIn
+  links (`npm run check:content -- --mode=construction` lists those);
+- `basecamp` only warns;
+- `live` fails on any placeholder.
+
+A local build with `NEXT_PUBLIC_PREVIEW=1` only warns in every mode.
 
 ### Tuning the contour field
 
@@ -108,24 +123,111 @@ writes the values to `src/config/contour-field.json`, which is committed. Colour
 token names. Leva is never part of the production build. Add `?field=force` to a URL to skip the low-spec check,
 which is useful in headless browsers.
 
-## Preview deployment: GitHub Pages
+## Hosting on Netlify
 
-`.github/workflows/pages.yml` runs on every push to `main` and on manual dispatch. It installs with
-`MOTION_TOKEN` from the repository secret, then builds with `NEXT_PUBLIC_BASE_PATH` set to the Pages base path
-(`/<repo>`) and `NEXT_PUBLIC_PREVIEW=1`. It deploys with `actions/configure-pages`,
-`actions/upload-pages-artifact` and `actions/deploy-pages`.
+Netlify builds this repository with continuous deployment. The domains are configuration values in
+`src/hosting/config.ts`: `PRIMARY_DOMAIN` (production), `REDIRECT_DOMAINS` (aliases that 301 to
+`https://PRIMARY_DOMAIN`, path kept) and `BASECAMP_HOST` (the branch subdomain of `basecamp`).
 
-One-time repository settings:
+### Deploy model
 
-1. **Settings → Pages → Build and deployment → Source: GitHub Actions.**
-2. **Settings → Secrets and variables → Actions → New repository secret:** `MOTION_TOKEN`.
-3. If the `github-pages` environment has deployment branch rules, `main` must be allowed (it is by default).
+| Deploy context  | Branch                     | `SITE_MODE`    | Serves                                                    |
+| --------------- | -------------------------- | -------------- | --------------------------------------------------------- |
+| Production      | `main`                     | `construction` | The under-construction page at `PRIMARY_DOMAIN`           |
+| Branch deploy   | `basecamp`                 | `basecamp`     | The full site behind the password gate at `BASECAMP_HOST` |
+| Deploy Previews | pull requests              | `basecamp`     | The same, gated, at the preview URL                       |
 
-Preview URL: `https://<user>.github.io/<repo>/`. Deep links and reloads such as `/work/kibon/` work because
-every route is exported as `route/index.html` (`trailingSlash: true`).
+`basecamp` is the integration branch: pull requests target it, and `main` is production. `netlify.toml` sets
+`SITE_MODE` per context, and `npm run build` (`scripts/site/build.mjs`) builds accordingly:
 
-`.github/workflows/ci.yml` checks pull requests: lint, types, contrast, a sub-path build and the size report.
-It also needs the `MOTION_TOKEN` secret.
+- **construction**: only the under-construction page. A small Node script renders it from the design tokens and
+  `src/content/about.ts` (no Next.js, no Three.js): static HTML with inline CSS, self-hosted WOFF2 subsets of
+  Archivo and Martian Mono, and the contour poster (200 m on small screens, 100 m where the site's field draws
+  100 m too). The only script runs the live Bern clock and the pointer/touch headlamp; both stay off with
+  reduced motion, and the page is complete without JavaScript. Every other path redirects (302) to `/`, and
+  `REDIRECT_DOMAINS` redirect (301) to `PRIMARY_DOMAIN`. A phone visit transfers about 81 KB
+  (`npm run report:size` after a construction build).
+- **basecamp**: the full static export, plus the gate as a Netlify Edge Function. The build writes it to
+  `.netlify/v1/edge-functions/` (Netlify's Frameworks API), so it exists only in these deploys; production has
+  no edge function at all.
+- **live**: the full site, no gate. Prepared for launch, not enabled.
+
+Netlify's automatic Next.js runtime is switched off (`NETLIFY_NEXT_PLUGIN_SKIP=true` in `netlify.toml`): deploys
+are plain static files. Each mode writes its own `_redirects` and `_headers` into `out/`, because headers and
+redirects in `netlify.toml` would apply to every context alike.
+
+### The Basecamp gate
+
+`src/hosting/gate.ts` (logic) and `src/hosting/gate-handler.ts` (requests) protect every path of a `basecamp`
+deploy: pages, RSC payloads, scripts and terrain data. Only the gate's own assets under `/.basecamp/assets/`
+(styles, fonts, poster) are public, and the gate answers `robots.txt` itself with `Disallow: /`.
+
+- Without a valid cookie the gate page is shown (the under-construction design with the password form):
+  401, `Cache-Control: no-store`.
+- The form posts `password` and `next` to `/.basecamp/unlock`. The password is compared with
+  `BASECAMP_PASSWORD` in constant time (both sides hashed first). The request is accepted only from
+  `https://PRIMARY_DOMAIN` (the production page's "Basecamp access" form), from the gated host itself, or
+  without an Origin header.
+- On success the gate sets `__Host-basecamp` (Secure, HttpOnly, SameSite=Lax, Path=/, 30 days). Its value is
+  an expiry plus an HMAC-SHA-256 signature; the key is derived from the password, so changing the password logs
+  everyone out. Then a 303 to `next` if it is a same-host relative path, else to `/`.
+- A wrong password waits ~750 ms, then shows the gate again with an error announced to screen readers.
+- `/.basecamp/lock` clears the cookie and shows the gate.
+- Without `BASECAMP_PASSWORD` the gate fails closed: the page says Basecamp is closed, and one log line says why.
+- Every gated response carries `X-Robots-Tag: noindex, nofollow`; shared caching is switched to `private`.
+
+`npm test` covers cookie signing, expiry, tampering, `next`, Origin and the constant-time comparison.
+`npm run test:hosting` runs the deploys under netlify-cli (`npm i -g netlify-cli`, or `NETLIFY_CLI=…`):
+`netlify serve --context deploy-preview` exercises the gate in Netlify's edge runtime (plus the form in Chromium
+when Playwright resolves), and `netlify serve --context production` the under-construction page, its redirects
+and the absence of the gate. The production run is skipped while the page's own facts are placeholders.
+
+### Netlify and GitHub settings
+
+Netlify (once, in the UI):
+
+1. **Add new project → Import an existing project →** this GitHub repository. Build settings come from
+   `netlify.toml` (build command `npm run build`, publish directory `out`).
+2. **Project configuration → Developer settings → Continuous deployment → Branches and deploy contexts →
+   Configure:** Production branch `main`; Branch deploys: **Let me add individual branches** → `basecamp`;
+   Deploy Previews on (pull requests into `main` or `basecamp` get one, because `basecamp` has branch
+   deploys).
+3. **Project configuration → Environment variables → Add a variable:**
+   - `MOTION_TOKEN`: scope **Builds**, all deploy contexts.
+   - `BASECAMP_PASSWORD`: scope **Functions**, deploy contexts **Branch deploys** and **Deploy Previews**,
+     marked **Contains secret values**. Edge functions read it at runtime; variables in `netlify.toml` never
+     reach them.
+4. **Domain management → Domains → Add a domain:** `PRIMARY_DOMAIN` as the primary domain, then each of
+   `REDIRECT_DOMAINS` as a domain alias. HTTPS certificates are issued automatically.
+5. **Domain management → Domains → Branch subdomains → New subdomain:** branch `basecamp`, which becomes
+   `BASECAMP_HOST`. Branch subdomains need Netlify DNS for `PRIMARY_DOMAIN` (the domain's **Options → Set up
+   Netlify DNS**, then Netlify's name servers at the registrar), and the branch needs one successful deploy
+   first.
+
+GitHub:
+
+1. **Settings → Secrets and variables → Actions:** `MOTION_TOKEN` (CI installs Motion+ with it).
+2. Create the `basecamp` branch from `main`. Optionally make it the default branch (**Settings → General →
+   Default branch**) so new pull requests target it.
+3. **Settings → Pages:** unpublish the old GitHub Pages preview; its workflow is gone.
+
+`.github/workflows/ci.yml` checks pull requests into `basecamp` and `main`: lint, types, contrast, unit tests,
+the construction build (into `main` with the production content check), the gated build, the size reports, and
+`npm run test:hosting`.
+
+### Changing the password
+
+Edit `BASECAMP_PASSWORD` under **Project configuration → Environment variables**, then redeploy the `basecamp`
+branch (**Deploys → Trigger deploy → Deploy project**, or push to it). Each deploy keeps the value it was built
+with, so existing Deploy Previews keep the old password until they are rebuilt. Every cookie signed with the old
+password stops working, so everyone has to enter the new one.
+
+### Launch
+
+1. Fill every placeholder (`npm run check:content` lists them; live builds fail on any).
+2. In `netlify.toml`, set `SITE_MODE = "live"` under `[context.production.environment]`.
+3. Merge `basecamp` into `main`. Production then serves the full site without a gate; `basecamp` and Deploy
+   Previews stay gated.
 
 ## Terrain pipeline
 
@@ -185,20 +287,6 @@ One console warning names the browser and the first differing texel. `npm run te
 a colour-managing browser (a gamma curve on decoded pixels) with and without `DecompressionStream`.
 
 Attribution: "Terrain data © swisstopo" appears in the HUD and the footer.
-
-## Production later: Netlify
-
-Nothing is linked or deployed yet. `netlify.toml` is ready for a static deploy: `npm run build`, publish `out`,
-Node 22, empty base path, no preview flag in production, and noindex on Deploy Previews and branch deploys.
-
-When it's time:
-
-1. In Netlify, **Add new project → Import an existing project**, connect this GitHub repository and keep the
-   settings from `netlify.toml`.
-2. **Project configuration → Environment variables:** add `MOTION_TOKEN` (all deploy contexts).
-3. Point the root domain at the project. No base path is needed.
-4. Keep production deploys rare: each one costs credits. Deploy Previews for pull requests and branch deploys
-   are free, so iterate there and promote deliberately.
 
 ## Accessibility and motion
 
