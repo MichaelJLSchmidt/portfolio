@@ -19,7 +19,8 @@
     "check:contrast": "node scripts/check-contrast.mjs",
     "check:content": "node scripts/check-content.mjs",
     "test:e2e": "node scripts/e2e.mjs",
-    "test": "node --test src/hosting/*.test.ts"
+    "test": "node --test src/hosting/*.test.ts",
+    "fonts:subset": "node scripts/site/fonts.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "9.8.2",
@@ -42,6 +43,7 @@
     "geotiff": "3.0.5",
     "leva": "0.10.1",
     "sharp": "0.35.5",
+    "subset-font": "2.9.0",
     "typescript": "5.9.3"
   }
 }
