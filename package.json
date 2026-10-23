@@ -8,8 +8,7 @@
   },
   "scripts": {
     "dev": "node scripts/dev.mjs",
-    "prebuild": "node scripts/check-content.mjs --build",
-    "build": "next build",
+    "build": "node scripts/site/build.mjs",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
     "terrain": "node scripts/terrain/build.mjs",
