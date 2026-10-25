@@ -14,6 +14,8 @@ next-env.d.ts
 /scripts/site/.cache/
 # optional PNG copies of the heightmaps (npm run terrain -- --png)
 /public/terrain/**/*.png
+# lossless PNG masters of the artefact images (npm run images regenerates them)
+/artefacts/.masters/
 
 # env files (MOTION_TOKEN and friends never get committed)
 .env
