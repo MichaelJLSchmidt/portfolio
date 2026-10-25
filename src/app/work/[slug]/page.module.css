@@ -33,6 +33,11 @@
   border-radius: 12px;
 }
 
+/* The artwork's stamp (flagged examples) sizes itself to the artwork. */
+.art {
+  container-type: inline-size;
+}
+
 .art {
   height: auto;
   border-color: var(--color-contour-dim);
@@ -58,6 +63,23 @@
   font-size: 1.125rem;
   font-weight: 600;
   font-stretch: 88%;
+}
+
+/* "7 min read · 60-second skim below" */
+.meta {
+  color: var(--color-sheet);
+}
+
+.meta a {
+  color: var(--color-glacier);
+  text-underline-offset: 4px;
+}
+
+/* The product hero, directly after the Summit summary. */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
 }
 
 .jump {
@@ -95,23 +117,6 @@
   color: var(--color-glacier);
 }
 
-.sections {
-  display: grid;
-  gap: 40px;
-}
-
-/* Each section is a map-legend panel (globals.css). */
-.section {
-  display: grid;
-  gap: 12px;
-  max-width: 46rem;
-  scroll-margin-top: 96px;
-}
-
-.sectionHeading {
-  font-size: clamp(2rem, 6vw, 3.5rem);
-}
-
 .inspect {
   display: grid;
 }
@@ -122,6 +127,8 @@
 }
 
 .next {
+  display: grid;
+  justify-items: start;
   padding-top: 32px;
   border-top: 1px solid var(--color-contour-dim);
 }
@@ -159,9 +166,36 @@
   transform: translateX(0.15em);
 }
 
+.backToAll {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  min-height: 44px;
+  margin-top: 16px;
+  color: var(--color-glacier);
+  text-decoration: none;
+}
+
+.backToAll:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* Below 1200 px: "Jump to" chips at the top, the waypoints in one column. From 1200 px the
+   "On this page" trail stays beside them instead. */
 .body {
   display: grid;
   gap: 40px;
+}
+
+.trail {
+  display: none;
+}
+
+.waypoints {
+  display: grid;
+  gap: clamp(72px, 9vw, 128px);
+  min-width: 0;
 }
 
 @media (min-width: 900px) {
@@ -170,21 +204,21 @@
     align-items: end;
     gap: clamp(32px, 4vw, 72px);
   }
+}
 
-  /* Jump-to rail stays beside the sections while reading. */
+@media (min-width: 1200px) {
   .body {
-    grid-template-columns: minmax(180px, 1fr) minmax(0, 3fr);
+    grid-template-columns: 13rem minmax(0, 1fr);
     align-items: start;
-    gap: clamp(32px, 5vw, 96px);
+    gap: 64px;
   }
 
   .jump {
-    position: sticky;
-    top: 96px;
+    display: none;
   }
 
-  .jump ul {
-    flex-direction: column;
-    align-items: flex-start;
+  .trail {
+    display: block;
+    align-self: stretch;
   }
 }
