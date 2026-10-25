@@ -198,6 +198,19 @@ for (const mode of pick(modes)) {
         },
         { BODY, LEGACY },
       );
+      // Where fixed overlays at the top of the screen (the HUD) end.
+      const cover = await page.evaluate(() =>
+        Math.ceil(
+          Math.max(
+            0,
+            ...[...document.querySelectorAll("body *")]
+              .filter((el) => getComputedStyle(el).position === "fixed" && el.getClientRects().length)
+              .map((el) => el.getBoundingClientRect())
+              .filter((r) => r.top <= 0 && r.height < window.innerHeight / 3)
+              .map((r) => r.bottom),
+          ),
+        ),
+      );
       let worst = null;
       for (let i = 0; i < count; i++) {
         const info = await page.evaluate((i) => {
@@ -246,6 +259,11 @@ for (const mode of pick(modes)) {
             width: Math.min(vp.viewport.width, Math.ceil(box.x + box.w) + g) - Math.max(0, Math.floor(box.x) - g),
             height: Math.min(vp.viewport.height, Math.ceil(box.y + box.h) + g) - Math.max(0, Math.floor(box.y) - g),
           };
+          // A block taller than the screen runs under the fixed HUD at the top: shoot below it.
+          if (clip.y < cover) {
+            clip.height -= cover - clip.y;
+            clip.y = cover;
+          }
           if (clip.width < 4 || clip.height < 4) break;
           // The headlamp, right on the text: the pointer, or a finger held down on a phone.
           const cx = clip.x + clip.width / 2;
