@@ -141,8 +141,6 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     pan: [0, 0] as [number, number],
     panPointer: [0, 0] as [number, number],
     panScroll: 0,
-    ripplePos: [0, 0] as [number, number],
-    rippleStart: -1,
     lastFrame: 0,
     region: null as TerrainSource | null,
     /** Terrain currently loaded into texture slot B, and its id. */
@@ -200,7 +198,6 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     u.uIndexWidth.value = cfg.indexLineWidthPx * dpr;
     u.uHeadlampRadius.value = cfg.headlampRadiusPx * dpr;
     u.uGlowWidth.value = cfg.glowWidthPx * dpr;
-    u.uRippleSpeed.value = cfg.rippleSpeedPxS * dpr;
     writeQuietKinds();
     u.uResolution.value.set(size.width * dpr, size.height * dpr);
     const a = anim.current;
@@ -448,13 +445,6 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     const onTouchEnd = (e: TouchEvent) => {
       if (e.touches.length === 0) fade(0, cfg().headlampFadeMs);
     };
-    // Click or tap: an altimeter ping rings out from the point of contact.
-    const onPointerDown = (e: PointerEvent) => {
-      a.ripplePos = [e.clientX * dpr, (window.innerHeight - e.clientY) * dpr];
-      a.rippleStart = performance.now();
-      a.lastInput = a.rippleStart;
-      wake();
-    };
     // Scrolling descends the map slowly (slower than the content).
     const onScroll = () => {
       const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
@@ -469,11 +459,9 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     window.addEventListener("touchmove", onTouch, opts);
     window.addEventListener("touchend", onTouchEnd, opts);
     window.addEventListener("touchcancel", onTouchEnd, opts);
-    window.addEventListener("pointerdown", onPointerDown, opts);
     window.addEventListener("scroll", onScroll, opts);
     onScroll();
     return () => {
-      window.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointerMove);
       document.removeEventListener("pointerout", onPointerOut);
@@ -507,7 +495,6 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       !tweenDone(a.lamp, now) ||
       !tweenDone(a.intervalTween, now) ||
       now - a.lastInput < 120 ||
-      (a.rippleStart >= 0 && now - a.rippleStart < 1800) ||
       Math.abs(a.pan[0] - a.panPointer[0]) + Math.abs(a.pan[1] - a.panPointer[1] - a.panScroll) > 2e-4 ||
       (a.ready && !a.readyNotified)
     );
@@ -655,8 +642,6 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     a.pan[1] += (a.panPointer[1] + a.panScroll - a.pan[1]) * ease;
     const t = (now - a.t0) / 1000;
     u.uPan.value.set(a.pan[0] + Math.sin(t * 0.05) * 0.008, a.pan[1] + Math.cos(t * 0.037) * 0.008);
-    const age = a.rippleStart >= 0 ? (now - a.rippleStart) / 1000 : -1;
-    u.uRipple.value.set(a.ripplePos[0], a.ripplePos[1], age >= 0 && age < 1.8 ? age : -1);
     u.uHeadlampStrength.value = a.lampValue;
     u.uHeadlampPos.value.set(a.lampPos[0], a.lampPos[1]);
     u.uTime.value = (now - a.t0) / 1000;

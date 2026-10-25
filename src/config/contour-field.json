@@ -16,7 +16,6 @@
   "parallax": 0.022,
   "scrollParallax": 0.05,
   "driftCyclesPerSecond": 0.05,
-  "rippleSpeedPxS": 900,
   "quietStrength": 0.25,
   "quietFeatherPx": 48,
   "bodyQuietStrength": 0.09,

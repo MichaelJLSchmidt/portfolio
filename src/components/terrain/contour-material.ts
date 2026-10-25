@@ -53,8 +53,6 @@ uniform float uDrift;  // cycles per second
 uniform vec2 uResolution;  // drawing buffer, device px
 uniform vec2 uPan;         // map offset in UV (pointer + scroll parallax, slow drift)
 uniform float uZoom;       // > 1 zooms in around the screen centre (camera push on morph)
-uniform vec3 uRipple;      // click ping: x, y (device px), age (s); age < 0 = none
-uniform float uRippleSpeed; // device px per second
 
 #define MAX_QUIET 24
 uniform vec4 uQuiet[MAX_QUIET];     // quiet zones behind text: left, bottom, right, top (device px)
@@ -106,14 +104,6 @@ void main() {
   float revealed = 1.0 - smoothstep(sweepLevel - 60.0, sweepLevel, h);
   float front = exp(-abs(h - sweepLevel) / 45.0) * step(uSweep, 0.999) * revealed;
 
-  // Click ping: a ring that lights the lines it passes.
-  float ripple = 0.0;
-  if (uRipple.z >= 0.0) {
-    float rr = length(gl_FragCoord.xy - uRipple.xy);
-    float radius = uRipple.z * uRippleSpeed;
-    ripple = exp(-abs(rr - radius) / (0.06 * uRippleSpeed)) * (1.0 - smoothstep(0.2, 1.6, uRipple.z));
-  }
-
   // Quiet zones: lines fade to the zone's strength inside its rectangle, feathered outwards,
   // like contours interrupted under a map's labels. Headings keep ~25% of a line, body text
   // ~9%; where zones overlap, the stronger knockout wins.
@@ -126,7 +116,7 @@ void main() {
     keep = min(keep, mix(1.0, uQuietKind[i].y, q));
   }
 
-  float light = max(max(lit, front), ripple);
+  float light = max(lit, front);
   float aReg = reg * mix(uLineOpacity, 1.0, light) * keep;
   float aInd = ind * mix(uIndexOpacity, 1.0, light) * keep;
   vec3 cReg = mix(uLineColor, uGlowColor, light);
@@ -138,7 +128,7 @@ void main() {
 
   // Soft halo around lit lines (desktop only).
   float halo = max(lineMask(dReg, uGlowWidth) * crowdReg, lineMask(dIdx, uGlowWidth * 1.3) * crowdIdx);
-  col += uGlowColor * halo * max(lit, ripple) * uGlow * 0.18 * revealed * keep;
+  col += uGlowColor * halo * lit * uGlow * 0.18 * revealed * keep;
 
   fragColor = vec4(col, 1.0);
 }
@@ -179,8 +169,6 @@ export type ContourUniforms = {
     | "uResolution"
     | "uPan"
     | "uZoom"
-    | "uRipple"
-    | "uRippleSpeed"
     | "uQuiet"
     | "uQuietKind"
     | "uQuietCount"]: THREE.IUniform;
@@ -218,8 +206,6 @@ export function createContourMaterial(): THREE.ShaderMaterial & { uniforms: Cont
     uResolution: { value: new THREE.Vector2(1, 1) },
     uPan: { value: new THREE.Vector2() },
     uZoom: { value: 1 },
-    uRipple: { value: new THREE.Vector3(0, 0, -1) },
-    uRippleSpeed: { value: 900 },
     uQuiet: { value: Array.from({ length: MAX_QUIET_ZONES }, () => new THREE.Vector4()) },
     uQuietKind: { value: Array.from({ length: MAX_QUIET_ZONES }, () => new THREE.Vector2(48, 0.25)) },
     uQuietCount: { value: 0 },
