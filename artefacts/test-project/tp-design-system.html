@@ -1,0 +1,224 @@
+<!-- Fig. 11: the design-system sheet. Colour tokens with contrast ratios, the type scale and
+     spacing, read from the product tokens in shared/artefact.css, and six themed components. -->
+<style>
+  .sheet {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: 430px 1fr;
+    gap: 26px;
+    padding: 22px 28px 18px;
+  }
+  .head {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .head p {
+    margin-top: 4px;
+  }
+  h2.label-caps {
+    margin-bottom: 8px;
+    color: var(--color-sheet-ink);
+  }
+  .tokens,
+  .comps {
+    display: grid;
+    align-content: start;
+    gap: 14px;
+  }
+  .swatches {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .sw {
+    display: grid;
+    grid-template-columns: 38px 1fr;
+    gap: 10px;
+    align-items: center;
+    padding: 6px;
+    border-radius: 8px;
+    background: #fff;
+  }
+  .sw i {
+    height: 38px;
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.12);
+  }
+  .tok {
+    font-family: var(--label);
+    font-size: 11.5px;
+    font-stretch: var(--label-wdth);
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  .tok small {
+    display: block;
+    color: var(--color-sheet-ink);
+    font-size: 11px;
+  }
+  .ratio {
+    display: inline-block;
+    margin-top: 2px;
+    padding: 0 5px;
+    border-radius: 4px;
+    background: var(--color-sheet);
+    color: var(--color-moss-ink);
+    font-weight: 600;
+  }
+  .type-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px solid rgb(90 92 82 / 0.3);
+    font-family: var(--hm-font);
+    color: var(--hm-ink);
+  }
+  .space {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+  }
+  .space div {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+  }
+  .space i {
+    background: var(--hm-blue);
+    border-radius: 2px;
+  }
+  .grid6 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .comp {
+    display: grid;
+    align-content: start;
+    gap: 8px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #fff;
+  }
+  .comp .tok {
+    color: var(--color-sheet-ink);
+  }
+  .comp .hm-steps {
+    margin: 4px 0 0;
+  }
+  .comp .hm-step {
+    font-size: 11px;
+  }
+  .comp .hm-input,
+  .comp .hm-btn {
+    height: 36px;
+  }
+  .comp .hm-radio {
+    padding: 8px 10px;
+  }
+</style>
+<div class="sheet">
+  <div class="head">
+    <div>
+      <h1 class="title">Hochmatt design system</h1>
+      <p class="label muted">Angular Material, themed with cantonal tokens · {{decisions.components}} components · reused by {{decisions.reuseServices}} services</p>
+    </div>
+    <span class="label muted">Source Sans 3 · WCAG 2.1 AA</span>
+  </div>
+  <div class="tokens">
+    <section>
+      <h2 class="label-caps">Colour, with contrast</h2>
+      <div class="swatches" id="swatches"></div>
+    </section>
+    <section>
+      <h2 class="label-caps">Type scale</h2>
+      <div id="type"></div>
+    </section>
+    <section>
+      <h2 class="label-caps">Spacing</h2>
+      <div class="space" id="space"></div>
+    </section>
+  </div>
+  <div class="comps hm" lang="de">
+    <div class="grid6">
+      <div class="comp">
+        <span class="tok">hm-stepper · --hm-blue</span>
+        <ol class="hm-steps"><li class="hm-step done"><i></i>Anspruch</li><li class="hm-step on"><i></i>Angaben</li><li class="hm-step"><i></i>Anlage</li><li class="hm-step"><i></i>Dokumente</li></ol>
+      </div>
+      <div class="comp">
+        <span class="tok">hm-form-field · --hm-error</span>
+        <span class="hm-label">E-Mail der Eigentümerin</span>
+        <span class="hm-input error">eigentuemerin@</span>
+        <span class="hm-error">Bitte vollständige Adresse eingeben.</span>
+      </div>
+      <div class="comp">
+        <span class="tok">hm-file-upload · --hm-line</span>
+        <div class="hm-upload"><span class="hm-doc">+</span><span><b>Datei auswählen</b><br /><span class="hm-small">Foto oder PDF</span></span></div>
+        <div class="hm-file"><span class="hm-doc">PDF</span><span style="flex: 1">Offerte.pdf</span><span class="hm-tick"></span></div>
+      </div>
+      <div class="comp">
+        <span class="tok">hm-radio-card · --hm-blue-tint</span>
+        <div class="hm-radio on"><div><b>Wärmepumpe</b><span>Luft/Wasser</span></div></div>
+        <div class="hm-radio"><div><b>Fernwärme</b><span>Anschluss</span></div></div>
+      </div>
+      <div class="comp">
+        <span class="tok">hm-alert · info, success, error</span>
+        <div class="hm-alert">Eingang bestätigt per E-Mail.</div>
+        <div class="hm-alert success">Entwurf gespeichert.</div>
+        <div class="hm-alert error">Ein Dokument fehlt.</div>
+      </div>
+      <div class="comp">
+        <span class="tok">hm-button · primary, secondary, link</span>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap"><span class="hm-btn">Weiter</span><span class="hm-btn secondary">Zurück</span><span class="hm-btn link">Später</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  // Token values and contrast ratios are read from the stylesheet, so the sheet shows what the
+  // product uses.
+  const css = getComputedStyle(document.documentElement);
+  const v = (name) => css.getPropertyValue(name).trim();
+  const lum = (hex) => {
+    const c = hex.replace("#", "").match(/../g).map((h) => parseInt(h, 16) / 255).map((x) => (x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  };
+  const ratio = (a, b) => {
+    const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
+    return ((x + 0.05) / (y + 0.05)).toFixed(1);
+  };
+  const white = "#ffffff";
+  const swatches = [
+    ["--hm-blue", "on white"],
+    ["--hm-blue-dark", "on white"],
+    ["--hm-ink", "on white"],
+    ["--hm-ink-2", "on white"],
+    ["--hm-error", "on white"],
+    ["--hm-success", "on white"],
+    ["--hm-blue-tint", "ink on it", "--hm-ink"],
+    ["--hm-field-border", "field border"],
+  ];
+  document.getElementById("swatches").innerHTML = swatches
+    .map(([name, note, against]) => {
+      const hex = v(name);
+      const r = ratio(hex, against ? v(against) : white);
+      return `<div class="sw"><i style="background:${hex}"></i><span class="tok">${name.slice(2)}<small>${hex.toUpperCase()}</small><span class="ratio">${r}:1 ${note}</span></span></div>`;
+    })
+    .join("");
+  document.getElementById("type").innerHTML = [
+    ["--hm-h1", "Titel", 700],
+    ["--hm-h2", "Abschnitt", 700],
+    ["--hm-text", "Fliesstext", 400],
+    ["--hm-small", "Hinweis", 400],
+  ]
+    .map(([name, sample, w]) => `<div class="type-row"><span style="font-size:${v(name)};font-weight:${w}">${sample}</span><span class="tok">${name.slice(2)} · ${v(name)}</span></div>`)
+    .join("");
+  const unit = parseFloat(v("--hm-space"));
+  document.getElementById("space").innerHTML = [1, 2, 3, 4, 6, 8]
+    .map((k) => `<div><i style="width:${k * unit}px;height:${k * unit}px"></i><span class="tok">${k * unit}</span></div>`)
+    .join("");
+</script>

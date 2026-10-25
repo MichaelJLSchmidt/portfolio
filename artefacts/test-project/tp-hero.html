@@ -1,0 +1,127 @@
+<!-- Hero: night frame with faint contours; a centred map sheet holds the final "Check
+     eligibility" step (German) in a flat browser frame. -->
+<style>
+  .stage {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding-top: 30px;
+  }
+  .stage.contours::before {
+    opacity: 0.32;
+  }
+  .hero-chip {
+    position: absolute;
+    top: 22px;
+    left: 24px;
+  }
+  .hero-caption {
+    position: absolute;
+    right: 26px;
+    top: 26px;
+    color: var(--color-sheet);
+  }
+  .sheet {
+    width: 820px;
+    padding: 18px;
+    border: 1px solid var(--color-contour);
+    border-radius: 10px;
+    background: var(--color-sheet);
+    box-shadow: 0 30px 80px -30px rgb(0 0 0 / 0.7);
+  }
+  .hm-main {
+    padding: 16px 48px 20px;
+  }
+  .hm-steps {
+    margin-bottom: 14px;
+  }
+  .hm-card {
+    padding: 18px 22px;
+  }
+  .hm-radio {
+    padding: 10px 12px;
+  }
+  .q {
+    display: grid;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .q-title {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .row.two {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+  }
+</style>
+<div class="stage contours">
+  <span class="chip hero-chip">Fictional example</span>
+  <span class="label hero-caption">foerderung.hochmatt.example</span>
+  <div class="sheet">
+    <div class="browser">
+      <div class="browser-bar">
+        <span class="browser-dots"><i></i><i></i><i></i></span>
+        <span class="browser-url">foerderung.hochmatt.example/antrag/anspruch</span>
+      </div>
+      <div class="browser-view hm" lang="de">
+        <header class="hm-header">
+          <div class="hm-brand">
+            <span class="hm-mark"></span>
+            <div><b>Kanton Hochmatt</b><span>Energieamt · Förderprogramm Heizungsersatz</span></div>
+          </div>
+          <div class="hm-lang"><span class="on">DE</span><span>FR</span></div>
+        </header>
+        <div class="hm-main">
+          <ol class="hm-steps">
+            <li class="hm-step on"><i></i>Anspruch</li>
+            <li class="hm-step"><i></i>Angaben</li>
+            <li class="hm-step"><i></i>Anlage</li>
+            <li class="hm-step"><i></i>Dokumente</li>
+            <li class="hm-step"><i></i>Bestätigen</li>
+          </ol>
+          <div class="hm-card">
+            <p class="hm-small">Schritt {{product.firstStep}} von {{product.steps}} · ohne Login</p>
+            <h1 style="margin-top: 4px">Haben Sie Anspruch auf einen Förderbeitrag?</h1>
+            <p class="hm-lead" style="margin-top: 6px">
+              Beantworten Sie {{decisions.precheckQuestions}} kurze Fragen. Das dauert etwa {{ui.precheckMinutes}} Minuten.
+            </p>
+            <div class="q">
+              <p class="q-title">Welche Heizung ersetzen Sie?</p>
+              <div class="row">
+                <div class="hm-radio on"><div><b>Ölheizung</b></div></div>
+                <div class="hm-radio"><div><b>Gasheizung</b></div></div>
+                <div class="hm-radio"><div><b>Elektroheizung</b></div></div>
+              </div>
+            </div>
+            <div class="q">
+              <p class="q-title">Gehört Ihnen die Liegenschaft?</p>
+              <div class="row two">
+                <div class="hm-radio on"><div><b>Ja, ich bin Eigentümer/in</b></div></div>
+                <div class="hm-radio"><div><b>Nein, ich bin Installateur/in</b></div></div>
+              </div>
+            </div>
+            <div class="hm-alert" style="margin-top: 14px">
+              <span>Förderbeitrag bis <b>CHF {{subsidy.maxChf|ch}}</b> für Wärmepumpen und Fernwärme.</span>
+            </div>
+            <div class="actions">
+              <span class="hm-disclosure">Warum fragen wir das?</span>
+              <span class="hm-btn">Weiter</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

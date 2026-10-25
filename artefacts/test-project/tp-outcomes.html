@@ -1,0 +1,126 @@
+<!-- Fig. 13: outcomes after three months as slope charts, one per measure. Solid lines are
+     measured, dashed lines estimated; a corner stamp says the data is fictional. -->
+<style>
+  .chart {
+    position: absolute;
+    inset: 0;
+    padding: 26px 34px 18px;
+    color: var(--color-sheet);
+  }
+  /* Contour grey is 4.4:1 on the raised ground: labels here use the sheet colour. */
+  .chart > p {
+    margin-top: 6px;
+    color: var(--color-sheet);
+  }
+  .title {
+    color: var(--color-sheet);
+  }
+  .stamp {
+    position: absolute;
+    top: 26px;
+    right: 34px;
+    transform: rotate(-3deg);
+  }
+  .panels {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+    margin-top: 22px;
+  }
+  .panel {
+    padding: 16px 16px 10px;
+    border: 1px solid var(--color-contour-dim);
+    border-radius: 10px;
+    background: var(--color-ground);
+  }
+  .panel h2 {
+    font-size: 15px;
+    font-weight: 650;
+    line-height: 1.2;
+  }
+  .panel p {
+    margin-top: 2px;
+    color: var(--color-contour);
+    font-size: 12px;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: 250px;
+    margin-top: 8px;
+    overflow: visible;
+  }
+  .axis {
+    stroke: var(--color-contour-dim);
+    stroke-width: 1.5;
+  }
+  .lbl {
+    fill: var(--color-contour);
+    font-family: var(--label);
+    font-size: 12px;
+    font-stretch: var(--label-wdth);
+  }
+  .val {
+    fill: var(--color-sheet);
+    font-family: var(--label);
+    font-size: 19px;
+    font-stretch: var(--label-wdth);
+    font-weight: 700;
+  }
+  .key {
+    position: absolute;
+    left: 34px;
+    right: 34px;
+    bottom: 20px;
+    display: flex;
+    gap: 28px;
+    color: var(--color-sheet);
+  }
+  .key span {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+</style>
+<div class="chart">
+  <h1 class="title">Outcomes after {{outcomes.months|word}} months</h1>
+  <p class="label">System logs, n = {{outcomes.applications}} applications · calls estimated from a {{outcomes.callLogWeeks}}-week log</p>
+  <span class="chip stamp">Fictional data</span>
+  <div class="panels">
+    <section class="panel"><h2>Complete on first submission</h2><p class="label">higher is better · measured</p><svg data-chart="complete"></svg></section>
+    <section class="panel"><h2>Median days to decision</h2><p class="label">lower is better · measured</p><svg data-chart="days"></svg></section>
+    <section class="panel"><h2>Caseworker phone calls</h2><p class="label">estimated · before = {{"100"}}</p><svg data-chart="calls"></svg></section>
+  </div>
+  <div class="key label">
+    <span><svg width="40" height="10" style="height: 10px; margin: 0"><path d="M0 5H40" stroke="#C8F5B0" stroke-width="3" /></svg>measured</span>
+    <span><svg width="40" height="10" style="height: 10px; margin: 0"><path d="M0 5H40" stroke="#FF8A5C" stroke-width="3" stroke-dasharray="7 5" /></svg>estimated</span>
+  </div>
+</div>
+<script>
+  const o = window.DATA.outcomes;
+  const index = 100 + o.callsPct;
+  const charts = {
+    complete: { from: o.complete.before, to: o.complete.after, max: 100, fmt: (v) => `${v}%`, dashed: false },
+    days: { from: o.medianDays.before, to: o.medianDays.after, max: 50, fmt: (v) => `${v} d`, dashed: false },
+    calls: { from: 100, to: index, max: 120, fmt: (v) => (v === 100 ? "100" : `≈ ${o.callsPct}%`.replace("-", "−")), dashed: true },
+  };
+  for (const svg of document.querySelectorAll("[data-chart]")) {
+    const c = charts[svg.dataset.chart];
+    const W = svg.clientWidth, H = 250, top = 20, bottom = 212, x0 = 30, x1 = W - 30;
+    const y = (v) => bottom - (v / c.max) * (bottom - top);
+    const colour = c.dashed ? "#FF8A5C" : "#C8F5B0";
+    const up = c.to > c.from;
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    svg.innerHTML = `
+      <line class="axis" x1="${x0}" y1="${top - 6}" x2="${x0}" y2="${bottom}"/>
+      <line class="axis" x1="${x1}" y1="${top - 6}" x2="${x1}" y2="${bottom}"/>
+      <line class="axis" x1="${x0}" y1="${bottom}" x2="${x1}" y2="${bottom}" stroke-dasharray="2 4"/>
+      <path d="M${x0} ${y(c.from)}L${x1} ${y(c.to)}" stroke="${colour}" stroke-width="3.5" fill="none" ${c.dashed ? 'stroke-dasharray="9 6"' : ""}/>
+      <circle cx="${x0}" cy="${y(c.from)}" r="6" fill="${colour}"/>
+      <circle cx="${x1}" cy="${y(c.to)}" r="6" fill="${colour}"/>
+      <text class="val" x="${x0 + 10}" y="${up ? y(c.from) + 30 : y(c.from) - 14}">${c.fmt(c.from)}</text>
+      <text class="val" x="${x1 - 10}" y="${up ? y(c.to) - 14 : y(c.to) + 30}" text-anchor="end">${c.fmt(c.to)}</text>
+      <text class="lbl" x="${x0}" y="${H - 14}" text-anchor="middle">Before</text>
+      <text class="lbl" x="${x1}" y="${H - 14}" text-anchor="middle">After</text>`;
+  }
+</script>

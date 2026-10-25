@@ -1,0 +1,1073 @@
+{
+  "tp-affinity": {
+    "width": 2400,
+    "height": 1500,
+    "placeholder": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAACQAwCdASoYAA8APu1mqk2ppaQiMAgBMB2JZQAAW+n5+Urk0gdAAP7nhnfL5oAGjZfVuq2OszTq6pEa5jaUd2ruZtAgAA==",
+    "alt": "images.tp-affinity.alt",
+    "caption": "figures.tp-affinity.caption",
+    "figure": 3,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/test-project/tp-affinity-640.avif",
+        "bytes": 21320
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/test-project/tp-affinity-960.avif",
+        "bytes": 39802
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/test-project/tp-affinity-1280.avif",
+        "bytes": 58928
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/test-project/tp-affinity-1920.avif",
+        "bytes": 98471
+      },
+      {
+        "format": "avif",
+        "width": 2400,
+        "src": "/media/test-project/tp-affinity-2400.avif",
+        "bytes": 108662
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/test-project/tp-affinity-640.webp",
+        "bytes": 27666
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/test-project/tp-affinity-960.webp",
+        "bytes": 53020
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/test-project/tp-affinity-1280.webp",
+        "bytes": 78944
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/test-project/tp-affinity-1920.webp",
+        "bytes": 132434
+      },
+      {
+        "format": "webp",
+        "width": 2400,
+        "src": "/media/test-project/tp-affinity-2400.webp",
+        "bytes": 169870
+      }
+    ],
+    "hash": "f1303c811d46f001",
+    "text": "Affinity map: what we heard 14 interviews · 60 observations · 6 themes Changed the brief H1–H6 homeowners I1–I5 installers C1–C3 caseworkers 1 Installer fills in the form 12 notes The installer filled it in H1 I sent it to my installer H3 Owner didn’t know the model I1 We fill these in at night I2 Floor area? Ask the installer H2 Installer’s e-mail on the form C1 The owner only signed H5 We know the specs, not the owner I3 Copied from the quote I4 My installer called for me H6 Same data for every canton I5 Who is the applicant? C2 2 Missing documents 16 notes Quote missing C1 Certificate number unknown H4 Proof of ownership? H2 Old quote attached C3 Photo unreadable C2 Which certificate? H1 Sent the documents twice H6 Land register extract C1 Attachment too big H3 Quote not signed C3 Certificate expired C2 Didn’t know it was needed H5 Scanned upside down C1 A page is missing C3 Owner or tenant? H4 Re-sent by post H2 3 Caseworkers re-key every case 10 notes Type it all again C1 Copy from the PDF by hand C2 No structure in e-mails C3 The batch is fine, the data isn’t C1 Searching the inbox C2 Same fields, other order C3 Typos when re-keying C1 Half a day per case C2 Notes in a spreadsheet C3 Can’t link documents C1 No status after sending 9 notes Did it arrive? H1 No reply for weeks H3 Called to ask H6 No receipt H2 My customer asks me I5 Is it complete? I2 Waiting, no news H4 When is the decision? H1 Lost track I4 Legal language 7 notes Legal terms H2 French version is older H6 What is a “Gesuchsteller”? H5 Translated badly I3 Long sentences H1 Footnotes everywhere H4 Two versions of one form C2 Login hurdles 6 notes Another account? H3 Forgot my password H5 Can’t log in for the owner I1 Paper is easier H6 Is there an app? H4 Needs a phone number H2 TEST PROJECT · FICTIONAL EXAMPLE · FIG. 3"
+  },
+  "tp-after": {
+    "width": 2400,
+    "height": 1500,
+    "placeholder": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAACQAwCdASoYAA8APu1qrU8ppiQiMAgBMB2JaQAAW+y4YgX0bZDgAP7tQ+c36FG4cXaLrhdVE5+b7ekhCKBaYSl6ZsKwAA==",
+    "alt": "images.tp-after.alt",
+    "caption": "figures.tp-compare.caption",
+    "figure": 9,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/test-project/tp-after-640.avif",
+        "bytes": 10312
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/test-project/tp-after-960.avif",
+        "bytes": 17066
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/test-project/tp-after-1280.avif",
+        "bytes": 24177
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/test-project/tp-after-1920.avif",
+        "bytes": 38414
+      },
+      {
+        "format": "avif",
+        "width": 2400,
+        "src": "/media/test-project/tp-after-2400.avif",
+        "bytes": 41539
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/test-project/tp-after-640.webp",
+        "bytes": 12794
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/test-project/tp-after-960.webp",
+        "bytes": 23110
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/test-project/tp-after-1280.webp",
+        "bytes": 33890
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/test-project/tp-after-1920.webp",
+        "bytes": 56344
+      },
+      {
+        "format": "webp",
+        "width": 2400,
+        "src": "/media/test-project/tp-after-2400.webp",
+        "bytes": 72504
+      }
+    ],
+    "hash": "942d9fb323e7d820",
+    "text": "foerderung.hochmatt.example/antrag/anlage Kanton Hochmatt Energieamt · Förderprogramm Heizungsersatz DE FR Anspruch Angaben Anlage Dokumente Bestätigen Angaben zur Anlage Die Angaben stehen in der Offerte Ihres Installateurs. Welche Heizung wird eingebaut? Wärmepumpe Luft/Wasser Wärmepumpe Erdsonde Fernwärme Anschluss Wie gross ist die beheizte Fläche? Steht in der Offerte unter «Energiebezugsfläche». 145 m² Warum fragen wir das? Die Fläche bestimmt, wie hoch Ihr Förderbeitrag ist. Fehlt sie, müssen wir nachfragen. Zurück Weiter Beispiel: hier steht es So sieht eine Offerte aus. Die Fläche ist markiert. Energiebezugsfläche: 145 m² TEST PROJECT · FICTIONAL EXAMPLE · FIG. 9 · AFTER"
+  },
+  "tp-annotated-upload": {
+    "width": 2880,
+    "height": 1800,
+    "placeholder": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAAAwAwCdASoYAA8ALrV2u12jqampiYC0SzgABc6jyftKTGiAAP701xvEoJV3aWok6GV0g6zb+eJ8yZTnLoeTaAGj+2AgAA==",
+    "alt": "images.tp-annotated-upload.alt",
+    "caption": "figures.tp-annotated-upload.caption",
+    "figure": 10,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/test-project/tp-annotated-upload-640.avif",
+        "bytes": 10136
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/test-project/tp-annotated-upload-960.avif",
+        "bytes": 18883
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/test-project/tp-annotated-upload-1280.avif",
+        "bytes": 26823
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/test-project/tp-annotated-upload-1920.avif",
+        "bytes": 42874
+      },
+      {
+        "format": "avif",
+        "width": 2560,
+        "src": "/media/test-project/tp-annotated-upload-2560.avif",
+        "bytes": 58782
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/test-project/tp-annotated-upload-640.webp",
+        "bytes": 13156
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/test-project/tp-annotated-upload-960.webp",
+        "bytes": 25616
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/test-project/tp-annotated-upload-1280.webp",
+        "bytes": 38492
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/test-project/tp-annotated-upload-1920.webp",
+        "bytes": 64342
+      },
+      {
+        "format": "webp",
+        "width": 2560,
+        "src": "/media/test-project/tp-annotated-upload-2560.webp",
+        "bytes": 91260
+      }
+    ],
+    "hotspots": [
+      {
+        "n": 1,
+        "x": 0.0764,
+        "y": 0.3624
+      },
+      {
+        "n": 2,
+        "x": 0.316,
+        "y": 0.6028
+      },
+      {
+        "n": 3,
+        "x": 0.7007,
+        "y": 0.7417
+      },
+      {
+        "n": 4,
+        "x": 0.2278,
+        "y": 0.8165
+      },
+      {
+        "n": 5,
+        "x": 0.7153,
+        "y": 0.2557
+      }
+    ],
+    "hash": "3b208374a3999822",
+    "text": "foerderung.hochmatt.example/antrag/dokumente Kanton Hochmatt Energieamt · Förderprogramm Heizungsersatz DE FR Anspruch Angaben Anlage Dokumente Bestätigen Dokumente hochladen Diese drei Dokumente brauchen wir. Mehr nicht. Offerte des Installateurs Die unterschriebene Offerte mit Preis und Heizungstyp. PDF Offerte_Waermepumpe.pdf Beispiel ansehen Nachweis, dass Ihnen das Haus gehört + Datei auswählen oder hierher ziehen Ein Foto oder PDF, bis 10 MB Nummer des Gebäudeenergieausweises GEAK- Die Nummer ist unvollständig. Sie steht oben rechts auf dem Ausweis. Warum fragen wir das? Zurück Weiter zur Bestätigung Für die Eigentümerin oder den Eigentümer Speichern Sie den Entwurf. Die Eigentümerin oder der Eigentümer prüft ihn mit AGOV und bestätigt. Entwurf speichern und teilen Link wird per E-Mail gesendet Zwischengespeichert TEST PROJECT · FICTIONAL EXAMPLE · FIG. 10"
+  },
+  "tp-archetypes": {
+    "width": 2400,
+    "height": 800,
+    "placeholder": "data:image/webp;base64,UklGRkQAAABXRUJQVlA4IDgAAABQAwCdASoYAAgAPu1yrU+pp6QiMAgBMB2JaQAAW8xW+ePgAAD+7VBI26i4digBhoa2GIYEF7CAAA==",
+    "alt": "images.tp-archetypes.alt",
+    "caption": "figures.tp-archetypes.caption",
+    "figure": 4,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/test-project/tp-archetypes-640.avif",
+        "bytes": 12726
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/test-project/tp-archetypes-960.avif",
+        "bytes": 22921
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/test-project/tp-archetypes-1280.avif",
+        "bytes": 33860
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/test-project/tp-archetypes-1920.avif",
+        "bytes": 52754
+      },
+      {
+        "format": "avif",
+        "width": 2400,
+        "src": "/media/test-project/tp-archetypes-2400.avif",
+        "bytes": 60889
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/test-project/tp-archetypes-640.webp",
+        "bytes": 17410
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/test-project/tp-archetypes-960.webp",
+        "bytes": 33158
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/test-project/tp-archetypes-1280.webp",
+        "bytes": 49600
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/test-project/tp-archetypes-1920.webp",
+        "bytes": 79350
+      },
+      {
+        "format": "webp",
+        "width": 2400,
+        "src": "/media/test-project/tp-archetypes-2400.webp",
+        "bytes": 102806
+      }
+    ],
+    "hash": "8dc8249f47d71867",
+    "text": "Delegating Owner Homeowner GOAL Get the subsidy without becoming a heating expert. KEY FRUSTRATION Asked for technical data only the installer has. KNOWS Owner details, the property, the budget DOESN’T KNOW Heat-pump model, heated floor area, certificate number “I just forward everything to my installer.” H3 Busy Installer Heating installer GOAL Close the job and get the customer’s subsidy approved fast. KEY FRUSTRATION Re-typing the same data into every canton’s PDF. KNOWS Model, output, floor area, the quote DOESN’T KNOW Ownership details, the owner’s login “I fill these in at night, in the van.” I2 Careful Caseworker Energy Office GOAL Decide on complete, legally sound files. KEY FRUSTRATION Chasing missing documents by phone. KNOWS The ordinance, the case system DOESN’T KNOW Whether a file is complete before opening it “Half my day is calling people back.” C1 TEST PROJECT · FICTIONAL EXAMPLE · FIG. 4"
+  },
+  "tp-before": {
+    "width": 2400,
+    "height": 1500,
+    "placeholder": "data:image/webp;base64,UklGRmYAAABXRUJQVlA4IFoAAADQAwCdASoYAA8APu1krU2ppaSiMAgBMB2JaQAAW+wvEbsGfkn1XAAA+GEeqe6CDx/kEzJwTfHjWjDvAODfQ+AKjHINPRW8tJeah0Utgss/324PsOXHBNvAgAA=",
+    "alt": "images.tp-before.alt",
+    "caption": "figures.tp-compare.caption",
+    "figure": 9,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/test-project/tp-before-640.avif",
+        "bytes": 6589
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/test-project/tp-before-960.avif",
+        "bytes": 12937
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/test-project/tp-before-1280.avif",
+        "bytes": 20119
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/test-project/tp-before-1920.avif",
+        "bytes": 33912
+      },
+      {
+        "format": "avif",
+        "width": 2400,
+        "src": "/media/test-project/tp-before-2400.avif",
+        "bytes": 42522
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/test-project/tp-before-640.webp",
+        "bytes": 9062
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/test-project/tp-before-960.webp",
+        "bytes": 18468
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/test-project/tp-before-1280.webp",
+        "bytes": 29014
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/test-project/tp-before-1920.webp",
+        "bytes": 52016
+      },
+      {
+        "format": "webp",
+        "width": 2400,
+        "src": "/media/test-project/tp-before-2400.webp",
+        "bytes": 69430
+      }
+    ],
+    "hash": "b43e95d2848372b2",
+    "text": "foerderung.hochmatt.example/formular-heizungsersatz.pdf formular-heizungsersatz.pdf Seite 3 / 9 Zoom: ganze Seite Gesuch um einen Förderbeitrag · Heizungsersatz Kanton Hochmatt · Energieamt Angaben zur Anlage 3.01 Art der neuen Anlage WP Luft/Wasser WP Sole/Wasser WP Wasser/Wasser Fernwärme Holz 3.02 Hersteller / Fabrikat 3.03 Typenbezeichnung gem. Offerte 3.04 Heizleistung kW (A2/W35 bzw. B0/W35) 3.05 Jahresarbeitszahl (JAZ) gem. Berechnung¹ 3.06 Energiebezugsfläche EBF in m² nach SIA² 3.07 GEAK-Nr. / Ausweis-Nr. (sofern vorhanden) 3.08 Baujahr Gebäude / Jahr Sanierung 3.09 Bisheriger Energieträger Heizöl Erdgas Elektro andere 3.10 Verbrauch der letzten Heizperioden (L, m³, kWh)³ 3.11 Installationsfirma (Name, Adresse) 3.12 UID der Firma 3.13 Datum der Offerte / Offert-Nr. 3.14 Offertbetrag inkl. MWST (CHF) ¹ Nachweis gemäss Anhang B der Verordnung; bei fehlender Berechnung ist das Gesuch unvollständig. ² Massgebend ist die Fläche nach Norm; Flächen unbeheizter Räume sind nicht anzurechnen. ³ Belege sind beizulegen. Unvollständige Gesuche werden zurückgewiesen. Die Angaben sind von der Gesuchstellerin bzw. vom Gesuchsteller persönlich zu bestätigen. Ort, Datum Unterschrift Gesuchsteller/in Stempel Installationsfirma TEST PROJECT · FICTIONAL EXAMPLE · FIG. 9 · BEFORE"
+  },
+  "tp-blueprint-current": {
+    "width": 2800,
+    "height": 1200,
+    "placeholder": "data:image/webp;base64,UklGRkoAAABXRUJQVlA4ID4AAADQAwCdASoYAAoAPu1yrU+pp6QiMAgBMB2JaQABJP/tEjQ0X7WIrsAA/vjPLTpJ/L/+hxi0u6i6+K2cuBgAAA==",
+    "alt": "images.tp-blueprint-current.alt",
+    "caption": "figures.tp-blueprint-current.caption",
+    "figure": 5,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/test-project/tp-blueprint-current-640.avif",
+        "bytes": 9586
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/test-project/tp-blueprint-current-960.avif",
+        "bytes": 19073
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/test-project/tp-blueprint-current-1280.avif",
+        "bytes": 28481
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/test-project/tp-blueprint-current-1920.avif",
+        "bytes": 44046
+      },
+      {
+        "format": "avif",
+        "width": 2560,
+        "src": "/media/test-project/tp-blueprint-current-2560.avif",
+        "bytes": 60523
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/test-project/tp-blueprint-current-640.webp",
+        "bytes": 13018
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/test-project/tp-blueprint-current-960.webp",
+        "bytes": 24808
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/test-project/tp-blueprint-current-1280.webp",
+        "bytes": 37058
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/test-project/tp-blueprint-current-1920.webp",
+        "bytes": 62854
+      },
+      {
+        "format": "webp",
+        "width": 2560,
+        "src": "/media/test-project/tp-blueprint-current-2560.webp",
+        "bytes": 87808
+      }
+    ],
+    "hash": "8fdcd16b1d1c7fb3",
+    "text": "Current service blueprint Heating subsidy today, from first question to decision 7 hand-offs 4 moments without feedback to the applicant APPLICANT INSTALLER FRONTSTAGE PDF, E-MAIL BACKSTAGE CASEWORKER SYSTEMS Learns about the subsidy Asks for a quote Prepares the quote Fills in the technical pages Signs the PDF E-mails PDF and attachments Shared inbox one for all caseworkers Checks completeness by hand E-mail or call: documents missing Sends documents again Re-keys the case Nightly batch import Case system from 2011 Decides Decision letter Waits median 41 days 1 2 3 4 5 6 7 1 no receipt 2 no status 3 no confirmation 4 no update while waiting TEST PROJECT · FICTIONAL EXAMPLE · FIG. 5"
+  },
+  "tp-decision-matrix": {
+    "width": 1600,
+    "height": 1200,
+    "placeholder": "data:image/webp;base64,UklGRl4AAABXRUJQVlA4IFIAAACwAwCdASoYABIAPu1erE2ppKSiMBgMATAdiWkA0BgYX+kYcSYhKAD+77Gn/dQfDy+s8P5gZwTdqSjyxqMdUYdYofqr3kpTrJAw86EIhLzQAAAA",
+    "alt": "images.tp-decision-matrix.alt",
+    "caption": "figures.tp-decision-matrix.caption",
+    "figure": 6,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/test-project/tp-decision-matrix-640.avif",
+        "bytes": 12982
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/test-project/tp-decision-matrix-960.avif",
+        "bytes": 19863
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/test-project/tp-decision-matrix-1280.avif",
+        "bytes": 26284
+      },
+      {
+        "format": "avif",
+        "width": 1600,
+        "src": "/media/test-project/tp-decision-matrix-1600.avif",
+        "bytes": 26967
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/test-project/tp-decision-matrix-640.webp",
+        "bytes": 15494
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/test-project/tp-decision-matrix-960.webp",
+        "bytes": 25250
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/test-project/tp-decision-matrix-1280.webp",
+        "bytes": 33268
+      },
+      {
+        "format": "webp",
+        "width": 1600,
+        "src": "/media/test-project/tp-decision-matrix-1600.webp",
+        "bytes": 43360
+      }
+    ],
+    "hash": "28222d70d0867c8d",
+    "text": "Decision matrix: who applies? More filled dots are better; for effort, more dots mean less effort OPTION LEGAL FIT DATA QUALITY EFFORT FOR OWNER BUILD EFFORT A Homeowner-only digital form B Installer applies alone C CHOSEN Delegated: installer prepares, owner confirms Ratings from decision workshop, n = 31. filled = better TEST PROJECT · FICTIONAL EXAMPLE · FIG. 6"
+  },
+  "tp-design-system": {
+    "width": 2400,
+    "height": 1500,
+    "placeholder": "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAACwAwCdASoYAA8APu1oqk6ppiQiMAgBMB2JaQAAUqLxMj429eGhgAD+3whGy1E3BEWp/va4tmt89aA1zGMS0md/1yr+jXn6AAA=",
+    "alt": "images.tp-design-system.alt",
+    "caption": "figures.tp-design-system.caption",
+    "figure": 11,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/test-project/tp-design-system-640.avif",
+        "bytes": 16121
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/test-project/tp-design-system-960.avif",
+        "bytes": 26975
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/test-project/tp-design-system-1280.avif",
+        "bytes": 38894
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/test-project/tp-design-system-1920.avif",
+        "bytes": 59828
+      },
+      {
+        "format": "avif",
+        "width": 2400,
+        "src": "/media/test-project/tp-design-system-2400.avif",
+        "bytes": 63784
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/test-project/tp-design-system-640.webp",
+        "bytes": 21300
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/test-project/tp-design-system-960.webp",
+        "bytes": 37368
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/test-project/tp-design-system-1280.webp",
+        "bytes": 54674
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/test-project/tp-design-system-1920.webp",
+        "bytes": 85370
+      },
+      {
+        "format": "webp",
+        "width": 2400,
+        "src": "/media/test-project/tp-design-system-2400.webp",
+        "bytes": 107988
+      }
+    ],
+    "hash": "4560e0ed7f4e8249",
+    "text": "Hochmatt design system Angular Material, themed with cantonal tokens · 23 components · reused by 3 services Source Sans 3 · WCAG 2.1 AA COLOUR, WITH CONTRAST hm-blue #1D4F91 8.1:1 on white hm-blue-dark #153B6D 11.2:1 on white hm-ink #1A1F24 16.6:1 on white hm-ink-2 #4A5560 7.6:1 on white hm-error #B42318 6.6:1 on white hm-success #1E7A3C 5.4:1 on white hm-blue-tint #E6EDF6 14.1:1 ink on it hm-field-border #7D8893 3.6:1 field border TYPE SCALE Titel hm-h1 · 26px Abschnitt hm-h2 · 19px Fliesstext hm-text · 15px Hinweis hm-small · 13px SPACING 4 8 12 16 24 32 hm-stepper · --hm-blue Anspruch Angaben Anlage Dokumente hm-form-field · --hm-error E-Mail der Eigentümerin eigentuemerin@ Bitte vollständige Adresse eingeben. hm-file-upload · --hm-line + Datei auswählen Foto oder PDF PDF Offerte.pdf hm-radio-card · --hm-blue-tint Wärmepumpe Luft/Wasser Fernwärme Anschluss hm-alert · info, success, error Eingang bestätigt per E-Mail. Entwurf gespeichert. Ein Dokument fehlt. hm-button · primary, secondary, link Weiter Zurück Später TEST PROJECT · FICTIONAL EXAMPLE · FIG. 11"
+  },
+  "tp-flow": {
+    "width": 2800,
+    "height": 1200,
+    "placeholder": "data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAADQAwCdASoYAAoAPu1iqU2ppaOiMAgBMB2JaQAAUp8dxMNuqC26cAAA/ueTQfvf2fhi5yB8Ypa+lLwTeJWl5gdPEowDSLTpqHk7ImgND4AAAA==",
+    "alt": "images.tp-flow.alt",
+    "caption": "figures.tp-flow.caption",
+    "figure": 7,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/test-project/tp-flow-640.avif",
+        "bytes": 8953
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/test-project/tp-flow-960.avif",
+        "bytes": 17756
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/test-project/tp-flow-1280.avif",
+        "bytes": 25552
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/test-project/tp-flow-1920.avif",
+        "bytes": 40839
+      },
+      {
+        "format": "avif",
+        "width": 2560,
+        "src": "/media/test-project/tp-flow-2560.avif",
+        "bytes": 55719
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/test-project/tp-flow-640.webp",
+        "bytes": 11476
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/test-project/tp-flow-960.webp",
+        "bytes": 23300
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/test-project/tp-flow-1280.webp",
+        "bytes": 33312
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/test-project/tp-flow-1920.webp",
+        "bytes": 56846
+      },
+      {
+        "format": "webp",
+        "width": 2560,
+        "src": "/media/test-project/tp-flow-2560.webp",
+        "bytes": 81994
+      }
+    ],
+    "hash": "f86512433d215e90",
+    "text": "New flow: check first, then hand over From the first visit to a complete case on the caseworker’s desk New decision point Yes / No: branch INSTALLER OR VISITOR, NO LOGIN OWNER, WITH AGOV ENERGY OFFICE Visitor installer or homeowner Pre-check 5 questions, anonymous Eligible? Installer prepares the draft data and documents Share link sent to the owner Owner logs in with AGOV Confirms? Submitted status page says when review starts Nightly batch import Caseworker complete, structured case Not eligible why, and where to get advice 2 reminder e-mails if the owner does not confirm Paper confirmation fallback Yes No Yes No 1 BEFORE LOGIN 2 DELEGATED HAND-OFF Status page: “Received — review starts within 2 working days.” TEST PROJECT · FICTIONAL EXAMPLE · FIG. 7"
+  },
+  "tp-hero": {
+    "width": 2560,
+    "height": 1440,
+    "placeholder": "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAABwAgCdASoYAA4AA4BaJaQAAv+5EH10/f04X5wAAP7ytOT79G/dHtY0cRJERgK9B1O15SzY3E1wMOY9++1R1Pr0iKo5+yjtAAA=",
+    "alt": "images.tp-hero.alt",
+    "caption": null,
+    "figure": null,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/test-project/tp-hero-640.avif",
+        "bytes": 10836
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/test-project/tp-hero-960.avif",
+        "bytes": 19473
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/test-project/tp-hero-1280.avif",
+        "bytes": 26248
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/test-project/tp-hero-1920.avif",
+        "bytes": 40858
+      },
+      {
+        "format": "avif",
+        "width": 2560,
+        "src": "/media/test-project/tp-hero-2560.avif",
+        "bytes": 49331
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/test-project/tp-hero-640.webp",
+        "bytes": 13444
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/test-project/tp-hero-960.webp",
+        "bytes": 24554
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/test-project/tp-hero-1280.webp",
+        "bytes": 36042
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/test-project/tp-hero-1920.webp",
+        "bytes": 58878
+      },
+      {
+        "format": "webp",
+        "width": 2560,
+        "src": "/media/test-project/tp-hero-2560.webp",
+        "bytes": 80554
+      }
+    ],
+    "hash": "f3099bc2fa4b84f9",
+    "text": "FICTIONAL EXAMPLE foerderung.hochmatt.example foerderung.hochmatt.example/antrag/anspruch Kanton Hochmatt Energieamt · Förderprogramm Heizungsersatz DE FR Anspruch Angaben Anlage Dokumente Bestätigen Schritt 1 von 5 · ohne Login Haben Sie Anspruch auf einen Förderbeitrag? Beantworten Sie 5 kurze Fragen. Das dauert etwa 2 Minuten. Welche Heizung ersetzen Sie? Ölheizung Gasheizung Elektroheizung Gehört Ihnen die Liegenschaft? Ja, ich bin Eigentümer/in Nein, ich bin Installateur/in Förderbeitrag bis CHF 10'000 für Wärmepumpen und Fernwärme. Warum fragen wir das? Weiter TEST PROJECT · FICTIONAL EXAMPLE · HERO"
+  },
+  "tp-landscape": {
+    "width": 2400,
+    "height": 1500,
+    "placeholder": "data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAADwAwCdASoYAA8APu1krU6ppaSiMAgBMB2JaQDImCP/1Qozv4WnO3HgAP7njcM+rzlSwIPHqylZDG9xaPidP+udM2sClnIHB/wPMNF+auAAAA==",
+    "alt": "images.tp-landscape.alt",
+    "caption": "figures.tp-landscape.caption",
+    "figure": 1,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/test-project/tp-landscape-640.avif",
+        "bytes": 15850
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/test-project/tp-landscape-960.avif",
+        "bytes": 28414
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/test-project/tp-landscape-1280.avif",
+        "bytes": 41946
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/test-project/tp-landscape-1920.avif",
+        "bytes": 65199
+      },
+      {
+        "format": "avif",
+        "width": 2400,
+        "src": "/media/test-project/tp-landscape-2400.avif",
+        "bytes": 65666
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/test-project/tp-landscape-640.webp",
+        "bytes": 20972
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/test-project/tp-landscape-960.webp",
+        "bytes": 39618
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/test-project/tp-landscape-1280.webp",
+        "bytes": 56744
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/test-project/tp-landscape-1920.webp",
+        "bytes": 88168
+      },
+      {
+        "format": "webp",
+        "width": 2400,
+        "src": "/media/test-project/tp-landscape-2400.webp",
+        "bytes": 114548
+      }
+    ],
+    "hash": "250b107f999c13de",
+    "text": "Service landscape, today 7 actors · 4 channels · 2 systems · 6 constraints Actor or channel Planned System PIN Constraint APPLICANTS CHANNELS ENERGY OFFICE & PARTNERS SYSTEMS Homeowner applies and declares Installer quotes and fills in PDF form 9 pages, DE or FR Shared e-mail inbox attachments, replies Phone questions, call-backs AGOV login planned for the new service Caseworkers 9, Energy Office Product owner Energy Office Legal service reads the ordinance IT provider hosting, AGOV Case system from 2011 Nightly batch import once a day Case-system vendor fixed contract quote, data signs fills in e-mailed re-keys every case LAW DE/FR ACCESSIBILITY AGOV LEGACY PROCUREMENT maintains Status known only after the nightly import TEST PROJECT · FICTIONAL EXAMPLE · FIG. 1"
+  },
+  "tp-outcomes": {
+    "width": 1920,
+    "height": 1080,
+    "placeholder": "data:image/webp;base64,UklGRkAAAABXRUJQVlA4IDQAAADwAgCdASoYAA4APu1iqU2ppaOiMAgBMB2JaQDImDDWAAD+7zJs/hdU5yaWXGlA9MNmQAAA",
+    "alt": "images.tp-outcomes.alt",
+    "caption": "figures.tp-outcomes.caption",
+    "figure": 13,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/test-project/tp-outcomes-640.avif",
+        "bytes": 10802
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/test-project/tp-outcomes-960.avif",
+        "bytes": 17917
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/test-project/tp-outcomes-1280.avif",
+        "bytes": 23570
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/test-project/tp-outcomes-1920.avif",
+        "bytes": 30258
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/test-project/tp-outcomes-640.webp",
+        "bytes": 13496
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/test-project/tp-outcomes-960.webp",
+        "bytes": 22986
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/test-project/tp-outcomes-1280.webp",
+        "bytes": 30980
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/test-project/tp-outcomes-1920.webp",
+        "bytes": 50010
+      }
+    ],
+    "hash": "5f05926fa65a3e17",
+    "text": "Outcomes after three months System logs, n = 640 applications · calls estimated from a 2-week log FICTIONAL DATA Complete on first submission higher is better · measured 38% 82% Before After Median days to decision lower is better · measured 41 d 19 d Before After Caseworker phone calls estimated · before = 100 100 ≈ −35% Before After measured estimated TEST PROJECT · FICTIONAL EXAMPLE · FIG. 13"
+  },
+  "tp-sketch-to-wire": {
+    "width": 2400,
+    "height": 800,
+    "placeholder": "data:image/webp;base64,UklGRkYAAABXRUJQVlA4IDoAAABwAwCdASoYAAgALrV2u12jqampiYC0SzgGZoIddlcOApxAhMAA/vT5ITYYdhRy2/cXQBYYxEGewQAA",
+    "alt": "images.tp-sketch-to-wire.alt",
+    "caption": "figures.tp-sketch-to-wire.caption",
+    "figure": 8,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/test-project/tp-sketch-to-wire-640.avif",
+        "bytes": 8156
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/test-project/tp-sketch-to-wire-960.avif",
+        "bytes": 14097
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/test-project/tp-sketch-to-wire-1280.avif",
+        "bytes": 20467
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/test-project/tp-sketch-to-wire-1920.avif",
+        "bytes": 30704
+      },
+      {
+        "format": "avif",
+        "width": 2400,
+        "src": "/media/test-project/tp-sketch-to-wire-2400.avif",
+        "bytes": 29676
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/test-project/tp-sketch-to-wire-640.webp",
+        "bytes": 12170
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/test-project/tp-sketch-to-wire-960.webp",
+        "bytes": 20506
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/test-project/tp-sketch-to-wire-1280.webp",
+        "bytes": 29952
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/test-project/tp-sketch-to-wire-1920.webp",
+        "bytes": 46242
+      },
+      {
+        "format": "webp",
+        "width": 2400,
+        "src": "/media/test-project/tp-sketch-to-wire-2400.webp",
+        "bytes": 54478
+      }
+    ],
+    "hash": "c32ab5e2f509cff4",
+    "text": "WEEK 1 SKETCH show an example! weiter WEEK 3 WIREFRAME WEEK 6 CODED PROTOTYPE Kanton Hochmatt DE FR Dokumente hochladen PDF Offerte des Installateurs Beispiel ansehen + Nachweis Eigentum Foto oder PDF + Gebäudeenergieausweis Nummer oder Foto Weiter TEST PROJECT · FICTIONAL EXAMPLE · FIG. 8"
+  },
+  "tp-test-rounds": {
+    "width": 1920,
+    "height": 1080,
+    "placeholder": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAAAwAwCdASoYAA4APu1iqU2ppaQiMAgBMB2JZwAAg++OHCMAAP7urfaaDE0tVtvEW5PnG1SWccHOCvQcOeVEwRs9o7g4AA==",
+    "alt": "images.tp-test-rounds.alt",
+    "caption": "figures.tp-test-rounds.caption",
+    "figure": 12,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/test-project/tp-test-rounds-640.avif",
+        "bytes": 16511
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/test-project/tp-test-rounds-960.avif",
+        "bytes": 26608
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/test-project/tp-test-rounds-1280.avif",
+        "bytes": 36129
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/test-project/tp-test-rounds-1920.avif",
+        "bytes": 46975
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/test-project/tp-test-rounds-640.webp",
+        "bytes": 21488
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/test-project/tp-test-rounds-960.webp",
+        "bytes": 35504
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/test-project/tp-test-rounds-1280.webp",
+        "bytes": 49286
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/test-project/tp-test-rounds-1920.webp",
+        "bytes": 75968
+      }
+    ],
+    "hash": "9911614367090d19",
+    "text": "Task success: “submit a complete application” n = 8 per round · moderated · German and French · read as directional ROUND 1 Paper and clickable 5/8 completed Owner data asked for too early Document names unclear Errors far from their fields ROUND 2 Coded prototype 7/8 completed Share link hard to find Accepted formats unclear French labels too long on phones ROUND 3 Release candidate 8/8 completed Reminder e-mail tone too formal Focus jumps after an upload No print view of the summary completed the task did not complete Small samples: a trend, not a rate TEST PROJECT · FICTIONAL EXAMPLE · FIG. 12"
+  },
+  "tp-workshop-board": {
+    "width": 2400,
+    "height": 1600,
+    "placeholder": "data:image/webp;base64,UklGRn4AAABXRUJQVlA4IHIAAACQBACdASoYABAAPu1kqU2ppaQiMAgBMB2JQBOj+EeqtuAB5IbzMYqdm77iOkAA/t8iJY0Zk9V528CxruO8fkPmy0zIY0OzlfvbN1b0ybX3yLzP9L3KhsnpNUyQlrbdaxh00x0BO241+1IcEt+nLAEcAAA=",
+    "alt": "images.tp-workshop-board.alt",
+    "caption": "figures.tp-workshop-board.caption",
+    "figure": 2,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/test-project/tp-workshop-board-640.avif",
+        "bytes": 19776
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/test-project/tp-workshop-board-960.avif",
+        "bytes": 35009
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/test-project/tp-workshop-board-1280.avif",
+        "bytes": 52152
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/test-project/tp-workshop-board-1920.avif",
+        "bytes": 81649
+      },
+      {
+        "format": "avif",
+        "width": 2400,
+        "src": "/media/test-project/tp-workshop-board-2400.avif",
+        "bytes": 90550
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/test-project/tp-workshop-board-640.webp",
+        "bytes": 24518
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/test-project/tp-workshop-board-960.webp",
+        "bytes": 46384
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/test-project/tp-workshop-board-1280.webp",
+        "bytes": 72884
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/test-project/tp-workshop-board-1920.webp",
+        "bytes": 118472
+      },
+      {
+        "format": "webp",
+        "width": 2400,
+        "src": "/media/test-project/tp-workshop-board-2400.webp",
+        "bytes": 150414
+      }
+    ],
+    "hash": "d1665aee4151406a",
+    "text": "Decision workshop: who applies? Workshop 3 of 5 · dot vote, one dot each Energy Office Legal service IT & UX OPTIONS A Homeowner-only digital form B Installer applies alone C Delegated: installer prepares, owner reviews and confirms with AGOV MUST BE TRUE (LEGAL) The owner’s own declaration stays intact The owner confirms with an AGOV login Installer data is marked “prepared by” The decision log is readable by legal German and French texts say the same RISKS The owner never confirms: the draft stalls Two people need two logins A wrong owner e-mail sends the link astray Owners without AGOV need a paper route MITIGATIONS Share link plus two reminder e-mails Paper confirmation form as a fallback DECISION RULE Choose the option that meets the ordinance and puts each item with the person who knows it Legal may veto; otherwise the dots decide Decision: C – delegated Signed off by legal in the room NEXT Prototype the hand-off with installers Add the decision to the log, in plain language 1-2-4-All, 31 participants TEST PROJECT · FICTIONAL EXAMPLE · FIG. 2"
+  }
+}

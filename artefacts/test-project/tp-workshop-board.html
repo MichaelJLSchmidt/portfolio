@@ -1,0 +1,200 @@
+<!-- Fig. 2: the decision-workshop board. Four columns, notes coloured by unit, dot votes, the
+     outlined decision and a hand-written annotation. -->
+<style>
+  .board {
+    position: absolute;
+    inset: 0;
+    padding: 26px 32px 22px;
+    background-image: radial-gradient(circle, rgb(90 92 82 / 0.28) 1px, transparent 1.4px);
+    background-size: 20px 20px;
+  }
+  .top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .top p {
+    margin-top: 4px;
+  }
+  .units {
+    display: flex;
+    gap: 16px;
+  }
+  .units span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .units i {
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+  }
+  .cols {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr 1fr 1fr;
+    gap: 16px;
+    height: 652px;
+  }
+  .col {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 12px 14px;
+    border: 1.5px solid rgb(90 92 82 / 0.45);
+    border-radius: 10px;
+    background: rgb(255 255 255 / 0.55);
+  }
+  .col h2 {
+    padding-bottom: 8px;
+    border-bottom: 1.5px solid rgb(90 92 82 / 0.45);
+  }
+  .note {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .note b {
+    display: block;
+    margin-bottom: 2px;
+    font-family: var(--label);
+    font-size: 12px;
+    font-stretch: var(--label-wdth);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+  .opt {
+    min-height: 100px;
+    font-size: 15px;
+  }
+  .sub {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1.5px dashed rgb(90 92 82 / 0.45);
+    color: var(--color-sheet-ink);
+  }
+  .dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .dots .dot {
+    width: 11px;
+    height: 11px;
+  }
+  .decision {
+    margin-top: 8px;
+    padding: 14px;
+    border: 3px solid var(--color-moss-ink);
+    border-radius: 6px;
+    background: #ffffff;
+    color: var(--color-moss-ink);
+    font-family: var(--diagram);
+    font-size: 21px;
+    font-weight: 750;
+    font-stretch: 90%;
+    line-height: 1.15;
+    text-align: center;
+    box-shadow: 0 0 0 5px rgb(47 107 58 / 0.14);
+  }
+  .decision small {
+    display: block;
+    margin-top: 6px;
+    color: var(--color-ground);
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .hand {
+    position: absolute;
+    left: 150px;
+    top: 560px;
+    color: var(--color-ground);
+    font-family: var(--diagram);
+    font-size: 21px;
+    font-style: italic;
+    font-weight: 500;
+    font-stretch: 78%;
+    transform: rotate(-4deg);
+    filter: url(#rough);
+  }
+  .hand-arrow {
+    position: absolute;
+    left: 70px;
+    top: 462px;
+    width: 110px;
+    height: 110px;
+    filter: url(#rough);
+  }
+</style>
+<svg width="0" height="0" style="position: absolute">
+  <filter id="rough">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" />
+    <feDisplacementMap in="SourceGraphic" scale="2.2" />
+  </filter>
+</svg>
+<div class="board">
+  <div class="top">
+    <div>
+      <h1 class="title">Decision workshop: who applies?</h1>
+      <p class="label muted">Workshop {{workshops.legalApproved}} of {{workshops.count}} · dot vote, one dot each</p>
+    </div>
+    <div class="units label">
+      <span><i style="background: var(--color-summit-gold)"></i>Energy Office</span>
+      <span><i style="background: var(--color-ice)"></i>Legal service</span>
+      <span><i style="background: var(--color-glacier)"></i>IT &amp; UX</span>
+    </div>
+  </div>
+  <div class="cols">
+    <section class="col">
+      <h2 class="label-caps">Options</h2>
+      <div class="note gold opt" data-votes="a"><b>A</b>Homeowner-only digital form<div class="dots"></div></div>
+      <div class="note glacier opt" data-votes="b"><b>B</b>Installer applies alone<div class="dots"></div></div>
+      <div class="note ice opt" data-votes="c"><b>C</b>Delegated: installer prepares, owner reviews and confirms with AGOV<div class="dots"></div></div>
+    </section>
+    <section class="col">
+      <h2 class="label-caps">Must be true (legal)</h2>
+      <div class="note ice">The owner’s own declaration stays intact</div>
+      <div class="note ice">The owner confirms with an AGOV login</div>
+      <div class="note ice">Installer data is marked “prepared by”</div>
+      <div class="note gold">The decision log is readable by legal</div>
+      <div class="note glacier">German and French texts say the same</div>
+    </section>
+    <section class="col">
+      <h2 class="label-caps">Risks</h2>
+      <div class="note gold">The owner never confirms: the draft stalls</div>
+      <div class="note glacier">Two people need two logins</div>
+      <div class="note glacier">A wrong owner e-mail sends the link astray</div>
+      <div class="note ice">Owners without AGOV need a paper route</div>
+      <h3 class="label-caps sub">Mitigations</h3>
+      <div class="note glacier">Share link plus {{decisions.reminders|word}} reminder e-mails</div>
+      <div class="note gold">Paper confirmation form as a fallback</div>
+    </section>
+    <section class="col">
+      <h2 class="label-caps">Decision rule</h2>
+      <div class="note ice">Choose the option that meets the ordinance <u>and</u> puts each item with the person who knows it</div>
+      <div class="note gold">Legal may veto; otherwise the dots decide</div>
+      <div class="decision">Decision: C – delegated<small>Signed off by legal in the room</small></div>
+      <h3 class="label-caps sub">Next</h3>
+      <div class="note glacier">Prototype the hand-off with installers</div>
+      <div class="note ice">Add the decision to the log, in plain language</div>
+    </section>
+  </div>
+  <svg class="hand-arrow" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+    <path d="M96 100 C 66 96, 34 76, 24 22" />
+    <path d="M14 34 L24 20 L36 31" />
+  </svg>
+  <p class="hand">1-2-4-All, {{workshops.participants}} participants</p>
+</div>
+<script>
+  const votes = window.DATA.workshops.votes;
+  const total = votes.a + votes.b + votes.c;
+  if (total !== window.DATA.workshops.participants) throw new Error(`votes add up to ${total}, not the participants`);
+  for (const note of document.querySelectorAll("[data-votes]")) {
+    const dots = note.querySelector(".dots");
+    for (let i = 0; i < votes[note.dataset.votes]; i++) dots.insertAdjacentHTML("beforeend", '<i class="dot"></i>');
+  }
+  // Notes sit a little askew, the way they land on a board.
+  for (const note of document.querySelectorAll(".note")) note.style.transform = `rotate(${(Math.random() * 2.4 - 1.2).toFixed(2)}deg)`;
+</script>

@@ -1,0 +1,155 @@
+<!-- Fig. 7: the new flow. An anonymous eligibility pre-check before any login, and a delegated
+     hand-off from installer to owner; the two new decision points are outlined in moss-ink. -->
+<style>
+  .head {
+    position: absolute;
+    top: 20px;
+    left: 30px;
+    right: 30px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .head p {
+    margin-top: 4px;
+  }
+  .key {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+  }
+  .key span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sw {
+    width: 24px;
+    height: 16px;
+    border: 3px solid var(--color-moss-ink);
+    border-radius: 4px;
+    background: #fff;
+  }
+  .band {
+    position: absolute;
+    top: 118px;
+    height: 30px;
+    border-radius: 6px 6px 0 0;
+    border-bottom: 2px solid var(--color-ground);
+    padding: 6px 10px;
+  }
+  .d-box {
+    align-items: flex-start;
+    font-size: 13.5px;
+  }
+  .d-box small {
+    font-size: 12px;
+  }
+  .pill {
+    border-radius: 999px;
+    text-align: left;
+  }
+  .diamond {
+    display: grid;
+    place-items: center;
+    width: 112px;
+    height: 84px;
+    font-family: var(--diagram);
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+  }
+  .diamond svg {
+    grid-area: 1 / 1;
+    width: 112px;
+    height: 84px;
+    overflow: visible;
+  }
+  .diamond b {
+    grid-area: 1 / 1;
+    position: relative;
+  }
+  .new {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 8px 2px 3px;
+    border-radius: 999px;
+    background: var(--color-moss-ink);
+    color: var(--color-sheet);
+    font-family: var(--label);
+    font-size: 11.5px;
+    font-stretch: var(--label-wdth);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .new .marker {
+    width: 20px;
+    height: 20px;
+    border-width: 1.5px;
+    font-size: 11px;
+  }
+  .status {
+    color: var(--color-sheet-ink);
+    font-size: 13px;
+  }
+</style>
+<div class="diagram contours">
+  <div class="head">
+    <div>
+      <h1 class="title">New flow: check first, then hand over</h1>
+      <p class="label muted">From the first visit to a complete case on the caseworker’s desk</p>
+    </div>
+    <div class="key label"><span><i class="sw"></i>New decision point</span><span>Yes / No: branch</span></div>
+  </div>
+</div>
+<script src="/shared/diagram.js"></script>
+<script>
+  const D = window.DATA;
+  const root = document.querySelector(".diagram");
+  const d = Diagram(root);
+  const W = 112, G = 22, X0 = 38, Y = 196, H = 84;
+  const x = (i) => X0 + i * (W + G);
+  const band = (from, to, text, bg) =>
+    root.insertAdjacentHTML("beforeend", `<div class="band label-caps" style="left:${x(from)}px;width:${x(to) + W - x(from)}px;background:${bg}">${text}</div>`);
+  band(0, 4, "Installer or visitor, no login", "rgb(232 196 104 / 0.35)");
+  band(5, 6, "Owner, with AGOV", "rgb(143 199 232 / 0.4)");
+  band(7, 9, "Energy Office", "rgb(200 245 176 / 0.5)");
+
+  const box = (id, i, html, cls = "") => d.box(id, { x: x(i), y: Y, w: W, h: H, html, cls });
+  box("start", 0, "Visitor<small>installer or homeowner</small>", "pill");
+  box("pre", 1, `Pre-check<small>${D.decisions.precheckQuestions} questions, anonymous</small>`);
+  // Decision diamonds are drawn as boxes without a frame, with an SVG diamond behind.
+  d.box("eligible", { x: x(2), y: Y, w: W, h: H, html: "" });
+  box("draft", 3, "Installer prepares the draft<small>data and documents</small>");
+  box("share", 4, "Share link<small>sent to the owner</small>", "moss");
+  box("agov", 5, "Owner logs in<small>with AGOV</small>");
+  d.box("confirm", { x: x(6), y: Y, w: W, h: H, html: "" });
+  box("submitted", 7, "Submitted<small>status page says when review starts</small>");
+  box("batch", 8, "Nightly batch import", "dark");
+  box("case", 9, "Caseworker<small>complete, structured case</small>");
+
+  for (const [id, label, moss] of [["eligible", "Eligible?", true], ["confirm", "Confirms?", false]]) {
+    const el = d.el(id);
+    el.classList.add("bare");
+    el.innerHTML = `<div class="diamond"><svg viewBox="0 0 112 84"><path d="M56 2 110 42 56 82 2 42Z" fill="#fff" stroke="${moss ? "#2F6B3A" : "#1B1C18"}" stroke-width="${moss ? 3 : 1.5}"/></svg><b style="max-width:72px;font-size:14px">${label}</b></div>`;
+  }
+
+  // Branches below the main path.
+  d.box("exit", { x: x(2) - 20, y: 360, w: 152, h: 70, cls: "pill soft", html: "Not eligible<small>why, and where to get advice</small>" });
+  d.box("remind", { x: x(6) - 24, y: 360, w: 128, h: 70, html: `${D.decisions.reminders} reminder e-mails<small>if the owner does not confirm</small>` });
+  d.box("paper", { x: x(7) + 20, y: 360, w: 130, h: 70, cls: "soft", html: "Paper confirmation<small>fallback</small>" });
+
+  d.wire("start", "pre").wire("pre", "eligible").wire("eligible", "draft", { label: "Yes", labelAt: [x(3) - 11, Y + 30] });
+  d.wire("eligible", "exit", { from: "b", to: "t", label: "No", labelAt: [x(2) + 74, 320] });
+  d.wire("draft", "share").wire("share", "agov").wire("agov", "confirm").wire("confirm", "submitted", { label: "Yes", labelAt: [x(7) - 11, Y + 30] });
+  d.wire("confirm", "remind", { from: "b", to: "t", label: "No", labelAt: [x(6) + 74, 320] });
+  d.wire("remind", "paper").wire("paper", "submitted", { from: "t", to: "b", tt: 0.75 });
+  d.wire("submitted", "batch").wire("batch", "case");
+
+  d.at(x(2) + W / 2, Y - 22, `<span class="new"><span class="marker">1</span>Before login</span>`);
+  d.at(x(4) + W / 2, Y - 22, `<span class="new"><span class="marker">2</span>Delegated hand-off</span>`);
+  d.at(x(8) + 30, 470, `<span class="status">Status page: “Received — review starts within ${D.decisions.statusWorkingDays} working days.”</span>`);
+</script>

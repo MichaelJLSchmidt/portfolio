@@ -1,0 +1,155 @@
+<!-- Fig. 9, after: the coded "System details" step, one question per section, plain-language
+     labels, an example of the quote and a "Warum fragen wir das?" hint. Same frame as tp-before. -->
+<style>
+  .frame {
+    position: absolute;
+    inset: 22px 30px 18px;
+  }
+  .browser {
+    height: 100%;
+  }
+  .hm-main {
+    padding: 16px 40px 0;
+  }
+  .hm-steps {
+    margin-bottom: 14px;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    gap: 18px;
+  }
+  .hm-card {
+    padding: 18px 22px;
+  }
+  .sec {
+    display: grid;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--hm-line-soft);
+  }
+  .radios {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .hm-radio {
+    padding: 10px 12px;
+  }
+  .area {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .area .hm-input {
+    width: 140px;
+  }
+  .help {
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--hm-blue-tint);
+    color: var(--hm-ink);
+    font-size: 14px;
+  }
+  .example {
+    padding: 14px;
+    border: 1px solid var(--hm-line-soft);
+    border-radius: 10px;
+    background: var(--hm-surface);
+  }
+  .doc {
+    position: relative;
+    height: 230px;
+    margin-top: 10px;
+    padding: 14px 16px;
+    border: 1px solid var(--hm-line);
+    border-radius: 4px;
+    background: #fff;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.08);
+  }
+  .doc i {
+    display: block;
+    height: 6px;
+    margin-bottom: 8px;
+    border-radius: 2px;
+    background: #d9dee3;
+  }
+  .doc .hl {
+    position: relative;
+    margin: 14px -6px 12px;
+    padding: 6px;
+    border: 2px solid var(--hm-blue);
+    border-radius: 4px;
+    background: var(--hm-blue-tint);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--hm-blue-dark);
+  }
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 16px;
+  }
+</style>
+<div class="frame">
+  <div class="browser">
+    <div class="browser-bar">
+      <span class="browser-dots"><i></i><i></i><i></i></span>
+      <span class="browser-url">foerderung.hochmatt.example/antrag/anlage</span>
+    </div>
+    <div class="browser-view hm" lang="de">
+      <header class="hm-header">
+        <div class="hm-brand"><span class="hm-mark"></span><div><b>Kanton Hochmatt</b><span>Energieamt · Förderprogramm Heizungsersatz</span></div></div>
+        <div class="hm-lang"><span class="on">DE</span><span>FR</span></div>
+      </header>
+      <div class="hm-main">
+        <ol class="hm-steps">
+          <li class="hm-step done"><i></i>Anspruch</li>
+          <li class="hm-step done"><i></i>Angaben</li>
+          <li class="hm-step on"><i></i>Anlage</li>
+          <li class="hm-step"><i></i>Dokumente</li>
+          <li class="hm-step"><i></i>Bestätigen</li>
+        </ol>
+        <div class="layout">
+          <div class="hm-card">
+            <h1>Angaben zur Anlage</h1>
+            <p class="hm-lead" style="margin-top: 4px">Die Angaben stehen in der Offerte Ihres Installateurs.</p>
+            <div class="sec">
+              <p class="hm-label">Welche Heizung wird eingebaut?</p>
+              <div class="radios">
+                <div class="hm-radio on"><div><b>Wärmepumpe</b><span>Luft/Wasser</span></div></div>
+                <div class="hm-radio"><div><b>Wärmepumpe</b><span>Erdsonde</span></div></div>
+                <div class="hm-radio"><div><b>Fernwärme</b><span>Anschluss</span></div></div>
+              </div>
+            </div>
+            <div class="sec">
+              <p class="hm-label">Wie gross ist die beheizte Fläche?</p>
+              <p class="hm-hint">Steht in der Offerte unter «Energiebezugsfläche».</p>
+              <div class="area"><span class="hm-input">{{ui.floorAreaM2}}<span class="hm-small">m²</span></span></div>
+            </div>
+            <div class="sec">
+              <span class="hm-disclosure open">Warum fragen wir das?</span>
+              <p class="help">Die Fläche bestimmt, wie hoch Ihr Förderbeitrag ist. Fehlt sie, müssen wir nachfragen.</p>
+            </div>
+            <div class="actions"><span class="hm-btn secondary">Zurück</span><span class="hm-btn">Weiter</span></div>
+          </div>
+          <aside class="example">
+            <p class="hm-label">Beispiel: hier steht es</p>
+            <p class="hm-hint">So sieht eine Offerte aus. Die Fläche ist markiert.</p>
+            <div class="doc">
+              <i style="width: 50%; height: 9px; background: #b9c1c9"></i>
+              <i style="width: 80%"></i>
+              <i style="width: 70%"></i>
+              <div class="hl">Energiebezugsfläche: {{ui.floorAreaM2}} m²</div>
+              <i style="width: 85%"></i>
+              <i style="width: 60%"></i>
+              <i style="width: 75%"></i>
+              <i style="width: 40%"></i>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
