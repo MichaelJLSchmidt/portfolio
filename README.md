@@ -75,10 +75,13 @@ Never commit the token. `.env*` files are git-ignored; `.env.example` lists the 
 | `npm run check:contrast` | WCAG contrast of the token colour pairs, quiet zones, body text and the type shine |
 | `npm run check:legibility` | Body text against its real background on rendered screenshots (field and poster) |
 | `npm run check:content`  | Lists every content placeholder still to fill, with file, line and field          |
+| `npm run check:figures`  | Numbers in copy, card and charts match their data file; images are current        |
 | `npm test`               | Unit tests of the Basecamp gate (`node:test`)                                      |
-| `npm run test:e2e`       | Chromium checks against `out/`: aborted view transitions, calm navigation, decode |
+| `npm run test:e2e`       | Chromium checks against `out/`: view transitions, calm navigation, decode, case-study template |
 | `npm run test:hosting`   | Gated and production deploys under netlify-cli (build, edge runtime, redirects)   |
 | `npm run report:size`    | Initial JS/CSS/fonts per route, lazy chunks, terrain assets (gzip)               |
+| `npm run report:transfer` | One page's transfer on a phone and a desktop, first view and full scroll         |
+| `npm run images`         | Renders and encodes the case-study artefact images (see "Case studies")           |
 | `npm run terrain`        | Regenerates `public/terrain` from swisstopo data                                  |
 | `npm run verify:terrain` | Checks that the committed heightmaps decode to the exact source heights          |
 | `npm run fonts:subset`   | Regenerates the under-construction page's WOFF2 subsets in `src/hosting/fonts`    |
@@ -114,7 +117,8 @@ its `SITE_MODE`:
 - `basecamp` only warns;
 - `live` fails on any placeholder.
 
-A local build with `NEXT_PUBLIC_PREVIEW=1` only warns in every mode.
+A local build with `NEXT_PUBLIC_PREVIEW=1` only warns in every mode. Flagged examples (see "Case studies")
+are fictional on purpose: `check:content` skips them and names them once, and live builds don't contain them.
 
 ### Tuning the contour field
 
@@ -130,6 +134,91 @@ intervals. "Save to config"
 writes the values to `src/config/contour-field.json`, which is committed. Colours and durations are stored as
 token names. Leva is never part of the production build. Add `?field=force` to a URL to skip the low-spec check,
 which is useful in headless browsers.
+
+## Case studies
+
+Every case study (`/work/<slug>/`) is built from the same blocks. The content model is in
+`src/lib/case-study.ts`, the copy in `src/content/case-studies.ts`, the components in
+`src/components/case-study`. `src/content/examples/test-project` is a complete, fictional model case study that
+uses every block; read it as the reference.
+
+- **Header:** the terrain header and its morph from the card stay; under the deck line a type line and the meta
+  line "7 min read · 60-second skim below" (reading time from the body, counted like Medium: 265 words a minute
+  plus 12 s for the first figure, a second less for each next one, at least 3 s; the link goes to the Summit
+  summary). The product hero (`hero`) sits directly after the summary.
+- **Waypoints:** each heading states its finding, "Label — finding"; decisions are h3 blocks.
+- **In-page navigation:** from 1200 px a sticky "On this page" trail beside the content (a `nav`, one link per
+  waypoint, a dotted contour trail that fills up to the waypoint being read, `aria-current="true"`); below
+  1200 px the "Jump to" chips near the top and "Next waypoint ↓ / Back to top ↑" at the end of each waypoint.
+- **Figures** (`Figure.tsx`): `<figure>` with `<picture>` (AVIF, then WebP, width descriptors, `sizes`, explicit
+  width and height), lazy unless `priority` (eager, `fetchpriority="high"`, only for an image in the first
+  viewport), a tiny blurred placeholder, and the caption "Fig. n — What it shows. Why it matters." (numbered in
+  order of appearance, about 30 words at most). Complex diagrams add a long description behind "Describe this
+  diagram". Two surfaces: the map sheet (sheet colour, 32 px inside, contour hairline, 8 px corners) for light UI
+  and diagrams, the night frame (raised ground) for charts and the hero; column (~720 px) or wide (~1120 px),
+  full width on phones.
+- **Lightbox** (`zoom: true`): an "Enlarge" button on a native `<dialog>`; focus moves in, Esc closes, focus
+  returns; the largest source loads on open; pinch and pan on touch, click or wheel zoom and +/−/reset (names
+  carry the zoom level) on desktop; no zoom animation with reduced motion. Without JavaScript the figure offers
+  "Open full-size image".
+- **Before/after** (`kind: "compare"`): a native range "Compare before and after" moves a clip, plus "Before /
+  After / Side by side" buttons; without JavaScript both images stack with their own alt text.
+- **Hotspots** (`kind: "hotspots"`): numbered marker buttons on the image highlight the matching note in the
+  caption's visible ordered list; positions come from the image manifest.
+- **Key insight** (one per page), **pull quote** (one per page), **decision** (options table, then chose / cost /
+  mitigation), **metric tiles** and **outcome table** with evidence badges MEASURED, ESTIMATED, QUALITATIVE
+  (shape plus text) and a legend.
+
+Lightbox, comparison and hotspot code load lazily, only on pages that use them, once the figure comes near the
+viewport (`Enhance.tsx`). `npm run check:figures` enforces the "one per page" and caption rules for every case
+study.
+
+### Numbers come from a data file
+
+A case study can keep every number in one data file (Test Project: `src/content/examples/test-project/data.ts`).
+Copy, the card, figure captions and alt text are written with tokens, `{{outcomes.complete.after}}%`,
+`{{workshops.count|word}}`, `CHF {{subsidy.maxChf|en}}` (`src/lib/fill.ts`; an unknown path stops the build).
+`src/content/examples/sources.ts` tells the tools where such a case study keeps its data, copy and artefacts.
+`npm run check:figures` (run by every build that includes examples) fails when copy, the card or an artefact
+source writes a digit of its own, when the data contradicts itself, when a key figure (`keyFigures`) is missing
+from the copy, card or chart it must appear in, or when a committed image is older than its data or source.
+
+### Flagged examples
+
+A card and case study marked `example: true` (`src/content/examples`) are fictional: a banner above the H1, a
+"Fictional example" stamp on the card, "fictional" in the type line, noindex on the page, a footer strip on every
+image. Where they appear (`includesExamples` in `src/hosting/config.ts`):
+
+| Build                                         | Examples                                                   |
+| --------------------------------------------- | ---------------------------------------------------------- |
+| `SITE_MODE=basecamp` (branch deploys, Deploy Previews) | included, last in the deck                        |
+| `SITE_MODE=live`                              | excluded: no route, card, asset, sitemap entry or bundle code |
+| no `SITE_MODE`                                | included in `npm run dev` and with `NEXT_PUBLIC_PREVIEW=1`, else excluded |
+
+A live build swaps `@/content/examples` for an empty module (`next.config.ts`), removes the examples' files from
+`out/` and fails if any mention of them is left. Their card terrains live in `public/terrain/examples.json`, not
+in `terrain.json`, so live bundles don't carry them either.
+
+### Artefact images
+
+`npm run images` (`scripts/images/`) renders each image from one HTML or SVG source in `artefacts/<slug>/`. The
+sources share `artefacts/shared/artefact.css` (the site palette from the tokens, the fictional product's UI
+tokens, self-hosted Archivo and Martian Mono for portfolio labels and diagrams, Source Sans 3 for the product UI)
+and `artefacts/shared/diagram.js` (boxes and connectors). Numbers come from the data file, as `{{tokens}}` or from
+`window.DATA` in a chart's script.
+
+1. Playwright renders the page at half the master size with deviceScaleFactor 2, waits for
+   `document.fonts.ready`, with animations off, the clock fixed and `Math.random` seeded, and screenshots the
+   artefact root to a lossless PNG master (`artefacts/.masters`, git-ignored).
+2. sharp encodes AVIF (quality 55) and WebP (quality 78) at 640/960/1280/1920/2560 px, never upscaled, into
+   `public/media/<slug>/`.
+3. The manifest next to the data file records intrinsic size, a blurred placeholder, alt and caption keys,
+   every source, hotspot positions, the rendered text and the hash of the inputs.
+
+Budget: the hero's 1920 px AVIF at most 180 KB. Sources and outputs are committed; masters are not. Image rules:
+flat browser frames (28 px bar, three neutral dots, the fictional URL), on light sheets ground-coloured markers,
+moss-ink highlights, alpenglow-ink "no feedback" gaps, at most one faint contour set behind diagrams, and the strip
+"TEST PROJECT · FICTIONAL EXAMPLE · Fig. n" on every image.
 
 ## Hosting on Netlify
 
@@ -158,7 +247,8 @@ Netlify builds this repository with continuous deployment. The domains are confi
 - **basecamp**: the full static export, plus the gate as a Netlify Edge Function. The build writes it to
   `.netlify/v1/edge-functions/` (Netlify's Frameworks API), so it exists only in these deploys; production has
   no edge function at all.
-- **live**: the full site, no gate. Prepared for launch, not enabled.
+- **live**: the full site, no gate. Prepared for launch, not enabled. Flagged examples are left out (see "Case
+  studies"), and the build writes a `sitemap.xml` of the indexable pages.
 
 Netlify's automatic Next.js runtime is switched off (`NETLIFY_NEXT_PLUGIN_SKIP=true` in `netlify.toml`): deploys
 are plain static files. Each mode writes its own `_redirects` and `_headers` into `out/`, because headers and
@@ -264,10 +354,13 @@ password stops working, so everyone has to enter the new one.
   - `cards/*.svg`: the leader card's Interlaken → Jungfrau crop (200 m lines) and seeded-noise terrains for
     project cards (seed = collector number, ~20 lines, every 4th an index line).
   - `morph/*.webp`: per-card heightmaps the field morphs to on case-study pages and Basecamp.
+  - `examples.json`: the card terrains of flagged examples (cards marked `"example": true` in the config), kept
+    out of `terrain.json` so live bundles don't carry them.
   - `profile.json`: the elevation profile along the leader trail (240 points, ~1 KB gzipped) for the About
     page's ascent chart.
 - `npm run terrain -- --refresh` re-downloads; `-- --placeholder` builds from procedural terrain without the
-  network; `-- --png` also writes PNG copies (git-ignored, not used by the site).
+  network; `-- --png` also writes PNG copies (git-ignored, not used by the site); `-- --only=lab-099` rebuilds only
+  the named seeded card terrains and updates their metadata, without touching the region.
 - `*.bin` next to every heightmap: the same heights as raw 16-bit values (gradient-predicted, zigzag-coded,
   gzipped by the pipeline), about 10% smaller than the WebP. The site only fetches them in a session where a
   browser decoded a WebP to different values (see "Heightmap decode check").
@@ -333,9 +426,11 @@ production builds compile them out:
   hover shine. Contour-coloured labels keep their halo (`.keep-halo`), and the poster fallback keeps all halos
   and its vignette.
 - Body text is measured as rendered: `npm run check:legibility` screenshots every `.body-copy` block (and the
-  footer) on the home page, a case study and Basecamp, at 1440×900 and 390×844, over the field with the
-  headlamp lit right on the text and over the poster. It requires at least 7:1 against the brightest
-  background pixel under or next to a glyph, and lines under the glyphs at most 15% of a lit line. It also
-  fails when a page is wider than the phone (it would pan sideways).
+  footer and tables, `.knockout`) on the home page, a case study, the case-study example (when built) and
+  Basecamp, at 1440×900 and 390×844, over the field with the headlamp lit right on the text and over the poster.
+  It requires at least 7:1 against the brightest background pixel under or next to a glyph, and lines under the
+  glyphs at most 15% of a lit line. Text on opaque surfaces (`.surface-copy`: captions, the summary, the banner,
+  the key insight, metric tiles) is measured too; dark text on the sheet colour needs 4.5:1 (no lines run
+  behind it). It also fails when a page is wider than the phone (it would pan sideways).
 - The HUD clock always shows the live Bern time, Calm map and reduced motion included (a changing time is
   content, not motion); only its pulsing dot stops.

@@ -4,4 +4,5 @@
 *.tif binary
 *.woff2 binary
 *.webp binary
+*.avif binary
 *.bin binary
