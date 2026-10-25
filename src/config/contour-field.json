@@ -12,7 +12,7 @@
   "headlampFadeMs": 600,
   "headlampGain": 1.5,
   "sweepGain": 2,
-  "parallax": 0.022,
+  "parallax": 0.011,
   "scrollParallax": 0.05,
   "driftCyclesPerSecond": 0.05,
   "quietStrength": 0.25,
