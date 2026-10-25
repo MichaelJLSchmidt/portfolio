@@ -37,6 +37,10 @@ const required = [
   ["mossInk", "sheet", 4.5],
   ["alpenglowInk", "sheet", 4.5],
   ["ground", "glacier", 4.5],
+  // Case-study surfaces: labels on legend panels and night frames, evidence shapes (3:1, graphics).
+  ["glacier", "groundRaised", 4.5],
+  ["alpenglow", "groundRaised", 3],
+  ["ice", "groundRaised", 3],
 ];
 // Documented as not allowed on the sheet colour; listed so the rule stays visible.
 const forbidden = [
