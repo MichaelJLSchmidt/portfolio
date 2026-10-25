@@ -93,7 +93,7 @@ DESKTOP (≥ 1000 px)                                   PHONE
 | H1                 | KineticText condense, letters open up under the pointer               | Static display cut                         |
 | Ascent profile     | Line draws with scroll, climber marker, plaques reveal                | Full line drawn, all waypoints visible     |
 | Principles, plaques | Kinetic headings in view, staggered reveals (`--dur-long`)           | Static                                     |
-| Background         | Headlamp, loupe, alpenglow pulse continue                             | Poster                                     |
+| Background         | Headlamp and drift continue (monochrome map)                          | Poster                                     |
 
 The ascent is driven by a passive scroll listener rather than `animation-timeline`: the climb has to land on
 each milestone's position on the trail, which depends on where its plaque sits, so a small rAF loop measures the
