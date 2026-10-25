@@ -8,7 +8,7 @@
   "indexOpacity": 0.9,
   "lineColor": "contour",
   "indexColor": "contour",
-  "headlampRadiusPx": 180,
+  "headlampRadiusPx": 120,
   "headlampFadeMs": 600,
   "headlampGain": 1.5,
   "sweepGain": 2,

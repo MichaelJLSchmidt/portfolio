@@ -11,9 +11,8 @@ type Tag = "h1" | "h2" | "h3" | "p" | "span";
 
 /** The contour field's headlamp falloff (contour-material.ts), for a distance in radii. */
 function headlampFalloff(d: number): number {
-  const x = Math.min(1, d);
-  const lit = 1 - x * x * (3 - 2 * x);
-  return lit * lit * (3 - 2 * lit);
+  const edge = Math.exp(-3);
+  return Math.max(Math.exp(-3 * d * d) - edge, 0) / (1 - edge);
 }
 
 export type KineticTextProps = {

@@ -93,10 +93,9 @@ void main() {
   float reg = lineMask(dReg, uLineWidth) * crowdReg;
   float ind = lineMask(dIdx, uIndexWidth) * crowdIdx;
 
-  // Headlamp: eased radial falloff around the pointer.
-  float dist = length(gl_FragCoord.xy - uHeadlampPos);
-  float lit = 1.0 - smoothstep(0.0, 1.0, dist / max(uHeadlampRadius, 1.0));
-  lit = lit * lit * (3.0 - 2.0 * lit) * uHeadlampStrength;
+  // Headlamp: a soft Gaussian falloff around the pointer, reaching zero at the radius.
+  float x = length(gl_FragCoord.xy - uHeadlampPos) / max(uHeadlampRadius, 1.0);
+  float lit = max(exp(-3.0 * x * x) - exp(-3.0), 0.0) / (1.0 - exp(-3.0)) * uHeadlampStrength;
 
   // Intro sweep: lines appear from the lowest ground upward, with a brighter leading edge.
   float sweepLevel = mix(range.x - 30.0, range.y + 60.0, uSweep);
@@ -188,7 +187,7 @@ export function createContourMaterial(): THREE.ShaderMaterial & { uniforms: Cont
     uLineColor: { value: new THREE.Vector3() },
     uIndexColor: { value: new THREE.Vector3() },
     uHeadlampPos: { value: new THREE.Vector2(-1e4, -1e4) },
-    uHeadlampRadius: { value: 180 },
+    uHeadlampRadius: { value: 120 },
     uHeadlampStrength: { value: 0 },
     uHeadlampGain: { value: 1.5 },
     uSweepGain: { value: 2 },
