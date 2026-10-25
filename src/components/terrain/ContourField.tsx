@@ -5,6 +5,7 @@ import { cancelFrame, frame, type Process } from "@/lib/frameloop";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import meta from "@terrain/terrain.json";
+import { cardTerrain } from "@/lib/card-terrain";
 import { color, easing } from "@/styles/tokens";
 import { MAX_QUIET_ZONES, coverTransform, createContourMaterial } from "./contour-material";
 import { INTRO_STORAGE_KEY, cancelPendingIntro } from "@/lib/motion-preference";
@@ -59,7 +60,7 @@ const regionSource = (profile: DeviceProfile): TerrainSource => {
 };
 
 const cardSource = (id: string): TerrainSource | null => {
-  const card = (meta.cards as Record<string, (typeof meta.cards)[keyof typeof meta.cards]>)[id];
+  const card = cardTerrain(id);
   if (!card) return null;
   const m = card.morph;
   return {

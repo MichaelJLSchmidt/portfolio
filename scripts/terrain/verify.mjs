@@ -18,7 +18,9 @@ import { decodeRawHeights, decodeRgb, rasterHash } from "./lib/heightmap.mjs";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const publicDir = join(root, "public");
 const meta = JSON.parse(readFileSync(join(publicDir, "terrain/terrain.json"), "utf8"));
-const maps = [...meta.heightmaps, ...Object.values(meta.cards).map((c) => c.morph)];
+// Flagged examples keep their card terrains in examples.json.
+const examples = JSON.parse(readFileSync(join(publicDir, "terrain/examples.json"), "utf8"));
+const maps = [...meta.heightmaps, ...[...Object.values(meta.cards), ...Object.values(examples.cards)].map((c) => c.morph)];
 let failed = 0;
 const fail = (msg) => {
   failed++;
