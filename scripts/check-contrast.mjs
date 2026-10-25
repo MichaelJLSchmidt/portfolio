@@ -54,13 +54,13 @@ for (const [fg, bg, min] of required) {
 for (const [fg, bg] of forbidden) console.log(`info  ${ratio(fg, bg).toFixed(2).padStart(5)}:1  ${fg} on ${bg} (never used for text or lines)`);
 
 // Quiet zones: text drawn without a halo over lines faded to `quietStrength`. Worst case is a
-// fully lit line (alpha 1 before fading) in any of the field's line colours, plus the glow
-// halo the shader adds around lit lines (0.18 at most, faded the same way).
+// fully opaque line (alpha 1 before fading; lit lines keep their colour) in any of the field's
+// line colours.
 const s = field.quietStrength;
-const lineColours = [...new Set([field.lineColor, field.indexColor, field.glowColor])];
+const lineColours = [...new Set([field.lineColor, field.indexColor])];
 const zoneBg = (token) => {
-  const g = rgb(color.ground), c = rgb(color[token]), glow = rgb(color[field.glowColor]);
-  return g.map((v, i) => Math.min(255, v + (c[i] - v) * s + glow[i] * 0.18 * s));
+  const g = rgb(color.ground), c = rgb(color[token]);
+  return g.map((v, i) => v + (c[i] - v) * s);
 };
 const zoneText = [
   ["sheet", 4.5],
@@ -82,8 +82,8 @@ console.log(`info  ${worst.toFixed(2).padStart(5)}:1  contour over the brightest
 // fully lit line; on a legend panel (raised ground at 88%) on top of that.
 const mixRgb = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
 const bodyBg = (line, strength) => {
-  const g = rgb(color.ground), c = rgb(color[line]), glow = rgb(color[field.glowColor]);
-  return g.map((v, i) => Math.min(255, v + (c[i] - v) * strength + glow[i] * 0.18 * strength));
+  const g = rgb(color.ground), c = rgb(color[line]);
+  return g.map((v, i) => v + (c[i] - v) * strength);
 };
 console.log(`\nBody text (lines at ${Math.round(field.bodyQuietStrength * 100)}%, no halo; minimum 7:1):`);
 for (const line of lineColours) {

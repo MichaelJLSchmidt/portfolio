@@ -8,11 +8,10 @@
   "indexOpacity": 0.9,
   "lineColor": "contour",
   "indexColor": "contour",
-  "glowColor": "glacier",
   "headlampRadiusPx": 180,
   "headlampFadeMs": 600,
-  "glowWidthPx": 7,
-  "glowStrength": 0.3,
+  "headlampGain": 1.5,
+  "sweepGain": 2,
   "parallax": 0.022,
   "scrollParallax": 0.05,
   "driftCyclesPerSecond": 0.05,
@@ -28,14 +27,12 @@
     "dprMax": 2,
     "heightmap": "desktop",
     "heightmapMinDevicePx": 1400,
-    "glow": true,
     "idleFps": 10,
     "ambientFps": 30
   },
   "mobile": {
     "dprMax": 1.5,
     "heightmap": "mobile",
-    "glow": false,
     "idleFps": 5,
     "ambientFps": 24
   },

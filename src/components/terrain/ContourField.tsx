@@ -170,8 +170,8 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       u.uGround.value.set(...hexToRgb(color.ground));
       u.uLineColor.value.set(...hexToRgb(colorOf(cfg.lineColor)));
       u.uIndexColor.value.set(...hexToRgb(colorOf(cfg.indexColor)));
-      u.uGlowColor.value.set(...hexToRgb(colorOf(cfg.glowColor)));
-      u.uGlow.value = profile.glow ? cfg.glowStrength / 0.3 : 0;
+      u.uHeadlampGain.value = cfg.headlampGain;
+      u.uSweepGain.value = cfg.sweepGain;
       u.uDrift.value = cfg.driftCyclesPerSecond;
       writeQuietKinds();
       updateIntervals(true);
@@ -197,7 +197,6 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     u.uLineWidth.value = cfg.lineWidthPx * dpr;
     u.uIndexWidth.value = cfg.indexLineWidthPx * dpr;
     u.uHeadlampRadius.value = cfg.headlampRadiusPx * dpr;
-    u.uGlowWidth.value = cfg.glowWidthPx * dpr;
     writeQuietKinds();
     u.uResolution.value.set(size.width * dpr, size.height * dpr);
     const a = anim.current;

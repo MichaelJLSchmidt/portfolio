@@ -14,7 +14,6 @@ export type DeviceProfile = {
   heightmapMinDevicePx?: number;
   /** Preview builds and dev only: a heightmap picked by width with ?hm=1024|1536|2048, for comparisons. */
   heightmapWidth?: number;
-  glow: boolean;
   /** Frame rate for the ambient animation (the slow drift) while the visitor is around. */
   ambientFps: number;
   /** Frame rate once nobody has touched the page for `dormantAfterMs`. */
@@ -22,6 +21,9 @@ export type DeviceProfile = {
 };
 
 export const fieldConfig: FieldConfig = config;
+
+/** The field is a monochrome map: its lines take neutral colours only. */
+export const LINE_COLORS = ["contour", "contourDim", "sheet"] as const satisfies readonly ColorToken[];
 
 /** Contour intervals the field may use (metres). The index line is every `indexEvery`-th. */
 export const CONTOUR_INTERVALS = [50, 100, 200, 250, 500] as const;

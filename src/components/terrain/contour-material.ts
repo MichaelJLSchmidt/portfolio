@@ -38,13 +38,12 @@ uniform float uIndexOpacity;
 uniform vec3 uGround;
 uniform vec3 uLineColor;
 uniform vec3 uIndexColor;
-uniform vec3 uGlowColor;
 
 uniform vec2 uHeadlampPos;    // device px, origin bottom-left
 uniform float uHeadlampRadius; // device px
-uniform float uHeadlampStrength;
-uniform float uGlow;          // 0..1, desktop only
-uniform float uGlowWidth;     // device px
+uniform float uHeadlampStrength; // 0..1, fades in and out
+uniform float uHeadlampGain;  // lit lines reach this many times their strength
+uniform float uSweepGain;     // the same for the intro sweep's leading edge
 
 uniform float uSweep;  // 0..1 draw-on from lake level upward
 uniform float uTime;   // seconds
@@ -99,7 +98,7 @@ void main() {
   float lit = 1.0 - smoothstep(0.0, 1.0, dist / max(uHeadlampRadius, 1.0));
   lit = lit * lit * (3.0 - 2.0 * lit) * uHeadlampStrength;
 
-  // Intro sweep: lines appear from the lowest ground upward, with a bright leading edge.
+  // Intro sweep: lines appear from the lowest ground upward, with a brighter leading edge.
   float sweepLevel = mix(range.x - 30.0, range.y + 60.0, uSweep);
   float revealed = 1.0 - smoothstep(sweepLevel - 60.0, sweepLevel, h);
   float front = exp(-abs(h - sweepLevel) / 45.0) * step(uSweep, 0.999) * revealed;
@@ -116,19 +115,14 @@ void main() {
     keep = min(keep, mix(1.0, uQuietKind[i].y, q));
   }
 
-  float light = max(lit, front);
-  float aReg = reg * mix(uLineOpacity, 1.0, light) * keep;
-  float aInd = ind * mix(uIndexOpacity, 1.0, light) * keep;
-  vec3 cReg = mix(uLineColor, uGlowColor, light);
-  vec3 cInd = mix(uIndexColor, uGlowColor, light);
+  // Lit lines keep their colour and only gain strength: the map stays monochrome.
+  float gain = max(mix(1.0, uHeadlampGain, lit), mix(1.0, uSweepGain, front));
+  float aReg = min(reg * uLineOpacity * gain, 1.0) * keep;
+  float aInd = min(ind * uIndexOpacity * gain, 1.0) * keep;
 
   vec3 col = uGround;
-  col = mix(col, cReg, aReg * revealed);
-  col = mix(col, cInd, aInd * revealed);
-
-  // Soft halo around lit lines (desktop only).
-  float halo = max(lineMask(dReg, uGlowWidth) * crowdReg, lineMask(dIdx, uGlowWidth * 1.3) * crowdIdx);
-  col += uGlowColor * halo * lit * uGlow * 0.18 * revealed * keep;
+  col = mix(col, uLineColor, aReg * revealed);
+  col = mix(col, uIndexColor, aInd * revealed);
 
   fragColor = vec4(col, 1.0);
 }
@@ -157,12 +151,11 @@ export type ContourUniforms = {
     | "uGround"
     | "uLineColor"
     | "uIndexColor"
-    | "uGlowColor"
     | "uHeadlampPos"
     | "uHeadlampRadius"
     | "uHeadlampStrength"
-    | "uGlow"
-    | "uGlowWidth"
+    | "uHeadlampGain"
+    | "uSweepGain"
     | "uSweep"
     | "uTime"
     | "uDrift"
@@ -194,12 +187,11 @@ export function createContourMaterial(): THREE.ShaderMaterial & { uniforms: Cont
     uGround: { value: new THREE.Vector3() },
     uLineColor: { value: new THREE.Vector3() },
     uIndexColor: { value: new THREE.Vector3() },
-    uGlowColor: { value: new THREE.Vector3() },
     uHeadlampPos: { value: new THREE.Vector2(-1e4, -1e4) },
     uHeadlampRadius: { value: 180 },
     uHeadlampStrength: { value: 0 },
-    uGlow: { value: 0 },
-    uGlowWidth: { value: 7 },
+    uHeadlampGain: { value: 1.5 },
+    uSweepGain: { value: 2 },
     uSweep: { value: 1 },
     uTime: { value: 0 },
     uDrift: { value: 0.02 },
