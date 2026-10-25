@@ -200,7 +200,6 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     u.uIndexWidth.value = cfg.indexLineWidthPx * dpr;
     u.uHeadlampRadius.value = cfg.headlampRadiusPx * dpr;
     u.uGlowWidth.value = cfg.glowWidthPx * dpr;
-    u.uLens.value.set(cfg.lensRadiusPx * dpr, cfg.lensStrength);
     u.uRippleSpeed.value = cfg.rippleSpeedPxS * dpr;
     writeQuietKinds();
     u.uResolution.value.set(size.width * dpr, size.height * dpr);

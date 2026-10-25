@@ -53,7 +53,6 @@ uniform float uDrift;  // cycles per second
 uniform vec2 uResolution;  // drawing buffer, device px
 uniform vec2 uPan;         // map offset in UV (pointer + scroll parallax, slow drift)
 uniform float uZoom;       // > 1 zooms in around the screen centre (camera push on morph)
-uniform vec2 uLens;        // loupe under the headlamp: radius (device px), strength 0..1
 uniform vec3 uRipple;      // click ping: x, y (device px), age (s); age < 0 = none
 uniform float uRippleSpeed; // device px per second
 
@@ -73,13 +72,7 @@ float lineMask(float d, float w) {
 }
 
 void main() {
-  // Loupe: the terrain swells under the headlamp. Lines keep their pixel width (fwidth).
-  vec2 frag = gl_FragCoord.xy;
-  vec2 toLamp = frag - uHeadlampPos;
-  float lens = (1.0 - smoothstep(0.0, uLens.x, length(toLamp))) * uHeadlampStrength;
-  lens = lens * lens * (3.0 - 2.0 * lens);
-  frag = uHeadlampPos + toLamp * (1.0 - uLens.y * lens);
-  vec2 p = (frag / uResolution - 0.5) / uZoom + 0.5 + uPan;
+  vec2 p = (gl_FragCoord.xy / uResolution - 0.5) / uZoom + 0.5 + uPan;
   vec2 st = vec2(p.x, 1.0 - p.y);
   float hA = decodeHeight(uHeightA, st * uUvA.xy + uUvA.zw, uEncA);
   float hB = decodeHeight(uHeightB, st * uUvB.xy + uUvB.zw, uEncB);
@@ -186,7 +179,6 @@ export type ContourUniforms = {
     | "uResolution"
     | "uPan"
     | "uZoom"
-    | "uLens"
     | "uRipple"
     | "uRippleSpeed"
     | "uQuiet"
@@ -226,7 +218,6 @@ export function createContourMaterial(): THREE.ShaderMaterial & { uniforms: Cont
     uResolution: { value: new THREE.Vector2(1, 1) },
     uPan: { value: new THREE.Vector2() },
     uZoom: { value: 1 },
-    uLens: { value: new THREE.Vector2(220, 0.3) },
     uRipple: { value: new THREE.Vector3(0, 0, -1) },
     uRippleSpeed: { value: 900 },
     uQuiet: { value: Array.from({ length: MAX_QUIET_ZONES }, () => new THREE.Vector4()) },

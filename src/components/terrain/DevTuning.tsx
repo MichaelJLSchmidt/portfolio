@@ -33,8 +33,6 @@ export default function DevTuning() {
     headlampFadeMs: { value: fieldConfig.headlampFadeMs, min: 0, max: 2000, step: 20 },
     glowWidthPx: { value: fieldConfig.glowWidthPx, min: 1, max: 20, step: 0.5 },
     glowStrength: { value: fieldConfig.glowStrength, min: 0, max: 1, step: 0.05 },
-    lensRadiusPx: { value: fieldConfig.lensRadiusPx, min: 0, max: 500, step: 10 },
-    lensStrength: { value: fieldConfig.lensStrength, min: 0, max: 0.8, step: 0.02 },
     parallax: { value: fieldConfig.parallax, min: 0, max: 0.08, step: 0.002 },
     scrollParallax: { value: fieldConfig.scrollParallax, min: 0, max: 0.2, step: 0.005 },
     driftCyclesPerSecond: { value: fieldConfig.driftCyclesPerSecond, min: 0, max: 0.2, step: 0.005 },
