@@ -215,7 +215,10 @@ and `artefacts/shared/diagram.js` (boxes and connectors). Numbers come from the 
 3. The manifest next to the data file records intrinsic size, a blurred placeholder, alt and caption keys,
    every source, hotspot positions, the rendered text and the hash of the inputs.
 
-Budget: the hero's 1920 px AVIF at most 180 KB. Sources and outputs are committed; masters are not. Image rules:
+Every image's page carries the whole data file, so changing any number marks all of that case study's images as
+stale: re-run `npm run images` (about five minutes for fifteen images; `npm run images -- tp-hero` renders one).
+Re-renders are byte-identical when nothing changed. Budget: the hero's 1920 px AVIF at most 180 KB. Sources and
+outputs are committed; masters are not. Image rules:
 flat browser frames (28 px bar, three neutral dots, the fictional URL), on light sheets ground-coloured markers,
 moss-ink highlights, alpenglow-ink "no feedback" gaps, at most one faint contour set behind diagrams, and the strip
 "TEST PROJECT · FICTIONAL EXAMPLE · Fig. n" on every image.
