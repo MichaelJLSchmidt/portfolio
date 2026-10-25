@@ -188,7 +188,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
         apply(cfg);
       }
     });
-    // updateIntervals reads refs only.
+    // updateIntervals reads refs and the session's fixed profile only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [material, profile]);
 
@@ -234,8 +234,9 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     const a = anim.current;
     const cfg = fieldStore.get().config;
     const view = sizeRef.current;
+    const spacing = { minSpacingPx: cfg[profile.kind].minSpacingPx, steepPercentile: cfg.steepPercentile };
     if (a.region) {
-      const next = contourInterval(a.region, view, cfg.zoomBase, cfg);
+      const next = contourInterval(a.region, view, cfg.zoomBase, spacing);
       if (next !== a.intervalA) {
         const now = performance.now();
         const shown = Math.exp(tweenValue(a.intervalTween, now, Math.log(a.intervalA)));
@@ -246,7 +247,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
         wake();
       }
     }
-    if (a.target) a.intervalB = contourInterval(a.target, view, cfg.zoomBase + cfg.morphZoom, cfg);
+    if (a.target) a.intervalB = contourInterval(a.target, view, cfg.zoomBase + cfg.morphZoom, spacing);
     const intervalM = a.slotId ? a.intervalB : a.intervalA;
     if (fieldStore.get().intervalM !== intervalM) fieldStore.set({ intervalM });
   }

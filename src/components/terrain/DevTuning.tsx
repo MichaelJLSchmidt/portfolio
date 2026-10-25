@@ -17,14 +17,15 @@ const durationTokens = Object.keys(duration);
 export default function DevTuning() {
   const values = useControls("Contour field", {
     // Contour interval: the smallest of 50/100/200/250/500 m that keeps lines on the
-    // steepest terrain (gradient percentile) at least minSpacingPx apart on this screen.
-    minSpacingPx: { value: fieldConfig.minSpacingPx, min: 1, max: 12, step: 0.25 },
+    // steepest terrain (gradient percentile) at least minSpacingPx (per device) apart.
     steepPercentile: { value: fieldConfig.steepPercentile, options: [50, 90, 95, 99] },
     indexEvery: { value: fieldConfig.indexEvery, min: 2, max: 10, step: 1 },
     lineWidthPx: { value: fieldConfig.lineWidthPx, min: 0.5, max: 4, step: 0.25 },
     indexLineWidthPx: { value: fieldConfig.indexLineWidthPx, min: 0.5, max: 5, step: 0.25 },
-    // Line strengths per device profile (fieldConfig.desktop / fieldConfig.mobile).
-    "Line strength": folder({
+    // Per device profile (fieldConfig.desktop / fieldConfig.mobile): spacing and line strengths.
+    "Per device": folder({
+      desktopMinSpacingPx: { value: fieldConfig.desktop.minSpacingPx, min: 1, max: 12, step: 0.25, label: "desktop spacing" },
+      mobileMinSpacingPx: { value: fieldConfig.mobile.minSpacingPx, min: 1, max: 12, step: 0.25, label: "mobile spacing" },
       desktopLineOpacity: { value: fieldConfig.desktop.lineOpacity, min: 0, max: 1, step: 0.01, label: "desktop lines" },
       desktopIndexOpacity: { value: fieldConfig.desktop.indexOpacity, min: 0, max: 1, step: 0.01, label: "desktop index" },
       mobileLineOpacity: { value: fieldConfig.mobile.lineOpacity, min: 0, max: 1, step: 0.01, label: "mobile lines" },
@@ -73,13 +74,21 @@ export default function DevTuning() {
   });
 
   useEffect(() => {
-    const { desktopLineOpacity, desktopIndexOpacity, mobileLineOpacity, mobileIndexOpacity, ...rest } = values;
+    const {
+      desktopMinSpacingPx,
+      mobileMinSpacingPx,
+      desktopLineOpacity,
+      desktopIndexOpacity,
+      mobileLineOpacity,
+      mobileIndexOpacity,
+      ...rest
+    } = values;
     const cfg = fieldStore.get().config;
     const next: FieldConfig = {
       ...cfg,
       ...rest,
-      desktop: { ...cfg.desktop, lineOpacity: desktopLineOpacity, indexOpacity: desktopIndexOpacity },
-      mobile: { ...cfg.mobile, lineOpacity: mobileLineOpacity, indexOpacity: mobileIndexOpacity },
+      desktop: { ...cfg.desktop, minSpacingPx: desktopMinSpacingPx, lineOpacity: desktopLineOpacity, indexOpacity: desktopIndexOpacity },
+      mobile: { ...cfg.mobile, minSpacingPx: mobileMinSpacingPx, lineOpacity: mobileLineOpacity, indexOpacity: mobileIndexOpacity },
     };
     fieldStore.set({ config: next });
   }, [values]);

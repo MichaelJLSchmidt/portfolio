@@ -1,5 +1,4 @@
 {
-  "minSpacingPx": 3,
   "steepPercentile": 95,
   "indexEvery": 5,
   "lineWidthPx": 1,
@@ -25,6 +24,7 @@
     "dprMax": 2,
     "heightmap": "desktop",
     "heightmapMinDevicePx": 1400,
+    "minSpacingPx": 3.25,
     "lineOpacity": 0.3,
     "indexOpacity": 0.5,
     "idleFps": 10,
@@ -33,6 +33,7 @@
   "mobile": {
     "dprMax": 1.5,
     "heightmap": "mobile",
+    "minSpacingPx": 3,
     "lineOpacity": 0.3,
     "indexOpacity": 0.5,
     "idleFps": 5,
