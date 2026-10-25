@@ -54,8 +54,6 @@ uniform vec2 uResolution;  // drawing buffer, device px
 uniform vec2 uPan;         // map offset in UV (pointer + scroll parallax, slow drift)
 uniform float uZoom;       // > 1 zooms in around the screen centre (camera push on morph)
 uniform vec2 uLens;        // loupe under the headlamp: radius (device px), strength 0..1
-uniform vec2 uPulse;       // rising alpenglow band: period (s), strength
-uniform vec3 uPulseColor;
 uniform vec3 uRipple;      // click ping: x, y (device px), age (s); age < 0 = none
 uniform float uRippleSpeed; // device px per second
 
@@ -115,10 +113,6 @@ void main() {
   float revealed = 1.0 - smoothstep(sweepLevel - 60.0, sweepLevel, h);
   float front = exp(-abs(h - sweepLevel) / 45.0) * step(uSweep, 0.999) * revealed;
 
-  // Rising alpenglow: a band of warm light climbs from the valleys to the summits.
-  float pulseLevel = mix(range.x - 250.0, range.y + 250.0, fract(uTime / uPulse.x));
-  float pulse = exp(-abs(h - pulseLevel) / 110.0) * uPulse.y;
-
   // Click ping: a ring that lights the lines it passes.
   float ripple = 0.0;
   if (uRipple.z >= 0.0) {
@@ -140,10 +134,10 @@ void main() {
   }
 
   float light = max(max(lit, front), ripple);
-  float aReg = reg * mix(uLineOpacity, 1.0, max(light, pulse)) * keep;
-  float aInd = ind * mix(uIndexOpacity, 1.0, max(light, pulse)) * keep;
-  vec3 cReg = mix(mix(uLineColor, uPulseColor, pulse), uGlowColor, light);
-  vec3 cInd = mix(mix(uIndexColor, uPulseColor, pulse), uGlowColor, light);
+  float aReg = reg * mix(uLineOpacity, 1.0, light) * keep;
+  float aInd = ind * mix(uIndexOpacity, 1.0, light) * keep;
+  vec3 cReg = mix(uLineColor, uGlowColor, light);
+  vec3 cInd = mix(uIndexColor, uGlowColor, light);
 
   vec3 col = uGround;
   col = mix(col, cReg, aReg * revealed);
@@ -152,7 +146,6 @@ void main() {
   // Soft halo around lit lines (desktop only).
   float halo = max(lineMask(dReg, uGlowWidth) * crowdReg, lineMask(dIdx, uGlowWidth * 1.3) * crowdIdx);
   col += uGlowColor * halo * max(lit, ripple) * uGlow * 0.18 * revealed * keep;
-  col += uPulseColor * halo * pulse * uGlow * 0.08 * revealed * keep;
 
   fragColor = vec4(col, 1.0);
 }
@@ -194,8 +187,6 @@ export type ContourUniforms = {
     | "uPan"
     | "uZoom"
     | "uLens"
-    | "uPulse"
-    | "uPulseColor"
     | "uRipple"
     | "uRippleSpeed"
     | "uQuiet"
@@ -236,8 +227,6 @@ export function createContourMaterial(): THREE.ShaderMaterial & { uniforms: Cont
     uPan: { value: new THREE.Vector2() },
     uZoom: { value: 1 },
     uLens: { value: new THREE.Vector2(220, 0.3) },
-    uPulse: { value: new THREE.Vector2(9, 0.5) },
-    uPulseColor: { value: new THREE.Vector3() },
     uRipple: { value: new THREE.Vector3(0, 0, -1) },
     uRippleSpeed: { value: 900 },
     uQuiet: { value: Array.from({ length: MAX_QUIET_ZONES }, () => new THREE.Vector4()) },

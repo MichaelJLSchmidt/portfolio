@@ -175,8 +175,6 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       u.uGlowColor.value.set(...hexToRgb(colorOf(cfg.glowColor)));
       u.uGlow.value = profile.glow ? cfg.glowStrength / 0.3 : 0;
       u.uDrift.value = cfg.driftCyclesPerSecond;
-      u.uPulse.value.set(cfg.pulsePeriodS, cfg.pulseStrength);
-      u.uPulseColor.value.set(...hexToRgb(colorOf(cfg.pulseColor)));
       writeQuietKinds();
       updateIntervals(true);
       wake();

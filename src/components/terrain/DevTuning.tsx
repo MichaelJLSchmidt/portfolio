@@ -38,9 +38,6 @@ export default function DevTuning() {
     parallax: { value: fieldConfig.parallax, min: 0, max: 0.08, step: 0.002 },
     scrollParallax: { value: fieldConfig.scrollParallax, min: 0, max: 0.2, step: 0.005 },
     driftCyclesPerSecond: { value: fieldConfig.driftCyclesPerSecond, min: 0, max: 0.2, step: 0.005 },
-    pulsePeriodS: { value: fieldConfig.pulsePeriodS, min: 2, max: 30, step: 0.5 },
-    pulseStrength: { value: fieldConfig.pulseStrength, min: 0, max: 1, step: 0.05 },
-    pulseColor: { value: fieldConfig.pulseColor, options: colorTokens },
     rippleSpeedPxS: { value: fieldConfig.rippleSpeedPxS, min: 200, max: 2000, step: 50 },
     // Quiet zones behind text: line strength inside, feather outside (CSS px).
     quietStrength: { value: fieldConfig.quietStrength, min: 0, max: 1, step: 0.05 },

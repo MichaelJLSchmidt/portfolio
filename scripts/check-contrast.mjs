@@ -57,7 +57,7 @@ for (const [fg, bg] of forbidden) console.log(`info  ${ratio(fg, bg).toFixed(2).
 // fully lit line (alpha 1 before fading) in any of the field's line colours, plus the glow
 // halo the shader adds around lit lines (0.18 at most, faded the same way).
 const s = field.quietStrength;
-const lineColours = [...new Set([field.lineColor, field.indexColor, field.glowColor, field.pulseColor])];
+const lineColours = [...new Set([field.lineColor, field.indexColor, field.glowColor])];
 const zoneBg = (token) => {
   const g = rgb(color.ground), c = rgb(color[token]), glow = rgb(color[field.glowColor]);
   return g.map((v, i) => Math.min(255, v + (c[i] - v) * s + glow[i] * 0.18 * s));

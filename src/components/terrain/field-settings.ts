@@ -15,7 +15,7 @@ export type DeviceProfile = {
   /** Preview builds and dev only: a heightmap picked by width with ?hm=1024|1536|2048, for comparisons. */
   heightmapWidth?: number;
   glow: boolean;
-  /** Frame rate for the ambient animation (pulse, drift) while the visitor is around. */
+  /** Frame rate for the ambient animation (the slow drift) while the visitor is around. */
   ambientFps: number;
   /** Frame rate once nobody has touched the page for `dormantAfterMs`. */
   idleFps: number;
