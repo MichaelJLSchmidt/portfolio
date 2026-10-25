@@ -442,6 +442,32 @@ async function casestudy() {
     check("each waypoint ends with “Next waypoint” (5) and “Back to top” (6)", info.next === 5 && info.top === 6, `${info.next} next, ${info.top} back`);
     check("no sideways scrolling", info.width <= 390, `${info.width}px`);
     check("hotspot markers at least 24×24 px", info.markers.length === 5 && info.markers.every((m) => m >= 24), info.markers.join(", "));
+    // The lightbox on touch: two fingers pinch, one finger pans.
+    const fig = page.locator("figure[data-zoom]").first();
+    await fig.scrollIntoViewIfNeeded();
+    await fig.locator("button[data-lightbox-open]").waitFor({ state: "visible", timeout: 8000 }).catch(() => {});
+    await fig.locator("button[data-lightbox-open]").tap();
+    await page.waitForSelector("dialog[open]", { timeout: 5000 }).catch(() => {});
+    const box = await page.locator("dialog[open] [data-lightbox-stage]").boundingBox();
+    const transform = () => page.evaluate(() => document.querySelector("dialog[open] img")?.style.transform ?? "");
+    if (box) {
+      const cdp = await context.newCDPSession(page);
+      const [cx, cy] = [box.x + box.width / 2, box.y + box.height / 2];
+      const pinch = (type, d) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: type === "touchEnd" ? [] : [{ x: cx - d, y: cy, id: 1 }, { x: cx + d, y: cy, id: 2 }] });
+      await pinch("touchStart", 30);
+      for (let d = 40; d <= 90; d += 10) await pinch("touchMove", d);
+      await pinch("touchEnd", 0);
+      const pinched = await transform();
+      const pan = (type, x) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: type === "touchEnd" ? [] : [{ x, y: cy, id: 3 }] });
+      await pan("touchStart", cx);
+      for (let x = cx; x >= cx - 60; x -= 10) await pan("touchMove", x);
+      await pan("touchEnd", 0);
+      const panned = await transform();
+      const scale = Number(pinched.match(/scale\(([\d.]+)\)/)?.[1] ?? 1);
+      const tx = (t) => Number(t.match(/translate\((-?[\d.]+)px/)?.[1] ?? 0);
+      check("lightbox: pinch zooms on touch", scale > 1.5, pinched);
+      check("lightbox: one finger pans when zoomed", tx(panned) < tx(pinched) - 30, panned);
+    } else check("lightbox opens on tap", false);
     await context.close();
   }
 
@@ -475,6 +501,18 @@ async function casestudy() {
     check(`${reduced ? "(reduced) " : ""}the largest source loads on open`, /-(2400|2560)\.(avif|webp)$/.test(inside.src ?? ""), inside.src);
     if (reduced) check("no zoom animation with reduced motion", inside.transition === "0s", inside.transition);
     const label = (z) => page.locator(`dialog[open] button[data-zoom="${z}"]`).getAttribute("aria-label");
+    if (!reduced) {
+      // Wheel and click zoom around the pointer (desktop).
+      const stage = await page.locator("dialog[open] [data-lightbox-stage]").boundingBox();
+      await page.mouse.move(stage.x + stage.width / 2, stage.y + stage.height / 2);
+      await page.mouse.wheel(0, -300);
+      const wheeled = await label("in");
+      await page.locator('dialog[open] button[data-zoom="reset"]').click();
+      await page.mouse.click(stage.x + stage.width / 2, stage.y + stage.height / 2);
+      const clicked = await label("in");
+      await page.locator('dialog[open] button[data-zoom="reset"]').click();
+      check("wheel and click zoom in", !/currently 100%/.test(wheeled ?? "") && /currently 150%/.test(clicked ?? ""), `${wheeled} | ${clicked}`);
+    }
     await page.locator('dialog[open] button[data-zoom="in"]').click();
     const zoomed = await label("in");
     await page.locator('dialog[open] button[data-zoom="out"]').click();
