@@ -96,11 +96,12 @@ for (const line of lineColours) {
   }
 }
 
-// Display type hover shine: the rest colour mixed towards glacier (oklab; the luminance stays
-// between the two ends), over a heading zone's brightest line.
-console.log("\nDisplay type hover shine (rest colour → glacier, heading zone):");
+// Display type hover shine: the rest colour mixed at most half way towards glacier (oklab; the
+// luminance stays between the two ends; KineticText.module.css), over a heading zone's
+// brightest line.
+console.log("\nDisplay type hover shine (rest colour → half way to glacier, heading zone):");
 const zoneWorst = Math.max(...lineColours.map((line) => lumRgb(zoneBg(line))));
-for (const t of [0, 0.5, 1]) {
+for (const t of [0, 0.25, 0.5]) {
   const l = lum(color.sheet) + (lum(color.glacier) - lum(color.sheet)) * t;
   const r = contrast(l, zoneWorst);
   const ok = r >= 4.5;

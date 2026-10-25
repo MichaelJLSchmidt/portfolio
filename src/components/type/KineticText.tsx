@@ -29,9 +29,9 @@ export type KineticTextProps = {
   /** Extra delay before the first letter, in ms. */
   delay?: number;
   /**
-   * Letters near a fine pointer shine towards glacier, like contours under the field's
-   * headlamp: the same falloff, a quick rise and a ~600 ms glide back. Colour only; the
-   * axes never move on hover.
+   * Letters near a fine pointer shine part of the way towards glacier, like contours under
+   * the field's headlamp: the same falloff, a quick rise and a ~600 ms glide back. Colour
+   * only; the axes never move on hover.
    */
   proximity?: boolean;
   /** Marks the heading as a quiet zone: the contour field fades its lines behind it. */
@@ -49,7 +49,7 @@ export type KineticTextProps = {
  * Variable-font headline. Each letter condenses from wide and light into the display cut,
  * with a glacier shine. Every letter keeps a hidden rest-state "ghost" that fixes its box,
  * and the visible glyph is positioned over it, so the axis animation never changes layout
- * (no CLS). On hover the same shine follows a fine pointer; the axes stay at rest.
+ * (no CLS). On hover a gentler shine follows a fine pointer; the axes stay at rest.
  */
 export function KineticText({
   text,
