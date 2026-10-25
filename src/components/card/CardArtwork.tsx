@@ -1,19 +1,9 @@
 import type { CSSProperties, ReactNode } from "react";
-import meta from "@terrain/terrain.json";
 import type { Artwork } from "@/content/cards";
 import { asset } from "@/lib/asset";
+import { cardTerrain } from "@/lib/card-terrain";
 import { projectToViewBox } from "@/lib/geo";
 import styles from "./SummitCard.module.css";
-
-type CardTerrain = {
-  svg: string;
-  viewBox: number[];
-  bboxLv95: number[] | null;
-  trail: number[][] | null;
-  pins: { x: number; y: number; elevationM: number }[] | null;
-};
-
-const terrainFor = (id: string) => (meta.cards as Record<string, CardTerrain>)[id];
 
 const pathFrom = (pts: [number, number][]) =>
   pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`).join("");
@@ -27,16 +17,19 @@ export function CardArtwork({
   alt,
   className,
   style,
+  stamp,
   children,
 }: {
   artwork: Artwork;
   alt: string;
   className?: string;
   style?: CSSProperties;
+  /** A rubber stamp across the map, e.g. "Fictional example" (visual; say it in text nearby too). */
+  stamp?: string;
   /** Optional overlay (e.g. the "Open expedition log" chip). */
   children?: ReactNode;
 }) {
-  const terrain = terrainFor(artwork.terrainId);
+  const terrain = cardTerrain(artwork.terrainId);
   if (!terrain) return null;
   const vb = terrain.viewBox;
   const [, , w, h] = vb;
@@ -89,6 +82,11 @@ export function CardArtwork({
           </g>
         ))}
       </svg>
+      {stamp && (
+        <span className={styles.stamp} aria-hidden="true">
+          {stamp}
+        </span>
+      )}
       {children}
     </div>
   );

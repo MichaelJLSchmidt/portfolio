@@ -110,6 +110,7 @@ export function SummitCard({
                 "title",
                 <Heading id={nameId} className={styles.name}>
                   {card.name}
+                  {card.example && <span className="visually-hidden"> ({cardLabels.exampleStamp})</span>}
                 </Heading>,
               )}
               <CostBadge value={card.cost} label={`${cardLabels.costPrefix}: ${card.costLabel}`} />
@@ -117,7 +118,7 @@ export function SummitCard({
             <p className={styles.coords}>{card.coordinates}</p>
             {morph(
               "art",
-              <CardArtwork artwork={card.artwork} alt={card.artworkAlt}>
+              <CardArtwork artwork={card.artwork} alt={card.artworkAlt} stamp={card.example ? cardLabels.exampleStamp : undefined}>
                 {linkToCaseStudy && (
                   <span className={`${styles.openChip} hud-label`} aria-hidden="true">
                     {cardLabels.openLog} →
@@ -155,7 +156,7 @@ export function SummitCard({
               <span aria-hidden="true">·</span>
               <span>{card.collector.number}</span>
               <span aria-hidden="true">·</span>
-              <RarityPip rarity={card.rarity} label={cardLabels.rarity(card.rarity)} />
+              <RarityPip rarity={card.rarity} label={cardLabels.rarity(card.rarity)} note={card.rarityNote} />
               <span aria-hidden="true">·</span>
               <span>{card.collector.language}</span>
             </p>
