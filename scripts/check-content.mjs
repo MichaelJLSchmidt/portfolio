@@ -11,6 +11,10 @@
 //     basecamp      warns only: the placeholders stay visible on the gated site
 //     live          fails on any placeholder
 //                   (construction and live only warn in a local preview, NEXT_PUBLIC_PREVIEW=1)
+//
+// Flagged examples (`example: true`, src/content/examples) are fictional on purpose: their
+// values are never placeholders, so they are skipped and named once. Live builds don't include
+// them at all; their numbers are checked by npm run check:figures instead.
 import { readFileSync, readdirSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -38,7 +42,14 @@ const segment = (value, index) => value?.slug ?? value?.label ?? value?.title ??
 
 const found = [];
 const seen = new Set();
+// Flagged examples by slug (a card has one; a case study is keyed by it), named by their card.
+const examples = new Map();
 function walk(value, path, parent, file) {
+  if (value && typeof value === "object" && value.example === true) {
+    const slug = value.slug ?? path[path.length - 1];
+    examples.set(slug, value.name ?? examples.get(slug) ?? slug);
+    return;
+  }
   if (typeof value === "string") {
     const tokens = value.match(PLACEHOLDER);
     if (tokens) found.push({ path, value, tokens, file, hints: [path[path.length - 1], parent?.label, parent?.title, parent?.term] });
@@ -116,6 +127,10 @@ const list = sites
 
 const preview = process.env.NEXT_PUBLIC_PREVIEW === "1";
 const what = scope ? "the under-construction page" : "the site";
+if (examples.size && !scope) {
+  const where = mode === "live" ? "not part of live builds" : "never part of a live build";
+  console.log(`Content: skipped ${[...examples.values()].join(", ")} (fictional example, ${where}).`);
+}
 if (!list.length) {
   console.log(`Content: no placeholders left${scope ? ` on ${what}` : ""}.`);
   process.exit(0);

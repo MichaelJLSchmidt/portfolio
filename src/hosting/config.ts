@@ -28,6 +28,19 @@ export const BASECAMP_BRANCH = "basecamp";
 export const SITE_MODES = ["construction", "basecamp", "live"] as const;
 export type SiteMode = (typeof SITE_MODES)[number];
 
+/**
+ * Flagged examples (src/content/examples: fictional case studies that demonstrate the page
+ * format) ship where the site is reviewed, never where it is public:
+ * - SITE_MODE=basecamp (branch deploys and Deploy Previews): included;
+ * - SITE_MODE=live: excluded, whatever else is set (no route, no card, no assets);
+ * - no SITE_MODE: included in `npm run dev` and in a local preview (NEXT_PUBLIC_PREVIEW=1),
+ *   excluded otherwise (a plain `npm run build` is a live build).
+ */
+export function includesExamples(env: Record<string, string | undefined>, dev = false): boolean {
+  if (env.SITE_MODE) return env.SITE_MODE === "basecamp";
+  return dev || env.NEXT_PUBLIC_PREVIEW === "1";
+}
+
 export const gate = {
   /** Host-only cookie: Secure, Path=/ and no Domain attribute are required by the prefix. */
   cookie: "__Host-basecamp",

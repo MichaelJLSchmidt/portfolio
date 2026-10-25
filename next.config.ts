@@ -1,4 +1,6 @@
 import type { NextConfig } from "next";
+import { PHASE_DEVELOPMENT_SERVER } from "next/constants";
+import { includesExamples } from "./src/hosting/config";
 
 /**
  * The site is a pure static export, served from the domain root on Netlify. A build for a
@@ -13,20 +15,27 @@ function normaliseBasePath(value: string | undefined): string {
 
 const basePath = normaliseBasePath(process.env.NEXT_PUBLIC_BASE_PATH);
 
-const nextConfig: NextConfig = {
-  output: "export",
-  // Every route becomes a folder with index.html, so deep links and reloads work on static hosts.
-  trailingSlash: true,
-  basePath,
-  images: { unoptimized: true },
-  reactStrictMode: true,
-  poweredByHeader: false,
-  // CLAUDE.md is the single agent guide for this repo; don't let `next dev` write AGENTS.md.
-  agentRules: false,
-  env: {
-    // Re-export the normalised value so client code and next.config agree.
-    NEXT_PUBLIC_BASE_PATH: basePath,
-  },
-};
-
-export default nextConfig;
+export default function nextConfig(phase: string): NextConfig {
+  // Flagged examples (src/content/examples) exist only where includesExamples() says so. Where
+  // they don't, their module is swapped for an empty one, so no route, card or copy of theirs
+  // can reach any bundle.
+  const examples = includesExamples(process.env, phase === PHASE_DEVELOPMENT_SERVER);
+  return {
+    output: "export",
+    // Every route becomes a folder with index.html, so deep links and reloads work on static hosts.
+    trailingSlash: true,
+    basePath,
+    images: { unoptimized: true },
+    reactStrictMode: true,
+    poweredByHeader: false,
+    // CLAUDE.md is the single agent guide for this repo; don't let `next dev` write AGENTS.md.
+    agentRules: false,
+    env: {
+      // Re-export the normalised value so client code and next.config agree.
+      NEXT_PUBLIC_BASE_PATH: basePath,
+    },
+    turbopack: examples
+      ? undefined
+      : { resolveAlias: { "@/content/examples": "./src/content/examples/none.ts", "@/content/examples/case-studies": "./src/content/examples/none.ts" } },
+  };
+}
