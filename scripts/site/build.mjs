@@ -14,7 +14,7 @@
 // build fails if any route, card, asset or mention of theirs is left. Each mode writes its own _redirects and _headers: Netlify applies those
 // files per deploy, while netlify.toml headers would apply to every context alike.
 import { spawnSync } from "node:child_process";
-import { mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -141,6 +141,11 @@ async function stripExamples() {
     }
   }
   rmSync(join(out, "terrain/examples.json"), { force: true });
+  // Folders the examples alone filled (e.g. out/media/) go too.
+  for (const media of Object.values(exampleMedia)) {
+    const parent = join(out, dirname(media.replace(/\/$/, "")));
+    if (parent !== out && existsSync(parent) && !readdirSync(parent).length) rmSync(parent, { recursive: true });
+  }
   const needles = exampleCards.flatMap((c) => [c.name, `/work/${c.slug}`, c.artwork.terrainId, exampleMedia[c.slug]].filter(Boolean));
   const files = (dir) => readdirSync(dir).flatMap((name) => (statSync(join(dir, name)).isDirectory() ? files(join(dir, name)) : [join(dir, name)]));
   const leaks = files(out)
