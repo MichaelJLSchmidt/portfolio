@@ -10,17 +10,24 @@ This repository currently holds the foundation plus three technical spikes for t
    - a rising alpenglow pulse;
    - parallax and click pings;
    - an intro sweep and terrain morphs;
-   - quiet zones: elements marked `data-quiet-zone` (hero text, page headers, Basecamp headings) fade the lines
-     behind them to 25% with a 48 px feather, so that text needs no halo or scrim while the field runs.
+   - quiet zones, like contours interrupted under the labels of a printed map: headings (`data-quiet-zone`)
+     fade the lines behind them to 25% with a 48 px feather; running text (`.body-copy`, or `.knockout` for
+     other text blocks) to 9% with a 64 px feather, so the lines visibly break around the copy. Longer reading
+     blocks also sit on a map-legend panel (`.legend`). See "Accessibility and motion".
 2. **Summit Card**: spring tilt and contour foil. Fully data-driven and accessible; the whole card links to its
    case study.
-3. **Card → case study transition**: a choreographed view-transition morph from the deck into `/work/[slug]`
-   and back, synchronised with the field. Durations and their reasoning are in `src/app/globals.css`.
+3. **Card → case study transition**: a choreographed view-transition morph from the deck into `/work/[slug]`,
+   synchronised with the field. The way back is a "card reassembly": the page's own content leaves first, the
+   artwork and title fly back into the card, and the card is rebuilt around them (neatline, parts, a glacier
+   shine on its name). Durations and their reasoning are in `src/app/globals.css`; the reassembly is in
+   `src/components/transition/return-transition.ts`.
 
 Production currently serves a static under-construction page; the full site lives on the `basecamp` branch behind
 a password gate (see "Hosting on Netlify").
 
-Headlines use kinetic variable-font type (`src/components/type/KineticText.tsx`). The About page ("Basecamp",
+Headlines use kinetic variable-font type (`src/components/type/KineticText.tsx`): letters condense from wide and
+light into the display cut with a glacier shine, and the same shine follows a fine pointer like the field's
+headlamp (colour only; the axes never move on hover). The About page ("Basecamp",
 `/about/`) opens from the leader card and tells the career as the real climb from Interlaken to the Jungfrau; its
 plan and the content still needed are in `docs/about-plan.md`.
 
@@ -65,7 +72,8 @@ Never commit the token. `.env*` files are git-ignored; `.env.example` lists the 
 | `npm run preview`        | Serves `out/` like a static host, including the base path and gzip               |
 | `npm run lint`           | ESLint (Next.js core-web-vitals + TypeScript rules)                               |
 | `npm run typecheck`      | Generates route types, then `tsc --noEmit`                                        |
-| `npm run check:contrast` | WCAG contrast of the token colour pairs                                            |
+| `npm run check:contrast` | WCAG contrast of the token colour pairs, quiet zones, body text and the type shine |
+| `npm run check:legibility` | Body text against its real background on rendered screenshots (field and poster) |
 | `npm run check:content`  | Lists every content placeholder still to fill, with file, line and field          |
 | `npm test`               | Unit tests of the Basecamp gate (`node:test`)                                      |
 | `npm run test:e2e`       | Chromium checks against `out/`: aborted view transitions, calm navigation, decode |
@@ -306,9 +314,28 @@ Attribution: "Terrain data © swisstopo" appears in the HUD and the footer.
     only); focus return and scroll restoration work as in full motion.
 - Navigation finishes cleanly even when a view transition is skipped, times out or fails: React commits the
   route change anyway, and the arriving heading settles. `npm run test:e2e -- transitions` simulates all three
-  (forward, back, forward again) plus Calm map and reduced motion, and checks the page, focus, the field's
-  terrain (`data-terrain` on the backdrop) and that nothing is left hidden. It needs Playwright with Chromium
-  and a build in `out/`.
+  (forward, browser back, forward again, the in-page back link, open again) plus Calm map, reduced motion and
+  the previous return (`?vt=classic`), and checks the page, focus, the field's terrain (`data-terrain` on the
+  backdrop), the return's phases (exit, travel, card rebuild) and that nothing is left hidden. It needs
+  Playwright with Chromium and a build in `out/`.
+
+### Preview-only switches
+
+Dev and preview builds (`NEXT_PUBLIC_PREVIEW=1`, so the Basecamp deploy) understand two query parameters;
+production builds compile them out:
+
+- `?name=…` shows the hero with another name, to check the layout for other lengths (the name is set on at
+  most two lines and sized by its longest line);
+- `?vt=classic` switches the way back to the deck to the previous plain morph for the rest of the session, and
+  `?vt=new` back to the card reassembly. This switch is temporary.
 - WCAG AA contrast is checked by `npm run check:contrast`, including sheet and glacier text over the faded
-  lines of a quiet zone. Contour-coloured labels keep their halo (`.keep-halo`), and the poster fallback keeps
-  all halos and its vignette.
+  lines of a quiet zone, body text over its knockout and legend panels, and display type at every step of its
+  hover shine. Contour-coloured labels keep their halo (`.keep-halo`), and the poster fallback keeps all halos
+  and its vignette.
+- Body text is measured as rendered: `npm run check:legibility` screenshots every `.body-copy` block (and the
+  footer) on the home page, a case study and Basecamp, at 1440×900 and 390×844, over the field with the
+  headlamp lit right on the text and over the poster. It requires at least 7:1 against the brightest
+  background pixel under or next to a glyph, and lines under the glyphs at most 15% of a lit line. It also
+  fails when a page is wider than the phone (it would pan sideways).
+- The HUD clock always shows the live Bern time, Calm map and reduced motion included (a changing time is
+  content, not motion); only its pulsing dot stops.

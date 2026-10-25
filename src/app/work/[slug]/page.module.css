@@ -60,11 +60,6 @@
   font-stretch: 88%;
 }
 
-.lede {
-  max-width: 38ch;
-  font-size: clamp(1.0625rem, 1.6vw, 1.3rem);
-}
-
 .jump {
   display: grid;
   gap: 12px;
@@ -105,10 +100,11 @@
   gap: 40px;
 }
 
+/* Each section is a map-legend panel (globals.css). */
 .section {
   display: grid;
   gap: 12px;
-  max-width: 40rem;
+  max-width: 46rem;
   scroll-margin-top: 96px;
 }
 

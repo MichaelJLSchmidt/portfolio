@@ -14,10 +14,6 @@
   font-size: clamp(2.5rem, 9vw, 7rem);
 }
 
-.intro {
-  color: var(--color-sheet);
-}
-
 .stage {
   position: relative;
 }
@@ -240,10 +236,6 @@
 
 .org {
   color: var(--color-contour);
-}
-
-.note {
-  color: var(--color-sheet);
 }
 
 @media (min-width: 900px) {

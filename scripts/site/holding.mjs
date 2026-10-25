@@ -99,14 +99,14 @@ function css({ fonts, poster }) {
   ].join("");
 }
 
-// Live Bern time (minute precision, like the site's HUD clock) and the headlamp glow. Both
-// stay off with reduced motion; without JavaScript the page is complete, just without them.
+// Live Bern time (minute precision, like the site's HUD clock) and the headlamp glow. The
+// clock always runs (a changing time is content, not motion); the headlamp stays off with
+// reduced motion. Without JavaScript the page is complete, just without either.
 const script = `(()=>{
 const reduce=matchMedia("(prefers-reduced-motion: reduce)"),clock=document.querySelector("[data-clock]"),lamp=document.querySelector(".lamp");
 const format=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Zurich",hour:"2-digit",minute:"2-digit",hourCycle:"h23"});
-let timer=0;
-const tick=()=>{const now=new Date();clock.textContent=format.format(now);clock.dateTime=now.toISOString();timer=setTimeout(tick,60000-now.getTime()%60000)};
-const apply=()=>{clearTimeout(timer);clock.parentElement.hidden=reduce.matches;if(reduce.matches)lamp.classList.remove("on");else tick()};
+const tick=()=>{const now=new Date();clock.textContent=format.format(now);clock.dateTime=now.toISOString();setTimeout(tick,60000-now.getTime()%60000)};
+const apply=()=>{if(reduce.matches)lamp.classList.remove("on")};
 const move=(e)=>{if(reduce.matches)return;lamp.style.setProperty("--x",e.clientX+"px");lamp.style.setProperty("--y",e.clientY+"px");lamp.classList.add("on")};
 const off=()=>lamp.classList.remove("on");
 addEventListener("pointermove",move,{passive:true});
@@ -115,7 +115,8 @@ addEventListener("pointerup",(e)=>{if(e.pointerType!=="mouse")off()});
 addEventListener("pointercancel",off);
 addEventListener("pointerout",(e)=>{if(!e.relatedTarget)off()});
 reduce.addEventListener("change",apply);
-apply();
+clock.parentElement.hidden=false;
+tick();
 })();`.replace(/\n/g, "");
 
 /** The page model (see src/hosting/page.ts) for assets copied by `copyAssets`. */

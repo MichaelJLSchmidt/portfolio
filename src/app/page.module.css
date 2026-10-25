@@ -2,14 +2,20 @@
   padding-top: 96px;
 }
 
-/* Full-width composition: meta row, a name that fills the measure, lede offset right. */
+/* The name is the entry point, not the whole board. It sits on at most two lines (HeroName)
+   and is sized by its longest line, --name-chars capitals at up to ~0.5 em each in the display cut,
+   so any name length fits: ~92% of the measure on phones, 62% on desktop, and never more than
+   a quarter of the screen height. The hero stops --peek short of the first screen's bottom,
+   where the deck heading comes in. */
 .hero {
+  --peek: clamp(88px, 12svh, 140px);
+  --name-fill: 0.92;
+  container-type: inline-size;
   display: grid;
-  grid-template-rows: auto auto auto;
+  grid-template-columns: minmax(0, 1fr);
   align-content: end;
-  gap: clamp(16px, 2.5vw, 40px);
-  min-height: min(92svh, 1100px);
-  padding-bottom: clamp(32px, 8svh, 96px);
+  row-gap: clamp(20px, 3svh, 32px);
+  min-height: calc(100svh - 96px - var(--peek));
 }
 
 .heroMeta {
@@ -29,18 +35,13 @@
 
 .name {
   margin-inline: -0.02em;
-  font-size: clamp(3.5rem, 17.5vw, 26rem);
+  font-size: min(calc(var(--name-fill) * 100cqi / (var(--name-chars, 10) * 0.5)), 26svh);
 }
 
-.heroFoot {
+.aside {
   display: grid;
-  gap: 32px;
-}
-
-.lede {
-  max-width: 34ch;
-  font-size: clamp(1.0625rem, 1.5vw, 1.375rem);
-  line-height: 1.55;
+  justify-items: start;
+  gap: clamp(20px, 3svh, 32px);
 }
 
 .cue {
@@ -82,20 +83,33 @@
   }
 }
 
+@media (min-width: 700px) {
+  .hero {
+    --name-fill: 0.8;
+  }
+}
+
+/* Desktop: a 12-column grid. Meta row on top; the name in the left eight columns; the lede
+   and the cue in a clear right-hand column, sitting on the name's last baseline. */
 @media (min-width: 1000px) {
-  .heroFoot {
-    grid-template-columns: 1fr minmax(0, 34ch);
-    align-items: end;
+  .hero {
+    --name-fill: 0.62;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: clamp(16px, 2vw, 32px);
   }
 
-  .lede {
-    grid-column: 2;
-    grid-row: 1;
+  .heroMeta {
+    grid-column: 1 / -1;
   }
 
-  .cue {
-    grid-column: 1;
-    grid-row: 1;
+  .name {
+    grid-column: 1 / span 8;
+    align-self: last baseline;
+  }
+
+  .aside {
+    grid-column: 9 / -1;
+    align-self: last baseline;
   }
 }
 

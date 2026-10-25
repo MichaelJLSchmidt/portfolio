@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { calmNavigation } from "@/lib/view-transition";
+import { watchNavigationIntent } from "./return-transition";
 
 /**
  * Browser back/forward: React commits a popstate navigation synchronously and does not
@@ -15,6 +16,9 @@ import { calmNavigation } from "@/lib/view-transition";
 let replaying = false;
 
 export function HistoryTransitions() {
+  // Where link clicks lead, for the return choreography (return-transition.ts).
+  useEffect(() => watchNavigationIntent(), []);
+
   useEffect(() => {
     if (typeof document.startViewTransition !== "function") return;
     const onPopState = (event: PopStateEvent & { hasUAVisualTransition?: boolean }) => {

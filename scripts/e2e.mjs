@@ -58,13 +58,14 @@ const check = (label, ok, detail = "") => {
 };
 
 /** A page with the intro marked as played, and hooks to count and sabotage view transitions. */
-async function open({ calm = false, reduced = false, init } = {}) {
+async function open({ calm = false, reduced = false, classic = false, init } = {}) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: reduced ? "reduce" : "no-preference" });
   await context.addInitScript(
-    ({ calm }) => {
+    ({ calm, classic }) => {
       try {
         sessionStorage.setItem("summit:intro-played", "1");
         if (calm) localStorage.setItem("summit:calm-map", "1");
+        if (classic) sessionStorage.setItem("summit:vt", "classic");
       } catch {}
       // Counts calls that reach the browser's API and, when armed, aborts the next one:
       // "skip" right after it starts, "timeout" by holding the DOM update past Chrome's 4 s
@@ -101,8 +102,22 @@ async function open({ calm = false, reduced = false, init } = {}) {
         return transition;
       };
     },
-    { calm },
+    { calm, classic },
   );
+  await context.addInitScript(() => {
+    // The return choreography's traces: html[data-vt], the named exit parts, the card rebuild.
+    window.__return = { vt: 0, exits: 0, reassemble: 0 };
+    document.addEventListener("DOMContentLoaded", () => {
+      new MutationObserver((records) => {
+        for (const r of records) {
+          const el = r.target;
+          if (r.attributeName === "data-vt" && el.getAttribute("data-vt") === "return") window.__return.vt++;
+          if (r.attributeName === "data-reassemble" && el.hasAttribute("data-reassemble")) window.__return.reassemble++;
+          if (r.attributeName === "style" && el.style?.viewTransitionName?.startsWith("vt-exit")) window.__return.exits++;
+        }
+      }).observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ["data-vt", "data-reassemble", "style"] });
+    });
+  });
   if (init) await context.addInitScript(init);
   const page = await context.newPage();
   const errors = [];
@@ -146,10 +161,14 @@ async function settle(page, { path, terrain }) {
       h1,
       ...(h1?.querySelectorAll('[class*="glyph"]') ?? []),
       ...(main?.querySelectorAll(".reveal, [style*='view-transition-name']") ?? []),
+      // The deck cards after a return: every part rebuilt, the name readable.
+      ...(main?.querySelectorAll("article[data-slug] [class*='nameBar'], article[data-slug] [class*='typeLine'], article[data-slug] [class*='rules'], article[data-slug] [class*='stats'], article[data-slug] [class*='collector']") ?? []),
     ]
       .filter((el) => el && visible(el) && (opacity(el) < 0.99 || getComputedStyle(el).visibility === "hidden"))
       .map((el) => `${el.tagName.toLowerCase()}.${String(el.className).split(" ")[0]}`);
     const openingCards = [...document.querySelectorAll('article[data-opening="true"]')].filter(visible).length;
+    const nameColours = [...(main?.querySelectorAll("article[data-slug] h2, article[data-slug] h3") ?? [])].map((h) => getComputedStyle(h).color);
+    if (nameColours.some((c) => c === "rgba(0, 0, 0, 0)")) hidden.push("card name (transparent)");
     return {
       path: location.pathname,
       h1: h1?.getAttribute("aria-label") ?? null,
@@ -161,6 +180,9 @@ async function settle(page, { path, terrain }) {
       focus: document.activeElement?.closest("article")?.dataset.slug ?? document.activeElement?.tagName.toLowerCase(),
       native: window.__vt.native,
       last: window.__vt.last,
+      ret: { ...window.__return },
+      rebuilding: document.querySelectorAll("[data-reassemble]").length,
+      vtAttr: document.documentElement.getAttribute("data-vt"),
     };
   });
 }
@@ -170,6 +192,7 @@ async function transitions() {
   const card = { slug: "kibon", path: "/work/kibon/", title: "kiBon 2.0", terrain: "dvb-001" };
   const modes = [
     { name: "full motion, transition runs", abort: null },
+    { name: "full motion, previous return (?vt=classic)", abort: null, classic: true },
     { name: "full motion, transition skipped", abort: "skip" },
     { name: "full motion, DOM update times out", abort: "timeout" },
     { name: "full motion, DOM update fails", abort: "fail" },
@@ -195,18 +218,44 @@ async function transitions() {
     await page.locator(`article[data-slug="${card.slug}"] a`).first().click();
     expectPage(await settle(page, { path: card.path, terrain: fieldOn ? card.terrain : null }), "open card", card);
 
+    // The way back: card reassembly in full motion, the previous morph with ?vt=classic.
+    const choreography = fieldOn && !mode.abort;
+    const expectReturn = (r, label, before) => {
+      check(`${label}: focus on the card`, r.focus === card.slug, `focus=${r.focus}`);
+      check(`${label}: card rebuilt and done`, r.rebuilding === 0 && r.vtAttr === null, `rebuilding=${r.rebuilding} data-vt=${r.vtAttr}`);
+      if (!choreography) return;
+      const ran = r.ret.vt > before.vt && r.ret.exits > before.exits && r.ret.reassemble > before.reassemble;
+      if (mode.classic) check(`${label}: previous return, no reassembly`, r.ret.vt === before.vt && r.ret.reassemble === before.reassemble, JSON.stringify(r.ret));
+      else check(`${label}: exit, travel and reassembly ran`, ran, JSON.stringify({ before, after: r.ret }));
+    };
+    const returnTrace = () => page.evaluate(() => ({ ...window.__return }));
+
     await arm();
+    let before = await returnTrace();
     await page.goBack();
     const back = await settle(page, { path: "/", terrain: fieldOn ? "region" : null });
     expectPage(back, "back", { path: "/", terrain: "region" });
-    check("back: focus on the card", back.focus === card.slug, `focus=${back.focus}`);
+    expectReturn(back, "back", before);
 
     await arm();
     await page.goForward();
     const again = await settle(page, { path: card.path, terrain: fieldOn ? card.terrain : null });
     expectPage(again, "forward", card);
-    if (mode.calm || mode.reduced) check("no View Transition API call", again.native === 0, `native calls=${again.native}`);
-    else check("View Transition API used", again.native >= 3, `native calls=${again.native}`);
+
+    // The in-page back link takes the same way back.
+    await arm();
+    before = await returnTrace();
+    await page.locator(`main nav a[href="${basePath}/"]`).first().click();
+    const link = await settle(page, { path: "/", terrain: fieldOn ? "region" : null });
+    expectPage(link, "back link", { path: "/", terrain: "region" });
+    expectReturn(link, "back link", before);
+
+    await arm();
+    await page.locator(`article[data-slug="${card.slug}"] a`).first().click();
+    const reopen = await settle(page, { path: card.path, terrain: fieldOn ? card.terrain : null });
+    expectPage(reopen, "open again", card);
+    if (mode.calm || mode.reduced) check("no View Transition API call", reopen.native === 0, `native calls=${reopen.native}`);
+    else check("View Transition API used", reopen.native >= 5, `native calls=${reopen.native}`);
     // React reports aborted transitions as recoverable errors (window.reportError): expected
     // here, since the aborts are simulated. Anything else is a failure.
     const expected = /simulated update failure|Transition was skipped|timeout in DOM update|ViewTransition (was aborted|timed out)/;

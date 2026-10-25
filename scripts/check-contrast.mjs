@@ -1,5 +1,7 @@
 // WCAG contrast check for the colour pairs the design uses, read from src/styles/tokens.ts,
-// plus text inside the field's quiet zones (src/config/contour-field.json).
+// plus text inside the field's quiet zones (src/config/contour-field.json): headings, body text
+// (at least 7:1) and legend panels, and display type through its hover shine. Rendered pages
+// are measured by npm run check:legibility.
 //   npm run check:contrast
 import { readFileSync } from "node:fs";
 import { color } from "../src/styles/tokens.ts";
@@ -75,4 +77,34 @@ for (const [fg, min] of zoneText) {
 }
 const worst = Math.min(...lineColours.map((line) => contrast(lum(color.contour), lumRgb(zoneBg(line)))));
 console.log(`info  ${worst.toFixed(2).padStart(5)}:1  contour over the brightest line: contour labels keep their halo (.keep-halo)`);
+
+// Body text (.body-copy, .knockout): lines knocked out to bodyQuietStrength, at least 7:1 over a
+// fully lit line; on a legend panel (raised ground at 88%) on top of that.
+const mixRgb = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
+const bodyBg = (line, strength) => {
+  const g = rgb(color.ground), c = rgb(color[line]), glow = rgb(color[field.glowColor]);
+  return g.map((v, i) => Math.min(255, v + (c[i] - v) * strength + glow[i] * 0.18 * strength));
+};
+console.log(`\nBody text (lines at ${Math.round(field.bodyQuietStrength * 100)}%, no halo; minimum 7:1):`);
+for (const line of lineColours) {
+  const bg = bodyBg(line, field.bodyQuietStrength);
+  for (const [label, backdrop] of [["knockout", bg], ["legend panel", mixRgb(bg, rgb(color.groundRaised), 0.88)]]) {
+    const r = contrast(lum(color.sheet), lumRgb(backdrop));
+    const ok = r >= 7;
+    if (!ok) failed++;
+    console.log(`${ok ? "pass" : "FAIL"}  ${r.toFixed(2).padStart(5)}:1  sheet over ${line} lines, ${label}`);
+  }
+}
+
+// Display type hover shine: the rest colour mixed towards glacier (oklab; the luminance stays
+// between the two ends), over a heading zone's brightest line.
+console.log("\nDisplay type hover shine (rest colour → glacier, heading zone):");
+const zoneWorst = Math.max(...lineColours.map((line) => lumRgb(zoneBg(line))));
+for (const t of [0, 0.5, 1]) {
+  const l = lum(color.sheet) + (lum(color.glacier) - lum(color.sheet)) * t;
+  const r = contrast(l, zoneWorst);
+  const ok = r >= 4.5;
+  if (!ok) failed++;
+  console.log(`${ok ? "pass" : "FAIL"}  ${r.toFixed(2).padStart(5)}:1  shine at ${Math.round(t * 100)}% over the brightest line`);
+}
 process.exit(failed ? 1 : 0);

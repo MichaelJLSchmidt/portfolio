@@ -52,6 +52,14 @@
   color: var(--color-contour);
 }
 
+/* Phones: the credit stays in the footer, so the clock and the controls keep their room
+   instead of running off the right edge. */
+@media (max-width: 479px) {
+  .credit {
+    display: none;
+  }
+}
+
 .coords {
   display: none;
   padding-top: 2px;
