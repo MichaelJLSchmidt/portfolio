@@ -8,12 +8,17 @@ import { color, duration, type ColorToken, type DurationToken } from "@/styles/t
 export type FieldConfig = typeof config;
 
 export type DeviceProfile = {
+  /** "desktop": a fine pointer and a long edge of at least 900 px; "mobile": anything else. */
+  kind: "desktop" | "mobile";
   dprMax: number;
   heightmap: "desktop" | "mobile";
   /** Below this many device pixels on the long edge, the 1024 heightmap is enough. */
   heightmapMinDevicePx?: number;
   /** Preview builds and dev only: a heightmap picked by width with ?hm=1024|1536|2048, for comparisons. */
   heightmapWidth?: number;
+  /** Strength of regular and index lines (0..1). The field reads them live from the config. */
+  lineOpacity: number;
+  indexOpacity: number;
   /** Frame rate for the ambient animation (the slow drift) while the visitor is around. */
   ambientFps: number;
   /** Frame rate once nobody has touched the page for `dormantAfterMs`. */
@@ -87,7 +92,8 @@ export function isMobileProfile(): boolean {
 }
 
 export function deviceProfile(cfg: FieldConfig = fieldConfig): DeviceProfile {
-  const profile = { ...((isMobileProfile() ? cfg.mobile : cfg.desktop) as DeviceProfile) };
+  const kind = isMobileProfile() ? "mobile" : "desktop";
+  const profile: DeviceProfile = { kind, ...(cfg[kind] as Omit<DeviceProfile, "kind">) };
   // The 1536 heightmap is ~1.9× the bytes of the 1024 one: only fetch it when the screen can show it.
   const devicePx = Math.max(window.innerWidth, window.innerHeight) * Math.min(window.devicePixelRatio || 1, profile.dprMax);
   if (profile.heightmap === "desktop" && devicePx < (profile.heightmapMinDevicePx ?? 0)) profile.heightmap = "mobile";

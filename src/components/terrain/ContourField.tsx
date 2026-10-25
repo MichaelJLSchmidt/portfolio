@@ -165,8 +165,10 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     const apply = (cfg: FieldConfig) => {
       const u = material.uniforms;
       u.uIndexEvery.value = cfg.indexEvery;
-      u.uLineOpacity.value = cfg.lineOpacity;
-      u.uIndexOpacity.value = cfg.indexOpacity;
+      // Line strengths per device profile, read live so the tuning panel applies at once.
+      const lines = cfg[profile.kind];
+      u.uLineOpacity.value = lines.lineOpacity;
+      u.uIndexOpacity.value = lines.indexOpacity;
       u.uGround.value.set(...hexToRgb(color.ground));
       u.uLineColor.value.set(...hexToRgb(colorOf(cfg.lineColor)));
       u.uIndexColor.value.set(...hexToRgb(colorOf(cfg.indexColor)));

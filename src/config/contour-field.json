@@ -4,8 +4,6 @@
   "indexEvery": 5,
   "lineWidthPx": 1,
   "indexLineWidthPx": 1.5,
-  "lineOpacity": 0.55,
-  "indexOpacity": 0.9,
   "lineColor": "contour",
   "indexColor": "contour",
   "headlampRadiusPx": 120,
@@ -27,12 +25,16 @@
     "dprMax": 2,
     "heightmap": "desktop",
     "heightmapMinDevicePx": 1400,
+    "lineOpacity": 0.3,
+    "indexOpacity": 0.5,
     "idleFps": 10,
     "ambientFps": 30
   },
   "mobile": {
     "dprMax": 1.5,
     "heightmap": "mobile",
+    "lineOpacity": 0.3,
+    "indexOpacity": 0.5,
     "idleFps": 5,
     "ambientFps": 24
   },

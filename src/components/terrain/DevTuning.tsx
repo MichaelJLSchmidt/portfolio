@@ -1,6 +1,6 @@
 "use client";
 
-import { Leva, button, monitor, useControls } from "leva";
+import { Leva, button, folder, monitor, useControls } from "leva";
 import { useEffect } from "react";
 import { duration } from "@/styles/tokens";
 import { LINE_COLORS, fieldConfig, type FieldConfig } from "./field-settings";
@@ -23,8 +23,13 @@ export default function DevTuning() {
     indexEvery: { value: fieldConfig.indexEvery, min: 2, max: 10, step: 1 },
     lineWidthPx: { value: fieldConfig.lineWidthPx, min: 0.5, max: 4, step: 0.25 },
     indexLineWidthPx: { value: fieldConfig.indexLineWidthPx, min: 0.5, max: 5, step: 0.25 },
-    lineOpacity: { value: fieldConfig.lineOpacity, min: 0, max: 1, step: 0.05 },
-    indexOpacity: { value: fieldConfig.indexOpacity, min: 0, max: 1, step: 0.05 },
+    // Line strengths per device profile (fieldConfig.desktop / fieldConfig.mobile).
+    "Line strength": folder({
+      desktopLineOpacity: { value: fieldConfig.desktop.lineOpacity, min: 0, max: 1, step: 0.01, label: "desktop lines" },
+      desktopIndexOpacity: { value: fieldConfig.desktop.indexOpacity, min: 0, max: 1, step: 0.01, label: "desktop index" },
+      mobileLineOpacity: { value: fieldConfig.mobile.lineOpacity, min: 0, max: 1, step: 0.01, label: "mobile lines" },
+      mobileIndexOpacity: { value: fieldConfig.mobile.indexOpacity, min: 0, max: 1, step: 0.01, label: "mobile index" },
+    }),
     lineColor: { value: fieldConfig.lineColor, options: LINE_COLORS },
     indexColor: { value: fieldConfig.indexColor, options: LINE_COLORS },
     headlampRadiusPx: { value: fieldConfig.headlampRadiusPx, min: 40, max: 400, step: 10 },
@@ -68,7 +73,14 @@ export default function DevTuning() {
   });
 
   useEffect(() => {
-    const next: FieldConfig = { ...fieldStore.get().config, ...values };
+    const { desktopLineOpacity, desktopIndexOpacity, mobileLineOpacity, mobileIndexOpacity, ...rest } = values;
+    const cfg = fieldStore.get().config;
+    const next: FieldConfig = {
+      ...cfg,
+      ...rest,
+      desktop: { ...cfg.desktop, lineOpacity: desktopLineOpacity, indexOpacity: desktopIndexOpacity },
+      mobile: { ...cfg.mobile, lineOpacity: mobileLineOpacity, indexOpacity: mobileIndexOpacity },
+    };
     fieldStore.set({ config: next });
   }, [values]);
 
