@@ -34,6 +34,9 @@ jobs:
       # Lists the content placeholders still to fill (informational).
       - run: npm run check:content
 
+      # Case-study numbers against their data files, and committed images against their sources.
+      - run: npm run check:figures
+
       # Production (main): the under-construction page. A pull request into main must pass its
       # content check as the Netlify build will; into basecamp a preview build is enough.
       - name: Build the under-construction page
@@ -54,6 +57,14 @@ jobs:
 
       - name: Report bundle and asset sizes
         run: npm run report:size
+
+      # Live builds leave flagged examples out entirely (the build fails if anything of theirs is
+      # left in out/). Placeholders only warn here (preview).
+      - name: Build the live site without examples
+        run: npm run build
+        env:
+          SITE_MODE: live
+          NEXT_PUBLIC_PREVIEW: "1"
 
   hosting:
     # The deploys under Netlify's own CLI: build pipeline, edge runtime (Deno), redirects.

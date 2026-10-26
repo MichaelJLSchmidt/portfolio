@@ -1,0 +1,182 @@
+<!-- Fig. 8: the document-upload step in three stages: a pencil sketch from the design studio
+     (SVG roughness filter), a grey wireframe, the coded prototype. -->
+<style>
+  .row {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 36px;
+    padding: 18px 28px 16px;
+  }
+  .stage {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 8px;
+  }
+  .stage + .stage::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -30px;
+    width: 24px;
+    height: 2px;
+    background: var(--color-ground);
+  }
+  .stage + .stage::after {
+    content: "";
+    position: absolute;
+    top: calc(50% - 5px);
+    left: -12px;
+    border: 6px solid transparent;
+    border-left: 8px solid var(--color-ground);
+    border-right: 0;
+  }
+  .stage h2 {
+    display: flex;
+    justify-content: space-between;
+  }
+  .frame {
+    position: relative;
+    overflow: hidden;
+    border: 1.5px solid rgb(90 92 82 / 0.5);
+    border-radius: 8px;
+    background: #fbfbf8;
+  }
+  .sketch svg {
+    width: 100%;
+    height: 100%;
+  }
+  .wire {
+    padding: 14px;
+    background: #ffffff;
+  }
+  .wf {
+    background: #d9dde0;
+    border-radius: 3px;
+  }
+  .wf-line {
+    height: 8px;
+    margin-bottom: 7px;
+    background: #d9dde0;
+    border-radius: 3px;
+  }
+  .wf-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1.5px dashed #b6bcc1;
+    border-radius: 6px;
+  }
+  .coded {
+    background: var(--hm-canvas);
+  }
+  .coded .hm-header {
+    height: 40px;
+    padding: 0 14px;
+  }
+  .coded .hm-mark {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+  }
+  .coded .hm-brand > div b {
+    font-size: 12px;
+  }
+  .coded .hm-brand > div span {
+    display: none;
+  }
+  .coded .hm-lang {
+    font-size: 11px;
+  }
+  .coded .hm-lang span {
+    padding: 1px 7px;
+  }
+  .coded .body {
+    padding: 12px 14px;
+  }
+  .coded h3 {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .coded .hm-file,
+  .coded .hm-upload {
+    margin-top: 8px;
+    padding: 8px 10px;
+    font-size: 12.5px;
+  }
+  .coded .hm-doc {
+    width: 22px;
+    height: 27px;
+    font-size: 7px;
+  }
+  .coded .hm-btn {
+    height: 30px;
+    padding: 0 12px;
+    font-size: 12.5px;
+  }
+</style>
+<svg width="0" height="0" style="position: absolute">
+  <filter id="pencil">
+    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="3" result="n" />
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" />
+  </filter>
+</svg>
+<div class="row">
+  <section class="stage">
+    <h2 class="label-caps"><span>Week {{delivery.sketchWeek}}</span><span class="muted">Sketch</span></h2>
+    <div class="frame sketch">
+      <svg viewBox="0 0 350 300" fill="none" stroke="#3b3d37" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" filter="url(#pencil)">
+        <rect x="14" y="12" width="322" height="276" rx="6" />
+        <path d="M14 42H336" />
+        <path d="M28 27h70M290 27h30" />
+        <path d="M30 62h150" stroke-width="3" />
+        <path d="M30 78h220M30 88h180" stroke="#8a8c80" />
+        <rect x="30" y="104" width="190" height="62" rx="6" stroke-dasharray="6 5" />
+        <path d="M112 146v-24M102 131l10-10 10 10" />
+        <path d="M52 156h120" stroke="#8a8c80" />
+        <rect x="236" y="104" width="80" height="100" rx="3" />
+        <path d="M248 120h56M248 132h44M248 144h50M248 156h30" stroke="#8a8c80" />
+        <path d="M244 166h64" stroke-width="3" />
+        <path d="M30 184h190" stroke="#8a8c80" />
+        <rect x="30" y="198" width="190" height="38" rx="6" stroke-dasharray="6 5" />
+        <rect x="236" y="248" width="80" height="26" rx="5" stroke-width="2.4" />
+        <path d="M170 254c30-10 52-34 64-62" stroke="#a33a18" />
+        <path d="M226 198l9-8 3 11" stroke="#a33a18" />
+      </svg>
+      <span style="position: absolute; left: 34px; top: 252px; color: #a33a18; font: italic 600 15px/1.1 var(--diagram); transform: rotate(-4deg); filter: url(#pencil)">show an example!</span>
+      <span style="position: absolute; left: 254px; top: 260px; font: 600 13px var(--diagram); filter: url(#pencil)">weiter</span>
+    </div>
+  </section>
+  <section class="stage">
+    <h2 class="label-caps"><span>Week {{delivery.midFidelityWeek}}</span><span class="muted">Wireframe</span></h2>
+    <div class="frame wire">
+      <div class="wf" style="height: 16px; margin-bottom: 14px"></div>
+      <div class="wf-line" style="width: 55%; height: 13px"></div>
+      <div class="wf-line" style="width: 85%"></div>
+      <div class="wf-row"><div class="wf" style="width: 26px; height: 32px"></div><div style="flex: 1"><div class="wf-line" style="width: 70%"></div><div class="wf-line" style="width: 45%; margin: 0"></div></div><div class="wf" style="width: 52px; height: 40px"></div></div>
+      <div class="wf-row"><div class="wf" style="width: 26px; height: 32px"></div><div style="flex: 1"><div class="wf-line" style="width: 60%"></div><div class="wf-line" style="width: 40%; margin: 0"></div></div></div>
+      <div class="wf-row"><div class="wf" style="width: 26px; height: 32px"></div><div style="flex: 1"><div class="wf-line" style="width: 64%"></div><div class="wf-line" style="width: 30%; margin: 0"></div></div></div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 14px"><div class="wf" style="width: 80px; height: 26px; background: #9aa3ab"></div></div>
+    </div>
+  </section>
+  <section class="stage">
+    <h2 class="label-caps"><span>Week {{delivery.prototypeWeek}}</span><span class="muted">Coded prototype</span></h2>
+    <div class="frame coded hm" lang="de">
+      <header class="hm-header">
+        <div class="hm-brand"><span class="hm-mark"></span><div><b>Kanton Hochmatt</b><span></span></div></div>
+        <div class="hm-lang"><span class="on">DE</span><span>FR</span></div>
+      </header>
+      <div class="body">
+        <h3>Dokumente hochladen</h3>
+        <div class="hm-file"><span class="hm-doc">PDF</span><span style="flex: 1"><b>Offerte des Installateurs</b><br /><span class="hm-small">Beispiel ansehen</span></span><span class="hm-tick"></span></div>
+        <div class="hm-upload"><span class="hm-doc">+</span><span><b>Nachweis Eigentum</b><br /><span class="hm-small">Foto oder PDF</span></span></div>
+        <div class="hm-upload"><span class="hm-doc">+</span><span><b>Gebäudeenergieausweis</b><br /><span class="hm-small">Nummer oder Foto</span></span></div>
+        <div style="display: flex; justify-content: flex-end; margin-top: 10px"><span class="hm-btn">Weiter</span></div>
+      </div>
+    </div>
+  </section>
+</div>

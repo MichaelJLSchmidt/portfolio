@@ -1,0 +1,145 @@
+<!-- Fig. 5: current-state service blueprint. Lanes for applicant, installer, frontstage,
+     backstage and systems; numbered hand-offs (circles) and moments without feedback
+     (alpenglow-ink diamonds). -->
+<style>
+  .head {
+    position: absolute;
+    top: 18px;
+    left: 28px;
+    right: 28px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .head p {
+    margin-top: 4px;
+  }
+  .key {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+  .key span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .lane {
+    position: absolute;
+    left: 28px;
+    right: 28px;
+    border-top: 1.5px solid rgb(90 92 82 / 0.5);
+  }
+  .lane > span {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    width: 132px;
+    color: var(--color-sheet-ink);
+  }
+  .visibility {
+    border-top: 1.5px dashed var(--color-ground);
+  }
+  .visibility::after {
+    content: "Line of visibility";
+    position: absolute;
+    left: 150px;
+    top: -16px;
+    font-family: var(--label);
+    font-size: 11px;
+    font-stretch: var(--label-wdth);
+    color: var(--color-sheet-ink);
+  }
+  .d-box {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+  .d-box small {
+    font-size: 11.5px;
+  }
+  .gapnote.left {
+    transform: translate(-50%, 0);
+    text-align: right;
+  }
+  .gapnote {
+    display: block;
+    transform: translate(50%, 0);
+    color: var(--color-alpenglow-ink);
+    font-family: var(--label);
+    font-size: 11px;
+    font-stretch: var(--label-wdth);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+</style>
+<div class="diagram contours">
+  <div class="head">
+    <div>
+      <h1 class="title">Current service blueprint</h1>
+      <p class="label muted">Heating subsidy today, from first question to decision</p>
+    </div>
+    <div class="key label">
+      <span><span class="marker"></span>{{discovery.handoffs}} hand-offs</span>
+      <span><span class="gap"><span></span></span>{{discovery.gaps}} moments without feedback to the applicant</span>
+    </div>
+  </div>
+  <div class="lane" style="top: 92px"><span class="label-caps">Applicant</span></div>
+  <div class="lane" style="top: 186px"><span class="label-caps">Installer</span></div>
+  <div class="lane" style="top: 270px"><span class="label-caps">Frontstage<br />PDF, e-mail</span></div>
+  <div class="lane visibility" style="top: 364px"><span class="label-caps">Backstage<br />Caseworker</span></div>
+  <div class="lane" style="top: 458px"><span class="label-caps">Systems</span></div>
+</div>
+<script src="/shared/diagram.js"></script>
+<script>
+  const D = window.DATA;
+  const d = Diagram(document.querySelector(".diagram"));
+  const col = (i) => 176 + i * 150;
+  const lane = { applicant: 112, installer: 202, front: 290, back: 384, systems: 480 };
+  const B = (id, i, l, html, cls = "") => d.box(id, { x: col(i), y: lane[l], w: 128, h: 54, html, cls });
+  B("learn", 0, "applicant", "Learns about the subsidy");
+  B("ask", 1, "applicant", "Asks for a quote");
+  B("quote", 1, "installer", "Prepares the quote");
+  B("fill", 2, "installer", "Fills in the technical pages");
+  B("sign", 2, "applicant", "Signs the PDF");
+  B("send", 3, "applicant", "E-mails PDF and attachments");
+  B("inbox", 3, "front", "Shared inbox<small>one for all caseworkers</small>");
+  B("check", 4, "back", "Checks completeness by hand");
+  B("chase", 5, "front", "E-mail or call: documents missing");
+  B("again", 5, "applicant", "Sends documents again");
+  B("rekey", 6, "back", "Re-keys the case");
+  B("batch", 6, "systems", "Nightly batch import", "dark");
+  B("system", 7, "systems", `Case system<small>from ${D.years.caseSystem}</small>`, "dark");
+  B("decide", 7, "back", "Decides");
+  B("letter", 7, "front", "Decision letter");
+  B("wait", 7, "applicant", `Waits<small>median ${D.problem.medianDays} days</small>`);
+
+  d.wire("learn", "ask")
+    .wire("ask", "quote", { from: "b", to: "t" })
+    .wire("quote", "fill")
+    .wire("fill", "sign", { from: "t", to: "b" })
+    .wire("sign", "send")
+    .wire("send", "inbox", { from: "b", to: "t" })
+    .wire("inbox", "check", { from: "r", to: "t", ft: 0.5 })
+    .wire("check", "chase", { from: "r", to: "b" })
+    .wire("chase", "again", { from: "t", to: "b" })
+    .wire("again", "rekey", { from: "r", to: "t", ft: 0.5, cls: "soft" })
+    .wire("rekey", "batch", { from: "b", to: "t" })
+    .wire("batch", "system")
+    .wire("system", "decide", { from: "t", to: "b" })
+    .wire("decide", "letter", { from: "t", to: "b" })
+    .wire("letter", "wait", { from: "t", to: "b" });
+
+  // Hand-offs (circles) and moments without feedback (diamonds), in the order they happen.
+  const handoffs = [
+    [col(1) + 64, 186], [col(2) + 64, 186], [col(3) + 64, 270], [col(4) + 64, 336], [col(5) + 64, 364], [col(6) + 64, 458], [col(7) + 64, 458],
+  ];
+  const gaps = [
+    [col(4) + 18, 124, "no receipt"], [col(4) + 18, 166, "no status"], [col(6) + 18, 168, "no confirmation"], [col(7) + 40, 232, "no update<br>while waiting", "left"],
+  ];
+  if (handoffs.length !== D.discovery.handoffs || gaps.length !== D.discovery.gaps) throw new Error("markers do not match the data");
+  handoffs.forEach(([x, y], i) => d.at(x, y, `<span class="marker">${i + 1}</span>`));
+  gaps.forEach(([x, y, note, side], i) => {
+    d.at(x, y, `<span class="gap"><span>${i + 1}</span></span>`);
+    d.at(side ? x - 18 : x + 18, y, `<span class="gapnote ${side ?? ""}">${note}</span>`);
+  });
+</script>

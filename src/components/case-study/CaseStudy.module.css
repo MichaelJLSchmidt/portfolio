@@ -1,0 +1,477 @@
+/* Case-study building blocks (Waypoints.tsx, Evidence.tsx, FictionBanner.tsx). Running text sits
+   on legend panels (.legend, globals.css); the insight and the banner sit on the sheet colour,
+   where only sheet-safe inks are used (ground, sheet-ink, moss-ink, alpenglow-ink). Labels on the
+   dark panels are glacier or sheet: npm run check:legibility asks 7:1 of text there. */
+
+/* ---------------------------------------------------------------- waypoints */
+
+.waypoint {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(24px, 3vw, 40px);
+  justify-items: start;
+  scroll-margin-top: 96px;
+}
+
+.waypoint > * {
+  width: 100%;
+  min-width: 0;
+}
+
+.panel {
+  display: grid;
+  gap: 18px;
+  max-width: 46rem;
+}
+
+/* "Label — finding": the label as a waypoint marker, the finding as the heading's voice. */
+.heading {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 4px;
+  scroll-margin-top: 96px;
+}
+
+.headingLabel {
+  color: var(--color-glacier);
+  font-weight: 600;
+}
+
+.headingFinding {
+  display: block;
+  color: var(--color-sheet);
+  font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.6rem);
+  font-weight: 760;
+  font-stretch: 85%;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.headingFinding::first-letter {
+  text-transform: uppercase;
+}
+
+.panel strong {
+  font-weight: 700;
+}
+
+.listIntro {
+  margin-bottom: -8px;
+}
+
+.list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 1.25em;
+}
+
+.list li::marker {
+  color: var(--color-glacier);
+}
+
+/* Numbered insights: circled numbers, like the markers on the affinity map (Fig. 3). */
+.list[data-ordered] {
+  padding: 0;
+  list-style: none;
+  counter-reset: insight;
+}
+
+.list[data-ordered] li {
+  position: relative;
+  padding-left: 44px;
+  counter-increment: insight;
+}
+
+.list[data-ordered] li::before {
+  content: counter(insight);
+  position: absolute;
+  top: 0.1em;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1.5px solid var(--color-glacier);
+  border-radius: 50%;
+  color: var(--color-glacier);
+  font-family: var(--font-martian), ui-monospace, monospace;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.credits {
+  font-size: 0.9375rem;
+}
+
+/* Below 1200 px: "Next waypoint ↓ / Back to top ↑" at the end of each waypoint. */
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 28px;
+}
+
+.foot a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  min-height: 44px;
+  color: var(--color-glacier);
+  text-decoration: none;
+  text-shadow:
+    0 0 2px var(--color-ground),
+    0 0 6px var(--color-ground),
+    0 0 14px var(--color-ground);
+}
+
+.foot a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (min-width: 1200px) {
+  .foot {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------- key insight */
+
+.insight {
+  display: grid;
+  gap: 10px;
+  max-width: 46rem;
+  padding: clamp(22px, 3vw, 32px) clamp(22px, 3vw, 36px);
+  border-left: 6px solid var(--color-moss-ink);
+  border-radius: 12px;
+  background: var(--color-sheet);
+  color: var(--color-ground);
+}
+
+.insightLabel {
+  color: var(--color-moss-ink);
+  font-family: var(--font-martian), ui-monospace, monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.insightText {
+  font-size: clamp(1.4rem, 1.05rem + 1.3vw, 2rem);
+  font-weight: 720;
+  font-stretch: 88%;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+/* ---------------------------------------------------------------- pull quote */
+
+.quote {
+  display: grid;
+  gap: 10px;
+  padding-left: 22px;
+  border-left: 3px solid var(--color-glacier);
+}
+
+.quote p {
+  font-size: clamp(1.25rem, 1rem + 0.9vw, 1.6rem);
+  font-style: italic;
+  line-height: 1.35;
+}
+
+.quote p::before {
+  content: "“";
+}
+
+.quote p::after {
+  content: "”";
+}
+
+.quote figcaption {
+  color: var(--color-glacier);
+}
+
+/* ------------------------------------------------------------------ decisions */
+
+.decision {
+  display: grid;
+  gap: 18px;
+  max-width: 52rem;
+}
+
+.decisionTitle {
+  color: var(--color-sheet);
+  font-size: clamp(1.25rem, 1rem + 0.9vw, 1.6rem);
+  font-weight: 760;
+  font-stretch: 88%;
+  line-height: 1.15;
+  scroll-margin-top: 96px;
+}
+
+.tableScroll {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--color-contour-dim);
+  border-radius: 8px;
+}
+
+.table {
+  width: 100%;
+  min-width: 36rem;
+  border-collapse: collapse;
+  color: var(--color-sheet);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.table caption {
+  padding: 12px 14px;
+  color: var(--color-glacier);
+  font-family: var(--font-martian), ui-monospace, monospace;
+  font-size: var(--type-hud-size);
+  letter-spacing: var(--type-hud-tracking);
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.table th,
+.table td {
+  padding: 11px 14px;
+  border-top: 1px solid var(--color-contour-dim);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table thead th {
+  color: var(--color-glacier);
+  font-family: var(--font-martian), ui-monospace, monospace;
+  font-size: var(--type-hud-size);
+  font-weight: 500;
+  letter-spacing: var(--type-hud-tracking);
+  text-transform: uppercase;
+}
+
+.table tbody th {
+  font-weight: 650;
+}
+
+.table tr[data-chosen] {
+  background: rgb(200 245 176 / 0.07);
+}
+
+.table tr[data-chosen] th {
+  box-shadow: inset 3px 0 0 var(--color-glacier);
+}
+
+.chosen {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border: 1px solid var(--color-glacier);
+  border-radius: 999px;
+  color: var(--color-glacier);
+  vertical-align: 0.1em;
+}
+
+.verdict {
+  display: grid;
+  gap: 12px;
+  max-width: none;
+}
+
+.verdict > div {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-contour-dim);
+}
+
+.verdict dt {
+  padding-top: 0.35em;
+  color: var(--color-glacier);
+  font-weight: 600;
+}
+
+.verdict dd {
+  margin: 0;
+}
+
+.verdict [data-term="chose"] dd {
+  font-weight: 700;
+}
+
+@media (max-width: 479px) {
+  .verdict > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+}
+
+/* ----------------------------------------------------------- metrics, outcomes */
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: 16px;
+  max-width: 52rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.metric {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  padding: 20px 22px;
+  border: 1px solid var(--color-contour-dim);
+  border-radius: 8px;
+  background: var(--color-ground-raised);
+  color: var(--color-sheet);
+}
+
+.metricValue {
+  color: var(--color-glacier);
+  font-family: var(--font-martian), ui-monospace, monospace;
+  font-size: clamp(2rem, 1.5rem + 1.6vw, 2.6rem);
+  font-weight: 700;
+  font-stretch: 87.5%;
+  line-height: 1.05;
+}
+
+.metricLabel {
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.metricDetail {
+  font-size: 0.9375rem;
+}
+
+.metric .badge {
+  margin-top: 8px;
+}
+
+.outcomes {
+  display: grid;
+  gap: 20px;
+  max-width: 52rem;
+}
+
+.after {
+  font-weight: 700;
+}
+
+.note {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.875rem;
+}
+
+/* ----------------------------------------------------------------- evidence */
+
+/* Shape plus text: the shape is coloured, the word is in the text colour. */
+.badge {
+  --evidence: var(--color-glacier);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-sheet);
+  font-family: var(--font-martian), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.badge svg {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  fill: var(--evidence);
+  stroke: var(--evidence);
+}
+
+.badge[data-evidence="estimated"] {
+  --evidence: var(--color-alpenglow);
+}
+
+.badge[data-evidence="qualitative"] {
+  --evidence: var(--color-ice);
+}
+
+/* On the sheet colour (the Summit summary): sheet-safe inks only. */
+:global([data-ink="sheet"]) .badge {
+  --evidence: var(--color-moss-ink);
+  color: var(--color-ground);
+}
+
+:global([data-ink="sheet"]) .badge[data-evidence="estimated"] {
+  --evidence: var(--color-alpenglow-ink);
+}
+
+:global([data-ink="sheet"]) .badge[data-evidence="qualitative"] {
+  --evidence: var(--color-sheet-ink);
+}
+
+.evidenceLegend {
+  display: grid;
+  gap: 8px;
+  max-width: none;
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.evidenceLegend > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+}
+
+.evidenceLegend dt {
+  min-width: 9.5rem;
+}
+
+.evidenceLegend dd {
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------- banner */
+
+.banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  max-width: 62rem;
+  padding: 14px 20px;
+  border-radius: 8px;
+  background: var(--color-sheet);
+  color: var(--color-ground);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.bannerStamp {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke: var(--color-alpenglow-ink);
+  stroke-width: 1.5;
+}
+
+.bannerLabel {
+  color: var(--color-alpenglow-ink);
+  font-family: var(--font-martian), ui-monospace, monospace;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}

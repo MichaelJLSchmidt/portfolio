@@ -4,6 +4,8 @@
 //   npm run test:e2e                  all scenarios
 //   npm run test:e2e -- transitions   aborted view transitions; Calm map and reduced motion
 //   npm run test:e2e -- decode        heightmap decode check and its fallbacks
+//   npm run test:e2e -- casestudy     the case-study template on the example page (needs a build
+//                                     that includes examples: SITE_MODE=basecamp or a preview)
 //
 // Serves ./out like a static host (base path read from the build) and drives Chromium with
 // Playwright, which is not a dependency: `npm i -D playwright && npx playwright install chromium`,
@@ -356,7 +358,251 @@ async function decode() {
   }
 }
 
-const scenarios = { transitions, decode };
+// --- case-study template ------------------------------------------------------------------------
+// On the flagged example, which uses every building block: the "On this page" trail (scroll-spy,
+// aria-current, keyboard), the lightbox (focus in and out, Esc, zoom buttons), the before/after
+// comparison (keyboard, view buttons), hotspots, and the fallbacks without JavaScript.
+const EXAMPLE = "/work/test-project/";
+
+async function casestudy() {
+  if (!existsSync(join(root, `out${EXAMPLE}index.html`))) {
+    console.log(`\ncase-study template: skipped (no ${EXAMPLE} in this build; build with SITE_MODE=basecamp)`);
+    return;
+  }
+  const url = `${base}${EXAMPLE}`;
+  const trail = 'nav[aria-label="On this page"]';
+  const waitFor = (page, fn, arg) => page.waitForFunction(fn, arg, { timeout: 8000, polling: 50 }).then(() => true, () => false);
+
+  console.log("\ncase-study template: trail, desktop 1440×900");
+  {
+    const { context, page, errors } = await open();
+    await page.goto(url, { waitUntil: "networkidle" });
+    const info = await page.evaluate((trail) => {
+      const nav = document.querySelector(trail);
+      const links = [...(nav?.querySelectorAll("a") ?? [])];
+      return {
+        visible: !!nav && nav.getClientRects().length > 0,
+        position: nav ? getComputedStyle(nav).position : null,
+        links: links.map((a) => a.getAttribute("href")),
+        h1Linked: links.some((a) => document.querySelector(a.getAttribute("href"))?.querySelector("h1")),
+        jumpVisible: !!document.querySelector("#jump-heading")?.getClientRects().length,
+        margin: getComputedStyle(document.querySelector("section[data-waypoint] h2")).scrollMarginTop,
+        robots: document.querySelector('meta[name="robots"]')?.content,
+      };
+    }, trail);
+    check("trail is a visible, sticky nav labelled “On this page”", info.visible && info.position === "sticky", `position=${info.position}`);
+    check("trail lists the six waypoints, not the H1", info.links.length === 6 && !info.h1Linked, info.links.join(" "));
+    check("“Jump to” chips hidden from 1200 px", !info.jumpVisible);
+    check("waypoint headings have a scroll margin", parseFloat(info.margin) >= 80, info.margin);
+    check("the example page is noindex", /noindex/.test(info.robots ?? ""), info.robots);
+    await page.evaluate(() => document.getElementById("discovery").scrollIntoView({ block: "start" }));
+    const spied = await waitFor(page, (t) => document.querySelector(`${t} a[aria-current="true"]`)?.getAttribute("href") === "#discovery", trail);
+    const current = await page.locator(`${trail} a[aria-current="true"]`).count();
+    check("scroll-spy marks the waypoint being read (aria-current=true)", spied && current === 1, `${current} current`);
+    // Keyboard: Tab onto a trail link, Enter follows it.
+    await page.focus(`${trail} a[href="#context"]`);
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    const focused = await page.evaluate(() => document.activeElement?.getAttribute("href"));
+    check("Tab moves along the trail", focused === "#decisions", `focus on ${focused}`);
+    await page.keyboard.press("Enter");
+    const followed = await waitFor(page, (t) => location.hash === "#decisions" && document.querySelector(`${t} a[aria-current="true"]`)?.getAttribute("href") === "#decisions", trail);
+    // Smooth scrolling (Lenis, fine pointers) is still gliding: wait until the page stops moving.
+    await page.waitForFunction(
+      () =>
+        new Promise((done) => {
+          const y = window.scrollY;
+          setTimeout(() => done(window.scrollY === y), 250);
+        }),
+      null,
+      { timeout: 8000, polling: 300 },
+    ).catch(() => {});
+    const top = await page.evaluate(() => Math.round(document.getElementById("decisions").getBoundingClientRect().top));
+    check("Enter jumps to the waypoint and the trail follows", followed, `hash=${await page.evaluate(() => location.hash)}`);
+    check("the waypoint lands below the HUD", top >= 40 && top <= 160, `top=${top}px`);
+    check("no page errors", errors.length === 0, errors.join("; "));
+    await context.close();
+  }
+
+  console.log("\ncase-study template: phone 390×844");
+  {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+    const page = await context.newPage();
+    await page.goto(url, { waitUntil: "networkidle" });
+    const info = await page.evaluate((trail) => ({
+      trail: !!document.querySelector(trail)?.getClientRects().length,
+      jump: !!document.querySelector("#jump-heading")?.getClientRects().length,
+      next: [...document.querySelectorAll("section[data-waypoint] a")].filter((a) => /^Next waypoint/.test(a.textContent) && a.getClientRects().length).length,
+      top: [...document.querySelectorAll('section[data-waypoint] a[href="#main"]')].filter((a) => a.getClientRects().length).length,
+      width: document.documentElement.scrollWidth,
+      markers: [...document.querySelectorAll("button[data-hotspot]")].map((b) => b.getBoundingClientRect()).map((r) => Math.min(r.width, r.height)),
+    }), trail);
+    check("trail hidden, “Jump to” chips shown", !info.trail && info.jump);
+    check("each waypoint ends with “Next waypoint” (5) and “Back to top” (6)", info.next === 5 && info.top === 6, `${info.next} next, ${info.top} back`);
+    check("no sideways scrolling", info.width <= 390, `${info.width}px`);
+    check("hotspot markers at least 24×24 px", info.markers.length === 5 && info.markers.every((m) => m >= 24), info.markers.join(", "));
+    // The lightbox on touch: two fingers pinch, one finger pans.
+    const fig = page.locator("figure[data-zoom]").first();
+    await fig.scrollIntoViewIfNeeded();
+    await fig.locator("button[data-lightbox-open]").waitFor({ state: "visible", timeout: 8000 }).catch(() => {});
+    await fig.locator("button[data-lightbox-open]").tap();
+    await page.waitForSelector("dialog[open]", { timeout: 5000 }).catch(() => {});
+    const box = await page.locator("dialog[open] [data-lightbox-stage]").boundingBox();
+    const transform = () => page.evaluate(() => document.querySelector("dialog[open] img")?.style.transform ?? "");
+    if (box) {
+      const cdp = await context.newCDPSession(page);
+      const [cx, cy] = [box.x + box.width / 2, box.y + box.height / 2];
+      const pinch = (type, d) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: type === "touchEnd" ? [] : [{ x: cx - d, y: cy, id: 1 }, { x: cx + d, y: cy, id: 2 }] });
+      await pinch("touchStart", 30);
+      for (let d = 40; d <= 90; d += 10) await pinch("touchMove", d);
+      await pinch("touchEnd", 0);
+      const pinched = await transform();
+      const pan = (type, x) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: type === "touchEnd" ? [] : [{ x, y: cy, id: 3 }] });
+      await pan("touchStart", cx);
+      for (let x = cx; x >= cx - 60; x -= 10) await pan("touchMove", x);
+      await pan("touchEnd", 0);
+      const panned = await transform();
+      const scale = Number(pinched.match(/scale\(([\d.]+)\)/)?.[1] ?? 1);
+      const tx = (t) => Number(t.match(/translate\((-?[\d.]+)px/)?.[1] ?? 0);
+      check("lightbox: pinch zooms on touch", scale > 1.5, pinched);
+      check("lightbox: one finger pans when zoomed", tx(panned) < tx(pinched) - 30, panned);
+    } else check("lightbox opens on tap", false);
+    await context.close();
+  }
+
+  console.log("\ncase-study template: lightbox");
+  for (const reduced of [false, true]) {
+    const { context, page, errors } = await open({ reduced });
+    await page.goto(url, { waitUntil: "networkidle" });
+    const fig = page.locator("figure[data-zoom]").first();
+    await fig.scrollIntoViewIfNeeded();
+    const button = fig.locator("button[data-lightbox-open]");
+    await button.waitFor({ state: "visible", timeout: 8000 }).catch(() => {});
+    const before = await fig.evaluate((f) => ({
+      fallback: f.querySelector("[data-lightbox-fallback]")?.hidden,
+      name: f.querySelector("button[data-lightbox-open]")?.textContent.trim(),
+    }));
+    check(`${reduced ? "(reduced) " : ""}“Enlarge” button replaces the full-size link`, before.fallback === true && before.name === "Enlarge", JSON.stringify(before));
+    await button.focus();
+    await page.keyboard.press("Enter");
+    const opened = await waitFor(page, () => document.querySelector("dialog[data-lightbox][open]"));
+    const inside = await page.evaluate(() => {
+      const d = document.querySelector("dialog[data-lightbox][open]");
+      const img = d?.querySelector("img");
+      return {
+        focusInside: !!d?.contains(document.activeElement),
+        src: img?.currentSrc || img?.getAttribute("src"),
+        caption: !!d?.querySelector("p")?.textContent,
+        transition: img ? getComputedStyle(img).transitionDuration : null,
+      };
+    });
+    check(`${reduced ? "(reduced) " : ""}dialog opens with focus inside`, opened && inside.focusInside);
+    check(`${reduced ? "(reduced) " : ""}the largest source loads on open`, /-(2400|2560)\.(avif|webp)$/.test(inside.src ?? ""), inside.src);
+    if (reduced) check("no zoom animation with reduced motion", inside.transition === "0s", inside.transition);
+    const label = (z) => page.locator(`dialog[open] button[data-zoom="${z}"]`).getAttribute("aria-label");
+    if (!reduced) {
+      // Wheel and click zoom around the pointer (desktop).
+      const stage = await page.locator("dialog[open] [data-lightbox-stage]").boundingBox();
+      await page.mouse.move(stage.x + stage.width / 2, stage.y + stage.height / 2);
+      await page.mouse.wheel(0, -300);
+      const wheeled = await label("in");
+      await page.locator('dialog[open] button[data-zoom="reset"]').click();
+      await page.mouse.click(stage.x + stage.width / 2, stage.y + stage.height / 2);
+      const clicked = await label("in");
+      await page.locator('dialog[open] button[data-zoom="reset"]').click();
+      check("wheel and click zoom in", !/currently 100%/.test(wheeled ?? "") && /currently 150%/.test(clicked ?? ""), `${wheeled} | ${clicked}`);
+    }
+    await page.locator('dialog[open] button[data-zoom="in"]').click();
+    const zoomed = await label("in");
+    await page.locator('dialog[open] button[data-zoom="out"]').click();
+    await page.locator('dialog[open] button[data-zoom="in"]').click();
+    await page.locator('dialog[open] button[data-zoom="reset"]').click();
+    const reset = await label("reset");
+    check(`${reduced ? "(reduced) " : ""}zoom buttons name the zoom level`, /150%/.test(zoomed ?? "") && /100%/.test(reset ?? ""), `${zoomed} | ${reset}`);
+    await page.keyboard.press("Escape");
+    const closed = await waitFor(page, () => !document.querySelector("dialog[data-lightbox][open]"));
+    const back = await page.evaluate(() => document.activeElement?.matches("button[data-lightbox-open]"));
+    check(`${reduced ? "(reduced) " : ""}Esc closes it and focus returns to “Enlarge”`, closed && back);
+    check("no page errors", errors.length === 0, errors.join("; "));
+    await context.close();
+  }
+
+  console.log("\ncase-study template: before/after and hotspots");
+  {
+    const { context, page, errors } = await open();
+    await page.goto(url, { waitUntil: "networkidle" });
+    const cmp = page.locator("figure[data-kind=compare]");
+    await cmp.scrollIntoViewIfNeeded();
+    await waitFor(page, () => document.querySelector("[data-compare]")?.dataset.enhanced === "true");
+    const range = cmp.locator('input[type="range"]');
+    check("slider is a native range labelled “Compare before and after”", (await range.getAttribute("aria-label")) === "Compare before and after");
+    await range.focus();
+    for (let i = 0; i < 5; i++) await page.keyboard.press("ArrowLeft");
+    const after5 = await cmp.evaluate((f) => ({ value: f.querySelector("input").value, pos: f.querySelector("[data-compare]").style.getPropertyValue("--pos"), text: f.querySelector("input").getAttribute("aria-valuetext") }));
+    check("arrow keys move the clip", after5.value === "45" && after5.pos === "45%" && after5.text === "45% before, 55% after", JSON.stringify(after5));
+    const view = (v) => cmp.locator(`button[data-compare-view="${v}"]`);
+    await view("before").click();
+    const b = await cmp.evaluate((f) => ({ value: f.querySelector("input").value, pressed: f.querySelector('[data-compare-view="before"]').getAttribute("aria-pressed") }));
+    await view("side").click();
+    const side = await cmp.evaluate((f) => ({ view: f.querySelector("[data-compare]").dataset.view, pressed: f.querySelector('[data-compare-view="side"]').getAttribute("aria-pressed") }));
+    await view("after").click();
+    const a = await cmp.evaluate((f) => ({ value: f.querySelector("input").value, view: f.querySelector("[data-compare]").dataset.view, pressed: f.querySelector('[data-compare-view="after"]').getAttribute("aria-pressed") }));
+    check("“Before”, “Side by side”, “After” set the view (aria-pressed)", b.value === "100" && b.pressed === "true" && side.view === "side" && side.pressed === "true" && a.value === "0" && a.view === "slider" && a.pressed === "true", JSON.stringify({ b, side, a }));
+
+    const hot = page.locator("figure[data-kind=hotspots]");
+    await hot.scrollIntoViewIfNeeded();
+    await hot.locator('button[data-hotspot="3"]').click();
+    await waitFor(page, () => document.querySelector('button[data-hotspot="3"]')?.getAttribute("aria-pressed") === "true");
+    const hs = await hot.evaluate((f) => ({
+      pressed: [...f.querySelectorAll("button[data-hotspot]")].map((m) => m.getAttribute("aria-pressed")).join(""),
+      active: [...f.querySelectorAll("[data-note]")].filter((n) => n.hasAttribute("data-active")).map((n) => n.dataset.note),
+      notesVisible: [...f.querySelectorAll("[data-note]")].every((n) => n.getClientRects().length),
+      named: f.querySelector('button[data-hotspot="3"]').getAttribute("aria-label"),
+    }));
+    check("a marker highlights its note in the visible list", hs.pressed === "falsefalsetruefalsefalse" && hs.active.join() === "3" && hs.notesVisible, JSON.stringify(hs));
+    check("markers are named buttons", /^Note 3: /.test(hs.named ?? ""), hs.named);
+    check("no page errors", errors.length === 0, errors.join("; "));
+    await context.close();
+  }
+
+  console.log("\ncase-study template: without JavaScript");
+  {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, javaScriptEnabled: false });
+    const page = await context.newPage();
+    await page.goto(url, { waitUntil: "load" });
+    const r = await page.evaluate(() => {
+      const visible = (el) => !!el && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden";
+      const cmp = document.querySelector("figure[data-kind=compare]");
+      const img = (prefix) => [...cmp.querySelectorAll("img")].find((i) => i.alt.startsWith(prefix));
+      const [before, after] = [img("Before"), img("After")].map((i) => i.getBoundingClientRect());
+      const zoom = document.querySelector("figure[data-zoom]");
+      return {
+        stacked: before.height > 0 && after.height > 0 && before.bottom <= after.top + 1,
+        alts: [...cmp.querySelectorAll("img")].map((i) => i.alt),
+        beforeFirst: cmp.querySelector("img")?.alt.startsWith("Before"),
+        rangeHidden: !visible(cmp.querySelector('input[type="range"]')),
+        fallback: visible(zoom.querySelector("[data-lightbox-fallback]")) ? zoom.querySelector("[data-lightbox-fallback]").getAttribute("href") : null,
+        enlargeHidden: !visible(zoom.querySelector("[data-lightbox-open]")),
+        notes: [...document.querySelectorAll("figure[data-kind=hotspots] [data-note]")].filter(visible).length,
+        describe: [...document.querySelectorAll("details > summary")].filter((s) => s.textContent === "Describe this diagram").length,
+        trailLinks: document.querySelectorAll('nav[aria-label="On this page"] a').length,
+        banner: document.querySelector('[role="note"]')?.textContent ?? "",
+        missingAlt: [...document.querySelectorAll("main img")].filter((i) => !i.hasAttribute("alt")).length,
+      };
+    });
+    check("before and after stack, each with its own alt text, before first", r.stacked && r.beforeFirst && r.alts.every((a) => a.length > 10) && r.rangeHidden, JSON.stringify(r.alts));
+    check("“Open full-size image” link instead of the lightbox", !!r.fallback && r.enlargeHidden, r.fallback);
+    check("hotspot notes listed", r.notes === 5, `${r.notes} notes`);
+    check("long descriptions behind “Describe this diagram”", r.describe >= 5, `${r.describe}`);
+    check("trail links present", r.trailLinks === 6);
+    check("fictional-example banner present", /FICTIONAL EXAMPLE|Fictional example/i.test(r.banner), r.banner.slice(0, 60));
+    check("every image has an alt attribute", r.missingAlt === 0, `${r.missingAlt} without`);
+    await context.close();
+  }
+}
+
+const scenarios = { transitions, decode, casestudy };
 try {
   for (const [name, run] of Object.entries(scenarios)) if (!only || only === name) await run();
 } finally {

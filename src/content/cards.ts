@@ -1,7 +1,8 @@
+import { exampleCards } from "@/content/examples";
 import type { Rarity } from "@/styles/tokens";
 
 /**
- * Summit Cards: the single source for every card and its case study.
+ * Summit Cards: the single source for every card. Case-study pages live in case-studies.ts.
  * Components render only what is here. [PLACEHOLDERS] mark facts still to confirm.
  */
 
@@ -34,27 +35,14 @@ export type Keyword = { term: string; reminder: string };
 /** Leave `value` out (or the whole stat) until there is a real number: empty stats don't render. */
 export type Stat = { label: string; value?: string };
 
-export type SetSymbol = "peak" | "grid";
-
-export type CaseStudy = {
-  lede: string;
-  /** Every field is optional: the summary shows only the ones with a value. */
-  summary: {
-    problem?: string;
-    role?: string;
-    team?: string;
-    duration?: string;
-    reach?: string;
-    keyDecision?: string;
-    outcome?: string;
-  };
-  sections: { id: string; title: string; body: string }[];
-};
+export type SetSymbol = "peak" | "grid" | "lab";
 
 export type SummitCardData = {
   slug: string;
   name: string;
   rarity: Rarity;
+  /** Why the card has its rarity, read with the rarity mark (e.g. "led the team and the UX strategy"). */
+  rarityNote?: string;
   /** Summit cost badge, 1–5 for projects; the leader card shows its birth altitude. */
   cost: string;
   costLabel: string;
@@ -72,8 +60,11 @@ export type SummitCardData = {
   summary: string;
   /** Where the card leads. Defaults to its case study at /work/<slug>/. */
   href?: string;
-  /** Project cards have a case study; the leader card leads to the About page instead. */
-  caseStudy?: CaseStudy;
+  /**
+   * A fictional example (src/content/examples): stamped on the card, last in the deck, and
+   * never part of a live build. Its values are invented on purpose, so check:content skips it.
+   */
+  example?: true;
 };
 
 export const cardLabels = {
@@ -83,6 +74,7 @@ export const cardLabels = {
   collector: "Collector line",
   rarity: (r: string) => `Rarity ${r}`,
   setSymbol: (set: string) => `Set ${set}`,
+  exampleStamp: "Fictional example",
 };
 
 export const caseStudyLabels = {
@@ -95,11 +87,51 @@ export const caseStudyLabels = {
   keyDecision: "Key decision",
   outcome: "Outcome",
   jumpTo: "Jump to",
+  onThisPage: "On this page",
+  nextWaypoint: "Next waypoint",
+  backToTop: "Back to top",
+  readingTime: (minutes: number) => `${minutes} min read`,
+  skim: "60-second skim below",
+  figure: (n: number) => `Fig. ${n}`,
+  describe: "Describe this diagram",
+  enlarge: "Enlarge",
+  openFullSize: "Open full-size image",
+  close: "Close",
+  zoomGroup: "Zoom",
+  reset: "Reset",
+  zoomIn: (level: number) => `Zoom in, currently ${level}%`,
+  zoomOut: (level: number) => `Zoom out, currently ${level}%`,
+  zoomReset: (level: number) => `Reset zoom, currently ${level}%`,
+  zoomStatus: (level: number) => `Zoom ${level}%`,
+  zoomHint: "Drag to pan. Pinch, scroll or click to zoom.",
+  compare: "Compare before and after",
+  compareView: "View",
+  before: "Before",
+  after: "After",
+  sideBySide: "Side by side",
+  compareValue: (before: number) => `${before}% before, ${100 - before}% after`,
+  noteMarker: (n: number, title: string) => `Note ${n}: ${title}`,
+  keyInsight: "Key insight",
+  decision: (n: number) => `Decision ${n}`,
+  chose: "Chose",
+  cost: "Cost",
+  mitigation: "Mitigation",
+  chosen: "Chosen",
+  outcomeColumns: ["Metric", "Before", "After", "Evidence"] as const,
+  evidence: {
+    measured: { label: "Measured", text: "counted in system logs or a manual file count" },
+    estimated: { label: "Estimated", text: "extrapolated from a sample" },
+    qualitative: { label: "Qualitative", text: "observed or reported, not counted" },
+  },
+  evidenceLegend: "Evidence",
+  credits: "Credits",
   next: "Next expedition",
   back: "Back to the deck",
+  backToAll: "Back to all expeditions",
+  example: "Fictional example",
 };
 
-export const cards: SummitCardData[] = [
+const projectCards: SummitCardData[] = [
   {
     slug: "profile",
     name: "Michael JL Schmidt",
@@ -177,33 +209,15 @@ export const cards: SummitCardData[] = [
     artworkAlt: "Contour map of a fictional massif generated for this project, with a dotted trail to the summit.",
     summary:
       "kiBon brings childcare subsidies for the Canton of Bern into one platform for parents, providers and the administration. Version 2.0 was planned with User Story Mapping. [SUMMARY]",
-    caseStudy: {
-      lede: "[LEDE] Planning and designing the second generation of the Canton of Bern's childcare-subsidy platform.",
-      summary: {
-        problem: "[PROBLEM]",
-        role: "UX designer and workshop moderator — [ROLE DETAILS]",
-        team: "[#]",
-        duration: "[#] months",
-        reach: "[#]",
-        keyDecision: "[KEY DECISION]",
-        outcome: "[OUTCOME]",
-      },
-      sections: [
-        { id: "context", title: "Context", body: "[CONTEXT]" },
-        { id: "story-mapping", title: "User Story Mapping", body: "[STORY MAPPING]" },
-        { id: "validation", title: "Validation workshop", body: "[VALIDATION WORKSHOP]" },
-        { id: "outcome", title: "Outcome", body: "[OUTCOME DETAILS]" },
-      ],
-    },
   },
 ];
+
+/** The deck: project cards, then the flagged examples where the build includes them (last). */
+export const cards: SummitCardData[] = [...projectCards, ...exampleCards];
 
 export const cardBySlug = (slug: string) => cards.find((c) => c.slug === slug);
 
 export const cardHref = (card: SummitCardData) => card.href ?? `/work/${card.slug}/`;
-
-/** Cards that have a case study page under /work/. */
-export const caseStudyCards = cards.filter((c): c is SummitCardData & { caseStudy: CaseStudy } => !!c.caseStudy);
 
 const withSlash = (path: string) => (path.endsWith("/") ? path : `${path}/`);
 

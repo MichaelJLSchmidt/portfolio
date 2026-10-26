@@ -89,6 +89,20 @@
         2380
       ],
       "morphWidth": 512
+    },
+    {
+      "id": "lab-099",
+      "kind": "seeded",
+      "example": true,
+      "seed": 99,
+      "lines": 20,
+      "indexEvery": 4,
+      "aspect": 1.5,
+      "elevationRangeM": [
+        640,
+        2510
+      ],
+      "morphWidth": 512
     }
   ],
   "heightmapBlurSigma": 1

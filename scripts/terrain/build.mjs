@@ -4,16 +4,19 @@
 //   npm run terrain -- --refresh re-download the elevation window
 //   npm run terrain -- --placeholder  skip the network and use procedural terrain
 //   npm run terrain -- --png     also write PNG copies of every heightmap (not used by the site)
+//   npm run terrain -- --only=lab-099   rebuild only these seeded card terrains (no download)
 //
 // Outputs (public/terrain): heightmap-{1024,1536,2048}.webp (lossless) with .bin raw-height
 // fallbacks, contours*.svg, cards/*.svg, morph/*.webp (+ .bin) and terrain.json (metadata the
-// site imports, including reference texels for the runtime decode check).
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+// site imports, including reference texels for the runtime decode check). Cards flagged
+// "example" in the config (fictional examples, never in a live build) are listed in
+// examples.json instead, so live bundles carry nothing of theirs.
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
 import { color } from "../../src/styles/tokens.ts";
-import { cards as cardContent } from "../../src/content/cards.ts";
+import "../lib/ts-hooks.mjs";
 import { bboxToLv95, wgs84ToLv95 } from "./lib/lv95.mjs";
 import { readWindow, resolveCogUrl } from "./lib/source.mjs";
 import { cropToBbox, fillGaps, floodFlat, gaussianBlur, minMax, resampleArea, sampleBilinear } from "./lib/grid.mjs";
@@ -21,6 +24,9 @@ import { isobands, maskToPathData, ringsToLines, toPathData } from "./lib/contou
 import { autoTrail, seededTerrain } from "./lib/noise.mjs";
 import { decodeRawHeights, encodeLosslessWebp, encodeRawHeights, gradientPercentiles, packHeightRgb, probeTexels, rasterHash } from "./lib/heightmap.mjs";
 import { encodeRgbPng } from "./lib/png.mjs";
+
+// Card content imports "@/…" modules, which resolve once ts-hooks is registered: import it late.
+const { cards: cardContent } = await import("../../src/content/cards.ts");
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const cfg = JSON.parse(readFileSync(join(root, "src/content/terrain.config.json"), "utf8"));
@@ -93,11 +99,97 @@ async function writeHeightmap(name, data, width, height, encoding) {
   };
 }
 
+// Card terrains (artwork SVG + morph heightmap for the contour field). Crop cards cut the real
+// terrain (they need the elevation grid); seeded cards are generated from their seed alone.
+const ART_W = 360;
+async function buildCard(card) {
+  const artH = Math.round(ART_W / card.aspect);
+  const morphW = card.morphWidth;
+  const morphH = Math.round(morphW / card.aspect);
+  let art, artMask = null, morph, bboxLv95 = null, trail = null, interval, index;
+
+  if (card.kind === "crop") {
+    const [ce, cn] = wgs84ToLv95(card.center.lon, card.center.lat);
+    const wM = card.widthKm * 1000, hM = wM / card.aspect;
+    bboxLv95 = [ce - wM / 2, cn - hM / 2, ce + wM / 2, cn + hM / 2].map((v) => Math.round(v));
+    art = gaussianBlur(cropToBbox(grid, bboxLv95, ART_W, artH), ART_W, artH, 0.7);
+    artMask = cropToBbox({ ...grid, data: lakeMask }, bboxLv95, ART_W, artH, 2);
+    morph = gaussianBlur(cropToBbox(grid, bboxLv95, morphW, morphH, 3), morphW, morphH, cfg.heightmapBlurSigma ?? 0);
+    interval = card.contourIntervalM;
+    index = card.indexEvery;
+  } else {
+    morph = seededTerrain(morphW, morphH, card.seed, card.elevationRangeM);
+    art = gaussianBlur(resampleArea(morph, morphW, morphH, ART_W, artH), ART_W, artH, 1.0);
+    const [lo, hi] = card.elevationRangeM;
+    interval = Math.max(10, Math.round((hi - lo) / (card.lines + 1) / 10) * 10);
+    index = card.indexEvery;
+    trail = autoTrail(art, ART_W, artH).map(([x, y]) => [round(x, 4), round(y, 4)]);
+  }
+
+  const [aMin, aMax] = minMax(art);
+  const thresholds = range(Math.ceil(aMin / interval) * interval, aMax, interval);
+  const svgFile = `cards/${card.id}.svg`;
+  const svgSize = write(
+    svgFile,
+    contourSvg(art, ART_W, artH, {
+      thresholds,
+      indexOf: (v) => Math.round(v / interval) % index === 0,
+      lakesMask: artMask,
+      tolerance: 0.3,
+      lakeOpacity: 0.16,
+    }),
+  );
+
+  const [mMin, mMax] = minMax(morph);
+  const morphEncoding = { channels: "RG", offset: round(Math.floor(mMin * 4) / 4), scale: cfg.quantisationM };
+  const morphMap = await writeHeightmap(`morph/${card.id}`, morph, morphW, morphH, morphEncoding);
+
+  const pins = trail
+    ? [0, 0.4, 0.72, 1].map((t) => {
+        const [x, y] = trail[Math.round(t * (trail.length - 1))];
+        return { x, y, elevationM: Math.round(sampleBilinear(art, ART_W, artH, x * ART_W, y * artH)) };
+      })
+    : null;
+
+  return {
+    kind: card.kind,
+    svg: `/terrain/${svgFile}`,
+    viewBox: [0, 0, ART_W, artH],
+    contourIntervalM: interval,
+    indexEvery: index,
+    bboxLv95,
+    trail,
+    pins,
+    svgBytes: svgSize,
+    morph: {
+      ...morphMap,
+      elevation: { min: round(mMin, 1), max: round(mMax, 1) },
+      encoding: morphEncoding,
+    },
+  };
+}
+
 const range = (from, to, step) => {
   const out = [];
   for (let v = from; v <= to; v += step) out.push(v);
   return out;
 };
+
+// --only: rebuild some seeded card terrains and update their metadata in place.
+const only = [...args].find((a) => a.startsWith("--only="))?.slice(7).split(",").filter(Boolean);
+if (only) {
+  const metaFile = (example) => join(outDir, example ? "examples.json" : "terrain.json");
+  for (const id of only) {
+    const card = cfg.cards.find((c) => c.id === id);
+    if (!card || card.kind !== "seeded") throw new Error(`--only: "${id}" is not a seeded card in terrain.config.json`);
+    const file = metaFile(card.example);
+    const meta = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : { cards: {} };
+    meta.cards = { ...meta.cards, [id]: await buildCard(card) };
+    writeFileSync(file, `${JSON.stringify(meta, null, 2)}\n`);
+    log(`  updated public/terrain/${card.example ? "examples.json" : "terrain.json"} (${id})`);
+  }
+  process.exit(0);
+}
 
 // ---------------------------------------------------------------------------
 // 1. Elevation source
@@ -209,74 +301,8 @@ const poster = posters.find((p) => p.intervalM === intervalM) ?? posters[0];
 // ---------------------------------------------------------------------------
 // 5. Card terrains (artwork SVG + morph heightmap for the contour field)
 // ---------------------------------------------------------------------------
-const ART_W = 360;
 const cards = {};
-for (const card of cfg.cards) {
-  const artH = Math.round(ART_W / card.aspect);
-  const morphW = card.morphWidth;
-  const morphH = Math.round(morphW / card.aspect);
-  let art, artMask = null, morph, bboxLv95 = null, trail = null, interval, index;
-
-  if (card.kind === "crop") {
-    const [ce, cn] = wgs84ToLv95(card.center.lon, card.center.lat);
-    const wM = card.widthKm * 1000, hM = wM / card.aspect;
-    bboxLv95 = [ce - wM / 2, cn - hM / 2, ce + wM / 2, cn + hM / 2].map((v) => Math.round(v));
-    art = gaussianBlur(cropToBbox(grid, bboxLv95, ART_W, artH), ART_W, artH, 0.7);
-    artMask = cropToBbox({ ...grid, data: lakeMask }, bboxLv95, ART_W, artH, 2);
-    morph = gaussianBlur(cropToBbox(grid, bboxLv95, morphW, morphH, 3), morphW, morphH, cfg.heightmapBlurSigma ?? 0);
-    interval = card.contourIntervalM;
-    index = card.indexEvery;
-  } else {
-    morph = seededTerrain(morphW, morphH, card.seed, card.elevationRangeM);
-    art = gaussianBlur(resampleArea(morph, morphW, morphH, ART_W, artH), ART_W, artH, 1.0);
-    const [lo, hi] = card.elevationRangeM;
-    interval = Math.max(10, Math.round((hi - lo) / (card.lines + 1) / 10) * 10);
-    index = card.indexEvery;
-    trail = autoTrail(art, ART_W, artH).map(([x, y]) => [round(x, 4), round(y, 4)]);
-  }
-
-  const [aMin, aMax] = minMax(art);
-  const thresholds = range(Math.ceil(aMin / interval) * interval, aMax, interval);
-  const svgFile = `cards/${card.id}.svg`;
-  const svgSize = write(
-    svgFile,
-    contourSvg(art, ART_W, artH, {
-      thresholds,
-      indexOf: (v) => Math.round(v / interval) % index === 0,
-      lakesMask: artMask,
-      tolerance: 0.3,
-      lakeOpacity: 0.16,
-    }),
-  );
-
-  const [mMin, mMax] = minMax(morph);
-  const morphEncoding = { channels: "RG", offset: round(Math.floor(mMin * 4) / 4), scale: cfg.quantisationM };
-  const morphMap = await writeHeightmap(`morph/${card.id}`, morph, morphW, morphH, morphEncoding);
-
-  const pins = trail
-    ? [0, 0.4, 0.72, 1].map((t) => {
-        const [x, y] = trail[Math.round(t * (trail.length - 1))];
-        return { x, y, elevationM: Math.round(sampleBilinear(art, ART_W, artH, x * ART_W, y * artH)) };
-      })
-    : null;
-
-  cards[card.id] = {
-    kind: card.kind,
-    svg: `/terrain/${svgFile}`,
-    viewBox: [0, 0, ART_W, artH],
-    contourIntervalM: interval,
-    indexEvery: index,
-    bboxLv95,
-    trail,
-    pins,
-    svgBytes: svgSize,
-    morph: {
-      ...morphMap,
-      elevation: { min: round(mMin, 1), max: round(mMax, 1) },
-      encoding: morphEncoding,
-    },
-  };
-}
+for (const card of cfg.cards) cards[card.id] = await buildCard(card);
 
 // ---------------------------------------------------------------------------
 // 6. Ascent profile along the leader card's trail (About page)
@@ -341,6 +367,7 @@ for (const card of cfg.cards) {
 // 7. Metadata
 // ---------------------------------------------------------------------------
 const [fx, fy] = toGridPx(cfg.region.focus.lon, cfg.region.focus.lat);
+const exampleIds = new Set(cfg.cards.filter((c) => c.example).map((c) => c.id));
 const meta = {
   attribution: "Terrain data © swisstopo",
   generatedAt: new Date().toISOString().slice(0, 10),
@@ -359,7 +386,10 @@ const meta = {
   poster,
   posters,
   lakes,
-  cards,
+  cards: Object.fromEntries(Object.entries(cards).filter(([id]) => !exampleIds.has(id))),
 };
 writeFileSync(join(outDir, "terrain.json"), `${JSON.stringify(meta, null, 2)}\n`);
 log("  wrote public/terrain/terrain.json");
+const examples = { cards: Object.fromEntries(Object.entries(cards).filter(([id]) => exampleIds.has(id))) };
+writeFileSync(join(outDir, "examples.json"), `${JSON.stringify(examples, null, 2)}\n`);
+log("  wrote public/terrain/examples.json");

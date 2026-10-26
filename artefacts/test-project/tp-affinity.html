@@ -1,0 +1,166 @@
+<!-- Fig. 3: affinity map. About 60 observations from 14 interviews in six theme clusters; the
+     three themes that changed the brief are highlighted and numbered like the insights. -->
+<style>
+  .map {
+    position: absolute;
+    inset: 0;
+    padding: 24px 30px 20px;
+  }
+  .top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .top p {
+    margin-top: 4px;
+  }
+  .codes {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    white-space: nowrap;
+  }
+  .changed {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-moss-ink);
+  }
+  .changed::before {
+    content: "";
+    width: 22px;
+    height: 14px;
+    border: 3px solid var(--color-moss-ink);
+    border-radius: 4px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto 1fr;
+    gap: 16px;
+    height: 618px;
+  }
+  .cluster {
+    position: relative;
+    padding: 12px 12px 10px;
+    border: 1.5px dashed var(--color-sheet-ink);
+    border-radius: 12px;
+    background: rgb(255 255 255 / 0.35);
+  }
+  .cluster.hi {
+    border: 3px solid var(--color-moss-ink);
+    background: rgb(255 255 255 / 0.7);
+  }
+  .cluster h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-family: var(--diagram);
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .cluster h2 .count {
+    margin-left: auto;
+    color: var(--color-sheet-ink);
+    font-family: var(--label);
+    font-size: 12.5px;
+    font-stretch: var(--label-wdth);
+    font-weight: 500;
+  }
+  .cluster.hi h2 .count {
+    color: var(--color-moss-ink);
+  }
+  .notes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .n {
+    width: calc((100% - 18px) / 4);
+    min-height: 60px;
+    padding: 5px 6px;
+    border-radius: 2px;
+    background: #fbf3c9;
+    box-shadow: 0 1px 0 rgb(27 28 24 / 0.12), 0 3px 6px -4px rgb(27 28 24 / 0.5);
+    font-size: 11.5px;
+    line-height: 1.2;
+    color: var(--color-ground);
+  }
+  .cluster:not(.hi) .n {
+    background: #f1ede0;
+    color: var(--color-sheet-ink);
+  }
+  .n i {
+    display: block;
+    margin-top: 2px;
+    font-family: var(--label);
+    font-size: 10px;
+    font-stretch: var(--label-wdth);
+    font-style: normal;
+    font-weight: 600;
+    color: var(--color-sheet-ink);
+  }
+</style>
+<div class="map contours">
+  <div class="top">
+    <div>
+      <h1 class="title">Affinity map: what we heard</h1>
+      <p class="label muted">{{discovery.interviews}} interviews · {{discovery.observations}} observations · {{discovery.themes}} themes</p>
+    </div>
+    <div class="codes label muted">
+      <span class="changed">Changed the brief</span><span>{{"H1–H6"}} homeowners</span><span>{{"I1–I5"}} installers</span><span>{{"C1–C3"}} caseworkers</span>
+    </div>
+  </div>
+  <div class="grid">
+    <section class="cluster hi" data-theme="installer" data-marker="1"><h2><span class="marker"></span>Installer fills in the form<span class="count"></span></h2><div class="notes"></div></section>
+    <section class="cluster hi" data-theme="documents" data-marker="2"><h2><span class="marker"></span>Missing documents<span class="count"></span></h2><div class="notes"></div></section>
+    <section class="cluster hi" data-theme="rekeying" data-marker="3"><h2><span class="marker"></span>Caseworkers re-key every case<span class="count"></span></h2><div class="notes"></div></section>
+    <section class="cluster" data-theme="status"><h2>No status after sending<span class="count"></span></h2><div class="notes"></div></section>
+    <section class="cluster" data-theme="language"><h2>Legal language<span class="count"></span></h2><div class="notes"></div></section>
+    <section class="cluster" data-theme="login"><h2>Login hurdles<span class="count"></span></h2><div class="notes"></div></section>
+  </div>
+</div>
+<script>
+  // Observations as written on the notes, with the participant who said or showed it.
+  const notes = {
+    installer: [
+      ["The installer filled it in", "H1"], ["I sent it to my installer", "H3"], ["Owner didn’t know the model", "I1"], ["We fill these in at night", "I2"],
+      ["Floor area? Ask the installer", "H2"], ["Installer’s e-mail on the form", "C1"], ["The owner only signed", "H5"], ["We know the specs, not the owner", "I3"],
+      ["Copied from the quote", "I4"], ["My installer called for me", "H6"], ["Same data for every canton", "I5"], ["Who is the applicant?", "C2"],
+    ],
+    documents: [
+      ["Quote missing", "C1"], ["Certificate number unknown", "H4"], ["Proof of ownership?", "H2"], ["Old quote attached", "C3"],
+      ["Photo unreadable", "C2"], ["Which certificate?", "H1"], ["Sent the documents twice", "H6"], ["Land register extract", "C1"],
+      ["Attachment too big", "H3"], ["Quote not signed", "C3"], ["Certificate expired", "C2"], ["Didn’t know it was needed", "H5"],
+      ["Scanned upside down", "C1"], ["A page is missing", "C3"], ["Owner or tenant?", "H4"], ["Re-sent by post", "H2"],
+    ],
+    rekeying: [
+      ["Type it all again", "C1"], ["Copy from the PDF by hand", "C2"], ["No structure in e-mails", "C3"], ["The batch is fine, the data isn’t", "C1"],
+      ["Searching the inbox", "C2"], ["Same fields, other order", "C3"], ["Typos when re-keying", "C1"], ["Half a day per case", "C2"],
+      ["Notes in a spreadsheet", "C3"], ["Can’t link documents", "C1"],
+    ],
+    status: [
+      ["Did it arrive?", "H1"], ["No reply for weeks", "H3"], ["Called to ask", "H6"], ["No receipt", "H2"], ["My customer asks me", "I5"],
+      ["Is it complete?", "I2"], ["Waiting, no news", "H4"], ["When is the decision?", "H1"], ["Lost track", "I4"],
+    ],
+    language: [["Legal terms", "H2"], ["French version is older", "H6"], ["What is a “Gesuchsteller”?", "H5"], ["Translated badly", "I3"], ["Long sentences", "H1"], ["Footnotes everywhere", "H4"], ["Two versions of one form", "C2"]],
+    login: [["Another account?", "H3"], ["Forgot my password", "H5"], ["Can’t log in for the owner", "I1"], ["Paper is easier", "H6"], ["Is there an app?", "H4"], ["Needs a phone number", "H2"]],
+  };
+  const counts = window.DATA.discovery.themeNotes;
+  const sum = Object.values(counts).reduce((a, b) => a + b, 0);
+  if (sum !== window.DATA.discovery.observations) throw new Error(`theme notes add up to ${sum}`);
+  for (const cluster of document.querySelectorAll("[data-theme]")) {
+    const theme = cluster.dataset.theme;
+    const list = notes[theme];
+    if (list.length < counts[theme]) throw new Error(`theme ${theme}: ${list.length} notes written, ${counts[theme]} needed`);
+    cluster.querySelector(".count").textContent = `${counts[theme]} notes`;
+    const box = cluster.querySelector(".notes");
+    for (const [text, code] of list.slice(0, counts[theme])) {
+      box.insertAdjacentHTML("beforeend", `<div class="n" style="transform:rotate(${(Math.random() * 3 - 1.5).toFixed(2)}deg)">${text}<i>${code}</i></div>`);
+    }
+    const marker = cluster.querySelector(".marker");
+    if (marker) marker.textContent = cluster.dataset.marker;
+  }
+</script>

@@ -1,0 +1,888 @@
+/* Shared stylesheet of every case-study artefact (npm run images). The site palette arrives as
+   the token custom properties (--color-*, from src/styles/tokens.ts, injected by
+   scripts/images/shell.mjs); the fictional product's UI tokens (--hm-*) are defined here.
+   Fonts: Archivo and Martian Mono for portfolio labels and diagrams, Source Sans 3 for the
+   fictional product's UI, so product and portfolio chrome are easy to tell apart.
+
+   Rules for every artefact:
+   - flat browser frames (28 px bar, three neutral dots, the fictional URL); at most one phone frame;
+   - on light sheets: markers are ground circles with light numerals, highlights moss-ink, "no
+     feedback" gaps alpenglow-ink; at most one faint contour set (.contours) behind diagrams,
+     never behind UI text;
+   - labels in Martian Mono 500 at 13–14 px, diagram text in Archivo 400/600;
+   - Swiss formats in the product UI (CHF 10'000, dd.mm.yyyy, DE/FR); no real coats of arms or
+     government logos, participant codes instead of names. */
+
+@font-face {
+  font-family: "Archivo";
+  src: url("fonts/archivo.woff2") format("woff2");
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+}
+
+@font-face {
+  font-family: "Martian Mono";
+  src: url("fonts/martian-mono.woff2") format("woff2");
+  font-weight: 100 800;
+  font-stretch: 75% 112.5%;
+}
+
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("fonts/source-sans-3.woff2") format("woff2");
+  font-weight: 200 900;
+}
+
+:root {
+  /* Fictional product: Canton of Hochmatt, Energy Office. */
+  --hm-blue: #1d4f91;
+  --hm-blue-dark: #153b6d;
+  --hm-blue-tint: #e6edf6;
+  --hm-ink: #1a1f24;
+  --hm-ink-2: #4a5560;
+  --hm-line: #c4ccd4;
+  /* Borders of form controls: 3:1 against white and the canvas (WCAG 1.4.11). */
+  --hm-field-border: #7d8893;
+  --hm-line-soft: #dde3e8;
+  --hm-canvas: #f3f5f7;
+  --hm-surface: #ffffff;
+  --hm-error: #b42318;
+  --hm-error-tint: #fdeceb;
+  --hm-success: #1e7a3c;
+  --hm-success-tint: #e7f4eb;
+  --hm-focus: #f2b705;
+  --hm-radius: 6px;
+  --hm-space: 4px;
+  --hm-font: "Source Sans 3", system-ui, sans-serif;
+  --hm-text: 15px;
+  --hm-h1: 26px;
+  --hm-h2: 19px;
+  --hm-small: 13px;
+
+  /* Portfolio chrome. */
+  --label: "Martian Mono", ui-monospace, monospace;
+  --label-wdth: 87.5%;
+  --diagram: "Archivo", system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+ul,
+ol,
+figure {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+/* ------------------------------------------------------------------ the image */
+
+.artefact {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--diagram);
+  color: var(--color-ground);
+}
+
+.artefact[data-surface="sheet"] {
+  background: var(--color-sheet);
+}
+
+.artefact[data-surface="night"] {
+  background: var(--color-ground-raised);
+  color: var(--color-sheet);
+}
+
+.artefact-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+/* "TEST PROJECT · FICTIONAL EXAMPLE · Fig. n" on every image. */
+.strip {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+  height: 24px;
+  padding: 0 14px;
+  background: var(--color-ground);
+  color: var(--color-sheet);
+  font-family: var(--label);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-stretch: var(--label-wdth);
+}
+
+.strip-note {
+  color: var(--color-alpenglow);
+  font-weight: 700;
+}
+
+.strip-dot {
+  color: var(--color-contour);
+}
+
+/* One faint contour set (contour grey at ~12%) behind diagrams; never behind UI text. */
+.contours::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("/terrain/cards/lab-099.svg") center / cover no-repeat;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.contours > * {
+  position: relative;
+}
+
+/* ------------------------------------------------------------ portfolio labels */
+
+.label {
+  font-family: var(--label);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  font-stretch: var(--label-wdth);
+}
+
+.label-caps {
+  font-family: var(--label);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  font-stretch: var(--label-wdth);
+}
+
+.title {
+  font-family: var(--diagram);
+  font-size: 22px;
+  font-weight: 700;
+  font-stretch: 90%;
+  letter-spacing: -0.005em;
+  line-height: 1.1;
+}
+
+.muted {
+  color: var(--color-sheet-ink);
+}
+
+.moss {
+  color: var(--color-moss-ink);
+}
+
+.glow {
+  color: var(--color-alpenglow-ink);
+}
+
+/* Numbered marker: a ground circle with a light numeral. */
+.marker {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--color-sheet);
+  border-radius: 50%;
+  background: var(--color-ground);
+  color: var(--color-sheet);
+  font-family: var(--label);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgb(27 28 24 / 0.3);
+  font-stretch: var(--label-wdth);
+}
+
+/* "No feedback" gap: an alpenglow-ink diamond. */
+.gap {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  color: var(--color-sheet);
+  font-family: var(--label);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  font-stretch: var(--label-wdth);
+}
+
+.gap::before {
+  content: "";
+  grid-area: 1 / 1;
+  width: 19px;
+  height: 19px;
+  border: 2px solid var(--color-sheet);
+  background: var(--color-alpenglow-ink);
+  transform: rotate(45deg);
+}
+
+.gap > span {
+  grid-area: 1 / 1;
+  position: relative;
+}
+
+/* Chip, e.g. "FICTIONAL EXAMPLE". */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 11px;
+  border: 1.5px solid var(--color-alpenglow);
+  border-radius: 999px;
+  color: var(--color-alpenglow);
+  font-family: var(--label);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-stretch: var(--label-wdth);
+}
+
+/* ------------------------------------------------------------- browser frame */
+
+.browser {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #b9c0c6;
+  border-radius: 8px;
+  background: var(--hm-surface);
+  box-shadow: 0 1px 0 rgb(27 28 24 / 0.04), 0 12px 32px -18px rgb(27 28 24 / 0.35);
+}
+
+.browser-bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 14px;
+  height: 28px;
+  padding: 0 12px;
+  border-bottom: 1px solid #d3d8dc;
+  background: #eceff1;
+}
+
+.browser-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.browser-dots i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #b8bec4;
+}
+
+.browser-url {
+  flex: 1;
+  max-width: 460px;
+  margin: 0 auto;
+  padding: 2px 12px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #5b646c;
+  font-family: var(--hm-font);
+  font-size: 12px;
+  text-align: center;
+}
+
+.browser-view {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--hm-canvas);
+}
+
+/* ---------------------------------------------------------- fictional product */
+
+.hm {
+  color: var(--hm-ink);
+  font-family: var(--hm-font);
+  font-size: var(--hm-text);
+  line-height: 1.45;
+}
+
+.hm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 28px;
+  border-bottom: 1px solid var(--hm-line-soft);
+  background: var(--hm-surface);
+}
+
+.hm-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* An abstract mark, not a coat of arms. */
+.hm-mark {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: var(--hm-blue);
+}
+
+.hm-mark::before {
+  content: "";
+  width: 18px;
+  height: 12px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 12'%3E%3Cpath d='M0 12 6 3l3.5 5L13 1l5 11Z' fill='%23fff'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.hm-brand > div b {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.hm-brand > div span {
+  display: block;
+  color: var(--hm-ink-2);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.hm-lang {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--hm-line);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.hm-lang span {
+  padding: 3px 11px;
+  color: var(--hm-ink-2);
+}
+
+.hm-lang .on {
+  background: var(--hm-blue);
+  color: #ffffff;
+}
+
+.hm-main {
+  padding: 24px 28px;
+}
+
+.hm-card {
+  padding: 22px 24px;
+  border: 1px solid var(--hm-line-soft);
+  border-radius: 10px;
+  background: var(--hm-surface);
+}
+
+.hm h1 {
+  font-size: var(--hm-h1);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.005em;
+}
+
+.hm h2 {
+  font-size: var(--hm-h2);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.hm-lead {
+  color: var(--hm-ink-2);
+  font-size: 16px;
+}
+
+.hm-small {
+  color: var(--hm-ink-2);
+  font-size: var(--hm-small);
+}
+
+/* Stepper */
+.hm-steps {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  margin-bottom: 20px;
+}
+
+/* Step numbers come from a counter, not from the markup. */
+.hm-steps {
+  counter-reset: step;
+}
+
+.hm-step i::before {
+  counter-increment: step;
+  content: counter(step);
+}
+
+.hm-step {
+  position: relative;
+  display: grid;
+  flex: 1;
+  justify-items: center;
+  gap: 6px;
+  color: var(--hm-ink-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.hm-step::before {
+  content: "";
+  position: absolute;
+  top: 13px;
+  right: 50%;
+  left: -50%;
+  height: 2px;
+  background: var(--hm-line);
+}
+
+.hm-step:first-child::before {
+  display: none;
+}
+
+.hm-step i {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--hm-line);
+  border-radius: 50%;
+  background: var(--hm-surface);
+  color: var(--hm-ink-2);
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.hm-step.done i {
+  border-color: var(--hm-blue);
+  background: var(--hm-blue);
+  color: #ffffff;
+}
+
+.hm-step.done::before,
+.hm-step.on::before {
+  background: var(--hm-blue);
+}
+
+.hm-step.on {
+  color: var(--hm-blue-dark);
+}
+
+.hm-step.on i {
+  border-color: var(--hm-blue);
+  color: var(--hm-blue);
+  box-shadow: 0 0 0 4px var(--hm-blue-tint);
+}
+
+/* Form */
+.hm-field {
+  display: grid;
+  gap: 6px;
+}
+
+.hm-label {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.hm-hint {
+  color: var(--hm-ink-2);
+  font-size: 13.5px;
+}
+
+.hm-input {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 42px;
+  padding: 0 12px;
+  border: 1.5px solid var(--hm-field-border);
+  border-radius: var(--hm-radius);
+  background: var(--hm-surface);
+  font-size: 15px;
+}
+
+.hm-input.error {
+  border-color: var(--hm-error);
+  box-shadow: inset 4px 0 0 var(--hm-error);
+}
+
+.hm-error {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  color: var(--hm-error);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.hm-error::before {
+  content: "!";
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--hm-error);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.hm-radio {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--hm-line);
+  border-radius: 8px;
+  background: var(--hm-surface);
+}
+
+.hm-radio::before {
+  content: "";
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--hm-field-border);
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.hm-radio.on {
+  border-color: var(--hm-blue);
+  background: var(--hm-blue-tint);
+}
+
+.hm-radio.on::before {
+  border: 5px solid var(--hm-blue);
+}
+
+.hm-radio b {
+  display: block;
+  font-weight: 700;
+}
+
+.hm-radio span {
+  display: block;
+  color: var(--hm-ink-2);
+  font-size: 13.5px;
+}
+
+.hm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 20px;
+  border: 1.5px solid var(--hm-blue);
+  border-radius: var(--hm-radius);
+  background: var(--hm-blue);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.hm-btn.secondary {
+  background: var(--hm-surface);
+  color: var(--hm-blue-dark);
+}
+
+.hm-btn.link {
+  border-color: transparent;
+  background: transparent;
+  color: var(--hm-blue-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.hm-alert {
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+  border-left: 4px solid var(--hm-blue);
+  border-radius: 6px;
+  background: var(--hm-blue-tint);
+  font-size: 14px;
+}
+
+.hm-alert.success {
+  border-color: var(--hm-success);
+  background: var(--hm-success-tint);
+}
+
+.hm-alert.error {
+  border-color: var(--hm-error);
+  background: var(--hm-error-tint);
+}
+
+.hm-disclosure {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--hm-blue-dark);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.hm-disclosure::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+}
+
+.hm-disclosure.open::before {
+  transform: rotate(45deg) translate(-2px, -2px);
+}
+
+.hm-upload {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1.5px dashed var(--hm-field-border);
+  border-radius: 8px;
+  background: var(--hm-surface);
+}
+
+.hm-file {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--hm-line);
+  border-radius: 8px;
+  background: var(--hm-surface);
+  font-size: 14px;
+}
+
+.hm-doc {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 36px;
+  border: 1.5px solid var(--hm-field-border);
+  border-radius: 3px 9px 3px 3px;
+  background: #ffffff;
+  color: var(--hm-ink-2);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.hm-tick {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--hm-success);
+}
+
+.hm-tick::before {
+  content: "";
+  width: 8px;
+  height: 4px;
+  margin-top: -2px;
+  border-bottom: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  transform: rotate(-45deg);
+}
+
+/* ------------------------------------------------------------ diagram parts */
+
+.note {
+  padding: 8px 10px;
+  border-radius: 3px;
+  box-shadow: 0 1px 0 rgb(27 28 24 / 0.12), 0 4px 10px -6px rgb(27 28 24 / 0.4);
+  color: var(--color-ground);
+  font-family: var(--diagram);
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.note.gold {
+  background: var(--color-summit-gold);
+}
+
+.note.ice {
+  background: var(--color-ice);
+}
+
+.note.glacier {
+  background: var(--color-glacier);
+}
+
+.box {
+  border: 1.5px solid var(--color-ground);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-ground);
+}
+
+/* ------------------------------------------------- diagrams (shared/diagram.js) */
+
+.diagram {
+  position: absolute;
+  inset: 0;
+}
+
+.d-wires {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  color: var(--color-ground);
+}
+
+.d-wire {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.d-wire.dashed {
+  stroke-dasharray: 5 4;
+}
+
+.d-wire.soft {
+  color: var(--color-sheet-ink);
+}
+
+.d-wire.moss {
+  color: var(--color-moss-ink);
+  stroke-width: 2.5;
+}
+
+.d-wire.glow {
+  color: var(--color-alpenglow-ink);
+}
+
+.d-box {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 8px 12px;
+  border: 1.5px solid var(--color-ground);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--color-ground);
+  font-family: var(--diagram);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.d-box small {
+  color: var(--color-sheet-ink);
+  font-size: 12.5px;
+  font-weight: 400;
+}
+
+.d-box.dashed {
+  border-style: dashed;
+}
+
+.d-box.soft {
+  border-color: var(--color-sheet-ink);
+  background: rgb(255 255 255 / 0.6);
+}
+
+.d-box.dark {
+  border-color: var(--color-ground);
+  background: var(--color-ground);
+  color: var(--color-sheet);
+}
+
+.d-box.dark small {
+  color: var(--color-sheet);
+}
+
+.d-box.moss {
+  border: 2.5px solid var(--color-moss-ink);
+}
+
+/* A box that only reserves space (its content draws its own shape, e.g. a decision diamond). */
+.d-box.bare {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.d-label {
+  position: absolute;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--color-sheet);
+  color: var(--color-sheet-ink);
+  font-family: var(--label);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+  font-stretch: var(--label-wdth);
+}
+
+.d-at {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}

@@ -1,7 +1,8 @@
-/* Summit summary: sheet colour, so only sheet-safe inks (ground, sheet-ink, moss-ink). */
+/* Summit summary: sheet colour, so only sheet-safe inks (ground, sheet-ink, moss-ink, alpenglow-ink). */
 .summary {
   display: grid;
   gap: 20px;
+  scroll-margin-top: 96px;
   padding: 24px;
   border-radius: 12px;
   background: var(--color-sheet);
@@ -57,6 +58,42 @@
   font-size: 1.3rem;
   font-weight: 700;
   font-stretch: 87.5%;
+}
+
+/* A stat that is a phrase ("~2,800 applications a year …"): text, set a little heavier. */
+.statText {
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+/* Outcomes as a list, each with its evidence badge. */
+.grid dd ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.grid dd li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+}
+
+.note {
+  color: var(--color-sheet-ink);
+  font-family: var(--font-martian), ui-monospace, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+}
+
+/* Phones: a stat that is a phrase takes the whole row instead of breaking inside a narrow column. */
+@media (max-width: 599px) {
+  .grid > [data-long] {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (min-width: 900px) {

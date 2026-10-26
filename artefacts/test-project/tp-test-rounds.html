@@ -1,0 +1,156 @@
+<!-- Fig. 12: task success per round of testing as dot rows (small multiples), with the top three
+     issues per round. Small samples: directional only. -->
+<style>
+  .chart {
+    position: absolute;
+    inset: 0;
+    padding: 26px 34px 18px;
+    color: var(--color-sheet);
+  }
+  /* Contour grey is 4.4:1 on the raised ground: labels here use the sheet colour. */
+  .chart > p {
+    margin-top: 6px;
+    color: var(--color-sheet);
+  }
+  .title {
+    color: var(--color-sheet);
+  }
+  .rounds {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+    margin-top: 30px;
+  }
+  .round {
+    display: grid;
+    align-content: start;
+    gap: 16px;
+    padding: 20px 20px 18px;
+    border: 1px solid var(--color-contour-dim);
+    border-radius: 10px;
+    background: var(--color-ground);
+  }
+  .round h2 {
+    display: grid;
+    gap: 2px;
+    color: var(--color-contour);
+  }
+  .round h2 .stage {
+    color: var(--color-sheet);
+    font-size: 16px;
+    font-weight: 650;
+  }
+  .score {
+    font-family: var(--label);
+    font-size: 52px;
+    font-stretch: var(--label-wdth);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--color-glacier);
+  }
+  .score small {
+    color: var(--color-sheet);
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .dots {
+    display: flex;
+    gap: 6px;
+  }
+  .dots i {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--color-contour);
+    border-radius: 50%;
+  }
+  .dots i.ok {
+    border-color: var(--color-glacier);
+    background: var(--color-glacier);
+  }
+  ol {
+    display: grid;
+    gap: 6px;
+    margin-top: 4px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-contour-dim);
+    counter-reset: i;
+  }
+  li {
+    position: relative;
+    padding-left: 24px;
+    font-size: 16px;
+    line-height: 1.3;
+  }
+  li::before {
+    counter-increment: i;
+    content: counter(i);
+    position: absolute;
+    left: 0;
+    top: 1px;
+    color: var(--color-contour);
+    font-family: var(--label);
+    font-size: 12px;
+    font-stretch: var(--label-wdth);
+  }
+  .key {
+    position: absolute;
+    left: 34px;
+    right: 34px;
+    bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    color: var(--color-sheet);
+  }
+  .key span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .key i {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--color-contour);
+    border-radius: 50%;
+  }
+  .key i.ok {
+    border-color: var(--color-glacier);
+    background: var(--color-glacier);
+  }
+</style>
+<div class="chart">
+  <h1 class="title">Task success: “submit a complete application”</h1>
+  <p class="label">n = {{delivery.perRound}} per round · moderated · German and French · read as directional</p>
+  <div class="rounds">
+    <section class="round" data-round="r1">
+      <h2><span class="label-caps">Round {{"1"}}</span><span class="stage">Paper and clickable</span></h2>
+      <p class="score"></p>
+      <div class="dots"></div>
+      <ol><li>Owner data asked for too early</li><li>Document names unclear</li><li>Errors far from their fields</li></ol>
+    </section>
+    <section class="round" data-round="r2">
+      <h2><span class="label-caps">Round {{"2"}}</span><span class="stage">Coded prototype</span></h2>
+      <p class="score"></p>
+      <div class="dots"></div>
+      <ol><li>Share link hard to find</li><li>Accepted formats unclear</li><li>French labels too long on phones</li></ol>
+    </section>
+    <section class="round" data-round="r3">
+      <h2><span class="label-caps">Round {{"3"}}</span><span class="stage">Release candidate</span></h2>
+      <p class="score"></p>
+      <div class="dots"></div>
+      <ol><li>Reminder e-mail tone too formal</li><li>Focus jumps after an upload</li><li>No print view of the summary</li></ol>
+    </section>
+  </div>
+  <div class="key label">
+    <span><i class="ok"></i>completed the task</span>
+    <span><i></i>did not complete</span>
+    <span>Small samples: a trend, not a rate</span>
+  </div>
+</div>
+<script>
+  const t = window.DATA.delivery;
+  document.querySelectorAll("[data-round]").forEach((round) => {
+    const ok = t.success[round.dataset.round];
+    round.querySelector(".score").innerHTML = `${ok}/${t.perRound} <small>completed</small>`;
+    round.querySelector(".dots").innerHTML = Array.from({ length: t.perRound }, (_, j) => `<i class="${j < ok ? "ok" : ""}"></i>`).join("");
+  });
+</script>

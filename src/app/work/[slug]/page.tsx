@@ -1,37 +1,77 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { CSSProperties } from "react";
 import { CardArtwork } from "@/components/card/CardArtwork";
 import { SummitCard } from "@/components/card/SummitCard";
+import { EvidenceBadge } from "@/components/case-study/Evidence";
+import { FictionBanner } from "@/components/case-study/FictionBanner";
+import { Figure } from "@/components/case-study/Figure";
+import { WaypointTrail } from "@/components/case-study/WaypointTrail";
+import { Waypoints } from "@/components/case-study/Waypoints";
 import { SummitSummary } from "@/components/SummitSummary";
 import { MagneticLink } from "@/components/transition/MagneticLink";
 import { MorphTarget } from "@/components/transition/MorphTarget";
 import { RememberCard } from "@/components/transition/RememberCard";
 import { KineticText } from "@/components/type/KineticText";
-import { morphName } from "@/lib/morph";
-import { caseStudyLabels as L, cardHref, caseStudyCards, cards } from "@/content/cards";
+import { caseStudies } from "@/content/case-studies";
+import { caseStudyLabels as L, cardBySlug, cardHref, cards } from "@/content/cards";
 import { site } from "@/content/site";
+import { readingMinutes, type CaseStudy as Study, type Evidence } from "@/lib/case-study";
+import { morphName } from "@/lib/morph";
 import styles from "./page.module.css";
 
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return caseStudyCards.map((card) => ({ slug: card.slug }));
+  return Object.keys(caseStudies)
+    .filter((slug) => cardBySlug(slug))
+    .map((slug) => ({ slug }));
 }
 
-const caseStudyBySlug = (slug: string) => caseStudyCards.find((c) => c.slug === slug);
+const entry = (slug: string) => {
+  const study = caseStudies[slug];
+  const card = cardBySlug(slug);
+  return study && card ? { study, card } : null;
+};
 
 export async function generateMetadata({ params }: PageProps<"/work/[slug]">): Promise<Metadata> {
-  const card = caseStudyBySlug((await params).slug);
-  return card ? { title: `${card.name} — Expedition log · ${site.hero.name}`, description: card.caseStudy.lede } : {};
+  const found = entry((await params).slug);
+  if (!found) return {};
+  const { card, study } = found;
+  const name = study.example ? `${card.name} (${L.example.toLowerCase()})` : card.name;
+  return {
+    title: `${name} — Expedition log · ${site.hero.name}`,
+    description: study.metaDescription ?? study.lede,
+    // Fictional examples are never indexed, in any build.
+    robots: study.example ? { index: false, follow: false } : undefined,
+  };
 }
 
+/** Every evidence kind the page uses, in a fixed order, for the legend. */
+function evidenceKinds(study: Study): Evidence[] {
+  const used = new Set<Evidence>();
+  if (Array.isArray(study.summary.outcome)) study.summary.outcome.forEach((o) => used.add(o.evidence));
+  for (const w of study.waypoints) {
+    for (const b of w.blocks) {
+      if (b.kind === "metrics") b.items.forEach((m) => used.add(m.evidence));
+      if (b.kind === "outcomes") b.rows.forEach((r) => used.add(r.evidence));
+    }
+  }
+  return (["measured", "estimated", "qualitative"] as const).filter((k) => used.has(k));
+}
+
+const reveal = (i: number) => ({ "--reveal-i": i }) as CSSProperties;
+
 export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
-  const card = caseStudyBySlug((await params).slug);
-  if (!card) notFound();
-  const { summary } = card.caseStudy;
+  const found = entry((await params).slug);
+  if (!found) notFound();
+  const { card, study } = found;
+  const { summary } = study;
   // The next card in the deck, wherever it leads (another case study or the About page).
   const next = cards[(cards.indexOf(card) + 1) % cards.length];
+  const hero = study.hero ? study.figures?.[study.hero] : undefined;
+  const outcome = summary.outcome;
 
   return (
     <main id="main" className={`${styles.main} container`} data-rarity={card.rarity} data-card={card.slug}>
@@ -44,9 +84,11 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
         </Link>
       </nav>
 
+      {study.banner && <FictionBanner label={study.banner.label} text={study.banner.text} />}
+
       <header className={styles.header}>
         <MorphTarget name={morphName("art", card.slug)} variant="art" className={styles.artSlot}>
-          <CardArtwork artwork={card.artwork} alt={card.artworkAlt} className={styles.art} />
+          <CardArtwork artwork={card.artwork} alt={card.artworkAlt} className={styles.art} stamp={card.example ? L.example : undefined} />
         </MorphTarget>
         <div className={styles.titleBlock} data-quiet-zone>
           <p className={`${styles.coords} hud-label map-halo keep-halo reveal`} data-vt-exit>
@@ -55,11 +97,14 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
           <MorphTarget name={morphName("title", card.slug)} variant="title">
             <KineticText as="h1" text={card.name} className={`${styles.title} display`} delay={420} proximity settleOnArrival />
           </MorphTarget>
-          <p className={`${styles.type} map-halo reveal`} style={{ "--reveal-i": 1 } as React.CSSProperties} data-vt-exit>
-            {card.type}
+          <p className={`${styles.type} map-halo reveal`} style={reveal(1)} data-vt-exit>
+            {study.typeLine ?? card.type}
           </p>
-          <p className="body-copy reveal" style={{ "--reveal-i": 2 } as React.CSSProperties} data-vt-exit>
-            {card.caseStudy.lede}
+          <p className="body-copy reveal" style={reveal(2)} data-vt-exit>
+            {study.lede}
+          </p>
+          <p className={`${styles.meta} hud-label map-halo reveal`} style={reveal(3)} data-vt-exit>
+            {L.readingTime(readingMinutes(study))} · <a href="#summary-heading">{L.skim}</a>
           </p>
         </div>
       </header>
@@ -68,8 +113,9 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
         id="summary-heading"
         heading={L.summaryHeading}
         className="reveal"
-        style={{ "--reveal-i": 3 } as React.CSSProperties}
+        style={reveal(4)}
         exitOnReturn
+        note={summary.note}
         rows={[
           { label: L.problem, value: summary.problem, wide: true },
           { label: L.role, value: summary.role, wide: true },
@@ -77,34 +123,52 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
           { label: L.duration, value: summary.duration, stat: true },
           { label: L.reach, value: summary.reach, stat: true },
           { label: L.keyDecision, value: summary.keyDecision, wide: true },
-          { label: L.outcome, value: summary.outcome, wide: true },
+          Array.isArray(outcome)
+            ? {
+                label: L.outcome,
+                wide: true,
+                content: (
+                  <ul>
+                    {outcome.map((o) => (
+                      <li key={o.text}>
+                        <span>{o.text}</span>
+                        <EvidenceBadge kind={o.evidence} />
+                      </li>
+                    ))}
+                  </ul>
+                ),
+              }
+            : { label: L.outcome, value: outcome, wide: true },
         ]}
       />
 
-      <div className={styles.body} data-vt-exit>
-      <nav className={styles.jump} aria-labelledby="jump-heading">
-        <h2 id="jump-heading" className="hud-label">
-          {L.jumpTo}
-        </h2>
-        <ul>
-          {card.caseStudy.sections.map((s) => (
-            <li key={s.id}>
-              <a href={`#${s.id}`} className={styles.chip}>
-                {s.title}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      {hero && (
+        <div className={styles.hero} data-vt-exit>
+          <Figure spec={hero} images={study.images ?? {}} assets={study.assets ?? {}} />
+        </div>
+      )}
 
-      <div className={styles.sections}>
-        {card.caseStudy.sections.map((s) => (
-          <section key={s.id} id={s.id} className={`${styles.section} legend`} aria-labelledby={`${s.id}-heading`}>
-            <KineticText as="h2" id={`${s.id}-heading`} text={s.title} className={`${styles.sectionHeading} display`} play="inview" />
-            <p className="body-copy">{s.body}</p>
-          </section>
-        ))}
-      </div>
+      <div className={styles.body} data-vt-exit>
+        <nav className={styles.jump} aria-labelledby="jump-heading">
+          <h2 id="jump-heading" className="hud-label">
+            {L.jumpTo}
+          </h2>
+          <ul>
+            {study.waypoints.map((w) => (
+              <li key={w.id}>
+                <a href={`#${w.id}`} className={styles.chip}>
+                  {w.nav}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <div className={styles.trail}>
+          <WaypointTrail label={L.onThisPage} items={study.waypoints.map((w) => ({ id: w.id, nav: w.nav }))} />
+        </div>
+        <div className={styles.waypoints}>
+          <Waypoints study={study} evidence={evidenceKinds(study)} />
+        </div>
       </div>
 
       <aside className={styles.inspect} aria-label={card.name} data-vt-exit>
@@ -121,6 +185,9 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
             </span>
           </span>
         </MagneticLink>
+        <Link href="/" scroll={false} className={`${styles.backToAll} hud-label`}>
+          <span aria-hidden="true">←</span> {L.backToAll}
+        </Link>
       </nav>
     </main>
   );

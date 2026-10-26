@@ -1,0 +1,134 @@
+<!-- Fig. 6: decision matrix. Three options against four criteria; ratings as filled and empty
+     dots (never colour alone); the chosen option outlined. -->
+<style>
+  .wrap {
+    position: absolute;
+    inset: 0;
+    padding: 26px 32px 18px;
+  }
+  .wrap > p {
+    margin-top: 4px;
+  }
+  table {
+    width: 100%;
+    margin-top: 30px;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+  }
+  th {
+    padding: 0 10px 2px;
+    color: var(--color-sheet-ink);
+    font-family: var(--label);
+    font-size: 12.5px;
+    font-stretch: var(--label-wdth);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-align: center;
+    text-transform: uppercase;
+    vertical-align: bottom;
+  }
+  th:first-child {
+    text-align: left;
+  }
+  td {
+    height: 104px;
+    padding: 0 10px;
+    border-top: 1.5px solid rgb(90 92 82 / 0.45);
+    border-bottom: 1.5px solid rgb(90 92 82 / 0.45);
+    background: #ffffff;
+    text-align: center;
+  }
+  td:first-child {
+    width: 230px;
+    border-left: 1.5px solid rgb(90 92 82 / 0.45);
+    border-radius: 10px 0 0 10px;
+    text-align: left;
+  }
+  td:last-child {
+    border-right: 1.5px solid rgb(90 92 82 / 0.45);
+    border-radius: 0 10px 10px 0;
+  }
+  tr.chosen td {
+    border-color: var(--color-moss-ink);
+    border-width: 3px;
+    background: #f4f8f4;
+  }
+  .opt b {
+    display: block;
+    font-size: 17px;
+    font-weight: 750;
+  }
+  .opt span {
+    color: var(--color-sheet-ink);
+    font-size: 13.5px;
+  }
+  .opt .tag {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--color-moss-ink);
+    color: var(--color-sheet);
+    font-family: var(--label);
+    font-size: 11.5px;
+    font-stretch: var(--label-wdth);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    vertical-align: 2px;
+  }
+  .dots {
+    display: inline-flex;
+    gap: 6px;
+  }
+  .dots i {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--color-ground);
+    border-radius: 50%;
+  }
+  .dots i.on {
+    background: var(--color-ground);
+  }
+  .foot {
+    position: absolute;
+    left: 32px;
+    right: 32px;
+    bottom: 18px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .key {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+</style>
+<div class="wrap">
+  <h1 class="title">Decision matrix: who applies?</h1>
+  <p class="label muted">More filled dots are better; for effort, more dots mean less effort</p>
+  <table>
+    <thead>
+      <tr><th>Option</th><th>Legal fit</th><th>Data quality</th><th>Effort for owner</th><th>Build effort</th></tr>
+    </thead>
+    <tbody>
+      <tr data-option="a"><td class="opt"><b>A</b><span>Homeowner-only digital form</span></td><td></td><td></td><td></td><td></td></tr>
+      <tr data-option="b"><td class="opt"><b>B</b><span>Installer applies alone</span></td><td></td><td></td><td></td><td></td></tr>
+      <tr data-option="c" class="chosen"><td class="opt"><b>C <span class="tag">Chosen</span></b><span>Delegated: installer prepares, owner confirms</span></td><td></td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+  <div class="foot label muted">
+    <span>Ratings from decision workshop, n = {{workshops.participants}}.</span>
+    <span class="key"><span class="dots"><i class="on"></i><i></i></span>filled = better</span>
+  </div>
+</div>
+<script>
+  const m = window.DATA.matrix;
+  for (const row of document.querySelectorAll("[data-option]")) {
+    const cells = [...row.querySelectorAll("td")].slice(1);
+    ["legal", "data", "owner", "build"].forEach((k, i) => {
+      const n = m[row.dataset.option][k];
+      cells[i].innerHTML = `<span class="dots">${Array.from({ length: m.scale }, (_, j) => `<i class="${j < n ? "on" : ""}"></i>`).join("")}</span>`;
+    });
+  }
+</script>

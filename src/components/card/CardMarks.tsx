@@ -26,7 +26,7 @@ const shapes: Record<string, string> = {
 };
 
 /** Rarity is always shape + letter + colour, never colour alone. */
-export function RarityPip({ rarity, label }: { rarity: Rarity; label: string }) {
+export function RarityPip({ rarity, label, note }: { rarity: Rarity; label: string; note?: string }) {
   const token = rarityTokens[rarity];
   return (
     <span className={styles.pip} data-rarity={rarity}>
@@ -34,7 +34,7 @@ export function RarityPip({ rarity, label }: { rarity: Rarity; label: string }) 
         <path d={shapes[token.shape]} />
       </svg>
       <span aria-hidden="true">{rarity}</span>
-      <span className="visually-hidden">{`${label} (${token.label})`}</span>
+      <span className="visually-hidden">{`${label} (${token.label})${note ? `: ${note}` : ""}`}</span>
     </span>
   );
 }
@@ -42,6 +42,8 @@ export function RarityPip({ rarity, label }: { rarity: Rarity; label: string }) 
 const symbols: Record<SetSymbolKind, string> = {
   peak: "M1 13 L6.5 4 L9 8 L11.5 2 L17 13 Z",
   grid: "M2 2h6v6H2Z M10 2h6v6h-6Z M2 10h6v6H2Z M10 10h6v6h-6Z",
+  // A flask: the Lab set holds the fictional examples.
+  lab: "M6.5 1.5h5v1.6h-.9v4.1l4.6 7.4c.6 1-.1 2-1.2 2H4c-1.1 0-1.8-1-1.2-2l4.6-7.4V3.1h-.9Z",
 };
 
 export function SetSymbol({ symbol, label }: { symbol: SetSymbolKind; label: string }) {

@@ -358,6 +358,29 @@
   fill: currentColor;
 }
 
+/* A rubber stamp across the map (flagged examples: "Fictional example"). Alpenglow on a ground
+   plate, so it stays readable over any contour. Sized to the nearest container: the card, or the
+   case-study header's artwork slot. */
+.stamp {
+  position: absolute;
+  top: 9%;
+  left: 5%;
+  z-index: 1;
+  padding: 0.35em 0.7em;
+  border: 2px double var(--color-alpenglow);
+  border-radius: 0.4em;
+  background: rgb(27 28 24 / 0.86);
+  color: var(--color-alpenglow);
+  font-family: var(--font-martian), ui-monospace, monospace;
+  font-size: max(10px, 2.6cqi);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  transform: rotate(-5deg);
+  pointer-events: none;
+}
+
 /* --------------------------------------------------------- foil & glare */
 
 /* Contour foil (rarity R and M): fine concentric rings centred on the pointer,

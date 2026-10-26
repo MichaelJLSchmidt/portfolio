@@ -1,0 +1,151 @@
+<!-- Fig. 9, before: page 3 of the PDF form ("Angaben zur Anlage"), dense, with fictional field
+     codes. Same frame as tp-after, so the comparison lines up. -->
+<style>
+  .frame {
+    position: absolute;
+    inset: 22px 30px 18px;
+  }
+  .browser {
+    height: 100%;
+  }
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    height: 34px;
+    background: #3a3d40;
+    color: #e5e7e9;
+    font-family: var(--hm-font);
+    font-size: 12.5px;
+  }
+  .viewer {
+    position: absolute;
+    inset: 34px 0 0;
+    display: grid;
+    justify-items: center;
+    padding-top: 16px;
+    background: #6b6f73;
+  }
+  .page {
+    width: 640px;
+    height: 640px;
+    padding: 26px 34px;
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgb(0 0 0 / 0.35);
+    color: #111;
+    font-family: "Archivo", sans-serif;
+    font-stretch: 80%;
+    font-size: 9.5px;
+    line-height: 1.25;
+  }
+  .page h1 {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #111;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .page h2 {
+    margin: 10px 0 6px;
+    padding: 3px 6px;
+    background: #e3e3e3;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid #555;
+    border-left: 1px solid #555;
+  }
+  .f {
+    height: 54px;
+    padding: 3px 5px;
+    border-right: 1px solid #555;
+    border-bottom: 1px solid #555;
+  }
+  .f b {
+    font-weight: 700;
+  }
+  .f .boxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 10px;
+    margin-top: 3px;
+  }
+  .f .boxes span::before {
+    content: "";
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-right: 3px;
+    border: 1px solid #111;
+    vertical-align: -1px;
+  }
+  .small {
+    margin-top: 8px;
+    color: #333;
+    font-size: 7.5px;
+    line-height: 1.3;
+  }
+  .sign {
+    display: flex;
+    gap: 30px;
+    margin-top: 10px;
+  }
+  .sign div {
+    flex: 1;
+    padding-top: 14px;
+    border-bottom: 1px solid #111;
+    font-size: 8px;
+  }
+</style>
+<div class="frame">
+  <div class="browser">
+    <div class="browser-bar">
+      <span class="browser-dots"><i></i><i></i><i></i></span>
+      <span class="browser-url">foerderung.hochmatt.example/formular-heizungsersatz.pdf</span>
+    </div>
+    <div class="browser-view" lang="de">
+      <div class="toolbar"><span>formular-heizungsersatz.pdf</span><span>Seite {{pdf.comparedPage}} / {{pdf.pages}}</span><span>Zoom: ganze Seite</span></div>
+      <div class="viewer">
+        <div class="page">
+          <h1><span>Gesuch um einen Förderbeitrag · Heizungsersatz</span><span>Kanton Hochmatt · Energieamt</span></h1>
+          <h2>Angaben zur Anlage</h2>
+          <div class="fields"></div>
+          <p class="small"></p>
+          <div class="sign"><div>Ort, Datum</div><div>Unterschrift Gesuchsteller/in</div><div>Stempel Installationsfirma</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  // The PDF's fields: fictional codes and labels, as dense as the original page.
+  const page = window.DATA.pdf.comparedPage;
+  const fields = [
+    ["Art der neuen Anlage", ["WP Luft/Wasser", "WP Sole/Wasser", "WP Wasser/Wasser", "Fernwärme", "Holz"]],
+    ["Hersteller / Fabrikat"],
+    ["Typenbezeichnung gem. Offerte"],
+    ["Heizleistung kW (A2/W35 bzw. B0/W35)"],
+    ["Jahresarbeitszahl (JAZ) gem. Berechnung¹"],
+    ["Energiebezugsfläche EBF in m² nach SIA²"],
+    ["GEAK-Nr. / Ausweis-Nr. (sofern vorhanden)"],
+    ["Baujahr Gebäude / Jahr Sanierung"],
+    ["Bisheriger Energieträger", ["Heizöl", "Erdgas", "Elektro", "andere"]],
+    ["Verbrauch der letzten Heizperioden (L, m³, kWh)³"],
+    ["Installationsfirma (Name, Adresse)"],
+    ["UID der Firma"],
+    ["Datum der Offerte / Offert-Nr."],
+    ["Offertbetrag inkl. MWST (CHF)"],
+  ];
+  if (fields.length !== window.DATA.pdf.comparedFields) throw new Error("field count does not match the data");
+  document.querySelector(".fields").innerHTML = fields
+    .map(([label, boxes], i) => `<div class="f"><b>${page}.${String(i + 1).padStart(2, "0")}</b> ${label}${boxes ? `<div class="boxes">${boxes.map((b) => `<span>${b}</span>`).join("")}</div>` : ""}</div>`)
+    .join("");
+  document.querySelector(".small").innerHTML =
+    "¹ Nachweis gemäss Anhang B der Verordnung; bei fehlender Berechnung ist das Gesuch unvollständig. ² Massgebend ist die Fläche nach Norm; Flächen unbeheizter Räume sind nicht anzurechnen. ³ Belege sind beizulegen. Unvollständige Gesuche werden zurückgewiesen. Die Angaben sind von der Gesuchstellerin bzw. vom Gesuchsteller persönlich zu bestätigen.";
+</script>

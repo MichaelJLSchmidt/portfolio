@@ -1,0 +1,167 @@
+<!-- Fig. 10: the final upload step (German). The page puts its numbered markers on the spots
+     marked data-hotspot (their positions go into the manifest); none are drawn into the image.
+     The FR toggle is visible in the header. -->
+<style>
+  .frame {
+    position: absolute;
+    inset: 24px 36px 20px;
+  }
+  .browser {
+    height: 100%;
+  }
+  .hm-main {
+    padding: 18px 60px 0;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 22px;
+  }
+  .hm-card {
+    padding: 22px 26px;
+  }
+  .docrow {
+    position: relative;
+    display: grid;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--hm-line-soft);
+  }
+  .docrow h2 {
+    font-size: 17px;
+  }
+  .hs {
+    position: absolute;
+    width: 0;
+    height: 0;
+  }
+  .ex {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--hm-blue-dark);
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .thumb {
+    width: 38px;
+    height: 48px;
+    padding: 6px 5px;
+    border: 1px solid var(--hm-line);
+    border-radius: 3px;
+    background: #fff;
+  }
+  .thumb i {
+    display: block;
+    height: 3px;
+    margin-bottom: 4px;
+    background: #cfd5db;
+  }
+  .side {
+    display: grid;
+    align-content: start;
+    gap: 14px;
+  }
+  .share {
+    position: relative;
+    padding: 18px;
+    border: 1px solid var(--hm-line-soft);
+    border-radius: 10px;
+    background: var(--hm-surface);
+  }
+  .share .hm-btn {
+    width: 100%;
+    margin-top: 12px;
+  }
+  .linkbox {
+    margin-top: 10px;
+    padding: 8px 10px;
+    border: 1px dashed var(--hm-line);
+    border-radius: 6px;
+    color: var(--hm-ink-2);
+    font-size: 13px;
+  }
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid var(--hm-line-soft);
+  }
+  .docrow {
+    padding-top: 20px;
+    margin-top: 20px;
+  }
+  .hm-lang .on {
+    background: var(--hm-blue);
+  }
+</style>
+<div class="frame">
+  <div class="browser">
+    <div class="browser-bar">
+      <span class="browser-dots"><i></i><i></i><i></i></span>
+      <span class="browser-url">foerderung.hochmatt.example/antrag/dokumente</span>
+    </div>
+    <div class="browser-view hm" lang="de">
+      <header class="hm-header">
+        <div class="hm-brand"><span class="hm-mark"></span><div><b>Kanton Hochmatt</b><span>Energieamt · Förderprogramm Heizungsersatz</span></div></div>
+        <div class="hm-lang"><span class="on">DE</span><span>FR</span></div>
+      </header>
+      <div class="hm-main">
+        <ol class="hm-steps">
+          <li class="hm-step done"><i></i>Anspruch</li>
+          <li class="hm-step done"><i></i>Angaben</li>
+          <li class="hm-step done"><i></i>Anlage</li>
+          <li class="hm-step on"><i></i>Dokumente</li>
+          <li class="hm-step"><i></i>Bestätigen</li>
+        </ol>
+        <div class="layout">
+          <div class="hm-card">
+            <h1>Dokumente hochladen</h1>
+            <p class="hm-lead" style="margin-top: 4px">Diese drei Dokumente brauchen wir. Mehr nicht.</p>
+            <div class="docrow">
+              <span class="hs" data-hotspot="1" style="left: -14px; top: 26px"></span>
+              <h2>Offerte des Installateurs</h2>
+              <p class="hm-hint">Die unterschriebene Offerte mit Preis und Heizungstyp.</p>
+              <div style="display: flex; gap: 14px; align-items: center">
+                <span class="hm-file" style="flex: 1"><span class="hm-doc">PDF</span><span style="flex: 1"><b>Offerte_Waermepumpe.pdf</b></span><span class="hm-tick"></span></span>
+                <span class="ex"><span class="thumb"><i></i><i style="width: 70%"></i><i></i><i style="width: 50%"></i></span>Beispiel ansehen</span>
+              </div>
+            </div>
+            <div class="docrow">
+              <h2>Nachweis, dass Ihnen das Haus gehört</h2>
+              <div class="hm-upload" style="position: relative">
+                <span class="hm-doc">+</span>
+                <span><b>Datei auswählen</b> oder hierher ziehen<br /><span class="hm-small">Ein Foto oder PDF, bis {{ui.maxUploadMb}} MB</span></span>
+                <span class="hs" data-hotspot="2" style="left: 330px; top: 38px"></span>
+              </div>
+            </div>
+            <div class="docrow">
+              <h2>Nummer des Gebäudeenergieausweises</h2>
+              <div class="hm-input error" style="position: relative">GEAK-<span class="hs" data-hotspot="3" style="right: -16px; top: 20px"></span></div>
+              <p class="hm-error">Die Nummer ist unvollständig. Sie steht oben rechts auf dem Ausweis.</p>
+              <div style="position: relative">
+                <span class="hm-disclosure">Warum fragen wir das?</span>
+                <span class="hs" data-hotspot="4" style="left: 204px; top: 10px"></span>
+              </div>
+            </div>
+            <div class="actions"><span class="hm-btn secondary">Zurück</span><span class="hm-btn">Weiter zur Bestätigung</span></div>
+          </div>
+          <div class="side">
+            <div class="share">
+              <span class="hs" data-hotspot="5" style="left: -14px; top: 30px"></span>
+              <h2>Für die Eigentümerin oder den Eigentümer</h2>
+              <p class="hm-hint" style="margin-top: 6px">Speichern Sie den Entwurf. Die Eigentümerin oder der Eigentümer prüft ihn mit AGOV und bestätigt.</p>
+              <span class="hm-btn">Entwurf speichern und teilen</span>
+              <p class="linkbox">Link wird per E-Mail gesendet</p>
+            </div>
+            <div class="hm-alert success"><span class="hm-tick"></span><span>Zwischengespeichert</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
