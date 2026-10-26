@@ -70,7 +70,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--color-glacier);
+  background: var(--color-contour);
   animation: cue 2.4s var(--ease-summit) infinite;
 }
 

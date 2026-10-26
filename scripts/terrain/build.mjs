@@ -30,6 +30,7 @@ const { cards: cardContent } = await import("../../src/content/cards.ts");
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const cfg = JSON.parse(readFileSync(join(root, "src/content/terrain.config.json"), "utf8"));
+const field = JSON.parse(readFileSync(join(root, "src/config/contour-field.json"), "utf8"));
 const outDir = join(root, "public/terrain");
 const cacheDir = join(root, "scripts/terrain/.cache");
 const args = new Set(process.argv.slice(2));
@@ -48,7 +49,7 @@ function write(rel, data) {
   return { bytes, gzipBytes: gz };
 }
 
-function svg({ w, h, regular, index, lakes, lakeOpacity }) {
+function svg({ w, h, regular, index, lakes, lakeOpacity, lineOpacity = 0.55, indexOpacity = 0.9 }) {
   const line = (d, width, opacity) =>
     d
       ? `<path d="${d}" fill="none" stroke="${color.contour}" stroke-opacity="${opacity}" stroke-width="${width}" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`
@@ -56,13 +57,13 @@ function svg({ w, h, regular, index, lakes, lakeOpacity }) {
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice">` +
     (lakes ? `<path d="${lakes}" fill="${color.ice}" fill-opacity="${lakeOpacity}"/>` : "") +
-    line(regular, 1, 0.55) +
-    line(index, 1.5, 0.9) +
+    line(regular, 1, lineOpacity) +
+    line(index, 1.5, indexOpacity) +
     `</svg>\n`
   );
 }
 
-function contourSvg(values, w, h, { thresholds, indexOf, lakesMask, tolerance, lakeOpacity }) {
+function contourSvg(values, w, h, { thresholds, indexOf, lakesMask, tolerance, lakeOpacity, lineOpacity, indexOpacity }) {
   let regular = "", index = "";
   for (const band of isobands(values, w, h, thresholds)) {
     const d = toPathData(ringsToLines(band, w, h), { tolerance });
@@ -70,7 +71,7 @@ function contourSvg(values, w, h, { thresholds, indexOf, lakesMask, tolerance, l
     else regular += d;
   }
   const lakes = lakesMask ? maskToPathData(lakesMask, w, h, { tolerance: tolerance * 1.5 }) : "";
-  return svg({ w, h, regular, index, lakes, lakeOpacity });
+  return svg({ w, h, regular, index, lakes, lakeOpacity, lineOpacity, indexOpacity });
 }
 
 /**
@@ -269,7 +270,8 @@ for (const lake of cfg.lakes) {
 
 // ---------------------------------------------------------------------------
 // 4. Contour posters (first paint, reduced motion, no-WebGL fallback), one per interval
-//    the field uses at page scale: 100 m for large screens, 200 m for phones and laptops.
+//    the field uses at page scale: 100 m for the largest screens, 200 m for phones, laptops
+//    and desktops up to ~1920 px.
 // ---------------------------------------------------------------------------
 const { intervalM, indexEvery } = cfg.contours;
 const posters = [];
@@ -277,7 +279,6 @@ const posters = [];
   const w = cfg.poster.gridWidth;
   const h = Math.round(w / aspect);
   const values = gaussianBlur(resampleArea(grid.data, grid.width, grid.height, w, h), w, h, cfg.poster.blurSigma);
-  const mask = resampleArea(lakeMask, grid.width, grid.height, w, h);
   for (const interval of cfg.poster.intervalsM) {
     const thresholds = range(Math.ceil(minElev / interval) * interval, maxElev, interval);
     const file = interval === intervalM ? "contours.svg" : `contours-${interval}.svg`;
@@ -286,9 +287,10 @@ const posters = [];
       contourSvg(values, w, h, {
         thresholds,
         indexOf: (v) => v % (interval * indexEvery) === 0,
-        lakesMask: mask,
         tolerance: cfg.poster.simplifyTolerance,
-        lakeOpacity: 0.08,
+        // The field's monochrome map: neutral lines only (no lakes), at its desktop strengths.
+        lineOpacity: field.desktop.lineOpacity,
+        indexOpacity: field.desktop.indexOpacity,
       }),
     );
     posters.push({ file: `/terrain/${file}`, intervalM: interval, width: w, height: h, ...size });

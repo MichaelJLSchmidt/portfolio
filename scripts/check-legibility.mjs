@@ -11,7 +11,8 @@
 // both backgrounds; measured are the background pixels under and next to them:
 //   - contrast: the text colour against the brightest of those pixels;
 //   - line strength: how far that pixel rises above the element's clean background, as a share
-//     of a fully lit (glacier) contour line.
+//     of a glacier-bright line (a fixed yardstick: lit lines used to turn glacier; they now stay
+//     neutral and fainter).
 // Pass: contrast ≥ 7:1 for light text, line strength ≤ 15% over the field; dark text on the sheet
 // colour (no field lines behind it) ≥ 4.5:1, the WCAG AA level its inks are chosen for.
 //

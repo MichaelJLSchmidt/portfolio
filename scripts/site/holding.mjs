@@ -59,11 +59,12 @@ function css({ fonts, poster }) {
     `*,*::before,*::after{box-sizing:border-box}`,
     `html{-webkit-text-size-adjust:100%;text-size-adjust:100%;background:var(--color-ground)}`,
     `body{margin:0;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;color:var(--color-sheet);font:400 var(--type-body-size)/var(--type-body-lh) "Archivo Text",system-ui,sans-serif}`,
-    // Terrain: the poster dimmed, the headlamp (the same poster, brighter, masked to a circle
+    // Terrain: the poster dimmed so its regular lines show at 23% (it draws them at the
+    // field's desktop strength), the headlamp (the same poster, brighter, masked to a circle
     // around the pointer) and a vignette that keeps the text legible.
     `.terrain{position:fixed;inset:0;z-index:-1;overflow:hidden}`,
     `.poster,.lamp{position:absolute;inset:0;background:var(--poster) center/cover no-repeat}`,
-    `.poster{opacity:.42}`,
+    `.poster{opacity:${Math.min(1, 0.23 / fieldConfig.desktop.lineOpacity).toFixed(2)}}`,
     `.lamp{--x:50vw;--y:50vh;opacity:0;filter:brightness(1.9);-webkit-mask:radial-gradient(circle min(36vmax,340px) at var(--x) var(--y),#000 0,rgb(0 0 0/.55) 45%,transparent 100%);mask:radial-gradient(circle min(36vmax,340px) at var(--x) var(--y),#000 0,rgb(0 0 0/.55) 45%,transparent 100%);transition:opacity var(--dur-long) var(--ease-trail)}`,
     `.lamp.on{opacity:1;transition-duration:var(--dur-short)}`,
     `.terrain::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgb(27 28 24/.9),transparent 18%,transparent 82%,rgb(27 28 24/.9)),radial-gradient(130% 85% at 0% 55%,rgb(27 28 24/.88) 0,rgb(27 28 24/.6) 45%,rgb(27 28 24/0) 80%)}`,

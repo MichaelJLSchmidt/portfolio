@@ -5,10 +5,10 @@ topographic contour map. Projects are presented as original "Summit Cards".
 
 This repository currently holds the foundation plus three technical spikes for the signature effects:
 
-1. **Persistent contour field**: one WebGL canvas behind all routes. It draws real swisstopo contours with:
-   - a pointer "headlamp" and loupe;
-   - a rising alpenglow pulse;
-   - parallax and click pings;
+1. **Persistent contour field**: one WebGL canvas behind all routes. It draws real swisstopo contours as a calm,
+   monochrome map (neutral lines only, also on case-study terrains and during morphs) with:
+   - a small pointer "headlamp" that only raises the strength of the lines under it;
+   - gentle parallax (pointer and scroll) and a slow drift;
    - an intro sweep and terrain morphs;
    - quiet zones, like contours interrupted under the labels of a printed map: headings (`data-quiet-zone`)
      fade the lines behind them to 25% with a 48 px feather; running text (`.body-copy`, or `.knockout` for
@@ -26,10 +26,10 @@ Production currently serves a static under-construction page; the full site live
 a password gate (see "Hosting on Netlify").
 
 Headlines use kinetic variable-font type (`src/components/type/KineticText.tsx`): letters condense from wide and
-light into the display cut with a glacier shine, and the same shine follows a fine pointer like the field's
-headlamp (colour only; the axes never move on hover). The About page ("Basecamp",
-`/about/`) opens from the leader card and tells the career as the real climb from Interlaken to the Jungfrau; its
-plan and the content still needed are in `docs/about-plan.md`.
+light into the display cut with a glacier shine, and a gentler shine (at most half way to glacier, no glow)
+follows a fine pointer like the field's headlamp (colour only; the axes never move on hover). The About page
+("Basecamp", `/about/`) opens from the leader card and tells the career as the real climb from Interlaken to the
+Jungfrau; its plan and the content still needed are in `docs/about-plan.md`.
 
 ## Stack
 
@@ -122,18 +122,24 @@ are fictional on purpose: `check:content` skips them and names them once, and li
 
 ### Tuning the contour field
 
-In `npm run dev`, a collapsed "Tuning (dev only)" leva panel controls every uniform: contour spacing, index
-lines, line widths and opacities, colour tokens, headlamp, glow, drift, intro and morph durations.
+In `npm run dev`, a collapsed "Tuning (dev only)" leva panel controls every uniform: contour spacing and line
+strengths per device, index lines, line widths, neutral line colours, headlamp (radius, gain, fade), the intro
+edge's gain, drift, intro and morph durations.
+
+The field is a monochrome map: lines take neutral colours only, and the headlamp and the intro sweep's leading
+edge only raise the strength of the same line colour (`headlampGain`, `sweepGain`). Line strength and spacing are
+set per device profile, `desktop` (a fine pointer and a long edge of at least 900 px) and `mobile` (everything
+else); both currently draw regular lines at 30% and index lines at 50%.
 
 The contour interval adapts to the screen. It is the smallest of 50, 100, 200, 250 and 500 m that keeps lines on
 steep terrain (the map's 95th-percentile gradient) at least `minSpacingPx` CSS pixels apart at the map's
-on-screen scale; every 5th line is an index line. With the committed `minSpacingPx: 3` phones in portrait get
-200 m (250 m on 320 px wide screens), 1280–1440 px laptops 200 m, tablets and 1920+ px desktops 100 m. The panel
-shows the interval in use; resizes glide to the new interval, and morphs blend between the two terrains'
-intervals. "Save to config"
-writes the values to `src/config/contour-field.json`, which is committed. Colours and durations are stored as
-token names. Leva is never part of the production build. Add `?field=force` to a URL to skip the low-spec check,
-which is useful in headless browsers.
+on-screen scale; every 5th line is an index line. With the committed `minSpacingPx` (3.25 on desktop, 3 on
+mobile) phones in portrait get 200 m (250 m on 320 px wide screens), laptops and desktops up to ~1920 px 200 m,
+tablets in portrait and 2560 px desktops 100 m. The panel shows the interval in use; resizes glide to the new
+interval, and morphs blend between the two terrains' intervals. "Save to config" writes the values to
+`src/config/contour-field.json`, which is committed. Colours and durations are stored as token names. Leva is
+never part of the production build. Add `?field=force` to a URL to skip the low-spec check, which is useful in
+headless browsers.
 
 ## Case studies
 
@@ -245,7 +251,7 @@ Netlify builds this repository with continuous deployment. The domains are confi
   Archivo and Martian Mono, and the contour poster (200 m on small screens, 100 m where the site's field draws
   100 m too). The only script runs the live Bern clock and the pointer/touch headlamp; both stay off with
   reduced motion, and the page is complete without JavaScript. Every other path redirects (302) to `/`, and
-  `REDIRECT_DOMAINS` redirect (301) to `PRIMARY_DOMAIN`. A phone visit transfers about 81 KB
+  `REDIRECT_DOMAINS` redirect (301) to `PRIMARY_DOMAIN`. A phone visit transfers about 80 KB
   (`npm run report:size` after a construction build).
 - **basecamp**: the full static export, plus the gate as a Netlify Edge Function. The build writes it to
   `.netlify/v1/edge-functions/` (Netlify's Frameworks API), so it exists only in these deploys; production has
@@ -349,13 +355,15 @@ password stops working, so everyone has to enter the new one.
     The 2048 map is only used in preview builds with `?hm=2048` (also `?hm=1024` / `?hm=1536`), to compare
     them side by side.
   - `terrain.json`: elevation range, LV95/WGS84 bbox, pixel scale, encoding, lakes and card metadata.
-  - `contours.svg` (100 m, 67 KB gzipped) and `contours-200.svg` (200 m, 35 KB gzipped): the first-paint,
-    reduced-motion and no-WebGL posters, every 5th line an index line, lakes as filled shapes found as flat
-    surfaces in the DTM. A media query computed from the same spacing rule as the field picks one, so the
-    poster and the field show the same interval (100 m on large screens and tablets, 200 m on phones and
-    laptops).
-  - `cards/*.svg`: the leader card's Interlaken → Jungfrau crop (200 m lines) and seeded-noise terrains for
-    project cards (seed = collector number, ~20 lines, every 4th an index line).
+  - `contours.svg` (100 m, 67 KB gzipped) and `contours-200.svg` (200 m, 34 KB gzipped): the first-paint,
+    reduced-motion and no-WebGL posters. Like the field they are a monochrome map: neutral lines only, at the
+    field's desktop line strengths from `src/config/contour-field.json`, every 5th line an index line. A media
+    query computed from the same spacing rule as the field (per device profile) picks one, so the poster and the
+    field show the same interval (100 m on the largest screens and tablets in portrait, 200 m on phones, laptops
+    and desktops up to ~1920 px).
+  - `cards/*.svg`: the leader card's Interlaken → Jungfrau crop (200 m lines, lakes as filled shapes found as
+    flat surfaces in the DTM) and seeded-noise terrains for project cards (seed = collector number, ~20 lines,
+    every 4th an index line).
   - `morph/*.webp`: per-card heightmaps the field morphs to on case-study pages and Basecamp.
   - `examples.json`: the card terrains of flagged examples (cards marked `"example": true` in the config), kept
     out of `terrain.json` so live bundles don't carry them.
@@ -436,4 +444,4 @@ production builds compile them out:
   the key insight, metric tiles) is measured too; dark text on the sheet colour needs 4.5:1 (no lines run
   behind it). It also fails when a page is wider than the phone (it would pan sideways).
 - The HUD clock always shows the live Bern time, Calm map and reduced motion included (a changing time is
-  content, not motion); only its pulsing dot stops.
+  content, not motion); the dot next to it is a static neutral marker.

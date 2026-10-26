@@ -142,8 +142,6 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     pan: [0, 0] as [number, number],
     panPointer: [0, 0] as [number, number],
     panScroll: 0,
-    ripplePos: [0, 0] as [number, number],
-    rippleStart: -1,
     lastFrame: 0,
     region: null as TerrainSource | null,
     /** Terrain currently loaded into texture slot B, and its id. */
@@ -168,16 +166,16 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     const apply = (cfg: FieldConfig) => {
       const u = material.uniforms;
       u.uIndexEvery.value = cfg.indexEvery;
-      u.uLineOpacity.value = cfg.lineOpacity;
-      u.uIndexOpacity.value = cfg.indexOpacity;
+      // Line strengths per device profile, read live so the tuning panel applies at once.
+      const lines = cfg[profile.kind];
+      u.uLineOpacity.value = lines.lineOpacity;
+      u.uIndexOpacity.value = lines.indexOpacity;
       u.uGround.value.set(...hexToRgb(color.ground));
       u.uLineColor.value.set(...hexToRgb(colorOf(cfg.lineColor)));
       u.uIndexColor.value.set(...hexToRgb(colorOf(cfg.indexColor)));
-      u.uGlowColor.value.set(...hexToRgb(colorOf(cfg.glowColor)));
-      u.uGlow.value = profile.glow ? cfg.glowStrength / 0.3 : 0;
+      u.uHeadlampGain.value = cfg.headlampGain;
+      u.uSweepGain.value = cfg.sweepGain;
       u.uDrift.value = cfg.driftCyclesPerSecond;
-      u.uPulse.value.set(cfg.pulsePeriodS, cfg.pulseStrength);
-      u.uPulseColor.value.set(...hexToRgb(colorOf(cfg.pulseColor)));
       writeQuietKinds();
       updateIntervals(true);
       wake();
@@ -191,7 +189,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
         apply(cfg);
       }
     });
-    // updateIntervals reads refs only.
+    // updateIntervals reads refs and the session's fixed profile only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [material, profile]);
 
@@ -202,9 +200,6 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     u.uLineWidth.value = cfg.lineWidthPx * dpr;
     u.uIndexWidth.value = cfg.indexLineWidthPx * dpr;
     u.uHeadlampRadius.value = cfg.headlampRadiusPx * dpr;
-    u.uGlowWidth.value = cfg.glowWidthPx * dpr;
-    u.uLens.value.set(cfg.lensRadiusPx * dpr, cfg.lensStrength);
-    u.uRippleSpeed.value = cfg.rippleSpeedPxS * dpr;
     writeQuietKinds();
     u.uResolution.value.set(size.width * dpr, size.height * dpr);
     const a = anim.current;
@@ -240,8 +235,9 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     const a = anim.current;
     const cfg = fieldStore.get().config;
     const view = sizeRef.current;
+    const spacing = { minSpacingPx: cfg[profile.kind].minSpacingPx, steepPercentile: cfg.steepPercentile };
     if (a.region) {
-      const next = contourInterval(a.region, view, cfg.zoomBase, cfg);
+      const next = contourInterval(a.region, view, cfg.zoomBase, spacing);
       if (next !== a.intervalA) {
         const now = performance.now();
         const shown = Math.exp(tweenValue(a.intervalTween, now, Math.log(a.intervalA)));
@@ -252,7 +248,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
         wake();
       }
     }
-    if (a.target) a.intervalB = contourInterval(a.target, view, cfg.zoomBase + cfg.morphZoom, cfg);
+    if (a.target) a.intervalB = contourInterval(a.target, view, cfg.zoomBase + cfg.morphZoom, spacing);
     const intervalM = a.slotId ? a.intervalB : a.intervalA;
     if (fieldStore.get().intervalM !== intervalM) fieldStore.set({ intervalM });
   }
@@ -452,13 +448,6 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     const onTouchEnd = (e: TouchEvent) => {
       if (e.touches.length === 0) fade(0, cfg().headlampFadeMs);
     };
-    // Click or tap: an altimeter ping rings out from the point of contact.
-    const onPointerDown = (e: PointerEvent) => {
-      a.ripplePos = [e.clientX * dpr, (window.innerHeight - e.clientY) * dpr];
-      a.rippleStart = performance.now();
-      a.lastInput = a.rippleStart;
-      wake();
-    };
     // Scrolling descends the map slowly (slower than the content).
     const onScroll = () => {
       const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
@@ -473,11 +462,9 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     window.addEventListener("touchmove", onTouch, opts);
     window.addEventListener("touchend", onTouchEnd, opts);
     window.addEventListener("touchcancel", onTouchEnd, opts);
-    window.addEventListener("pointerdown", onPointerDown, opts);
     window.addEventListener("scroll", onScroll, opts);
     onScroll();
     return () => {
-      window.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointerMove);
       document.removeEventListener("pointerout", onPointerOut);
@@ -511,7 +498,6 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       !tweenDone(a.lamp, now) ||
       !tweenDone(a.intervalTween, now) ||
       now - a.lastInput < 120 ||
-      (a.rippleStart >= 0 && now - a.rippleStart < 1800) ||
       Math.abs(a.pan[0] - a.panPointer[0]) + Math.abs(a.pan[1] - a.panPointer[1] - a.panScroll) > 2e-4 ||
       (a.ready && !a.readyNotified)
     );
@@ -659,8 +645,6 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     a.pan[1] += (a.panPointer[1] + a.panScroll - a.pan[1]) * ease;
     const t = (now - a.t0) / 1000;
     u.uPan.value.set(a.pan[0] + Math.sin(t * 0.05) * 0.008, a.pan[1] + Math.cos(t * 0.037) * 0.008);
-    const age = a.rippleStart >= 0 ? (now - a.rippleStart) / 1000 : -1;
-    u.uRipple.value.set(a.ripplePos[0], a.ripplePos[1], age >= 0 && age < 1.8 ? age : -1);
     u.uHeadlampStrength.value = a.lampValue;
     u.uHeadlampPos.value.set(a.lampPos[0], a.lampPos[1]);
     u.uTime.value = (now - a.t0) / 1000;

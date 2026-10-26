@@ -1,9 +1,9 @@
 "use client";
 
-import { Leva, button, monitor, useControls } from "leva";
+import { Leva, button, folder, monitor, useControls } from "leva";
 import { useEffect } from "react";
-import { color, duration } from "@/styles/tokens";
-import { fieldConfig, type FieldConfig } from "./field-settings";
+import { duration } from "@/styles/tokens";
+import { LINE_COLORS, fieldConfig, type FieldConfig } from "./field-settings";
 import { fieldStore } from "./field-store";
 
 /**
@@ -12,36 +12,35 @@ import { fieldStore } from "./field-store";
  * Never shipped: imported behind a NODE_ENV === "development" check.
  */
 const TUNING_URL = "http://localhost:4319/contour-field";
-const colorTokens = Object.keys(color);
 const durationTokens = Object.keys(duration);
 
 export default function DevTuning() {
   const values = useControls("Contour field", {
     // Contour interval: the smallest of 50/100/200/250/500 m that keeps lines on the
-    // steepest terrain (gradient percentile) at least minSpacingPx apart on this screen.
-    minSpacingPx: { value: fieldConfig.minSpacingPx, min: 1, max: 12, step: 0.25 },
+    // steepest terrain (gradient percentile) at least minSpacingPx (per device) apart.
     steepPercentile: { value: fieldConfig.steepPercentile, options: [50, 90, 95, 99] },
     indexEvery: { value: fieldConfig.indexEvery, min: 2, max: 10, step: 1 },
     lineWidthPx: { value: fieldConfig.lineWidthPx, min: 0.5, max: 4, step: 0.25 },
     indexLineWidthPx: { value: fieldConfig.indexLineWidthPx, min: 0.5, max: 5, step: 0.25 },
-    lineOpacity: { value: fieldConfig.lineOpacity, min: 0, max: 1, step: 0.05 },
-    indexOpacity: { value: fieldConfig.indexOpacity, min: 0, max: 1, step: 0.05 },
-    lineColor: { value: fieldConfig.lineColor, options: colorTokens },
-    indexColor: { value: fieldConfig.indexColor, options: colorTokens },
-    glowColor: { value: fieldConfig.glowColor, options: colorTokens },
+    // Per device profile (fieldConfig.desktop / fieldConfig.mobile): spacing and line strengths.
+    "Per device": folder({
+      desktopMinSpacingPx: { value: fieldConfig.desktop.minSpacingPx, min: 1, max: 12, step: 0.25, label: "desktop spacing" },
+      mobileMinSpacingPx: { value: fieldConfig.mobile.minSpacingPx, min: 1, max: 12, step: 0.25, label: "mobile spacing" },
+      desktopLineOpacity: { value: fieldConfig.desktop.lineOpacity, min: 0, max: 1, step: 0.01, label: "desktop lines" },
+      desktopIndexOpacity: { value: fieldConfig.desktop.indexOpacity, min: 0, max: 1, step: 0.01, label: "desktop index" },
+      mobileLineOpacity: { value: fieldConfig.mobile.lineOpacity, min: 0, max: 1, step: 0.01, label: "mobile lines" },
+      mobileIndexOpacity: { value: fieldConfig.mobile.indexOpacity, min: 0, max: 1, step: 0.01, label: "mobile index" },
+    }),
+    lineColor: { value: fieldConfig.lineColor, options: LINE_COLORS },
+    indexColor: { value: fieldConfig.indexColor, options: LINE_COLORS },
     headlampRadiusPx: { value: fieldConfig.headlampRadiusPx, min: 40, max: 400, step: 10 },
     headlampFadeMs: { value: fieldConfig.headlampFadeMs, min: 0, max: 2000, step: 20 },
-    glowWidthPx: { value: fieldConfig.glowWidthPx, min: 1, max: 20, step: 0.5 },
-    glowStrength: { value: fieldConfig.glowStrength, min: 0, max: 1, step: 0.05 },
-    lensRadiusPx: { value: fieldConfig.lensRadiusPx, min: 0, max: 500, step: 10 },
-    lensStrength: { value: fieldConfig.lensStrength, min: 0, max: 0.8, step: 0.02 },
+    // Lit lines keep their colour and reach this many times their strength.
+    headlampGain: { value: fieldConfig.headlampGain, min: 1, max: 3, step: 0.05 },
+    sweepGain: { value: fieldConfig.sweepGain, min: 1, max: 3, step: 0.05 },
     parallax: { value: fieldConfig.parallax, min: 0, max: 0.08, step: 0.002 },
     scrollParallax: { value: fieldConfig.scrollParallax, min: 0, max: 0.2, step: 0.005 },
     driftCyclesPerSecond: { value: fieldConfig.driftCyclesPerSecond, min: 0, max: 0.2, step: 0.005 },
-    pulsePeriodS: { value: fieldConfig.pulsePeriodS, min: 2, max: 30, step: 0.5 },
-    pulseStrength: { value: fieldConfig.pulseStrength, min: 0, max: 1, step: 0.05 },
-    pulseColor: { value: fieldConfig.pulseColor, options: colorTokens },
-    rippleSpeedPxS: { value: fieldConfig.rippleSpeedPxS, min: 200, max: 2000, step: 50 },
     // Quiet zones behind text: line strength inside, feather outside (CSS px).
     quietStrength: { value: fieldConfig.quietStrength, min: 0, max: 1, step: 0.05 },
     quietFeatherPx: { value: fieldConfig.quietFeatherPx, min: 0, max: 160, step: 4 },
@@ -75,7 +74,22 @@ export default function DevTuning() {
   });
 
   useEffect(() => {
-    const next: FieldConfig = { ...fieldStore.get().config, ...values };
+    const {
+      desktopMinSpacingPx,
+      mobileMinSpacingPx,
+      desktopLineOpacity,
+      desktopIndexOpacity,
+      mobileLineOpacity,
+      mobileIndexOpacity,
+      ...rest
+    } = values;
+    const cfg = fieldStore.get().config;
+    const next: FieldConfig = {
+      ...cfg,
+      ...rest,
+      desktop: { ...cfg.desktop, minSpacingPx: desktopMinSpacingPx, lineOpacity: desktopLineOpacity, indexOpacity: desktopIndexOpacity },
+      mobile: { ...cfg.mobile, minSpacingPx: mobileMinSpacingPx, lineOpacity: mobileLineOpacity, indexOpacity: mobileIndexOpacity },
+    };
     fieldStore.set({ config: next });
   }, [values]);
 
