@@ -50,11 +50,10 @@
   left: 50%;
   translate: -50% 0;
   white-space: nowrap;
-  /* Hover shine: --p (0..1, pointer proximity) mixes the rest colour towards glacier and adds
-     a very soft glacier glow. Paint only: no axis or layout change. Any mix of the rest colours
-     used (sheet, glacier) and glacier stays well above AA on ground. */
-  color: color-mix(in oklab, var(--kt-color), var(--color-glacier) calc(var(--p, 0) * 100%));
-  text-shadow: 0 0 0.3em color-mix(in oklab, var(--color-glacier) calc(var(--p, 0) * 28%), transparent);
+  /* Hover shine: --p (0..1, pointer proximity) mixes the rest colour at most half way towards
+     glacier. Colour only: no glow, no axis or layout change. Any mix of the rest colours used
+     (sheet, glacier) and glacier stays well above AA on ground. */
+  color: color-mix(in oklab, var(--kt-color), var(--color-glacier) calc(var(--p, 0) * 50%));
 }
 
 @keyframes kt-condense {
@@ -111,5 +110,4 @@
   font-weight: var(--kt-rest-wght);
   opacity: 1;
   color: var(--kt-color);
-  text-shadow: none;
 }

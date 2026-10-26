@@ -9,7 +9,8 @@
 // both backgrounds; measured are the background pixels under and next to them:
 //   - contrast: the text colour against the brightest of those pixels;
 //   - line strength: how far that pixel rises above the element's clean background, as a share
-//     of a fully lit (glacier) contour line.
+//     of a glacier-bright line (a fixed yardstick: lit lines used to turn glacier; they now stay
+//     neutral and fainter).
 // Pass: contrast ≥ 7:1 everywhere, line strength ≤ 15% over the field.
 //
 //   npm run check:legibility           (a build in out/, Playwright as for npm run test:e2e)

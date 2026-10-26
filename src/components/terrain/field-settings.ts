@@ -8,20 +8,29 @@ import { color, duration, type ColorToken, type DurationToken } from "@/styles/t
 export type FieldConfig = typeof config;
 
 export type DeviceProfile = {
+  /** "desktop": a fine pointer and a long edge of at least 900 px; "mobile": anything else. */
+  kind: "desktop" | "mobile";
   dprMax: number;
   heightmap: "desktop" | "mobile";
   /** Below this many device pixels on the long edge, the 1024 heightmap is enough. */
   heightmapMinDevicePx?: number;
   /** Preview builds and dev only: a heightmap picked by width with ?hm=1024|1536|2048, for comparisons. */
   heightmapWidth?: number;
-  glow: boolean;
-  /** Frame rate for the ambient animation (pulse, drift) while the visitor is around. */
+  /** Lines on steep terrain stay at least this many CSS px apart (see contourInterval). */
+  minSpacingPx: number;
+  /** Strength of regular and index lines (0..1). The field reads them live from the config. */
+  lineOpacity: number;
+  indexOpacity: number;
+  /** Frame rate for the ambient animation (the slow drift) while the visitor is around. */
   ambientFps: number;
   /** Frame rate once nobody has touched the page for `dormantAfterMs`. */
   idleFps: number;
 };
 
 export const fieldConfig: FieldConfig = config;
+
+/** The field is a monochrome map: its lines take neutral colours only. */
+export const LINE_COLORS = ["contour", "contourDim", "sheet"] as const satisfies readonly ColorToken[];
 
 /** Contour intervals the field may use (metres). The index line is every `indexEvery`-th. */
 export const CONTOUR_INTERVALS = [50, 100, 200, 250, 500] as const;
@@ -30,13 +39,13 @@ export const CONTOUR_INTERVALS = [50, 100, 200, 250, 500] as const;
  * Contour interval for a heightmap as it is drawn on screen. On-screen scale is texels per
  * CSS pixel (cover-fitted, zoomed); steepness is the map's gradient at the configured
  * percentile (metres per texel). The interval is the smallest clean value that keeps lines
- * on that slope at least `minSpacingPx` apart.
+ * on that slope at least `minSpacingPx` apart (set per device profile).
  */
 export function contourInterval(
   map: { width: number; height: number; gradientM: Record<string, number> },
   view: { width: number; height: number },
   zoom: number,
-  cfg: Pick<FieldConfig, "minSpacingPx" | "steepPercentile">,
+  cfg: { minSpacingPx: number; steepPercentile: number },
 ): number {
   const va = view.width / view.height;
   const ta = map.width / map.height;
@@ -60,21 +69,27 @@ export function hexToRgb(hex: string): [number, number, number] {
  * Media query for the poster drawn at `intervalM`: true where `contourInterval` would pick
  * that interval (or finer) for the region map, so first paint and the fallback match the
  * field. Landscape screens see the full map width (desktop map), portrait screens its
- * full height (phone map). Pure arithmetic, so it renders the same on the server.
+ * full height (phone map). Each device profile has its own minimum spacing; the query
+ * tells them apart by pointer (fine: desktop, coarse: mobile), since the size half of the
+ * split (a long edge under 900 px is mobile) is implied by the 100 m poster's thresholds.
+ * Pure arithmetic, so it renders the same on the server.
  */
 export function posterMedia(
   maps: { width: number; height: number; gradientM: Record<string, number>; use: string }[],
   intervalM: number,
-  cfg: Pick<FieldConfig, "minSpacingPx" | "steepPercentile" | "zoomBase">,
+  cfg: Pick<FieldConfig, "desktop" | "mobile" | "steepPercentile" | "zoomBase">,
 ): string {
   const slope = (m: (typeof maps)[number]) => m.gradientM[`p${cfg.steepPercentile}`] ?? m.gradientM.p95;
   const desktop = maps.find((m) => m.use === "desktop") ?? maps[0];
   const mobile = maps.find((m) => m.use === "mobile") ?? maps[0];
-  const k = cfg.minSpacingPx / (cfg.zoomBase * intervalM);
-  const minWidth = Math.ceil(k * slope(desktop) * desktop.width);
-  const minHeight = Math.ceil(k * slope(mobile) * mobile.height);
   const ratio = `${desktop.width}/${desktop.height}`;
-  return `(min-aspect-ratio: ${ratio}) and (min-width: ${minWidth}px), (max-aspect-ratio: ${ratio}) and (min-height: ${minHeight}px)`;
+  const queries = (minSpacingPx: number, pointer: "fine" | "coarse") => {
+    const k = minSpacingPx / (cfg.zoomBase * intervalM);
+    const minWidth = Math.ceil(k * slope(desktop) * desktop.width);
+    const minHeight = Math.ceil(k * slope(mobile) * mobile.height);
+    return `(min-aspect-ratio: ${ratio}) and (min-width: ${minWidth}px) and (pointer: ${pointer}), (max-aspect-ratio: ${ratio}) and (min-height: ${minHeight}px) and (pointer: ${pointer})`;
+  };
+  return `${queries(cfg.desktop.minSpacingPx, "fine")}, ${queries(cfg.mobile.minSpacingPx, "coarse")}`;
 }
 
 export function isMobileProfile(): boolean {
@@ -85,7 +100,8 @@ export function isMobileProfile(): boolean {
 }
 
 export function deviceProfile(cfg: FieldConfig = fieldConfig): DeviceProfile {
-  const profile = { ...((isMobileProfile() ? cfg.mobile : cfg.desktop) as DeviceProfile) };
+  const kind = isMobileProfile() ? "mobile" : "desktop";
+  const profile: DeviceProfile = { kind, ...(cfg[kind] as Omit<DeviceProfile, "kind">) };
   // The 1536 heightmap is ~1.9× the bytes of the 1024 one: only fetch it when the screen can show it.
   const devicePx = Math.max(window.innerWidth, window.innerHeight) * Math.min(window.devicePixelRatio || 1, profile.dprMax);
   if (profile.heightmap === "desktop" && devicePx < (profile.heightmapMinDevicePx ?? 0)) profile.heightmap = "mobile";

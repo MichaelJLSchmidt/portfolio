@@ -1,6 +1,6 @@
 {
   "attribution": "Terrain data © swisstopo",
-  "generatedAt": "2026-10-22",
+  "generatedAt": "2026-10-25",
   "source": {
     "product": "swissALTIRegio",
     "collection": "ch.swisstopo.swissaltiregio",
@@ -407,8 +407,8 @@
     "intervalM": 100,
     "width": 900,
     "height": 619,
-    "bytes": 187189,
-    "gzipBytes": 68880
+    "bytes": 185325,
+    "gzipBytes": 68215
   },
   "posters": [
     {
@@ -416,16 +416,16 @@
       "intervalM": 100,
       "width": 900,
       "height": 619,
-      "bytes": 187189,
-      "gzipBytes": 68880
+      "bytes": 185325,
+      "gzipBytes": 68215
     },
     {
       "file": "/terrain/contours-200.svg",
       "intervalM": 200,
       "width": 900,
       "height": 619,
-      "bytes": 94458,
-      "gzipBytes": 35314
+      "bytes": 92594,
+      "gzipBytes": 34574
     }
   ],
   "lakes": [
