@@ -13,9 +13,11 @@ export function WaypointTrail({ label, items }: { label: string; items: { id: st
 
   useEffect(() => {
     const sections = items.map((i) => document.getElementById(i.id)).filter((s): s is HTMLElement => !!s);
-    let frame = 0;
+    let loop: typeof import("@/lib/frameloop") | null = null;
+    let queued = false;
+    let disposed = false;
     const update = () => {
-      frame = 0;
+      queued = false;
       // The current waypoint is the last one whose top has passed a line 30% down the screen;
       // at the very bottom of the page, the last one.
       const line = window.innerHeight * 0.3;
@@ -27,15 +29,24 @@ export function WaypointTrail({ label, items }: { label: string; items: { id: st
       if (bottom && index >= 0) index = sections.length - 1;
       setActive(index);
     };
+    // Measured in the read phase of Motion's frame loop (the page's single animation loop),
+    // at most once per frame.
     const schedule = () => {
-      if (!frame) frame = requestAnimationFrame(update);
+      if (queued || !loop) return;
+      queued = true;
+      loop.frame.read(update);
     };
-    update();
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule);
-    window.addEventListener("hashchange", schedule);
+    import("@/lib/frameloop").then((m) => {
+      if (disposed) return;
+      loop = m;
+      update();
+      window.addEventListener("scroll", schedule, { passive: true });
+      window.addEventListener("resize", schedule);
+      window.addEventListener("hashchange", schedule);
+    });
     return () => {
-      cancelAnimationFrame(frame);
+      disposed = true;
+      if (loop) loop.cancelFrame(update);
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
       window.removeEventListener("hashchange", schedule);
