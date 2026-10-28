@@ -1,0 +1,191 @@
+/* The motion lab (/lab/): three frames side by side, and the specimen sheet inside each. */
+.main {
+  display: grid;
+  gap: 24px;
+  padding-top: 96px;
+  padding-bottom: 64px;
+}
+
+.header {
+  display: grid;
+  gap: 12px;
+  max-width: 72ch;
+}
+
+.title {
+  font-size: clamp(2.75rem, 7vw, 6rem);
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+  gap: 16px;
+}
+
+/* Headings and frames share two rows across the columns, so the frames line up. */
+.column {
+  display: grid;
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+  row-gap: 8px;
+  min-width: 0;
+}
+
+.columnHead {
+  display: grid;
+  gap: 4px;
+  color: var(--color-glacier);
+}
+
+.columnNote {
+  color: var(--color-contour);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.frame {
+  width: 100%;
+  height: min(78svh, 900px);
+  border: 1px solid var(--color-contour-dim);
+  border-radius: 8px;
+  background: var(--color-ground);
+}
+
+/* ------------------------------------------------------------ specimen */
+
+.specimen {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 48px;
+  padding: 24px 20px 96px;
+}
+
+.scroller {
+  overflow-x: auto;
+}
+
+.readout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 0;
+  color: var(--color-glacier);
+}
+
+.readout div {
+  display: flex;
+  gap: 8px;
+}
+
+.readout dt {
+  color: var(--color-contour);
+}
+
+.readout dd {
+  margin: 0;
+}
+
+.section {
+  display: grid;
+  gap: 16px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-contour-dim);
+}
+
+.section > h2 {
+  color: var(--color-glacier);
+}
+
+.note {
+  max-width: 52ch;
+  color: var(--color-contour);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 24px;
+}
+
+.big {
+  font-size: clamp(2.5rem, 9vw, 4.5rem);
+}
+
+.mid {
+  font-size: clamp(1.75rem, 5vw, 2.75rem);
+}
+
+.glintHost {
+  position: relative;
+  margin: 0;
+}
+
+.sheetRow {
+  padding: 16px 20px;
+  border-radius: 8px;
+  background: var(--color-sheet);
+}
+
+.sheetText {
+  color: var(--color-ground);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.states {
+  border-collapse: collapse;
+}
+
+.states th,
+.states td {
+  padding: 8px 12px 8px 0;
+  text-align: start;
+  vertical-align: middle;
+}
+
+.states th {
+  color: var(--color-contour);
+  font-weight: 400;
+}
+
+.displayLinks {
+  display: grid;
+  gap: 24px;
+}
+
+.nextLink {
+  display: inline-grid;
+  gap: 8px;
+  justify-self: start;
+  color: var(--color-glacier);
+}
+
+.nextName {
+  --l-rest-color: var(--color-sheet);
+  font-size: clamp(2.25rem, 7vw, 3.5rem);
+}
+
+.spacer {
+  display: grid;
+  align-items: end;
+  min-height: 110svh;
+  color: var(--color-contour);
+}
+
+.block {
+  margin: 0;
+}
+
+.cardBlock {
+  padding: 20px;
+  border: 1px solid var(--color-contour-dim);
+  border-radius: 12px;
+  background: var(--color-ground-raised);
+}
+
+.sheet {
+  max-width: 40ch;
+}
