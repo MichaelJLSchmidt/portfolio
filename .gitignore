@@ -16,6 +16,8 @@ next-env.d.ts
 /public/terrain/**/*.png
 # lossless PNG masters of the artefact images (npm run images regenerates them)
 /artefacts/.masters/
+# review videos (npm run record:motion)
+/motion-recordings/
 
 # env files (MOTION_TOKEN and friends never get committed)
 .env

@@ -84,6 +84,7 @@ Never commit the token. `.env*` files are git-ignored; `.env.example` lists the 
 | `npm run report:size`    | Initial JS/CSS/fonts per route, lazy chunks, terrain assets (gzip)               |
 | `npm run report:transfer` | One page's transfer on a phone and a desktop, first view and full scroll         |
 | `npm run report:motion`  | Layout time in a page's first 3.5 s on a phone with the CPU slowed 4×; Lighthouse with `--lighthouse` |
+| `npm run record:motion`  | Review videos of the motion lab and a round trip in each motion mode (`motion-recordings/`) |
 | `npm run images`         | Renders and encodes the case-study artefact images (see "Case studies")           |
 | `npm run terrain`        | Regenerates `public/terrain` from swisstopo data                                  |
 | `npm run verify:terrain` | Checks that the committed heightmaps decode to the exact source heights          |
