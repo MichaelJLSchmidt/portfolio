@@ -16,6 +16,7 @@
     "verify:terrain": "node scripts/terrain/verify.mjs",
     "report:size": "node scripts/report-sizes.mjs",
     "report:transfer": "node scripts/report-transfer.mjs",
+    "report:motion": "node scripts/report-motion.mjs",
     "preview": "node scripts/serve-out.mjs",
     "check:contrast": "node scripts/check-contrast.mjs",
     "check:legibility": "node scripts/check-legibility.mjs",
