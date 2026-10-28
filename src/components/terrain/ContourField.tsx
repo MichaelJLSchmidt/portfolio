@@ -603,9 +603,9 @@ function Field({ profile, paused, calm, onReady }: FieldProps) {
     finishIntro(false);
     const now = performance.now();
     a.lamp = { from: tweenValue(a.lamp, now, a.lampValue), to: 0, start: now, dur: 0, ease: easeTrail };
-    a.panPointer = [0, 0];
+    // The map stays where it is: the pan's targets become its current position.
+    a.panPointer = [a.pan[0], a.pan[1]];
     a.panScroll = 0;
-    a.pan = [...a.panPointer];
     wake();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [calm]);
