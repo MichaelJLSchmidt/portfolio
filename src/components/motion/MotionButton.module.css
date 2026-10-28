@@ -1,0 +1,78 @@
+/* MotionButton.tsx: hover (under (hover: hover)) and keyboard focus share one switch, --on. */
+.button {
+  --on: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--color-glacier);
+  border-radius: 999px;
+  background: rgb(27 28 24 / 0.8);
+  color: var(--color-glacier);
+  font-family: var(--font-archivo), system-ui, sans-serif;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.button:focus-visible {
+  --on: 1;
+}
+
+@media (hover: hover) {
+  .button:hover {
+    --on: 1;
+  }
+}
+
+/* The motion lab shows each state side by side (data-lab-state, review pages only). */
+.button:is([data-lab-state="on"], [data-lab-state="press"]) {
+  --on: 1;
+}
+
+.button:disabled {
+  border-style: dashed;
+  border-color: var(--color-contour);
+  color: var(--color-contour);
+  cursor: default;
+}
+
+.label {
+  display: inline-grid;
+}
+
+.label > * {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+}
+
+/* The reserved box: the label at its breath axes. */
+.ghost {
+  visibility: hidden;
+  font-stretch: var(--axis-label-hover-wdth);
+  font-weight: var(--axis-label-hover-wght);
+}
+
+.run {
+  justify-self: center;
+  font-stretch: var(--axis-label-rest-wdth);
+  font-weight: var(--axis-label-rest-wght);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .button {
+    transition: transform var(--spring-press);
+  }
+
+  :root:not([data-motion="still"]) .button:is(:active, [data-lab-state="press"]):not(:disabled) {
+    transform: scale(var(--scale-press));
+  }
+
+  :root:not([data-motion="still"]) .run {
+    font-stretch: calc(var(--axis-label-rest-wdth) + (var(--axis-label-hover-wdth) - var(--axis-label-rest-wdth)) * var(--on));
+    font-weight: calc(var(--axis-label-rest-wght) + (var(--axis-label-hover-wght) - var(--axis-label-rest-wght)) * var(--on));
+    transition:
+      font-stretch var(--dur-breath) var(--ease-settle),
+      font-weight var(--dur-breath) var(--ease-settle);
+  }
+}

@@ -62,8 +62,8 @@ button {
 
 .display {
   font-family: var(--font-archivo), system-ui, sans-serif;
-  font-weight: var(--type-display-wght);
-  font-stretch: calc(var(--type-display-wdth) * 1%);
+  font-weight: var(--axis-display-rest-wght);
+  font-stretch: var(--axis-display-rest-wdth);
   line-height: var(--type-display-lh);
   text-transform: uppercase;
   letter-spacing: -0.01em;
@@ -73,7 +73,7 @@ button {
   font-family: var(--font-martian), ui-monospace, monospace;
   font-size: var(--type-hud-size);
   letter-spacing: var(--type-hud-tracking);
-  font-stretch: calc(var(--type-hud-wdth) * 1%);
+  font-stretch: var(--axis-mono-rest-wdth);
   text-transform: uppercase;
   line-height: 1.4;
 }
@@ -94,7 +94,7 @@ button {
   position: absolute;
   left: 1rem;
   top: 1rem;
-  z-index: 100;
+  z-index: var(--layer-skip-link);
   padding: 0.5rem 0.875rem;
   background: var(--color-sheet);
   color: var(--color-ground);
@@ -133,22 +133,14 @@ i,
   padding-inline: var(--gutter);
 }
 
-/* Staggered entrance for supporting text (pure CSS; no-op with reduced motion). */
-@keyframes reveal-in {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
-  }
-}
-
-:root[data-motion="full"] .reveal {
-  animation: reveal-in var(--dur-long) var(--ease-trail) backwards;
-  animation-delay: calc(var(--reveal-base, 260ms) + var(--reveal-i, 0) * 90ms);
+/* The motion lab's frames (preview only) show the primitives without the site's chrome. */
+:root:has([data-lab-frame]) [data-chrome] {
+  display: none !important;
 }
 
 .page {
   position: relative;
-  z-index: 1;
+  z-index: var(--layer-page);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -241,8 +233,8 @@ i,
    - exit:   the old page dissolves in --dur-medium (360 ms), a plus-lighter crossfade;
    - travel: the card artwork and title fly to the header in --dur-scenic (900 ms) with a
              strong decelerate, the longest move on screen;
-   - enter:  the new page's text reveals over --dur-long (560 ms) in a stagger once the
-             artwork is mid-flight (--reveal-base), so entering takes longer than leaving;
+   - enter:  the new page arrives with the root crossfade (its first-viewport text is never
+             hidden, reveal.ts), and the title settles once the morph has landed (SettleText);
    - field:  the background terrain morphs over --dur-cinematic (1.4 s) with a camera push.
    ------------------------------------------------------------------------------------ */
 ::view-transition {
@@ -250,7 +242,7 @@ i,
 }
 
 /* Root: a true crossfade (matched linear curves, plus-lighter), so the shared map and
-   HUD keep constant brightness; the new page's text arrives later via its reveals. */
+   HUD keep constant brightness. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   mix-blend-mode: plus-lighter;
@@ -293,7 +285,7 @@ i,
 
 /* Title: the box travels, the text does not scale. Both snapshots keep their own size,
    anchored top-left in the moving box, and cross-fade early, so the text stays sharp in
-   flight; the heading then settles on its axes once it has landed (KineticText). */
+   flight; the heading then settles on its axes once it has landed (SettleText). */
 ::view-transition-old(.morph-title),
 ::view-transition-new(.morph-title) {
   inline-size: auto;
@@ -369,15 +361,15 @@ i,
   animation: vt-title-new calc(var(--dur-scenic) - 200ms) linear 100ms both;
 }
 
-/* Calm map / reduced motion: no view transition at all (src/lib/view-transition.ts). The
-   page changes directly and the incoming page fades in, opacity only (CalmRouteFade). */
+/* Still mode: no view transition at all (src/lib/view-transition.ts). The page changes directly
+   and the incoming page fades in, opacity only (RouteFade). Calm morphs like full. */
 @keyframes route-fade-in {
   from {
     opacity: 0;
   }
 }
 
-:root[data-motion="reduced"][data-route-fade] main {
+:root[data-motion="still"][data-route-fade] main {
   animation: route-fade-in var(--dur-calm) linear both;
 }
 
