@@ -8,7 +8,7 @@ import { CardArtwork } from "@/components/card/CardArtwork";
 import { SummitSummary } from "@/components/SummitSummary";
 import { MorphTarget } from "@/components/transition/MorphTarget";
 import { RememberCard } from "@/components/transition/RememberCard";
-import { KineticText } from "@/components/type/KineticText";
+import { SettleText } from "@/components/motion/SettleText";
 import { about } from "@/content/about";
 import { caseStudyLabels as L, cardBySlug } from "@/content/cards";
 import { hasValue, withValues } from "@/lib/content";
@@ -19,8 +19,6 @@ export const metadata: Metadata = {
   title: about.meta.title,
   description: about.meta.description,
 };
-
-const reveal = (i: number) => ({ "--reveal-i": i }) as CSSProperties;
 
 /** Basecamp: the About page, opened from the leader card (its art and name morph in). */
 export default function About() {
@@ -49,20 +47,20 @@ export default function About() {
           <CardArtwork artwork={leader.artwork} alt={leader.artworkAlt} className={styles.art} />
         </MorphTarget>
         <div className={styles.intro} data-quiet-zone>
-          <p className={`${styles.eyebrow} hud-label map-halo reveal`} data-vt-exit>
+          <p className={`${styles.eyebrow} hud-label map-halo`} data-reveal="" data-vt-exit>
             {about.header.eyebrow}
           </p>
           <MorphTarget name={morphName("title", leader.slug)} variant="title">
-            <KineticText as="h1" text={about.header.name} className={`${styles.name} display`} delay={420} proximity settleOnArrival />
+            <SettleText as="h1" text={about.header.name} className={`${styles.name} display`} shine glint settleOnArrival />
           </MorphTarget>
-          <p className={`${styles.role} map-halo reveal`} style={reveal(1)} data-vt-exit>
+          <p className={`${styles.role} map-halo`} data-reveal="" data-vt-exit>
             {about.header.role}
             <span className={`${styles.place} hud-label map-halo keep-halo`}>{about.header.place}</span>
           </p>
-          <p className={`${styles.statement} body-copy reveal`} style={reveal(2)} data-vt-exit>
+          <p className={`${styles.statement} body-copy`} data-reveal="" data-vt-exit>
             {about.header.statement}
           </p>
-          <Actions actions={about.actions} className="reveal" exitOnReturn />
+          <Actions actions={about.actions} reveal exitOnReturn />
         </div>
       </header>
 
@@ -70,8 +68,7 @@ export default function About() {
         id="basecamp-summary"
         heading={about.summary.heading}
         rows={about.summary.rows}
-        className="reveal"
-        style={reveal(3)}
+        reveal
         exitOnReturn
       />
 
@@ -79,7 +76,7 @@ export default function About() {
 
       <section className={styles.section} aria-labelledby="rope-team-heading" data-vt-exit>
         <div className={styles.sectionHead} data-quiet-zone>
-          <KineticText as="h2" id="rope-team-heading" text={about.principles.heading} className={`${styles.sectionHeading} display`} play="inview" />
+          <SettleText as="h2" id="rope-team-heading" text={about.principles.heading} className={`${styles.sectionHeading} display`} trigger="inview" />
           <p className="body-copy">{about.principles.intro}</p>
         </div>
         <ol className={styles.markers}>
@@ -96,7 +93,7 @@ export default function About() {
 
       <section className={styles.section} aria-labelledby="craft-heading" data-vt-exit>
         <div className={styles.sectionHead} data-quiet-zone>
-          <KineticText as="h2" id="craft-heading" text={about.craft.heading} className={`${styles.sectionHeading} display`} play="inview" />
+          <SettleText as="h2" id="craft-heading" text={about.craft.heading} className={`${styles.sectionHeading} display`} trigger="inview" />
           <p className="body-copy">{about.craft.intro}</p>
         </div>
         <ul className={styles.plaques}>
@@ -124,7 +121,7 @@ export default function About() {
       </section>
 
       <section className={`${styles.section} ${styles.offTrail}`} aria-labelledby="off-trail-heading" data-vt-exit>
-        <KineticText as="h2" id="off-trail-heading" text={about.offTrail.heading} className={`${styles.sectionHeading} display`} play="inview" quiet />
+        <SettleText as="h2" id="off-trail-heading" text={about.offTrail.heading} className={`${styles.sectionHeading} display`} trigger="inview" quiet />
         <div className={`${styles.offTrailBody} legend`}>
           <p className="body-copy">{about.offTrail.body}</p>
           <p className={`${styles.flavor} italic`}>{about.offTrail.flavor}</p>
@@ -132,7 +129,7 @@ export default function About() {
       </section>
 
       <section className={styles.contact} aria-labelledby="contact-heading" data-quiet-zone data-vt-exit>
-        <KineticText as="h2" id="contact-heading" text={about.contact.heading} className={`${styles.contactHeading} display`} play="inview" proximity />
+        <SettleText as="h2" id="contact-heading" text={about.contact.heading} className={`${styles.contactHeading} display`} trigger="inview" shine />
         <p className="body-copy">{about.contact.body}</p>
         <Actions actions={about.actions} />
       </section>

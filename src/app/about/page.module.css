@@ -1,6 +1,4 @@
 .main {
-  /* Text reveals start once the leader card's artwork is mid-flight (see globals.css). */
-  --reveal-base: 520ms;
   display: grid;
   gap: clamp(56px, 8vw, 128px);
   padding-top: 96px;
@@ -61,7 +59,7 @@
   align-items: baseline;
   gap: 4px 16px;
   font-size: 1.125rem;
-  font-stretch: 88%;
+  font-stretch: var(--type-condensed-wdth);
   font-weight: 600;
 }
 
@@ -176,7 +174,7 @@
 
 .plaqueTerm {
   font-size: clamp(2rem, 3.4vw, 2.75rem);
-  font-stretch: 72%;
+  font-stretch: var(--axis-display-compact-wdth);
 }
 
 .reminder {
@@ -201,7 +199,7 @@
   color: var(--color-contour);
   font-family: var(--font-martian), ui-monospace, monospace;
   font-size: var(--type-hud-size);
-  font-stretch: calc(var(--type-hud-wdth) * 1%);
+  font-stretch: var(--axis-mono-rest-wdth);
   letter-spacing: var(--type-hud-tracking);
   text-transform: uppercase;
 }
@@ -210,7 +208,7 @@
   margin: 0;
   font-family: var(--font-martian), ui-monospace, monospace;
   font-size: 1.375rem;
-  font-stretch: 87.5%;
+  font-stretch: var(--axis-mono-rest-wdth);
   font-weight: 700;
 }
 

@@ -3,9 +3,24 @@ import { asset } from "@/lib/asset";
 import styles from "./Actions.module.css";
 
 /** Contact actions. Until a URL exists, an action shows as a visible, inert [PLACEHOLDER]. */
-export function Actions({ actions, className, exitOnReturn = false }: { actions: Action[]; className?: string; exitOnReturn?: boolean }) {
+export function Actions({
+  actions,
+  className,
+  exitOnReturn = false,
+  reveal = false,
+}: {
+  actions: Action[];
+  className?: string;
+  exitOnReturn?: boolean;
+  /** Rises in when it scrolls into view (reveal.ts). */
+  reveal?: boolean;
+}) {
   return (
-    <ul className={className ? `${styles.actions} ${className}` : styles.actions} data-vt-exit={exitOnReturn ? "" : undefined}>
+    <ul
+      className={className ? `${styles.actions} ${className}` : styles.actions}
+      data-vt-exit={exitOnReturn ? "" : undefined}
+      data-reveal={reveal ? "" : undefined}
+    >
       {actions.map((a, i) => (
         <li key={a.kind}>
           {a.href ? (

@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import type { CSSProperties } from "react";
+// Motion primitives first: their CSS is shared by every route, and importing them after the
+// case-study blocks makes Turbopack merge those blocks' CSS into the chunk every route loads.
+import { SettleText } from "@/components/motion/SettleText";
+import { SignatureLink } from "@/components/motion/SignatureLink";
 import { CardArtwork } from "@/components/card/CardArtwork";
 import { SummitCard } from "@/components/card/SummitCard";
 import { EvidenceBadge } from "@/components/case-study/Evidence";
@@ -10,10 +13,8 @@ import { Figure } from "@/components/case-study/Figure";
 import { WaypointTrail } from "@/components/case-study/WaypointTrail";
 import { Waypoints } from "@/components/case-study/Waypoints";
 import { SummitSummary } from "@/components/SummitSummary";
-import { MagneticLink } from "@/components/transition/MagneticLink";
 import { MorphTarget } from "@/components/transition/MorphTarget";
 import { RememberCard } from "@/components/transition/RememberCard";
-import { KineticText } from "@/components/type/KineticText";
 import { caseStudies } from "@/content/case-studies";
 import { caseStudyLabels as L, cardBySlug, cardHref, cards } from "@/content/cards";
 import { site } from "@/content/site";
@@ -61,8 +62,6 @@ function evidenceKinds(study: Study): Evidence[] {
   return (["measured", "estimated", "qualitative"] as const).filter((k) => used.has(k));
 }
 
-const reveal = (i: number) => ({ "--reveal-i": i }) as CSSProperties;
-
 export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
   const found = entry((await params).slug);
   if (!found) notFound();
@@ -91,19 +90,19 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
           <CardArtwork artwork={card.artwork} alt={card.artworkAlt} className={styles.art} stamp={card.example ? L.example : undefined} />
         </MorphTarget>
         <div className={styles.titleBlock} data-quiet-zone>
-          <p className={`${styles.coords} hud-label map-halo keep-halo reveal`} data-vt-exit>
+          <p className={`${styles.coords} hud-label map-halo keep-halo`} data-reveal="" data-vt-exit>
             {card.coordinates}
           </p>
           <MorphTarget name={morphName("title", card.slug)} variant="title">
-            <KineticText as="h1" text={card.name} className={`${styles.title} display`} delay={420} proximity settleOnArrival />
+            <SettleText as="h1" text={card.name} className={`${styles.title} display`} shine glint settleOnArrival />
           </MorphTarget>
-          <p className={`${styles.type} map-halo reveal`} style={reveal(1)} data-vt-exit>
+          <p className={`${styles.type} map-halo`} data-reveal="" data-vt-exit>
             {study.typeLine ?? card.type}
           </p>
-          <p className="body-copy reveal" style={reveal(2)} data-vt-exit>
+          <p className="body-copy" data-reveal="" data-vt-exit>
             {study.lede}
           </p>
-          <p className={`${styles.meta} hud-label map-halo reveal`} style={reveal(3)} data-vt-exit>
+          <p className={`${styles.meta} hud-label map-halo`} data-reveal="" data-vt-exit>
             {L.readingTime(readingMinutes(study))} · <a href="#summary-heading">{L.skim}</a>
           </p>
         </div>
@@ -112,8 +111,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
       <SummitSummary
         id="summary-heading"
         heading={L.summaryHeading}
-        className="reveal"
-        style={reveal(4)}
+        reveal
         exitOnReturn
         note={summary.note}
         rows={[
@@ -176,15 +174,15 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
       </aside>
 
       <nav className={styles.next} aria-label={L.next} data-vt-exit>
-        <MagneticLink href={cardHref(next)} className={styles.nextLink}>
-          <span className="hud-label">{L.next}</span>
-          <span className={styles.nextRow}>
-            <KineticText text={next.name} className={`${styles.nextName} display`} play="inview" proximity />
-            <span className={`${styles.nextArrow} display`} aria-hidden="true">
-              →
-            </span>
-          </span>
-        </MagneticLink>
+        <SignatureLink
+          href={cardHref(next)}
+          variant="display"
+          className={styles.nextLink}
+          before={<span className="hud-label">{L.next}</span>}
+          label={next.name}
+          labelClassName={`${styles.nextName} display`}
+          arrow="→"
+        />
         <Link href="/" scroll={false} className={`${styles.backToAll} hud-label`}>
           <span aria-hidden="true">←</span> {L.backToAll}
         </Link>

@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { cards } from "@/content/cards";
 import { site } from "@/content/site";
 import { rememberOrigin, takeOrigin } from "@/components/transition/return-focus";
-import { KineticText } from "@/components/type/KineticText";
+import { SettleText } from "@/components/motion/SettleText";
 import { SummitCard } from "./SummitCard";
 import { TiltControl } from "./TiltControl";
 import styles from "./Deck.module.css";
@@ -35,8 +35,8 @@ export function Deck() {
     if (returned.current) return;
     // First visit this session: deal the cards in when the deck scrolls into view.
     const list = listRef.current;
-    // Read the resolved attribute: the hook still reports its SSR snapshot during this effect.
-    if (!list || document.documentElement.getAttribute("data-motion") === "reduced") return;
+    // Full motion only. Read the resolved attribute: a hook still reports its SSR snapshot here.
+    if (!list || document.documentElement.getAttribute("data-motion") !== "full") return;
     let dealt = false;
     try {
       dealt = sessionStorage.getItem(DEALT_KEY) === "1";
@@ -65,7 +65,7 @@ export function Deck() {
   return (
     <section className={styles.deck} aria-labelledby="deck-heading">
       <div className={styles.header}>
-        <KineticText as="h2" id="deck-heading" text={site.hero.deckHeading} className={`${styles.heading} display`} play="inview" proximity />
+        <SettleText as="h2" id="deck-heading" text={site.hero.deckHeading} className={`${styles.heading} display`} trigger="inview" shine />
         <p className={`${styles.intro} body-copy`}>{site.hero.deckIntro}</p>
         <TiltControl labels={{ enable: site.hud.tiltEnable, resume: site.hud.tiltResume, on: site.hud.tiltOn }} />
       </div>
