@@ -25,7 +25,6 @@ export function SummitSummary({
   className,
   style,
   exitOnReturn = false,
-  reveal = false,
 }: {
   id: string;
   heading: string;
@@ -36,8 +35,6 @@ export function SummitSummary({
   style?: CSSProperties;
   /** Leaves first when going back to the deck (return-transition.ts). */
   exitOnReturn?: boolean;
-  /** Rises in when it scrolls into view (reveal.ts); shown from first paint in the first viewport. */
-  reveal?: boolean;
 }) {
   return (
     <section
@@ -45,7 +42,6 @@ export function SummitSummary({
       style={style}
       aria-labelledby={id}
       data-vt-exit={exitOnReturn ? "" : undefined}
-      data-reveal={reveal ? "" : undefined}
       data-ink="sheet"
     >
       <h2 id={id} className={`${styles.heading} hud-label`}>

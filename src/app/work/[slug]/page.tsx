@@ -99,7 +99,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
           <p className={`${styles.type} map-halo`} data-reveal="" data-vt-exit>
             {study.typeLine ?? card.type}
           </p>
-          <p className="body-copy" data-reveal="" data-vt-exit>
+          <p className="body-copy" data-vt-exit>
             {study.lede}
           </p>
           <p className={`${styles.meta} hud-label map-halo`} data-reveal="" data-vt-exit>
@@ -111,7 +111,6 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
       <SummitSummary
         id="summary-heading"
         heading={L.summaryHeading}
-        reveal
         exitOnReturn
         note={summary.note}
         rows={[

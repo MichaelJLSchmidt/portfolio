@@ -10,6 +10,10 @@ import { duration, levels, stagger } from "@/styles/tokens";
  * Budgets (the reveal level): at most two groups animate at once, each within 600 ms (item stagger
  * for the first six); a group that would exceed that, or arrives while the page scrolls fast,
  * snaps to its end state. Still mode never hides anything. One controller for the whole site.
+ *
+ * Running text, tables and numbers never move (readability outranks motion): a rising block ("" or
+ * "card") that is or holds body copy, a surface-copy panel or a table is shown at once. A sheet
+ * only unfolds and fades, so its text never moves.
  */
 type State = "wait" | "play" | "done";
 
@@ -21,6 +25,9 @@ let lastT = 0;
 let speed = 0;
 
 const set = (el: Element, state: State) => el.setAttribute("data-reveal-state", state);
+const NEVER_MOVES = ".body-copy, .surface-copy, table";
+const rises = (el: Element) => ["", "card"].includes(el.getAttribute("data-reveal") ?? "");
+const movesText = (el: Element) => rises(el) && (el.matches(NEVER_MOVES) || !!el.querySelector(NEVER_MOVES));
 
 function keyOf(el: Element): string {
   const scope = el.closest("main") ?? document.body;
@@ -36,7 +43,7 @@ function prepare(el: Element) {
   const key = keyOf(el);
   const r = el.getBoundingClientRect();
   const shown = r.top < window.innerHeight && r.bottom > 0;
-  if (currentMode() === "still" || isSettled(key) || shown || r.bottom <= 0) {
+  if (currentMode() === "still" || isSettled(key) || shown || r.bottom <= 0 || movesText(el)) {
     if (shown) markSettled(key);
     set(el, "done");
     return;

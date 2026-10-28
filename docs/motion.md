@@ -171,7 +171,9 @@ Mark a block `data-reveal` (`""` rises 8 px and fades, `"card"` rises 12 px), or
 unfolds with clip-path, its content fading in after). One controller (`reveal.ts`, mounted in the
 root layout) runs them: anything in the first viewport is visible from first paint and never hidden
 (so it can be the LCP element); below the fold, blocks wait and reveal once per session, at most two
-groups at once within 600 ms, and snap to their end state while the page scrolls fast.
+groups at once within 600 ms, and snap to their end state while the page scrolls fast. Running text,
+tables and numbers never move: a rising block that is or holds `.body-copy`, `.surface-copy` or a
+table is shown at once, so mark labels, eyebrows, actions and panels without prose, not paragraphs.
 
 ### useMotionMode and haptic
 

@@ -17,7 +17,7 @@ export default function Home() {
         </div>
         <HeroName name={site.hero.name} className={`${styles.name} display`} />
         <div className={styles.aside}>
-          <p className="body-copy" data-reveal="">
+          <p className="body-copy">
             {site.hero.lede}
           </p>
           <a href="#deck-heading" className={`${styles.cue} hud-label map-halo keep-halo`} data-reveal="" data-quiet-zone>

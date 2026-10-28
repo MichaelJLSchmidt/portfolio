@@ -219,7 +219,7 @@ export function Specimen() {
         <SettleText as="p" id="lab-inview" text={S.settle.chars} className={`${styles.big} display`} trigger="inview" />
         <ContourRule />
         {[S.reveal.block, S.reveal.block, S.reveal.block].map((text, i) => (
-          <p key={i} className={`${styles.block} body-copy`} data-reveal="" style={{ "--i": i } as CSSProperties}>
+          <p key={i} className={`${styles.block} hud-label`} data-reveal="" style={{ "--i": i } as CSSProperties}>
             {text}
           </p>
         ))}

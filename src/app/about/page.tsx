@@ -57,7 +57,7 @@ export default function About() {
             {about.header.role}
             <span className={`${styles.place} hud-label map-halo keep-halo`}>{about.header.place}</span>
           </p>
-          <p className={`${styles.statement} body-copy`} data-reveal="" data-vt-exit>
+          <p className={`${styles.statement} body-copy`} data-vt-exit>
             {about.header.statement}
           </p>
           <Actions actions={about.actions} reveal exitOnReturn />
@@ -68,7 +68,6 @@ export default function About() {
         id="basecamp-summary"
         heading={about.summary.heading}
         rows={about.summary.rows}
-        reveal
         exitOnReturn
       />
 
