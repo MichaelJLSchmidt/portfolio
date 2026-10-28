@@ -44,8 +44,8 @@ Installing needs `MOTION_TOKEN` in the environment (see README). Never write the
   must use `asset()` from `src/lib/asset.ts`, or it breaks in a sub-path build.
 - Accessibility: semantic HTML first, content readable without JavaScript, keyboard operable, WCAG AA contrast
   (on the sheet colour only sheet-ink, moss-ink, alpenglow-ink or ground).
-- Motion: every effect needs a reduced-motion twin (`prefers-reduced-motion` or the in-site Calm map toggle,
-  exposed as `html[data-motion="reduced"]` and `useReducedMotion()`).
+- Motion: three modes on `html[data-motion]` (full; calm, the Calm map switch; still, OS reduced motion) via
+  `useMotionMode()`; apply the primitives and tokens in `docs/motion.md`, every effect with calm and still twins.
 - Keep heavy code out of the initial bundle (Three/R3F and Motion load lazily) and keep transfer per visit small.
 - Case studies: waypoint headings state the finding; at most one key insight and one pull quote per page. A case
   study with a data file writes every number as a `{{token}}` (`src/lib/fill.ts`), in copy and artefacts alike;

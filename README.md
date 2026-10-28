@@ -25,9 +25,11 @@ This repository currently holds the foundation plus three technical spikes for t
 Production currently serves a static under-construction page; the full site lives on the `basecamp` branch behind
 a password gate (see "Hosting on Netlify").
 
-Headlines use kinetic variable-font type (`src/components/type/KineticText.tsx`): letters condense from wide and
-light into the display cut with a glacier shine, and a gentler shine (at most half way to glacier, no glow)
-follows a fine pointer like the field's headlamp (colour only; the axes never move on hover). The About page
+Motion has one verb, "settle" (`docs/motion.md`): headlines arrive slightly wide and condense into the display
+cut (`src/components/motion/SettleText.tsx`), interactive text breathes wider on hover or focus and settles back,
+and a single mint glint marks a first arrival or a committed action. A gentle shine (at most half way to glacier,
+no glow) follows a fine pointer, lit by the same headlamp as the field. Three motion modes (full, calm, still)
+and every primitive are shown side by side in the motion lab (`/lab/`, preview builds only). The About page
 ("Basecamp", `/about/`) opens from the leader card and tells the career as the real climb from Interlaken to the
 Jungfrau; its plan and the content still needed are in `docs/about-plan.md`.
 
@@ -37,7 +39,7 @@ Jungfrau; its plan and the content still needed are in `docs/about-plan.md`.
 | -------------------------- | ----------------------------------------------------------------------------------- |
 | Framework                  | Next.js 16 (App Router), React 19.3, TypeScript, static export (`output: "export"`) |
 | Field                      | three + @react-three/fiber, custom GLSL (WebGL2), leva for dev-only tuning          |
-| Motion                     | `motion` (springs, gestures), Motion+ (`useMagneticPull`), React `<ViewTransition>` |
+| Motion                     | `motion` (frame loop, springs), React `<ViewTransition>`; tokens and primitives in `docs/motion.md` |
 | Smooth scroll              | Lenis, fine-pointer desktop only                                                    |
 | Fonts                      | Archivo (wdth + wght, italic) and Martian Mono via `next/font/google`, self-hosted  |
 | Hosting                    | Netlify: static files, plus one Edge Function (the Basecamp gate) off production   |
@@ -77,10 +79,11 @@ Never commit the token. `.env*` files are git-ignored; `.env.example` lists the 
 | `npm run check:content`  | Lists every content placeholder still to fill, with file, line and field          |
 | `npm run check:figures`  | Numbers in copy, card and charts match their data file; images are current        |
 | `npm test`               | Unit tests of the Basecamp gate (`node:test`)                                      |
-| `npm run test:e2e`       | Chromium checks against `out/`: view transitions, calm navigation, decode, case-study template |
+| `npm run test:e2e`       | Chromium checks against `out/`: view transitions, motion modes, hydration, motion primitives, decode, case-study template |
 | `npm run test:hosting`   | Gated and production deploys under netlify-cli (build, edge runtime, redirects)   |
 | `npm run report:size`    | Initial JS/CSS/fonts per route, lazy chunks, terrain assets (gzip)               |
 | `npm run report:transfer` | One page's transfer on a phone and a desktop, first view and full scroll         |
+| `npm run report:motion`  | Layout time in a page's first 3.5 s on a phone with the CPU slowed 4×; Lighthouse with `--lighthouse` |
 | `npm run images`         | Renders and encodes the case-study artefact images (see "Case studies")           |
 | `npm run terrain`        | Regenerates `public/terrain` from swisstopo data                                  |
 | `npm run verify:terrain` | Checks that the committed heightmaps decode to the exact source heights          |
@@ -405,28 +408,33 @@ Attribution: "Terrain data © swisstopo" appears in the HUD and the footer.
 - Semantic HTML first. The hero name is server-rendered text, so LCP is text, not the canvas.
 - All interactions work with the keyboard. Each card is a single link, named by the card's title, with the focus
   ring around the card. Focus returns to the originating card after navigating back.
-- Kinetic headlines keep a hidden rest-state copy of each letter, so the animation never changes layout (no CLS).
+- Settling headlines keep a hidden rest-state copy of each letter, so the animation never changes layout (no CLS).
   The accessible name is the plain text.
-- Every effect has a reduced-motion twin, triggered by `prefers-reduced-motion` or the Calm map toggle (stored
-  in localStorage):
-  - the field becomes the static poster;
-  - tilt is off;
-  - the foil is static;
-  - headlines don't animate;
-  - the deck doesn't deal in;
-  - no View Transition runs at all: pages change directly and the incoming page fades in over 150 ms (opacity
-    only); focus return and scroll restoration work as in full motion.
+- Text in the first viewport is visible from first paint; only blocks below the fold reveal (`data-reveal`).
+- Three motion modes on `html[data-motion]`, resolved before first paint (`docs/motion.md` has the full matrix):
+  - **full**, the default;
+  - **calm**, the "Calm map" switch (stored in localStorage; its accessible name is "Reduce motion on this
+    site"): view-transition morphs, responses and title settles stay; ambient field motion, the headlamp,
+    parallax, the intro sweep, glints, pointer shine, tilt, loops and Lenis stop; the field holds still and only
+    morphs between routes;
+  - **still**, when the OS asks for reduced motion (also without JavaScript): the field becomes the static
+    poster, nothing moves or changes width, colour and opacity changes take 200 ms at most, and no View
+    Transition runs at all: pages change directly and the incoming page fades in over 150 ms (opacity only);
+    focus return and scroll restoration work as in full motion. Still always wins over the switch, which then
+    shows on and says why.
 - Navigation finishes cleanly even when a view transition is skipped, times out or fails: React commits the
   route change anyway, and the arriving heading settles. `npm run test:e2e -- transitions` simulates all three
-  (forward, browser back, forward again, the in-page back link, open again) plus Calm map, reduced motion and
+  (forward, browser back, forward again, the in-page back link, open again) plus calm, still and
   the previous return (`?vt=classic`), and checks the page, focus, the field's terrain (`data-terrain` on the
   backdrop), the return's phases (exit, travel, card rebuild) and that nothing is left hidden. It needs
   Playwright with Chromium and a build in `out/`.
 
 ### Preview-only switches
 
-Dev and preview builds (`NEXT_PUBLIC_PREVIEW=1`, so the Basecamp deploy) understand two query parameters;
+Dev and preview builds (`NEXT_PUBLIC_PREVIEW=1`, so the Basecamp deploy) understand three query parameters;
 production builds compile them out:
+
+- `?motion=full|calm|still` loads the page in that motion mode (the OS setting for reduced motion still wins);
 
 - `?name=…` shows the hero with another name, to check the layout for other lengths (the name is set on at
   most two lines and sized by its longest line);
@@ -443,5 +451,6 @@ production builds compile them out:
   glyphs at most 15% of a lit line. Text on opaque surfaces (`.surface-copy`: captions, the summary, the banner,
   the key insight, metric tiles) is measured too; dark text on the sheet colour needs 4.5:1 (no lines run
   behind it). It also fails when a page is wider than the phone (it would pan sideways).
-- The HUD clock always shows the live Bern time, Calm map and reduced motion included (a changing time is
-  content, not motion); the dot next to it is a static neutral marker.
+- The HUD clock always shows the live Bern time, calm and still included (a changing time is content, not
+  motion); it keeps a fixed width, so filling it in after hydration moves nothing. The dot next to it is a
+  static neutral marker.
