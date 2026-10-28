@@ -15,6 +15,11 @@ import styles from "./TerrainBackdrop.module.css";
 
 type FieldComponent = ComponentType<{ profile: DeviceProfile; paused: boolean; calm: boolean; onReady: () => void }>;
 
+// The motion lab's frames (data-lab-frame) show the primitives alone, without the field. Only
+// builds with the lab carry the check.
+const previewable = process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_PREVIEW === "1";
+const labFrame = () => previewable && !!document.querySelector("[data-lab-frame]");
+
 // Dev-only tuning panel: the branch is removed from production builds.
 const DevTuning =
   process.env.NODE_ENV === "development" ? dynamic(() => import("./DevTuning"), { ssr: false }) : () => null;
@@ -73,8 +78,7 @@ export function TerrainBackdrop() {
     let cancelled = false;
     whenIdle(() => {
       if (cancelled) return;
-      // The motion lab's frames show the primitives alone (data-lab-frame): no field there.
-      if (!canRunField() || document.querySelector("[data-lab-frame]")) {
+      if (!canRunField() || labFrame()) {
         cancelPendingIntro();
         return;
       }

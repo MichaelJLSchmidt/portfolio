@@ -133,11 +133,6 @@ i,
   padding-inline: var(--gutter);
 }
 
-/* The motion lab's frames (preview only) show the primitives without the site's chrome. */
-:root:has([data-lab-frame]) [data-chrome] {
-  display: none !important;
-}
-
 .page {
   position: relative;
   z-index: var(--layer-page);

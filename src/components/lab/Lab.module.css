@@ -53,6 +53,11 @@
 
 /* ------------------------------------------------------------ specimen */
 
+/* A frame shows the primitives without the site's chrome (HUD, field, footer: data-chrome). */
+:root:has(.specimen) [data-chrome] {
+  display: none !important;
+}
+
 .specimen {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
