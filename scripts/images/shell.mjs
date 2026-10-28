@@ -42,7 +42,7 @@ export function buildShell(o) {
 <head>
 <meta charset="utf-8">
 <title>${o.id}</title>
-<style>${tokensToCss()}</style>
+<style>${tokensToCss({ motion: false })}</style>
 <link rel="stylesheet" href="/shared/artefact.css">
 <style>html,body{margin:0;background:transparent}*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}</style>
 <script>${seeded(seed)}window.DATA=${JSON.stringify(o.data)};</script>
