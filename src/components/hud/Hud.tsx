@@ -7,7 +7,7 @@ import styles from "./Hud.module.css";
 /** Instrument strip: fast, precise, always on top of the slow terrain. */
 export function Hud() {
   return (
-    <header className={styles.hud}>
+    <header className={styles.hud} data-chrome="">
       <div className={styles.cluster}>
         <Link href="/" className={`${styles.mark} hud-label`} aria-label={site.hud.markHome}>
           {site.hud.mark}
@@ -18,13 +18,13 @@ export function Hud() {
       <div className={`${styles.cluster} ${styles.right}`}>
         <span className={`${styles.clock} hud-label`}>
           <span className={styles.live} aria-hidden="true" />
-          <BernClock label={site.hud.clockLabel} />
+          <BernClock label={site.hud.clockLabel} className={styles.time} />
         </span>
         <span className={styles.row}>
           <Link href="/about/" className={`${styles.navLink} hud-label`}>
             {site.hud.about}
           </Link>
-          <CalmToggle label={site.hud.calm} />
+          <CalmToggle labels={site.hud.calm} />
         </span>
       </div>
     </header>

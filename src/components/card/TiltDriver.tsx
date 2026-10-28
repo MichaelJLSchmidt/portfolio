@@ -2,13 +2,14 @@
 
 import { animate, useSpring, type MotionValue } from "motion/react";
 import { useEffect, useRef, type RefObject } from "react";
-import { spring } from "@/styles/tokens";
+import { legacy, spring } from "@/styles/tokens";
 import { onGyroTilt, type GyroStatus } from "./gyro";
 
 /** Springs the card flat; resolves once it is (at most `spring.settle.visualDuration`). Null if already flat. */
 export type SettleTilt = () => Promise<void> | null;
 
-const MAX_POINTER_DEG = 14;
+// The card's current tilt, kept until phase 4 moves cards to spring.tilt and distance.tiltMax.
+const MAX_POINTER_DEG = legacy.tilt.maxDeg;
 const VARS = ["--rx", "--ry", "--px", "--py", "--hyp"];
 
 /**
@@ -28,10 +29,10 @@ export default function TiltDriver({
   settleRef: RefObject<SettleTilt | null>;
   gyro: GyroStatus;
 }) {
-  const rx = useSpring(0, spring.tilt);
-  const ry = useSpring(0, spring.tilt);
-  const px = useSpring(50, spring.tilt);
-  const py = useSpring(50, spring.tilt);
+  const rx = useSpring(0, legacy.tilt.spring);
+  const ry = useSpring(0, legacy.tilt.spring);
+  const px = useSpring(50, legacy.tilt.spring);
+  const py = useSpring(50, legacy.tilt.spring);
   // While settling, pointer and gyro input no longer move the card.
   const settling = useRef(false);
 

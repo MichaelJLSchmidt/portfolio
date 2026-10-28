@@ -24,10 +24,16 @@
     color var(--dur-micro) var(--ease-trail);
 }
 
-a.action:hover,
 .action[data-primary] {
   background: var(--color-glacier);
   color: var(--color-ground);
+}
+
+@media (hover: hover) {
+  a.action:hover {
+    background: var(--color-glacier);
+    color: var(--color-ground);
+  }
 }
 
 .action[data-placeholder] {
@@ -39,8 +45,4 @@ a.action:hover,
 .tbd {
   font-family: var(--font-martian), ui-monospace, monospace;
   font-size: 0.75em;
-}
-
-:root[data-motion="reduced"] .action {
-  transition: none;
 }

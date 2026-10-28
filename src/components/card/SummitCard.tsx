@@ -6,7 +6,7 @@ import { Suspense, lazy, useEffect, useId, useRef, useState, type CSSProperties,
 import { cardHref, cardLabels, type SummitCardData } from "@/content/cards";
 import { withValues } from "@/lib/content";
 import { useFinePointer, useIdle } from "@/lib/idle";
-import { useReducedMotion } from "@/lib/motion-preference";
+import { useMotionMode } from "@/lib/motion-mode";
 import { prefetchTerrain } from "@/components/terrain/field-store";
 import { MorphTarget } from "@/components/transition/MorphTarget";
 import { morphName } from "@/lib/morph";
@@ -51,13 +51,15 @@ export function SummitCard({
 }: SummitCardProps) {
   const [active, setActive] = useState(false);
   const [opening, setOpening] = useState(false);
-  const reduced = useReducedMotion();
+  // Tilt, the pointer glare and the touch shimmer are full-motion effects.
+  const { mode } = useMotionMode();
+  const full = mode === "full";
   const gyro = useGyroStatus();
   const rootRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const finePointer = useFinePointer();
   const idle = useIdle();
-  const tilt = !reduced && ((finePointer && idle) || gyro === "on");
+  const tilt = full && ((finePointer && idle) || gyro === "on");
   const nameId = useId();
   const settleRef = useRef<SettleTilt | null>(null);
   const router = useRouter();
@@ -94,7 +96,7 @@ export function SummitCard({
       data-active={active}
       data-opening={opening}
       data-link={linkToCaseStudy}
-      data-shimmer={!reduced && (gyro === "off" || gyro === "resume")}
+      data-shimmer={full && (gyro === "off" || gyro === "resume")}
       aria-labelledby={nameId}
       onPointerEnter={() => {
         setActive(true);

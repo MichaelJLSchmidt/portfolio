@@ -23,8 +23,8 @@ export function attach(figure: HTMLElement): () => void {
     if (!note) return;
     const r = note.getBoundingClientRect();
     if (r.top < 0 || r.bottom > window.innerHeight) {
-      const reduced = document.documentElement.getAttribute("data-motion") === "reduced";
-      note.scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
+      const still = document.documentElement.getAttribute("data-motion") === "still";
+      note.scrollIntoView({ block: "nearest", behavior: still ? "auto" : "smooth" });
     }
   };
 

@@ -54,8 +54,10 @@
   text-decoration: none;
 }
 
-.cue:hover {
-  color: var(--color-glacier);
+@media (hover: hover) {
+  .cue:hover {
+    color: var(--color-glacier);
+  }
 }
 
 .cueLine {
@@ -71,6 +73,10 @@
   position: absolute;
   inset: 0;
   background: var(--color-contour);
+}
+
+/* An auto-playing loop: full motion only, so never without JavaScript or in calm and still. */
+:root[data-motion="full"] .cueLine::after {
   animation: cue 2.4s var(--ease-summit) infinite;
 }
 
@@ -111,9 +117,4 @@
     grid-column: 9 / -1;
     align-self: last baseline;
   }
-}
-
-:root[data-motion="reduced"] .cueLine::after {
-  animation: none;
-  transform: none;
 }

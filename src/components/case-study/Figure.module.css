@@ -158,14 +158,17 @@
   outline-offset: 2px;
 }
 
-:root[data-motion="full"] .hotspot {
-  transition:
-    background var(--dur-short) var(--ease-trail),
-    transform var(--dur-short) var(--ease-trail);
-}
+/* A pressed marker grows a little: a response, kept in calm. */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .hotspot {
+    transition:
+      background var(--dur-short) var(--ease-trail),
+      transform var(--dur-short) var(--ease-trail);
+  }
 
-:root[data-motion="full"] .hotspot[aria-pressed="true"] {
-  transform: scale(1.12);
+  :root:not([data-motion="still"]) .hotspot[aria-pressed="true"] {
+    transform: scale(1.12);
+  }
 }
 
 .notes {
@@ -515,8 +518,10 @@
   -webkit-user-drag: none;
 }
 
-:root[data-motion="full"] .lightboxStage:not([data-gesture]) img {
-  transition: transform var(--dur-short) var(--ease-trail);
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .lightboxStage:not([data-gesture]) img {
+    transition: transform var(--dur-short) var(--ease-trail);
+  }
 }
 
 .lightboxHint {

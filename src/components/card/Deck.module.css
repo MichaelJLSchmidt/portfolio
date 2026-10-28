@@ -46,13 +46,15 @@
   }
 }
 
-/* Deal-in: cards slide up from the deck, slightly turned, one after another. */
-.cards[data-deal="pending"] .slot {
+/* Deal-in (full motion only): cards slide up from the deck, slightly turned, one after another.
+   Both states depend on the mode, so switching to calm or still mid-deal lands every card at
+   once. Phase 4 moves the deal onto the card tokens. */
+:root[data-motion="full"] .cards[data-deal="pending"] .slot {
   opacity: 0;
   transform: translate3d(0, 22vh, 0) rotate(calc(-7deg + var(--deal-i) * 14deg)) scale(0.9);
 }
 
-.cards[data-deal="dealt"] .slot {
+:root[data-motion="full"] .cards[data-deal="dealt"] .slot {
   transition:
     opacity var(--dur-long) var(--ease-trail),
     transform var(--dur-scenic) var(--ease-drop);

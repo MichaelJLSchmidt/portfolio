@@ -6,9 +6,10 @@ import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import meta from "@terrain/terrain.json";
 import { cardTerrain } from "@/lib/card-terrain";
-import { color, easing } from "@/styles/tokens";
+import { color, easing, headlamp } from "@/styles/tokens";
+import { watchHeadlamp } from "@/lib/headlamp";
 import { MAX_QUIET_ZONES, coverTransform, createContourMaterial } from "./contour-material";
-import { INTRO_STORAGE_KEY, cancelPendingIntro } from "@/lib/motion-preference";
+import { INTRO_STORAGE_KEY, cancelPendingIntro } from "@/lib/motion-mode";
 import { colorOf, contourInterval, hexToRgb, msOf, type DeviceProfile, type FieldConfig } from "./field-settings";
 import { fieldStore } from "./field-store";
 import { loadHeightmap, type HeightmapMeta } from "./heightmap-loader";
@@ -18,7 +19,11 @@ import { watchQuietZones, type QuietKind, type QuietRect } from "./quiet-zones";
  * The persistent contour field. Mounted once from the root layout (lazy chunk with
  * Three/R3F), so it never remounts on route changes. Renders on demand: continuous
  * frames only while something animates, a low idle rate for the slow drift, nothing
- * while the tab is hidden or reduced motion is on.
+ * while the tab is hidden or in still mode (paused; the poster shows).
+ *
+ * Calm mode keeps the map but stops its own motion: no drift or line flow (the field's clock
+ * stops), no headlamp, no parallax, no intro sweep. The terrain still morphs between routes,
+ * without the camera push, and frames are drawn only while it does.
  *
  * One animation loop: the scheduler runs on Motion's frame loop (which also drives Lenis
  * and the springs) and renders with R3F's advance() (frameloop "never"), so the page has
@@ -106,7 +111,9 @@ const tweenValue = (t: Tween | null, now: number, fallback: number) => {
 };
 const tweenDone = (t: Tween | null, now: number) => !t || now - t.start >= t.dur;
 
-function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: boolean; onReady: () => void }) {
+type FieldProps = { profile: DeviceProfile; paused: boolean; calm: boolean; onReady: () => void };
+
+function Field({ profile, paused, calm, onReady }: FieldProps) {
   const material = useMemo(() => createContourMaterial(), []);
   const gl = useThree((s) => s.gl);
   const size = useThree((s) => s.size);
@@ -143,6 +150,8 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     panPointer: [0, 0] as [number, number],
     panScroll: 0,
     lastFrame: 0,
+    /** The field's own clock (s): drift and line flow. It stands still in calm mode. */
+    clock: 0,
     region: null as TerrainSource | null,
     /** Terrain currently loaded into texture slot B, and its id. */
     target: null as TerrainSource | null,
@@ -158,7 +167,6 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     readyNotified: false,
     capped: false,
     frameTimes: [] as number[],
-    t0: performance.now(),
   });
 
   // --- configuration → uniforms --------------------------------------------------
@@ -199,7 +207,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     const u = material.uniforms;
     u.uLineWidth.value = cfg.lineWidthPx * dpr;
     u.uIndexWidth.value = cfg.indexLineWidthPx * dpr;
-    u.uHeadlampRadius.value = cfg.headlampRadiusPx * dpr;
+    u.uHeadlampRadius.value = headlamp.radiusPx * dpr;
     writeQuietKinds();
     u.uResolution.value.set(size.width * dpr, size.height * dpr);
     const a = anim.current;
@@ -286,7 +294,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
         // No storage: play the intro every page load rather than failing.
       }
       // The first frame shows an empty map; the sweep starts once the canvas has faded in.
-      if (!played && !paused) startIntro(msOf("medium"));
+      if (!played && !paused && !sched.current.calm) startIntro(msOf("medium"));
       a.ready = true;
       wake();
     }, () => {
@@ -426,38 +434,36 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       a.lamp = { from: tweenValue(a.lamp, now, a.lampValue), to, start: now, dur, ease: easeTrail };
       wake();
     };
-    const onPointerMove = (e: PointerEvent) => {
-      if (e.pointerType === "touch") return;
-      setPos(e.clientX, e.clientY);
+    // Mouse and pen: the shared headlamp source (src/lib/headlamp.ts), once per frame.
+    const unwatch = watchHeadlamp((lamp) => {
+      if (sched.current.calm) return;
+      if (!lamp.on) return fade(0, headlamp.fadeMs);
+      setPos(lamp.x, lamp.y);
       // Parallax: the map leans away from the pointer, a little.
       const k = cfg().parallax;
-      a.panPointer = [(e.clientX / window.innerWidth - 0.5) * k, -(e.clientY / window.innerHeight - 0.5) * k];
-      if (a.lamp?.to !== 1) fade(1, msOf("micro"));
+      a.panPointer = [(lamp.x / window.innerWidth - 0.5) * k, -(lamp.y / window.innerHeight - 0.5) * k];
+      if (a.lamp?.to !== 1) fade(1, msOf(headlamp.rise));
       wake();
-    };
-    const onPointerOut = (e: PointerEvent) => {
-      if (!e.relatedTarget && e.pointerType !== "touch") fade(0, cfg().headlampFadeMs);
-    };
+    });
     const onTouch = (e: TouchEvent) => {
       const t = e.touches[0];
-      if (!t) return;
+      if (!t || sched.current.calm) return;
       setPos(t.clientX, t.clientY);
-      if (a.lamp?.to !== 1) fade(1, msOf("micro"));
+      if (a.lamp?.to !== 1) fade(1, msOf(headlamp.rise));
       wake();
     };
     const onTouchEnd = (e: TouchEvent) => {
-      if (e.touches.length === 0) fade(0, cfg().headlampFadeMs);
+      if (e.touches.length === 0) fade(0, headlamp.fadeMs);
     };
     // Scrolling descends the map slowly (slower than the content).
     const onScroll = () => {
+      if (sched.current.calm) return;
       const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
       a.panScroll = -(window.scrollY / max) * cfg().scrollParallax;
       a.lastInput = performance.now();
       wake();
     };
     const opts = { passive: true } as const;
-    window.addEventListener("pointermove", onPointerMove, opts);
-    document.addEventListener("pointerout", onPointerOut, opts);
     window.addEventListener("touchstart", onTouch, opts);
     window.addEventListener("touchmove", onTouch, opts);
     window.addEventListener("touchend", onTouchEnd, opts);
@@ -466,8 +472,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     onScroll();
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("pointermove", onPointerMove);
-      document.removeEventListener("pointerout", onPointerOut);
+      unwatch();
       window.removeEventListener("touchstart", onTouch);
       window.removeEventListener("touchmove", onTouch);
       window.removeEventListener("touchend", onTouchEnd);
@@ -483,12 +488,14 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     lastRender: 0,
     lastTick: 0,
     paused,
+    calm,
     // The callbacks actually queued on Motion's loop (this component's functions are
     // recreated on every render), so they can be cancelled.
     queuedTick: null as Process | null,
     queuedRender: null as Process | null,
   });
   sched.current.paused = paused;
+  sched.current.calm = calm;
 
   const isBusy = (now: number) => {
     const a = anim.current;
@@ -538,6 +545,8 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
       s.queuedRender = frame.render(render);
       a.frameTimes.length = 0;
       if (s.timer) clearTimeout(s.timer);
+      // Calm: nothing moves on its own, so no ambient frames until the next morph or resize.
+      if (s.calm) return;
       s.timer = setTimeout(() => {
         s.timer = 0;
         wake();
@@ -587,6 +596,20 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paused]);
 
+  // Calm: the map lands where it is (intro drawn, headlamp out), then holds still.
+  useEffect(() => {
+    if (!calm) return;
+    const a = anim.current;
+    finishIntro(false);
+    const now = performance.now();
+    a.lamp = { from: tweenValue(a.lamp, now, a.lampValue), to: 0, start: now, dur: 0, ease: easeTrail };
+    a.panPointer = [0, 0];
+    a.panScroll = 0;
+    a.pan = [...a.panPointer];
+    wake();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [calm]);
+
   useEffect(
     () => () => {
       stop();
@@ -635,19 +658,24 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
     const mm = a.morphValue * a.morphValue * (3 - 2 * a.morphValue);
     u.uInterval.value = Math.exp(lnA + (lnB - lnA) * mm);
     const cfg = fieldStore.get().config;
-    // Camera: push in while morphing to a card's terrain.
-    u.uZoom.value = cfg.zoomBase + a.morphValue * cfg.morphZoom;
-    // Pan eases towards pointer + scroll targets, plus a very slow autonomous drift.
+    const still = sched.current.calm;
+    // Camera: push in while morphing to a card's terrain (not in calm).
+    u.uZoom.value = cfg.zoomBase + (still ? 0 : a.morphValue * cfg.morphZoom);
+    // Pan eases towards pointer + scroll targets, plus a very slow autonomous drift; the field's
+    // clock (drift and line flow) only runs outside calm.
     const dt = a.lastFrame ? Math.min(0.1, (now - a.lastFrame) / 1000) : 0;
     a.lastFrame = now;
-    const ease = 1 - Math.exp(-dt * 2.2);
-    a.pan[0] += (a.panPointer[0] - a.pan[0]) * ease;
-    a.pan[1] += (a.panPointer[1] + a.panScroll - a.pan[1]) * ease;
-    const t = (now - a.t0) / 1000;
+    if (!still) {
+      a.clock += dt;
+      const ease = 1 - Math.exp(-dt * 2.2);
+      a.pan[0] += (a.panPointer[0] - a.pan[0]) * ease;
+      a.pan[1] += (a.panPointer[1] + a.panScroll - a.pan[1]) * ease;
+    }
+    const t = a.clock;
     u.uPan.value.set(a.pan[0] + Math.sin(t * 0.05) * 0.008, a.pan[1] + Math.cos(t * 0.037) * 0.008);
     u.uHeadlampStrength.value = a.lampValue;
     u.uHeadlampPos.value.set(a.lampPos[0], a.lampPos[1]);
-    u.uTime.value = (now - a.t0) / 1000;
+    u.uTime.value = t;
 
     if (!a.readyNotified) {
       a.readyNotified = true;
@@ -663,15 +691,7 @@ function Field({ profile, paused, onReady }: { profile: DeviceProfile; paused: b
   );
 }
 
-export default function ContourField({
-  profile,
-  paused,
-  onReady,
-}: {
-  profile: DeviceProfile;
-  paused: boolean;
-  onReady: () => void;
-}) {
+export default function ContourField({ profile, paused, calm, onReady }: FieldProps) {
   return (
     <Canvas
       orthographic
@@ -683,7 +703,7 @@ export default function ContourField({
       style={{ position: "absolute", inset: 0 }}
       aria-hidden="true"
     >
-      <Field profile={profile} paused={paused} onReady={onReady} />
+      <Field profile={profile} paused={paused} calm={calm} onReady={onReady} />
     </Canvas>
   );
 }

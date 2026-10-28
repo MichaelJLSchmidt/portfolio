@@ -19,7 +19,15 @@ export const site = {
     about: "Basecamp",
     clockLabel: "Bern",
     coordinates: "N 46°41′ · E 7°52′",
-    calm: "Calm map",
+    /** The motion switch: its visible state ("Calm map" on, "Clear night" off) and its name. */
+    calm: {
+      on: "Calm map",
+      off: "Clear night",
+      name: "Reduce motion on this site",
+      forced: "Your device asks for reduced motion, so the map stays still. Change it in your system settings.",
+    },
+    /** Shown only where vibration works (Android); the visible label is its name. */
+    haptics: "Haptics",
     tiltEnable: "Enable tilt",
     tiltResume: "Resume tilt",
     tiltOn: "Tilt: on",

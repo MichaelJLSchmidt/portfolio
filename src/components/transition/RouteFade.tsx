@@ -3,14 +3,14 @@
 import { usePathname } from "next/navigation";
 import { useLayoutEffect, useRef } from "react";
 import { duration } from "@/styles/tokens";
-import { calmNavigation } from "@/lib/view-transition";
+import { stillNavigation } from "@/lib/view-transition";
 
 /**
- * Calm map / reduced motion: routes change without a View Transition, and the incoming page
- * fades in over --dur-calm (opacity only, see globals.css). The attribute is set in a layout
- * effect, before the new page is painted.
+ * Still mode: routes change without a View Transition, and the incoming page fades in over
+ * --dur-calm (opacity only, see globals.css). The attribute is set in a layout effect, before the
+ * new page is painted. Full and calm morph instead.
  */
-export function CalmRouteFade() {
+export function RouteFade() {
   const pathname = usePathname();
   const shown = useRef(pathname);
 
@@ -18,7 +18,7 @@ export function CalmRouteFade() {
     // Route changes only (not the first render, nor a dev re-run of this effect).
     if (shown.current === pathname) return;
     shown.current = pathname;
-    if (!calmNavigation()) return;
+    if (!stillNavigation()) return;
     const root = document.documentElement;
     // Restart the fade for back-to-back navigations.
     root.removeAttribute("data-route-fade");
