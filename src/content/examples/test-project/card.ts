@@ -26,11 +26,13 @@ export const rawCard: SummitCardData = {
     { term: "Ship", reminder: "discovery to staged rollout in {{project.months}} months, WCAG 2.1 AA audited." },
   ],
   flavor: "“The form was asking the wrong person.” — field note, week {{discovery.fieldNoteWeek}}",
-  stats: [
-    { label: "Team", value: "{{team.ux}} + {{team.productDev}}" },
-    { label: "Months", value: "{{project.months}}" },
-    { label: "Reach", value: "{{reach.perYear|en}}/yr" },
-  ],
+  stats: {
+    teamLed: "{{team.ux}} + {{team.productDev}}",
+    time: "{{project.months}} mo",
+    scope: "{{reach.perYear|en}}/yr",
+    impact: { before: "{{outcomes.complete.before}}%", after: "{{outcomes.complete.after}}%" },
+  },
+  indexLine: { kind: "Service", summary: "A subsidy form people finish", time: "{{project.months}} months" },
   artwork: { kind: "seeded", terrainId: "lab-099" },
   artworkAlt: "Contour map of a fictional massif generated for this example, with a dotted trail to the summit.",
   summary:

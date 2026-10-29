@@ -127,7 +127,7 @@ export const keyFigures: { label: string; text: string; in: string[] }[] = [
   { label: "reuse by services", text: `${data.decisions.reuseServices} services`, in: ["copy", "card"] },
   { label: "project months", text: `${data.project.months} months`, in: ["copy", "card"] },
   { label: "team", text: `${data.team.ux} + ${data.team.productDev}`, in: ["card"] },
-  { label: "reach a year", text: as(data.reach.perYear, "en"), in: ["copy", "card"] },
+  { label: "reach a year", text: as(data.reach.perYear, "en"), in: ["card"] },
   { label: "interviews", text: `${data.discovery.interviews} interviews`, in: ["copy", "tp-affinity"] },
   { label: "hand-offs", text: `${data.discovery.handoffs} hand-offs`, in: ["copy", "tp-blueprint-current"] },
   { label: "no-feedback gaps", text: `${data.discovery.gaps} moments`, in: ["copy", "tp-blueprint-current"] },

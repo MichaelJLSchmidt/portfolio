@@ -19,12 +19,10 @@ export const rawCaseStudy: CaseStudy = {
   typeLine: "Service design · Public sector · UX Team Lead · {{project.months}} months · {{years.start}}–{{years.end}} (fictional)",
   metaDescription: "Fictional model case study demonstrating a senior UX case study format.",
   summary: {
-    problem:
+    mandate:
       "{{problem.incompletePct}}% of heating-subsidy applications arrived incomplete. Homeowners waited a median {{problem.medianDays}} days for a decision.",
     role: "UX Team Lead. I set research and design strategy, facilitated {{workshops.count}} cross-unit workshops, led {{team.designersLed}} designers and built the core form patterns in Angular.",
-    team: "{{team.ux}} UX + {{team.productDev}} product & dev",
-    duration: "{{project.months}} months",
-    reach: "~{{reach.perYear|en}} applications a year in German and French",
+    teamLed: "{{team.ux}} UX + {{team.productDev}} product & dev",
     keyDecision:
       "Let installers prepare the application and homeowners confirm it via AGOV, instead of forcing homeowners through a {{pdf.pages}}-page form alone.",
     outcome: [
@@ -34,6 +32,7 @@ export const rawCaseStudy: CaseStudy = {
     ],
     note: "Fictional example data.",
   },
+  didNotDo: "final illustration work, the batch-import integration, and the French copy, which a francophone content designer owned.",
   hero: "tp-hero",
   waypoints: [
     {
@@ -103,11 +102,6 @@ export const rawCaseStudy: CaseStudy = {
           ],
         },
         { kind: "figure", id: "tp-workshop-board" },
-        {
-          kind: "p",
-          lead: "What I did not do:",
-          text: "final illustration work, the batch-import integration, and the French copy, which a francophone content designer owned.",
-        },
       ],
     },
     {

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Suspense, lazy, useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { cardHref, cardLabels, type SummitCardData } from "@/content/cards";
+import { cardHref, cardLabels, cardStats, coordinatesLine, type SummitCardData } from "@/content/cards";
 import { withValues } from "@/lib/content";
 import { useFinePointer, useIdle } from "@/lib/idle";
 import { useMotionMode } from "@/lib/motion-mode";
@@ -69,7 +69,7 @@ export function SummitCard({
   // "opening" state so the chip shows again after navigating back.
   useEffect(() => () => setOpening(false), []);
   const foil = card.rarity === "R" || card.rarity === "M";
-  const stats = withValues(card.stats).slice(0, 3);
+  const stats = withValues(cardStats(card)).slice(0, 3);
 
   const intent = () => prefetchTerrain(card.artwork.terrainId);
 
@@ -117,7 +117,7 @@ export function SummitCard({
               )}
               <CostBadge value={card.cost} label={`${cardLabels.costPrefix}: ${card.costLabel}`} />
             </header>
-            <p className={styles.coords}>{card.coordinates}</p>
+            <p className={styles.coords}>{coordinatesLine(card)}</p>
             {morph(
               "art",
               <CardArtwork artwork={card.artwork} alt={card.artworkAlt} stamp={card.example ? cardLabels.exampleStamp : undefined}>

@@ -35,6 +35,24 @@ export type Keyword = { term: string; reminder: string };
 /** Leave `value` out (or the whole stat) until there is a real number: empty stats don't render. */
 export type Stat = { label: string; value?: string };
 
+/**
+ * The card's stats. Every one is optional (leave it out until there is a real number). The stat
+ * row shows at most three, TEAM LED, TIME and IMPACT (before → after), and disappears without
+ * any; the scope joins the coordinates line instead.
+ */
+export type CardStats = {
+  /** e.g. "3 + 7" (direct + wider team) or "2 → 6" (grown). */
+  teamLed?: string;
+  time?: string;
+  /** e.g. "9 products": the coordinates line, after the place. */
+  scope?: string;
+  /** The headline outcome; `note` says what the numbers count ("on system"). */
+  impact?: { before: string; after: string; note?: string };
+};
+
+/** One line for an index of expeditions: "<name> — <kind> · <summary> · <time>". */
+export type IndexLine = { kind: string; summary: string; time: string };
+
 export type SetSymbol = "peak" | "grid" | "lab";
 
 export type SummitCardData = {
@@ -52,8 +70,8 @@ export type SummitCardData = {
   collector: { number: string; language: string };
   keywords: Keyword[];
   flavor: string;
-  /** Up to three; the row adapts to the stats that have a value and disappears without any. */
-  stats?: Stat[];
+  stats: CardStats;
+  indexLine: IndexLine;
   artwork: Artwork;
   artworkAlt: string;
   /** Two-sentence summary shown under the card in the deck. */
@@ -71,6 +89,7 @@ export const cardLabels = {
   openLog: "Open expedition log",
   costPrefix: "Summit cost",
   stats: "Card stats",
+  stat: { teamLed: "Team led", time: "Time", impact: "Impact" },
   collector: "Collector line",
   rarity: (r: string) => `Rarity ${r}`,
   setSymbol: (set: string) => `Set ${set}`,
@@ -79,13 +98,13 @@ export const cardLabels = {
 
 export const caseStudyLabels = {
   summaryHeading: "Summit summary",
-  problem: "Problem",
+  mandate: "Mandate",
   role: "My role",
-  team: "Team",
-  duration: "Duration",
-  reach: "Reach",
+  teamLed: "Team I led",
+  putInPlace: "What I put in place",
   keyDecision: "Key decision",
   outcome: "Outcome",
+  didNotDo: "What I did not do",
   jumpTo: "Jump to",
   onThisPage: "On this page",
   nextWaypoint: "Next waypoint",
@@ -140,6 +159,22 @@ export const cards: SummitCardData[] = [...projectCards, ...exampleCards];
 export const cardBySlug = (slug: string) => cards.find((c) => c.slug === slug);
 
 export const cardHref = (card: SummitCardData) => card.href ?? `/work/${card.slug}/`;
+
+/** The coordinates line: the place, then the scope. */
+export const coordinatesLine = (card: SummitCardData) => [card.coordinates, card.stats.scope].filter(Boolean).join(" · ");
+
+/** The card's stats as rows, at most three: team led, time, impact (before → after). */
+export const cardStats = (card: SummitCardData): Stat[] => {
+  const { teamLed, time, impact } = card.stats;
+  return [
+    { label: cardLabels.stat.teamLed, value: teamLed },
+    { label: cardLabels.stat.time, value: time },
+    { label: cardLabels.stat.impact, value: impact && [`${impact.before} → ${impact.after}`, impact.note].filter(Boolean).join(" ") },
+  ];
+};
+
+/** "Seilschaft — People · Built a UX practice from 2 to 6 · 3 years". */
+export const indexLineText = (card: SummitCardData) => `${card.name} — ${[card.indexLine.kind, card.indexLine.summary, card.indexLine.time].join(" · ")}`;
 
 const withSlash = (path: string) => (path.endsWith("/") ? path : `${path}/`);
 

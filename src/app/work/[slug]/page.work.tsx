@@ -16,7 +16,7 @@ import { SummitSummary } from "@/components/SummitSummary";
 import { MorphTarget } from "@/components/transition/MorphTarget";
 import { RememberCard } from "@/components/transition/RememberCard";
 import { caseStudies } from "@/content/case-studies";
-import { caseStudyLabels as L, cardBySlug, cardHref, cards } from "@/content/cards";
+import { caseStudyLabels as L, cardBySlug, cardHref, cards, coordinatesLine } from "@/content/cards";
 import { site } from "@/content/site";
 import { readingMinutes, type CaseStudy as Study, type Evidence } from "@/lib/case-study";
 import { morphName } from "@/lib/morph";
@@ -98,7 +98,7 @@ export default async function CaseStudy({ params }: Props) {
         </MorphTarget>
         <div className={styles.titleBlock} data-quiet-zone>
           <p className={`${styles.coords} hud-label map-halo keep-halo`} data-reveal="" data-vt-exit>
-            {card.coordinates}
+            {coordinatesLine(card)}
           </p>
           <MorphTarget name={morphName("title", card.slug)} variant="title">
             <SettleText as="h1" text={card.name} className={`${styles.title} display`} shine glint settleOnArrival />
@@ -121,11 +121,22 @@ export default async function CaseStudy({ params }: Props) {
         exitOnReturn
         note={summary.note}
         rows={[
-          { label: L.problem, value: summary.problem, wide: true },
+          { label: L.mandate, value: summary.mandate, wide: true },
           { label: L.role, value: summary.role, wide: true },
-          { label: L.team, value: summary.team, stat: true },
-          { label: L.duration, value: summary.duration, stat: true },
-          { label: L.reach, value: summary.reach, stat: true },
+          { label: L.teamLed, value: summary.teamLed, wide: true },
+          summary.putInPlace?.length
+            ? {
+                label: L.putInPlace,
+                wide: true,
+                content: (
+                  <ul data-marks="">
+                    {summary.putInPlace.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                ),
+              }
+            : { label: L.putInPlace },
           { label: L.keyDecision, value: summary.keyDecision, wide: true },
           Array.isArray(outcome)
             ? {
