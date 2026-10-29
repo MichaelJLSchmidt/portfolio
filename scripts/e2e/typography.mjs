@@ -32,7 +32,14 @@ export async function fontswap({ browser, base, check }) {
       await context.close();
       continue;
     }
-    const before = await page.waitForFunction(() => document.querySelector("h1")?.getBoundingClientRect().height, null, { timeout: 20000 }).then((h) => h.jsonValue());
+    // Read once the page's stylesheets apply (it never paints before they do), with the fallback faces.
+    const before = await page
+      .waitForFunction(
+        () => [...document.querySelectorAll('link[rel="stylesheet"]')].every((l) => l.sheet) && document.readyState !== "loading" && document.querySelector("h1")?.getBoundingClientRect().height,
+        null,
+        { timeout: 20000 },
+      )
+      .then((h) => h.jsonValue());
     await page.waitForFunction(() => document.fonts.status === "loaded", null, { timeout: 30000, polling: 100 });
     await page.waitForTimeout(1500);
     const after = await page.evaluate(() => document.querySelector("h1").getBoundingClientRect().height);

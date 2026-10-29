@@ -53,7 +53,15 @@ export async function hud({ browser, base, check }) {
     const home = await widthAt();
     await page.locator('header a[href$="/about/"]').first().click();
     await page.waitForURL(/\/about\/$/);
-    await page.waitForTimeout(1200);
+    // Measured at rest: the route's view transition over and the readout on Bern.
+    await page.waitForFunction(
+      () =>
+        document.querySelector("header [data-terrain-readout]")?.getAttribute("data-terrain-readout") === "bern" &&
+        !document.getAnimations().some((a) => a.effect?.pseudoElement?.startsWith("::view-transition")),
+      null,
+      { timeout: 15000 },
+    );
+    await page.waitForTimeout(400);
     const bern = await widthAt();
     check("the readout keeps its box from the region to Bern", Math.abs(home - bern) < 0.5, `${home.toFixed(1)} → ${bern.toFixed(1)} px`);
     check("Bern's readout shows coordinates at 1440 px", /E 2’600’000/.test(await page.locator("header [data-terrain-readout] .visually-hidden").textContent()));
