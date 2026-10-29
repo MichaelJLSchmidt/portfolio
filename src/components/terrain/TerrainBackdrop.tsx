@@ -93,11 +93,16 @@ export function TerrainBackdrop() {
     }
     whenIdle(() => {
       if (cancelled) return;
+      // The motion lab's frames never show the field: they load nothing for it.
+      if (labFrame()) {
+        cancelPendingIntro();
+        return;
+      }
       import("./field-boot").then((boot) => {
         if (cancelled) return;
         const resolved = boot.resolveTier();
         fieldStore.set({ tier: resolved });
-        if (resolved === "low" || labFrame()) {
+        if (resolved === "low") {
           cancelPendingIntro();
           return;
         }
