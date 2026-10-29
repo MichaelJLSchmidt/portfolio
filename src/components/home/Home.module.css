@@ -346,6 +346,11 @@
 .toastText {
   position: relative;
   margin: 0;
+}
+
+/* The message keeps its own case ("COPIED — see you at the trailhead."): scoped to the toast so
+   it outranks the global .hud-label in any stylesheet order. */
+.toast .toastText {
   text-transform: none;
 }
 
