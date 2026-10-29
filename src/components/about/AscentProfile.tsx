@@ -229,7 +229,7 @@ export function AscentProfile({
       <header className={styles.header} data-quiet-zone>
         <RuledHeading id="ascent-heading" text={labels.heading} className={`${styles.heading} display`} ruleClassName={styles.headRule} />
         <p className="body-copy">{labels.intro}</p>
-        <p className={`${styles.rarityNote} hud-label map-halo keep-halo`}>{labels.rarityNote}</p>
+        <p className={`${styles.rarityNote} hud-label map-halo keep-halo knockout`}>{labels.rarityNote}</p>
       </header>
 
       <div className={styles.stage}>

@@ -124,7 +124,7 @@
 .gridLabel {
   position: absolute;
   left: 0;
-  color: var(--color-contour);
+  color: var(--color-sheet);
   translate: 0 -130%;
 }
 
@@ -144,8 +144,9 @@
   translate: -4px 70%;
 }
 
+/* Straight over the field: sheet, like every label there (7:1; contour is never used over it). */
 .stopElevation {
-  color: var(--color-contour);
+  color: var(--color-sheet);
 }
 
 /* Milestone pins: lit once the climber has passed them (--p ≥ --at), pure CSS. */

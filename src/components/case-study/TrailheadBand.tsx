@@ -59,7 +59,7 @@ export function TrailheadBand({
           </div>
         </div>
       )}
-      <SignatureLink href="/" scroll={false} variant="standalone" role="mono" label={labels.backToAll} arrow="←" arrowAt="start" className={`${styles.backToAll} hud-label`} data-quiet-zone />
+      <SignatureLink href="/" scroll={false} variant="standalone" role="mono" label={labels.backToAll} arrow="←" arrowAt="start" className={`${styles.backToAll} hud-label map-halo`} data-quiet-zone />
     </nav>
   );
 }

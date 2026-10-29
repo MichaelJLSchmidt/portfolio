@@ -289,6 +289,21 @@ for (const mode of pick(modes)) {
             clip.height -= cover - clip.y;
             clip.y = cover;
           }
+          // ...and under a fixed bar along the bottom (the case study's altimeter bar below the
+          // large breakpoint): shoot above it.
+          const floor = await page.evaluate(() =>
+            Math.floor(
+              Math.min(
+                window.innerHeight,
+                ...[...document.querySelectorAll("body *")]
+                  .filter((el) => getComputedStyle(el).position === "fixed" && getComputedStyle(el).visibility !== "hidden" && el.getClientRects().length)
+                  .map((el) => el.getBoundingClientRect())
+                  .filter((r) => r.bottom >= window.innerHeight - 1 && r.top > (window.innerHeight * 2) / 3)
+                  .map((r) => r.top),
+              ),
+            ),
+          );
+          if (clip.y + clip.height > floor) clip.height = floor - clip.y;
           if (clip.width < 4 || clip.height < 4) break;
           // The headlamp, right on the text: the pointer, or a finger held down on a phone.
           const cx = clip.x + clip.width / 2;
