@@ -220,8 +220,8 @@ build the same order from a rule, a mono label and the finding (role `text`).
 ### RollNumber
 
 `<RollNumber value={4158} />` (`pad={2} trend={1}` for a clock): a number that rolls digit by digit
-to its new value (Motion+ `AnimateNumber`, one shared lazy chunk loaded after hydration, never in
-still, where numbers snap). Server and hydration render `formatInteger` (or zero-padded), so they
+to its new value (Motion+ `AnimateNumber`, one shared lazy chunk loaded the first time a value
+changes, so a page whose numbers never move never fetches it; never in still, where numbers snap). Server and hydration render `formatInteger` (or zero-padded), so they
 agree; each thousands group rolls on its own so the digits match. Decorative: give screen readers
 the value as text and hide this. The terrain readout, the Bern clock and the career climb's readout
 use it.

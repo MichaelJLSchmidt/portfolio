@@ -71,7 +71,7 @@ behind text like every other line. The pin is drawn in the contour shader.
 N 1’200’000 · ALT 554 M`, the home region as `JUNGFRAU · ALT 4’158 M`, a card as far as its terrain
 metadata goes (the centre of a real crop, the top of a seeded massif). The server and hydration
 render it from the route with `formatInteger`; after hydration, changed numbers roll with
-`AnimateNumber` (Motion+, loaded lazily, one thousands group at a time so the digits match
+`AnimateNumber` (Motion+, loaded the first time a number changes, one thousands group at a time so the digits match
 `formatInteger` exactly) over the `terrain` token, and snap in still. Screen readers get the plain
 text once.
 
