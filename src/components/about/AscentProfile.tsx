@@ -2,19 +2,21 @@
 
 import { useEffect, useRef, type CSSProperties } from "react";
 import profile from "@terrain/profile.json";
-import type { Milestone } from "@/content/about";
+import type { Camp } from "@/content/about";
+import { rarityShapes } from "@/components/card/rarity-shapes";
 import { SettleText } from "@/components/motion/SettleText";
 import { formatInteger } from "@/lib/format";
 import { useMotionMode } from "@/lib/motion-mode";
+import { rarity as rarityTokens } from "@/styles/tokens";
 import styles from "./AscentProfile.module.css";
 
 /**
  * The career as the real climb from Interlaken to the Jungfrau. The chart (sticky) is the
- * terrain sampled along the Interlaken → Jungfrau trail; milestone plaques scroll beneath it, and
+ * terrain sampled along the Interlaken → Jungfrau trail; the camps' plaques scroll beneath it, and
  * the climbed part of the line, a climber marker and an altitude readout follow the scroll
  * directly (painted in the scroll handler, no easing, so they never trail the finger).
  * The ordered list is the content; the chart is decorative. Without JS or in still mode the
- * whole line is drawn and every milestone is shown; calm follows the scroll like full (a
+ * whole line is drawn and every camp is shown; calm follows the scroll like full (a
  * readout of the reader's own scrolling, not ambient motion).
  */
 
@@ -48,16 +50,21 @@ const pct = (v: number, total: number) => `${((v / total) * 100).toFixed(3)}%`;
 export type AscentLabels = {
   heading: string;
   intro: string;
+  /** What the camps' rarity letters mean. */
+  rarityNote: string;
+  rarityLabel: string;
   readout: { altitude: string; distance: string };
 };
 
+const cssColor = (token: string) => `var(--color-${token.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)})`;
+
 export function AscentProfile({
   labels,
-  milestones,
+  camps: milestones,
   stops,
 }: {
   labels: AscentLabels;
-  milestones: Milestone[];
+  camps: Camp[];
   /** Named waypoints on the profile (e.g. Interlaken, Jungfrau) with their official heights. */
   stops: { label: string; elevation?: string; at: number }[];
 }) {
@@ -131,6 +138,7 @@ export function AscentProfile({
       <header className={styles.header} data-quiet-zone>
         <SettleText as="h2" id="ascent-heading" text={labels.heading} className={`${styles.heading} display`} trigger="inview" />
         <p className="body-copy">{labels.intro}</p>
+        <p className={`${styles.rarityNote} hud-label map-halo keep-halo`}>{labels.rarityNote}</p>
       </header>
 
       <div className={styles.stage}>
@@ -191,21 +199,29 @@ export function AscentProfile({
         </div>
 
         <ol ref={stepsRef} className={styles.steps}>
-          {milestones.map((m, i) => (
-            <li key={i} className={styles.step} data-reached="">
-              <article className={styles.plaque}>
-                <p className={`${styles.year} hud-label`}>
-                  <span className={styles.index} aria-hidden="true">
-                    {i + 1}
-                  </span>
-                  {m.year}
-                </p>
-                <h3 className={`${styles.title} display`}>{m.title}</h3>
-                {m.org && <p className={`${styles.org} hud-label`}>{m.org}</p>}
-                <p className="body-copy">{m.note}</p>
-              </article>
-            </li>
-          ))}
+          {milestones.map((m, i) => {
+            const token = rarityTokens[m.rarity];
+            return (
+              <li key={i} className={styles.step} data-reached="">
+                <article className={styles.plaque}>
+                  <p className={`${styles.year} hud-label`}>
+                    <span className={styles.index} aria-hidden="true">
+                      {i + 1}
+                    </span>
+                    {m.year}
+                    <span className={styles.rarity} style={{ "--rarity": cssColor(token.color) } as CSSProperties}>
+                      <svg viewBox="0 0 12 12" aria-hidden="true">
+                        <path d={rarityShapes[token.shape]} />
+                      </svg>
+                      <span aria-hidden="true">{m.rarity}</span>
+                      <span className="visually-hidden">{`${labels.rarityLabel} ${m.rarity}, ${token.label.toLowerCase()}`}</span>
+                    </span>
+                  </p>
+                  <h3 className={`${styles.title} display`}>{m.title}</h3>
+                </article>
+              </li>
+            );
+          })}
         </ol>
       </div>
     </section>
