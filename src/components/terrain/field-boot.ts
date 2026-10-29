@@ -1,5 +1,7 @@
 import { currentTier } from "@/lib/motion-mode";
 import { deviceProfile, isMobileProfile, type DeviceProfile, type FieldTier } from "./field-settings";
+import { fieldStore } from "./field-store";
+import { readoutFor } from "./readout";
 
 /**
  * Decides, once the page is idle, whether this visit gets the WebGL field and in which tier.
@@ -39,6 +41,17 @@ export function markTierC() {
     // The field is unmounted for this page view anyway.
   }
 }
+
+/** From the first idle moment on, the store's readout follows the morph target (every tier). */
+let readoutTarget: string | null | undefined;
+const syncReadout = () => {
+  const { morphTarget } = fieldStore.get();
+  if (morphTarget === readoutTarget) return;
+  readoutTarget = morphTarget;
+  fieldStore.set({ readout: readoutFor(morphTarget) });
+};
+fieldStore.subscribe(syncReadout);
+syncReadout();
 
 export function resolveTier(): FieldTier {
   const params = new URLSearchParams(window.location.search);

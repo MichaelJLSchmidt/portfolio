@@ -11,8 +11,9 @@ import styles from "./TerrainReadout.module.css";
 
 /**
  * The field's readout, e.g. "BERN · E 2’600’000 · N 1’200’000 · ALT 554 M": what the terrain
- * behind the page is. It follows the field store (route changes and the lab's morphs alike); the
- * server and hydration render it from the route, with formatInteger, so both agree. Changed
+ * behind the page is. It follows the field store's morph target (route changes and the lab's
+ * morphs alike); the server and hydration render it from the route, with formatInteger, so both
+ * agree. Changed
  * numbers roll with the terrain (AnimateNumber, loaded after hydration) in full and calm, and
  * snap in still. Screen readers get the plain text once; the rolling digits are hidden from them.
  *
@@ -22,11 +23,13 @@ type Roll = ComponentType<{ value: number }>;
 
 export function TerrainReadout({ className }: { className?: string }) {
   const pathname = usePathname();
-  const readout = useSyncExternalStore(
+  // The store starts on the route's terrain on the client, so hydration matches the server.
+  const target = useSyncExternalStore(
     fieldStore.subscribe,
-    () => fieldStore.get().readout,
-    () => readoutFor(routeTerrain(pathname)),
+    () => fieldStore.get().morphTarget,
+    () => routeTerrain(pathname),
   );
+  const readout = readoutFor(target);
   const { mode } = useMotionMode();
   const [Roll, setRoll] = useState<Roll | null>(null);
   useEffect(() => {

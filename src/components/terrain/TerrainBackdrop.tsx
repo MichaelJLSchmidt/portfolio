@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState, type ComponentType } from "react";
 import meta from "@terrain/terrain.json";
-import bern from "@terrain/bern/summary.json";
+import bern from "@terrain/bern/posters.json";
 import { site } from "@/content/site";
 import { asset } from "@/lib/asset";
 import { whenIdle } from "@/lib/idle";
@@ -142,7 +142,7 @@ export function TerrainBackdrop() {
                 width={bernCoarse.width}
                 height={bernCoarse.height}
                 decoding="async"
-                style={{ objectPosition: `${bern.zeroPoint.u * 100}% ${bern.zeroPoint.v * 100}%` }}
+                style={{ objectPosition: `${bern.focus.u * 100}% ${bern.focus.v * 100}%` }}
               />
             </picture>
           )}

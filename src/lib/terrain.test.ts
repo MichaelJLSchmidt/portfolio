@@ -10,6 +10,7 @@ const { formatReadout, readoutFor, readoutParts } = await import("../components/
 const { REST, Timeline, morphStep, planRoute, prewarmStep } = await import("../components/terrain/conductor.ts");
 const { contourInterval, intervalSet, LOWLAND_INTERVALS, CONTOUR_INTERVALS } = await import("../components/terrain/field-settings.ts");
 const bern = (await import("../../public/terrain/bern/summary.json", { with: { type: "json" } })).default;
+const bernPosters = (await import("../../public/terrain/bern/posters.json", { with: { type: "json" } })).default;
 
 describe("routeTerrain", () => {
   it("maps Basecamp to Bern, with or without the trailing slash", () => {
@@ -67,8 +68,8 @@ describe("contour intervals per terrain", () => {
   });
 
   it("keeps the spacing rule: Bern reaches 10 m on a laptop and a phone", () => {
-    const desktop = bern.heightmaps.find((h) => h.use === "desktop")!;
-    const mobile = bern.heightmaps.find((h) => h.use === "mobile")!;
+    const desktop = bernPosters.heightmaps.find((h) => h.use === "desktop")!;
+    const mobile = bernPosters.heightmaps.find((h) => h.use === "mobile")!;
     assert.equal(contourInterval(desktop, { width: 1440, height: 900 }, 1.06, { minSpacingPx: 3.25, steepPercentile: 95 }, bern.intervalsM), 10);
     assert.equal(contourInterval(mobile, { width: 390, height: 844 }, 1.06, { minSpacingPx: 3, steepPercentile: 95 }, bern.intervalsM), 10);
   });

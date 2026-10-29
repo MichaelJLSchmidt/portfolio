@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from "react";
 import { BASE_PATH } from "@/lib/asset";
 import { fieldConfig, type FieldConfig, type FieldTier } from "./field-settings";
-import { readoutFor, type Readout } from "./readout";
+import type { Readout } from "./readout";
 import { routeTerrain } from "./route-terrain";
 
 /** Shared state between the route-aware backdrop, the lazy WebGL field and HUD controls. */
@@ -23,8 +23,12 @@ export type FieldState = {
   intervalM: number | null;
   /** Terrain the field is showing once a morph has landed (null = the region). */
   shownTerrain: string | null;
-  /** The readout of the terrain the field is heading to (kept in step with morphTarget). */
-  readout: Readout;
+  /**
+   * The readout of the terrain the field is heading to, kept in step with morphTarget once the page
+   * is idle (field-boot.ts, so the readout's code stays out of the initial bundle); null before.
+   * TerrainReadout derives it from morphTarget itself.
+   */
+  readout: Readout | null;
   /** Incremented on every route change, also when the terrain stays (the conductor holds the quiet zones). */
   routeSeq: number;
   /** The field's device tier once resolved (field-boot.ts); null before. */
@@ -46,7 +50,7 @@ let state: FieldState = {
   replayIntro: 0,
   intervalM: null,
   shownTerrain: null,
-  readout: readoutFor(initialTarget),
+  readout: null,
   routeSeq: 0,
   tier: null,
   config: fieldConfig,
@@ -57,7 +61,6 @@ export const fieldStore = {
   get: () => state,
   set(patch: Partial<FieldState> | ((s: FieldState) => Partial<FieldState>)) {
     const next = typeof patch === "function" ? patch(state) : patch;
-    if (next.morphTarget !== undefined && next.morphTarget !== state.morphTarget) next.readout = readoutFor(next.morphTarget);
     state = { ...state, ...next };
     listeners.forEach((l) => l());
   },
