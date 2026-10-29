@@ -5,6 +5,9 @@
 //                            glints are tried in the full column and the frames scroll to the reveals
 //   round-trip-<mode>.webm   in full, calm and still: the deck, a card into its case study, the Next
 //                            expedition link (hover, keyboard focus, commit) and back to the deck
+//   terrain-card-<mode>.webm, terrain-basecamp-<mode>.webm
+//                            the terrain conductor (docs/terrain.md): home → a card → home and
+//                            home → Basecamp (Bern) → home, the link hovered first (pre-warm)
 //
 //   npm run record:motion                       into ./motion-recordings (git-ignored)
 //   npm run record:motion -- --out <folder>
@@ -131,6 +134,31 @@ try {
       await page.goBack();
       await pause(page, 3000);
     });
+  }
+
+  for (const mode of ["full", "calm", "still"]) {
+    const options = { reducedMotion: mode === "still" ? "reduce" : "no-preference" };
+    const links = { card: 'article[data-slug="kibon"] a', basecamp: 'header a[href$="/about/"]' };
+    for (const [name, selector] of Object.entries(links)) {
+      await record(`terrain-${name}-${mode}`, options, async (page, context) => {
+        await context.addInitScript((calm) => {
+          try {
+            sessionStorage.setItem("summit:intro-played", "1");
+            if (calm) localStorage.setItem("summit:calm-map", "1");
+          } catch {}
+        }, mode === "calm");
+        await page.goto(`${base}/?field=force`, { waitUntil: "networkidle" });
+        await pause(page, 2500);
+        const link = page.locator(selector).first();
+        await link.scrollIntoViewIfNeeded();
+        await link.hover();
+        await pause(page, 1200);
+        await link.click();
+        await pause(page, 3500);
+        await page.goBack();
+        await pause(page, 3500);
+      });
+    }
   }
 } finally {
   await browser.close();
