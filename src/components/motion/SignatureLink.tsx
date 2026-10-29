@@ -84,6 +84,8 @@ export function SignatureLink({
   ...props
 }: SignatureLinkProps) {
   const Anchor = (plain ? "a" : Link) as typeof Link;
+  // A jump within the page (href "#…") is no route: prefetching it would fetch this page's own payload.
+  const anchorProps = !plain && typeof props.href === "string" && props.href.startsWith("#") ? { prefetch: false, ...props } : props;
   const ref = useRef<HTMLAnchorElement>(null);
   const key = settleKey("", `link:${label}`);
 
@@ -137,7 +139,7 @@ export function SignatureLink({
 
   if (variant === "inline") {
     return (
-      <Anchor ref={ref} {...props} className={classes} data-variant="inline" style={style} onClick={commit}>
+      <Anchor ref={ref} {...anchorProps} className={classes} data-variant="inline" style={style} onClick={commit}>
         {before}
         <span className={styles.phrase}>
           {label}
@@ -174,7 +176,7 @@ export function SignatureLink({
   return (
     <Anchor
       ref={ref}
-      {...props}
+      {...anchorProps}
       className={classes}
       data-variant={variant}
       data-role={role}
