@@ -149,3 +149,36 @@ export function floodFlat(data, w, h, sx, sy, tolerance = 0.5) {
   }
   return { mask, level, count };
 }
+
+/**
+ * Catmull-Rom (bicubic) resample, for upsampling a DEM past its native resolution: the GPU
+ * then interpolates a smooth surface linearly between texels, instead of the native grid's
+ * facets. Separable, edges clamped.
+ */
+export function resampleCubic(data, sw, sh, dw, dh) {
+  const k = (t) => {
+    t = Math.abs(t);
+    return t <= 1 ? 1.5 * t ** 3 - 2.5 * t ** 2 + 1 : t < 2 ? -0.5 * t ** 3 + 2.5 * t ** 2 - 4 * t + 2 : 0;
+  };
+  // One pass resamples `lines` lines of length sn → dn; `at(line, i)` reads the source.
+  const pass = (lines, sn, dn, at, write) => {
+    for (let line = 0; line < lines; line++) {
+      for (let d = 0; d < dn; d++) {
+        const x = ((d + 0.5) * sn) / dn - 0.5;
+        const x0 = Math.floor(x);
+        let sum = 0, wsum = 0;
+        for (let i = -1; i <= 2; i++) {
+          const w = k(x - (x0 + i));
+          sum += w * at(line, Math.min(Math.max(x0 + i, 0), sn - 1));
+          wsum += w;
+        }
+        write(line, d, sum / wsum);
+      }
+    }
+  };
+  const rows = new Float32Array(dw * sh);
+  pass(sh, sw, dw, (y, x) => data[y * sw + x], (y, x, v) => (rows[y * dw + x] = v));
+  const out = new Float32Array(dw * dh);
+  pass(dw, sh, dh, (x, y) => rows[y * dw + x], (x, y, v) => (out[y * dw + x] = v));
+  return out;
+}

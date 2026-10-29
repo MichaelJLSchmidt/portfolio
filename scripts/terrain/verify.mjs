@@ -3,6 +3,8 @@
 //   npm run verify:terrain              decode each WebP with libwebp (sharp) and compare
 //   npm run verify:terrain -- --browser also decode it in Chromium the way the site does
 //
+// Covers the region, the card terrains and the Basecamp terrain (public/terrain/bern/bern.json).
+//
 // The reference is the SHA-256 of the packed RGB raster, recorded in terrain.json when the
 // file was encoded (scripts/terrain/lib/heightmap.mjs). PNG copies written with --png are
 // compared too. The browser check uses Playwright if it can be resolved (`npm i -D
@@ -20,7 +22,10 @@ const publicDir = join(root, "public");
 const meta = JSON.parse(readFileSync(join(publicDir, "terrain/terrain.json"), "utf8"));
 // Flagged examples keep their card terrains in examples.json.
 const examples = JSON.parse(readFileSync(join(publicDir, "terrain/examples.json"), "utf8"));
-const maps = [...meta.heightmaps, ...[...Object.values(meta.cards), ...Object.values(examples.cards)].map((c) => c.morph)];
+// The Basecamp terrain (npm run terrain:bern) keeps its own manifest.
+const bernFile = join(publicDir, "terrain/bern/bern.json");
+const bern = existsSync(bernFile) ? JSON.parse(readFileSync(bernFile, "utf8")) : { heightmaps: [] };
+const maps = [...meta.heightmaps, ...[...Object.values(meta.cards), ...Object.values(examples.cards)].map((c) => c.morph), ...bern.heightmaps];
 let failed = 0;
 const fail = (msg) => {
   failed++;
