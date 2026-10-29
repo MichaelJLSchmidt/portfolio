@@ -87,6 +87,8 @@ export type SummitCardData = {
 
 export const cardLabels = {
   openLog: "Open expedition log",
+  /** The card link's accessible name. */
+  open: (name: string, type: string, rarity: string) => `Open expedition: ${name}, ${type}, rarity ${rarity}`,
   costPrefix: "Summit cost",
   stats: "Card stats",
   stat: { teamLed: "Team led", time: "Time", impact: "Impact" },
@@ -105,7 +107,7 @@ export const caseStudyLabels = {
   keyDecision: "Key decision",
   outcome: "Outcome",
   didNotDo: "What I did not do",
-  jumpTo: "Jump to",
+  jumpTo: "On this page",
   onThisPage: "On this page",
   nextWaypoint: "Next waypoint",
   backToTop: "Back to top",
@@ -145,8 +147,8 @@ export const caseStudyLabels = {
   evidenceLegend: "Evidence",
   credits: "Credits",
   next: "Next expedition",
-  back: "Back to the deck",
-  backToAll: "Back to all expeditions",
+  back: "All expeditions",
+  backToAll: "All expeditions",
   example: "Fictional example",
 };
 

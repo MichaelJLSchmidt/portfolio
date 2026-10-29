@@ -13,7 +13,7 @@ export const rawCaseStudy: CaseStudy = {
   example: true,
   banner: {
     label: "Model case study · Fictional example",
-    text: "the canton, people and figures are invented to demonstrate the page format.",
+    text: "the organisation, people and figures are invented to show the format.",
   },
   lede: "A bilingual subsidy service where {{outcomes.complete.after}}% of applications are now complete on first submission.",
   typeLine: "Service design · Public sector · UX Team Lead · {{project.months}} months · {{years.start}}–{{years.end}} (fictional)",

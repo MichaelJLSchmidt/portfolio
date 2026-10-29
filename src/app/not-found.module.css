@@ -15,17 +15,7 @@
   font-size: clamp(3rem, 14vw, 9rem);
 }
 
-.back {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6em;
-  justify-self: start;
-  min-height: 44px;
-  color: var(--color-glacier);
-  text-decoration: none;
-}
-
-.back:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
+.line {
+  max-width: 36ch;
+  font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
 }

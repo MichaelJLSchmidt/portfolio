@@ -159,7 +159,7 @@ uses every block; read it as the reference.
 - **Waypoints:** each heading states its finding, "Label — finding"; decisions are h3 blocks.
 - **In-page navigation:** from 1200 px a sticky "On this page" trail beside the content (a `nav`, one link per
   waypoint, a dotted contour trail that fills up to the waypoint being read, `aria-current="true"`); below
-  1200 px the "Jump to" chips near the top and "Next waypoint ↓ / Back to top ↑" at the end of each waypoint.
+  1200 px the "On this page" chips near the top and "Next waypoint ↓ / Back to top ↑" at the end of each waypoint.
 - **Figures** (`Figure.tsx`): `<figure>` with `<picture>` (AVIF, then WebP, width descriptors, `sizes`, explicit
   width and height), lazy unless `priority` (eager, `fetchpriority="high"`, only for an image in the first
   viewport), a tiny blurred placeholder, and the caption "Fig. n — What it shows. Why it matters." (numbered in
@@ -407,8 +407,9 @@ Attribution: "Terrain data © swisstopo" appears in the footer of every page (an
 ## Accessibility and motion
 
 - Semantic HTML first. The hero name is server-rendered text, so LCP is text, not the canvas.
-- All interactions work with the keyboard. Each card is a single link, named by the card's title, with the focus
-  ring around the card. Focus returns to the originating card after navigating back.
+- All interactions work with the keyboard. Each card is a single link, named "Open expedition: <name>, <type>,
+  rarity <letter>", with the focus ring around the card. Focus returns to the originating card after navigating
+  back.
 - Settling headlines keep a hidden rest-state copy of each letter, so the animation never changes layout (no CLS).
   The accessible name is the plain text.
 - Text in the first viewport is visible from first paint; only blocks below the fold reveal (`data-reveal`).

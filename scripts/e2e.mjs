@@ -409,7 +409,7 @@ async function casestudy() {
     }, trail);
     check("trail is a visible, sticky nav labelled “On this page”", info.visible && info.position === "sticky", `position=${info.position}`);
     check("trail lists the six waypoints, not the H1", info.links.length === 6 && !info.h1Linked, info.links.join(" "));
-    check("“Jump to” chips hidden from 1200 px", !info.jumpVisible);
+    check("“On this page” chips hidden from 1200 px", !info.jumpVisible);
     check("waypoint headings have a scroll margin", parseFloat(info.margin) >= 80, info.margin);
     check("the example page is noindex", /noindex/.test(info.robots ?? ""), info.robots);
     await page.evaluate(() => document.getElementById("discovery").scrollIntoView({ block: "start" }));
@@ -455,7 +455,7 @@ async function casestudy() {
       width: document.documentElement.scrollWidth,
       markers: [...document.querySelectorAll("button[data-hotspot]")].map((b) => b.getBoundingClientRect()).map((r) => Math.min(r.width, r.height)),
     }), trail);
-    check("trail hidden, “Jump to” chips shown", !info.trail && info.jump);
+    check("trail hidden, “On this page” chips shown", !info.trail && info.jump);
     check("each waypoint ends with “Next waypoint” (5) and “Back to top” (6)", info.next === 5 && info.top === 6, `${info.next} next, ${info.top} back`);
     check("no sideways scrolling", info.width <= 390, `${info.width}px`);
     check("hotspot markers at least 24×24 px", info.markers.length === 5 && info.markers.every((m) => m >= 24), info.markers.join(", "));

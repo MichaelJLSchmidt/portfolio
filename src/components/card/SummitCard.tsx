@@ -39,7 +39,7 @@ export type SummitCardProps = {
 /**
  * A data-driven trading-card-style project card with spring tilt and contour foil
  * (rarity R and M). The whole card is one link to the case study: a transparent anchor
- * covers the face and takes its accessible name from the card name.
+ * covers the face, named "Open expedition: <name>, <type>, rarity <letter>".
  */
 export function SummitCard({
   card,
@@ -176,7 +176,7 @@ export function SummitCard({
               <Link
                 href={cardHref(card)}
                 className={styles.cardLink}
-                aria-labelledby={nameId}
+                aria-label={cardLabels.open(card.name, card.type, card.rarity)}
                 onClick={(e) => {
                   // Hide hover-only chrome before the view transition snapshots the card.
                   setOpening(true);

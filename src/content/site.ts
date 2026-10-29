@@ -51,9 +51,9 @@ export const site = {
   },
   skipLink: "Skip to content",
   notFound: {
-    eyebrow: "404 · Off the map",
-    heading: "No trail here",
-    body: "This page isn't on the map. The deck is a safer route.",
-    back: "Back to the deck",
+    eyebrow: "404",
+    heading: "Off the map",
+    body: "This trail isn’t on any map I’ve drawn.",
+    back: "Back to the trailhead",
   },
 } as const;

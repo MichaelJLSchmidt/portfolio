@@ -56,7 +56,7 @@ export const lab = {
         display: "Seilschaft",
         eyebrow: "Next expedition",
         nav: "Basecamp",
-        navCurrent: "The deck",
+        navCurrent: "Expeditions",
       },
       button: {
         title: "Motion button",
