@@ -43,7 +43,7 @@ export function TrailheadBand({
   return (
     <nav ref={ref} className={styles.trailhead} aria-label={labels.nav} data-vt-exit>
       {next && (
-        <div className={styles.trailheadNext}>
+        <div className={styles.trailheadNext} data-quiet-zone>
           <SignatureLink
             href={cardHref(next)}
             variant="display"
@@ -59,7 +59,7 @@ export function TrailheadBand({
           </div>
         </div>
       )}
-      <SignatureLink href="/" scroll={false} variant="standalone" role="mono" label={labels.backToAll} arrow="←" arrowAt="start" className={`${styles.backToAll} hud-label`} />
+      <SignatureLink href="/" scroll={false} variant="standalone" role="mono" label={labels.backToAll} arrow="←" arrowAt="start" className={`${styles.backToAll} hud-label`} data-quiet-zone />
     </nav>
   );
 }

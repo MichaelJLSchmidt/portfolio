@@ -95,7 +95,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
       <RememberCard slug={card.slug} />
       <nav className={styles.crumbs} aria-label={L.back} data-vt-exit>
         {/* No scroll to the top: the deck brings the card back into view itself (Deck). */}
-        <SignatureLink href="/" scroll={false} variant="standalone" role="mono" label={L.back} arrow="←" arrowAt="start" className={`${styles.crumb} hud-label`} />
+        <SignatureLink href="/" scroll={false} variant="standalone" role="mono" label={L.back} arrow="←" arrowAt="start" className={`${styles.crumb} hud-label`} data-quiet-zone />
       </nav>
 
       {study.banner && <FictionBanner label={study.banner.label} text={study.banner.text} />}
