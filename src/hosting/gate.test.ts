@@ -159,7 +159,7 @@ const page: PageModel = {
   contact: [{ label: "Email", href: null }],
   placeholder: (label) => `[${label.toUpperCase()}]`,
   hud: { coordinates: "N", altitude: "ALT", clock: "Bern" },
-  access: { heading: "Basecamp access", label: "Password", submit: "Enter", error: "Wrong password.", closed: "Closed.", username: "basecamp" },
+  access: { heading: "Trail under construction", label: "Password", submit: "Enter", pending: "CHECKING…", error: "That’s not the password.", closed: "Closed.", username: "basecamp" },
   credit: { label: "Credit", href: null },
   css: "",
   script: "",
@@ -248,7 +248,11 @@ describe("gate handler", () => {
     assert.equal(res.headers.get("Set-Cookie"), null);
     assert.equal(res.headers.get("Cache-Control"), "no-store");
     const html = await res.text();
-    assert.match(html, /role="alert">Wrong password\.</);
+    assert.match(html, /role="alert">That’s not the password\.</);
+    // The submit button carries its pending label for the inline script ("CHECKING…").
+    assert.match(html, /<button type="submit" data-pending="CHECKING…">Enter<\/button>/);
+    // The field's underline, drawn on focus.
+    assert.match(html, /<span class="input"><input id="password"[^>]*><span class="line" aria-hidden="true"><\/span><\/span>/);
     assert.match(html, /aria-invalid="true" aria-describedby="access-error"/);
     assert.match(html, /name="next" value="\/about\/"/);
   });
@@ -303,5 +307,17 @@ describe("gate handler", () => {
     assert.equal(calls.next, 0);
     assert.ok(calls.logs.length <= 1);
     assert.ok(calls.logs.every((line) => line.includes(gate.passwordEnv)));
+  });
+});
+
+// The page's own copy (src/content/about.ts): the under-construction page and the gate.
+describe("the night-summit page's copy", () => {
+  it("reads as the trail under construction", async () => {
+    await import("../../scripts/lib/ts-hooks.mjs");
+    const { holding } = await import("../content/about.ts");
+    assert.equal(holding.access.heading, "Trail under construction");
+    assert.equal(holding.status, "The route is being marked. If you were given the password, step in.");
+    assert.equal(holding.access.error, "That’s not the password. Check the message you received, or write to me.");
+    assert.equal(holding.access.pending, "CHECKING…");
   });
 });

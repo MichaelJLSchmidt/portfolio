@@ -23,6 +23,8 @@ export type PageModel = {
     heading: string;
     label: string;
     submit: string;
+    /** The submit button's label while the password is checked (the inline script sets it). */
+    pending: string;
     error: string;
     closed: string;
     /** Account name for password managers; the gate ignores it. */
@@ -83,9 +85,11 @@ function accessForm(page: PageModel, form: FormState): string {
     `<input type="text" name="username" value="${escapeHtml(access.username)}" autocomplete="username" hidden>`,
     `<label for="password">${escapeHtml(access.label)}</label>`,
     `<div class="field">`,
-    `<input id="password" name="password" type="password" autocomplete="current-password" required maxlength="1024"`,
+    // The underline draws under the field on focus (.line).
+    `<span class="input"><input id="password" name="password" type="password" autocomplete="current-password" required maxlength="1024"`,
     error ? ` aria-invalid="true" aria-describedby="access-error" autofocus>` : ">",
-    `<button type="submit">${escapeHtml(access.submit)}</button>`,
+    `<span class="line" aria-hidden="true"></span></span>`,
+    `<button type="submit" data-pending="${escapeHtml(access.pending)}">${escapeHtml(access.submit)}</button>`,
     `</div>`,
     error ? `<p id="access-error" class="error" role="alert">${escapeHtml(access.error)}</p>` : "",
     `</form>`,

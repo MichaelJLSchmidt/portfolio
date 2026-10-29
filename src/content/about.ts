@@ -140,7 +140,7 @@ export const about = {
 export const holding = {
   name: site.name,
   role: "UX Team Lead · Senior UX Designer · Bern",
-  status: "Basecamp is being set up. The expedition starts soon.",
+  status: "The route is being marked. If you were given the password, step in.",
   /** Title and meta description, built from the name and role. */
   meta: {
     title: (name: string) => `${name} · UX Team Lead · Senior UX Designer`,
@@ -150,10 +150,12 @@ export const holding = {
   contact: actions.filter((a) => a.kind === "email" || a.kind === "linkedin"),
   hud: { coordinates: "46.6863° N · 7.8632° E", altitude: "ALT 566 M", clock: "Bern" },
   access: {
-    heading: "Basecamp access",
+    heading: "Trail under construction",
     label: "Password",
     submit: "Enter basecamp →",
-    error: "Wrong password. Try again.",
+    /** The submit button while the password is being checked. */
+    pending: "CHECKING…",
+    error: "That’s not the password. Check the message you received, or write to me.",
     closed: "Basecamp is closed for now.",
     username: "basecamp",
   },
