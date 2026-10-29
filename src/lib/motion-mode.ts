@@ -70,7 +70,14 @@ function apply(calm = readCalm()) {
   window.dispatchEvent(new Event(CHANGE_EVENT));
 }
 
-/** The Calm map switch. Has no effect on the mode while the OS asks for reduced motion. */
+// A Calm map choice made but not applied yet (setCalmMap): the mode follows a frame later.
+let pendingCalm: boolean | null = null;
+
+/**
+ * The Calm map switch. Has no effect on the mode while the OS asks for reduced motion. The switch's
+ * own look (html[data-calm]) changes at once; the mode, which restyles the whole page and
+ * re-renders whatever follows it, a frame later, so the switch answers before that work runs.
+ */
 export function setCalmMap(on: boolean) {
   try {
     if (on) localStorage.setItem(CALM_STORAGE_KEY, "1");
@@ -78,7 +85,17 @@ export function setCalmMap(on: boolean) {
   } catch {
     // Storage can be blocked (private mode, policies); the switch still works for this page view.
   }
-  apply(on);
+  root().setAttribute("data-calm", on ? "1" : "0");
+  const queued = pendingCalm !== null;
+  pendingCalm = on;
+  if (queued) return;
+  requestAnimationFrame(() =>
+    window.setTimeout(() => {
+      const calm = pendingCalm ?? on;
+      pendingCalm = null;
+      apply(calm);
+    }, 0),
+  );
 }
 
 /** Haptics: "on" or "off" once the visitor chose; unset means the mode's default (on in full only). */
@@ -121,6 +138,7 @@ export function cancelPendingIntro() {
 /** The resolved mode, read from <html> (the pre-paint script's result). Outside React too. */
 export function currentMode(): MotionMode {
   if (typeof document === "undefined") return "still";
+  if (pendingCalm !== null) return resolve(pendingCalm);
   const m = root().getAttribute("data-motion") as MotionMode | null;
   return m && MODES.includes(m) ? m : "still";
 }

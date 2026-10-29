@@ -37,7 +37,8 @@ Precedence: still always wins. When the OS forces still, the switch shows "on" a
 description says why. The switch is a native `<input type="checkbox" switch role="switch">` whose
 visible label, "Calm map", is also its name (WCAG 2.5.3 Label in Name); its description reads
 "Reduces motion on this site", plus the explanation when the OS forces still. The thumb shows the
-state.
+state (html[data-calm], set at once on a flip); the mode itself (html[data-motion], which restyles
+the whole page and re-renders what follows it) changes a frame later, so the switch answers first.
 
 Preview builds accept `?motion=full|calm|still` for one page load (the lab's frames, tests,
 recordings); the OS setting still wins.

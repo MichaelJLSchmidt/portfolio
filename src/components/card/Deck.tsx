@@ -101,12 +101,18 @@ export function Deck({ copy: t }: { copy: typeof home.expeditions }) {
     rememberView(next);
     const mode = currentMode();
     if (mode === "still") return setChosen(next);
-    // The view switch's own timing (globals.css): the names morph over 360 ms; calm cross-fades.
-    const root = document.documentElement;
-    const flag = mode === "calm" ? "view-calm" : "view";
-    root.setAttribute("data-vt", flag);
-    window.setTimeout(() => root.getAttribute("data-vt") === flag && root.removeAttribute("data-vt"), duration.medium + duration.short);
-    startTransition(() => setChosen(next));
+    // The press paints first; the switch (a view transition, which holds rendering while it
+    // captures the page) starts a frame later.
+    requestAnimationFrame(() =>
+      window.setTimeout(() => {
+        // The view switch's own timing (globals.css): the names morph over 360 ms; calm cross-fades.
+        const root = document.documentElement;
+        const flag = mode === "calm" ? "view-calm" : "view";
+        root.setAttribute("data-vt", flag);
+        window.setTimeout(() => root.getAttribute("data-vt") === flag && root.removeAttribute("data-vt"), duration.medium + duration.short);
+        startTransition(() => setChosen(next));
+      }, 0),
+    );
   };
 
   // No case study in this build (a live build until the first real one is written): the section

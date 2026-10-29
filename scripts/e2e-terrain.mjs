@@ -211,12 +211,14 @@ export function terrainScenarios({ browser, base, root, check, settle }) {
       const shown = await page.evaluate(() => {
         const root = document.querySelector("main [data-terrain-readout] [data-run]").cloneNode(true);
         const rolls = root.querySelectorAll("[data-part] > span > *");
+        const alt = root.querySelectorAll('[data-part="alt"] > span > *').length;
         for (const n of rolls) n.replaceWith(n.firstElementChild?.textContent ?? n.textContent);
-        return { text: root.textContent.replace(/\s+/g, " ").trim(), rolls: rolls.length };
+        return { text: root.textContent.replace(/\s+/g, " ").trim(), rolls: rolls.length, alt };
       });
       check(`${mode}: the shown digits match the text`, shown.text === bernReadout, shown.text);
       if (mode === "still") check("still: numbers snap (no rolling digits)", shown.rolls === 0, `${shown.rolls} rolling groups`);
-      else check("full: numbers roll (AnimateNumber per thousands group)", shown.rolls === 7, `${shown.rolls} rolling groups`);
+      // The altitude changed, so it rolls (AnimateNumber); the coordinates appear with Bern, at their value.
+      else check("full: a changed number rolls (the altitude, AnimateNumber)", shown.alt === 1, `${shown.alt} rolling altitude groups, ${shown.rolls} in all`);
       const card = await page.locator('button[data-morph]:not([data-morph="bern"]):not([data-morph="region"])').first();
       if (await card.count()) {
         await card.click();

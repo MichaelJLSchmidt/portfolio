@@ -91,6 +91,9 @@ function StatValue({ value, phase }: { value: string; phase: Roll }) {
   );
 }
 
+/** Resolves once the current frame has painted (a frame, then a task). */
+const afterPaint = () => new Promise<void>((done) => requestAnimationFrame(() => window.setTimeout(done, 0)));
+
 /**
  * A Summit Card: a data-driven trading-card-style project card. The whole card is one link to
  * its case study, named "Open expedition: <name>, <type>, rarity <letter>" (", Visited" once its
@@ -375,14 +378,14 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNa
                 // A tilted card springs flat first (≤ 120 ms), so the morph never starts tilted.
                 const settled = settleRef.current?.();
                 const href = cardHref(card);
+                e.preventDefault();
                 if (navigate) {
-                  e.preventDefault();
                   void (settled ?? Promise.resolve()).then(() => navigate(href));
                   return;
                 }
-                if (!settled) return;
-                e.preventDefault();
-                settled.then(() => router.push(href));
+                // Otherwise the press paints first and the route change (a view transition, which
+                // holds rendering while it captures the page) starts a frame later.
+                void (settled ?? afterPaint()).then(() => router.push(href));
               }}
             />
           </div>

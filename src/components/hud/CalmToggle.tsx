@@ -12,8 +12,9 @@ type Labels = { label: string; description: string; forced: string };
  * The motion switch: a native checkbox switch (`switch` gives iOS Safari its system switch and
  * tick; role="switch" elsewhere). Its visible label, "Calm map", is its name (WCAG 2.5.3 Label in
  * Name); the description says what it does, "Reduces motion on this site", and when the OS asks
- * for reduced motion also why it shows on and cannot be switched off. The thumb follows
- * html[data-motion], so it is right from first paint, and moves on the thumb spring. The label
+ * for reduced motion also why it shows on and cannot be switched off. The thumb follows <html>
+ * (data-calm, or the still mode), so it is right from first paint and moves on the thumb spring as
+ * soon as it is flipped; the mode itself follows a frame later (setCalmMap). The label
  * settles in mono on first load.
  */
 export function CalmToggle({ labels }: { labels: Labels }) {

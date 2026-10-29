@@ -301,8 +301,9 @@
 }
 
 /* Switches (CalmToggle.tsx): a native checkbox drawn as the track, a thumb over it. The "on"
-   look follows html[data-motion] for the motion switch (right from first paint) and the
-   checkbox for the haptics switch. Off reads in sheet (7:1 over the backdrop), on in glacier. */
+   look follows <html> for the motion switch (right from first paint: data-calm, the visitor's
+   choice, set at once on a flip, or the still mode) and the checkbox for the haptics switch.
+   Off reads in sheet (7:1 over the backdrop), on in glacier. */
 .toggle {
   display: inline-flex;
   align-items: center;
@@ -353,12 +354,12 @@
   pointer-events: none;
 }
 
-:root:is([data-motion="calm"], [data-motion="still"]) .toggle:not(.haptics),
+:root:is([data-calm="1"], [data-motion="still"]) .toggle:not(.haptics),
 .haptics[data-on="true"] {
   color: var(--color-glacier);
 }
 
-:root:is([data-motion="calm"], [data-motion="still"]) .toggle:not(.haptics) .thumb,
+:root:is([data-calm="1"], [data-motion="still"]) .toggle:not(.haptics) .thumb,
 .haptics[data-on="true"] .thumb {
   transform: translateX(10px);
 }
