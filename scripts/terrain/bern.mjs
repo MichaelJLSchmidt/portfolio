@@ -8,8 +8,9 @@
 //
 // Outputs (public/terrain/bern, committed): heightmap-{1536,800}.webp (16-bit heights in R+G,
 // lossless) with .bin raw-height fallbacks, contours-{10,20}.svg posters with the river and the
-// zero-point pin, and bern.json (metadata the field imports: encoding, reference texels, interval
-// set, river path in terrain coordinates, the altitude at the zero point and the source). The
+// zero-point pin, bern.json (metadata the field imports: encoding, reference texels, interval
+// set, river path in terrain coordinates, the altitude at the zero point and the source) and
+// summary.json (the few values the backdrop and the readout need on every page). The
 // window is only ~6 MB of the swissALTIRegio COG; the river comes from swissTLM3D through
 // api3.geo.admin.ch. If that request fails the river is traced along the DEM's valley floor
 // (said so in bern.json), and without elevation data there is no river at all.
@@ -401,4 +402,16 @@ const meta = {
   checks: source.placeholder ? null : checks,
 };
 writeFileSync(join(outDir, `${cfg.id}.json`), `${JSON.stringify(meta, null, 2)}\n`);
+// What the backdrop (posters) and the readout need on every page: kept apart from the manifest,
+// whose river and reference texels only the lazily loaded field reads.
+const summary = {
+  id: meta.id,
+  label: meta.label,
+  placeholder: meta.placeholder,
+  zeroPoint: { e: meta.zeroPoint.e, n: meta.zeroPoint.n, u: meta.zeroPoint.u, v: meta.zeroPoint.v, altitudeM: meta.zeroPoint.altitudeM },
+  intervalsM: meta.intervalsM,
+  heightmaps: heightmaps.map(({ use, width, height, gradientM }) => ({ use, width, height, gradientM })),
+  posters: posters.map(({ file, intervalM, width, height }) => ({ file, intervalM, width, height })),
+};
+writeFileSync(join(outDir, "summary.json"), `${JSON.stringify(summary, null, 2)}\n`);
 log(`  wrote public/terrain/${cfg.id}/${cfg.id}.json${source.placeholder ? "  (PLACEHOLDER terrain: replace with npm run terrain:bern -- --refresh)" : ""}`);
