@@ -1,15 +1,18 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { fieldConfig, type FieldConfig } from "./field-settings";
+import { BASE_PATH } from "@/lib/asset";
+import { fieldConfig, type FieldConfig, type FieldTier } from "./field-settings";
+import type { Readout } from "./readout";
+import { routeTerrain } from "./route-terrain";
 
 /** Shared state between the route-aware backdrop, the lazy WebGL field and HUD controls. */
 export type FieldState = {
-  /** Terrain id the field should morph to (a card's terrain), or null for the region. */
+  /** Terrain id the field should morph to (a card's terrain, "bern"), or null for the region. */
   morphTarget: string | null;
   /** Terrain ids worth preloading (card hover/focus). */
   prefetch: string[];
-  /** "poster" until the WebGL field has painted its first frame. */
+  /** "poster" until the WebGL field has painted its first frame (and again after a context loss). */
   mode: "poster" | "field";
   introPlaying: boolean;
   /** Incremented to ask the field to skip the intro. */
@@ -20,11 +23,26 @@ export type FieldState = {
   intervalM: number | null;
   /** Terrain the field is showing once a morph has landed (null = the region). */
   shownTerrain: string | null;
+  /**
+   * The readout of the terrain the field is heading to, kept in step with morphTarget once the page
+   * is idle (field-boot.ts, so the readout's code stays out of the initial bundle); null before.
+   * TerrainReadout derives it from morphTarget itself.
+   */
+  readout: Readout | null;
+  /** Incremented on every route change, also when the terrain stays (the conductor holds the quiet zones). */
+  routeSeq: number;
+  /** The field's device tier once resolved (field-boot.ts); null before. */
+  tier: FieldTier | null;
   config: FieldConfig;
 };
 
+// On the client the store starts on the current route's terrain, so a readout rendered during
+// hydration matches the server's (which derives it from the route too).
+const initialTarget =
+  typeof window === "undefined" ? null : routeTerrain(window.location.pathname.slice(BASE_PATH.length) || "/");
+
 let state: FieldState = {
-  morphTarget: null,
+  morphTarget: initialTarget,
   prefetch: [],
   mode: "poster",
   introPlaying: false,
@@ -32,6 +50,9 @@ let state: FieldState = {
   replayIntro: 0,
   intervalM: null,
   shownTerrain: null,
+  readout: null,
+  routeSeq: 0,
+  tier: null,
   config: fieldConfig,
 };
 const listeners = new Set<() => void>();

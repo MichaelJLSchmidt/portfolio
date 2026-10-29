@@ -2,7 +2,8 @@
 // every running-text element (.body-copy, and .knockout blocks such as the footer and tables) on
 // the home page, a case study, the case-study example (when the build includes it) and Basecamp,
 // at a desktop and a phone size, over the moving contour field at its worst (the headlamp lit
-// right on the text) and over the static poster (reduced motion, no WebGL). Text on opaque
+// right on the text), over the field caught mid-morph during a route change (preview builds) and
+// over the static poster (reduced motion, no WebGL). Text on opaque
 // surfaces (.surface-copy: the sheet colour of the banner, key insight and map-sheet captions, the
 // night frames of tiles and charts) is measured the same way, for either polarity.
 //
@@ -150,6 +151,9 @@ const viewports = [
 const modes = [
   { name: "field, headlamp on the text", reduced: false },
   { name: "poster", reduced: true },
+  // A route change caught halfway: the field frozen mid-morph towards another terrain, its quiet
+  // zones held as the conductor holds them (preview builds: the field's debug hook).
+  { name: "mid-morph (route change), headlamp on the text", reduced: false, morph: true },
 ];
 
 // Narrow a run while iterating: LEGIBILITY_ONLY="Basecamp,desktop,field" (any of the words).
@@ -179,6 +183,10 @@ for (const mode of pick(modes)) {
     for (const p of pick(pages)) {
       await page.goto(`${base}${p.path}${mode.reduced ? "" : "?field=force"}`, { waitUntil: "networkidle" });
       if (!mode.reduced) await page.waitForSelector('[data-field="on"]', { timeout: 20000 });
+      if (mode.morph && !(await page.evaluate((path) => window.__terrain?.freeze(path === "/about/" ? null : "bern", 0.5) ?? false, p.path))) {
+        console.log(`skip  ${mode.name} · ${vp.name} · ${p.name}: no field debug hook (build with NEXT_PUBLIC_PREVIEW=1)`);
+        continue;
+      }
       await page.waitForTimeout(1500);
       // Content wider than a phone widens its layout viewport: the page pans sideways, and the
       // screenshots (taken by the visual viewport) no longer line up with the element boxes.

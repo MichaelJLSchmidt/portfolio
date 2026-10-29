@@ -10,6 +10,8 @@
 //   npm run test:e2e -- decode        heightmap decode check and its fallbacks
 //   npm run test:e2e -- casestudy     the case-study template on the example page (needs a build
 //                                     that includes examples: SITE_MODE=basecamp or a preview)
+//   npm run test:e2e -- terrain       the terrain conductor, Bern, the readout, tiers and context
+//                                     loss (scripts/e2e-terrain.mjs; needs NEXT_PUBLIC_PREVIEW=1)
 //
 // Serves ./out like a static host (base path read from the build) and drives Chromium with
 // Playwright, which is not a dependency: `npm i -D playwright && npx playwright install chromium`,
@@ -854,6 +856,8 @@ async function primitives() {
 }
 
 const scenarios = { transitions, modes, hydration, primitives, decode, casestudy };
+// The terrain conductor and the Bern terrain (scripts/e2e-terrain.mjs).
+Object.assign(scenarios, (await import("./e2e-terrain.mjs")).terrainScenarios({ browser, base, root, check, settle }));
 try {
   for (const [name, run] of Object.entries(scenarios)) if (!only || only === name) await run();
 } finally {

@@ -1,0 +1,84 @@
+/* The terrain lab (/lab/terrain/): the page sits over the live field, panels on the legend surface. */
+.main {
+  display: grid;
+  gap: 32px;
+  padding-top: 96px;
+  padding-bottom: 64px;
+}
+
+.header {
+  display: grid;
+  gap: 12px;
+  max-width: 72ch;
+}
+
+.title {
+  font-size: clamp(2.75rem, 7vw, 6rem);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: 16px;
+}
+
+.panel {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--color-contour-dim);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-ground-raised) 88%, transparent);
+  color: var(--color-sheet);
+}
+
+.panel h2,
+.panel h3 {
+  margin: 0;
+  color: var(--color-glacier);
+}
+
+.note {
+  margin: 0;
+  color: var(--color-sheet);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+}
+
+.row a {
+  color: var(--color-sheet);
+}
+
+.row a[aria-current="true"] {
+  color: var(--color-glacier);
+}
+
+.readout {
+  color: var(--color-glacier);
+  overflow-x: auto;
+}
+
+.state {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px 16px;
+  margin: 0;
+}
+
+.state dt {
+  color: var(--color-sheet);
+  font-size: 0.75rem;
+}
+
+.state dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}

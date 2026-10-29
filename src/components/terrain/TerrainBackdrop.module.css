@@ -8,12 +8,25 @@
   contain: strict;
 }
 
+.layer,
 .poster,
 .canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+}
+
+/* One poster per terrain the backdrop can show: the region, and Basecamp's (Bern, the Aare in
+   ice, the zero-point pin). A route change cross-fades the layers in 200 ms, opacity only: what
+   still mode and tier C see instead of the field's morph. */
+.layer {
+  transition: opacity var(--dur-still) linear;
+}
+
+.backdrop[data-poster="bern"] .layer[data-layer="region"],
+.backdrop[data-poster="region"] .layer[data-layer="bern"] {
+  opacity: 0;
 }
 
 .poster {
@@ -47,6 +60,14 @@
   animation: none;
   opacity: 0;
   transition-delay: var(--dur-medium);
+}
+
+/* The WebGL context is lost: the poster is back at once. */
+.backdrop[data-field="lost"] .layer,
+.backdrop[data-field="lost"] .poster,
+.backdrop[data-field="lost"] .canvas,
+.backdrop[data-field="lost"] .vignette {
+  transition: none;
 }
 
 /* The band under the HUD. */

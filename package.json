@@ -12,6 +12,7 @@
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
     "terrain": "node scripts/terrain/build.mjs",
+    "terrain:bern": "node scripts/terrain/bern.mjs",
     "images": "node scripts/images/build.mjs",
     "verify:terrain": "node scripts/terrain/verify.mjs",
     "report:size": "node scripts/report-sizes.mjs",
