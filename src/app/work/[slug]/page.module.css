@@ -42,8 +42,12 @@
   box-shadow: 0 24px 60px rgb(0 0 0 / 0.45);
 }
 
+/* The title is sized by its longest word (--title-chars, ~0.5 em per capital in the display cut),
+   so a long single word still fits this column. */
 .titleBlock {
+  container-type: inline-size;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
   align-content: end;
 }
@@ -53,7 +57,7 @@
 }
 
 .title {
-  font-size: clamp(3rem, 12vw, 8.5rem);
+  font-size: min(clamp(3rem, 12vw, 8.5rem), calc(0.96 * 100cqi / (var(--title-chars, 8) * 0.5)));
   overflow-wrap: anywhere;
 }
 

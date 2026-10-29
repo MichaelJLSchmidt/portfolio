@@ -4,7 +4,8 @@
 //          notes, Workshops, Contact) with #expeditions and #contact; the HUD's items left to right
 //          and where Contact leads; Basecamp's sections and its five camps; the 404 page; example
 //          content (the "Example quote" tags and the Summit log's small print) only where the build
-//          has examples
+//          has examples; the display titles of Basecamp and the case studies inside their column at
+//          phone to desktop widths
 //   phone  every route at 360 and 390 px: no sideways scrolling, the HUD keeps the mark, Basecamp
 //          and the Calm map switch inside the screen without overlaps, and the footer carries the rest
 //
@@ -93,6 +94,31 @@ export async function ia({ base, basePath, root, check, open }) {
   check("404: “Off the map” with “Back to the trailhead”", notFound.h1 === "Off the map" && !!notFound.back, JSON.stringify(notFound));
   check("no page errors", errors.length === 0, errors.join("; "));
   await context.close();
+
+  // A display title is sized by its longest word: one long word never runs out of its column, or
+  // past the screen, where it would be clipped and the lede beside it with it. Checked at rest
+  // (still), so no settle is caught half way.
+  const still = await open({ reduced: true });
+  for (const width of [390, 900, 1000, 1280, 1440]) {
+    await still.page.setViewportSize({ width, height: 900 });
+    for (const route of routes(root).filter((r) => r === "/about/" || r.startsWith("/work/"))) {
+      await still.page.goto(`${base}${route}`, { waitUntil: "networkidle" });
+      const r = await still.page.evaluate(() => {
+        const h1 = document.querySelector("main h1");
+        const vw = document.documentElement.clientWidth;
+        const right = Math.max(...[...h1.querySelectorAll("[aria-hidden] span")].map((g) => g.getBoundingClientRect().right));
+        const texts = [...h1.closest("header").querySelectorAll("p")].map((p) => Math.round(p.getBoundingClientRect().right));
+        return { right: Math.round(right), box: Math.round(h1.getBoundingClientRect().right), vw, texts };
+      });
+      check(
+        `${route} at ${width} px: the title fits its column, the text beside it stays on screen`,
+        r.right <= r.box + 1 && r.right <= r.vw && r.texts.every((x) => x <= r.vw),
+        JSON.stringify(r),
+      );
+    }
+  }
+  check("no page errors (titles)", still.errors.length === 0, still.errors.join("; "));
+  await still.context.close();
 }
 
 export async function phone({ browser, base, root, check }) {

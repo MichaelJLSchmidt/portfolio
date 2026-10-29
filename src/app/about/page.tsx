@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import profile from "@terrain/profile.json";
 import { AscentProfile } from "@/components/about/AscentProfile";
 import { ContactBand } from "@/components/home/ContactBand";
@@ -8,6 +9,7 @@ import { SettleText } from "@/components/motion/SettleText";
 import { MorphTarget } from "@/components/transition/MorphTarget";
 import { about } from "@/content/about";
 import { BASECAMP_MORPH } from "@/lib/morph";
+import { longestWord } from "@/lib/name-lines";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -28,9 +30,19 @@ export default function About() {
   return (
     <main id="main" className={`${styles.main} container`}>
       <header className={styles.header} data-quiet-zone>
-        <MorphTarget name={BASECAMP_MORPH} variant="title">
-          <SettleText as="h1" text={about.header.heading} className={`${styles.name} display`} shine glint settleOnArrival />
-        </MorphTarget>
+        <div className={styles.nameCell}>
+          <MorphTarget name={BASECAMP_MORPH} variant="title">
+            <SettleText
+              as="h1"
+              text={about.header.heading}
+              className={`${styles.name} display`}
+              style={{ "--title-chars": longestWord(about.header.heading) } as CSSProperties}
+              shine
+              glint
+              settleOnArrival
+            />
+          </MorphTarget>
+        </div>
         <p className={`${styles.lead} knockout`}>{about.header.lead}</p>
       </header>
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 // Motion primitives first: their CSS is shared by every route, and importing them after the
@@ -20,6 +21,7 @@ import { caseStudyLabels as L, cardBySlug, cardHref, cards, coordinatesLine } fr
 import { site } from "@/content/site";
 import { readingMinutes, type CaseStudy as Study, type Evidence } from "@/lib/case-study";
 import { morphName } from "@/lib/morph";
+import { longestWord } from "@/lib/name-lines";
 import styles from "./page.module.css";
 
 export const dynamicParams = false;
@@ -101,7 +103,15 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
             {coordinatesLine(card)}
           </p>
           <MorphTarget name={morphName("title", card.slug)} variant="title">
-            <SettleText as="h1" text={card.name} className={`${styles.title} display`} shine glint settleOnArrival />
+            <SettleText
+              as="h1"
+              text={card.name}
+              className={`${styles.title} display`}
+              style={{ "--title-chars": longestWord(card.name) } as CSSProperties}
+              shine
+              glint
+              settleOnArrival
+            />
           </MorphTarget>
           <p className={`${styles.type} map-halo`} data-reveal="" data-vt-exit>
             {study.typeLine ?? card.type}

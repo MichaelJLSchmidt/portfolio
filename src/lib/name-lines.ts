@@ -8,3 +8,11 @@ export function nameLines(name: string, maxOneLine = 12): string[] {
   if (words.join(" ").length <= maxOneLine || words.length < 2) return [words.join(" ")];
   return [words.slice(0, -1).join(" "), words[words.length - 1]];
 }
+
+/**
+ * The length of a display title's longest word: a title never breaks inside a word, so layout
+ * sizes the type by it (--title-chars) and a long single word still fits its column.
+ */
+export function longestWord(text: string): number {
+  return Math.max(...text.trim().split(/\s+/).map((word) => word.length));
+}

@@ -14,8 +14,14 @@
   padding-top: clamp(24px, 6vw, 96px);
 }
 
+/* Sized by its longest word (--title-chars, ~0.5 em per capital in the display cut), so it never
+   runs into the lead beside it. */
+.nameCell {
+  container-type: inline-size;
+}
+
 .name {
-  font-size: clamp(3.5rem, 16vw, 12rem);
+  font-size: min(clamp(3.5rem, 16vw, 12rem), calc(0.96 * 100cqi / (var(--title-chars, 8) * 0.5)));
 }
 
 .lead {
