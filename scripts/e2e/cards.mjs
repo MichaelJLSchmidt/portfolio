@@ -90,8 +90,11 @@ export async function cards({ browser, base, root, check }) {
     );
     check("no foil on the cards not hovered", others.every((o) => o === 0 || o === 1), JSON.stringify(others));
     // Press: 0.98.
+    // The press spring takes 350 ms; with the field drawing in software, frames come slowly.
     await page.mouse.down();
-    await page.waitForTimeout(250);
+    await page
+      .waitForFunction((sel) => Number(getComputedStyle(document.querySelector(`${sel} [class*=stage]`)).scale) < 0.981, card("seilschaft"), { timeout: 2000, polling: 50 })
+      .catch(() => {});
     const pressed = await target.evaluate((el) => getComputedStyle(el.querySelector("[class*=stage]")).scale);
     await page.mouse.move(5, 5);
     await page.mouse.up();
