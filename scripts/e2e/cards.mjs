@@ -13,7 +13,7 @@ import { join } from "node:path";
 
 const ORDER = ["seilschaft", "gratweg", "test-project"];
 
-export async function cards({ browser, base, basePath, root, check, settle }) {
+export async function cards({ browser, base, root, check }) {
   console.log("\ncards: the deck and its cards");
   if (!existsSync(join(root, "out/work/seilschaft/index.html"))) {
     console.log("  skipped: the example case studies are not in this build (build with SITE_MODE=basecamp)");
@@ -45,7 +45,7 @@ export async function cards({ browser, base, basePath, root, check, settle }) {
     await page.goto(`${base}/`, { waitUntil: "load" });
     await page.locator(card(ORDER[0])).scrollIntoViewIfNeeded();
     await page.waitForTimeout(800);
-    const r = await page.evaluate((sel) => {
+    const r = await page.evaluate(() => {
       const arts = [...document.querySelectorAll("#expeditions article[data-slug]")];
       const boxes = arts.map((a) => a.getBoundingClientRect());
       const tilt = arts.map((a) => a.querySelector("[class*=tilt]"));
@@ -56,7 +56,7 @@ export async function cards({ browser, base, basePath, root, check, settle }) {
         ratio: tilt.map((t) => +(t.getBoundingClientRect().width / t.getBoundingClientRect().height).toFixed(3)),
         gyro: [...document.querySelectorAll("button")].some((b) => /tilt/i.test(b.textContent)),
       };
-    }, card(ORDER[0]));
+    });
     check("desktop: three cards side by side, in one row", new Set(r.tops).size === 1 && r.lefts[0] < r.lefts[1] && r.lefts[1] < r.lefts[2], JSON.stringify(r.tops));
     check("cards rest at 0° (no rotation)", r.transforms.every((t) => t === "none" || /^matrix\(1, 0, 0, 1,/.test(t)), r.transforms.join(" | "));
     check("cards keep the 63:88 ratio", r.ratio.every((x) => Math.abs(x - 63 / 88) < 0.01), r.ratio.join(", "));
