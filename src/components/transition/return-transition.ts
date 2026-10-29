@@ -2,7 +2,7 @@ import { BASE_PATH } from "@/lib/asset";
 import { duration } from "@/styles/tokens";
 
 /**
- * The way back into the deck (case study or Basecamp → deck): a "card reassembly".
+ * The way back into the deck (case study → deck): a "card reassembly".
  *
  * 1. The page's own content (everything not shared with the card, marked `data-vt-exit`)
  *    leaves first: each part gets a view-transition name just before the old state is

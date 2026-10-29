@@ -1,18 +1,14 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import type { CSSProperties } from "react";
 import profile from "@terrain/profile.json";
 import { Actions } from "@/components/about/Actions";
 import { AscentProfile } from "@/components/about/AscentProfile";
-import { CardArtwork } from "@/components/card/CardArtwork";
 import { SummitSummary } from "@/components/SummitSummary";
 import { MorphTarget } from "@/components/transition/MorphTarget";
-import { RememberCard } from "@/components/transition/RememberCard";
 import { SettleText } from "@/components/motion/SettleText";
 import { about } from "@/content/about";
-import { caseStudyLabels as L, cardBySlug } from "@/content/cards";
 import { hasValue, withValues } from "@/lib/content";
-import { morphName } from "@/lib/morph";
+import { BASECAMP_MORPH } from "@/lib/morph";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -20,47 +16,30 @@ export const metadata: Metadata = {
   description: about.meta.description,
 };
 
-/** Basecamp: the About page, opened from the leader card (its art and name morph in). */
+/**
+ * Basecamp: the About page. Reached from the HUD's Basecamp link, whose label morphs into the H1
+ * (BasecampLink) and settles once it has landed; going back, the H1 shrinks into the bar again.
+ */
 export default function About() {
-  const leader = cardBySlug(about.cardSlug)!;
-  // Named waypoints on the profile, with the official heights from the card content.
-  const waypoints = leader.artwork.kind === "crop" ? leader.artwork.waypoints : [];
-  const stops = profile.stops.flatMap((s) =>
-    s.label
-      ? [{ label: s.label, elevation: waypoints.find((w) => w.label === s.label)?.elevation, at: s.km / profile.lengthKm }]
-      : [],
-  );
+  // Named ends of the trail on the profile, with their official heights.
+  const stops = profile.stops.flatMap((s) => (s.label ? [{ label: s.label, elevation: about.ascent.stops[s.label], at: s.km / profile.lengthKm }] : []));
 
   return (
-    <main id="main" className={`${styles.main} container`} data-card={leader.slug}>
-      {/* data-vt-exit: the page's own content, which leaves first on the way back (return-transition.ts). */}
-      <RememberCard slug={leader.slug} />
-      <nav className={styles.crumbs} aria-label={L.back} data-vt-exit>
-        {/* No scroll to the top: the deck brings the card back into view itself (Deck). */}
-        <Link href="/" scroll={false} className="hud-label">
-          <span aria-hidden="true">←</span> {L.back}
-        </Link>
-      </nav>
-
+    <main id="main" className={`${styles.main} container`}>
       <header className={styles.header}>
-        <MorphTarget name={morphName("art", leader.slug)} variant="art" className={styles.artSlot}>
-          <CardArtwork artwork={leader.artwork} alt={leader.artworkAlt} className={styles.art} />
-        </MorphTarget>
         <div className={styles.intro} data-quiet-zone>
-          <p className={`${styles.eyebrow} hud-label map-halo`} data-reveal="" data-vt-exit>
+          <p className={`${styles.eyebrow} hud-label map-halo`} data-reveal="">
             {about.header.eyebrow}
           </p>
-          <MorphTarget name={morphName("title", leader.slug)} variant="title">
-            <SettleText as="h1" text={about.header.name} className={`${styles.name} display`} shine glint settleOnArrival />
+          <MorphTarget name={BASECAMP_MORPH} variant="title">
+            <SettleText as="h1" text={about.header.heading} className={`${styles.name} display`} shine glint settleOnArrival />
           </MorphTarget>
-          <p className={`${styles.role} map-halo`} data-reveal="" data-vt-exit>
+          <p className={`${styles.role} map-halo`} data-reveal="">
             {about.header.role}
             <span className={`${styles.place} hud-label map-halo keep-halo`}>{about.header.place}</span>
           </p>
-          <p className={`${styles.statement} body-copy`} data-vt-exit>
-            {about.header.statement}
-          </p>
-          <Actions actions={about.actions} reveal exitOnReturn />
+          <p className={`${styles.statement} body-copy`}>{about.header.statement}</p>
+          <Actions actions={about.actions} reveal />
         </div>
       </header>
 
@@ -68,7 +47,6 @@ export default function About() {
         id="basecamp-summary"
         heading={about.summary.heading}
         rows={about.summary.rows}
-        exitOnReturn
       />
 
       <AscentProfile labels={about.ascent} milestones={about.ascent.milestones} stops={stops} />

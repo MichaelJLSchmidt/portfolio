@@ -1,9 +1,11 @@
-import { cardBySlug, type Stat } from "./cards";
+import type { Stat } from "./cards";
+import { site } from "./site";
 
 /**
- * About page ("Basecamp"): who leads the rope team, what they carry and how they climb.
- * Components render only what is here. [PLACEHOLDERS] mark facts still to confirm;
- * actions without a real URL yet render as visible, inert placeholders.
+ * About page ("Basecamp", /about/): who leads the rope team, what they carry and how they climb.
+ * It is reached from the HUD's Basecamp link, whose label morphs into the page's H1. Components
+ * render only what is here. [PLACEHOLDERS] mark facts still to confirm; actions without a real
+ * URL yet render as visible, inert placeholders.
  */
 
 export type Action = { label: string; href: string | null; kind: "email" | "linkedin" | "cv" };
@@ -16,8 +18,6 @@ export type Milestone = {
   /** Position along the ascent profile, 0 (Interlaken) to 1 (Jungfrau). */
   at: number;
 };
-
-const leader = cardBySlug("profile")!;
 
 const actions: Action[] = [
   { label: "Email", href: "mailto:michael.jl.schmidt@bluewin.ch", kind: "email" },
@@ -47,16 +47,16 @@ const milestones: Milestone[] = [
 ];
 
 export const about = {
-  /** The card that opens this page; its artwork and name morph into the header. */
-  cardSlug: leader.slug,
   meta: {
     title: "Basecamp — Michael JL Schmidt, UX Team Lead",
     description:
       "About a UX Team Lead from Interlaken: facilitation, design systems and front-end craft, told as an ascent from 566 m to the Jungfrau.",
   },
   header: {
-    eyebrow: "Basecamp · About",
-    name: leader.name,
+    eyebrow: "About",
+    /** The H1: the HUD's Basecamp label, which morphs into it (the same word on both ends). */
+    heading: site.hud.about,
+    name: site.name,
     role: "UX Team Lead · Senior UX Designer",
     place: "Interlaken · 566 m · Swiss Alps",
     statement:
@@ -83,6 +83,8 @@ export const about = {
     intro:
       "A career as the real climb from Interlaken to the Jungfrau: the line below is the terrain along that trail, sampled from swisstopo elevation data.",
     readout: { altitude: "Alt", distance: "Km" },
+    /** Official heights of the named ends of the trail (the profile's labels). */
+    stops: { Interlaken: "566 m", Jungfrau: "4158 m" } as Record<string, string>,
     milestones,
   },
   principles: {
@@ -107,10 +109,13 @@ export const about = {
   },
   craft: {
     heading: "Craft",
-    intro: "The three keywords on the leader card, with the evidence behind them.",
-    // Same wording as the leader card, so the card and this page never drift apart.
+    intro: "Three strengths, with the evidence behind them.",
     // Stats are optional: add them per keyword once there are real numbers (1–3 each).
-    items: leader.keywords.map((k, i) => ({
+    items: [
+      { term: "Facilitation", reminder: "Hyper Island-trained workshop lead" },
+      { term: "Design Systems", reminder: "driving a central Angular Material system" },
+      { term: "Front-end", reminder: "designs in Figma, ships in code" },
+    ].map((k, i) => ({
       ...k,
       evidence: ["[WORKSHOP FORMATS AND OUTCOMES]", "[DESIGN SYSTEM SCOPE AND ADOPTION]", "[SHIPPED COMPONENTS, STORYBOOK]"][i],
       stats: ([[{ label: "Workshops", value: "[#]" }], [], []] as Stat[][])[i],
@@ -119,7 +124,7 @@ export const about = {
   offTrail: {
     heading: "Off the trail",
     body: "[PERSONAL NOTE] Interlaken sits between two lakes and below three famous peaks. Weekends usually start uphill.",
-    flavor: leader.flavor,
+    flavor: "Born at 566 m. Still climbing.",
   },
   contact: {
     heading: "Plan a route together",
@@ -133,7 +138,7 @@ export const about = {
  * the facts used here: the name and the email and LinkedIn links.
  */
 export const holding = {
-  name: leader.name,
+  name: site.name,
   role: "UX Team Lead · Senior UX Designer · Bern",
   status: "Basecamp is being set up. The expedition starts soon.",
   /** Title and meta description, built from the name and role. */

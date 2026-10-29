@@ -43,7 +43,7 @@ export type SummitCardData = {
   rarity: Rarity;
   /** Why the card has its rarity, read with the rarity mark (e.g. "led the team and the UX strategy"). */
   rarityNote?: string;
-  /** Summit cost badge, 1–5 for projects; the leader card shows its birth altitude. */
+  /** Summit cost badge, 1–5. */
   cost: string;
   costLabel: string;
   coordinates: string;
@@ -131,60 +131,8 @@ export const caseStudyLabels = {
   example: "Fictional example",
 };
 
-const projectCards: SummitCardData[] = [
-  {
-    slug: "profile",
-    name: "Michael JL Schmidt",
-    rarity: "M",
-    cost: "566",
-    costLabel: "Birth altitude 566 m",
-    coordinates: "N 46°41′ · E 7°52′ · Interlaken",
-    type: "Leader — UX Team Lead · DV Bern AG",
-    set: { code: "IKN", name: "Interlaken", symbol: "peak" },
-    collector: { number: "000", language: "EN" },
-    keywords: [
-      { term: "Facilitation", reminder: "Hyper Island-trained workshop lead" },
-      { term: "Design Systems", reminder: "driving a central Angular Material system" },
-      { term: "Front-end", reminder: "designs in Figma, ships in code" },
-    ],
-    flavor: "Born at 566 m. Still climbing.",
-    stats: [
-      { label: "Team", value: "4 FTE" },
-      { label: "At DV Bern", value: "8+ yrs" },
-      { label: "Workshops led", value: "[#]" },
-    ],
-    artwork: {
-      kind: "crop",
-      terrainId: "ikn-000",
-      trail: [
-        { lon: 7.8632, lat: 46.6863 },
-        { lon: 7.8689, lat: 46.6658 },
-        { lon: 7.902, lat: 46.6316 },
-        { lon: 7.9089, lat: 46.5935 },
-        { lon: 7.9216, lat: 46.605 },
-        { lon: 7.9614, lat: 46.5853 },
-        { lon: 7.974, lat: 46.5743 },
-        { lon: 7.985, lat: 46.5475 },
-        { lon: 7.9625, lat: 46.5372 },
-      ],
-      waypoints: [
-        { lon: 7.8632, lat: 46.6863, label: "Interlaken", elevation: "566 m" },
-        { lon: 7.9089, lat: 46.5935 },
-        { lon: 7.9614, lat: 46.5853 },
-        { lon: 7.9625, lat: 46.5372, label: "Jungfrau", elevation: "4158 m" },
-      ],
-      labels: [
-        { lon: 7.76, lat: 46.697, text: "Thunersee", elevation: "558" },
-        { lon: 7.94, lat: 46.708, text: "Brienzersee", elevation: "564" },
-      ],
-    },
-    artworkAlt:
-      "Contour map from Interlaken between Lake Thun and Lake Brienz up to the Jungfrau, with a dotted trail and four waypoints.",
-    summary:
-      "UX Team Lead at DV Bern AG for more than eight years. Runs the workshops, drives the central Angular Material design system and designs straight into code. [SUMMARY]",
-    href: "/about/",
-  },
-];
+/** Real project cards. None is written yet: a live build's deck is empty and says so (Deck). */
+const projectCards: SummitCardData[] = [];
 
 /** The deck: project cards, then the flagged examples where the build includes them (last). */
 export const cards: SummitCardData[] = [...projectCards, ...exampleCards];
@@ -195,7 +143,10 @@ export const cardHref = (card: SummitCardData) => card.href ?? `/work/${card.slu
 
 const withSlash = (path: string) => (path.endsWith("/") ? path : `${path}/`);
 
-/** The terrain the contour field should morph to on a given route (a card's own terrain). */
+/**
+ * The terrain the contour field should morph to on a given route (a card's own terrain). Other
+ * routes, Basecamp (/about/) included, return null: the region.
+ */
 export const terrainIdForPath = (pathname: string | null): string | null => {
   if (!pathname || pathname === "/") return null;
   const path = withSlash(pathname);

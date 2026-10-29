@@ -10,7 +10,7 @@ import styles from "./AscentProfile.module.css";
 
 /**
  * The career as the real climb from Interlaken to the Jungfrau. The chart (sticky) is the
- * terrain sampled along the leader card's trail; milestone plaques scroll beneath it, and
+ * terrain sampled along the Interlaken → Jungfrau trail; milestone plaques scroll beneath it, and
  * the climbed part of the line, a climber marker and an altitude readout follow the scroll
  * directly (painted in the scroll handler, no easing, so they never trail the finger).
  * The ordered list is the content; the chart is decorative. Without JS or in still mode the

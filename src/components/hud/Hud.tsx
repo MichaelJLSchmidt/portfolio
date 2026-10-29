@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { site } from "@/content/site";
+import { BasecampLink } from "./BasecampLink";
 import { BernClock } from "./BernClock";
 import { CalmToggle } from "./CalmToggle";
 import styles from "./Hud.module.css";
@@ -21,9 +22,7 @@ export function Hud() {
           <BernClock label={site.hud.clockLabel} className={styles.time} />
         </span>
         <span className={styles.row}>
-          <Link href="/about/" className={`${styles.navLink} hud-label`}>
-            {site.hud.about}
-          </Link>
+          <BasecampLink label={site.hud.about} className={`${styles.navLink} hud-label`} />
           <CalmToggle labels={site.hud.calm} />
         </span>
       </div>

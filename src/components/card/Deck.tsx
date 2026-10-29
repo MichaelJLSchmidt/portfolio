@@ -62,20 +62,25 @@ export function Deck() {
     return () => io.disconnect();
   }, []);
 
+  // No case study in this build (a live build until the first real one is written): the section
+  // stays, says so, and offers nothing to tilt or open.
+  const empty = cards.length === 0;
   return (
     <section className={styles.deck} aria-labelledby="deck-heading">
       <div className={styles.header}>
         <SettleText as="h2" id="deck-heading" text={site.hero.deckHeading} className={`${styles.heading} display`} trigger="inview" shine />
-        <p className={`${styles.intro} body-copy`}>{site.hero.deckIntro}</p>
-        <TiltControl labels={{ enable: site.hud.tiltEnable, resume: site.hud.tiltResume, on: site.hud.tiltOn }} />
+        <p className={`${styles.intro} body-copy`}>{empty ? site.hero.deckEmpty : site.hero.deckIntro}</p>
+        {!empty && <TiltControl labels={{ enable: site.hud.tiltEnable, resume: site.hud.tiltResume, on: site.hud.tiltOn }} />}
       </div>
-      <ul ref={listRef} className={styles.cards} data-deal={deal}>
-        {cards.map((card, i) => (
-          <li key={card.slug} className={styles.slot} style={{ "--deal-i": i } as React.CSSProperties}>
-            <SummitCard card={card} transitionNames onOpen={() => rememberOrigin(card.slug)} />
-          </li>
-        ))}
-      </ul>
+      {!empty && (
+        <ul ref={listRef} className={styles.cards} data-deal={deal}>
+          {cards.map((card, i) => (
+            <li key={card.slug} className={styles.slot} style={{ "--deal-i": i } as React.CSSProperties}>
+              <SummitCard card={card} transitionNames onOpen={() => rememberOrigin(card.slug)} />
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }
