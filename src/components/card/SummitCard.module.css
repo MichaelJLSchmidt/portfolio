@@ -796,3 +796,11 @@
     transition: none;
   }
 }
+
+/* Forced colours: no foil or glare over the card. */
+@media (forced-colors: active) {
+  .foil,
+  .glare {
+    display: none;
+  }
+}

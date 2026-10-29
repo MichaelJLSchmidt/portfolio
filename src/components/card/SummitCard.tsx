@@ -166,7 +166,7 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNa
         // The last card in: the deck has dealt for this session.
         if (!document.querySelector('article[data-arrive="wait"]')) markDealt();
         // A Mythic card marks its arrival with one gold glint, once its name has settled.
-        if (card.rarity === "M") window.setTimeout(() => playGlint(goldRef.current), delay + duration.settleDisplay);
+        if (card.rarity === "M") window.setTimeout(() => playGlint(goldRef.current, { auto: true }), delay + duration.settleDisplay);
       },
       { rootMargin: "0px 0px -12% 0px" },
     );
@@ -194,7 +194,7 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNa
       (entries) => {
         if (!entries.some((e) => e.isIntersecting) || isSettled(glintKey) || currentMode() !== "full") return;
         markSettled(glintKey);
-        playGlint(nameRef.current);
+        playGlint(nameRef.current, { auto: true });
         middle.disconnect();
       },
       { rootMargin: "-50% 0px -50% 0px" },

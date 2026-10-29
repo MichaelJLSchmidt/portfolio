@@ -1,5 +1,6 @@
 import { caseStudyLabels as L } from "@/content/cards";
-import { stillNavigation } from "@/lib/view-transition";
+import { haptic } from "@/lib/haptics";
+import { activeViewTransition, stillNavigation } from "@/lib/view-transition";
 
 /**
  * Lightbox for a wide figure, on a native <dialog> (Figure.tsx renders the markup):
@@ -11,6 +12,7 @@ import { stillNavigation } from "@/lib/view-transition";
  *   pans when zoomed;
  * - opening, the figure's image morphs into the overlay's on the share spring (a view transition,
  *   html[data-vt="lightbox"]), and back on close; still mode opens and closes at once;
+ * - its buttons (Enlarge, zoom, Close) tick the press haptic;
  * - no zoom animation with reduced motion (Figure.module.css).
  */
 const MORPH = "lightbox-figure";
@@ -136,8 +138,9 @@ export function attach(figure: HTMLElement): () => void {
   // Closing (button, backdrop, Esc) morphs the image back into the figure.
   const shut = () => morph(img, shown, () => dialog.close());
   const onClick = (e: MouseEvent) => {
-    // A click on the backdrop (the dialog itself, outside its content) closes it.
-    if (e.target === dialog) shut();
+    // A click on the backdrop (the dialog itself, outside its content) closes it. Not while the
+    // morph runs: the browser hit-tests past the travelling image then, onto the backdrop.
+    if (e.target === dialog && !activeViewTransition()) shut();
   };
 
   // Pointers: drag to pan, two fingers to pinch, a click without movement to zoom in.
@@ -203,6 +206,10 @@ export function attach(figure: HTMLElement): () => void {
   };
   const onResize = () => render(false);
 
+  // Buttons tick the press haptic (Android; haptics.ts decides).
+  const press = () => haptic("press");
+  const buttons = [open, zoomIn, zoomOut, zoomReset, close].filter((b): b is HTMLButtonElement => !!b);
+  buttons.forEach((b) => b.addEventListener("click", press));
   open.addEventListener("click", onOpen);
   dialog.addEventListener("close", onClose);
   dialog.addEventListener("cancel", onCancel);
@@ -220,6 +227,7 @@ export function attach(figure: HTMLElement): () => void {
   window.addEventListener("resize", onResize);
 
   return () => {
+    buttons.forEach((b) => b.removeEventListener("click", press));
     open.removeEventListener("click", onOpen);
     dialog.removeEventListener("close", onClose);
     dialog.removeEventListener("cancel", onCancel);

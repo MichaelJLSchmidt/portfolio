@@ -77,6 +77,7 @@ export function attach(figure: HTMLElement): () => void {
   root.addEventListener("pointerdown", stopOnTouch);
   range.addEventListener("keydown", stopOnTouch);
   const onClick = (e: Event) => {
+    haptic("press");
     const v = (e.currentTarget as HTMLButtonElement).dataset.compareView;
     if (v === "side") {
       root.dataset.view = root.dataset.view === "side" ? "slider" : "side";

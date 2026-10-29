@@ -186,7 +186,7 @@ export function SettleText({
     const committed = takeArrivalGlint(window.location.pathname);
     if (!committed && isSettled(`${key}g`)) return;
     markSettled(`${key}g`);
-    playGlint(el);
+    playGlint(el, { auto: !committed });
   };
 
   useImperativeHandle(ref, () => ({

@@ -75,6 +75,7 @@ export function CopyAddress({ address, className }: { address: string; className
             className={styles.toastClose}
             aria-label={t.dismiss}
             onClick={() => {
+              haptic("press");
               setNote(null);
               setCopied(false);
             }}

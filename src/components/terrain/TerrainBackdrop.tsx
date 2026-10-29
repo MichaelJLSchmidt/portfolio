@@ -7,6 +7,7 @@ import meta from "@terrain/terrain.json";
 import bern from "@terrain/bern/posters.json";
 import { site } from "@/content/site";
 import { asset } from "@/lib/asset";
+import { haptic } from "@/lib/haptics";
 import { whenIdle } from "@/lib/idle";
 import { cancelPendingIntro, useMotionMode } from "@/lib/motion-mode";
 import { fieldConfig, posterMedia, type DeviceProfile } from "./field-settings";
@@ -186,7 +187,10 @@ export function TerrainBackdrop() {
         <button
           type="button"
           className={`${styles.skip} hud-label`}
-          onClick={() => fieldStore.set((s) => ({ skipIntro: s.skipIntro + 1 }))}
+          onClick={() => {
+            haptic("press");
+            fieldStore.set((s) => ({ skipIntro: s.skipIntro + 1 }));
+          }}
         >
           {site.hud.skipIntro}
         </button>

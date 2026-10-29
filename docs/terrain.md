@@ -83,6 +83,21 @@ card terrains show a name and an altitude, never coordinates. Its copy (the part
 region's summit) is in `src/content/readout.ts`. The numbers roll with `RollNumber`, the shared lazy
 Motion+ chunk.
 
+**While a case study is read** (phase 5): from the first waypoint on, the readout gives way to the
+reading, `WAYPOINT 2 / 6 · ALT 1’240 M`: the waypoint of how many, and an altitude climbing from the
+card terrain's base (its first pin, or its lowest point) at the first waypoint to its summit at the
+last (`readingReadout` in `readout.ts`, the page's reading spy in
+`src/components/case-study/reading.ts`). Above the first waypoint it is the terrain's readout again.
+The box reserves room for it too.
+
+**Basecamp's layout** keeps the zero point clear: the field frames Bern on it, so the pin sits at the
+centre of every screen, and the About header reaches past the middle of the screen before the legend
+begins (`src/app/about/page.module.css`), at 1440×900, 1280×800 and 390×844 alike.
+
+**Forced colours** hide the backdrop (field and poster) entirely. The poster's drift, the field's
+stand-in while it loads, plays on desktop in full motion only (WCAG 2.2.2: it is the field's ambient,
+which the Calm map switch stops).
+
 ## Device tiers
 
 `field-boot.ts` resolves the tier once the page is idle (lazily loaded; none of it is in a route's

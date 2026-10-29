@@ -59,7 +59,7 @@ export type SignatureLinkProps = Omit<ComponentProps<typeof Link>, "children"> &
 /**
  * The signature link. Hover (fine pointers only, under `(hover: hover)`) and keyboard focus get
  * exactly the same motion; press narrows the weight; committing (click, Enter or tap) ticks the
- * commit haptic where supported and plays the glint: on the destination's H1 once it has arrived
+ * commit haptic where supported (a jump within the page: the detent) and plays the glint: on the destination's H1 once it has arrived
  * when the link leads to another page, on the link itself otherwise. The label sits in a box reserved
  * at its widest (breath) state, so a breath never moves anything. Still mode keeps the colour
  * change only; calm keeps the breath but never glints. docs/motion.md has the details.
@@ -118,10 +118,12 @@ export function SignatureLink({
   const commit = (e: MouseEvent<HTMLAnchorElement>) => {
     onClick?.(e);
     if (e.defaultPrevented || e.button !== 0) return;
-    haptic("commit");
+    // A jump within the page ticks the detent; anything else commits.
+    const a = e.currentTarget;
+    const jump = !plain && a.origin === window.location.origin && a.pathname === window.location.pathname && !!a.hash;
+    haptic(jump ? "detent" : "commit");
     // To another page: the transition freezes this link in its snapshot, so the glint plays on the
     // destination's H1 once it has arrived. In-page links and files glint here.
-    const a = e.currentTarget;
     const route = !plain && a.origin === window.location.origin && a.pathname !== window.location.pathname;
     if (route && !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)) glintOnArrival(a.pathname);
     else playGlint(ref.current);

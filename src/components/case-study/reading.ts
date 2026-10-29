@@ -33,8 +33,6 @@ function set(next: Reading) {
   listeners.forEach((l) => l());
 }
 
-export const readingStore = { get: () => reading, subscribe };
-
 /** The current waypoint of the case study on screen (index -1 before the first, or elsewhere). */
 export function useReading(): Reading {
   return useSyncExternalStore(subscribe, () => reading, () => REST);

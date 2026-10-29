@@ -84,7 +84,7 @@ Never commit the token. `.env*` files are git-ignored; `.env.example` lists the 
 | `npm run check:content`  | Lists every content placeholder still to fill, with file, line and field          |
 | `npm run check:figures`  | Numbers in copy, card and charts match their data file; images are current        |
 | `npm test`               | Unit tests of the Basecamp gate (`node:test`)                                      |
-| `npm run test:e2e`       | Chromium checks against `out/`: view transitions, motion modes, hydration, motion primitives, decode, case-study template, deck and Next loop, Basecamp morph, page structure, phone layouts |
+| `npm run test:e2e`       | Chromium checks against `out/`: view transitions, motion modes, hydration, motion primitives, decode, case-study template, deck and Next loop, Basecamp morph, page structure, phone layouts, HUD and toast, font swap, cards and views, route arrivals and focus, reading (trail, altimeter bar, career climb) |
 | `npm run test:hosting`   | Gated and production deploys under netlify-cli (build, edge runtime, redirects)   |
 | `npm run report:size`    | Initial JS/CSS/fonts per route, lazy chunks, terrain assets (gzip)               |
 | `npm run report:transfer` | One page's transfer on a phone and a desktop, first view and full scroll         |
@@ -446,11 +446,15 @@ Attribution: "Terrain data © swisstopo" appears in the footer of every page (an
     Transition runs at all: pages change directly and the incoming page fades in over 150 ms (opacity only);
     focus return and scroll restoration work as in full motion. Still always wins over the switch, which then
     shows on and says why.
+- After every route change focus moves to the new page's H1, so screen readers announce it (going back to the
+  deck focuses the card you came from instead). Browser back and forward cross-fade in 180 ms with the shared
+  elements; links run the arrival choreography (`docs/motion.md`, Route transitions).
 - Navigation finishes cleanly even when a view transition is skipped, times out or fails: React commits the
   route change anyway, and the arriving heading settles. `npm run test:e2e -- transitions` simulates all three
   (forward, browser back, forward again, the in-page back link, open again) plus calm, still and
   the previous return (`?vt=classic`), and checks the page, focus, the field's terrain (`data-terrain` on the
-  backdrop), the return's phases (exit, travel, card rebuild) and that nothing is left hidden. It needs
+  backdrop), the return's phases (exit, travel, card rebuild; browser back: the traversal cross-fade) and that
+  nothing is left hidden. It needs
   Playwright with Chromium and a build in `out/`.
 
 ### Preview-only switches

@@ -94,6 +94,11 @@ button {
   :focus-visible {
     outline-color: Highlight;
   }
+
+  /* Forced colours: no glint (the field and the cards' foil leave too, in their own styles). */
+  [data-glint] {
+    display: none;
+  }
 }
 
 /* The H1 focused after a route change (RouteArrival) is announced, not operated: no ring. */

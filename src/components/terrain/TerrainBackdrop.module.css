@@ -119,8 +119,9 @@
   }
 }
 
-/* Without the WebGL field the poster still breathes: a slow, compositor-only drift (an
-   auto-playing loop: full motion only). */
+/* Without the WebGL field the poster still breathes: a slow, compositor-only drift. An
+   auto-playing loop, so it is the field's ambient (WCAG 2.2.2): desktop in full motion only, and
+   the Calm map switch stops it. */
 @keyframes poster-drift {
   from {
     transform: scale(1.06) translate3d(-1%, 0.6%, 0);
@@ -130,13 +131,13 @@
   }
 }
 
-:root[data-motion="full"] .backdrop[data-field="off"] .poster {
+:root[data-motion="full"][data-tier="desktop"] .backdrop[data-field="off"] .poster {
   animation: poster-drift 48s var(--ease-summit) infinite alternate;
   will-change: transform;
 }
 
 /* First visit: keep the "field never arrived" fallback alongside the drift. */
-:root[data-motion="full"][data-intro="pending"] .backdrop[data-field="off"] .poster {
+:root[data-motion="full"][data-tier="desktop"][data-intro="pending"] .backdrop[data-field="off"] .poster {
   animation:
     poster-fallback var(--dur-medium) var(--ease-trail) 4s both,
     poster-drift 48s var(--ease-summit) infinite alternate;
@@ -146,4 +147,11 @@
 :root[data-motion="still"] .canvas,
 :root[data-motion="still"] .vignette {
   transition: none;
+}
+
+/* Forced colours: no field and no poster; the page is the system's background. */
+@media (forced-colors: active) {
+  .backdrop {
+    display: none;
+  }
 }

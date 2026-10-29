@@ -3,14 +3,23 @@ import { currentMode } from "@/lib/motion-mode";
 
 /**
  * Plays the glint layer(s) in `scope` once (full motion only). Glints are the signature level:
- * one at a time, so a glint asked for while another plays is skipped. Resolves when it is over.
+ * one at a time, so a glint asked for while another plays is skipped. An `auto` glint (one nobody
+ * asked for: a first arrival, a Mythic card arriving, a card crossing a phone's middle, the
+ * contact band) is also skipped within a screen's height of the last one on the page, so there is
+ * at most one signature per viewport. A commit's glint always plays. Resolves when it is over.
  */
 let playing: Element | null = null;
+let lastAuto: { path: string; y: number } | null = null;
 
-export function playGlint(scope: Element | null): Promise<void> {
+export function playGlint(scope: Element | null, { auto = false }: { auto?: boolean } = {}): Promise<void> {
   if (!scope || currentMode() !== "full" || (playing && playing.isConnected)) return Promise.resolve();
   const layers = scope.matches("[data-glint]") ? [scope] : [...scope.querySelectorAll("[data-glint]")];
   if (!layers.length) return Promise.resolve();
+  if (auto) {
+    const here = { path: window.location.pathname, y: window.scrollY };
+    if (lastAuto && lastAuto.path === here.path && Math.abs(lastAuto.y - here.y) < window.innerHeight) return Promise.resolve();
+    lastAuto = here;
+  }
   playing = scope;
   return new Promise((done) => {
     const end = () => {

@@ -188,9 +188,6 @@ export const cardStats = (card: SummitCardData): (Stat & { note?: string })[] =>
 /** The cost pips' scale: a card's cost is its scope, 1 to 5. */
 export const COST_SCALE = 5;
 
-/** "Seilschaft — People · Built a UX practice from 2 to 6 · 3 years". */
-export const indexLineText = (card: SummitCardData) => `${card.name} — ${[card.indexLine.kind, card.indexLine.summary, card.indexLine.time].join(" · ")}`;
-
 const withSlash = (path: string) => (path.endsWith("/") ? path : `${path}/`);
 
 /**

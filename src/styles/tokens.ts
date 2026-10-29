@@ -296,9 +296,6 @@ export const breakpoint = {
 
 export type Breakpoint = keyof typeof breakpoint;
 
-/** `(min-width: 960px)` for matchMedia. */
-export const mediaUp = (b: Breakpoint) => `(min-width: ${breakpoint[b]}px)`;
-
 /**
  * Device profile (not a layout breakpoint): a fine pointer and a long edge of at least
  * `desktopMinEdgePx` is the desktop tier (html[data-tier], the field's tier A).

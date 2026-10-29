@@ -79,7 +79,14 @@ export function AltimeterBar({
           <h2 id={`${id}title`} className="hud-label">
             {labels.sheet}
           </h2>
-          <button type="button" className={`${styles.jumpSheetClose} hud-label`} onClick={() => sheetRef.current?.close()}>
+          <button
+            type="button"
+            className={`${styles.jumpSheetClose} hud-label`}
+            onClick={() => {
+              haptic("press");
+              sheetRef.current?.close();
+            }}
+          >
             {labels.close}
           </button>
         </div>

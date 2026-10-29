@@ -580,10 +580,13 @@
 }
 
 /* A definite width: the card is a size container, so it has no width of its own to give an auto
-   track (60% of the deck card's 420 px). */
+   track (60% of the deck card's 420 px). Not rendered until it nears the screen, so the italic
+   face its rules text uses loads only then (63:88 reserves its height meanwhile). */
 .trailheadCard {
   width: 252px;
   max-width: 100%;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 252px auto 352px;
 }
 
 .nextLink {
