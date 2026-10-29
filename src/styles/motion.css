@@ -7,6 +7,18 @@
   --reveal-rise: var(--dist-rise);
 }
 
+/* A list's ring bullets (data-reveal="list"): each li::before is masked by a conic sweep. */
+@property --ring-sweep {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 360deg;
+}
+
+[data-reveal="list"] > li::before {
+  -webkit-mask: conic-gradient(#000 var(--ring-sweep), transparent 0);
+  mask: conic-gradient(#000 var(--ring-sweep), transparent 0);
+}
+
 [data-reveal="card"] {
   --reveal-rise: var(--dist-rise-card);
 }
@@ -48,6 +60,18 @@
   }
 }
 
+@keyframes reveal-ring {
+  from {
+    --ring-sweep: 0deg;
+  }
+}
+
+@keyframes reveal-draw-down {
+  from {
+    transform: scaleY(0);
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   :root:not([data-motion="still"]) :is([data-reveal=""], [data-reveal="card"])[data-reveal-state="wait"] {
     opacity: 0;
@@ -82,6 +106,41 @@
 
   :root:not([data-motion="still"]) [data-reveal="line"][data-reveal-state="play"] {
     animation: reveal-trace var(--dur-draw) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
+  }
+
+  /* Lists: the ring bullets draw, one item after another (the item stagger); the text stays. */
+  :root:not([data-motion="still"]) [data-reveal="list"][data-reveal-state="wait"] > li::before {
+    --ring-sweep: 0deg;
+  }
+
+  :root:not([data-motion="still"]) [data-reveal="list"][data-reveal-state="play"] > li::before {
+    animation: reveal-ring var(--dur-reveal) var(--ease-settle) calc(min(var(--i, 0), var(--stagger-item-max) - 1) * var(--stagger-item)) backwards;
+  }
+
+  /* A pull quote: its rule (::before) draws down, then the quote fades in; nothing moves. */
+  :root:not([data-motion="still"]) [data-reveal="quote"][data-reveal-state="wait"]::before {
+    transform: scaleY(0);
+  }
+
+  :root:not([data-motion="still"]) [data-reveal="quote"][data-reveal-state="wait"] > * {
+    opacity: 0;
+  }
+
+  :root:not([data-motion="still"]) [data-reveal="quote"][data-reveal-state="play"]::before {
+    animation: reveal-draw-down var(--dur-reveal) var(--ease-settle) backwards;
+  }
+
+  :root:not([data-motion="still"]) [data-reveal="quote"][data-reveal-state="play"] > * {
+    animation: reveal-fade var(--dur-short) var(--ease-settle) var(--dur-reveal) backwards;
+  }
+
+  /* A caption fades in after its figure. */
+  :root:not([data-motion="still"]) [data-reveal="caption"][data-reveal-state="wait"] {
+    opacity: 0;
+  }
+
+  :root:not([data-motion="still"]) [data-reveal="caption"][data-reveal-state="play"] {
+    animation: reveal-fade var(--dur-short) var(--ease-settle) var(--dur-reveal) backwards;
   }
 
   :root:not([data-motion="still"]) [data-reveal="sheet"][data-reveal-state="wait"] {

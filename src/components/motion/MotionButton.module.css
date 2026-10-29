@@ -59,9 +59,20 @@
   font-weight: var(--axis-label-rest-wght);
 }
 
+@keyframes mb-settle {
+  from {
+    font-stretch: var(--axis-label-reveal-wdth);
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   :root:not([data-motion="still"]) .button {
     transition: transform var(--spring-press);
+  }
+
+  /* A new label (e.g. "COPIED") settles in from the reveal width. */
+  :root:not([data-motion="still"]) .run[data-settle] {
+    animation: mb-settle var(--dur-settle) var(--ease-settle);
   }
 
   :root:not([data-motion="still"]) .button:is(:active, [data-lab-state="press"]):not(:disabled) {

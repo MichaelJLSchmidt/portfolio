@@ -5,18 +5,11 @@
   padding-bottom: 64px;
 }
 
-.crumbs a {
+.crumb {
+  --l-rest-color: var(--color-glacier);
   display: inline-flex;
   align-items: center;
-  gap: 0.6em;
   min-height: 44px;
-  color: var(--color-glacier);
-  text-decoration: none;
-}
-
-.crumbs a:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
 }
 
 .header {
@@ -72,9 +65,8 @@
   color: var(--color-sheet);
 }
 
-.meta a {
-  color: var(--color-glacier);
-  text-underline-offset: 4px;
+.skim {
+  --l-rest-color: var(--color-glacier);
 }
 
 /* The product hero, directly after the Summit summary. */
@@ -89,7 +81,8 @@
   gap: 12px;
 }
 
-.jump h2 {
+.jumpHeading {
+  --kt-color: var(--color-sheet);
   color: var(--color-sheet);
 }
 
@@ -102,21 +95,9 @@
   list-style: none;
 }
 
+/* The jump chips: SignatureLink's chip variant (breath, brightening border, sheet when pressed). */
 .chip {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 16px;
-  border: 1px solid var(--color-contour);
-  border-radius: 999px;
-  background: rgb(27 28 24 / 0.75);
-  color: var(--color-sheet);
-  text-decoration: none;
-}
-
-.chip:hover {
-  border-color: var(--color-glacier);
-  color: var(--color-glacier);
+  font-size: 0.9375rem;
 }
 
 .inspect {
@@ -148,18 +129,11 @@
 }
 
 .backToAll {
+  --l-rest-color: var(--color-glacier);
   display: inline-flex;
   align-items: center;
-  gap: 0.6em;
   min-height: 44px;
   margin-top: 16px;
-  color: var(--color-glacier);
-  text-decoration: none;
-}
-
-.backToAll:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
 }
 
 /* Below 1200 px: "Jump to" chips at the top, the waypoints in one column. From 1200 px the

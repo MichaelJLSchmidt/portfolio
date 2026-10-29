@@ -21,7 +21,17 @@
   text-align: center;
 }
 
+/* The rule that leads: drawn as the section comes into view, before the heading settles. */
+.headRule {
+  width: min(100%, 12rem);
+}
+
+.head[data-align="center"] .headRule {
+  transform-origin: center;
+}
+
 .eyebrow {
+  --kt-color: var(--color-glacier);
   color: var(--color-glacier);
 }
 
@@ -169,6 +179,12 @@
   line-height: 1.2;
 }
 
+/* H3s settle a little from the breath above their condensed rest axes (SettleText role "text"). */
+.ruleTitle[data-role] {
+  --kt-rest-wdth: var(--type-condensed-wdth);
+  --kt-rest-wght: 700;
+}
+
 .evidence {
   padding-top: 8px;
   border-top: 1px dashed var(--color-contour-dim);
@@ -286,4 +302,90 @@
 
 .contactActions {
   justify-content: center;
+}
+
+/* ---------------------------------------------------------------- copy address and its toast */
+
+.copy {
+  font-size: 1rem;
+}
+
+/* The toast: a status message at the bottom of the screen, on the raised ground with a glacier
+   hairline. It rises in (calm: fades) over --dur-reveal; still mode fades within --dur-still. */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  z-index: var(--layer-overlay);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100vw - 2 * var(--gutter));
+  padding: 6px 6px 6px 18px;
+  border: 1px solid var(--color-glacier);
+  border-radius: 999px;
+  background: var(--color-ground-raised);
+  color: var(--color-sheet);
+  text-align: start;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  translate: -50% 0;
+}
+
+.toast[data-open] {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.toastText {
+  position: relative;
+  margin: 0;
+  text-transform: none;
+}
+
+.toast[data-ok] .toastText {
+  color: var(--color-glacier);
+}
+
+.toastClose {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--color-sheet);
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--dist-rise));
+  }
+}
+
+@keyframes toast-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .toast[data-open] {
+    animation: toast-in var(--dur-reveal) var(--ease-settle);
+  }
+
+  :root[data-motion="calm"] .toast[data-open] {
+    animation-name: toast-fade;
+  }
+}
+
+:root[data-motion="still"] .toast[data-open] {
+  animation: toast-fade var(--dur-still) linear;
 }

@@ -7,8 +7,10 @@
   padding-bottom: 64px;
 }
 
+/* Glacier like every eyebrow: alpenglow would read below 7:1 over the field. */
 .eyebrow {
-  color: var(--color-alpenglow);
+  --kt-color: var(--color-glacier);
+  color: var(--color-glacier);
 }
 
 .heading {

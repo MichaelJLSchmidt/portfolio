@@ -20,6 +20,7 @@ import { activeViewTransition } from "@/lib/view-transition";
 import { duration, headlamp, stagger, staggerStep, type AxisRole } from "@/styles/tokens";
 import { Glint } from "./Glint";
 import { playGlint } from "./glint";
+import { scrollingFast } from "./reveal";
 import styles from "./SettleText.module.css";
 
 type Tag = "h1" | "h2" | "h3" | "p" | "span";
@@ -41,8 +42,12 @@ export type SettleTextProps = {
   id?: string;
   className?: string;
   mode?: SettleMode;
-  /** Axes from the tokens: display (default for chars and words) or label / mono (default for block). */
-  role?: AxisRole;
+  /**
+   * Axes from the tokens: display (default for chars and words) or label / mono (default for
+   * block); or "text": the className sets the rest axes (--kt-rest-wdth, --kt-rest-wght, e.g. the
+   * condensed type of H3s) and the text settles from the breath above them (+8 wdth): a small settle.
+   */
+  role?: AxisRole | "text";
   trigger?: SettleTrigger;
   /** A single mint glint after the first arrival this session (full motion, dark surfaces). */
   glint?: boolean;
@@ -72,6 +77,19 @@ export type SettleTextProps = {
    * moves nothing (display titles in the first viewport). Only for text at those axes.
    */
   widths?: "display";
+  /**
+   * Block mode for text that may wrap (headings): every letter keeps its own box at rest width,
+   * as in chars mode, so the line breaks are those of the rest state, but the whole block settles
+   * at once (no cascade).
+   */
+  wrap?: boolean;
+  /** Milliseconds before the settle starts: the line leads (a contour rule draws first). */
+  delay?: number;
+  /**
+   * "heading": at most one heading settle at a time; one that would start while another runs, or
+   * while the page scrolls fast, shows at rest instead (waypoint and section headings).
+   */
+  channel?: "heading";
   style?: CSSProperties;
   ref?: Ref<SettleHandle>;
 };
@@ -102,6 +120,9 @@ export function SettleText({
   scope = "page",
   reserve = "widest",
   widths,
+  wrap = false,
+  delay = 0,
+  channel,
   style,
   ref,
 }: SettleTextProps) {
@@ -112,8 +133,10 @@ export function SettleText({
   const finePointer = useFinePointer();
 
   const lines = text.split("\n");
-  const units = mode === "chars" ? text.replace(/[\s\n]/g, "").length : mode === "words" ? text.split(/\s+/).length : 1;
-  const step = staggerStep(mode === "words" ? stagger.word : stagger.char, units);
+  // A wrapping block lays out like chars mode and settles all at once.
+  const split = mode === "block" && wrap ? "chars" : mode;
+  const units = split === "chars" ? text.replace(/[\s\n]/g, "").length : split === "words" ? text.split(/\s+/).length : 1;
+  const step = mode === "block" ? 0 : staggerStep(mode === "words" ? stagger.word : stagger.char, units);
 
   // The settle's state is the element's own animation state, kept on data-play (React renders
   // only the initial value, so it never overwrites it). A settle that has run to the end is
@@ -126,7 +149,16 @@ export function SettleText({
     stopRef.current();
     stopRef.current = () => {};
     el.setAttribute("data-play", state);
-    if (state === "true") stopRef.current = whenSettled(el, landed);
+    if (state !== "true") return;
+    const release = channel === "heading" ? holdHeading(el) : () => {};
+    const stop = whenSettled(el, () => {
+      release();
+      landed();
+    });
+    stopRef.current = () => {
+      release();
+      stop();
+    };
   };
 
   // A settle has landed: remembered, then the glint (full motion, once per session).
@@ -199,6 +231,12 @@ export function SettleText({
         // Play when it scrolls into view, or right away if the reader already jumped past it.
         if (!entries.some((e) => e.isIntersecting || e.boundingClientRect.bottom < 0)) return;
         io.disconnect();
+        // Headings take turns, and snap while the reader scrolls fast.
+        if (channel === "heading" && (headingBusy() || scrollingFast())) {
+          el.setAttribute("data-play", "rest");
+          markSettled(key);
+          return;
+        }
         setPlay("true");
       },
       { rootMargin: "0px 0px -12% 0px" },
@@ -297,13 +335,14 @@ export function SettleText({
       data-role={role}
       data-reserve={mode === "block" && reserve === "rest" ? "rest" : undefined}
       data-widths={widths}
+      data-wrap={mode === "block" && wrap ? "" : undefined}
       data-play={trigger === "paint" ? "true" : "rest"}
       data-settle-key={key}
       data-quiet-zone={quiet ? "" : undefined}
-      style={{ ...style, "--kt-step": `${step}ms` } as CSSProperties}
+      style={{ ...style, "--kt-step": `${step}ms`, ...(delay ? { "--kt-delay": `${delay}ms` } : {}) } as CSSProperties}
     >
       <span className="visually-hidden">{text.replace(/\n/g, " ")}</span>
-      {mode === "block" ? (
+      {split === "block" ? (
         <span className={styles.block} aria-hidden="true">
           <span className={styles.ghost}>{text}</span>
           <span className={styles.run} data-st="run">
@@ -317,7 +356,7 @@ export function SettleText({
               {l > 0 && <br />}
               {line.split(" ").map((word, w, words) => (
                 <Fragment key={w}>
-                  {mode === "words" ? unit(word, index++) : <span className={styles.word}>{[...word].map((ch) => unit(ch, index++))}</span>}
+                  {split === "words" ? unit(word, index++) : <span className={styles.word}>{[...word].map((ch) => unit(ch, index++))}</span>}
                   {w < words.length - 1 ? " " : null}
                 </Fragment>
               ))}
@@ -328,6 +367,16 @@ export function SettleText({
       {glint && <Glint text={text} className={styles.glint} />}
     </Tag>
   );
+}
+
+// The heading channel: the element whose settle is running, if any.
+let headingOwner: Element | null = null;
+const headingBusy = () => !!headingOwner && headingOwner.isConnected;
+function holdHeading(el: Element): () => void {
+  headingOwner = el;
+  return () => {
+    if (headingOwner === el) headingOwner = null;
+  };
 }
 
 /** Calls `done` once the settle animations running in `el` have finished (now, if none run). */

@@ -107,6 +107,15 @@
   padding-inline-end: var(--dist-nudge);
 }
 
+/* A leading arrow (back links) nudges back, so the room is at the start. */
+.link[data-arrow="start"] .ghost {
+  padding-inline: var(--dist-nudge) 0;
+}
+
+.link[data-arrow="start"] .run {
+  justify-self: end;
+}
+
 .run {
   justify-self: start;
 }
@@ -210,6 +219,10 @@
   :root:not([data-motion="still"]) .arrow {
     transform: translateX(calc(var(--on) * var(--dist-nudge)));
     transition: transform var(--dur-breath) var(--ease-settle);
+  }
+
+  :root:not([data-motion="still"]) .link[data-arrow="start"] .arrow {
+    transform: translateX(calc(var(--on) * -1 * var(--dist-nudge)));
   }
 
   :root:not([data-motion="still"]) .link[data-variant="nav"] .label::after {

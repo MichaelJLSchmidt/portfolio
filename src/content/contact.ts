@@ -14,3 +14,12 @@ export const actions: Action[] = [
 
 /** The CV on its own (the HUD's "CV" and the hero's button). */
 export const cv = actions.find((a) => a.kind === "cv")!;
+
+/** The "Copy address" button beside Email in the contact band, and the toast it raises. */
+export const copyAddress = {
+  label: "Copy address",
+  done: "COPIED",
+  toast: "COPIED — see you at the trailhead.",
+  failed: (address: string) => `Couldn’t copy. The address is ${address}.`,
+  dismiss: "Dismiss",
+};

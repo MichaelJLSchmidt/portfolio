@@ -32,6 +32,8 @@ export type SignatureLinkProps = Omit<ComponentProps<typeof Link>, "children"> &
   before?: ReactNode;
   /** A decorative arrow after the label (standalone and display), nudged on hover or focus. */
   arrow?: string;
+  /** "start": the arrow comes before the label and nudges back (back links, "← All expeditions"). */
+  arrowAt?: "start" | "end";
   /**
    * nav and chip: the current page (true or "page": aria-current="page"), or the current place
    * within a section ("location", e.g. Expeditions on a case study, the waypoint being read).
@@ -63,6 +65,7 @@ export function SignatureLink({
   label,
   before,
   arrow,
+  arrowAt = "end",
   current = false,
   settle = false,
   labelClassName,
@@ -137,6 +140,7 @@ export function SignatureLink({
       className={classes}
       data-variant={variant}
       data-role={role}
+      data-arrow={arrow ? arrowAt : undefined}
       data-settle={settle ? "true" : undefined}
       data-settle-key={settle ? key : undefined}
       aria-current={variant === "nav" || variant === "chip" ? currentValue : undefined}
@@ -148,10 +152,12 @@ export function SignatureLink({
         <span className="visually-hidden">{label}</span>
         {/* Holds the box at the breath axes (plus the arrow's nudge). */}
         <span className={styles.ghost} aria-hidden="true">
+          {arrow && arrowAt === "start" && <span className={styles.arrow}>{arrow}</span>}
           {label}
-          {arrow && <span className={styles.arrow}>{arrow}</span>}
+          {arrow && arrowAt === "end" && <span className={styles.arrow}>{arrow}</span>}
         </span>
         <span className={styles.run} aria-hidden="true">
+          {arrow && arrowAt === "start" && <span className={styles.arrow}>{arrow}</span>}
           <span className={styles.word}>
             {letters.map((ch, i) => (
               <span key={i} className={styles.ch} style={{ "--kt-i": i } as CSSProperties}>
@@ -160,7 +166,7 @@ export function SignatureLink({
             ))}
             <Glint text={label} surface={surface} className={styles.glint} />
           </span>
-          {arrow && <span className={styles.arrow}>{arrow}</span>}
+          {arrow && arrowAt === "end" && <span className={styles.arrow}>{arrow}</span>}
         </span>
       </span>
     </Anchor>

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 // Motion primitives first: their CSS is shared by every route, and importing them after the
 // case-study blocks makes Turbopack merge those blocks' CSS into the chunk every route loads.
@@ -94,9 +93,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
       <RememberCard slug={card.slug} />
       <nav className={styles.crumbs} aria-label={L.back} data-vt-exit>
         {/* No scroll to the top: the deck brings the card back into view itself (Deck). */}
-        <Link href="/" scroll={false} className="hud-label">
-          <span aria-hidden="true">←</span> {L.back}
-        </Link>
+        <SignatureLink href="/" scroll={false} variant="standalone" role="mono" label={L.back} arrow="←" arrowAt="start" className={`${styles.crumb} hud-label`} />
       </nav>
 
       {study.banner && <FictionBanner label={study.banner.label} text={study.banner.text} />}
@@ -128,7 +125,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
             {study.lede}
           </p>
           <p className={`${styles.meta} hud-label map-halo`} data-reveal="" data-vt-exit>
-            {L.readingTime(readingMinutes(study))} · <a href="#summary-heading">{L.skim}</a>
+            {L.readingTime(readingMinutes(study))} · <SignatureLink href="#summary-heading" variant="inline" label={L.skim} className={styles.skim} />
           </p>
         </div>
       </header>
@@ -183,15 +180,11 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
 
       <div className={styles.body} data-vt-exit>
         <nav className={styles.jump} aria-labelledby="jump-heading">
-          <h2 id="jump-heading" className="hud-label">
-            {L.jumpTo}
-          </h2>
+          <SettleText as="h2" id="jump-heading" text={L.jumpTo} mode="chars" role="mono" trigger="inview" className={`${styles.jumpHeading} hud-label`} />
           <ul>
             {study.waypoints.map((w) => (
               <li key={w.id}>
-                <a href={`#${w.id}`} className={styles.chip}>
-                  {w.nav}
-                </a>
+                <SignatureLink href={`#${w.id}`} variant="chip" label={w.nav} className={styles.chip} />
               </li>
             ))}
           </ul>
@@ -220,9 +213,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
             arrow="→"
           />
         )}
-        <Link href="/" scroll={false} className={`${styles.backToAll} hud-label`}>
-          <span aria-hidden="true">←</span> {L.backToAll}
-        </Link>
+        <SignatureLink href="/" scroll={false} variant="standalone" role="mono" label={L.backToAll} arrow="←" arrowAt="start" className={`${styles.backToAll} hud-label`} />
       </nav>
     </main>
   );

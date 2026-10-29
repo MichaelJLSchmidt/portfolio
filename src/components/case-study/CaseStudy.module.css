@@ -37,6 +37,16 @@
   font-weight: 600;
 }
 
+.headingLabelText[data-role] {
+  --kt-color: var(--color-glacier);
+  --kt-rest-wght: 600;
+}
+
+/* The rule that leads a waypoint heading. */
+.headingRule {
+  width: min(100%, 12rem);
+}
+
 .headingFinding {
   display: block;
   color: var(--color-sheet);
@@ -48,8 +58,10 @@
   text-wrap: balance;
 }
 
-.headingFinding::first-letter {
-  text-transform: uppercase;
+/* The finding settles a little from the breath above its rest axes (SettleText role "text"). */
+.headingFinding[data-role] {
+  --kt-rest-wdth: var(--type-finding-wdth);
+  --kt-rest-wght: 760;
 }
 
 .panel strong {
@@ -64,11 +76,25 @@
   display: grid;
   gap: 10px;
   margin: 0;
-  padding-left: 1.25em;
+  padding-left: 0;
+  list-style: none;
 }
 
-.list li::marker {
-  color: var(--color-glacier);
+/* Contour-ring bullets: they draw once, item after item, as the list comes into view. */
+.list:not([data-ordered]) li {
+  position: relative;
+  padding-left: 1.5em;
+}
+
+.list:not([data-ordered]) li::before {
+  content: "";
+  position: absolute;
+  top: 0.55em;
+  left: 0.2em;
+  width: 0.55em;
+  height: 0.55em;
+  border: 1.5px solid var(--color-glacier);
+  border-radius: 50%;
 }
 
 /* Numbered insights: circled numbers, like the markers on the affinity map (Fig. 3). */
@@ -113,22 +139,15 @@
   gap: 4px 28px;
 }
 
-.foot a {
+.footLink {
+  --l-rest-color: var(--color-glacier);
   display: inline-flex;
   align-items: center;
-  gap: 0.5em;
   min-height: 44px;
-  color: var(--color-glacier);
-  text-decoration: none;
   text-shadow:
     0 0 2px var(--color-ground),
     0 0 6px var(--color-ground),
     0 0 14px var(--color-ground);
-}
-
-.foot a:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
 }
 
 @media (min-width: 1280px) {
@@ -169,11 +188,21 @@
 
 /* ---------------------------------------------------------------- pull quote */
 
+/* The quote's rule is drawn (::before) as the quote comes into view, then the quote fades in. */
 .quote {
+  position: relative;
   display: grid;
   gap: 10px;
   padding-left: 22px;
-  border-left: 3px solid var(--color-glacier);
+}
+
+.quote::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--color-glacier);
+  transform-origin: top center;
 }
 
 .quote p {
@@ -209,6 +238,12 @@
   font-stretch: var(--type-condensed-wdth);
   line-height: 1.15;
   scroll-margin-top: 96px;
+}
+
+/* A small settle from the breath above its condensed rest axes (SettleText role "text"). */
+.decisionTitle[data-role] {
+  --kt-rest-wdth: var(--type-condensed-wdth);
+  --kt-rest-wght: 760;
 }
 
 .tableScroll {

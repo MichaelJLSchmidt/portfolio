@@ -10,8 +10,14 @@
 }
 
 .heading {
+  --kt-color: var(--color-moss-ink);
   color: var(--color-moss-ink);
   font-weight: 700;
+}
+
+.heading[data-role] {
+  --kt-rest-wght: 700;
+  --kt-from-wght: 700;
 }
 
 .grid {

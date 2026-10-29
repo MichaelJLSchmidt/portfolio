@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Deck } from "@/components/card/Deck";
 import { HeroName } from "@/components/HeroName";
+import { SettleText } from "@/components/motion/SettleText";
 import { ActionLinks } from "@/components/home/ActionLinks";
 import { ContactBand } from "@/components/home/ContactBand";
 import { FieldNotes } from "@/components/home/FieldNotes";
@@ -24,9 +25,7 @@ export default function Home() {
   return (
     <main id="main" className={`${styles.main} container`}>
       <section className={styles.hero} aria-labelledby="hero-name">
-        <p className={`${styles.eyebrow} hud-label map-halo`} data-reveal="" data-quiet-zone>
-          {t.eyebrow.join(" · ")}
-        </p>
+        <SettleText as="p" text={t.eyebrow.join(" · ")} mode="chars" role="mono" quiet className={`${styles.eyebrow} hud-label map-halo`} />
         <HeroName name={site.hero.name} className={`${styles.name} display`} />
         <div className={styles.aside}>
           <p className={`${styles.statement} knockout`}>{t.statement}</p>

@@ -4,7 +4,7 @@ import { useEffect, useRef, type CSSProperties } from "react";
 import profile from "@terrain/profile.json";
 import type { Camp } from "@/content/about";
 import { rarityShapes } from "@/components/card/rarity-shapes";
-import { SettleText } from "@/components/motion/SettleText";
+import { RuledHeading } from "@/components/motion/RuledHeading";
 import { formatInteger } from "@/lib/format";
 import { useMotionMode } from "@/lib/motion-mode";
 import { rarity as rarityTokens } from "@/styles/tokens";
@@ -136,7 +136,7 @@ export function AscentProfile({
   return (
     <section ref={rootRef} className={styles.ascent} aria-labelledby="ascent-heading" style={{ "--p": 1 } as CSSProperties} data-vt-exit>
       <header className={styles.header} data-quiet-zone>
-        <SettleText as="h2" id="ascent-heading" text={labels.heading} className={`${styles.heading} display`} trigger="inview" />
+        <RuledHeading id="ascent-heading" text={labels.heading} className={`${styles.heading} display`} ruleClassName={styles.headRule} />
         <p className="body-copy">{labels.intro}</p>
         <p className={`${styles.rarityNote} hud-label map-halo keep-halo`}>{labels.rarityNote}</p>
       </header>

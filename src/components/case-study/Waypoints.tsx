@@ -1,5 +1,9 @@
-import { useId } from "react";
+import { useId, type CSSProperties } from "react";
+import { ContourRule } from "@/components/motion/ContourRule";
+import { SettleText } from "@/components/motion/SettleText";
+import { SignatureLink } from "@/components/motion/SignatureLink";
 import { caseStudyLabels as L } from "@/content/cards";
+import { duration } from "@/styles/tokens";
 import { decisionNumbers, figureNumbers, type Block, type CaseStudy, type Decision, type Evidence, type ListItem, type Waypoint } from "@/lib/case-study";
 import { EvidenceBadge, EvidenceLegend } from "./Evidence";
 import { Figure } from "./Figure";
@@ -42,9 +46,9 @@ function TextBlock({ block }: { block: Block }) {
       return (
         <>
           {block.intro && <p className={`${styles.listIntro} body-copy`}>{block.intro}</p>}
-          <List className={`${styles.list} body-copy`} data-ordered={block.ordered || undefined}>
+          <List className={`${styles.list} body-copy`} data-ordered={block.ordered || undefined} data-reveal="list">
             {block.items.map((item, i) => (
-              <li key={i}>
+              <li key={i} style={{ "--i": i } as CSSProperties}>
                 <Item item={item} />
               </li>
             ))}
@@ -59,10 +63,10 @@ function TextBlock({ block }: { block: Block }) {
   }
 }
 
-/** At most one per page: a <blockquote> with its attribution. */
+/** At most one per page: a <blockquote> with its attribution. Its rule draws, then it fades in. */
 export function PullQuote({ text, attribution }: { text: string; attribution: string }) {
   return (
-    <figure className={styles.quote}>
+    <figure className={styles.quote} data-reveal="quote">
       <blockquote>
         <p className="body-copy">{text}</p>
       </blockquote>
@@ -71,11 +75,11 @@ export function PullQuote({ text, attribution }: { text: string; attribution: st
   );
 }
 
-/** The page's one key insight: an aside on the sheet colour with a visible label. */
+/** The page's one key insight: an aside on the sheet colour with a visible label; it unfolds like a map sheet. */
 export function KeyInsight({ text }: { text: string }) {
   const id = useId();
   return (
-    <aside className={`${styles.insight} surface-copy`} aria-labelledby={id}>
+    <aside className={`${styles.insight} surface-copy`} aria-labelledby={id} data-reveal="sheet" data-fold="left">
       <p id={id} className={styles.insightLabel}>
         {L.keyInsight}
       </p>
@@ -89,9 +93,7 @@ export function DecisionBlock({ decision: d, number }: { decision: Decision; num
   const id = useId();
   return (
     <div className={`${styles.decision} legend`} id={d.id}>
-      <h3 className={styles.decisionTitle}>
-        {L.decision(number)} — {d.title}
-      </h3>
+      <SettleText as="h3" text={`${L.decision(number)} — ${d.title}`} mode="block" wrap role="text" trigger="inview" className={styles.decisionTitle} />
       {d.text?.map((t, i) => (
         <p key={i} className="body-copy">
           {t}
@@ -201,16 +203,26 @@ export function OutcomeTable({ block, kinds }: { block: Outcomes; kinds: Evidenc
   );
 }
 
+/**
+ * "Label — finding": the line leads. A contour rule draws, the label settles in mono, then the
+ * finding settles as one block a moment later; headings take turns and snap while the reader
+ * scrolls fast (SettleText channel "heading").
+ */
 function Heading({ waypoint: w, index }: { waypoint: Waypoint; index: number }) {
+  const finding = w.finding ? `${w.finding[0].toUpperCase()}${w.finding.slice(1)}` : null;
   return (
-    <h2 id={`${w.id}-heading`} className={styles.heading}>
-      <span className={`${styles.headingLabel} hud-label`}>
-        <span aria-hidden="true">{String(index + 1).padStart(2, "0")} · </span>
-        {w.label}
-        {w.finding && " —"}
-      </span>
-      {w.finding && <span className={styles.headingFinding}> {w.finding}</span>}
-    </h2>
+    <>
+      <ContourRule className={styles.headingRule} />
+      <h2 id={`${w.id}-heading`} className={styles.heading}>
+        <span className={`${styles.headingLabel} hud-label`}>
+          <span aria-hidden="true">{String(index + 1).padStart(2, "0")} · </span>
+          <SettleText as="span" text={finding ? `${w.label} —` : w.label} mode="chars" role="mono" trigger="inview" className={styles.headingLabelText} />
+        </span>{" "}
+        {finding && (
+          <SettleText as="span" text={finding} mode="block" wrap role="text" trigger="inview" delay={duration.short} channel="heading" className={styles.headingFinding} />
+        )}
+      </h2>
+    </>
   );
 }
 
@@ -272,16 +284,19 @@ export function Waypoints({ study, evidence }: { study: CaseStudy; evidence: Evi
                 <p className={`${styles.credits} body-copy`}>{study.credits}</p>
               </div>
             )}
-            <p className={`${styles.foot} hud-label`}>
+            <p className={styles.foot}>
               {next && (
-                <a href={`#${next.id}`}>
-                  {L.nextWaypoint}
-                  <span className="visually-hidden">: {next.nav}</span> <span aria-hidden="true">↓</span>
-                </a>
+                <SignatureLink
+                  href={`#${next.id}`}
+                  variant="standalone"
+                  role="mono"
+                  label={L.nextWaypoint}
+                  arrow="↓"
+                  aria-label={`${L.nextWaypoint}: ${next.nav}`}
+                  className={`${styles.footLink} hud-label`}
+                />
               )}
-              <a href="#main">
-                {L.backToTop} <span aria-hidden="true">↑</span>
-              </a>
+              <SignatureLink href="#main" variant="standalone" role="mono" label={L.backToTop} arrow="↑" className={`${styles.footLink} hud-label`} />
             </p>
           </section>
         );

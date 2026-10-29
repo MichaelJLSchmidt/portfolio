@@ -1,3 +1,4 @@
+import { SettleText } from "@/components/motion/SettleText";
 import { home } from "@/content/home";
 import { SectionHead } from "./SectionHead";
 import styles from "./Home.module.css";
@@ -14,7 +15,7 @@ export function TrailRules() {
             <span className={`${styles.ruleNo} hud-label`} aria-hidden="true">
               {String(i + 1).padStart(2, "0")}
             </span>
-            <h3 className={styles.ruleTitle}>{r.title}</h3>
+            <SettleText as="h3" text={r.title} mode="block" wrap role="text" trigger="inview" className={styles.ruleTitle} />
             <p className="body-copy">{r.text}</p>
             <p className={`${styles.evidence} body-copy`}>
               <span className="hud-label">{t.evidenceLabel}</span> {r.evidence}

@@ -20,6 +20,7 @@
 }
 
 .eyebrow {
+  --kt-color: var(--color-glacier);
   color: var(--color-glacier);
 }
 

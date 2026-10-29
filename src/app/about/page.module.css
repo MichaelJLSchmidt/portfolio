@@ -57,8 +57,14 @@
 }
 
 .legendHeading {
+  --kt-color: var(--color-moss-ink);
   color: var(--color-moss-ink);
   font-weight: 700;
+}
+
+.legendHeading[data-role] {
+  --kt-rest-wght: 700;
+  --kt-from-wght: 700;
 }
 
 .legendRows {
@@ -103,6 +109,7 @@
 }
 
 .bioHeading {
+  --kt-color: var(--color-glacier);
   color: var(--color-glacier);
 }
 
@@ -170,6 +177,12 @@
   font-stretch: var(--type-condensed-wdth);
 }
 
+/* A small settle from the breath above its condensed rest axes (SettleText role "text"). */
+.dayTitle[data-role] {
+  --kt-rest-wdth: var(--type-condensed-wdth);
+  --kt-rest-wght: 700;
+}
+
 @media (min-width: 1024px) {
   .days {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -184,6 +197,11 @@
 
 .offMapHead {
   display: grid;
+  gap: 10px;
+}
+
+.headRule {
+  width: min(100%, 12rem);
 }
 
 @media (min-width: 1024px) {

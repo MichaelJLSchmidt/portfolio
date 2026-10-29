@@ -50,6 +50,16 @@
   --kt-dur: var(--dur-settle);
 }
 
+/* "text": the className gives the rest axes; the settle comes from the breath above them (the
+   display role's +8), at the label duration: a small settle (H3s, findings). */
+.settle[data-role="text"] {
+  --kt-from-wdth: calc(var(--kt-rest-wdth) + var(--axis-display-hover-wdth) - var(--axis-display-rest-wdth));
+  --kt-from-wght: var(--kt-rest-wght);
+  --kt-breath-wdth: var(--kt-from-wdth);
+  --kt-breath-wght: var(--kt-rest-wght);
+  --kt-dur: var(--dur-settle);
+}
+
 .letters {
   display: inline;
 }
@@ -168,7 +178,7 @@
 
   :root:not([data-motion="still"]) .settle[data-play="true"] :is(.glyph, .run) {
     animation: st-settle var(--kt-dur) var(--ease-settle) backwards;
-    animation-delay: calc(var(--kt-i) * var(--kt-step, 0ms));
+    animation-delay: calc(var(--kt-delay, 0ms) + var(--kt-i) * var(--kt-step, 0ms));
   }
 
   /* Arriving with a page transition: held just wide (the breath), then a short settle. */

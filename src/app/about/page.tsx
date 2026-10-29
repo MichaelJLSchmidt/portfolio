@@ -5,6 +5,7 @@ import { AscentProfile } from "@/components/about/AscentProfile";
 import { ContactBand } from "@/components/home/ContactBand";
 import { SectionHead } from "@/components/home/SectionHead";
 import { MapSheet } from "@/components/motion/MapSheet";
+import { RuledHeading } from "@/components/motion/RuledHeading";
 import { SettleText } from "@/components/motion/SettleText";
 import { MorphTarget } from "@/components/transition/MorphTarget";
 import { about } from "@/content/about";
@@ -49,9 +50,7 @@ export default function About() {
 
       <section className={styles.who} aria-labelledby="legend-heading">
         <MapSheet as="div" className={styles.legend} fold="left">
-          <h2 id="legend-heading" className={`${styles.legendHeading} hud-label`}>
-            {about.legend.heading}
-          </h2>
+          <SettleText as="h2" id="legend-heading" text={about.legend.heading} mode="chars" role="mono" trigger="inview" className={`${styles.legendHeading} hud-label`} />
           <dl className={`${styles.legendRows} surface-copy`}>
             {about.legend.rows.map((r) => (
               <div key={r.label}>
@@ -62,7 +61,7 @@ export default function About() {
           </dl>
         </MapSheet>
         <div className={styles.bio}>
-          <h2 className={`${styles.bioHeading} hud-label map-halo`}>{about.bio.heading}</h2>
+          <SettleText as="h2" text={about.bio.heading} mode="chars" role="mono" trigger="inview" className={`${styles.bioHeading} hud-label map-halo`} />
           {about.bio.paragraphs.map((p) => (
             <p key={p} className="body-copy">
               {p}
@@ -90,7 +89,7 @@ export default function About() {
           {about.firstDays.steps.map((s) => (
             <li key={s.title} className={`${styles.day} legend`}>
               <p className={`${styles.dayRange} hud-label`}>{s.days}</p>
-              <h3 className={styles.dayTitle}>{s.title}</h3>
+              <SettleText as="h3" text={s.title} mode="block" wrap role="text" trigger="inview" className={styles.dayTitle} />
               <p className="body-copy">{s.text}</p>
             </li>
           ))}
@@ -106,7 +105,7 @@ export default function About() {
         </section>
         <section className={styles.section} aria-labelledby="off-map-heading">
           <div className={styles.offMapHead} data-quiet-zone>
-            <SettleText as="h2" id="off-map-heading" text={about.offMap.heading} className={`${styles.sectionHeading} display`} trigger="inview" />
+            <RuledHeading id="off-map-heading" text={about.offMap.heading} className={`${styles.sectionHeading} display`} ruleClassName={styles.headRule} />
           </div>
           <p className="body-copy">{about.offMap.body}</p>
         </section>

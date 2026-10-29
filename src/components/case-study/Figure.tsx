@@ -200,7 +200,7 @@ export function Figure({ spec, images, assets, number }: Props) {
       {media}
       {zoomImage && <Zoom {...zoomImage} label={label} caption={spec.caption} />}
       {(spec.caption || spec.long) && (
-        <figcaption className={`${styles.caption} surface-copy`}>
+        <figcaption className={`${styles.caption} surface-copy`} data-reveal="caption">
           {spec.caption && (
             <p id={captionId} className={styles.captionText}>
               {label && <span className={styles.figLabel}>{label} — </span>}
