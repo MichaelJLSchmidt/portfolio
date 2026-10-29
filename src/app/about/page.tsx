@@ -11,6 +11,7 @@ import { MorphTarget } from "@/components/transition/MorphTarget";
 import { about } from "@/content/about";
 import { BASECAMP_MORPH } from "@/lib/morph";
 import { widestEm } from "@/lib/display-width";
+import { arrival, stagger } from "@/styles/tokens";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -45,16 +46,18 @@ export default function About() {
             />
           </MorphTarget>
         </div>
-        <p className={`${styles.lead} knockout`}>{about.header.lead}</p>
+        {/* Arriving from the HUD link: the H1 lands, then the lead settles and the legend unfolds. */}
+        <SettleText as="p" text={about.header.lead} mode="block" wrap role="text" arrive={arrival.landed} className={`${styles.lead} knockout`} />
       </header>
 
       <section className={styles.who} aria-labelledby="legend-heading">
-        <MapSheet as="div" className={styles.legend} fold="left">
+        <MapSheet as="div" className={styles.legend} fold="left" arriveAt={arrival.landed}>
           <SettleText as="h2" id="legend-heading" text={about.legend.heading} mode="chars" role="mono" trigger="inview" className={`${styles.legendHeading} hud-label`} />
-          <dl className={`${styles.legendRows} surface-copy`}>
-            {about.legend.rows.map((r) => (
-              <div key={r.label}>
-                <dt>{r.label}</dt>
+          {/* The rows fade in one after another, their labels (role, base…) settling in mono; the values never move. */}
+          <dl className={`${styles.legendRows} surface-copy`} data-sheet-rows="">
+            {about.legend.rows.map((r, i) => (
+              <div key={r.label} style={{ "--i": i } as CSSProperties}>
+                <SettleText as="dt" text={r.label} mode="block" role="mono" trigger="inview" arrive={arrival.landed + Math.min(i, stagger.item.max - 1) * stagger.item.step} className={styles.legendLabel} />
                 <dd>{r.value}</dd>
               </div>
             ))}

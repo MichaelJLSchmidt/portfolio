@@ -7,7 +7,9 @@ import { SettleText } from "@/components/motion/SettleText";
 import { SignatureLink } from "@/components/motion/SignatureLink";
 import { CardArtwork } from "@/components/card/CardArtwork";
 import { EvidenceBadge } from "@/components/case-study/Evidence";
+import { AltimeterBar } from "@/components/case-study/AltimeterBar";
 import { FictionBanner } from "@/components/case-study/FictionBanner";
+import { TrailheadBand } from "@/components/case-study/TrailheadBand";
 import { Figure } from "@/components/case-study/Figure";
 import { WaypointTrail } from "@/components/case-study/WaypointTrail";
 import { Waypoints } from "@/components/case-study/Waypoints";
@@ -15,11 +17,12 @@ import { SummitSummary } from "@/components/SummitSummary";
 import { MorphTarget } from "@/components/transition/MorphTarget";
 import { RememberCard } from "@/components/transition/RememberCard";
 import { caseStudies } from "@/content/case-studies";
-import { caseStudyLabels as L, cardBySlug, cardHref, cards, coordinatesLine } from "@/content/cards";
+import { caseStudyLabels as L, cardBySlug, cards, coordinatesLine } from "@/content/cards";
 import { site } from "@/content/site";
 import { readingMinutes, type CaseStudy as Study, type Evidence } from "@/lib/case-study";
 import { morphName } from "@/lib/morph";
 import { widestEm } from "@/lib/display-width";
+import { arrival } from "@/styles/tokens";
 import styles from "./page.module.css";
 
 export const dynamicParams = false;
@@ -117,14 +120,17 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
               settleOnArrival
             />
           </MorphTarget>
-          <p className={`${styles.type} map-halo`} data-reveal="" data-vt-exit>
-            {study.typeLine ?? card.type}
-          </p>
+          {/* The type and meta lines settle as the page arrives (arrival.lines after the commit). */}
+          <div data-vt-exit>
+            <SettleText as="p" text={study.typeLine ?? card.type} mode="block" wrap role="text" arrive={arrival.lines} className={`${styles.type} map-halo`} />
+          </div>
           <p className="body-copy" data-vt-exit>
             {study.lede}
           </p>
-          <p className={`${styles.meta} hud-label map-halo`} data-reveal="" data-vt-exit>
-            {L.readingTime(readingMinutes(study))} · <SignatureLink href="#summary-heading" variant="inline" label={L.skim} className={styles.skim} />
+          <p className={`${styles.meta} hud-label map-halo`} data-vt-exit>
+            <SettleText text={L.readingTime(readingMinutes(study))} mode="block" role="mono" arrive={arrival.lines} />
+            {" · "}
+            <SignatureLink href="#summary-heading" variant="inline" label={L.skim} className={styles.skim} />
           </p>
         </div>
       </header>
@@ -133,6 +139,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
         id="summary-heading"
         heading={L.summaryHeading}
         exitOnReturn
+        arriveAt={arrival.summary}
         note={summary.note}
         rows={[
           { label: L.mandate, value: summary.mandate, wide: true },
@@ -189,27 +196,15 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
           </ul>
         </nav>
         <div className={styles.trail}>
-          <WaypointTrail label={L.onThisPage} items={study.waypoints.map((w) => ({ id: w.id, nav: w.nav }))} />
+          <WaypointTrail slug={card.slug} label={L.onThisPage} items={study.waypoints.map((w) => ({ id: w.id, nav: w.nav }))} />
         </div>
         <div className={styles.waypoints}>
           <Waypoints study={study} evidence={evidenceKinds(study)} />
         </div>
       </div>
 
-      <nav className={styles.next} aria-label={L.next} data-vt-exit>
-        {next && (
-          <SignatureLink
-            href={cardHref(next)}
-            variant="display"
-            className={styles.nextLink}
-            before={<span className="hud-label">{L.next}</span>}
-            label={next.name}
-            labelClassName={`${styles.nextName} display`}
-            arrow="→"
-          />
-        )}
-        <SignatureLink href="/" scroll={false} variant="standalone" role="mono" label={L.backToAll} arrow="←" arrowAt="start" className={`${styles.backToAll} hud-label`} />
-      </nav>
+      <TrailheadBand next={next} labels={{ nav: L.next, next: L.next, backToAll: L.backToAll }} />
+      <AltimeterBar slug={card.slug} items={study.waypoints.map((w) => ({ id: w.id, nav: w.nav }))} labels={{ bar: L.onThisPage, sheet: L.jumpTo, close: L.close }} />
     </main>
   );
 }

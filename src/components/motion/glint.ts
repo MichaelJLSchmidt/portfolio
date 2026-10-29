@@ -27,3 +27,23 @@ export function playGlint(scope: Element | null): Promise<void> {
     layers[0].addEventListener("animationend", end, { once: true });
   });
 }
+
+/**
+ * A committed navigation (a card opened, a link to another page): the view transition freezes the
+ * departing page in its snapshot, so the commit's glint plays on the destination instead, on its
+ * H1 once it has arrived (SettleText `glint`, full motion). The path is the destination's.
+ */
+let arrival: { path: string; at: number } | null = null;
+
+export function glintOnArrival(path: string) {
+  arrival = { path: path.endsWith("/") ? path : `${path}/`, at: performance.now() };
+}
+
+/** True once for the page a commit has just led to (within a few seconds). */
+export function takeArrivalGlint(path: string): boolean {
+  const wanted = arrival;
+  if (!wanted || performance.now() - wanted.at > 5000) return false;
+  if (wanted.path !== (path.endsWith("/") ? path : `${path}/`)) return false;
+  arrival = null;
+  return true;
+}

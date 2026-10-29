@@ -55,9 +55,15 @@
 }
 
 .type {
+  margin: 0;
   font-size: 1.125rem;
   font-weight: 600;
   font-stretch: var(--type-condensed-wdth);
+}
+
+.type[data-role] {
+  --kt-rest-wdth: var(--type-condensed-wdth);
+  --kt-rest-wght: 600;
 }
 
 /* "7 min read · 60-second skim below" */
@@ -98,33 +104,6 @@
 /* The jump chips: SignatureLink's chip variant (breath, brightening border, sheet when pressed). */
 .chip {
   font-size: 0.9375rem;
-}
-
-.next {
-  display: grid;
-  justify-items: start;
-  padding-top: 32px;
-  border-top: 1px solid var(--color-contour-dim);
-}
-
-.nextLink {
-  display: inline-grid;
-  gap: 8px;
-  min-height: 44px;
-  color: var(--color-glacier);
-}
-
-.nextName {
-  --l-rest-color: var(--color-sheet);
-  font-size: clamp(2.5rem, 9vw, 7rem);
-}
-
-.backToAll {
-  --l-rest-color: var(--color-glacier);
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  margin-top: 16px;
 }
 
 /* Below 1200 px: "Jump to" chips at the top, the waypoints in one column. From 1200 px the

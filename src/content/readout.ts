@@ -6,6 +6,8 @@
 export const readoutCopy = {
   /** The home region reads its summit. */
   home: { label: "Jungfrau", altitudeM: 4158 },
+  /** While a case study is read: "WAYPOINT 2 / 6". */
+  waypoint: "WAYPOINT",
   east: "E",
   north: "N",
   altitude: "ALT",

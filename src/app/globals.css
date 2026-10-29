@@ -96,6 +96,12 @@ button {
   }
 }
 
+/* The H1 focused after a route change (RouteArrival) is announced, not operated: no ring. */
+[data-route-focus]:focus {
+  outline: none;
+  animation: none;
+}
+
 /* Fallbacks while the web fonts load. next/font's own are local(Arial), which many phones and
    Linux don't have; these take the first of several common faces and give them the web font's
    metrics (overrides are divided by size-adjust), so the swap moves as little as possible:
@@ -328,34 +334,36 @@ i,
 }
 
 /* ------------------------------------------------------------------------------------
-   View transitions (React <ViewTransition> on route changes)
+   View transitions (React <ViewTransition> on route changes; kinds in src/lib/view-transition.ts)
 
-   Durations follow Material 3's scale (medium 250–400 ms, long 450–600 ms, extra-long
-   700–1000 ms) and the rule that duration grows with travel distance and size change:
-   - exit:   the old page dissolves in --dur-medium (360 ms), a plus-lighter crossfade;
-   - travel: the card artwork and title fly to the header in --dur-scenic (900 ms) with a
-             strong decelerate, the longest move on screen;
-   - enter:  the new page arrives with the root crossfade (its first-viewport text is never
-             hidden, reveal.ts), and the title settles once the morph has landed (SettleText);
-   - field:  the background terrain morphs over --dur-cinematic (1.4 s) with a camera push.
+   A link navigation (the route's arrival, RouteArrival and `arrival` in the tokens):
+   - 0 ms:   the press state and the haptic (the link or card itself);
+   - leave:  the old page's own content fades out over --dur-leave (160 ms) while the new page
+             fades in over the same, a plus-lighter crossfade, so the shared map and HUD keep
+             constant brightness and the new text never waits;
+   - travel: the shared artwork and title (card → header and H1, mini card → next header, HUD
+             label → Basecamp H1) travel on the share spring (420 ms, --spring-share-*);
+   - then:   the new page's parts follow from the commit (data-arrive-at, SettleText `arrive`) and
+             the H1 settles once the morph has landed, its glint after it;
+   - field:  the background terrain morphs over --dur-terrain (700 ms) from the same commit.
+   Browser back and forward (html[data-vt="traverse"]): a --dur-crossfade (180 ms) cross-fade plus
+   the shared elements where both pages have them; no arrival choreography, no glint.
    ------------------------------------------------------------------------------------ */
 ::view-transition {
   pointer-events: none;
 }
 
-/* Root: a true crossfade (matched linear curves, plus-lighter), so the shared map and
-   HUD keep constant brightness. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   mix-blend-mode: plus-lighter;
 }
 
 ::view-transition-old(root) {
-  animation: vt-exit var(--dur-medium) linear both;
+  animation: vt-exit var(--dur-leave) linear both;
 }
 
 ::view-transition-new(root) {
-  animation: vt-enter var(--dur-medium) linear both;
+  animation: vt-enter var(--dur-leave) linear both;
 }
 
 @keyframes vt-exit {
@@ -370,19 +378,19 @@ i,
   }
 }
 
-/* Shared elements travel on one curve. */
+/* Shared elements travel on the share spring. */
 ::view-transition-group(.morph) {
-  animation-duration: var(--dur-scenic);
-  animation-timing-function: var(--ease-drop);
+  animation-duration: var(--spring-share-dur);
+  animation-timing-function: var(--spring-share-ease);
 }
 
-/* Artwork: same terrain at a similar aspect, so a long, even crossfade is seamless. */
+/* Artwork: same terrain at a similar aspect, so an even crossfade in flight is seamless. */
 ::view-transition-old(.morph-art),
 ::view-transition-new(.morph-art) {
   height: 100%;
   object-fit: cover;
-  animation-duration: var(--dur-scenic);
-  animation-timing-function: var(--ease-drop);
+  animation-duration: var(--spring-share-dur);
+  animation-timing-function: var(--ease-settle);
 }
 
 /* Title: the box travels, the text does not scale. Both snapshots keep their own size,
@@ -396,11 +404,11 @@ i,
 }
 
 ::view-transition-old(.morph-title) {
-  animation: vt-title-old var(--dur-scenic) linear both;
+  animation: vt-title-old var(--spring-share-dur) linear both;
 }
 
 ::view-transition-new(.morph-title) {
-  animation: vt-title-new var(--dur-scenic) linear both;
+  animation: vt-title-new var(--spring-share-dur) linear both;
 }
 
 @keyframes vt-title-old {
@@ -423,11 +431,20 @@ i,
 
 /* Named parts without a partner (the other cards) leave and arrive with the page. */
 ::view-transition-old(.morph):only-child {
-  animation: vt-exit var(--dur-medium) var(--ease-scree) both;
+  animation: vt-exit var(--dur-leave) var(--ease-scree) both;
 }
 
 ::view-transition-new(.morph):only-child {
   animation: vt-enter var(--dur-long) var(--ease-trail) both;
+}
+
+/* Browser back and forward: a short cross-fade; the shared elements keep the share spring. */
+:root[data-vt="traverse"]::view-transition-old(root),
+:root[data-vt="traverse"]::view-transition-new(root),
+:root[data-vt="traverse"]::view-transition-old(.morph):only-child,
+:root[data-vt="traverse"]::view-transition-new(.morph):only-child {
+  animation-duration: var(--dur-crossfade);
+  animation-timing-function: linear;
 }
 
 /* The deck's Cards ⇄ Index switch (html[data-vt="view"], Deck.tsx): each card's name morphs into

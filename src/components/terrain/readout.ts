@@ -20,11 +20,13 @@ export type Readout = {
   e: number | null;
   n: number | null;
   altitudeM: number | null;
+  /** While a case study is being read: the waypoint (1-based) of how many (the label gives way to it). */
+  waypoint?: { n: number; of: number };
 };
 
 export type ReadoutPart =
   | { key: "label"; text: string }
-  | { key: "e" | "n" | "alt"; prefix: string; value: number; suffix: string };
+  | { key: "wp" | "e" | "n" | "alt"; prefix: string; value: number; suffix: string };
 
 export const READOUT_SEPARATOR = t.separator;
 
@@ -48,8 +50,28 @@ export function readoutFor(id: string | null): Readout {
   return { id: null, label: t.home.label, e: null, n: null, altitudeM: t.home.altitudeM };
 }
 
+/**
+ * Reading a case study: "WAYPOINT 2 / 6 · ALT 1’240 M", the altitude climbing from the card
+ * terrain's base (its first pin, or its lowest point) at the first waypoint to its summit at the
+ * last, so the numbers roll as the reader climbs.
+ */
+export function readingReadout(id: string, index: number, count: number): Readout {
+  const terrain = cardTerrain(id);
+  const pins = terrain?.pins;
+  const base = pins?.length ? pins[0].elevationM : terrain?.morph.elevation.min;
+  const summit = pins?.length ? pins[pins.length - 1].elevationM : terrain?.morph.elevation.max;
+  const at = count > 1 ? index / (count - 1) : 1;
+  const altitudeM = base !== undefined && summit !== undefined ? Math.round(base + (summit - base) * at) : null;
+  return { id, label: readoutFor(id).label, e: null, n: null, altitudeM, waypoint: { n: index + 1, of: count } };
+}
+
 /** The readout's parts in reading order; numbers stay numbers so they can roll. */
 export function readoutParts(r: Readout): ReadoutPart[] {
+  if (r.waypoint) {
+    const parts: ReadoutPart[] = [{ key: "wp", prefix: `${t.waypoint} `, value: r.waypoint.n, suffix: ` / ${r.waypoint.of}` }];
+    if (r.altitudeM !== null) parts.push({ key: "alt", prefix: `${t.altitude} `, value: r.altitudeM, suffix: ` ${t.unit}` });
+    return parts;
+  }
   const parts: ReadoutPart[] = [{ key: "label", text: r.label.toUpperCase() }];
   if (r.e !== null) parts.push({ key: "e", prefix: `${t.east} `, value: r.e, suffix: "" });
   if (r.n !== null) parts.push({ key: "n", prefix: `${t.north} `, value: r.n, suffix: "" });

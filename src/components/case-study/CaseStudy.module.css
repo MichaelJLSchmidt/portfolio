@@ -298,8 +298,22 @@
 }
 
 .table tr[data-chosen] th {
-  box-shadow: inset 3px 0 0 var(--color-glacier);
+  position: relative;
 }
+
+.chosenMark {
+  position: absolute;
+  top: 6px;
+  left: 2px;
+  width: 6px;
+  height: calc(100% - 12px);
+  overflow: visible;
+  fill: none;
+  stroke: var(--color-glacier);
+  stroke-linecap: round;
+  stroke-width: 2;
+}
+
 
 .chosen {
   display: inline-block;
@@ -455,6 +469,36 @@
   --evidence: var(--color-sheet-ink);
 }
 
+/* The legend's swatches draw as it unfolds: the outline, then the fill. */
+@keyframes swatch-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+@keyframes swatch-fill {
+  from {
+    fill-opacity: 0;
+  }
+}
+
+.evidenceLegend svg :is(circle, path) {
+  stroke-dasharray: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .evidenceLegend[data-reveal-state="wait"] svg :is(circle, path) {
+    stroke-dashoffset: 1;
+    fill-opacity: 0;
+  }
+
+  :root:not([data-motion="still"]) .evidenceLegend[data-reveal-state="play"] svg :is(circle, path) {
+    animation:
+      swatch-draw var(--dur-trace) var(--ease-settle) calc(var(--reveal-dur, var(--dur-reveal)) * 0.5) backwards,
+      swatch-fill var(--dur-short) linear calc(var(--reveal-dur, var(--dur-reveal)) * 0.5 + var(--dur-trace)) backwards;
+  }
+}
+
 .evidenceLegend {
   display: grid;
   gap: 8px;
@@ -481,11 +525,13 @@
 /* ------------------------------------------------------------------- banner */
 
 .banner {
+  --sheet-dur: var(--dur-unfold);
   display: flex;
   align-items: flex-start;
   gap: 14px;
   max-width: 62rem;
   padding: 14px 20px;
+  border-left: 3px solid var(--color-alpenglow-ink);
   border-radius: 8px;
   background: var(--color-sheet);
   color: var(--color-ground);
@@ -509,4 +555,214 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+/* The trailhead band (TrailheadBand.tsx): "Next expedition" and the next card's name beside its
+   mini card (stacked on phones), the way back to every expedition below. */
+.trailhead {
+  display: grid;
+  justify-items: start;
+  padding-top: 32px;
+  border-top: 1px solid var(--color-contour-dim);
+}
+
+.trailheadNext {
+  display: grid;
+  gap: 24px;
+  align-items: center;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .trailheadNext {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+/* A definite width: the card is a size container, so it has no width of its own to give an auto
+   track (60% of the deck card's 420 px). */
+.trailheadCard {
+  width: 252px;
+  max-width: 100%;
+}
+
+.nextLink {
+  display: inline-grid;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--color-glacier);
+}
+
+.nextName {
+  --l-rest-color: var(--color-sheet);
+  font-size: clamp(2.5rem, 9vw, 7rem);
+}
+
+.backToAll {
+  --l-rest-color: var(--color-glacier);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 16px;
+}
+
+/* The altimeter bar (AltimeterBar.tsx), below the large breakpoint: fixed along the bottom once
+   the first waypoint is reached, a thin contour along its top edge filling with the reading
+   progress (--reading). */
+.altimeter {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: var(--layer-hud);
+  display: none;
+  padding: 0 max(16px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(16px, env(safe-area-inset-left));
+  border-top: 1px solid var(--color-contour-dim);
+  background: color-mix(in srgb, var(--color-ground) 94%, transparent);
+}
+
+@media (width < 1280px) {
+  .altimeter[data-shown] {
+    display: block;
+  }
+
+  /* The page ends above the bar. */
+  :global(body):has(.altimeter[data-shown]) {
+    padding-bottom: 64px;
+  }
+}
+
+.altimeterLine {
+  position: absolute;
+  inset: -1px 0 auto;
+  height: 1px;
+  background: var(--color-glacier);
+  transform: scaleX(var(--reading, 0));
+  transform-origin: left center;
+}
+
+.altimeterButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-sheet);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.altimeterCount {
+  flex: none;
+  color: var(--color-glacier);
+}
+
+.altimeterName {
+  --kt-color: var(--color-sheet);
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.altimeterArrow {
+  flex: none;
+  color: var(--color-glacier);
+}
+
+/* The jump list: a bottom sheet (a modal dialog) that rises over --dur-sheet; still mode fades it
+   in. */
+.jumpSheet {
+  inset: auto 0 0;
+  width: 100%;
+  max-width: none;
+  max-height: min(80svh, 32rem);
+  margin: 0;
+  padding: 0 16px max(16px, env(safe-area-inset-bottom));
+  border: 0;
+  border-top: 1px solid var(--color-contour);
+  border-radius: 12px 12px 0 0;
+  background: var(--color-ground);
+  color: var(--color-sheet);
+}
+
+.jumpSheet::backdrop {
+  background: color-mix(in srgb, var(--color-ground) 60%, transparent);
+}
+
+@keyframes sheet-rise {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes sheet-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .jumpSheet[open] {
+    animation: sheet-rise var(--dur-sheet) var(--ease-settle);
+  }
+
+  :root:not([data-motion="still"]) .jumpSheet[open]::backdrop {
+    animation: sheet-fade var(--dur-sheet) linear;
+  }
+}
+
+:root[data-motion="still"] .jumpSheet[open] {
+  animation: sheet-fade var(--dur-still) linear;
+}
+
+.jumpSheetBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+}
+
+.jumpSheetBar h2 {
+  margin: 0;
+  color: var(--color-sheet);
+}
+
+.jumpSheetClose {
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--color-glacier);
+  cursor: pointer;
+}
+
+.jumpSheetList {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.jumpSheetList a {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-height: 48px;
+  padding: 12px 0;
+  border-top: 1px solid var(--color-contour-dim);
+  color: var(--color-sheet);
+  font-size: 1.0625rem;
+  text-decoration: none;
+}
+
+.jumpSheetList a[aria-current="true"] {
+  color: var(--color-glacier);
+}
+
+.jumpSheetList :global(.hud-label) {
+  color: var(--color-sheet);
 }

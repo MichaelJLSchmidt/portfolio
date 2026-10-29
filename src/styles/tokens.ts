@@ -123,6 +123,10 @@ export const duration = {
   crossfade: 180,
   /** A bottom sheet opening (the altimeter's jump list). */
   sheet: 300,
+  /** A small sheet unfolding: the fiction banner, a hotspot's note. */
+  unfold: 240,
+  /** A route's arrival: everything on the new page has landed (see `arrival`). */
+  arrival: 740,
   /** A card's artwork contours shift by one interval on hover. */
   shift: 600,
   /** Hovering a link to another terrain leans the field towards it (and back on leave). */
@@ -173,6 +177,21 @@ export const stagger = {
   word: { step: 40, cap: 320 },
   item: { step: 50, max: 6 },
   card: { step: 70, cap: 420 },
+} as const;
+
+/**
+ * A route's arrival (a link navigation in full and calm; RouteArrival), in ms after the route
+ * commits, the moment the field's conductor starts: the old page's own content leaves over
+ * `duration.leave`, the shared artwork and title travel on `spring.share`, then the new page's
+ * parts follow, all landed by `duration.arrival`. Text never waits: it is readable throughout.
+ */
+export const arrival = {
+  /** A case study's type and meta lines settle. */
+  lines: 260,
+  /** A case study's summary sheet unfolds (to the arrival's end). */
+  summary: 380,
+  /** Basecamp: the lead settles and the legend unfolds, the H1 having landed. */
+  landed: 420,
 } as const;
 
 /** Distances in px (tilt in degrees). */

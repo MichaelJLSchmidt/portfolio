@@ -6,7 +6,7 @@ import { haptic } from "@/lib/haptics";
 import { isSettled, markSettled, settleKey } from "@/lib/settled";
 import { duration, levels, stagger, staggerStep } from "@/styles/tokens";
 import { Glint } from "./Glint";
-import { playGlint } from "./glint";
+import { glintOnArrival, playGlint } from "./glint";
 import styles from "./SignatureLink.module.css";
 
 export type SignatureLinkVariant = "inline" | "standalone" | "display" | "nav" | "chip";
@@ -58,8 +58,9 @@ export type SignatureLinkProps = Omit<ComponentProps<typeof Link>, "children"> &
 
 /**
  * The signature link. Hover (fine pointers only, under `(hover: hover)`) and keyboard focus get
- * exactly the same motion; press narrows the weight; committing (click, Enter or tap) plays the
- * glint as navigation starts, with a haptic tick where supported. The label sits in a box reserved
+ * exactly the same motion; press narrows the weight; committing (click, Enter or tap) ticks the
+ * commit haptic where supported and plays the glint: on the destination's H1 once it has arrived
+ * when the link leads to another page, on the link itself otherwise. The label sits in a box reserved
  * at its widest (breath) state, so a breath never moves anything. Still mode keeps the colour
  * change only; calm keeps the breath but never glints. docs/motion.md has the details.
  */
@@ -118,7 +119,12 @@ export function SignatureLink({
     onClick?.(e);
     if (e.defaultPrevented || e.button !== 0) return;
     haptic("commit");
-    playGlint(ref.current);
+    // To another page: the transition freezes this link in its snapshot, so the glint plays on the
+    // destination's H1 once it has arrived. In-page links and files glint here.
+    const a = e.currentTarget;
+    const route = !plain && a.origin === window.location.origin && a.pathname !== window.location.pathname;
+    if (route && !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)) glintOnArrival(a.pathname);
+    else playGlint(ref.current);
   };
 
   // The settle cascade fits the char stagger's cap.

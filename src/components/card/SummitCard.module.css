@@ -122,6 +122,11 @@
   min-width: 0;
 }
 
+/* The name's box when it is named for a commit only (transitionNames="commit"). */
+.nameSlot {
+  min-width: 0;
+}
+
 .name {
   margin: 0;
   font-size: max(18px, 7.4cqi);

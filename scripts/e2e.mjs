@@ -134,12 +134,13 @@ async function open({ calm = false, reduced = false, classic = false, init } = {
   );
   await context.addInitScript(() => {
     // The return choreography's traces: html[data-vt], the named exit parts, the card rebuild.
-    window.__return = { vt: 0, exits: 0, reassemble: 0 };
+    window.__return = { vt: 0, exits: 0, reassemble: 0, traverse: 0 };
     document.addEventListener("DOMContentLoaded", () => {
       new MutationObserver((records) => {
         for (const r of records) {
           const el = r.target;
           if (r.attributeName === "data-vt" && el.getAttribute("data-vt") === "return") window.__return.vt++;
+          if (r.attributeName === "data-vt" && el.getAttribute("data-vt") === "traverse") window.__return.traverse++;
           if (r.attributeName === "data-reassemble" && el.hasAttribute("data-reassemble")) window.__return.reassemble++;
           if (r.attributeName === "style" && el.style?.viewTransitionName?.startsWith("vt-exit")) window.__return.exits++;
         }
@@ -260,14 +261,16 @@ async function transitions() {
     await page.locator(`article[data-slug="${card.slug}"] a`).first().click();
     expectPage(await settle(page, { path: card.path, terrain: fieldOn ? card.terrain : null }), "open card", card);
 
-    // The way back: card reassembly in full motion, the previous morph with ?vt=classic.
+    // The way back: card reassembly in full motion by the back link, the previous morph with
+    // ?vt=classic; browser back cross-fades (a traversal) without the reassembly.
     const choreography = fieldOn && !mode.abort;
-    const expectReturn = (r, label, before) => {
+    const expectReturn = (r, label, before, { traversal = false } = {}) => {
       check(`${label}: focus on the card`, r.focus === card.slug, `focus=${r.focus}`);
       check(`${label}: card rebuilt and done`, r.rebuilding === 0 && r.vtAttr === null, `rebuilding=${r.rebuilding} data-vt=${r.vtAttr}`);
       if (!choreography) return;
       const ran = r.ret.vt > before.vt && r.ret.exits > before.exits && r.ret.reassemble > before.reassemble;
-      if (mode.classic) check(`${label}: previous return, no reassembly`, r.ret.vt === before.vt && r.ret.reassemble === before.reassemble, JSON.stringify(r.ret));
+      if (traversal) check(`${label}: a traversal cross-fade, no reassembly`, r.ret.traverse > before.traverse && r.ret.reassemble === before.reassemble, JSON.stringify({ before, after: r.ret }));
+      else if (mode.classic) check(`${label}: previous return, no reassembly`, r.ret.vt === before.vt && r.ret.reassemble === before.reassemble, JSON.stringify(r.ret));
       else check(`${label}: exit, travel and reassembly ran`, ran, JSON.stringify({ before, after: r.ret }));
     };
     const returnTrace = () => page.evaluate(() => ({ ...window.__return }));
@@ -277,7 +280,7 @@ async function transitions() {
     await page.goBack();
     const back = await settle(page, { path: "/", terrain: fieldOn ? "region" : null });
     expectPage(back, "back", { path: "/", terrain: "region" });
-    expectReturn(back, "back", before);
+    expectReturn(back, "back", before, { traversal: true });
 
     await arm();
     await page.goForward();

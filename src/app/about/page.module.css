@@ -31,6 +31,11 @@
   line-height: 1.35;
 }
 
+.lead[data-role] {
+  --kt-rest-wdth: 100%;
+  --kt-rest-wght: 560;
+}
+
 @media (min-width: 1024px) {
   .header {
     grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
@@ -95,6 +100,10 @@
   letter-spacing: var(--type-hud-tracking);
   line-height: 1.9;
   text-transform: uppercase;
+}
+
+.legendLabel[data-role] {
+  --kt-color: var(--color-sheet-ink);
 }
 
 .legendRows dd {

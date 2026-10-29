@@ -1,5 +1,6 @@
 import { playGlint } from "@/components/motion/glint";
 import { BASE_PATH } from "@/lib/asset";
+import { clearTraversal } from "@/lib/view-transition";
 import { duration, stagger } from "@/styles/tokens";
 
 /**
@@ -15,8 +16,9 @@ import { duration, stagger } from "@/styles/tokens";
  *    (SummitCard.module.css), a glint crosses its name once the neatline has closed (the Glint
  *    primitive, full motion), then the attribute is removed.
  *
- * view-transition.ts calls `beginReturn` for every view transition; it only acts when a detail
- * page (`main[data-card]`) is left for the deck. Dev and preview builds keep the previous
+ * view-transition.ts calls `beginReturn` for every route transition but browser back and forward
+ * (those cross-fade); it only acts when a detail page (`main[data-card]`) is left for the deck
+ * by a link (the back links). Dev and preview builds keep the previous
  * return behind `?vt=classic` (and back with `?vt=new`), remembered for the session, so both
  * can be compared.
  */
@@ -55,6 +57,7 @@ export function watchNavigationIntent(): () => void {
     const a = (e.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
     if (!a || a.target === "_blank" || a.origin !== window.location.origin) return;
     intended = { path: a.pathname, at: performance.now() };
+    clearTraversal();
   };
   document.addEventListener("click", onClick, { capture: true });
   classic();

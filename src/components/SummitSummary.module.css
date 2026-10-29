@@ -1,5 +1,6 @@
 /* Summit summary: sheet colour, so only sheet-safe inks (ground, sheet-ink, moss-ink, alpenglow-ink). */
 .summary {
+  --sheet-dur: var(--dur-medium);
   display: grid;
   gap: 20px;
   scroll-margin-top: 96px;

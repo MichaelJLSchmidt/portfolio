@@ -1,5 +1,6 @@
 import { useId, type CSSProperties } from "react";
 import { ContourRule } from "@/components/motion/ContourRule";
+import { RollValue } from "@/components/motion/RollValue";
 import { SettleText } from "@/components/motion/SettleText";
 import { SignatureLink } from "@/components/motion/SignatureLink";
 import { caseStudyLabels as L } from "@/content/cards";
@@ -88,7 +89,10 @@ export function KeyInsight({ text }: { text: string }) {
   );
 }
 
-/** A decision: an h3 "Decision n — question", the options as a real table, then chose / cost / mitigation. */
+/**
+ * A decision: an h3 "Decision n — question", the options as a real table (a contour marker draws
+ * beside the chosen option as it scrolls into view), then chose / cost / mitigation.
+ */
 export function DecisionBlock({ decision: d, number }: { decision: Decision; number: number }) {
   const id = useId();
   return (
@@ -117,6 +121,12 @@ export function DecisionBlock({ decision: d, number }: { decision: Decision; num
               {d.options.rows.map((r) => (
                 <tr key={r.option} data-chosen={r.chosen || undefined}>
                   <th scope="row">
+                    {/* The chosen option: a contour marker draws down beside it. */}
+                    {r.chosen && (
+                      <svg className={styles.chosenMark} viewBox="0 0 6 100" preserveAspectRatio="none" aria-hidden="true" data-reveal="mark">
+                        <path pathLength={1} d="M3 0C1 20 5 38 3 50S1 80 3 100" />
+                      </svg>
+                    )}
                     {r.option}
                     {r.chosen && <span className={`${styles.chosen} hud-label`}>{L.chosen}</span>}
                   </th>
@@ -150,13 +160,13 @@ export function DecisionBlock({ decision: d, number }: { decision: Decision; num
 type Metrics = Extract<Block, { kind: "metrics" }>;
 type Outcomes = Extract<Block, { kind: "outcomes" }>;
 
-/** Metric tiles: the value, what it measures, and how it was obtained. */
+/** Metric tiles: the value (its number rolls once from a nearby one), what it measures, and how it was obtained. */
 export function MetricTiles({ block }: { block: Metrics }) {
   return (
     <ul className={styles.metrics} aria-label={block.label}>
       {block.items.map((m) => (
         <li key={m.label} className={`${styles.metric} surface-copy`}>
-          <span className={styles.metricValue}>{m.value}</span>
+          <RollValue value={m.value} only="last" className={styles.metricValue} />
           <span className={styles.metricLabel}>{m.label}</span>
           {m.detail && <span className={styles.metricDetail}>{m.detail}</span>}
           <EvidenceBadge kind={m.evidence} />

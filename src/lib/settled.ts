@@ -39,5 +39,8 @@ export function markSettled(key: string) {
   }
 }
 
-/** Before first paint: stop the animations of every remembered element (keys are [a-z0-9]). */
-export const settledScript = `try{var k=JSON.parse(sessionStorage.getItem("${SETTLED_STORAGE_KEY}")||"[]").filter(function(x){return/^s[a-z0-9]+$/.test(x)});if(k.length){var st=document.createElement("style");st.textContent=k.map(function(x){return'[data-settle-key="'+x+'"],[data-settle-key="'+x+'"] *'}).join(",")+"{animation:none!important}";document.head.appendChild(st)}}catch(e){}`;
+/**
+ * Before first paint: stop the animations of every remembered element (keys are [a-z0-9]), unless
+ * a route's arrival plays it again (data-arrive, SettleText).
+ */
+export const settledScript = `try{var k=JSON.parse(sessionStorage.getItem("${SETTLED_STORAGE_KEY}")||"[]").filter(function(x){return/^s[a-z0-9]+$/.test(x)});if(k.length){var st=document.createElement("style");st.textContent=k.map(function(x){var s='[data-settle-key="'+x+'"]:not([data-arrive])';return s+","+s+" *"}).join(",")+"{animation:none!important}";document.head.appendChild(st)}}catch(e){}`;

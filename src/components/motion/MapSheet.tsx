@@ -9,6 +9,7 @@ import type { CSSProperties, ElementType, ReactNode } from "react";
 export function MapSheet({
   as: Tag = "div",
   fold = "top",
+  arriveAt,
   className,
   style,
   children,
@@ -16,12 +17,17 @@ export function MapSheet({
   as?: ElementType;
   /** The edge the sheet unfolds from. */
   fold?: "top" | "left";
+  /**
+   * On screen when a route arrives by a link: unfolds this many milliseconds after the commit, up
+   * to the arrival's end (`arrival` in the tokens, reveal.ts). Otherwise it is simply there.
+   */
+  arriveAt?: number;
   className?: string;
   style?: CSSProperties;
   children: ReactNode;
 }) {
   return (
-    <Tag className={className ? `map-sheet ${className}` : "map-sheet"} data-reveal="sheet" data-fold={fold} style={style}>
+    <Tag className={className ? `map-sheet ${className}` : "map-sheet"} data-reveal="sheet" data-fold={fold} data-arrive-at={arriveAt} style={style}>
       {children}
     </Tag>
   );

@@ -11,7 +11,7 @@ import { currentMode, useMotionMode } from "@/lib/motion-mode";
 import { isSettled, markSettled, settleKey } from "@/lib/settled";
 import { useVisited } from "@/lib/visited";
 import { Glint } from "@/components/motion/Glint";
-import { playGlint } from "@/components/motion/glint";
+import { glintOnArrival, playGlint } from "@/components/motion/glint";
 import { RollNumber, preloadRoll } from "@/components/motion/RollNumber";
 import { SettleText, type SettleHandle } from "@/components/motion/SettleText";
 import { prefetchTerrain } from "@/components/terrain/field-store";
@@ -36,11 +36,17 @@ export type SummitCardProps = {
   headingLevel?: 2 | 3;
   /**
    * Give the artwork and name view-transition names so they morph into the case-study
-   * header. Only one element per name may exist on a page.
+   * header. Only one element per name may exist on a page. "commit": named only for the
+   * navigation the reader commits to (the trailhead band's next card, commit-morph.ts), so the
+   * deck's card of the same name never pairs with it.
    */
-  transitionNames?: boolean;
+  transitionNames?: boolean | "commit";
+  /** A second way to a page that a visible link already leads to: hidden from screen readers and out of the tab order. */
+  decorative?: boolean;
   /** Called before navigating to the case study (e.g. to remember the origin for focus return). */
   onOpen?: () => void;
+  /** Takes the navigation over (the trailhead band runs it inside a view transition of its own). */
+  navigate?: (href: string) => void;
 };
 
 /** Set once every card has arrived: later visits this session show the deck at once. */
@@ -96,11 +102,11 @@ function StatValue({ value, phase }: { value: string; phase: Roll }) {
  * deeper shadow and a brighter border, the name breathes +8, the keyword chips breathe in turn,
  * the artwork's contours shift by one interval and the foil shows (rarity R and M); the stats
  * roll once from a nearby value (touch: the first time in view). A fine pointer tilts it (≤ 5°).
- * Press scales it to 0.98; opening ticks the open haptic and glints the name. Touch shows one
- * glint as the card crosses the screen's middle. Calm keeps the responses and settles, still only
- * colour and opacity.
+ * Press scales it to 0.98; opening ticks the open haptic, and the case study's H1 glints once it
+ * has arrived. Touch shows one glint as the card crosses the screen's middle. Calm keeps the
+ * responses and settles, still only colour and opacity.
  */
-export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNames = false, onOpen }: SummitCardProps) {
+export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNames = false, decorative = false, onOpen, navigate }: SummitCardProps) {
   const [active, setActive] = useState(false);
   const [opening, setOpening] = useState(false);
   const [roll, setRoll] = useState<Roll>("rest");
@@ -139,7 +145,8 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNa
     if (!el) return;
     const key = settleKey("deck", `arrive:${card.slug}`);
     // DEALT_KEY: the deck has dealt this session (also how tests and recordings skip the deal).
-    if (isSettled(key) || dealt() || currentMode() === "still") return el.setAttribute("data-arrive", "done");
+    // The trailhead band's mini card is simply there (its band reveals).
+    if (size === "mini" || isSettled(key) || dealt() || currentMode() === "still") return el.setAttribute("data-arrive", "done");
     const r = el.getBoundingClientRect();
     if (r.top < window.innerHeight && r.bottom > 0) {
       markSettled(key);
@@ -165,7 +172,7 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNa
     );
     io.observe(el);
     return () => io.disconnect();
-  }, [card.slug, card.rarity]);
+  }, [card.slug, card.rarity, size]);
 
   // Touch: the stats roll the first time the card is in view, and one glint marks it as it
   // crosses the middle of the screen (full motion); once per session each.
@@ -214,7 +221,11 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNa
   };
 
   const morph = (part: "art" | "title", node: ReactNode) =>
-    transitionNames ? (
+    transitionNames === "commit" ? (
+      <div className={part === "art" ? styles.artSlot : styles.nameSlot} data-commit-morph={morphName(part, card.slug)} data-commit-class={`morph morph-${part}`}>
+        {node}
+      </div>
+    ) : transitionNames ? (
       <MorphTarget name={morphName(part, card.slug)} variant={part} className={part === "art" ? styles.artSlot : undefined}>
         {node}
       </MorphTarget>
@@ -235,6 +246,7 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNa
       data-opening={opening}
       data-visited={visited || undefined}
       aria-labelledby={card.example ? `${nameId} ${exampleId}` : nameId}
+      aria-hidden={decorative || undefined}
       style={
         {
           ...(terrain ? { "--foil-mask": `url("${asset(terrain.svg)}")` } : {}),
@@ -348,6 +360,7 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNa
             <Link
               href={cardHref(card)}
               className={styles.cardLink}
+              tabIndex={decorative ? -1 : undefined}
               aria-label={`${cardLabels.open(card.name, card.type, card.rarity)}${visited ? `, ${cardLabels.visited}` : ""}`}
               onClick={(e) => {
                 // Hide hover-only chrome before the view transition snapshots the card.
@@ -355,12 +368,18 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNa
                 onOpen?.();
                 if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
                 haptic("open");
-                playGlint(nameRef.current);
+                // The glint marks the arrival: on the case study's H1 once it has landed.
+                glintOnArrival(e.currentTarget.pathname);
                 // A tilted card springs flat first (≤ 120 ms), so the morph never starts tilted.
                 const settled = settleRef.current?.();
+                const href = cardHref(card);
+                if (navigate) {
+                  e.preventDefault();
+                  void (settled ?? Promise.resolve()).then(() => navigate(href));
+                  return;
+                }
                 if (!settled) return;
                 e.preventDefault();
-                const href = cardHref(card);
                 settled.then(() => router.push(href));
               }}
             />

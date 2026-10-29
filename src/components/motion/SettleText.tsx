@@ -16,14 +16,14 @@ import { headlampFalloff, watchHeadlamp } from "@/lib/headlamp";
 import { useFinePointer } from "@/lib/idle";
 import { currentMode, useMotionMode } from "@/lib/motion-mode";
 import { isSettled, markSettled, settleKey } from "@/lib/settled";
-import { activeViewTransition } from "@/lib/view-transition";
+import { activeViewTransition, transitionKind } from "@/lib/view-transition";
 import { duration, headlamp, stagger, staggerStep, type AxisRole } from "@/styles/tokens";
 import { Glint } from "./Glint";
-import { playGlint } from "./glint";
+import { playGlint, takeArrivalGlint } from "./glint";
 import { scrollingFast } from "./reveal";
 import styles from "./SettleText.module.css";
 
-type Tag = "h1" | "h2" | "h3" | "p" | "span";
+type Tag = "h1" | "h2" | "h3" | "p" | "span" | "dt";
 
 /** chars: per-letter cascade (display titles); words: per word; block: one run (labels, buttons, nav). */
 export type SettleMode = "chars" | "words" | "block";
@@ -57,9 +57,16 @@ export type SettleTextProps = {
   quiet?: boolean;
   /**
    * For text that morphs in with a page transition: while the transition runs it holds just wide
-   * (the breath axes) and settles once the transition has landed. Direct loads settle as usual.
+   * (the breath axes) and settles once the transition has landed. Direct loads settle as usual;
+   * browser back and forward show it at rest.
    */
   settleOnArrival?: boolean;
+  /**
+   * Part of a route's arrival (a link navigation, full and calm; RouteArrival): the settle plays
+   * this many milliseconds after the route commits (`arrival` in the tokens), every time the page
+   * is reached by a link. Direct loads settle from first paint as usual.
+   */
+  arrive?: number;
   /**
    * "page" (default): plays once per page per session. "site": once per session wherever it
    * appears, for chrome that every page shares (the HUD).
@@ -122,6 +129,7 @@ export function SettleText({
   shine = false,
   quiet = false,
   settleOnArrival = false,
+  arrive,
   scope = "page",
   reserve = "widest",
   widths,
@@ -173,7 +181,10 @@ export function SettleText({
     if (!el) return;
     if (el.getAttribute("data-play") === "true") el.setAttribute("data-play", "done");
     markSettled(key);
-    if (!glint || currentMode() !== "full" || isSettled(`${key}g`)) return;
+    if (!glint || currentMode() !== "full") return;
+    // Once per session, and again whenever a commit led here (a card opened, a link followed).
+    const committed = takeArrivalGlint(window.location.pathname);
+    if (!committed && isSettled(`${key}g`)) return;
     markSettled(`${key}g`);
     playGlint(el);
   };
@@ -196,8 +207,29 @@ export function SettleText({
     if (!el) return;
     if (trigger === "paint" && isSettled(key) && el.getAttribute("data-play") === "true") el.setAttribute("data-play", "done");
     const transition = activeViewTransition();
-    if (!settleOnArrival || !transition || currentMode() === "still") return;
+    const kind = transitionKind();
+    if (!transition || currentMode() === "still" || kind === "traverse" || kind === "view") return;
     let live = true;
+    // Part of the arrival: the settle from the reveal axes, `arrive` ms after the commit.
+    if (arrive !== undefined && !settleOnArrival) {
+      el.style.setProperty("--kt-delay", `${arrive}ms`);
+      el.setAttribute("data-arrive", "play");
+      el.setAttribute("data-play", "rest");
+      void el.offsetWidth;
+      el.setAttribute("data-play", "true");
+      const stop = whenSettled(el, () => {
+        if (!live) return;
+        el.setAttribute("data-arrive", "done");
+        el.setAttribute("data-play", "done");
+        landed();
+      });
+      return () => {
+        live = false;
+        stop();
+        el.setAttribute("data-arrive", "done");
+      };
+    }
+    if (!settleOnArrival) return;
     el.setAttribute("data-arrive", "hold");
     const settle = () => {
       if (!live) return;
@@ -216,7 +248,7 @@ export function SettleText({
     };
     // landed reads props that are fixed for the element's life.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settleOnArrival, key]);
+  }, [settleOnArrival, arrive, key]);
 
   // Triggers. Text already in view when an in-view settle would start stays at rest: it has been
   // visible from first paint.

@@ -10,6 +10,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { RouteFade } from "@/components/transition/RouteFade";
 import { HistoryTransitions } from "@/components/transition/HistoryTransitions";
+import { RouteArrival } from "@/components/transition/RouteArrival";
 import { Reveals } from "@/components/motion/Reveals";
 import "./globals.css";
 import "@/styles/motion.css";
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <SmoothScroll />
         <HistoryTransitions />
         <RouteFade />
+        <RouteArrival />
         <Reveals />
         <Hud />
         <div className="page">

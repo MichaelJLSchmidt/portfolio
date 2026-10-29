@@ -31,6 +31,7 @@
 }
 
 .figure[data-surface="sheet"] {
+  --tick: var(--color-moss-ink);
   padding: var(--pad);
   border: 1px solid var(--color-contour);
   background: var(--color-sheet);
@@ -171,6 +172,81 @@
   }
 }
 
+/* One ping per pin, in turn (hotspots.ts): a ring leaves the pin and fades. */
+.hotspot::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border: 2px solid var(--color-glacier);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes hotspot-ping {
+  from {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}
+
+:root[data-motion="full"] .hotspot[data-ping]::after {
+  animation: hotspot-ping var(--dur-long) var(--ease-settle) var(--ping-delay, 0ms) backwards;
+}
+
+/* The pressed pin's title in a mini sheet beside it: it unfolds from the pin's side, its letters
+   settling; still mode shows it at once. */
+.media :global([data-hotspot-label]) {
+  position: absolute;
+  z-index: 2;
+  margin: -12px 0 0 22px;
+  padding: 3px 10px;
+  border: 1px solid var(--color-contour);
+  border-radius: 4px;
+  background: var(--color-sheet);
+  color: var(--color-ground);
+  font-family: var(--font-mono);
+  font-size: var(--type-hud-size);
+  font-stretch: var(--axis-mono-rest-wdth);
+  letter-spacing: var(--type-hud-tracking);
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.media :global([data-hotspot-label][data-side="start"]) {
+  margin-left: 0;
+  transform: translateX(calc(-100% - 22px));
+}
+
+@keyframes hotspot-label-unfold {
+  from {
+    clip-path: inset(0 100% 0 0);
+    font-stretch: var(--axis-mono-reveal-wdth);
+  }
+}
+
+@keyframes hotspot-label-unfold-start {
+  from {
+    clip-path: inset(0 0 0 100%);
+    font-stretch: var(--axis-mono-reveal-wdth);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .media :global([data-hotspot-label][data-play]) {
+    animation: hotspot-label-unfold var(--dur-unfold) var(--ease-settle);
+  }
+
+  :root:not([data-motion="still"]) .media :global([data-hotspot-label][data-play][data-side="start"]) {
+    animation-name: hotspot-label-unfold-start;
+  }
+}
+
 .notes {
   display: grid;
   gap: 6px;
@@ -243,6 +319,23 @@
   background: var(--color-ground);
   color: var(--color-sheet);
   font-weight: 600;
+}
+
+/* The labels breathe while the slider is hovered, focused or held. */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .compareTag {
+    transition: font-stretch var(--dur-breath) var(--ease-settle);
+  }
+
+  :root:not([data-motion="still"]) .compareStage:is(:active, :has(.compareRange:focus-visible)) .compareTag {
+    font-stretch: var(--axis-mono-hover-wdth);
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .compareStage:hover .compareTag {
+    font-stretch: var(--axis-mono-hover-wdth);
+  }
 }
 
 .compareBefore .compareTag {
