@@ -46,7 +46,7 @@ time · Calm map); below 880 px it keeps the mark, Basecamp and the switch, and 
 | Field                      | three + @react-three/fiber, custom GLSL (WebGL2), leva for dev-only tuning          |
 | Motion                     | `motion` (frame loop, springs), React `<ViewTransition>`; tokens and primitives in `docs/motion.md` |
 | Smooth scroll              | Lenis, fine-pointer desktop only                                                    |
-| Fonts                      | Archivo (wdth + wght, italic) and Martian Mono via `next/font/google`, self-hosted  |
+| Fonts                      | Archivo (wdth + wght, italic) and Martian Mono via `next/font/google`, self-hosted; the italic face loads only once italic text nears the screen (`src/lib/italic-face.ts`) |
 | Hosting                    | Netlify: static files, plus one Edge Function (the Basecamp gate) off production   |
 | Terrain                    | Node scripts with geotiff.js and d3-contour                                         |
 

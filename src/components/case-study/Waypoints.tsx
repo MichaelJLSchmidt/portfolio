@@ -69,7 +69,7 @@ export function PullQuote({ text, attribution }: { text: string; attribution: st
   return (
     <figure className={styles.quote} data-reveal="quote">
       <blockquote>
-        <p className="body-copy">{text}</p>
+        <p className="body-copy italic">{text}</p>
       </blockquote>
       <figcaption className="hud-label">— {attribution}</figcaption>
     </figure>

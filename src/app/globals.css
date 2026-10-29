@@ -256,11 +256,17 @@ button {
   }
 }
 
+/* Italic: the local text fallback until italic text comes near the screen (html[data-italic],
+   src/lib/italic-face.ts), so the italic face is fetched only where italic is read. */
 em,
 i,
 .italic {
-  font-family: var(--font-archivo-italic), var(--font-archivo), system-ui, sans-serif;
+  font-family: "Archivo Text Fallback", system-ui, sans-serif;
   font-style: italic;
+}
+
+:root[data-italic] :is(em, i, .italic) {
+  font-family: var(--font-archivo-italic), var(--font-archivo), system-ui, sans-serif;
 }
 
 :root {

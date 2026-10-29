@@ -207,7 +207,6 @@
 
 .quote p {
   font-size: clamp(1.25rem, 1rem + 0.9vw, 1.6rem);
-  font-style: italic;
   line-height: 1.35;
 }
 
