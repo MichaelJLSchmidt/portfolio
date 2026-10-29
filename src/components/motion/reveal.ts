@@ -47,13 +47,10 @@ function keyOf(el: Element): string {
   return settleKey(window.location.pathname, `reveal:${el.id || index}`);
 }
 
-function prepare(el: Element) {
-  if (el.hasAttribute("data-reveal-state")) return;
-  const rects = el.getClientRects();
+function prepare(el: Element, r: DOMRect | null) {
   // A page Next keeps alive while hidden: prepared once it shows again.
-  if (!rects.length) return;
+  if (!r) return;
   const key = keyOf(el);
-  const r = el.getBoundingClientRect();
   const shown = r.top < window.innerHeight && r.bottom > 0;
   if (currentMode() === "still" || isSettled(key) || shown || r.bottom <= 0 || movesText(el)) {
     if (shown) markSettled(key);
@@ -196,5 +193,8 @@ export function playArrival(main: Element) {
 }
 
 function scan() {
-  document.querySelectorAll("[data-reveal]:not([data-reveal-state])").forEach(prepare);
+  // Every box is read before any state is written: one layout for the whole scan, not one per block.
+  const found = [...document.querySelectorAll("[data-reveal]:not([data-reveal-state])")];
+  const rects = found.map((el) => (el.getClientRects().length ? el.getBoundingClientRect() : null));
+  found.forEach((el, i) => prepare(el, rects[i]));
 }

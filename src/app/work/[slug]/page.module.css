@@ -12,8 +12,11 @@
   min-height: 44px;
 }
 
+/* A definite track, not an auto one: the title's size depends on its column (cqi), and an auto
+   track re-measures that column, and with it the whole page, on every layout. */
 .header {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
 }
 

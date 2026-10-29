@@ -263,11 +263,20 @@ export function SettleText({
       return () => stopRef.current();
     }
     if (isSettled(key) || state === "done" || currentMode() === "still") return;
-    const r = el.getBoundingClientRect();
-    if (r.top < window.innerHeight && r.bottom > 0) return markSettled(key);
-    setPlay("wait");
+    // The observer's first report places the text without forcing a layout per mounting text.
+    let first = true;
     const io = new IntersectionObserver(
       (entries) => {
+        if (first) {
+          first = false;
+          const r = entries[entries.length - 1].boundingClientRect;
+          if (r.top < window.innerHeight && r.bottom > 0) {
+            io.disconnect();
+            markSettled(key);
+            return;
+          }
+          setPlay("wait");
+        }
         // Play when it scrolls into view, or right away if the reader already jumped past it.
         if (!entries.some((e) => e.isIntersecting || e.boundingClientRect.bottom < 0)) return;
         io.disconnect();
