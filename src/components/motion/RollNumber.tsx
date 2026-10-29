@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ComponentType } from "react";
 import { formatInteger } from "@/lib/format";
-import { useMotionMode } from "@/lib/motion-mode";
+import { useModeIf } from "@/lib/motion-mode";
 import type { RollDigitsProps } from "./roll-digits";
 import styles from "./RollNumber.module.css";
 
@@ -25,7 +25,7 @@ export const preloadRoll = () => void loadDigits();
  * the line's height and baseline.
  */
 export function RollNumber({ value, pad, trend, duration, className }: RollDigitsProps & { className?: string }) {
-  const { mode } = useMotionMode();
+  const mode = useModeIf(true);
   const [Digits, setDigits] = useState<Digits | null>(null);
   // The value first rendered: on screen until the chunk is in, so the first roll starts from it.
   const [initial] = useState(value);

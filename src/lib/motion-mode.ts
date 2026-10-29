@@ -157,6 +157,18 @@ const getHapticsSupported = () => hapticsSupported();
  * The motion mode for rendering. The server snapshot is "still", so server HTML and hydration
  * never start motion; the resolved mode follows right after hydration.
  */
+const stillMode = (): MotionMode => "still";
+const noSubscribe = () => () => {};
+
+/**
+ * Just the motion mode, and only while `enabled`: otherwise "still", with no subscription, so a
+ * component that needs the mode for one optional feature (a heading's shine) does not re-render
+ * when the Calm map switch flips. Components with many instances use this, not useMotionMode().
+ */
+export function useModeIf(enabled: boolean): MotionMode {
+  return useSyncExternalStore(enabled ? subscribe : noSubscribe, enabled ? currentMode : stillMode, stillMode);
+}
+
 export function useMotionMode() {
   const mode = useSyncExternalStore(subscribe, currentMode, () => "still" as MotionMode);
   const tier = useSyncExternalStore(subscribe, currentTier, () => "mobile" as DeviceTier);

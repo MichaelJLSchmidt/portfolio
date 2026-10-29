@@ -14,7 +14,7 @@ import {
 import { glyphEm, textEm } from "@/lib/display-width";
 import { headlampFalloff, watchHeadlamp } from "@/lib/headlamp";
 import { useFinePointer } from "@/lib/idle";
-import { currentMode, useMotionMode } from "@/lib/motion-mode";
+import { currentMode, useModeIf } from "@/lib/motion-mode";
 import { isSettled, markSettled, settleKey } from "@/lib/settled";
 import { activeViewTransition, transitionKind } from "@/lib/view-transition";
 import { duration, headlamp, stagger, staggerStep, type AxisRole } from "@/styles/tokens";
@@ -143,7 +143,8 @@ export function SettleText({
   const elRef = useRef<HTMLElement>(null);
   const pathname = usePathname();
   const key = settleKey(scope === "site" ? "" : (pathname ?? ""), id ?? text);
-  const { mode: motion } = useMotionMode();
+  // The mode only matters to the shine (a switch to calm re-renders no other settle text).
+  const motion = useModeIf(shine);
   const finePointer = useFinePointer();
 
   const lines = text.split("\n");
