@@ -9,19 +9,10 @@ export const site = {
   name,
   title: `${name} — UX Team Lead`,
   description:
-    "Portfolio of a UX Team Lead and Senior UX Designer from Interlaken in the Swiss Alps: design systems, facilitation and front-end craft.",
+    "Portfolio of a UX Team Lead in Bern, Switzerland: UX teams, design systems and workshops for public services people can finish.",
   lang: "en",
-  hero: {
-    eyebrow: "UX Team Lead · Senior UX Designer",
-    name,
-    origin: "Interlaken · 566 m · Swiss Alps",
-    lede: "I lead a UX team that designs public-sector platforms, runs the workshops that shape them, and ships the design system they are built with.",
-    scrollCue: "Descend to the deck",
-    deckHeading: "The Summit Deck",
-    deckIntro: "Each project is a card. Open one for the full expedition log.",
-    /** The deck without a single case study (a live build until the first one is written). */
-    deckEmpty: "The expedition logs are being written up. Until then, ask me for a walkthrough.",
-  },
+  /** The home page's own copy is in home.ts. */
+  hero: { name },
   /** Main navigation (the HUD; on phones the footer holds all but Basecamp). */
   nav: {
     label: "Main",
