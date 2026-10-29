@@ -700,7 +700,9 @@ async function modes() {
     const sw = await page.evaluate(() => {
       const input = document.querySelector('header input[role="switch"]');
       const desc = input?.getAttribute("aria-describedby");
-      return { label: input?.closest("label")?.textContent.trim(), checked: input?.checked, described: desc ? document.getElementById(desc)?.textContent ?? "" : "" };
+      // The visible label settles as decoration around a visually hidden copy: that copy is its text.
+      const label = input?.closest("label");
+      return { label: (label?.querySelector(".visually-hidden") ?? label)?.textContent.trim(), checked: input?.checked, described: desc ? document.getElementById(desc)?.textContent ?? "" : "" };
     });
     check("switch named and labelled “Calm map”, state shown", named === 1 && /^calm map$/i.test(sw.label ?? "") && sw.checked === (mode !== "full"), JSON.stringify(sw));
     check("switch described “Reduces motion on this site”", sw.described.startsWith("Reduces motion on this site"), sw.described);
