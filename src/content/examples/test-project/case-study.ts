@@ -20,9 +20,16 @@ export const rawCaseStudy: CaseStudy = {
   metaDescription: "Fictional model case study demonstrating a senior UX case study format.",
   summary: {
     mandate:
-      "{{problem.incompletePct}}% of heating-subsidy applications arrived incomplete. Homeowners waited a median {{problem.medianDays}} days for a decision.",
-    role: "UX Team Lead. I set research and design strategy, facilitated {{workshops.count}} cross-unit workshops, led {{team.designersLed}} designers and built the core form patterns in Angular.",
-    teamLed: "{{team.ux}} UX + {{team.productDev}} product & dev",
+      "The Energy Office asked for “the PDF, but online” in {{mandate.months}} months. I reframed the goal as “complete on first submission”, because a faster PDF would still arrive incomplete.",
+    role: "UX Team Lead. I set research and design strategy, facilitated {{workshops.count}} cross-unit workshops and built the core form patterns in Angular.",
+    teamLed:
+      "{{team.designersLed}} designers directly, inside a squad of {{team.productDev}} product and development colleagues, plus a francophone content designer.",
+    putInPlace: [
+      "One north-star metric for {{workshops.units|word}} units",
+      "A weekly decision log signed off by legal",
+      "German and French written side by side, not translated",
+      "Caseworker testing every {{delivery.caseworkerTestingWeeks|word}} weeks",
+    ],
     keyDecision:
       "Let installers prepare the application and homeowners confirm it via AGOV, instead of forcing homeowners through a {{pdf.pages}}-page form alone.",
     outcome: [
@@ -32,7 +39,7 @@ export const rawCaseStudy: CaseStudy = {
     ],
     note: "Fictional example data.",
   },
-  didNotDo: "final illustration work, the batch-import integration, and the French copy, which a francophone content designer owned.",
+  didNotDo: "I didn’t design the caseworker back office. I lobbied for its budget and handed my research to the vendor’s team.",
   hero: "tp-hero",
   waypoints: [
     {
@@ -70,7 +77,7 @@ export const rawCaseStudy: CaseStudy = {
       id: "leadership",
       nav: "Leadership",
       label: "Leadership",
-      finding: "from “digitise the PDF” to one measurable goal",
+      finding: "{{workshops.units|word}} units, one number",
       blocks: [
         {
           kind: "p",
@@ -102,6 +109,11 @@ export const rawCaseStudy: CaseStudy = {
           ],
         },
         { kind: "figure", id: "tp-workshop-board" },
+        {
+          kind: "p",
+          lead: "What I put in place:",
+          text: "{{workshops.units|Word}} units each measured success differently: the Energy Office counted applications, finance counted payouts, legal counted complaints, IT counted uptime. In the first workshop we agreed on one shared number, applications complete on first submission, and every later decision was checked against it. A one-page decision log, reviewed every Thursday with the legal adviser, meant nobody re-opened a settled question. My designers each owned one journey end to end; I owned the cross-unit agreements and stayed out of their pixels.",
+        },
       ],
     },
     {
