@@ -25,7 +25,7 @@
     "durationMs": 400
   },
   "desktop": {
-    "dprMax": 1.5,
+    "dprMax": 2,
     "renderScale": 1,
     "heightmap": "desktop",
     "heightmapMinDevicePx": 1400,

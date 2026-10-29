@@ -9,8 +9,9 @@ export type FieldConfig = typeof config;
 
 /**
  * The field's device tier, named like html[data-tier] (phase 1, motion-mode.ts):
- * - "desktop" (tier A): a fine pointer and a long edge of at least 900 px. DPR up to 1.5, ambient
- *   drift at ~30 fps, headlamp, parallax, pre-warm on hover and focus.
+ * - "desktop" (tier A): a fine pointer and a long edge of at least 900 px. DPR up to 2 (1.5 drew
+ *   visibly softer lines on 2× screens), ambient drift at ~30 fps, headlamp, parallax, pre-warm on
+ *   hover and focus.
  * - "mobile" (tier B): touch, or a long edge under 900 px. DPR 1 at a 0.75 render scale; no drift,
  *   line flow, headlamp or parallax; frames only during transitions and (throttled) scrolling.
  * - "low" (tier C): no WebGL2, Save-Data, little memory or few cores, or a context lost twice this

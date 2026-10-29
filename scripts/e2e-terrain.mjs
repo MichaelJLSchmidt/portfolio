@@ -114,7 +114,7 @@ export function terrainScenarios({ browser, base, root, check, settle }) {
     await fieldOn(page);
     await landed(page, "region");
     const s0 = await state(page);
-    check("tier A on a fine-pointer desktop", s0?.tier === "desktop" && s0.dpr <= 1.5, JSON.stringify({ tier: s0?.tier, dpr: s0?.dpr }));
+    check("tier A on a fine-pointer desktop (DPR cap 2)", s0?.tier === "desktop" && s0.dpr <= 2, JSON.stringify({ tier: s0?.tier, dpr: s0?.dpr }));
 
     // Pre-warm: hovering the card leans the field 12% towards its terrain, and back on leave.
     const cardLink = page.locator('article[data-slug="kibon"] a').first();
