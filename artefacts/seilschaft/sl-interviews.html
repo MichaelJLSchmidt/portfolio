@@ -1,0 +1,182 @@
+<!-- Interview synthesis: one note per product owner, sorted by the main thing that held them back.
+     Owners who would involve UX earlier are outlined in moss-ink; the rest stand apart. Participant
+     codes, not names. -->
+<style>
+  .board {
+    position: absolute;
+    inset: 0;
+    padding: 24px 30px 20px;
+  }
+  .top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .top p {
+    margin-top: 4px;
+  }
+  .big {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    max-width: 380px;
+    text-align: right;
+  }
+  .big b {
+    color: var(--color-moss-ink);
+    font-family: var(--label);
+    font-size: 40px;
+    font-stretch: var(--label-wdth);
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .big span {
+    font-size: 14px;
+    line-height: 1.3;
+    text-align: left;
+  }
+  .cols {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr 1fr 1fr;
+    gap: 14px;
+  }
+  .col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    border: 1.5px solid rgb(90 92 82 / 0.45);
+    border-radius: 10px;
+    background: rgb(255 255 255 / 0.5);
+  }
+  .col.apart {
+    border-style: dashed;
+    background: transparent;
+  }
+  .col h2 {
+    padding-bottom: 8px;
+    border-bottom: 1.5px solid rgb(90 92 82 / 0.45);
+  }
+  .col h2 small {
+    display: block;
+    margin-top: 2px;
+    color: var(--color-sheet-ink);
+    letter-spacing: 0.04em;
+    text-transform: none;
+  }
+  .notes {
+    display: grid;
+    gap: 8px;
+  }
+  .col:first-child .notes {
+    grid-template-columns: 1fr 1fr;
+  }
+  .note {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 6px;
+    min-height: 70px;
+    padding: 8px 10px 7px;
+    font-size: 13px;
+  }
+  .note.yes {
+    outline: 2.5px solid var(--color-moss-ink);
+    outline-offset: 2px;
+  }
+  .note i {
+    display: block;
+    color: var(--color-sheet-ink);
+    font-family: var(--label);
+    font-size: 10.5px;
+    font-stretch: var(--label-wdth);
+    font-style: normal;
+    letter-spacing: 0.06em;
+  }
+  .key {
+    position: absolute;
+    left: 30px;
+    bottom: 16px;
+    display: flex;
+    gap: 22px;
+  }
+  .key span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .key .sw {
+    width: 18px;
+    height: 14px;
+    border-radius: 2px;
+    background: var(--color-summit-gold);
+  }
+  .key .sw.yes {
+    outline: 2.5px solid var(--color-moss-ink);
+    outline-offset: 1px;
+  }
+</style>
+<div class="board">
+  <div class="top">
+    <div>
+      <h1 class="title">Interview synthesis: {{interviews.productOwners}} product owners</h1>
+      <p class="label muted">One interview per team, {{interviews.minutes}} minutes, same questions · main reason per owner</p>
+    </div>
+    <p class="big"><b>{{interviews.earlier}} of {{interviews.productOwners}}</b><span>would involve UX earlier if they knew what they would get and when</span></p>
+  </div>
+  <div class="cols">
+    <section class="col" data-group="slot"><h2 class="label-caps">No slot in the plan<small>UX arrives as a favour at the end</small></h2><div class="notes"></div></section>
+    <section class="col" data-group="scope"><h2 class="label-caps">Scope fear<small>early design might change the promise</small></h2><div class="notes"></div></section>
+    <section class="col" data-group="name"><h2 class="label-caps">No name<small>nobody knows who picks it up</small></h2><div class="notes"></div></section>
+    <section class="col apart" data-group="not"><h2 class="label-caps">Would not<small>little to gain, or fewer meetings</small></h2><div class="notes"></div></section>
+  </div>
+  <div class="key label">
+    <span><i class="sw yes"></i>would involve UX earlier</span>
+    <span><i class="sw"></i>would not</span>
+    <span>P = product owner · cluster in brackets</span>
+  </div>
+</div>
+<script>
+  const I = window.DATA.interviews;
+  const quotes = {
+    slot: [
+      ["Our quarter is planned before design hears about it.", "Permits"],
+      ["We’d book UX if there were a slot to book.", "Payments"],
+      ["Design comes after the sprint plan, every time.", "Social services"],
+      ["I never know when it’s too early to ask.", "Permits"],
+      ["There is no line for UX in our roadmap.", "Payments"],
+    ],
+    scope: [
+      ["Early design changes what we promised.", "Payments"],
+      ["A late ticket feels safer.", "Social services"],
+      ["Research might move our deadline.", "Permits"],
+    ],
+    name: [
+      ["Who is our designer, actually?", "Social services"],
+      ["Every ticket gets someone new.", "Permits"],
+      ["I don’t know whom to call.", "Payments"],
+    ],
+    not: [
+      ["Internal tool, a handful of users.", "Internal tools"],
+      ["Back-office screens; nobody complains.", "Internal tools"],
+      ["Honestly: fewer meetings, please.", "Social services"],
+    ],
+  };
+  const colours = { Permits: "gold", Payments: "ice", "Social services": "glacier", "Internal tools": "gold" };
+  const counts = { ...I.reasons, not: I.notEarlier };
+  let n = 0;
+  for (const [group, count] of Object.entries(counts)) {
+    const list = quotes[group];
+    if (list.length !== count) throw new Error(`${group}: ${list.length} notes for ${count} owners`);
+    const box = document.querySelector(`[data-group="${group}"] .notes`);
+    list.forEach(([text, cluster]) => {
+      n++;
+      box.insertAdjacentHTML("beforeend", `<div class="note ${colours[cluster]} ${group === "not" ? "" : "yes"}">“${text}”<i>P${n} (${cluster})</i></div>`);
+    });
+  }
+  if (n !== I.productOwners) throw new Error(`${n} notes for ${I.productOwners} owners`);
+  for (const note of document.querySelectorAll(".note")) note.style.transform = `rotate(${(Math.random() * 2 - 1).toFixed(2)}deg)`;
+</script>

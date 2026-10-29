@@ -1,5 +1,7 @@
 import type { SummitCardData } from "@/content/cards";
 import terrains from "@terrain/examples.json";
+import { card as gratweg } from "./gratweg/card";
+import { card as seilschaft } from "./seilschaft/card";
 import { card as testProject } from "./test-project/card";
 
 /**
@@ -12,10 +14,15 @@ import { card as testProject } from "./test-project/card";
  *
  * This module is small on purpose (the deck imports it); the long-form copy is in ./case-studies.
  */
-export const exampleCards: SummitCardData[] = [testProject];
+// Deck order, and the "Next expedition" loop: Seilschaft → Gratweg → Test Project → Seilschaft.
+export const exampleCards: SummitCardData[] = [seilschaft, gratweg, testProject];
 
 /** The examples' card terrains (public/terrain/examples.json, written by npm run terrain). */
 export const exampleTerrains: Record<string, unknown> = terrains.cards;
 
 /** Each example's encoded images under public/, by slug. */
-export const exampleMedia: Record<string, string> = { "test-project": "/media/test-project/" };
+export const exampleMedia: Record<string, string> = {
+  seilschaft: "/media/seilschaft/",
+  gratweg: "/media/gratweg/",
+  "test-project": "/media/test-project/",
+};

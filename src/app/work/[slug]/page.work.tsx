@@ -74,8 +74,9 @@ export default async function CaseStudy({ params }: Props) {
   if (!found) notFound();
   const { card, study } = found;
   const { summary } = study;
-  // The next card in the deck, wherever it leads (another case study or the About page).
-  const next = cards[(cards.indexOf(card) + 1) % cards.length];
+  // The next case study in deck order, looping back to the first; never another kind of page.
+  const studies = cards.filter((c) => caseStudies[c.slug]);
+  const next = studies.length > 1 ? studies[(studies.indexOf(card) + 1) % studies.length] : null;
   const hero = study.hero ? study.figures?.[study.hero] : undefined;
   const outcome = summary.outcome;
 
@@ -191,15 +192,17 @@ export default async function CaseStudy({ params }: Props) {
       </aside>
 
       <nav className={styles.next} aria-label={L.next} data-vt-exit>
-        <SignatureLink
-          href={cardHref(next)}
-          variant="display"
-          className={styles.nextLink}
-          before={<span className="hud-label">{L.next}</span>}
-          label={next.name}
-          labelClassName={`${styles.nextName} display`}
-          arrow="→"
-        />
+        {next && (
+          <SignatureLink
+            href={cardHref(next)}
+            variant="display"
+            className={styles.nextLink}
+            before={<span className="hud-label">{L.next}</span>}
+            label={next.name}
+            labelClassName={`${styles.nextName} display`}
+            arrow="→"
+          />
+        )}
         <Link href="/" scroll={false} className={`${styles.backToAll} hud-label`}>
           <span aria-hidden="true">←</span> {L.backToAll}
         </Link>

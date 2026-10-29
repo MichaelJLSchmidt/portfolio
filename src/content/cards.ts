@@ -46,7 +46,7 @@ export type CardStats = {
   time?: string;
   /** e.g. "9 products": the coordinates line, after the place. */
   scope?: string;
-  /** The headline outcome; `note` says what the numbers count ("on system"). */
+  /** The headline outcome; `note` says what the numbers count ("on system"), under the value. */
   impact?: { before: string; after: string; note?: string };
 };
 
@@ -163,13 +163,13 @@ export const cardHref = (card: SummitCardData) => card.href ?? `/work/${card.slu
 /** The coordinates line: the place, then the scope. */
 export const coordinatesLine = (card: SummitCardData) => [card.coordinates, card.stats.scope].filter(Boolean).join(" · ");
 
-/** The card's stats as rows, at most three: team led, time, impact (before → after). */
-export const cardStats = (card: SummitCardData): Stat[] => {
+/** The card's stats as rows, at most three: team led, time, impact (before → after, its note below). */
+export const cardStats = (card: SummitCardData): (Stat & { note?: string })[] => {
   const { teamLed, time, impact } = card.stats;
   return [
     { label: cardLabels.stat.teamLed, value: teamLed },
     { label: cardLabels.stat.time, value: time },
-    { label: cardLabels.stat.impact, value: impact && [`${impact.before} → ${impact.after}`, impact.note].filter(Boolean).join(" ") },
+    { label: cardLabels.stat.impact, value: impact && `${impact.before} → ${impact.after}`, note: impact?.note },
   ];
 };
 

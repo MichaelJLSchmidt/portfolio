@@ -1,0 +1,102 @@
+<!-- The onboarding trail: three stages along a dotted trail over faint contours, each ending with
+     something the new hire has shipped, not read. -->
+<style>
+  .trail {
+    position: absolute;
+    inset: 0;
+    padding: 22px 30px 18px;
+  }
+  .trail > p {
+    margin-top: 4px;
+  }
+  svg.path {
+    position: absolute;
+    left: 30px;
+    right: 30px;
+    top: 112px;
+    width: calc(100% - 60px);
+    height: 60px;
+    overflow: visible;
+  }
+  .stages {
+    position: absolute;
+    left: 30px;
+    right: 30px;
+    top: 112px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 26px;
+  }
+  .stage {
+    display: grid;
+    gap: 8px;
+  }
+  .pin {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 0 0;
+    border: 3px solid var(--color-sheet);
+    border-radius: 50%;
+    background: var(--color-moss-ink);
+    color: var(--color-sheet);
+    font-family: var(--label);
+    font-size: 13px;
+    font-stretch: var(--label-wdth);
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgb(27 28 24 / 0.3);
+  }
+  .card {
+    margin-top: 8px;
+    padding: 12px 14px;
+    border: 1.5px solid var(--color-ground);
+    border-radius: 8px;
+    background: #fff;
+  }
+  .card h2 {
+    font-size: 17px;
+  }
+  .card p {
+    margin-top: 4px;
+    font-size: 13.5px;
+    line-height: 1.35;
+  }
+  .card .ship {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed rgb(90 92 82 / 0.6);
+    color: var(--color-moss-ink);
+    font-weight: 700;
+  }
+</style>
+<div class="trail contours">
+  <h1 class="title">Onboarding trail: ship, then read</h1>
+  <p class="label muted">Every new hire walks it, the senior included · a mentor walks alongside</p>
+  <svg class="path" viewBox="0 0 1140 60" preserveAspectRatio="none">
+    <path d="M26 26 C 260 6, 360 54, 560 26 S 900 2, 1110 26" fill="none" stroke="#2F6B3A" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round" />
+  </svg>
+  <div class="stages">
+    <section class="stage" data-stage="0">
+      <span class="pin"></span>
+      <div class="card"><h2>Listen</h2><p>Sit in on crit and a research day; meet your cluster’s product owners.</p><p class="ship">Ships: a Polish ticket from templates</p></div>
+    </section>
+    <section class="stage" data-stage="1">
+      <span class="pin"></span>
+      <div class="card"><h2>Shape with a mentor</h2><p>Design a release with a product team, the mentor in every review.</p><p class="ship">Ships: a Shape project, presented at crit</p></div>
+    </section>
+    <section class="stage" data-stage="2">
+      <span class="pin"></span>
+      <div class="card"><h2>Lead a study</h2><p>Plan and run research with citizens from the pool.</p><p class="ship">Ships: a first Explore study of your own</p></div>
+    </section>
+  </div>
+</div>
+<script>
+  const O = window.DATA.onboarding;
+  const ends = [O.first, O.second, O.third];
+  document.querySelectorAll("[data-stage]").forEach((el, i) => {
+    const from = i === 0 ? 1 : ends[i - 1] + 1;
+    el.querySelector(".pin").textContent = ends[i];
+    el.querySelector("h2").insertAdjacentHTML("beforebegin", `<p class="label-caps" style="color:#5A5C52;margin-top:6px">Days ${from}–${ends[i]}</p>`);
+  });
+</script>

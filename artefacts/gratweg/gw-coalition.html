@@ -1,0 +1,132 @@
+<!-- The coalition one-pager: the problem, the business case from the teams' own hours, the pilot
+     terms, and five signatures by role. A white page on the map sheet. -->
+<style>
+  .desk {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+  }
+  .page {
+    width: 700px;
+    padding: 24px 32px 20px;
+    border: 1px solid #c9cdc6;
+    border-radius: 4px;
+    background: #fff;
+    box-shadow: 0 1px 0 rgb(27 28 24 / 0.06), 0 18px 40px -22px rgb(27 28 24 / 0.5);
+    transform: rotate(0.5deg);
+  }
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    color: var(--color-sheet-ink);
+  }
+  h1 {
+    margin-top: 10px;
+    font-size: 24px;
+  }
+  h2 {
+    margin-top: 14px;
+    padding-bottom: 5px;
+    border-bottom: 1.5px solid var(--color-ground);
+    color: var(--color-moss-ink);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .page p.t {
+    margin-top: 8px;
+    font-size: 13.5px;
+    line-height: 1.4;
+  }
+  .case {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .case b {
+    font-family: var(--label);
+    font-size: 30px;
+    font-stretch: var(--label-wdth);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .case span {
+    font-size: 13.5px;
+    line-height: 1.35;
+  }
+  ul.terms {
+    display: grid;
+    gap: 5px;
+    margin-top: 8px;
+    font-size: 13.5px;
+  }
+  ul.terms li {
+    padding-left: 16px;
+    position: relative;
+  }
+  ul.terms li::before {
+    content: "–";
+    position: absolute;
+    left: 0;
+    color: var(--color-sheet-ink);
+  }
+  .signs {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .sig svg {
+    width: 100%;
+    height: 32px;
+  }
+  .sig p {
+    padding-top: 3px;
+    border-top: 1px solid var(--color-ground);
+    font-size: 11px;
+    line-height: 1.25;
+  }
+</style>
+<div class="desk">
+  <article class="page">
+    <p class="meta label"><span>To the steering board · Digital Services</span><span>Hochmatt Informatik · {{years.start}}</span></p>
+    <h1 class="title">One design system for our citizen services</h1>
+    <div class="row">
+      <div>
+        <h2 class="label-caps">The problem</h2>
+        <p class="t">{{landscape.auditFailed|Word}} of {{landscape.products|word}} products fail WCAG 2.1 AA. {{landscape.libraries|Word}} UI libraries, {{landscape.blues|word}} primary blues, {{landscape.datePickers|word}} date pickers. Citizens think they deal with different authorities.</p>
+      </div>
+      <div>
+        <h2 class="label-caps">The business case</h2>
+        <p class="case"><b>{{businessCase.datePickerHours}} hours</b><span>spent rebuilding one date picker, counted by the {{businessCase.teams|word}} teams themselves</span></p>
+      </div>
+    </div>
+    <h2 class="label-caps">The pilot we ask for</h2>
+    <ul class="terms">
+      <li>{{pilot.months|Word}} months, {{pilot.products|word}} products chosen by pain, not prestige</li>
+      <li>A core team of {{team.core|word}}; contributors from the product teams</li>
+      <li>Continue only if both pilot products ship a release on the system</li>
+    </ul>
+    <h2 class="label-caps">Co-signed by</h2>
+    <div class="signs" id="signs"></div>
+  </article>
+</div>
+<script>
+  const C = window.DATA.coalition;
+  const roles = ["Lead developer, tax portal", "Lead developer, permits", "Lead developer, payments", "Accessibility officer", "Head of Digital Services"];
+  if (roles.length !== C.signatories) throw new Error("one signature per signatory");
+  // Each squiggle is a seeded scribble, so every signature looks different but renders the same.
+  const scribble = () => {
+    let x = 6, d = `M${x} ${20 + Math.random() * 6}`;
+    while (x < 110) {
+      x += 8 + Math.random() * 10;
+      d += ` Q ${x - 5} ${4 + Math.random() * 10}, ${x} ${16 + Math.random() * 12}`;
+    }
+    return `<svg viewBox="0 0 120 32" fill="none" stroke="#1B1C18" stroke-width="1.6" stroke-linecap="round"><path d="${d}"/></svg>`;
+  };
+  document.getElementById("signs").innerHTML = roles.map((r) => `<div class="sig">${scribble()}<p>${r}</p></div>`).join("");
+</script>

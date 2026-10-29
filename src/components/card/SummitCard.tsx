@@ -148,7 +148,11 @@ export function SummitCard({
                 {stats.map((s) => (
                   <div key={s.label} className={styles.stat}>
                     <dt>{s.label}</dt>
-                    <dd>{s.value}</dd>
+                    {/* A before → after value is long: it steps down a size to stay inside its cell. */}
+                    <dd data-long={s.value.length > 6 ? "" : undefined}>
+                      {s.value}
+                      {s.note && <small className={styles.statNote}>{s.note}</small>}
+                    </dd>
                   </div>
                 ))}
               </dl>

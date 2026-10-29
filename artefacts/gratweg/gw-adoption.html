@@ -1,0 +1,149 @@
+<!-- The adoption dashboard every product team could see: products on the system per quarter as a
+     step chart, the headline count, and a status row per product. A flat browser frame on the map
+     sheet; the fictional intranet in Source Sans. -->
+<style>
+  .wrap {
+    position: absolute;
+    inset: 18px 22px 16px;
+  }
+  .browser {
+    height: 100%;
+  }
+  .app-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 50px;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--hm-line-soft);
+    background: var(--hm-surface);
+  }
+  .main {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 16px;
+    padding: 16px 18px;
+  }
+  .card {
+    padding: 14px 16px;
+    border: 1px solid var(--hm-line-soft);
+    border-radius: 10px;
+    background: var(--hm-surface);
+  }
+  .kpi {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .kpi b {
+    color: var(--hm-blue-dark);
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .kpi span {
+    color: var(--hm-ink-2);
+    font-size: 15px;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: 250px;
+    margin-top: 10px;
+    overflow: visible;
+  }
+  .ax {
+    fill: var(--hm-ink-2);
+    font-family: var(--hm-font);
+    font-size: 12px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  th {
+    padding: 0 6px 8px 0;
+    border-bottom: 1px solid var(--hm-line);
+    color: var(--hm-ink-2);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+  }
+  td {
+    padding: 7px 6px 7px 0;
+    border-bottom: 1px solid var(--hm-line-soft);
+  }
+  .st {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--hm-success-tint);
+    color: var(--hm-success);
+    font-size: 12px;
+    font-weight: 700;
+  }
+</style>
+<div class="wrap">
+  <div class="browser">
+    <div class="browser-bar">
+      <span class="browser-dots"><i></i><i></i><i></i></span>
+      <span class="browser-url">design.hochmatt-informatik.example/adoption</span>
+    </div>
+    <div class="browser-view hm">
+      <header class="app-head">
+        <div class="hm-brand">
+          <span class="hm-mark"></span>
+          <div><b>Design system · adoption</b><span>Counted from each product’s dependencies, every night</span></div>
+        </div>
+        <span class="hm-small">Public to every team</span>
+      </header>
+      <div class="main">
+        <section class="card">
+          <p class="kpi"><b id="kpi"></b><span>products on the system</span></p>
+          <svg id="c"></svg>
+        </section>
+        <section class="card">
+          <table>
+            <thead><tr><th>Product</th><th>Status</th><th>Since</th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const D = window.DATA;
+  const q = D.adoption.quarterly;
+  const total = D.landscape.products;
+  document.getElementById("kpi").textContent = `${D.outcomes.products.after} of ${total}`;
+  const svg = document.getElementById("c");
+  const W = svg.clientWidth, H = 250, L = 28, R = 10, T = 10, B = 28;
+  const x = (i) => L + (i / (q.length - 1)) * (W - L - R);
+  const y = (v) => T + (1 - v / total) * (H - T - B);
+  let s = "";
+  for (let v = 0; v <= total; v += 3) s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#dde3e8"/><text class="ax" x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  let d = `M${x(0)} ${y(q[0])}`;
+  for (let i = 1; i < q.length; i++) d += `H${x(i)}V${y(q[i])}`;
+  s += `<path d="${d}V${y(0)}H${x(0)}Z" fill="#e6edf6"/><path d="${d}" fill="none" stroke="#1d4f91" stroke-width="3"/>`;
+  q.forEach((v, i) => {
+    s += `<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="#1d4f91"/>`;
+    if (i % 2 === 0) s += `<text class="ax" x="${x(i)}" y="${H - 6}" text-anchor="middle">${i === 0 ? "Start" : `Month ${i * 3}`}</text>`;
+  });
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.innerHTML = s;
+
+  // Which quarter each product joined: the first two are the pilot.
+  const products = ["Building permits", "Tax portal", "Parking permits", "School enrolment", "Dog registry", "Waste calendar", "Business register", "Address change", "Fishing licences"];
+  const joined = [];
+  q.forEach((v, i) => {
+    while (joined.length < v) joined.push(i);
+  });
+  document.getElementById("rows").innerHTML = products
+    .map((p, k) => `<tr><td>${p}</td><td><span class="st">✓ On system</span></td><td>${joined[k] === 0 ? "Start" : `Month ${joined[k] * 3}`}${k < D.pilot.products ? " · pilot" : ""}</td></tr>`)
+    .join("");
+  if (joined.length !== total) throw new Error("every product joins once");
+</script>

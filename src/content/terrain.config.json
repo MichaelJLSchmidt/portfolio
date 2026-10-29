@@ -90,6 +90,34 @@
         2510
       ],
       "morphWidth": 512
+    },
+    {
+      "id": "lab-097",
+      "kind": "seeded",
+      "example": true,
+      "seed": 97,
+      "lines": 20,
+      "indexEvery": 4,
+      "aspect": 1.5,
+      "elevationRangeM": [
+        560,
+        2280
+      ],
+      "morphWidth": 512
+    },
+    {
+      "id": "lab-098",
+      "kind": "seeded",
+      "example": true,
+      "seed": 98,
+      "lines": 20,
+      "indexEvery": 4,
+      "aspect": 1.5,
+      "elevationRangeM": [
+        720,
+        3140
+      ],
+      "morphWidth": 512
     }
   ],
   "heightmapBlurSigma": 1
