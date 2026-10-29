@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { cards, indexLineText } from "@/content/cards";
-import { home } from "@/content/home";
+import type { home } from "@/content/home";
 import { site } from "@/content/site";
 import { rememberOrigin, takeOrigin } from "@/components/transition/return-focus";
 import { SettleText } from "@/components/motion/SettleText";
@@ -13,7 +13,11 @@ import styles from "./Deck.module.css";
 /** The home-page deck: every card from content, each one a link to its case study. */
 const DEALT_KEY = "summit:deck-dealt";
 
-export function Deck() {
+/**
+ * The section's copy arrives as a prop from the server page: importing home.ts here would put the
+ * whole home copy (invented testimonials included) into this client component's bundle.
+ */
+export function Deck({ copy: t }: { copy: typeof home.expeditions }) {
   const listRef = useRef<HTMLUListElement>(null);
   const [deal, setDeal] = useState<"none" | "pending" | "dealt">("none");
 
@@ -66,7 +70,6 @@ export function Deck() {
   // No case study in this build (a live build until the first real one is written): the section
   // stays, says so, and offers nothing to tilt or open.
   const empty = cards.length === 0;
-  const t = home.expeditions;
   return (
     <section id="expeditions" className={styles.deck} aria-labelledby="deck-heading">
       <div className={styles.header}>

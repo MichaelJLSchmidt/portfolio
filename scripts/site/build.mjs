@@ -168,7 +168,11 @@ async function stripExamples() {
     const parent = join(out, dirname(media.replace(/\/$/, "")));
     if (parent !== out && existsSync(parent) && !readdirSync(parent).length) rmSync(parent, { recursive: true });
   }
-  const needles = exampleCards.flatMap((c) => [c.name, `/work/${c.slug}`, c.artwork.terrainId, exampleMedia[c.slug]].filter(Boolean));
+  // The invented testimonials (home field notes written as ex("…")) belong to the examples too.
+  const { home } = await import("../../src/content/home.ts");
+  const { isExample } = await import("../../src/content/example-values.ts");
+  const quotes = home.fieldNotes.notes.map((n) => n.quote).filter(isExample);
+  const needles = [...exampleCards.flatMap((c) => [c.name, `/work/${c.slug}`, c.artwork.terrainId, exampleMedia[c.slug]].filter(Boolean)), ...quotes];
   const files = (dir) => readdirSync(dir).flatMap((name) => (statSync(join(dir, name)).isDirectory() ? files(join(dir, name)) : [join(dir, name)]));
   const leaks = files(out)
     .filter((f) => /\.(html|txt|js|json|css|xml|svg|map)$/.test(f))
@@ -180,5 +184,5 @@ async function stripExamples() {
     console.error(`Examples are excluded from this build, but out/ still mentions them:\n  ${leaks.join("\n  ")}`);
     process.exit(1);
   }
-  console.log(`Examples: none in out/ (checked for ${needles.map((n) => `"${n}"`).join(", ")})`);
+  console.log(`Examples: none in out/ (checked for ${needles.length - quotes.length} example names and paths and ${quotes.length} invented testimonials)`);
 }

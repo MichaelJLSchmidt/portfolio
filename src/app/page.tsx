@@ -47,7 +47,7 @@ export default function Home() {
       </section>
       <SummitLog />
       <TrailRules />
-      <Deck />
+      <Deck copy={home.expeditions} />
       <FieldNotes />
       <Workshops />
       <ContactBand />

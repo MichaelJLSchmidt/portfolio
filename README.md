@@ -111,18 +111,27 @@ automatically. Every other runtime URL (heightmaps, terrain SVGs, textures, fetc
 ### Content and placeholders
 
 All copy lives in `src/content`. Facts still to confirm are written as `[PLACEHOLDERS]` (links as `href: null`);
-they stay visible in preview builds so gaps are easy to spot. Stats are optional everywhere (cards, case-study
-summary, Basecamp): a stat row shows only the stats that have a value and disappears when none has one.
+they stay visible in preview builds so gaps are easy to spot. Card stats (team led, time, scope, impact) and
+the Summit summary's rows are optional: a stat row shows only the stats that have a value and disappears when
+none has one, and a summary row without a value is left out.
 `npm run check:content` lists every remaining placeholder with file, line and field. `npm run build` runs it for
 its `SITE_MODE`:
 
 - `construction` requires only what the under-construction page shows: the name and the email and LinkedIn
   links (`npm run check:content -- --mode=construction` lists those);
 - `basecamp` only warns;
-- `live` fails on any placeholder.
+- `live` fails on any placeholder or example value.
 
 A local build with `NEXT_PUBLIC_PREVIEW=1` only warns in every mode. Flagged examples (see "Case studies")
 are fictional on purpose: `check:content` skips them and names them once, and live builds don't contain them.
+
+**Example values.** The home page and Basecamp tell the intended story with invented figures, quotes, legend
+entries, dates, the bio and the evidence lines of the trail rules. Each is written as `ex("…")`
+(`src/content/example-values.ts`): it renders as written, `check:content` lists it with file, line and field
+next to the placeholders, and a live build stops on it until a real value replaces it. The invented field
+notes (testimonials) go further: they render only where flagged examples do, each tagged "Example quote", and
+a build without examples fails if any of them is left in `out/`. While its figures are examples, the Summit
+log shows the small print "Example figures. Real numbers replace them before launch."
 
 ### Tuning the contour field
 
