@@ -82,6 +82,29 @@ for (const [fg, min] of zoneText) {
 const worst = Math.min(...lineColours.map((line) => contrast(lum(color.contour), lumRgb(zoneBg(line)))));
 console.log(`info  ${worst.toFixed(2).padStart(5)}:1  contour over the brightest line: contour labels keep their halo (.keep-halo)`);
 
+// Every text over the field reads at 7:1 or more: labels, eyebrows and links sit in a quiet zone
+// (lines at quietStrength) or on the HUD's backdrop (ground at 92% over a fully lit line), so
+// only sheet and glacier qualify; contour text belongs on opaque surfaces (cards, panels).
+console.log(`\nText over the field (minimum 7:1):`);
+const hudBg = (line) => {
+  const g = rgb(color.ground), c = rgb(color[line]);
+  return g.map((v, i) => c[i] + (v - c[i]) * 0.92);
+};
+for (const fg of ["sheet", "glacier"]) {
+  for (const line of lineColours) {
+    for (const [label, backdrop] of [["quiet zone", zoneBg(line)], ["HUD backdrop", hudBg(line)]]) {
+      const r = contrast(lum(color[fg]), lumRgb(backdrop));
+      const ok = r >= 7;
+      if (!ok) failed++;
+      console.log(`${ok ? "pass" : "FAIL"}  ${r.toFixed(2).padStart(5)}:1  ${fg} over ${line} lines, ${label}`);
+    }
+  }
+}
+for (const fg of ["contour", "ice", "alpenglow"]) {
+  const r = Math.min(...lineColours.map((line) => contrast(lum(color[fg]), lumRgb(zoneBg(line)))));
+  console.log(`info  ${r.toFixed(2).padStart(5)}:1  ${fg} in a quiet zone: below 7:1, so never used for text over the field`);
+}
+
 // Body text (.body-copy, .knockout): lines knocked out to bodyQuietStrength, at least 7:1 over a
 // fully lit line; on a legend panel (raised ground at 88%) on top of that.
 const mixRgb = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);

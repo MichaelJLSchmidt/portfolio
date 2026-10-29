@@ -251,7 +251,7 @@
 }
 
 .rarityNote {
-  color: var(--color-contour);
+  color: var(--color-sheet);
 }
 
 @media (min-width: 1024px) {

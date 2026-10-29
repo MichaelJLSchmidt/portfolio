@@ -75,10 +75,11 @@
   }
 }
 
+/* Not a link yet: a dashed pill, its text still at 7:1 or more over the field. */
 .action[data-placeholder] {
   border-style: dashed;
   border-color: var(--color-contour);
-  color: var(--color-contour);
+  color: var(--color-sheet);
 }
 
 .tbd {
@@ -204,10 +205,10 @@
   margin: 0;
 }
 
+/* Set roman: the quote marks and the attribution carry the voice, and home never loads the
+   italic face for them. */
 .noteQuote {
   font-size: clamp(1.125rem, 1.6vw, 1.3rem);
-  font-style: italic;
-  font-family: var(--font-archivo-italic), var(--font-archivo), system-ui, sans-serif;
 }
 
 .noteSource {

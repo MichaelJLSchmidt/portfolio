@@ -1,5 +1,6 @@
-// Body text against what is actually behind it, measured on rendered screenshots in Chromium:
-// every running-text element (.body-copy, and .knockout blocks such as the footer and tables) on
+// Text against what is actually behind it, measured on rendered screenshots in Chromium:
+// every running-text element (.body-copy, and .knockout blocks such as the footer and tables) and
+// every label straight over the field on
 // the home page, a case study, the case-study example (when the build includes it) and Basecamp,
 // at a desktop and a phone size, over the moving contour field at its worst (the headlamp lit
 // right on the text), over the field caught mid-morph during a route change (preview builds) and
@@ -72,9 +73,12 @@ for (let i = 0; i < 50; i++) {
   await new Promise((r) => setTimeout(r, 100));
 }
 
-// Running text and other knocked-out text blocks (the footer). Builds from before the shared
-// class names: the same elements by their modules.
-const BODY = ".body-copy, .knockout, .surface-copy";
+// Running text and other knocked-out text blocks (the footer), plus every label straight over the
+// field (eyebrows, meta and type lines, the scroll cue: .hud-label and .map-halo text outside a
+// surface; the HUD has its own backdrop). Builds from before the shared class names: the same
+// elements by their modules.
+const LABELS = ":is(.hud-label, .map-halo):not(header[data-chrome] *):not(:is(.surface-copy, .legend, .map-sheet, article, [data-ink='sheet'], .knockout, .body-copy, dialog) *)";
+const BODY = `.body-copy, .knockout, .surface-copy, ${LABELS}`;
 const LEGACY = [
   "p[class*='_lede']",
   "p[class*='_intro']",

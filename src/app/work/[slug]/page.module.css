@@ -54,7 +54,7 @@
 }
 
 .coords {
-  color: var(--color-contour);
+  color: var(--color-sheet);
 }
 
 .title {
@@ -90,7 +90,7 @@
 }
 
 .jump h2 {
-  color: var(--color-contour);
+  color: var(--color-sheet);
 }
 
 .jump ul {
