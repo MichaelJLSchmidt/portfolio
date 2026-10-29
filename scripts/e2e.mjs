@@ -673,13 +673,16 @@ async function modes() {
     if (mode !== "still") await page.waitForSelector('[data-field="on"]', { timeout: 20000 }).catch(() => {});
     const html = await page.evaluate(() => ({ motion: document.documentElement.dataset.motion, tier: document.documentElement.dataset.tier }));
     check(`html[data-motion="${mode}"]`, html.motion === mode, JSON.stringify(html));
-    // The switch: named, its state matches, and in still it says why it cannot turn motion back on.
+    // The switch: its visible label is its name (Label in Name), its state matches, its description
+    // says what it does, and in still also why it cannot turn motion back on.
+    const named = await page.getByRole("switch", { name: "Calm map", exact: true }).count();
     const sw = await page.evaluate(() => {
       const input = document.querySelector('header input[role="switch"]');
       const desc = input?.getAttribute("aria-describedby");
-      return { name: input?.getAttribute("aria-label"), checked: input?.checked, described: desc ? document.getElementById(desc)?.textContent ?? "" : "" };
+      return { label: input?.closest("label")?.textContent.trim(), checked: input?.checked, described: desc ? document.getElementById(desc)?.textContent ?? "" : "" };
     });
-    check("switch named “Reduce motion on this site”, state shown", sw.name === "Reduce motion on this site" && sw.checked === (mode !== "full"), JSON.stringify(sw));
+    check("switch named and labelled “Calm map”, state shown", named === 1 && /^calm map$/i.test(sw.label ?? "") && sw.checked === (mode !== "full"), JSON.stringify(sw));
+    check("switch described “Reduces motion on this site”", sw.described.startsWith("Reduces motion on this site"), sw.described);
     if (mode === "still") check("still: the switch explains why it is on", /reduced motion/i.test(sw.described), sw.described);
 
     // Hover and focus the deck heading area, open a card, try the next link, come back.

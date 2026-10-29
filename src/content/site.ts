@@ -22,17 +22,27 @@ export const site = {
     /** The deck without a single case study (a live build until the first one is written). */
     deckEmpty: "The expedition logs are being written up. Until then, ask me for a walkthrough.",
   },
+  /** Main navigation (the HUD; on phones the footer holds all but Basecamp). */
+  nav: {
+    label: "Main",
+    footerLabel: "Site",
+    expeditions: "Expeditions",
+    basecamp: "Basecamp",
+    contact: "Contact",
+    cv: "CV",
+  },
   hud: {
     mark: "Höhenlinie",
-    markHome: "Höhenlinie, back to the deck",
-    about: "Basecamp",
+    markHome: "Höhenlinie, home",
     clockLabel: "Bern",
-    coordinates: "N 46°41′ · E 7°52′",
-    /** The motion switch: its visible state ("Calm map" on, "Clear night" off) and its name. */
+    /**
+     * The motion switch. Its visible label is always "Calm map" and is also its name (WCAG 2.5.3
+     * Label in Name); the switch itself shows on or off. The description adds why it is on and
+     * locked when the OS asks for reduced motion.
+     */
     calm: {
-      on: "Calm map",
-      off: "Clear night",
-      name: "Reduce motion on this site",
+      label: "Calm map",
+      description: "Reduces motion on this site",
       forced: "Your device asks for reduced motion, so the map stays still. Change it in your system settings.",
     },
     /** Shown only where vibration works (Android); the visible label is its name. */
@@ -41,13 +51,12 @@ export const site = {
     tiltResume: "Resume tilt",
     tiltOn: "Tilt: on",
     skipIntro: "Skip",
-    credit: "Terrain data © swisstopo",
   },
   footer: {
     credit: "Terrain data © swisstopo",
     creditHref: "https://www.swisstopo.admin.ch/en/terms-of-use-free-geodata-and-geoservices",
-    note: "Contours drawn from swissALTIRegio. Built as a static site.",
-    about: "About · Basecamp",
+    built: "Built by hand with Next.js, WebGL and Motion",
+    place: "Bern, 2026",
   },
   skipLink: "Skip to content",
   notFound: {

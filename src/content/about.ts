@@ -1,5 +1,8 @@
 import type { Stat } from "./cards";
+import { actions } from "./contact";
 import { site } from "./site";
+
+export type { Action } from "./contact";
 
 /**
  * About page ("Basecamp", /about/): who leads the rope team, what they carry and how they climb.
@@ -7,8 +10,6 @@ import { site } from "./site";
  * render only what is here. [PLACEHOLDERS] mark facts still to confirm; actions without a real
  * URL yet render as visible, inert placeholders.
  */
-
-export type Action = { label: string; href: string | null; kind: "email" | "linkedin" | "cv" };
 
 export type Milestone = {
   year: string;
@@ -18,12 +19,6 @@ export type Milestone = {
   /** Position along the ascent profile, 0 (Interlaken) to 1 (Jungfrau). */
   at: number;
 };
-
-const actions: Action[] = [
-  { label: "Email", href: "mailto:michael.jl.schmidt@bluewin.ch", kind: "email" },
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/michaeljlschmidt/", kind: "linkedin" },
-  { label: "Download CV (PDF)", href: null, kind: "cv" },
-];
 
 const milestones: Milestone[] = [
   { year: "[YEAR]", title: "[EDUCATION]", org: "[SCHOOL]", note: "[ONE LINE ABOUT WHAT STARTED IT]", at: 0.06 },
@@ -48,14 +43,14 @@ const milestones: Milestone[] = [
 
 export const about = {
   meta: {
-    title: "Basecamp — Michael JL Schmidt, UX Team Lead",
+    title: `Basecamp — ${site.name}, UX Team Lead`,
     description:
       "About a UX Team Lead from Interlaken: facilitation, design systems and front-end craft, told as an ascent from 566 m to the Jungfrau.",
   },
   header: {
     eyebrow: "About",
     /** The H1: the HUD's Basecamp label, which morphs into it (the same word on both ends). */
-    heading: site.hud.about,
+    heading: site.nav.basecamp,
     name: site.name,
     role: "UX Team Lead · Senior UX Designer",
     place: "Interlaken · 566 m · Swiss Alps",

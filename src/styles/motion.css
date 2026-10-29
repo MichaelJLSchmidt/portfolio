@@ -1,5 +1,5 @@
-/* Reveals (src/components/motion/reveal.ts): blocks below the fold wait, then rise, draw or unfold
-   once as they scroll into view. Nothing in the first viewport ever waits, and still mode never
+/* Reveals (src/components/motion/reveal.ts): blocks below the fold wait, then rise (calm: fade
+   only), draw or unfold once as they scroll into view. Nothing in the first viewport ever waits, and still mode never
    hides anything (the waiting states only exist outside still). Durations keep a group within the
    reveal level's 600 ms. */
 
@@ -50,6 +50,15 @@
 
   :root:not([data-motion="still"]) :is([data-reveal=""], [data-reveal="card"])[data-reveal-state="play"] {
     animation: reveal-rise var(--dur-reveal) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
+  }
+
+  /* Calm: the same reveal without the rise, opacity only. */
+  :root[data-motion="calm"] :is([data-reveal=""], [data-reveal="card"])[data-reveal-state="wait"] {
+    transform: none;
+  }
+
+  :root[data-motion="calm"] :is([data-reveal=""], [data-reveal="card"])[data-reveal-state="play"] {
+    animation-name: reveal-fade;
   }
 
   :root:not([data-motion="still"]) [data-reveal="rule"][data-reveal-state="wait"] {

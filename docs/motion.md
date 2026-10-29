@@ -20,7 +20,7 @@ layout (`src/lib/motion-mode.ts`) and kept in sync with the OS setting and the s
 | View Transition morphs (card ⇄ page) | yes | yes | no API call; the 150 ms route fade |
 | Hover, focus, press responses | yes | yes | colour and opacity only, ≤ 200 ms |
 | Title settles | yes | yes (cascade ≤ 240 ms) | rest state |
-| Reveals, contour rules, map sheets | yes | yes | shown, never hidden |
+| Reveals, contour rules, map sheets | yes | yes; reveals fade without the rise | shown, never hidden |
 | Glint | yes | no | no |
 | Pointer shine (headlamp on type) | yes (mouse and pen) | no | no |
 | Field: drift, line flow, headlamp, parallax, intro sweep | yes | no; the map holds still | poster |
@@ -31,8 +31,10 @@ layout (`src/lib/motion-mode.ts`) and kept in sync with the OS setting and the s
 | Haptics | on by default | off by default | off |
 
 Precedence: still always wins. When the OS forces still, the switch shows "on" and its accessible
-description says why. The switch is a native `<input type="checkbox" switch role="switch">` named
-"Reduce motion on this site"; its visible state reads "Calm map" (on) or "Clear night" (off).
+description says why. The switch is a native `<input type="checkbox" switch role="switch">` whose
+visible label, "Calm map", is also its name (WCAG 2.5.3 Label in Name); its description reads
+"Reduces motion on this site", plus the explanation when the OS forces still. The thumb shows the
+state.
 
 Preview builds accept `?motion=full|calm|still` for one page load (the lab's frames, tests,
 recordings); the OS setting still wins.
@@ -166,7 +168,8 @@ reserved), press scales to 0.97 on the press spring, a `press` haptic.
 
 ### Reveal, ContourRule, MapSheet
 
-Mark a block `data-reveal` (`""` rises 8 px and fades, `"card"` rises 12 px), or use
+Mark a block `data-reveal` (`""` rises 8 px and fades, `"card"` rises 12 px; in calm both only
+fade), or use
 `<ContourRule />` (a 1 px line that draws) and `<MapSheet fold="top|left">` (a light sheet that
 unfolds with clip-path, its content fading in after). One controller (`reveal.ts`, mounted in the
 root layout) runs them: anything in the first viewport is visible from first paint and never hidden

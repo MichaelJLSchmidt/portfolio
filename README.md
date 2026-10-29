@@ -402,7 +402,7 @@ checks every heightmap once per session (`src/components/terrain/heightmap-loade
 One console warning names the browser and the first differing texel. `npm run test:e2e -- decode` simulates
 a colour-managing browser (a gamma curve on decoded pixels) with and without `DecompressionStream`.
 
-Attribution: "Terrain data © swisstopo" appears in the HUD and the footer.
+Attribution: "Terrain data © swisstopo" appears in the footer of every page (and on the under-construction page).
 
 ## Accessibility and motion
 
@@ -414,10 +414,10 @@ Attribution: "Terrain data © swisstopo" appears in the HUD and the footer.
 - Text in the first viewport is visible from first paint; only blocks below the fold reveal (`data-reveal`).
 - Three motion modes on `html[data-motion]`, resolved before first paint (`docs/motion.md` has the full matrix):
   - **full**, the default;
-  - **calm**, the "Calm map" switch (stored in localStorage; its accessible name is "Reduce motion on this
-    site"): view-transition morphs, responses and title settles stay; ambient field motion, the headlamp,
-    parallax, the intro sweep, glints, pointer shine, tilt, loops and Lenis stop; the field holds still and only
-    morphs between routes;
+  - **calm**, the "Calm map" switch (stored in localStorage; its visible label is its name, and its
+    description reads "Reduces motion on this site"): view-transition morphs, responses and title settles
+    stay; reveals fade without their rise; ambient field motion, the headlamp, parallax, the intro sweep,
+    glints, pointer shine, tilt, loops and Lenis stop; the field holds still and only morphs between routes;
   - **still**, when the OS asks for reduced motion (also without JavaScript): the field becomes the static
     poster, nothing moves or changes width, colour and opacity changes take 200 ms at most, and no View
     Transition runs at all: pages change directly and the incoming page fades in over 150 ms (opacity only);
@@ -454,4 +454,5 @@ production builds compile them out:
   behind it). It also fails when a page is wider than the phone (it would pan sideways).
 - The HUD clock always shows the live Bern time, calm and still included (a changing time is content, not
   motion); it keeps a fixed width, so filling it in after hydration moves nothing. The dot next to it is a
-  static neutral marker.
+  static neutral marker. Below 880 px (phones, tablets in portrait) it moves into the footer with
+  Expeditions, Contact and CV.
