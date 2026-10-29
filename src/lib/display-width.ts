@@ -1,23 +1,31 @@
+import condensedTable from "./condensed-widths.json";
 import table from "./display-widths.json";
 
 /**
- * Archivo's advance widths at the display rest axes (wdth 62, wght 800, upper case, the .display
- * letter-spacing), measured by scripts/measure-display.mjs. They let the server size display
- * titles to their real width and fix every letter's box (SettleText `widths="display"`), so a
- * web font arriving after the fallback cannot move anything.
+ * Archivo's advance widths, measured by scripts/measure-display.mjs, for the cuts whose letter
+ * boxes are fixed (SettleText `widths`): "display", the display rest axes (wdth 62, wght 800,
+ * upper case, the .display letter-spacing); "condensed", the condensed cut at wght 600, mixed
+ * case (the case-study type line). They let the server size display titles to their real width
+ * and fix every letter's box, so a web font arriving after the fallback cannot move anything.
  */
+export type MeasuredCut = "display" | "condensed";
 const em = table.em as Record<string, number>;
+const cuts: Record<MeasuredCut, { em: Record<string, number>; upper: boolean }> = {
+  display: { em, upper: true },
+  condensed: { em: condensedTable.em as Record<string, number>, upper: false },
+};
 
 /** One glyph's advance in em, or null when it isn't in the table. */
-export function glyphEm(ch: string): number | null {
-  return em[ch.toUpperCase()] ?? null;
+export function glyphEm(ch: string, cut: MeasuredCut = "display"): number | null {
+  const { em: widths, upper } = cuts[cut];
+  return widths[upper ? ch.toUpperCase() : ch] ?? null;
 }
 
-/** A run of text's width in em at the display rest axes, or null if a glyph isn't measured. */
-export function textEm(text: string): number | null {
+/** A run of text's width in em at a cut's axes, or null if a glyph isn't measured. */
+export function textEm(text: string, cut: MeasuredCut = "display"): number | null {
   let sum = 0;
   for (const ch of text) {
-    const w = glyphEm(ch);
+    const w = glyphEm(ch, cut);
     if (w === null) return null;
     sum += w;
   }

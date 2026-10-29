@@ -11,7 +11,7 @@ import {
   type ReactNode,
   type Ref,
 } from "react";
-import { glyphEm, textEm } from "@/lib/display-width";
+import { glyphEm, textEm, type MeasuredCut } from "@/lib/display-width";
 import { headlampFalloff, watchHeadlamp } from "@/lib/headlamp";
 import { useFinePointer } from "@/lib/idle";
 import { currentMode, useModeIf } from "@/lib/motion-mode";
@@ -81,9 +81,12 @@ export type SettleTextProps = {
   /**
    * "display": every letter's (or word's) box takes its measured width at the display rest axes
    * (src/lib/display-width.ts) instead of the font's, so the web font arriving after the fallback
-   * moves nothing (display titles in the first viewport). Only for text at those axes.
+   * moves nothing (display titles in the first viewport). "condensed": the same at the condensed
+   * cut, wght 600, and each word space too (a gap of the measured space at the end of its word),
+   * so wrapping text keeps the web font's line breaks (the case-study type line). Only for text at
+   * those axes.
    */
-  widths?: "display";
+  widths?: MeasuredCut;
   /**
    * Block mode for text that may wrap (headings): every letter keeps its own box at rest width,
    * as in chars mode, so the line breaks are those of the rest state, but the whole block settles
@@ -366,8 +369,11 @@ export function SettleText({
   }, [shine, mode, motion, finePointer, text]);
 
   let index = 0;
+  // The condensed cut fixes the word space as well: a gap of its measured width ends each word
+  // (words are atomic, so lines still break between them), instead of the font's own space.
+  const gap = widths === "condensed" && split === "chars";
   const unit = (content: string, i: number): ReactNode => (
-    <span key={i} className={styles.unit} style={widths ? ({ "--u": (content.length === 1 ? glyphEm(content) : textEm(content)) ?? undefined } as CSSProperties) : undefined}>
+    <span key={i} className={styles.unit} style={widths ? ({ "--u": (content.length === 1 ? glyphEm(content, widths) : textEm(content, widths)) ?? undefined } as CSSProperties) : undefined}>
       <span className={styles.ghost}>{content}</span>
       <span className={styles.glyph} data-st="glyph" style={{ "--kt-i": i } as CSSProperties}>
         {content}
@@ -406,8 +412,15 @@ export function SettleText({
               {l > 0 && <br />}
               {line.split(" ").map((word, w, words) => (
                 <Fragment key={w}>
-                  {split === "words" ? unit(word, index++) : <span className={styles.word}>{[...word].map((ch) => unit(ch, index++))}</span>}
-                  {w < words.length - 1 ? " " : null}
+                  {split === "words" ? (
+                    unit(word, index++)
+                  ) : (
+                    <span className={styles.word}>
+                      {[...word].map((ch) => unit(ch, index++))}
+                      {gap && w < words.length - 1 && <span className={styles.gap} style={{ "--u": glyphEm(" ", "condensed") } as CSSProperties} />}
+                    </span>
+                  )}
+                  {w < words.length - 1 && !gap ? " " : null}
                 </Fragment>
               ))}
             </Fragment>

@@ -152,7 +152,13 @@ All in `src/components/motion/`. Each works in full, calm and still with no layo
 - `widths="display"`: every letter's box takes its measured width at the display rest axes
   (`src/lib/display-widths.json`, `scripts/measure-display.mjs`), so the web font replacing the
   fallback moves nothing (display titles in the first viewport). The display cut also has a
-  fallback face with Archivo's vertical metrics (`globals.css`).
+  fallback face with Archivo's vertical metrics (`globals.css`). `widths="condensed"`: the same for
+  the condensed cut at wght 600 (`src/lib/condensed-widths.json`), each word space a measured gap
+  at the end of its word, so wrapping text keeps the web font's line breaks (the case-study type
+  line).
+- Boxes reserved at the label breath axes (SignatureLink and MotionButton ghosts) take the
+  "Archivo Breath Fallback" until the web font arrives: a fallback can't widen, and a narrower
+  box would rewrap a row of links when the font lands.
 - `delay` (ms): the line leads; `channel="heading"`: one heading settle at a time, snapping to rest
   while the page scrolls fast. `scope="site"`: once per session wherever it appears (the HUD).
 - `trigger`: `paint` (CSS from first paint, before hydration), `inview`, `manual` (`ref.play()`).

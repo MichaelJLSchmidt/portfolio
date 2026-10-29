@@ -74,8 +74,14 @@
   display: inline-block;
 }
 
-/* widths="display": the box takes the measured width (--u, em), not the font's. */
-.settle[data-widths="display"] .unit {
+/* widths: the box takes the measured width (--u, em), not the font's; the condensed cut's word
+   space is a gap of the measured space (src/lib/condensed-widths.json). */
+.settle[data-widths] .unit {
+  width: calc(var(--u) * 1em);
+}
+
+.gap {
+  display: inline-block;
   width: calc(var(--u) * 1em);
 }
 

@@ -107,6 +107,11 @@
   padding-inline-end: var(--dist-nudge);
 }
 
+/* The label role (Archivo): before the web font, the fallback that is as wide as its breath. */
+.link[data-role="label"] .ghost {
+  font-family: var(--font-text-breath);
+}
+
 /* A leading arrow (back links) nudges back, so the room is at the start. */
 .link[data-arrow="start"] .ghost {
   padding-inline: var(--dist-nudge) 0;

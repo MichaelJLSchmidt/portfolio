@@ -46,9 +46,10 @@
   white-space: nowrap;
 }
 
-/* The reserved box: the label at its breath axes. */
+/* The reserved box: the label at its breath axes (before the web font, a fallback as wide). */
 .ghost {
   visibility: hidden;
+  font-family: var(--font-text-breath);
   font-stretch: var(--axis-label-hover-wdth);
   font-weight: var(--axis-label-hover-wght);
 }

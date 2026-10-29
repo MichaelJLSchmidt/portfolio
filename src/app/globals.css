@@ -115,13 +115,36 @@ button {
      1 em, descent 0.2 em);
    - display: Archivo's vertical metrics (ascent 0.878 em, descent 0.21 em) on a face narrowed
      towards the condensed cut; with every display letter in a box of its measured width
-     (SettleText widths="display") the swap moves nothing. */
+     (SettleText widths="display") the swap moves nothing;
+   - breath: Archivo at the label's breath axes (wdth 112, wght 650), about 19% wider than at wdth
+     100, for the boxes links and buttons reserve at that state (their ghosts): a fallback can't
+     widen, so without it those boxes grow when the web font arrives and rows rewrap;
+   - condensed: Archivo at wdth 88, wght 600 (the case-study type line, in the first viewport),
+     about 5% narrower than at wdth 100, so its line breaks are the web font's. */
 @font-face {
   font-family: "Archivo Text Fallback";
   src: local("Arial"), local("Liberation Sans"), local("Arimo"), local("Helvetica Neue"), local("Helvetica"), local("Roboto"), local("Noto Sans");
   size-adjust: 98.7%;
   ascent-override: 88.96%;
   descent-override: 21.28%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Archivo Breath Fallback";
+  src: local("Arial"), local("Liberation Sans"), local("Arimo"), local("Helvetica Neue"), local("Helvetica"), local("Roboto"), local("Noto Sans");
+  size-adjust: 117.5%;
+  ascent-override: 74.73%;
+  descent-override: 17.88%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Archivo Condensed Fallback";
+  src: local("Arial"), local("Liberation Sans"), local("Arimo"), local("Helvetica Neue"), local("Helvetica"), local("Roboto"), local("Noto Sans");
+  size-adjust: 94%;
+  ascent-override: 93.41%;
+  descent-override: 22.34%;
   line-gap-override: 0%;
 }
 
@@ -145,6 +168,8 @@ button {
 
 :root {
   --font-text: "Archivo", "Archivo Text Fallback", var(--font-archivo), system-ui, sans-serif;
+  --font-text-breath: "Archivo", "Archivo Breath Fallback", var(--font-archivo), system-ui, sans-serif;
+  --font-text-condensed: "Archivo", "Archivo Condensed Fallback", var(--font-archivo), system-ui, sans-serif;
   --font-mono: "Martian Mono", "Martian Mono Local Fallback", var(--font-martian), ui-monospace, monospace;
   --font-display: "Archivo", "Archivo Display Fallback", var(--font-archivo), system-ui, sans-serif;
 }

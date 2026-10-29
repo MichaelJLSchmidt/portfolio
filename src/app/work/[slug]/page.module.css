@@ -59,6 +59,7 @@
 
 .type {
   margin: 0;
+  font-family: var(--font-text-condensed);
   font-size: 1.125rem;
   font-weight: 600;
   font-stretch: var(--type-condensed-wdth);

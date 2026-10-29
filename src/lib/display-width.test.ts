@@ -21,6 +21,18 @@ describe("display widths", () => {
     assert.equal(widestEm("A B\nCD", { lines: true }), Math.max(textEm("A B") ?? 0, textEm("CD") ?? 0));
   });
 
+  it("measure the condensed cut in mixed case, word space included", () => {
+    assert.notEqual(glyphEm("a", "condensed"), glyphEm("A", "condensed"));
+    assert.ok((glyphEm(" ", "condensed") ?? 0) > 0);
+  });
+
+  it("cover every character of the case-study type lines (their boxes are fixed too)", async () => {
+    const { caseStudies } = await import("../content/case-studies.ts");
+    const lines = [...cards.map((c) => c.type), ...Object.values(caseStudies).map((s) => s.typeLine ?? "")];
+    // Numbers come from {{tokens}}: the digits are in the table.
+    for (const l of lines) assert.notEqual(textEm(l.replace(/\{\{[^}]*\}\}/g, "0").replace(/\s+/g, ""), "condensed"), null, l);
+  });
+
   it("cover every letter of the current display titles (so their boxes are fixed)", () => {
     const titles = [site.hero.name, about.header.heading, ...cards.map((c) => c.name)];
     for (const t of titles) assert.notEqual(textEm(t.replace(/\s+/g, "")), null, t);

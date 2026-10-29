@@ -122,7 +122,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
           </MorphTarget>
           {/* The type and meta lines settle as the page arrives (arrival.lines after the commit). */}
           <div data-vt-exit>
-            <SettleText as="p" text={study.typeLine ?? card.type} mode="block" wrap role="text" arrive={arrival.lines} className={`${styles.type} map-halo`} />
+            <SettleText as="p" text={study.typeLine ?? card.type} mode="block" wrap role="text" widths="condensed" arrive={arrival.lines} className={`${styles.type} map-halo`} />
           </div>
           <p className="body-copy" data-vt-exit>
             {study.lede}
