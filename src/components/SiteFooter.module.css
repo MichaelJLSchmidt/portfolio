@@ -46,9 +46,10 @@
   min-height: 32px;
 }
 
+/* Not a link yet (no CV URL): the [URL] tag says so; the colour stays the footer's, legible over
+   the field. */
 .placeholder {
   gap: 0.5em;
-  color: var(--color-contour);
 }
 
 .clock {

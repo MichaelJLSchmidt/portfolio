@@ -220,12 +220,24 @@ for (const mode of pick(modes)) {
           // The worst text colour among the element and its text-bearing descendants: the darkest
           // for light text, the lightest for dark text (all of it darker than mid-grey).
           const lin = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+          // Any computed colour (rgb(), oklab() from color-mix, …) as sRGB bytes and alpha.
+          const ctx = Object.assign(document.createElement("canvas"), { width: 1, height: 1 }).getContext("2d", { willReadFrequently: true });
+          const rgba = (color) => {
+            ctx.clearRect(0, 0, 1, 1);
+            ctx.fillStyle = color;
+            ctx.fillRect(0, 0, 1, 1);
+            return ctx.getImageData(0, 0, 1, 1).data;
+          };
           let min = 1;
           let max = 0;
           for (const node of [el, ...el.querySelectorAll("*")]) {
             if (![...node.childNodes].some((c) => c.nodeType === 3 && c.textContent.trim())) continue;
             if (!node.getClientRects().length) continue;
-            const [r2, g, b] = getComputedStyle(node).color.match(/[\d.]+/g).map(Number);
+            const cs = getComputedStyle(node);
+            // Text that is not drawn (a hidden layer such as a link's glint) is not read.
+            if (cs.visibility !== "visible") continue;
+            const [r2, g, b, a] = rgba(cs.color);
+            if (a === 0) continue;
             const l = 0.2126 * lin(r2 / 255) + 0.7152 * lin(g / 255) + 0.0722 * lin(b / 255);
             min = Math.min(min, l);
             max = Math.max(max, l);
