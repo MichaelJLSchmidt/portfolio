@@ -10,6 +10,13 @@
 //   npm run test:e2e -- decode        heightmap decode check and its fallbacks
 //   npm run test:e2e -- casestudy     the case-study template on the example page (needs a build
 //                                     that includes examples: SITE_MODE=basecamp or a preview)
+//   npm run test:e2e -- deck          deck order, card link names and the Next expedition loop
+//                                     (scripts/e2e/deck.mjs; needs the examples)
+//   npm run test:e2e -- basecamp      the HUD label ↔ Basecamp H1 morph in full, calm and still
+//                                     (scripts/e2e/basecamp.mjs)
+//   npm run test:e2e -- ia            page structure, HUD order, example content (scripts/e2e/layout.mjs)
+//   npm run test:e2e -- phone         every route at 360 and 390 px: no overflow, HUD and footer
+//                                     (scripts/e2e/layout.mjs)
 //
 // Serves ./out like a static host (base path read from the build) and drives Chromium with
 // Playwright, which is not a dependency: `npm i -D playwright && npx playwright install chromium`,
@@ -21,6 +28,9 @@ import { createRequire } from "node:module";
 import { createServer } from "node:net";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { basecamp } from "./e2e/basecamp.mjs";
+import { deck } from "./e2e/deck.mjs";
+import { ia, phone, routes as builtRoutes } from "./e2e/layout.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const only = process.argv[2];
@@ -166,7 +176,10 @@ async function settle(page, { path, terrain }) {
       main,
       h1,
       ...(h1?.querySelectorAll('[class*="glyph"]') ?? []),
-      ...(main?.querySelectorAll("[data-reveal], [style*='view-transition-name']") ?? []),
+      // Reveals still waiting below the fold are not hidden: they play when scrolled to.
+      ...[...(main?.querySelectorAll("[data-reveal], [style*='view-transition-name']") ?? [])].filter(
+        (el) => !(el.getAttribute("data-reveal-state") === "wait" && el.getBoundingClientRect().top >= window.innerHeight),
+      ),
       // The deck cards after a return: every part rebuilt, the name readable.
       ...(main?.querySelectorAll("article[data-slug] [class*='nameBar'], article[data-slug] [class*='typeLine'], article[data-slug] [class*='rules'], article[data-slug] [class*='stats'], article[data-slug] [class*='collector']") ?? []),
     ]
@@ -740,9 +753,7 @@ async function modes() {
 // Direct loads of every route: no hydration or console errors, and the motion attributes on <html>
 // survive hydration (a failed hydration re-creates the document and drops them).
 async function hydration() {
-  const routes = ["/", "/about/", "/work/test-project/", "/lab/", "/lab/specimen/", "/no-such-page/"].filter(
-    (r) => r === "/no-such-page/" || existsSync(join(root, "out", r, "index.html")),
-  );
+  const routes = [...builtRoutes(root), "/lab/", "/lab/specimen/"].filter((r) => r === "/no-such-page/" || existsSync(join(root, "out", r, "index.html")));
   for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
     console.log(`\nhydration: direct loads at ${viewport.width}×${viewport.height}`);
     for (const route of routes) {
@@ -870,6 +881,7 @@ async function primitives() {
 }
 
 const scenarios = { transitions, modes, hydration, primitives, decode, casestudy };
+Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, basecamp, ia, phone }).map(([name, run]) => [name, () => run({ browser, base, basePath, root, check, open, settle })])));
 try {
   for (const [name, run] of Object.entries(scenarios)) if (!only || only === name) await run();
 } finally {

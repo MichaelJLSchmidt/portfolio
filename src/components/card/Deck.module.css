@@ -12,7 +12,12 @@
   text-align: center;
 }
 
+/* Cards waiting for the deal-in are turned up to 7°: on a phone their corners would widen the page.
+   The section clips sideways overflow, with the page gutter as margin so the deal still paints into
+   it. */
 .deck {
+  overflow-x: clip;
+  overflow-clip-margin: var(--gutter);
   scroll-margin-top: 72px;
 }
 

@@ -1,7 +1,11 @@
 # About page plan: "Basecamp"
 
-**Status: built** (`src/app/about`, `src/components/about`). The placeholders listed under "Content still needed"
-are marked `[LIKE THIS]` in `src/content/about.ts`; actions without a URL render as visible, inert placeholders.
+**Status: superseded in phase 2.** The leader card is retired and Basecamp is reached from the HUD: its
+Basecamp label morphs into the page's H1 (`src/components/hud/BasecampLink.tsx`). The page now reads: header
+(H1 and lead), map legend, bio, rope rules (working with me), first 90 days, career climb (the ascent chart with
+five camps, each with its card rarity), craft, off the map and the contact band; the copy is in
+`src/content/about.ts`, invented values as `ex("…")`. The plan below is kept for its reasoning (the climb, the
+chart, the motion budget); its entry points, header and sections describe the first version.
 
 The About page continues the night hike. If case studies are expeditions, About is the **basecamp**: where you
 learn who leads the rope team, what they carry and how they climb. It uses the same map, tokens, type and

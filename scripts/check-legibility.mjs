@@ -140,6 +140,7 @@ const pages = [
   { path: "/", name: "home" },
   // The examples use every case-study building block; live builds don't include them.
   ...(existsSync(join(out, "work/test-project/index.html")) ? [{ path: "/work/test-project/", name: "case-study example" }] : []),
+  ...["seilschaft", "gratweg"].filter((s) => existsSync(join(out, `work/${s}/index.html`))).map((s) => ({ path: `/work/${s}/`, name: `case study ${s}` })),
   { path: "/about/", name: "Basecamp" },
 ];
 const viewports = [

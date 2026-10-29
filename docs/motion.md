@@ -17,7 +17,7 @@ layout (`src/lib/motion-mode.ts`) and kept in sync with the OS setting and the s
 | | full | calm | still |
 | --- | --- | --- | --- |
 | Chosen by | default | the "Calm map" switch | the OS (`prefers-reduced-motion: reduce`), also without JavaScript |
-| View Transition morphs (card ⇄ page) | yes | yes | no API call; the 150 ms route fade |
+| View Transition morphs (card ⇄ page, HUD Basecamp label ⇄ Basecamp H1) | yes | yes | no API call; the 150 ms route fade |
 | Hover, focus, press responses | yes | yes | colour and opacity only, ≤ 200 ms |
 | Title settles | yes | yes (cascade ≤ 240 ms) | rest state |
 | Reveals, contour rules, map sheets | yes | yes; reveals fade without the rise | shown, never hidden |
