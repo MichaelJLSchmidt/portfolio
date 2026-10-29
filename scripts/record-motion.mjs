@@ -138,8 +138,18 @@ try {
 
   for (const mode of ["full", "calm", "still"]) {
     const options = { reducedMotion: mode === "still" ? "reduce" : "no-preference" };
-    const links = { card: 'article[data-slug="kibon"] a', basecamp: 'header a[href$="/about/"]' };
-    for (const [name, selector] of Object.entries(links)) {
+    const links = {
+      card: { selector: 'article[data-slug="kibon"] a', path: "/work/kibon/", terrain: "dvb-001" },
+      basecamp: { selector: 'header a[href$="/about/"]', path: "/about/", terrain: "bern" },
+    };
+    // SwiftShader and the encoder slow everything down: wait for each arrival (the route, then the
+    // field landing on its terrain) rather than for fixed times, then hold the frame a moment.
+    const arrive = async (page, path, terrain) => {
+      await page.waitForURL((url) => url.pathname.endsWith(path), { timeout: 30000 }).catch(() => {});
+      if (mode !== "still") await page.waitForSelector(`[data-field="on"][data-terrain="${terrain}"]`, { timeout: 30000 }).catch(() => {});
+      await pause(page, 1500);
+    };
+    for (const [name, to] of Object.entries(links)) {
       await record(`terrain-${name}-${mode}`, options, async (page, context) => {
         await context.addInitScript((calm) => {
           try {
@@ -148,15 +158,17 @@ try {
           } catch {}
         }, mode === "calm");
         await page.goto(`${base}/?field=force`, { waitUntil: "networkidle" });
-        await pause(page, 2500);
-        const link = page.locator(selector).first();
+        await arrive(page, "/", "region");
+        const link = page.locator(to.selector).first();
         await link.scrollIntoViewIfNeeded();
         await link.hover();
         await pause(page, 1200);
         await link.click();
-        await pause(page, 3500);
+        await arrive(page, to.path, to.terrain);
         await page.goBack();
-        await pause(page, 3500);
+        await arrive(page, "/", "region");
+        // The encoder lags behind under SwiftShader: let it catch up before the video closes.
+        await pause(page, 2500);
       });
     }
   }

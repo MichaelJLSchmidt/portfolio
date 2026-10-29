@@ -153,7 +153,7 @@ const modes = [
   { name: "poster", reduced: true },
   // A route change caught halfway: the field frozen mid-morph towards another terrain, its quiet
   // zones held as the conductor holds them (preview builds: the field's debug hook).
-  { name: "field mid-morph, headlamp on the text", reduced: false, morph: true },
+  { name: "mid-morph (route change), headlamp on the text", reduced: false, morph: true },
 ];
 
 // Narrow a run while iterating: LEGIBILITY_ONLY="Basecamp,desktop,field" (any of the words).
