@@ -119,7 +119,16 @@ const curve = (name: EasingToken | "linear") => {
   return c;
 };
 
-export type TimelineEvent = { channel: Channel; from: number; to: number; start: number; end: number | null; duration: number };
+export type TimelineEvent = {
+  channel: Channel;
+  from: number;
+  to: number;
+  start: number;
+  /** When an update first saw the tween done, and the update before (it lies in between). */
+  end: number | null;
+  prev: number | null;
+  duration: number;
+};
 
 type Running = { from: number; to: number; start: number; duration: number; ease: (x: number) => number; event: TimelineEvent };
 type Pending = Step & { at: number };
@@ -134,6 +143,7 @@ export class Timeline {
   private pending: Pending[] = [];
   /** Started and finished tweens, for the preview-only debug hook. */
   onEvent: ((e: TimelineEvent) => void) | null = null;
+  private lastUpdate = 0;
 
   play(steps: Step[], now: number) {
     // Queued steps of an older plan give way; a running tween hands over when the new step starts.
@@ -158,7 +168,7 @@ export class Timeline {
         this.pending = this.pending.filter((p) => p.at > now);
         for (const step of due) {
           const from = step.from ?? this.values[step.channel];
-          const event: TimelineEvent = { channel: step.channel, from, to: step.to, start: step.at, end: null, duration: step.duration };
+          const event: TimelineEvent = { channel: step.channel, from, to: step.to, start: step.at, end: null, prev: null, duration: step.duration };
           this.running.set(step.channel, { from, to: step.to, start: step.at, duration: step.duration, ease: curve(step.easing), event });
           this.onEvent?.(event);
         }
@@ -171,9 +181,11 @@ export class Timeline {
       if (p >= 1) {
         this.running.delete(channel);
         t.event.end = now;
+        t.event.prev = Math.max(this.lastUpdate, t.start);
         this.onEvent?.(t.event);
       }
     }
+    this.lastUpdate = now;
     return this.running.size > 0 || this.pending.length > 0;
   }
 

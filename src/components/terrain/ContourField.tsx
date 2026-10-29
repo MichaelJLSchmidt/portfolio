@@ -407,7 +407,7 @@ function Field({ profile, paused, calm, onReady, onContextLost }: FieldProps) {
   };
   useEffect(() => {
     if (!previewable) return;
-    timeline.onEvent = (e: TimelineEvent) => log({ type: e.end === null ? "start" : "end", channel: e.channel, from: e.from, to: e.to, start: e.start, end: e.end, duration: e.duration });
+    timeline.onEvent = (e: TimelineEvent) => log({ type: e.end === null ? "start" : "end", channel: e.channel, from: e.from, to: e.to, start: e.start, end: e.end, prev: e.prev, duration: e.duration });
   }, [timeline]);
 
   function play(steps: Step[]) {
