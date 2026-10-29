@@ -23,6 +23,9 @@
 //                                     display titles keep their boxes (scripts/e2e/typography.mjs)
 //   npm run test:e2e -- hud           the HUD's slots, condensing and readout (scripts/e2e/chrome.mjs)
 //   npm run test:e2e -- toast         Copy address and its toast in full and still (scripts/e2e/chrome.mjs)
+//   npm run test:e2e -- cards         the deck's grid, phone list, arrival, hover, focus, press, marks,
+//                                     stats and the visited stamp (scripts/e2e/cards.mjs)
+//   npm run test:e2e -- views         Cards · Index in full, calm and still (scripts/e2e/cards.mjs)
 //
 // Serves ./out like a static host (base path read from the build) and drives Chromium with
 // Playwright, which is not a dependency: `npm i -D playwright && npx playwright install chromium`,
@@ -39,6 +42,7 @@ import { deck } from "./e2e/deck.mjs";
 import { ia, phone, routes as builtRoutes } from "./e2e/layout.mjs";
 import { fontswap } from "./e2e/typography.mjs";
 import { hud, toast } from "./e2e/chrome.mjs";
+import { cards, views } from "./e2e/cards.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const only = process.argv[2];
@@ -906,7 +910,7 @@ async function primitives() {
 const scenarios = { transitions, modes, hydration, primitives, decode, casestudy };
 // The terrain conductor and the Bern terrain (scripts/e2e-terrain.mjs).
 Object.assign(scenarios, (await import("./e2e-terrain.mjs")).terrainScenarios({ browser, base, root, check, settle }));
-Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, basecamp, ia, phone, fontswap, hud, toast }).map(([name, run]) => [name, () => run({ browser, base, basePath, root, check, open, settle })])));
+Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, basecamp, ia, phone, fontswap, hud, toast, cards, views }).map(([name, run]) => [name, () => run({ browser, base, basePath, root, check, open, settle })])));
 try {
   for (const [name, run] of Object.entries(scenarios)) if (!only || only === name) await run();
 } finally {

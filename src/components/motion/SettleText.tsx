@@ -30,8 +30,8 @@ export type SettleMode = "chars" | "words" | "block";
 /** paint: from first paint (CSS, before hydration); inview: when scrolled into view; manual: `play()`. */
 export type SettleTrigger = "paint" | "inview" | "manual";
 export type SettleHandle = {
-  /** Plays the settle again (and the glint after it, if the text has one). */
-  play(): void;
+  /** Plays the settle again (and the glint after it, if the text has one), after `delayMs`. */
+  play(delayMs?: number): void;
   glint(): Promise<void>;
 };
 
@@ -86,6 +86,11 @@ export type SettleTextProps = {
   /** Milliseconds before the settle starts: the line leads (a contour rule draws first). */
   delay?: number;
   /**
+   * The letters breathe to the breath axes (+8) when an ancestor sets `--on: 1` (a hovered or
+   * focused card), left to right, and settle back (full and calm).
+   */
+  breath?: boolean;
+  /**
    * "heading": at most one heading settle at a time; one that would start while another runs, or
    * while the page scrolls fast, shows at rest instead (waypoint and section headings).
    */
@@ -122,6 +127,7 @@ export function SettleText({
   widths,
   wrap = false,
   delay = 0,
+  breath = false,
   channel,
   style,
   ref,
@@ -173,7 +179,8 @@ export function SettleText({
   };
 
   useImperativeHandle(ref, () => ({
-    play() {
+    play(delayMs) {
+      if (delayMs !== undefined) elRef.current?.style.setProperty("--kt-delay", `${delayMs}ms`);
       setPlay("rest");
       requestAnimationFrame(() => setPlay("true"));
     },
@@ -336,6 +343,7 @@ export function SettleText({
       data-reserve={mode === "block" && reserve === "rest" ? "rest" : undefined}
       data-widths={widths}
       data-wrap={mode === "block" && wrap ? "" : undefined}
+      data-breath={breath ? "" : undefined}
       data-play={trigger === "paint" ? "true" : "rest"}
       data-settle-key={key}
       data-quiet-zone={quiet ? "" : undefined}

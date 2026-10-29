@@ -101,7 +101,7 @@ describe("tokens → CSS", () => {
       if ("cap" in s) assert.equal(css.get(`--stagger-${k}-cap`), `${s.cap}ms`, k);
       if ("max" in s) assert.equal(css.get(`--stagger-${k}-max`), String(s.max), k);
     }
-    for (const [k, v] of Object.entries(distance)) assert.equal(css.get(`--dist-${kebab(k)}`), `${v}${k === "tiltMax" ? "deg" : "px"}`, k);
+    for (const [k, v] of Object.entries(distance)) assert.equal(css.get(`--dist-${kebab(k)}`), `${v}${/^tilt/.test(k) ? "deg" : "px"}`, k);
     assert.equal(css.get("--glint-band"), `${glint.band}%`);
     assert.equal(css.get("--glint-angle"), `${glint.angle}deg`);
     assert.equal(css.get("--glint-color"), `rgb(${hexChannels(color.glacier).join(" ")} / ${glint.alpha})`);
@@ -109,6 +109,7 @@ describe("tokens → CSS", () => {
     assert.equal(css.get("--headlamp-fade"), `${headlamp.fadeMs}ms`);
     assert.equal(css.get("--headlamp-shine"), `${headlamp.shineMax * 100}%`);
     assert.equal(css.get("--scale-press"), String(scale.press));
+    assert.equal(css.get("--scale-card-press"), String(scale.cardPress));
     for (const [k, v] of Object.entries(layer)) assert.equal(css.get(`--layer-${kebab(k)}`), String(v), k);
     assert.equal(css.get("--type-condensed-wdth"), `${type.condensed.wdth}%`);
   });
@@ -167,10 +168,6 @@ describe("stylesheets read existing tokens", () => {
 // phase that owns it to replace (cards and deck: phase 4; terrain: phase 6). Lower it, never raise it.
 describe("no hard-coded motion values in stylesheets", () => {
   const allowance: Record<string, number> = {
-    // Card reassembly delays, touch shimmer loop (phase 4).
-    "components/card/SummitCard.module.css": 5,
-    // Deal-in stagger (phase 4).
-    "components/card/Deck.module.css": 1,
     // Poster fallback delay and drift loop (phase 6).
     "components/terrain/TerrainBackdrop.module.css": 2,
     // Scroll cue loop (phase 5).

@@ -38,9 +38,6 @@ export const site = {
     },
     /** Shown only where vibration works (Android); the visible label is its name. */
     haptics: "Haptics",
-    tiltEnable: "Enable tilt",
-    tiltResume: "Resume tilt",
-    tiltOn: "Tilt: on",
     skipIntro: "Skip",
   },
   footer: {

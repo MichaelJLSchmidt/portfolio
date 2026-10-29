@@ -69,6 +69,8 @@ export const home = {
     emptyHeading: "Expeditions",
     empty: "The expedition logs are being written up. Until then, ask me for a walkthrough.",
     indexLabel: "The expeditions at a glance",
+    /** The deck's two views: the cards, or one line per card. */
+    views: { label: "Show the expeditions as", cards: "Cards", index: "Index" },
   },
   fieldNotes: {
     eyebrow: "Field notes",

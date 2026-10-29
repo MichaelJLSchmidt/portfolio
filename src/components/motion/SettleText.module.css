@@ -181,6 +181,13 @@
     animation-delay: calc(var(--kt-delay, 0ms) + var(--kt-i) * var(--kt-step, 0ms));
   }
 
+  /* breath: the letters follow an ancestor's --on (a hovered card) to the breath axes. */
+  :root:not([data-motion="still"]) .settle[data-breath] .glyph {
+    font-stretch: calc(var(--kt-rest-wdth) + (var(--kt-breath-wdth) - var(--kt-rest-wdth)) * var(--on, 0));
+    transition: font-stretch var(--dur-breath) var(--ease-settle);
+    transition-delay: calc(var(--on, 0) * var(--kt-i) * var(--stagger-char));
+  }
+
   /* Arriving with a page transition: held just wide (the breath), then a short settle. */
   :root:not([data-motion="still"]) .settle[data-arrive="hold"] :is(.glyph, .run) {
     animation: none;

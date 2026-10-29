@@ -430,6 +430,33 @@ i,
   animation: vt-enter var(--dur-long) var(--ease-trail) both;
 }
 
+/* The deck's Cards ⇄ Index switch (html[data-vt="view"], Deck.tsx): each card's name morphs into
+   its row's name, and the page cross-fades, over --dur-medium (360 ms). Calm (data-vt="view-calm")
+   only cross-fades: the shared names are switched off for that transition. */
+:root[data-vt="view"]::view-transition-group(.morph),
+:root[data-vt="view"]::view-transition-old(root),
+:root[data-vt="view"]::view-transition-new(root) {
+  animation-duration: var(--dur-medium);
+  animation-timing-function: var(--ease-settle);
+}
+
+:root[data-vt="view"]::view-transition-old(.morph-title) {
+  animation: vt-title-old var(--dur-medium) linear both;
+}
+
+:root[data-vt="view"]::view-transition-new(.morph-title) {
+  animation: vt-title-new var(--dur-medium) linear both;
+}
+
+:root[data-vt="view-calm"] [style*="view-transition-name"] {
+  view-transition-name: none !important;
+}
+
+:root[data-vt="view-calm"]::view-transition-old(root),
+:root[data-vt="view-calm"]::view-transition-new(root) {
+  animation-duration: var(--dur-medium);
+}
+
 /* Back into the deck: "card reassembly" (html[data-vt="return"], return-transition.ts).
    1. 0–220 ms: the page's own content leaves first, fading and dropping a few pixels (scree);
    2. 100–800 ms: the artwork travels back into the card's window, cropped and never stretched

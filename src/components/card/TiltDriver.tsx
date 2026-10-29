@@ -1,40 +1,41 @@
 "use client";
 
-import { animate, useSpring, type MotionValue } from "motion/react";
+import { animate, useSpring, type AnimationPlaybackControls, type MotionValue } from "motion/react";
 import { useEffect, useRef, type RefObject } from "react";
-import { legacy, spring } from "@/styles/tokens";
-import { onGyroTilt, type GyroStatus } from "./gyro";
+import { duration, easing, spring } from "@/styles/tokens";
 
 /** Springs the card flat; resolves once it is (at most `spring.settle.visualDuration`). Null if already flat. */
 export type SettleTilt = () => Promise<void> | null;
 
-// The card's current tilt, kept until phase 4 moves cards to spring.tilt and distance.tiltMax.
-const MAX_POINTER_DEG = legacy.tilt.maxDeg;
 const VARS = ["--rx", "--ry", "--px", "--py", "--hyp"];
+const settleEase = [...easing.settle] as [number, number, number, number];
 
 /**
- * Pointer (or gyroscope) tilt through Motion springs, loaded lazily so Motion is not part
- * of the initial bundle. Writes CSS custom properties on the card root: --rx/--ry for
- * rotation, --px/--py/--hyp for foil and glare. Renders nothing.
+ * Pointer tilt through Motion springs (spring.tilt), loaded lazily so Motion is not part of the
+ * initial bundle: at most `maxDeg` (distance.tiltMax, 5°; mini cards 3°) under a fine pointer,
+ * never on focus or touch, and off in calm and still (SummitCard mounts it in full motion only).
+ * Leaving resets the card over --dur-breath-out (240 ms). Writes CSS custom properties on the card
+ * root: --rx/--ry for rotation, --px/--py/--hyp for the foil and glare. Renders nothing.
  */
 export default function TiltDriver({
   rootRef,
   stageRef,
   settleRef,
-  gyro,
+  maxDeg,
 }: {
   rootRef: RefObject<HTMLElement | null>;
   stageRef: RefObject<HTMLElement | null>;
   /** Filled with a function that settles the tilt before the card opens a page. */
   settleRef: RefObject<SettleTilt | null>;
-  gyro: GyroStatus;
+  maxDeg: number;
 }) {
-  const rx = useSpring(0, legacy.tilt.spring);
-  const ry = useSpring(0, legacy.tilt.spring);
-  const px = useSpring(50, legacy.tilt.spring);
-  const py = useSpring(50, legacy.tilt.spring);
-  // While settling, pointer and gyro input no longer move the card.
+  const rx = useSpring(0, spring.tilt);
+  const ry = useSpring(0, spring.tilt);
+  const px = useSpring(50, spring.tilt);
+  const py = useSpring(50, spring.tilt);
+  // While settling or resetting, pointer input no longer moves the card.
   const settling = useRef(false);
+  const resets = useRef<AnimationPlaybackControls[]>([]);
 
   useEffect(() => {
     // Runs again when Next re-shows a page kept alive after back navigation.
@@ -47,6 +48,7 @@ export default function TiltDriver({
     ];
     const rest = () => values.forEach(([v, to]) => v.jump(to));
     settleRef.current = () => {
+      resets.current.forEach((r) => r.stop());
       if (Math.abs(rx.get()) < 0.25 && Math.abs(ry.get()) < 0.25) {
         rest();
         return null;
@@ -87,39 +89,37 @@ export default function TiltDriver({
     if (!stage) return;
     const move = (e: PointerEvent) => {
       if (e.pointerType === "touch" || settling.current) return;
+      resets.current.forEach((r) => r.stop());
+      resets.current = [];
       const r = stage.getBoundingClientRect();
       const x = Math.min(Math.max((e.clientX - r.left) / r.width, 0), 1);
       const y = Math.min(Math.max((e.clientY - r.top) / r.height, 0), 1);
-      rx.set((0.5 - y) * 2 * MAX_POINTER_DEG);
-      ry.set((x - 0.5) * 2 * MAX_POINTER_DEG);
+      rx.set((0.5 - y) * 2 * maxDeg);
+      ry.set((x - 0.5) * 2 * maxDeg);
       px.set(x * 100);
       py.set(y * 100);
     };
+    // Leaving resets over --dur-breath-out, a tween rather than the follow spring.
     const leave = () => {
       if (settling.current) return;
-      rx.set(0);
-      ry.set(0);
-      px.set(50);
-      py.set(50);
+      resets.current.forEach((r) => r.stop());
+      resets.current = (
+        [
+          [rx, 0],
+          [ry, 0],
+          [px, 50],
+          [py, 50],
+        ] as [MotionValue<number>, number][]
+      ).map(([v, to]) => animate(v.get(), to, { duration: duration.breathOut / 1000, ease: settleEase, onUpdate: (x) => v.jump(x) }));
     };
     stage.addEventListener("pointermove", move, { passive: true });
     stage.addEventListener("pointerleave", leave);
     return () => {
       stage.removeEventListener("pointermove", move);
       stage.removeEventListener("pointerleave", leave);
+      resets.current.forEach((r) => r.stop());
     };
-  }, [stageRef, rx, ry, px, py]);
-
-  useEffect(() => {
-    if (gyro !== "on") return;
-    return onGyroTilt((x, y) => {
-      if (settling.current) return;
-      rx.set(x);
-      ry.set(y);
-      px.set(50 + (y / 8) * 40);
-      py.set(50 - (x / 8) * 40);
-    });
-  }, [gyro, rx, ry, px, py]);
+  }, [stageRef, rx, ry, px, py, maxDeg]);
 
   return null;
 }

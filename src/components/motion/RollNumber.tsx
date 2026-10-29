@@ -12,6 +12,9 @@ type Digits = ComponentType<RollDigitsProps>;
 let chunk: Promise<Digits> | null = null;
 const loadDigits = () => (chunk ??= import("./roll-digits").then((m) => m.default));
 
+/** Loads the rolling digits ahead of a roll that has to start at once (a card's first hover). */
+export const preloadRoll = () => void loadDigits();
+
 /**
  * A number that rolls to a new value, digit by digit (AnimateNumber, Motion+): the readout's
  * coordinates and altitude, the Bern clock, card stats. The server and hydration render the

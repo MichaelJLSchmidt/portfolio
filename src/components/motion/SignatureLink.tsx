@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useLayoutEffect, useRef, type ComponentProps, type CSSProperties, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, type ComponentProps, type CSSProperties, type MouseEvent, type ReactElement, type ReactNode } from "react";
 import { haptic } from "@/lib/haptics";
 import { isSettled, markSettled, settleKey } from "@/lib/settled";
 import { duration, levels, stagger, staggerStep } from "@/styles/tokens";
@@ -30,6 +30,10 @@ export type SignatureLinkProps = Omit<ComponentProps<typeof Link>, "children"> &
   label: string;
   /** Content before the label, e.g. an eyebrow line; part of the link's name. */
   before?: ReactNode;
+  /** Content after the label (and its arrow), e.g. an index row's summary; part of the link's name. */
+  after?: ReactNode;
+  /** Wraps the label element, e.g. in a MorphTarget so it is a shared element of a View Transition. */
+  wrapLabel?: (label: ReactElement) => ReactNode;
   /** A decorative arrow after the label (standalone and display), nudged on hover or focus. */
   arrow?: string;
   /** "start": the arrow comes before the label and nudges back (back links, "← All expeditions"). */
@@ -64,6 +68,8 @@ export function SignatureLink({
   role = variant === "display" ? "display" : "label",
   label,
   before,
+  after,
+  wrapLabel,
   arrow,
   arrowAt = "end",
   current = false,
@@ -133,6 +139,30 @@ export function SignatureLink({
     );
   }
 
+  const labelEl = (
+    <span className={labelClassName ? `${styles.label} ${labelClassName}` : styles.label}>
+      <span className="visually-hidden">{label}</span>
+      {/* Holds the box at the breath axes (plus the arrow's nudge). */}
+      <span className={styles.ghost} aria-hidden="true">
+        {arrow && arrowAt === "start" && <span className={styles.arrow}>{arrow}</span>}
+        {label}
+        {arrow && arrowAt === "end" && <span className={styles.arrow}>{arrow}</span>}
+      </span>
+      <span className={styles.run} aria-hidden="true">
+        {arrow && arrowAt === "start" && <span className={styles.arrow}>{arrow}</span>}
+        <span className={styles.word}>
+          {letters.map((ch, i) => (
+            <span key={i} className={styles.ch} style={{ "--kt-i": i } as CSSProperties}>
+              {ch}
+            </span>
+          ))}
+          <Glint text={label} surface={surface} className={styles.glint} />
+        </span>
+        {arrow && arrowAt === "end" && <span className={styles.arrow}>{arrow}</span>}
+      </span>
+    </span>
+  );
+
   return (
     <Anchor
       ref={ref}
@@ -148,27 +178,8 @@ export function SignatureLink({
       onClick={commit}
     >
       {before}
-      <span className={labelClassName ? `${styles.label} ${labelClassName}` : styles.label}>
-        <span className="visually-hidden">{label}</span>
-        {/* Holds the box at the breath axes (plus the arrow's nudge). */}
-        <span className={styles.ghost} aria-hidden="true">
-          {arrow && arrowAt === "start" && <span className={styles.arrow}>{arrow}</span>}
-          {label}
-          {arrow && arrowAt === "end" && <span className={styles.arrow}>{arrow}</span>}
-        </span>
-        <span className={styles.run} aria-hidden="true">
-          {arrow && arrowAt === "start" && <span className={styles.arrow}>{arrow}</span>}
-          <span className={styles.word}>
-            {letters.map((ch, i) => (
-              <span key={i} className={styles.ch} style={{ "--kt-i": i } as CSSProperties}>
-                {ch}
-              </span>
-            ))}
-            <Glint text={label} surface={surface} className={styles.glint} />
-          </span>
-          {arrow && arrowAt === "end" && <span className={styles.arrow}>{arrow}</span>}
-        </span>
-      </span>
+      {wrapLabel ? wrapLabel(labelEl) : labelEl}
+      {after}
     </Anchor>
   );
 }

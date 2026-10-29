@@ -100,15 +100,6 @@
   font-size: 0.9375rem;
 }
 
-.inspect {
-  display: grid;
-}
-
-/* Cards use inline-size containment, so they need a definite width: centre with margins. */
-.inspect > * {
-  margin-inline: auto;
-}
-
 .next {
   display: grid;
   justify-items: start;

@@ -6,7 +6,6 @@ import { notFound } from "next/navigation";
 import { SettleText } from "@/components/motion/SettleText";
 import { SignatureLink } from "@/components/motion/SignatureLink";
 import { CardArtwork } from "@/components/card/CardArtwork";
-import { SummitCard } from "@/components/card/SummitCard";
 import { EvidenceBadge } from "@/components/case-study/Evidence";
 import { FictionBanner } from "@/components/case-study/FictionBanner";
 import { Figure } from "@/components/case-study/Figure";
@@ -196,10 +195,6 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
           <Waypoints study={study} evidence={evidenceKinds(study)} />
         </div>
       </div>
-
-      <aside className={styles.inspect} aria-label={card.name} data-vt-exit>
-        <SummitCard card={card} size="inspect" headingLevel={2} linkToCaseStudy={false} />
-      </aside>
 
       <nav className={styles.next} aria-label={L.next} data-vt-exit>
         {next && (

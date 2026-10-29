@@ -23,8 +23,14 @@ export async function deck({ base, basePath, root, check, open, settle }) {
     names.length === ORDER.length && names.every((n) => /^Open expedition: [^,]+, .+, rarity [CURM]$/.test(n ?? "")),
     names.join(" | "),
   );
-  const index = await page.$$eval("#expeditions ul[aria-label] li", (lis) => lis.map((l) => l.textContent.trim()));
+  // The Index view: one row per card, its name and its index line.
+  await page.locator("#expeditions").getByRole("button", { name: "Index", exact: true }).click();
+  await page.waitForSelector("[data-index-slug]");
+  const index = await page.$$eval("#expeditions ol[aria-label] li a", (as) =>
+    as.map((a) => `${a.querySelector(".visually-hidden")?.textContent}${a.lastElementChild?.textContent ?? ""}`.trim()),
+  );
   check("one index line per card, in deck order", index.length === ORDER.length && index[0].startsWith("Seilschaft — People ·"), index.join(" | "));
+  await page.locator("#expeditions").getByRole("button", { name: "Cards", exact: true }).click();
 
   // Every case study's Next link, as built: the loop, and never anything but a case study.
   const studies = readdirSync(join(root, "out/work")).filter((d) => existsSync(join(root, "out/work", d, "index.html")));

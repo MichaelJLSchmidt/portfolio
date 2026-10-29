@@ -187,6 +187,10 @@ export const distance = {
   lift: -6,
   /** Largest card tilt. */
   tiltMax: 5,
+  /** Largest tilt of a mini card (the trailhead band). */
+  tiltMini: 3,
+  /** The card's tilt perspective. */
+  perspective: 900,
   /** The HUD condenses once the page has scrolled this far. */
   hudCondense: 120,
 } as const;
@@ -195,6 +199,8 @@ export const distance = {
 export const scale = {
   /** A pressed button. */
   press: 0.97,
+  /** A pressed card (touch, and as it opens). */
+  cardPress: 0.98,
 } as const;
 
 /** The single mint pass: one band across the text, on dark surfaces only. */
@@ -291,14 +297,6 @@ export const layer = {
   skipLink: 100,
 } as const;
 
-/**
- * Values that phase 4 (cards and deck) replaces with the tokens above: the current card tilt,
- * kept as it is until then so this phase changes nothing visible on the cards.
- */
-export const legacy = {
-  tilt: { spring: { stiffness: 150, damping: 18, mass: 0.6 }, maxDeg: 14 },
-} as const;
-
 export const cubicBezier = (e: EasingToken) => `cubic-bezier(${easing[e].join(",")})`;
 
 /** Seconds, for Motion transitions. */
@@ -345,7 +343,7 @@ export function tokensToCss({ motion = true }: { motion?: boolean } = {}): strin
     if ("cap" in s) vars.push(`--stagger-${k}-cap:${s.cap}ms`);
     if ("max" in s) vars.push(`--stagger-${k}-max:${s.max}`);
   }
-  for (const [k, v] of Object.entries(distance)) vars.push(`--dist-${kebab(k)}:${v}${k === "tiltMax" ? "deg" : "px"}`);
+  for (const [k, v] of Object.entries(distance)) vars.push(`--dist-${kebab(k)}:${v}${/^tilt/.test(k) ? "deg" : "px"}`);
   vars.push(
     `--glint-band:${glint.band}%`,
     `--glint-angle:${glint.angle}deg`,
@@ -354,6 +352,7 @@ export function tokensToCss({ motion = true }: { motion?: boolean } = {}): strin
     `--headlamp-fade:${headlamp.fadeMs}ms`,
     `--headlamp-shine:${headlamp.shineMax * 100}%`,
     `--scale-press:${scale.press}`,
+    `--scale-card-press:${scale.cardPress}`,
   );
   for (const [k, v] of Object.entries(layer)) vars.push(`--layer-${kebab(k)}:${v}`);
   return `:root{${vars.join(";")}}`;
