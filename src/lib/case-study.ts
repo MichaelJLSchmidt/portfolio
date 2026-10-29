@@ -122,22 +122,29 @@ export type CaseStudy = {
   metaDescription?: string;
   /** Shown above the H1 on flagged examples. */
   banner?: { label: string; text: string };
-  /** Every field is optional: the summary shows only the ones with a value. */
+  /**
+   * The Summit summary, the page in six rows for a reader who skims: mandate · my role · team I
+   * led · what I put in place · key decision · outcome. A row without a value is left out.
+   */
   summary: {
-    problem?: string;
+    /** What was asked for, and how I reframed it. */
+    mandate?: string;
     role?: string;
-    team?: string;
-    duration?: string;
-    reach?: string;
+    /** Whom I led: direct reports, the wider team, people I led without authority. */
+    teamLed?: string;
+    /** The structures I left behind (rituals, processes, systems), one item each. */
+    putInPlace?: string[];
     keyDecision?: string;
     outcome?: string | OutcomeItem[];
     /** A closing line, e.g. "Fictional example data." */
     note?: string;
   };
+  /** One honest line on the scope I did not own; shown before the credits. */
+  didNotDo: string;
   /** Figure id of the product hero, shown directly after the Summit summary. */
   hero?: string;
   waypoints: Waypoint[];
-  credits?: string;
+  credits: string;
   figures?: Record<string, FigureSpec>;
   images?: Record<string, ImageSpec>;
   /** Encoded images by id (generated manifest). */
@@ -169,7 +176,7 @@ export function figureOfImage(figures: Record<string, FigureSpec>, image: string
 const itemText = (i: ListItem) => (typeof i === "string" ? i : `${i.lead} ${i.text}`);
 
 /** The page's running text, waypoint by waypoint (headings, blocks and figure captions). */
-export function bodyText(study: Pick<CaseStudy, "waypoints" | "figures" | "credits">): string[] {
+export function bodyText(study: Pick<CaseStudy, "waypoints" | "figures" | "credits" | "didNotDo">): string[] {
   const parts: string[] = [];
   for (const w of study.waypoints) {
     parts.push(w.label, w.finding ?? "");
@@ -207,7 +214,7 @@ export function bodyText(study: Pick<CaseStudy, "waypoints" | "figures" | "credi
       }
     }
   }
-  if (study.credits) parts.push(study.credits);
+  parts.push(study.didNotDo, study.credits);
   return parts.filter(Boolean);
 }
 
@@ -215,7 +222,7 @@ export function bodyText(study: Pick<CaseStudy, "waypoints" | "figures" | "credi
  * Reading time in whole minutes, the way Medium counts it: the body's words at 265 words a minute,
  * plus 12 s for the first figure and a second less for each one after, down to 3 s.
  */
-export function readingMinutes(study: Pick<CaseStudy, "waypoints" | "figures" | "credits">): number {
+export function readingMinutes(study: Pick<CaseStudy, "waypoints" | "figures" | "credits" | "didNotDo">): number {
   const words = bodyText(study).join(" ").split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w)).length;
   const figures = figureNumbers(study).size;
   const looking = Array.from({ length: figures }, (_, i) => Math.max(3, 12 - i)).reduce((a, b) => a + b, 0);

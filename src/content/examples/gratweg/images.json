@@ -1,0 +1,614 @@
+{
+  "gw-a11y-chart": {
+    "width": 1920,
+    "height": 1080,
+    "placeholder": "data:image/webp;base64,UklGRlYAAABXRUJQVlA4IEoAAACwAwCdASoYAA4APu1kqU2ppaQiMAgBMB2JZwAAUqmnF8sGMt+xYAD+40WkGs7HhWJhpTGTbhI7oROqnXat64EkbDVeVifzLoAAAA==",
+    "alt": "images.gw-a11y-chart.alt",
+    "caption": "figures.gw-a11y-chart.caption",
+    "figure": 7,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/gratweg/gw-a11y-chart-640.avif",
+        "bytes": 8397
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/gratweg/gw-a11y-chart-960.avif",
+        "bytes": 14330
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/gratweg/gw-a11y-chart-1280.avif",
+        "bytes": 18710
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/gratweg/gw-a11y-chart-1920.avif",
+        "bytes": 23556
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/gratweg/gw-a11y-chart-640.webp",
+        "bytes": 10752
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/gratweg/gw-a11y-chart-960.webp",
+        "bytes": 18502
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/gratweg/gw-a11y-chart-1280.webp",
+        "bytes": 25316
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/gratweg/gw-a11y-chart-1920.webp",
+        "bytes": 41026
+      }
+    ],
+    "hash": "1f69a5ce40778a51",
+    "text": "Accessibility issues per product External WCAG 2.1 AA audit, before and after adoption · measured −64% issues in total Building permits 42 15 Tax portal 35 13 Parking permits 51 18 School enrolment 28 10 Dog registry 39 14 Waste calendar 47 17 Business register 33 12 Address change 30 11 Fishing licences 45 16 before after GRATWEG · FICTIONAL EXAMPLE · FIG. 7"
+  },
+  "gw-adoption": {
+    "width": 2400,
+    "height": 1080,
+    "placeholder": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAACQAwCdASoYAAsAPu1yrU+pp6QiMAgBMB2JaQAAXK+EjeIibI6AAP7tUhPWaM6rZN2MQC4oAXbRaWVMN98nB/CkIA4AAA==",
+    "alt": "images.gw-adoption.alt",
+    "caption": "figures.gw-adoption.caption",
+    "figure": 6,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/gratweg/gw-adoption-640.avif",
+        "bytes": 8153
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/gratweg/gw-adoption-960.avif",
+        "bytes": 13831
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/gratweg/gw-adoption-1280.avif",
+        "bytes": 19499
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/gratweg/gw-adoption-1920.avif",
+        "bytes": 31220
+      },
+      {
+        "format": "avif",
+        "width": 2400,
+        "src": "/media/gratweg/gw-adoption-2400.avif",
+        "bytes": 34164
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/gratweg/gw-adoption-640.webp",
+        "bytes": 9896
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/gratweg/gw-adoption-960.webp",
+        "bytes": 18214
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/gratweg/gw-adoption-1280.webp",
+        "bytes": 26584
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/gratweg/gw-adoption-1920.webp",
+        "bytes": 43220
+      },
+      {
+        "format": "webp",
+        "width": 2400,
+        "src": "/media/gratweg/gw-adoption-2400.webp",
+        "bytes": 54702
+      }
+    ],
+    "hash": "ec3d3246151d628d",
+    "text": "design.hochmatt-informatik.example/adoption Design system · adoption Counted from each product’s dependencies, every night Public to every team 9 of 9 products on the system 0 3 6 9 Start Month 6 Month 12 Month 18 Month 24 Product Status Since Building permits ✓ On system Month 6 · pilot Tax portal ✓ On system Month 6 · pilot Parking permits ✓ On system Month 12 School enrolment ✓ On system Month 12 Dog registry ✓ On system Month 15 Waste calendar ✓ On system Month 18 Business register ✓ On system Month 18 Address change ✓ On system Month 21 Fishing licences ✓ On system Month 24 GRATWEG · FICTIONAL EXAMPLE · FIG. 6"
+  },
+  "gw-before-after": {
+    "width": 2400,
+    "height": 1500,
+    "placeholder": "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAADwAwCdASoYAA8APu1krU6ppaSiMAgBMB2JaQDImCIftJzYqXc5Xv8AAP7ni/ILhLzvlRhPsHDB4HRAnBfwg98T027P2MXAAAA=",
+    "alt": "images.gw-before-after.alt",
+    "caption": "figures.gw-before-after.caption",
+    "figure": 8,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/gratweg/gw-before-after-640.avif",
+        "bytes": 11444
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/gratweg/gw-before-after-960.avif",
+        "bytes": 20307
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/gratweg/gw-before-after-1280.avif",
+        "bytes": 28154
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/gratweg/gw-before-after-1920.avif",
+        "bytes": 44686
+      },
+      {
+        "format": "avif",
+        "width": 2400,
+        "src": "/media/gratweg/gw-before-after-2400.avif",
+        "bytes": 49070
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/gratweg/gw-before-after-640.webp",
+        "bytes": 15514
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/gratweg/gw-before-after-960.webp",
+        "bytes": 26806
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/gratweg/gw-before-after-1280.webp",
+        "bytes": 39678
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/gratweg/gw-before-after-1920.webp",
+        "bytes": 64992
+      },
+      {
+        "format": "webp",
+        "width": 2400,
+        "src": "/media/gratweg/gw-before-after-2400.webp",
+        "bytes": 85332
+      }
+    ],
+    "hash": "086408225096b064",
+    "text": "The same form in three products Address step, with one field left empty · before and after the design system BEFORE · THREE LOOKS parkieren.hochmatt.example Parkkarte beantragen Strasse und Nummer PLZ und Ort FEHLER: Pflichtfeld WEITER steuern.hochmatt.example Adresse für die Steuererklärung Strasse und Nummer PLZ und Ort Ungültige Eingabe! Weiter umzug.hochmatt.example Umzug melden Strasse und Nummer PLZ und Ort Ort fehlt Weiter AFTER · ONE SYSTEM parkieren.hochmatt.example Parkkarte beantragen Strasse und Nummer PLZ und Ort Bitte geben Sie PLZ und Ort an. Weiter steuern.hochmatt.example Adresse für die Steuererklärung Strasse und Nummer PLZ und Ort Bitte geben Sie PLZ und Ort an. Weiter umzug.hochmatt.example Umzug melden Strasse und Nummer PLZ und Ort Bitte geben Sie PLZ und Ort an. Weiter GRATWEG · FICTIONAL EXAMPLE · FIG. 8"
+  },
+  "gw-coalition": {
+    "width": 1600,
+    "height": 1200,
+    "placeholder": "data:image/webp;base64,UklGRmAAAABXRUJQVlA4IFQAAADwAwCdASoYABIAPu1sq1CppaOiqAqpMB2JaWfkABvhlMcOUpOYALAAAP7v99H63gPnZniGVhGuSxfKffd5B+qmN7j5iH+VNdto0B7OxdqpqRcAAAA=",
+    "alt": "images.gw-coalition.alt",
+    "caption": "figures.gw-coalition.caption",
+    "figure": 1,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/gratweg/gw-coalition-640.avif",
+        "bytes": 17263
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/gratweg/gw-coalition-960.avif",
+        "bytes": 29687
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/gratweg/gw-coalition-1280.avif",
+        "bytes": 40696
+      },
+      {
+        "format": "avif",
+        "width": 1600,
+        "src": "/media/gratweg/gw-coalition-1600.avif",
+        "bytes": 49015
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/gratweg/gw-coalition-640.webp",
+        "bytes": 25492
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/gratweg/gw-coalition-960.webp",
+        "bytes": 43564
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/gratweg/gw-coalition-1280.webp",
+        "bytes": 60304
+      },
+      {
+        "format": "webp",
+        "width": 1600,
+        "src": "/media/gratweg/gw-coalition-1600.webp",
+        "bytes": 79840
+      }
+    ],
+    "hash": "6cb9fb1561f8ae7e",
+    "text": "To the steering board · Digital Services Hochmatt Informatik · 2023 One design system for our citizen services THE PROBLEM Seven of nine products fail WCAG 2.1 AA. Four UI libraries, eleven primary blues, six date pickers. Citizens think they deal with different authorities. THE BUSINESS CASE 480 hours spent rebuilding one date picker, counted by the nine teams themselves THE PILOT WE ASK FOR Six months, two products chosen by pain, not prestige A core team of three; contributors from the product teams Continue only if both pilot products ship a release on the system CO-SIGNED BY Lead developer, tax portal Lead developer, permits Lead developer, payments Accessibility officer Head of Digital Services GRATWEG · FICTIONAL EXAMPLE · FIG. 1"
+  },
+  "gw-governance": {
+    "width": 2400,
+    "height": 1500,
+    "placeholder": "data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAADwAwCdASoYAA8APu1orU6ppiSiMAgBMB2JZwDKACIj9cqwxm/tnTSAAP7njeNx+kGUS7jk4MXD0zujid5R7dqZU3HgLmAA",
+    "alt": "images.gw-governance.alt",
+    "caption": "figures.gw-governance.caption",
+    "figure": 4,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/gratweg/gw-governance-640.avif",
+        "bytes": 11966
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/gratweg/gw-governance-960.avif",
+        "bytes": 20591
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/gratweg/gw-governance-1280.avif",
+        "bytes": 29666
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/gratweg/gw-governance-1920.avif",
+        "bytes": 48011
+      },
+      {
+        "format": "avif",
+        "width": 2400,
+        "src": "/media/gratweg/gw-governance-2400.avif",
+        "bytes": 53295
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/gratweg/gw-governance-640.webp",
+        "bytes": 15924
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/gratweg/gw-governance-960.webp",
+        "bytes": 27842
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/gratweg/gw-governance-1280.webp",
+        "bytes": 41332
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/gratweg/gw-governance-1920.webp",
+        "bytes": 68168
+      },
+      {
+        "format": "webp",
+        "width": 2400,
+        "src": "/media/gratweg/gw-governance-2400.webp",
+        "bytes": 86706
+      }
+    ],
+    "hash": "655098ec55c21d6d",
+    "text": "Governance: the core team owns, contributors propose One page per change · nobody waits in silence Core team decides FAST LANE · AN ICON, A TOKEN VALUE, A FIX FULL RFC · A NEW COMPONENT OR A CHANGED BEHAVIOUR 12 contributors from the product teams One-page RFC problem, proposal, who it affects Core-team member decides within 2 days Open for comments every team can read and reply Core team decides within a 10-day decision window Built by the contributor a core-team reviewer pairs Declined the reason is written on the RFC Release notes with the contributor’s name Core team of 3 1 designer, 2 component developers small everything else accepted accepted declined GRATWEG · FICTIONAL EXAMPLE · FIG. 4"
+  },
+  "gw-hero": {
+    "width": 2560,
+    "height": 1440,
+    "placeholder": "data:image/webp;base64,UklGRnYAAABXRUJQVlA4IGoAAACwAwCdASoYAA4APu1iqU2ppaOiMAgBMB2JYwCdACHXYxp4+k3EkAD+hBdOtv6jCVI/bqbp3VZLE6YQrZoYJtOG4h+4qigYPEriWNUt6wfGbnimziRr35JCpa9ASkxx/DqU561/DEUrgAAA",
+    "alt": "images.gw-hero.alt",
+    "caption": null,
+    "figure": null,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/gratweg/gw-hero-640.avif",
+        "bytes": 11982
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/gratweg/gw-hero-960.avif",
+        "bytes": 20593
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/gratweg/gw-hero-1280.avif",
+        "bytes": 28081
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/gratweg/gw-hero-1920.avif",
+        "bytes": 44727
+      },
+      {
+        "format": "avif",
+        "width": 2560,
+        "src": "/media/gratweg/gw-hero-2560.avif",
+        "bytes": 53717
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/gratweg/gw-hero-640.webp",
+        "bytes": 16788
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/gratweg/gw-hero-960.webp",
+        "bytes": 29044
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/gratweg/gw-hero-1280.webp",
+        "bytes": 41886
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/gratweg/gw-hero-1920.webp",
+        "bytes": 67564
+      },
+      {
+        "format": "webp",
+        "width": 2560,
+        "src": "/media/gratweg/gw-hero-2560.webp",
+        "bytes": 90284
+      }
+    ],
+    "hash": "f3c4bcf6058cd3da",
+    "text": "11 blues, 9 products FICTIONAL EXAMPLE Swatch audit of every primary blue in use · header and button per product Building permits #1D4F91 Weiter Tax portal #1F5AA6 #2A66B8 Weiter Parking permits #0E4A8A Weiter School enrolment #2C5D9E Weiter Dog registry #164C7E #225D94 Weiter Waste calendar #3366AA Weiter Business register #18457F Weiter Address change #2B4F8C Weiter Fishing licences #1A5C9C Weiter One token: color.primary The same blue in every product, from one source in Figma AFTER THE SYSTEM GRATWEG · FICTIONAL EXAMPLE · HERO"
+  },
+  "gw-options": {
+    "width": 2400,
+    "height": 940,
+    "placeholder": "data:image/webp;base64,UklGRkoAAABXRUJQVlA4ID4AAADwAwCdASoYAAkAPu1iqk2ppaQiMAgBMB2JaQDMHCHw9R9Yxc6fE4AAAP7q1Vt/E03Zkk1hXT5+FCBWb+AAAA==",
+    "alt": "images.gw-options.alt",
+    "caption": "figures.gw-options.caption",
+    "figure": 3,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/gratweg/gw-options-640.avif",
+        "bytes": 9957
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/gratweg/gw-options-960.avif",
+        "bytes": 17722
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/gratweg/gw-options-1280.avif",
+        "bytes": 26664
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/gratweg/gw-options-1920.avif",
+        "bytes": 40479
+      },
+      {
+        "format": "avif",
+        "width": 2400,
+        "src": "/media/gratweg/gw-options-2400.avif",
+        "bytes": 44161
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/gratweg/gw-options-640.webp",
+        "bytes": 13484
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/gratweg/gw-options-960.webp",
+        "bytes": 23738
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/gratweg/gw-options-1280.webp",
+        "bytes": 35528
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/gratweg/gw-options-1920.webp",
+        "bytes": 56822
+      },
+      {
+        "format": "webp",
+        "width": 2400,
+        "src": "/media/gratweg/gw-options-2400.webp",
+        "bytes": 73530
+      }
+    ],
+    "hash": "909d2d03343ae987",
+    "text": "What do we build on? Rated by the core team and the coalition · filled dots are better (for cost: cheaper) Custom component library Time to first benefit Accessibility Cost to run Brand fit Full control, and we maintain every line of it. Commercial kit Time to first benefit Accessibility Cost to run Brand fit Fast start, but a licence and a second visual language. CHOSEN Angular Material + our own tokens Time to first benefit Accessibility Cost to run Brand fit Teams already use it; accessibility comes built in. The compromises, signed once by brand: Material’s focus ring stays, dense tables keep their spacing, and the elevation shadows are toned down rather than removed. GRATWEG · FICTIONAL EXAMPLE · FIG. 3"
+  },
+  "gw-pareto": {
+    "width": 1920,
+    "height": 1080,
+    "placeholder": "data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAACQAwCdASoYAA4APu1iqU2ppaOiMAgBMB2JZwDDNCHQQzV2m+AAAP7i4EvNfsscHwRzGQOuVUqi8zBa2nGnaqwqM6Z143gA",
+    "alt": "images.gw-pareto.alt",
+    "caption": "figures.gw-pareto.caption",
+    "figure": 2,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/gratweg/gw-pareto-640.avif",
+        "bytes": 8389
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/gratweg/gw-pareto-960.avif",
+        "bytes": 13678
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/gratweg/gw-pareto-1280.avif",
+        "bytes": 18837
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/gratweg/gw-pareto-1920.avif",
+        "bytes": 22830
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/gratweg/gw-pareto-640.webp",
+        "bytes": 10660
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/gratweg/gw-pareto-960.webp",
+        "bytes": 18584
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/gratweg/gw-pareto-1280.webp",
+        "bytes": 24210
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/gratweg/gw-pareto-1920.webp",
+        "bytes": 38826
+      }
+    ],
+    "hash": "8007eda708e4e18e",
+    "text": "UI inventory: a few patterns do most of the work 1,240 instances across 9 products · 61 patterns, sorted by use · measured 0% 50% 80% 100% 80% of screens First version: 23 patterns The other 38 Most used Least used GRATWEG · FICTIONAL EXAMPLE · FIG. 2"
+  },
+  "gw-pipeline": {
+    "width": 2800,
+    "height": 1000,
+    "placeholder": "data:image/webp;base64,UklGRkwAAABXRUJQVlA4IEAAAACwAwCdASoYAAkAPu1orU6ppiSiMAgBMB2JaQAAW4VmZ2XsSX9rwAD+54xkx4G7mRXGweHN/t8msV1iwFLofAAA",
+    "alt": "images.gw-pipeline.alt",
+    "caption": "figures.gw-pipeline.caption",
+    "figure": 5,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/gratweg/gw-pipeline-640.avif",
+        "bytes": 7398
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/gratweg/gw-pipeline-960.avif",
+        "bytes": 14015
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/gratweg/gw-pipeline-1280.avif",
+        "bytes": 20247
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/gratweg/gw-pipeline-1920.avif",
+        "bytes": 34589
+      },
+      {
+        "format": "avif",
+        "width": 2560,
+        "src": "/media/gratweg/gw-pipeline-2560.avif",
+        "bytes": 45499
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/gratweg/gw-pipeline-640.webp",
+        "bytes": 9522
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/gratweg/gw-pipeline-960.webp",
+        "bytes": 18384
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/gratweg/gw-pipeline-1280.webp",
+        "bytes": 27076
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/gratweg/gw-pipeline-1920.webp",
+        "bytes": 47610
+      },
+      {
+        "format": "webp",
+        "width": 2560,
+        "src": "/media/gratweg/gw-pipeline-2560.webp",
+        "bytes": 66872
+      }
+    ],
+    "hash": "05b3a21791f41129",
+    "text": "The token pipeline: change once, ship everywhere Nobody edits a colour by hand · the brand team reviews tokens, not screens Figma variables Designers change a token, with its name and contrast note. DESIGN · BRAND CI ● Read-only key Reads the variables on every change; it can never write back. PIPELINE Style Dictionary color.primary color.primary-dark space.step Turns tokens into code for every platform we need. PIPELINE Angular Material theme @include mat.theme(…) The generated theme, with our tokens in place of Material’s. CORE TEAM Product packages Each product updates one package and gets every change. PRODUCT TEAMS GRATWEG · FICTIONAL EXAMPLE · FIG. 5"
+  }
+}

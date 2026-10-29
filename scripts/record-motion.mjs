@@ -8,6 +8,10 @@
 //   terrain-card-<mode>.webm, terrain-basecamp-<mode>.webm
 //                            the terrain conductor (docs/terrain.md): home → a card → home and
 //                            home → Basecamp (Bern) → home, the link hovered first (pre-warm)
+//   home.webm                the home page from the hero to the contact band, at reading pace
+//   basecamp-nav.webm        the HUD's Basecamp label morphing into the Basecamp H1, a look down the
+//                            page, and back (browser back, then the HUD again)
+//   case-study-loop.webm     Seilschaft → Gratweg → Test Project → Seilschaft by the Next links
 //
 //   npm run record:motion                       into ./motion-recordings (git-ignored)
 //   npm run record:motion -- --out <folder>
@@ -114,7 +118,7 @@ try {
       await page.mouse.move(640, 300, { steps: 10 });
       await page.locator("#deck-heading").scrollIntoViewIfNeeded();
       await pause(page, 1200);
-      await page.locator('article[data-slug="kibon"] a').first().click();
+      await page.locator('article[data-slug="test-project"] a').first().click();
       await pause(page, 3000);
       const next = page.locator('a[data-variant="display"]').first();
       await next.scrollIntoViewIfNeeded();
@@ -139,7 +143,7 @@ try {
   for (const mode of ["full", "calm", "still"]) {
     const options = { reducedMotion: mode === "still" ? "reduce" : "no-preference" };
     const links = {
-      card: { selector: 'article[data-slug="kibon"] a', path: "/work/kibon/", terrain: "dvb-001" },
+      card: { selector: 'article[data-slug="seilschaft"] a', path: "/work/seilschaft/", terrain: "lab-097" },
       basecamp: { selector: 'header a[href$="/about/"]', path: "/about/", terrain: "bern" },
     };
     // SwiftShader and the encoder slow everything down: wait for each arrival (the route, then the
@@ -172,6 +176,60 @@ try {
       });
     }
   }
+  // A visit as a reader takes it: open the site, skim the home page, go to Basecamp, follow the work.
+  const visit = async (context) =>
+    context.addInitScript(() => {
+      try {
+        sessionStorage.setItem("summit:intro-played", "1");
+      } catch {}
+    });
+  const scrollThrough = async (page, steps, dy, wait) => {
+    for (let i = 0; i < steps; i++) {
+      await page.mouse.wheel(0, dy);
+      await pause(page, wait);
+    }
+  };
+  await record("home", {}, async (page, context) => {
+    await visit(context);
+    await page.goto(`${base}/?field=force`, { waitUntil: "networkidle" });
+    await pause(page, 2500);
+    await scrollThrough(page, 28, 380, 650);
+    await pause(page, 1500);
+  });
+  await record("basecamp-nav", {}, async (page, context) => {
+    await visit(context);
+    await page.goto(`${base}/?field=force`, { waitUntil: "networkidle" });
+    await pause(page, 2000);
+    const hud = page.locator('header a[href$="/about/"]').first();
+    await hud.hover();
+    await pause(page, 700);
+    await hud.click();
+    await pause(page, 3000);
+    await scrollThrough(page, 8, 420, 600);
+    await page.goBack();
+    await pause(page, 2500);
+    await page.goto(`${base}/work/seilschaft/?field=force`, { waitUntil: "networkidle" });
+    await pause(page, 1500);
+    await hud.click();
+    await pause(page, 3000);
+    await page.goBack();
+    await pause(page, 2500);
+  });
+  await record("case-study-loop", {}, async (page, context) => {
+    await visit(context);
+    await page.goto(`${base}/work/seilschaft/?field=force`, { waitUntil: "networkidle" });
+    await pause(page, 2500);
+    for (let i = 0; i < 3; i++) {
+      await scrollThrough(page, 4, 600, 450);
+      const next = page.locator('nav[aria-label="Next expedition"] a[data-variant="display"]');
+      await next.scrollIntoViewIfNeeded();
+      await pause(page, 700);
+      await next.hover();
+      await pause(page, 700);
+      await next.click();
+      await pause(page, 3000);
+    }
+  });
 } finally {
   await browser.close();
   server.kill();

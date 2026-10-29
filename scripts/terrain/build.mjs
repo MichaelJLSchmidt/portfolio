@@ -25,9 +25,6 @@ import { autoTrail, seededTerrain } from "./lib/noise.mjs";
 import { decodeRawHeights, encodeLosslessWebp, encodeRawHeights, gradientPercentiles, packHeightRgb, probeTexels, rasterHash } from "./lib/heightmap.mjs";
 import { encodeRgbPng } from "./lib/png.mjs";
 
-// Card content imports "@/…" modules, which resolve once ts-hooks is registered: import it late.
-const { cards: cardContent } = await import("../../src/content/cards.ts");
-
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const cfg = JSON.parse(readFileSync(join(root, "src/content/terrain.config.json"), "utf8"));
 const field = JSON.parse(readFileSync(join(root, "src/config/contour-field.json"), "utf8"));
@@ -305,12 +302,11 @@ const cards = {};
 for (const card of cfg.cards) cards[card.id] = await buildCard(card);
 
 // ---------------------------------------------------------------------------
-// 6. Ascent profile along the leader card's trail (About page)
+// 6. Ascent profile along the Interlaken → Jungfrau trail (Basecamp's career climb)
 // ---------------------------------------------------------------------------
 {
-  const leader = cardContent.find((c) => c.artwork.kind === "crop");
-  if (leader && leader.artwork.kind === "crop") {
-    const { trail, waypoints } = leader.artwork;
+  if (cfg.profile) {
+    const { trail, waypoints } = cfg.profile;
     const pts = trail.map((p) => wgs84ToLv95(p.lon, p.lat));
     const STEP = 25; // metres between DEM samples
     const raw = [];
@@ -352,7 +348,7 @@ for (const card of cfg.cards) cards[card.id] = await buildCard(card);
     });
     const profile = {
       attribution: "Terrain data © swisstopo",
-      trail: leader.artwork.terrainId,
+      trail: cfg.profile.id,
       lengthKm: round(total / 1000, 2),
       elevation: { min: Math.min(...elevations), max: Math.max(...elevations) },
       points,

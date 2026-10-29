@@ -331,6 +331,21 @@
   white-space: nowrap;
 }
 
+.stat dd[data-long] {
+  font-size: max(15px, 4cqi);
+}
+
+/* What an impact counts ("on system"): a small line under the value. */
+.statNote {
+  display: block;
+  margin-top: 0.2em;
+  color: var(--color-contour);
+  font-size: max(8.5px, 2.25cqi);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
 .collector {
   display: flex;
   align-items: center;

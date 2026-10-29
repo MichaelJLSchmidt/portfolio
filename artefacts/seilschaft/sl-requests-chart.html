@@ -1,0 +1,85 @@
+<!-- Share of requests that reached UX before development started, per quarter, as an area chart
+     with the two moments that moved it (the intake, the clusters) marked on the line. -->
+<style>
+  .chart {
+    position: absolute;
+    inset: 0;
+    padding: 26px 34px 18px;
+    color: var(--color-sheet);
+  }
+  /* Contour grey is 4.4:1 on the raised ground: labels here use the sheet colour. */
+  .chart > p {
+    margin-top: 6px;
+    color: var(--color-sheet);
+  }
+  .title {
+    color: var(--color-sheet);
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: 380px;
+    margin-top: 18px;
+    overflow: visible;
+  }
+  .grid {
+    stroke: var(--color-contour-dim);
+    stroke-width: 1;
+  }
+  .lbl {
+    fill: var(--color-sheet);
+    font-family: var(--label);
+    font-size: 11.5px;
+    font-stretch: var(--label-wdth);
+  }
+  .val {
+    fill: var(--color-sheet);
+    font-family: var(--label);
+    font-size: 20px;
+    font-stretch: var(--label-wdth);
+    font-weight: 700;
+  }
+  .ann {
+    fill: var(--color-sheet);
+    font-family: var(--diagram);
+    font-size: 13px;
+    font-weight: 600;
+  }
+</style>
+<div class="chart">
+  <h1 class="title">Requests reaching UX before development starts</h1>
+  <p class="label">Share of all requests on the intake board, per quarter · measured</p>
+  <svg id="c"></svg>
+</div>
+<script>
+  const D = window.DATA;
+  const q = D.requests.quarterly;
+  const svg = document.getElementById("c");
+  const W = svg.clientWidth, H = 380, L = 44, R = 30, T = 16, B = 40;
+  const x = (i) => L + (i / (q.length - 1)) * (W - L - R);
+  const y = (v) => T + (1 - v / 100) * (H - T - B);
+  let s = "";
+  for (const v of [0, 25, 50, 75, 100]) s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text class="lbl" x="${L - 10}" y="${y(v) + 4}" text-anchor="end">${v}%</text>`;
+  const line = q.map((v, i) => `${i ? "L" : "M"}${x(i)} ${y(v)}`).join("");
+  s += `<path d="${line}L${x(q.length - 1)} ${y(0)}L${x(0)} ${y(0)}Z" fill="#C8F5B0" opacity="0.14"/>`;
+  s += `<path d="${line}" fill="none" stroke="#C8F5B0" stroke-width="3.5" stroke-linejoin="round"/>`;
+  q.forEach((v, i) => {
+    s += `<circle cx="${x(i)}" cy="${y(v)}" r="${i === 0 || i === q.length - 1 ? 6 : 3.5}" fill="#C8F5B0"/>`;
+    // The project starts in the third quarter of its first year.
+    const k = i + 2;
+    s += `<text class="lbl" x="${x(i)}" y="${H - 18}" text-anchor="middle">Q${(k % 4) + 1}</text>`;
+    if (k % 4 === 0 || i === 0) s += `<text class="lbl" x="${x(i)}" y="${H - 2}" text-anchor="middle">${D.years.start + Math.floor(k / 4)}</text>`;
+  });
+  s += `<text class="val" x="${x(0) + 10}" y="${y(q[0]) - 14}">${D.requests.before}%</text>`;
+  s += `<text class="val" x="${x(q.length - 1) - 10}" y="${y(q[q.length - 1]) - 16}" text-anchor="end">${D.requests.after}%</text>`;
+  // What moved it: the intake (end of the first half-year), the clusters seated (year two).
+  const mark = (i, text) => {
+    s += `<line x1="${x(i)}" x2="${x(i)}" y1="${y(q[i]) - 8}" y2="${y(100) + 26}" stroke="#DDE3E3" stroke-dasharray="3 4"/>`;
+    s += `<text class="ann" x="${x(i) + 8}" y="${y(100) + 34}">${text}</text>`;
+  };
+  mark(1, "Intake live");
+  mark(4, "Designers seated in clusters");
+  mark(8, "Research day and pool");
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.innerHTML = s;
+</script>

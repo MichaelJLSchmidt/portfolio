@@ -2,6 +2,7 @@
   position: relative;
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
   gap: 8px 24px;
   padding: 48px var(--gutter) max(24px, env(safe-area-inset-bottom));
@@ -12,4 +13,71 @@
 .footer a {
   color: var(--color-sheet);
   text-underline-offset: 3px;
+}
+
+/* Phones (and tablets in portrait): what the HUD moves out of its bar (Hud.module.css, below
+   880 px). */
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 20px;
+  width: 100%;
+}
+
+.nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 880px) {
+  .nav {
+    display: none;
+  }
+}
+
+.navLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+}
+
+/* Not a link yet (no CV URL): the [URL] tag says so; the colour stays the footer's, legible over
+   the field. */
+.placeholder {
+  gap: 0.5em;
+}
+
+.clock {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* One line where it fits; stacked on narrow screens, so no separator is left dangling. */
+.credits {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sep {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .credits {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0 0.6em;
+  }
+
+  .sep {
+    display: inline;
+  }
 }

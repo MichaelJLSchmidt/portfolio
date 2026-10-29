@@ -4,7 +4,7 @@ import { duration, levels, stagger } from "@/styles/tokens";
 
 /**
  * Reveals: blocks marked `data-reveal` ("" rises --dist-rise and fades, "card" rises
- * --dist-rise-card, "rule" draws, "sheet" unfolds from its fold edge) appear as they scroll into
+ * --dist-rise-card; in calm both only fade; "rule" draws, "sheet" unfolds from its fold edge) appear as they scroll into
  * view, once per session. Anything in the first viewport is shown from first paint and never
  * hidden, so it can be the LCP element; only blocks below the fold wait (data-reveal-state).
  * Budgets (the reveal level): at most two groups animate at once, each within 600 ms (item stagger

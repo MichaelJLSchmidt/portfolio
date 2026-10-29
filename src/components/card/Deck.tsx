@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { cards } from "@/content/cards";
+import { cards, indexLineText } from "@/content/cards";
+import type { home } from "@/content/home";
 import { site } from "@/content/site";
 import { rememberOrigin, takeOrigin } from "@/components/transition/return-focus";
 import { SettleText } from "@/components/motion/SettleText";
@@ -12,7 +13,11 @@ import styles from "./Deck.module.css";
 /** The home-page deck: every card from content, each one a link to its case study. */
 const DEALT_KEY = "summit:deck-dealt";
 
-export function Deck() {
+/**
+ * The section's copy arrives as a prop from the server page: importing home.ts here would put the
+ * whole home copy (invented testimonials included) into this client component's bundle.
+ */
+export function Deck({ copy: t }: { copy: typeof home.expeditions }) {
   const listRef = useRef<HTMLUListElement>(null);
   const [deal, setDeal] = useState<"none" | "pending" | "dealt">("none");
 
@@ -62,20 +67,36 @@ export function Deck() {
     return () => io.disconnect();
   }, []);
 
+  // No case study in this build (a live build until the first real one is written): the section
+  // stays, says so, and offers nothing to tilt or open.
+  const empty = cards.length === 0;
   return (
-    <section className={styles.deck} aria-labelledby="deck-heading">
+    <section id="expeditions" className={styles.deck} aria-labelledby="deck-heading">
       <div className={styles.header}>
-        <SettleText as="h2" id="deck-heading" text={site.hero.deckHeading} className={`${styles.heading} display`} trigger="inview" shine />
-        <p className={`${styles.intro} body-copy`}>{site.hero.deckIntro}</p>
-        <TiltControl labels={{ enable: site.hud.tiltEnable, resume: site.hud.tiltResume, on: site.hud.tiltOn }} />
+        <p className={`${styles.eyebrow} hud-label map-halo`} data-reveal="">
+          {t.eyebrow}
+        </p>
+        <SettleText as="h2" id="deck-heading" text={empty ? t.emptyHeading : t.heading} className={`${styles.heading} display`} trigger="inview" shine />
+        <p className={`${styles.intro} body-copy`}>{empty ? t.empty : t.intro}</p>
+        {!empty && (
+          // The deck in one line per card, for a reader who skims (and a later Index view).
+          <ul className={`${styles.index} body-copy`} aria-label={t.indexLabel}>
+            {cards.map((card) => (
+              <li key={card.slug}>{indexLineText(card)}</li>
+            ))}
+          </ul>
+        )}
+        {!empty && <TiltControl labels={{ enable: site.hud.tiltEnable, resume: site.hud.tiltResume, on: site.hud.tiltOn }} />}
       </div>
-      <ul ref={listRef} className={styles.cards} data-deal={deal}>
-        {cards.map((card, i) => (
-          <li key={card.slug} className={styles.slot} style={{ "--deal-i": i } as React.CSSProperties}>
-            <SummitCard card={card} transitionNames onOpen={() => rememberOrigin(card.slug)} />
-          </li>
-        ))}
-      </ul>
+      {!empty && (
+        <ul ref={listRef} className={styles.cards} data-deal={deal}>
+          {cards.map((card, i) => (
+            <li key={card.slug} className={styles.slot} style={{ "--deal-i": i } as React.CSSProperties}>
+              <SummitCard card={card} transitionNames onOpen={() => rememberOrigin(card.slug)} />
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }

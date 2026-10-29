@@ -12,6 +12,19 @@
   text-align: center;
 }
 
+/* Cards waiting for the deal-in are turned up to 7°: on a phone their corners would widen the page.
+   The section clips sideways overflow, with the page gutter as margin so the deal still paints into
+   it. */
+.deck {
+  overflow-x: clip;
+  overflow-clip-margin: var(--gutter);
+  scroll-margin-top: 72px;
+}
+
+.eyebrow {
+  color: var(--color-glacier);
+}
+
 .heading {
   font-size: clamp(2.75rem, 10vw, 9rem);
   scroll-margin-top: 96px;
@@ -19,6 +32,17 @@
 
 .intro {
   max-width: 40ch;
+}
+
+/* One line per expedition: name — kind · summary · time. */
+.index {
+  display: grid;
+  gap: 4px;
+  max-width: 60ch;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 1rem;
 }
 
 /* Cards sit centred on the page, a little offset from each other like a dealt hand. Without

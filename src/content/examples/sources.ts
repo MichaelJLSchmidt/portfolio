@@ -1,5 +1,11 @@
 import type { SummitCardData } from "@/content/cards";
 import type { CaseStudy } from "@/lib/case-study";
+import * as gratwegCard from "./gratweg/card";
+import * as gratwegStudy from "./gratweg/case-study";
+import * as gratwegData from "./gratweg/data";
+import * as seilschaftCard from "./seilschaft/card";
+import * as seilschaftStudy from "./seilschaft/case-study";
+import * as seilschaftData from "./seilschaft/data";
 import { rawCard } from "./test-project/card";
 import { rawCaseStudy } from "./test-project/case-study";
 import { consistency, data, keyFigures } from "./test-project/data";
@@ -27,6 +33,28 @@ export type DataSource = {
 };
 
 export const dataSources: DataSource[] = [
+  {
+    slug: "seilschaft",
+    data: seilschaftData.data,
+    keyFigures: seilschaftData.keyFigures,
+    consistency: seilschaftData.consistency,
+    raw: { caseStudy: seilschaftStudy.rawCaseStudy, card: seilschaftCard.rawCard },
+    artefacts: "artefacts/seilschaft",
+    media: "/media/seilschaft/",
+    manifest: "src/content/examples/seilschaft/images.json",
+    strip: { name: "Seilschaft", note: "Fictional example" },
+  },
+  {
+    slug: "gratweg",
+    data: gratwegData.data,
+    keyFigures: gratwegData.keyFigures,
+    consistency: gratwegData.consistency,
+    raw: { caseStudy: gratwegStudy.rawCaseStudy, card: gratwegCard.rawCard },
+    artefacts: "artefacts/gratweg",
+    media: "/media/gratweg/",
+    manifest: "src/content/examples/gratweg/images.json",
+    strip: { name: "Gratweg", note: "Fictional example" },
+  },
   {
     slug: "test-project",
     data,

@@ -5,47 +5,45 @@ import { haptic } from "@/lib/haptics";
 import { useMotionMode } from "@/lib/motion-mode";
 import styles from "./Hud.module.css";
 
-type Labels = { on: string; off: string; name: string; forced: string };
+type Labels = { label: string; description: string; forced: string };
 
 /**
  * The motion switch: a native checkbox switch (`switch` gives iOS Safari its system switch and
- * tick; role="switch" elsewhere), named "Reduce motion on this site". The visible state ("Calm
- * map" / "Clear night") and the thumb follow html[data-motion], so they are right from first
- * paint. When the OS asks for reduced motion the switch shows on and its description says why.
+ * tick; role="switch" elsewhere). Its visible label, "Calm map", is its name (WCAG 2.5.3 Label in
+ * Name); the description says what it does, "Reduces motion on this site", and when the OS asks
+ * for reduced motion also why it shows on and cannot be switched off. The thumb follows
+ * html[data-motion], so it is right from first paint.
  */
 export function CalmToggle({ labels }: { labels: Labels }) {
   const { calm, forcedStill, setCalm } = useMotionMode();
   const descId = useId();
+  // The description sits outside the <label>, so it never becomes part of the name.
   return (
-    <label className={`${styles.toggle} hud-label`}>
-      <span className={styles.switch}>
-        <input
-          type="checkbox"
-          role="switch"
-          {...{ switch: "" }}
-          className={styles.input}
-          checked={calm || forcedStill}
-          aria-label={labels.name}
-          aria-describedby={forcedStill ? descId : undefined}
-          aria-disabled={forcedStill || undefined}
-          onChange={(e) => {
-            if (forcedStill) return;
-            setCalm(e.currentTarget.checked);
-            haptic("detent");
-          }}
-        />
-        <span className={styles.thumb} aria-hidden="true" />
-      </span>
-      <span className={styles.state} aria-hidden="true">
-        <span data-state="on">{labels.on}</span>
-        <span data-state="off">{labels.off}</span>
-      </span>
-      {forcedStill && (
-        <span id={descId} className="visually-hidden">
-          {labels.forced}
+    <>
+      <label className={`${styles.toggle} hud-label`}>
+        <span className={styles.switch}>
+          <input
+            type="checkbox"
+            role="switch"
+            {...{ switch: "" }}
+            className={styles.input}
+            checked={calm || forcedStill}
+            aria-describedby={descId}
+            aria-disabled={forcedStill || undefined}
+            onChange={(e) => {
+              if (forcedStill) return;
+              setCalm(e.currentTarget.checked);
+              haptic("detent");
+            }}
+          />
+          <span className={styles.thumb} aria-hidden="true" />
         </span>
-      )}
-    </label>
+        <span>{labels.label}</span>
+      </label>
+      <span id={descId} className="visually-hidden">
+        {forcedStill ? `${labels.description}. ${labels.forced}` : labels.description}
+      </span>
+    </>
   );
 }
 

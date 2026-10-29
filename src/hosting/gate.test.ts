@@ -99,10 +99,10 @@ describe("password comparison", () => {
 describe("next", () => {
   it("keeps same-host relative paths", () => {
     assert.equal(safeNext("/", host), "/");
-    assert.equal(safeNext("/work/kibon/", host), "/work/kibon/");
+    assert.equal(safeNext("/work/test-project/", host), "/work/test-project/");
     assert.equal(safeNext("/about/?hm=2048", host), "/about/?hm=2048");
     assert.equal(safeNext("/a/../about/", host), "/about/");
-    assert.equal(safeNext("/work/kibon/index.htm?x=1", host), "/work/kibon/?x=1");
+    assert.equal(safeNext("/work/test-project/index.htm?x=1", host), "/work/test-project/?x=1");
     assert.equal(safeNext("/index.html", host), "/");
   });
 
@@ -190,7 +190,7 @@ const cookieFrom = (response: Response) => response.headers.get("Set-Cookie")!.s
 describe("gate handler", () => {
   it("shows the gate page for any path without a valid cookie", async () => {
     const { calls, request } = harness();
-    for (const path of ["/", "/work/kibon/", "/_next/static/chunks/app.js", "/terrain/heightmap-1536.webp", "/index.txt?_rsc=1", "/_basecamp/x.css"]) {
+    for (const path of ["/", "/work/test-project/", "/_next/static/chunks/app.js", "/terrain/heightmap-1536.webp", "/index.txt?_rsc=1", "/_basecamp/x.css"]) {
       const res = await request(path);
       assert.equal(res.status, 401, path);
       assert.match(res.headers.get("WWW-Authenticate")!, /^Cookie realm="Basecamp"/);
@@ -202,8 +202,8 @@ describe("gate handler", () => {
       assert.match(html, /autocomplete="current-password"/);
     }
     assert.equal(calls.next, 0);
-    const res = await request("/work/kibon/?a=1");
-    assert.match(await res.text(), /name="next" value="\/work\/kibon\/\?a=1"/);
+    const res = await request("/work/test-project/?a=1");
+    assert.match(await res.text(), /name="next" value="\/work\/test-project\/\?a=1"/);
   });
 
   it("lets the gate's own assets through and answers robots.txt itself", async () => {
@@ -217,9 +217,9 @@ describe("gate handler", () => {
 
   it("unlocks with the right password: cookie, then 303 to next", async () => {
     const { calls, unlock, request } = harness();
-    const res = await unlock({ password: PASSWORD, next: "/work/kibon/" }, { Origin: `https://${PRIMARY_DOMAIN}` });
+    const res = await unlock({ password: PASSWORD, next: "/work/test-project/" }, { Origin: `https://${PRIMARY_DOMAIN}` });
     assert.equal(res.status, 303);
-    assert.equal(res.headers.get("Location"), "/work/kibon/");
+    assert.equal(res.headers.get("Location"), "/work/test-project/");
     const setCookie = res.headers.get("Set-Cookie")!;
     assert.match(setCookie, new RegExp(`^${gate.cookie.replace("-", "\\-")}=\\d+\\.[A-Za-z0-9_-]{43}; `));
     for (const attribute of ["Path=/", `Max-Age=${gate.maxAgeSeconds}`, "Secure", "HttpOnly", "SameSite=Lax"]) {
@@ -228,7 +228,7 @@ describe("gate handler", () => {
     assert.doesNotMatch(setCookie, /Domain=/i);
     assert.deepEqual(calls.waits, []);
 
-    const inside = await request("/work/kibon/", { headers: { Cookie: cookieFrom(res) } });
+    const inside = await request("/work/test-project/", { headers: { Cookie: cookieFrom(res) } });
     assert.equal(await inside.text(), "protected");
     assert.equal(inside.headers.get("X-Robots-Tag"), "noindex, nofollow");
     assert.equal(inside.headers.get("Cache-Control"), "private, max-age=31536000, immutable");

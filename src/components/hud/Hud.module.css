@@ -1,83 +1,78 @@
+/* One row, left to right: mark · Expeditions · Basecamp · Contact · CV · Bern time · Calm map.
+   Below 880 px the bar keeps the mark, Basecamp and the switch (.wide items move to the footer),
+   which fits 360 px with room to spare. */
 .hud {
   position: fixed;
   inset: 0 0 auto;
   z-index: var(--layer-hud);
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  padding: max(12px, env(safe-area-inset-top)) 16px 12px;
+  align-items: center;
+  gap: 12px clamp(16px, 2vw, 28px);
+  padding: max(8px, env(safe-area-inset-top)) var(--gutter) 10px;
   pointer-events: none;
   background: linear-gradient(to bottom, rgb(27 28 24 / 0.92), rgb(27 28 24 / 0));
 }
 
-.cluster {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  white-space: nowrap;
+.hud > * {
   pointer-events: auto;
 }
 
-.right {
-  align-items: flex-end;
-}
-
 .mark {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
   color: var(--color-glacier);
   font-weight: 700;
   text-decoration: none;
+  white-space: nowrap;
 }
 
-.row {
-  display: inline-flex;
+.nav {
+  flex: 1;
+  min-width: 0;
+}
+
+.links {
+  display: flex;
   align-items: center;
-  gap: 16px;
+  gap: clamp(16px, 2vw, 28px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .navLink {
   display: inline-flex;
   align-items: center;
   min-height: 32px;
-  color: var(--color-sheet);
-  text-decoration: none;
+  white-space: nowrap;
 }
 
-@media (hover: hover) {
-  .navLink:hover {
-    color: var(--color-glacier);
-  }
-}
-
-.credit,
-.coords {
+/* The CV until its file exists: visible and inert (check:content lists it). */
+.placeholder {
+  gap: 0.5em;
   color: var(--color-contour);
 }
 
-/* Phones: the credit stays in the footer, so the clock and the controls keep their room
-   instead of running off the right edge. */
-@media (max-width: 479px) {
-  .credit {
-    display: none;
-  }
-}
-
-.coords {
+.wide {
   display: none;
-  padding-top: 2px;
 }
 
-@media (min-width: 900px) {
-  .coords {
-    display: block;
+@media (min-width: 880px) {
+  .wide {
+    display: revert;
+  }
+
+  .clock.wide {
+    display: inline-flex;
   }
 }
 
 .clock {
-  display: inline-flex;
   align-items: center;
   gap: 8px;
   color: var(--color-sheet);
+  white-space: nowrap;
 }
 
 .time {
@@ -104,6 +99,7 @@
   gap: 8px;
   min-height: 32px;
   color: var(--color-contour);
+  white-space: nowrap;
   cursor: pointer;
   transition: color var(--dur-micro) var(--ease-settle);
 }
@@ -144,24 +140,6 @@
   border-radius: 50%;
   background: currentColor;
   pointer-events: none;
-}
-
-/* Both state labels share one cell, so the switch keeps its width when it flips. */
-.state {
-  display: inline-grid;
-}
-
-.state > * {
-  grid-area: 1 / 1;
-}
-
-.state > [data-state="on"],
-:root:is([data-motion="calm"], [data-motion="still"]) .state > [data-state="off"] {
-  visibility: hidden;
-}
-
-:root:is([data-motion="calm"], [data-motion="still"]) .state > [data-state="on"] {
-  visibility: visible;
 }
 
 :root:is([data-motion="calm"], [data-motion="still"]) .toggle:not(.haptics),

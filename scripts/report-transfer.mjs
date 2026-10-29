@@ -4,7 +4,7 @@
 // (Three.js and the heightmaps, loaded after idle where the device can run it) is listed apart.
 //
 //   npm run report:transfer                       the case-study example (/work/test-project/)
-//   npm run report:transfer -- /work/kibon/       any page of the build in out/
+//   npm run report:transfer -- /work/seilschaft/  any page of the build in out/
 //
 // Playwright as for npm run test:e2e.
 import { spawn } from "node:child_process";

@@ -24,6 +24,8 @@ export const data = {
     c: { legal: 3, data: 3, owner: 2, build: 1 },
   },
   project: { months: 11, coachingMonth: 6 },
+  /** What the Energy Office first asked for: "the PDF, but online" within this many months. */
+  mandate: { months: 12 },
   reach: { perYear: 2800 },
   discovery: {
     interviews: 14,
@@ -74,6 +76,7 @@ export const data = {
     auditIssues: 6,
     betaWeeks: 8,
     betaFirms: 3,
+    caseworkerTestingWeeks: 2,
   },
   outcomes: {
     applications: 640,
@@ -124,10 +127,12 @@ export const keyFigures: { label: string; text: string; in: string[] }[] = [
   { label: "workshops (card)", text: `${data.workshops.count} workshops`, in: ["card"] },
   { label: "workshop participants", text: `${data.workshops.participants}`, in: ["copy", "card", "tp-workshop-board", "tp-decision-matrix"] },
   { label: "components", text: `${data.decisions.components}`, in: ["copy", "card", "tp-design-system"] },
-  { label: "reuse by services", text: `${data.decisions.reuseServices} services`, in: ["copy", "card"] },
+  { label: "reuse by services", text: `${data.decisions.reuseServices} services`, in: ["copy"] },
   { label: "project months", text: `${data.project.months} months`, in: ["copy", "card"] },
-  { label: "team", text: `${data.team.ux} + ${data.team.productDev}`, in: ["card"] },
-  { label: "reach a year", text: as(data.reach.perYear, "en"), in: ["copy", "card"] },
+  { label: "team led (card)", text: `${data.team.designersLed} + ${data.team.productDev}`, in: ["card"] },
+  { label: "designers led", text: `${data.team.designersLed} designers`, in: ["copy"] },
+  { label: "units", text: `${data.workshops.units} units`, in: ["card"] },
+  { label: "reach a year", text: as(data.reach.perYear, "en"), in: ["card"] },
   { label: "interviews", text: `${data.discovery.interviews} interviews`, in: ["copy", "tp-affinity"] },
   { label: "hand-offs", text: `${data.discovery.handoffs} hand-offs`, in: ["copy", "tp-blueprint-current"] },
   { label: "no-feedback gaps", text: `${data.discovery.gaps} moments`, in: ["copy", "tp-blueprint-current"] },

@@ -1,0 +1,164 @@
+<!-- Hero: the "eleven blues" swatch audit. Each product's header and button in its own blue on a
+     night frame with faint contours; below, the one blue token that replaced them all. Swatch codes
+     are generated from the colours, so the source holds no figures of its own. -->
+<style>
+  .stage {
+    position: absolute;
+    inset: 0;
+    padding: 22px 26px 18px;
+  }
+  .stage.contours::before {
+    opacity: 0.32;
+  }
+  .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .top .title {
+    color: var(--color-sheet);
+  }
+  .sub {
+    color: var(--color-sheet);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 22px;
+  }
+  .prod {
+    overflow: hidden;
+    border: 1px solid var(--color-contour);
+    border-radius: 8px;
+    background: var(--color-sheet);
+    box-shadow: 0 16px 40px -24px rgb(0 0 0 / 0.8);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 50px;
+    padding: 0 16px;
+    color: #fff;
+    font-family: var(--hm-font);
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .bar i {
+    width: 16px;
+    height: 12px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 12'%3E%3Cpath d='M0 12 6 3l3.5 5L13 1l5 11Z' fill='%23fff'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+  .body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 16px;
+  }
+  .sw {
+    display: flex;
+    gap: 6px;
+    font-family: var(--label);
+    font-size: 12px;
+    font-stretch: var(--label-wdth);
+    color: var(--color-ground);
+  }
+  .sw span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .sw b {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+  }
+  .btn {
+    padding: 7px 16px;
+    border-radius: 4px;
+    color: #fff;
+    font-family: var(--hm-font);
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .one {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 24px;
+    padding: 14px 18px;
+    border: 2px solid var(--color-glacier);
+    border-radius: 10px;
+    background: var(--color-ground);
+    color: var(--color-sheet);
+  }
+  .one b.chip-blue {
+    width: 46px;
+    height: 46px;
+    border-radius: 8px;
+    background: var(--hm-blue);
+    box-shadow: 0 0 0 3px var(--color-sheet);
+  }
+  .one strong {
+    display: block;
+    font-size: 17px;
+  }
+  .one span {
+    color: var(--color-sheet);
+    font-size: 14px;
+  }
+  .one .arrow {
+    margin-left: auto;
+    color: var(--color-glacier);
+    font-family: var(--label);
+    font-size: 13px;
+    font-stretch: var(--label-wdth);
+    letter-spacing: 0.06em;
+  }
+</style>
+<div class="stage contours">
+  <div class="top">
+    <h1 class="title">{{landscape.blues}} blues, {{landscape.products}} products</h1>
+    <span class="chip">Fictional example</span>
+  </div>
+  <p class="label sub">Swatch audit of every primary blue in use · header and button per product</p>
+  <div class="grid" id="g"></div>
+  <div class="one">
+    <b class="chip-blue"></b>
+    <div><strong>One token: color.primary</strong><span>The same blue in every product, from one source in Figma</span></div>
+    <span class="arrow">AFTER THE SYSTEM</span>
+  </div>
+</div>
+<script>
+  const L = window.DATA.landscape;
+  // Header blue and, where it differs, button blue per product: eleven distinct blues across nine.
+  const products = [
+    ["Building permits", "#1d4f91", "#1d4f91"],
+    ["Tax portal", "#1f5aa6", "#2a66b8"],
+    ["Parking permits", "#0e4a8a", "#0e4a8a"],
+    ["School enrolment", "#2c5d9e", "#2c5d9e"],
+    ["Dog registry", "#164c7e", "#225d94"],
+    ["Waste calendar", "#3366aa", "#3366aa"],
+    ["Business register", "#18457f", "#18457f"],
+    ["Address change", "#2b4f8c", "#2b4f8c"],
+    ["Fishing licences", "#1a5c9c", "#1a5c9c"],
+  ];
+  if (products.length !== L.products) throw new Error("one tile per product");
+  const blues = new Set(products.flatMap(([, a, b]) => [a, b]));
+  if (blues.size !== L.blues) throw new Error(`${blues.size} distinct blues, ${L.blues} expected`);
+  document.getElementById("g").innerHTML = products
+    .map(
+      ([name, head, button]) => `<div class="prod">
+        <div class="bar" style="background:${head}"><i></i>${name}</div>
+        <div class="body">
+          <span class="sw"><span><b style="background:${head}"></b>${head.toUpperCase()}</span>${button !== head ? `<span><b style="background:${button}"></b>${button.toUpperCase()}</span>` : ""}</span>
+          <span class="btn" style="background:${button}">Weiter</span>
+        </div>
+      </div>`,
+    )
+    .join("");
+</script>

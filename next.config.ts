@@ -39,6 +39,8 @@ export default function nextConfig(phase: string): NextConfig {
       // Always defined (empty unless "1"), so preview-only branches (?name=, ?vt=, ?motion=, the
       // lab's hooks) are constant-folded out of production builds.
       NEXT_PUBLIC_PREVIEW: process.env.NEXT_PUBLIC_PREVIEW === "1" ? "1" : "",
+      // "1" where flagged examples are part of the build: invented testimonials show only there.
+      NEXT_PUBLIC_EXAMPLES: examples ? "1" : "",
     },
     turbopack: examples
       ? undefined

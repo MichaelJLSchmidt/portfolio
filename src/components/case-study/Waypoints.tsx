@@ -263,8 +263,12 @@ export function Waypoints({ study, evidence }: { study: CaseStudy; evidence: Evi
                   return null;
               }
             })}
-            {!next && study.credits && (
+            {!next && (
               <div className={`${styles.panel} legend`}>
+                <p className="body-copy">
+                  <strong>{L.didNotDo}: </strong>
+                  {study.didNotDo}
+                </p>
                 <p className={`${styles.credits} body-copy`}>{study.credits}</p>
               </div>
             )}

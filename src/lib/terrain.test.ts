@@ -85,9 +85,9 @@ describe("route conductor", () => {
   });
 
   it("draws on over the draw token in full motion, never in calm", () => {
-    const full = planRoute("dvb-001", "full", REST, { changes: true, revealFloor: 0.3 });
+    const full = planRoute("lab-097", "full", REST, { changes: true, revealFloor: 0.3 });
     assert.deepEqual(ends(full, "reveal"), [[0, 900]]);
-    assert.equal(planRoute("dvb-001", "calm", REST, { changes: true, revealFloor: 0.3 }).length, 0);
+    assert.equal(planRoute("lab-097", "calm", REST, { changes: true, revealFloor: 0.3 }).length, 0);
   });
 
   it("recentres on Bern: the Aare draws over 200–900 ms, the pin pings at 300 ms", () => {

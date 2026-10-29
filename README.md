@@ -29,9 +29,14 @@ Motion has one verb, "settle" (`docs/motion.md`): headlines arrive slightly wide
 cut (`src/components/motion/SettleText.tsx`), interactive text breathes wider on hover or focus and settles back,
 and a single mint glint marks a first arrival or a committed action. A gentle shine (at most half way to glacier,
 no glow) follows a fine pointer, lit by the same headlamp as the field. Three motion modes (full, calm, still)
-and every primitive are shown side by side in the motion lab (`/lab/`, preview builds only). The About page
-("Basecamp", `/about/`) opens from the leader card and tells the career as the real climb from Interlaken to the
-Jungfrau; its plan and the content still needed are in `docs/about-plan.md`.
+and every primitive are shown side by side in the motion lab (`/lab/`, preview builds only).
+
+The pages put leadership proof before the work, for hiring managers who skim. Home: the hero, the Summit log
+(what changed), the Trail rules (how I lead), the Expeditions (the deck), Field notes, Workshops and Contact.
+Basecamp (`/about/`) is reached from the HUD, whose Basecamp label morphs into the page's H1: the map legend,
+the bio, how I work with a team, the first 90 days, the career climb drawn on the real ascent from Interlaken to
+the Jungfrau, and contact. The HUD is the main navigation (mark · Expeditions · Basecamp · Contact · CV · Bern
+time · Calm map); below 880 px it keeps the mark, Basecamp and the switch, and the footer holds the rest.
 
 ## Stack
 
@@ -79,12 +84,12 @@ Never commit the token. `.env*` files are git-ignored; `.env.example` lists the 
 | `npm run check:content`  | Lists every content placeholder still to fill, with file, line and field          |
 | `npm run check:figures`  | Numbers in copy, card and charts match their data file; images are current        |
 | `npm test`               | Unit tests of the Basecamp gate (`node:test`)                                      |
-| `npm run test:e2e`       | Chromium checks against `out/`: view transitions, motion modes, hydration, motion primitives, decode, case-study template |
+| `npm run test:e2e`       | Chromium checks against `out/`: view transitions, motion modes, hydration, motion primitives, decode, case-study template, deck and Next loop, Basecamp morph, page structure, phone layouts |
 | `npm run test:hosting`   | Gated and production deploys under netlify-cli (build, edge runtime, redirects)   |
 | `npm run report:size`    | Initial JS/CSS/fonts per route, lazy chunks, terrain assets (gzip)               |
 | `npm run report:transfer` | One page's transfer on a phone and a desktop, first view and full scroll         |
 | `npm run report:motion`  | Layout time in a page's first 3.5 s on a phone with the CPU slowed 4×; Lighthouse with `--lighthouse` |
-| `npm run record:motion`  | Review videos of the motion lab and a round trip in each motion mode (`motion-recordings/`) |
+| `npm run record:motion`  | Review videos: the motion lab, a round trip in each mode, the home page, Basecamp via the nav and the case-study loop (`motion-recordings/`) |
 | `npm run images`         | Renders and encodes the case-study artefact images (see "Case studies")           |
 | `npm run terrain`        | Regenerates `public/terrain` from swisstopo data                                  |
 | `npm run verify:terrain` | Checks that the committed heightmaps decode to the exact source heights          |
@@ -111,18 +116,27 @@ automatically. Every other runtime URL (heightmaps, terrain SVGs, textures, fetc
 ### Content and placeholders
 
 All copy lives in `src/content`. Facts still to confirm are written as `[PLACEHOLDERS]` (links as `href: null`);
-they stay visible in preview builds so gaps are easy to spot. Stats are optional everywhere (cards, case-study
-summary, Basecamp): a stat row shows only the stats that have a value and disappears when none has one.
+they stay visible in preview builds so gaps are easy to spot. Card stats (team led, time, scope, impact) and
+the Summit summary's rows are optional: a stat row shows only the stats that have a value and disappears when
+none has one, and a summary row without a value is left out.
 `npm run check:content` lists every remaining placeholder with file, line and field. `npm run build` runs it for
 its `SITE_MODE`:
 
 - `construction` requires only what the under-construction page shows: the name and the email and LinkedIn
   links (`npm run check:content -- --mode=construction` lists those);
 - `basecamp` only warns;
-- `live` fails on any placeholder.
+- `live` fails on any placeholder or example value.
 
 A local build with `NEXT_PUBLIC_PREVIEW=1` only warns in every mode. Flagged examples (see "Case studies")
 are fictional on purpose: `check:content` skips them and names them once, and live builds don't contain them.
+
+**Example values.** The home page and Basecamp tell the intended story with invented figures, quotes, legend
+entries, dates, the bio and the evidence lines of the trail rules. Each is written as `ex("…")`
+(`src/content/example-values.ts`): it renders as written, `check:content` lists it with file, line and field
+next to the placeholders, and a live build stops on it until a real value replaces it. The invented field
+notes (testimonials) go further: they render only where flagged examples do, each tagged "Example quote", and
+a build without examples fails if any of them is left in `out/`. While its figures are examples, the Summit
+log shows the small print "Example figures. Real numbers replace them before launch."
 
 ### Tuning the contour field
 
@@ -149,8 +163,16 @@ headless browsers.
 
 Every case study (`/work/<slug>/`) is built from the same blocks. The content model is in
 `src/lib/case-study.ts`, the copy in `src/content/case-studies.ts`, the components in
-`src/components/case-study`. `src/content/examples/test-project` is a complete, fictional model case study that
-uses every block; read it as the reference.
+`src/components/case-study`. `src/content/examples` holds three complete, fictional model case studies at one
+fictional employer: Seilschaft (people: building a UX practice), Gratweg (platform: a design system) and Test
+Project (service: a subsidy form), in that deck order, each one's "Next expedition" leading to the next and the
+last back to the first. Test Project uses every block; read it as the reference.
+
+- **Leadership fields:** every case study states its mandate, the team I led, what I put in place, one "What I
+  did not do" line (before the credits) and its credits. The Summit summary reads MANDATE · MY ROLE · TEAM I LED ·
+  WHAT I PUT IN PLACE · KEY DECISION · OUTCOME. On the card the stats are TEAM LED, TIME and IMPACT (before →
+  after, what it counts below), the scope joins the coordinates line, and an index line ("Seilschaft — People ·
+  Built a UX practice from 2 to 6 · 3 years") lists the card on the home page.
 
 - **Header:** the terrain header and its morph from the card stay; under the deck line a type line and the meta
   line "7 min read · 60-second skim below" (reading time from the body, counted like Medium: 265 words a minute
@@ -159,7 +181,7 @@ uses every block; read it as the reference.
 - **Waypoints:** each heading states its finding, "Label — finding"; decisions are h3 blocks.
 - **In-page navigation:** from 1200 px a sticky "On this page" trail beside the content (a `nav`, one link per
   waypoint, a dotted contour trail that fills up to the waypoint being read, `aria-current="true"`); below
-  1200 px the "Jump to" chips near the top and "Next waypoint ↓ / Back to top ↑" at the end of each waypoint.
+  1200 px the "On this page" chips near the top and "Next waypoint ↓ / Back to top ↑" at the end of each waypoint.
 - **Figures** (`Figure.tsx`): `<figure>` with `<picture>` (AVIF, then WebP, width descriptors, `sizes`, explicit
   width and height), lazy unless `priority` (eager, `fetchpriority="high"`, only for an image in the first
   viewport), a tiny blurred placeholder, and the caption "Fig. n — What it shows. Why it matters." (numbered in
@@ -231,7 +253,7 @@ Re-renders are byte-identical when nothing changed. Budget: the hero's 1920 px A
 outputs are committed; masters are not. Image rules:
 flat browser frames (28 px bar, three neutral dots, the fictional URL), on light sheets ground-coloured markers,
 moss-ink highlights, alpenglow-ink "no feedback" gaps, at most one faint contour set behind diagrams, and the strip
-"TEST PROJECT · FICTIONAL EXAMPLE · Fig. n" on every image.
+"<NAME> · FICTIONAL EXAMPLE · Fig. n" on every image.
 
 ## Hosting on Netlify
 
@@ -365,14 +387,14 @@ password stops working, so everyone has to enter the new one.
     query computed from the same spacing rule as the field (per device profile) picks one, so the poster and the
     field show the same interval (100 m on the largest screens and tablets in portrait, 200 m on phones, laptops
     and desktops up to ~1920 px).
-  - `cards/*.svg`: the leader card's Interlaken → Jungfrau crop (200 m lines, lakes as filled shapes found as
-    flat surfaces in the DTM) and seeded-noise terrains for project cards (seed = collector number, ~20 lines,
-    every 4th an index line).
-  - `morph/*.webp`: per-card heightmaps the field morphs to on case-study pages and Basecamp.
+  - `cards/*.svg`: seeded-noise terrains for project cards (seed = collector number, ~20 lines, every 4th an
+    index line), and crop cards cut from the real terrain (200 m lines, lakes as filled shapes found as flat
+    surfaces in the DTM; no card uses one at the moment).
+  - `morph/*.webp`: per-card heightmaps the field morphs to on case-study pages.
   - `examples.json`: the card terrains of flagged examples (cards marked `"example": true` in the config), kept
     out of `terrain.json` so live bundles don't carry them.
-  - `profile.json`: the elevation profile along the leader trail (240 points, ~1 KB gzipped) for the About
-    page's ascent chart.
+  - `profile.json`: the elevation profile along the Interlaken → Jungfrau trail (`profile` in the config, 240
+    points, ~1 KB gzipped) for Basecamp's career climb.
 - `npm run terrain -- --refresh` re-downloads; `-- --placeholder` builds from procedural terrain without the
   network; `-- --png` also writes PNG copies (git-ignored, not used by the site); `-- --only=lab-099` rebuilds only
   the named seeded card terrains and updates their metadata, without touching the region.
@@ -402,22 +424,23 @@ checks every heightmap once per session (`src/components/terrain/heightmap-loade
 One console warning names the browser and the first differing texel. `npm run test:e2e -- decode` simulates
 a colour-managing browser (a gamma curve on decoded pixels) with and without `DecompressionStream`.
 
-Attribution: "Terrain data © swisstopo" appears in the HUD and the footer.
+Attribution: "Terrain data © swisstopo" appears in the footer of every page (and on the under-construction page).
 
 ## Accessibility and motion
 
 - Semantic HTML first. The hero name is server-rendered text, so LCP is text, not the canvas.
-- All interactions work with the keyboard. Each card is a single link, named by the card's title, with the focus
-  ring around the card. Focus returns to the originating card after navigating back.
+- All interactions work with the keyboard. Each card is a single link, named "Open expedition: <name>, <type>,
+  rarity <letter>", with the focus ring around the card. Focus returns to the originating card after navigating
+  back.
 - Settling headlines keep a hidden rest-state copy of each letter, so the animation never changes layout (no CLS).
   The accessible name is the plain text.
 - Text in the first viewport is visible from first paint; only blocks below the fold reveal (`data-reveal`).
 - Three motion modes on `html[data-motion]`, resolved before first paint (`docs/motion.md` has the full matrix):
   - **full**, the default;
-  - **calm**, the "Calm map" switch (stored in localStorage; its accessible name is "Reduce motion on this
-    site"): view-transition morphs, responses and title settles stay; ambient field motion, the headlamp,
-    parallax, the intro sweep, glints, pointer shine, tilt, loops and Lenis stop; the field holds still and only
-    morphs between routes;
+  - **calm**, the "Calm map" switch (stored in localStorage; its visible label is its name, and its
+    description reads "Reduces motion on this site"): view-transition morphs, responses and title settles
+    stay; reveals fade without their rise; ambient field motion, the headlamp, parallax, the intro sweep,
+    glints, pointer shine, tilt, loops and Lenis stop; the field holds still and only morphs between routes;
   - **still**, when the OS asks for reduced motion (also without JavaScript): the field becomes the static
     poster, nothing moves or changes width, colour and opacity changes take 200 ms at most, and no View
     Transition runs at all: pages change directly and the incoming page fades in over 150 ms (opacity only);
@@ -454,4 +477,5 @@ production builds compile them out:
   behind it). It also fails when a page is wider than the phone (it would pan sideways).
 - The HUD clock always shows the live Bern time, calm and still included (a changing time is content, not
   motion); it keeps a fixed width, so filling it in after hydration moves nothing. The dot next to it is a
-  static neutral marker.
+  static neutral marker. Below 880 px (phones, tablets in portrait) it moves into the footer with
+  Expeditions, Contact and CV.

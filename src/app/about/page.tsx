@@ -1,18 +1,15 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import type { CSSProperties } from "react";
 import profile from "@terrain/profile.json";
-import { Actions } from "@/components/about/Actions";
 import { AscentProfile } from "@/components/about/AscentProfile";
-import { CardArtwork } from "@/components/card/CardArtwork";
-import { SummitSummary } from "@/components/SummitSummary";
-import { MorphTarget } from "@/components/transition/MorphTarget";
-import { RememberCard } from "@/components/transition/RememberCard";
+import { ContactBand } from "@/components/home/ContactBand";
+import { SectionHead } from "@/components/home/SectionHead";
+import { MapSheet } from "@/components/motion/MapSheet";
 import { SettleText } from "@/components/motion/SettleText";
+import { MorphTarget } from "@/components/transition/MorphTarget";
 import { about } from "@/content/about";
-import { caseStudyLabels as L, cardBySlug } from "@/content/cards";
-import { hasValue, withValues } from "@/lib/content";
-import { morphName } from "@/lib/morph";
+import { BASECAMP_MORPH } from "@/lib/morph";
+import { longestWord } from "@/lib/name-lines";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -20,118 +17,101 @@ export const metadata: Metadata = {
   description: about.meta.description,
 };
 
-/** Basecamp: the About page, opened from the leader card (its art and name morph in). */
+/**
+ * Basecamp: the About page. Reached from the HUD's Basecamp link, whose label morphs into the H1
+ * (BasecampLink) and settles once it has landed; going back, the H1 shrinks into the bar again.
+ * Who and where (legend, bio), how I lead (rope rules, first 90 days), the climb so far, then
+ * the craft, the person and the way in.
+ */
 export default function About() {
-  const leader = cardBySlug(about.cardSlug)!;
-  // Named waypoints on the profile, with the official heights from the card content.
-  const waypoints = leader.artwork.kind === "crop" ? leader.artwork.waypoints : [];
-  const stops = profile.stops.flatMap((s) =>
-    s.label
-      ? [{ label: s.label, elevation: waypoints.find((w) => w.label === s.label)?.elevation, at: s.km / profile.lengthKm }]
-      : [],
-  );
+  // Named ends of the trail on the profile, with their official heights.
+  const stops = profile.stops.flatMap((s) => (s.label ? [{ label: s.label, elevation: about.ascent.stops[s.label], at: s.km / profile.lengthKm }] : []));
 
   return (
-    <main id="main" className={`${styles.main} container`} data-card={leader.slug}>
-      {/* data-vt-exit: the page's own content, which leaves first on the way back (return-transition.ts). */}
-      <RememberCard slug={leader.slug} />
-      <nav className={styles.crumbs} aria-label={L.back} data-vt-exit>
-        {/* No scroll to the top: the deck brings the card back into view itself (Deck). */}
-        <Link href="/" scroll={false} className="hud-label">
-          <span aria-hidden="true">←</span> {L.back}
-        </Link>
-      </nav>
-
-      <header className={styles.header}>
-        <MorphTarget name={morphName("art", leader.slug)} variant="art" className={styles.artSlot}>
-          <CardArtwork artwork={leader.artwork} alt={leader.artworkAlt} className={styles.art} />
-        </MorphTarget>
-        <div className={styles.intro} data-quiet-zone>
-          <p className={`${styles.eyebrow} hud-label map-halo`} data-reveal="" data-vt-exit>
-            {about.header.eyebrow}
-          </p>
-          <MorphTarget name={morphName("title", leader.slug)} variant="title">
-            <SettleText as="h1" text={about.header.name} className={`${styles.name} display`} shine glint settleOnArrival />
+    <main id="main" className={`${styles.main} container`}>
+      <header className={styles.header} data-quiet-zone>
+        <div className={styles.nameCell}>
+          <MorphTarget name={BASECAMP_MORPH} variant="title">
+            <SettleText
+              as="h1"
+              text={about.header.heading}
+              className={`${styles.name} display`}
+              style={{ "--title-chars": longestWord(about.header.heading) } as CSSProperties}
+              shine
+              glint
+              settleOnArrival
+            />
           </MorphTarget>
-          <p className={`${styles.role} map-halo`} data-reveal="" data-vt-exit>
-            {about.header.role}
-            <span className={`${styles.place} hud-label map-halo keep-halo`}>{about.header.place}</span>
-          </p>
-          <p className={`${styles.statement} body-copy`} data-vt-exit>
-            {about.header.statement}
-          </p>
-          <Actions actions={about.actions} reveal exitOnReturn />
         </div>
+        <p className={`${styles.lead} knockout`}>{about.header.lead}</p>
       </header>
 
-      <SummitSummary
-        id="basecamp-summary"
-        heading={about.summary.heading}
-        rows={about.summary.rows}
-        exitOnReturn
-      />
-
-      <AscentProfile labels={about.ascent} milestones={about.ascent.milestones} stops={stops} />
-
-      <section className={styles.section} aria-labelledby="rope-team-heading" data-vt-exit>
-        <div className={styles.sectionHead} data-quiet-zone>
-          <SettleText as="h2" id="rope-team-heading" text={about.principles.heading} className={`${styles.sectionHeading} display`} trigger="inview" />
-          <p className="body-copy">{about.principles.intro}</p>
+      <section className={styles.who} aria-labelledby="legend-heading">
+        <MapSheet as="div" className={styles.legend} fold="left">
+          <h2 id="legend-heading" className={`${styles.legendHeading} hud-label`}>
+            {about.legend.heading}
+          </h2>
+          <dl className={`${styles.legendRows} surface-copy`}>
+            {about.legend.rows.map((r) => (
+              <div key={r.label}>
+                <dt>{r.label}</dt>
+                <dd>{r.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </MapSheet>
+        <div className={styles.bio}>
+          <h2 className={`${styles.bioHeading} hud-label map-halo`}>{about.bio.heading}</h2>
+          {about.bio.paragraphs.map((p) => (
+            <p key={p} className="body-copy">
+              {p}
+            </p>
+          ))}
         </div>
-        <ol className={styles.markers}>
-          {about.principles.items.map((p) => (
-            <li key={p.title} className={`${styles.marker} legend`}>
-              <span className={styles.blaze} aria-hidden="true" />
-              <h3 className={`${styles.markerTitle} display`}>{p.title}</h3>
-              <p className="body-copy">{p.body}</p>
-              {hasValue(p.metric) && <p className={`${styles.metric} hud-label`}>{p.metric}</p>}
+      </section>
+
+      <section className={styles.section} aria-labelledby="rope-rules-heading">
+        <SectionHead id="rope-rules-heading" eyebrow={about.ropeRules.eyebrow} heading={about.ropeRules.heading} />
+        <ul className={styles.ropeRules}>
+          {about.ropeRules.rules.map((r) => (
+            <li key={r.lead} className="legend">
+              <p className="body-copy">
+                <strong>{r.lead}</strong> {r.text}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className={styles.section} aria-labelledby="first-days-heading">
+        <SectionHead id="first-days-heading" eyebrow={about.firstDays.eyebrow} heading={about.firstDays.heading} />
+        <ol className={styles.days}>
+          {about.firstDays.steps.map((s) => (
+            <li key={s.title} className={`${styles.day} legend`}>
+              <p className={`${styles.dayRange} hud-label`}>{s.days}</p>
+              <h3 className={styles.dayTitle}>{s.title}</h3>
+              <p className="body-copy">{s.text}</p>
             </li>
           ))}
         </ol>
       </section>
 
-      <section className={styles.section} aria-labelledby="craft-heading" data-vt-exit>
-        <div className={styles.sectionHead} data-quiet-zone>
-          <SettleText as="h2" id="craft-heading" text={about.craft.heading} className={`${styles.sectionHeading} display`} trigger="inview" />
-          <p className="body-copy">{about.craft.intro}</p>
-        </div>
-        <ul className={styles.plaques}>
-          {about.craft.items.map((c) => {
-            const stats = withValues(c.stats);
-            return (
-              <li key={c.term} className={styles.plaque}>
-                <h3 className={`${styles.plaqueTerm} display`}>{c.term}</h3>
-                <p className={`${styles.reminder} italic`}>{c.reminder}</p>
-                <p className="body-copy">{c.evidence}</p>
-                {stats.length > 0 && (
-                  <dl className={styles.plaqueStats} style={{ "--cells": stats.length } as CSSProperties}>
-                    {stats.map((s) => (
-                      <div key={s.label}>
-                        <dt>{s.label}</dt>
-                        <dd>{s.value}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+      <AscentProfile labels={about.ascent} camps={about.ascent.camps} stops={stops} />
 
-      <section className={`${styles.section} ${styles.offTrail}`} aria-labelledby="off-trail-heading" data-vt-exit>
-        <SettleText as="h2" id="off-trail-heading" text={about.offTrail.heading} className={`${styles.sectionHeading} display`} trigger="inview" quiet />
-        <div className={`${styles.offTrailBody} legend`}>
-          <p className="body-copy">{about.offTrail.body}</p>
-          <p className={`${styles.flavor} italic`}>{about.offTrail.flavor}</p>
-        </div>
-      </section>
+      <div className={styles.pair}>
+        <section className={styles.section} aria-labelledby="craft-heading">
+          <SectionHead id="craft-heading" eyebrow={about.craft.eyebrow} heading={about.craft.heading} />
+          <p className="body-copy">{about.craft.body}</p>
+        </section>
+        <section className={styles.section} aria-labelledby="off-map-heading">
+          <div className={styles.offMapHead} data-quiet-zone>
+            <SettleText as="h2" id="off-map-heading" text={about.offMap.heading} className={`${styles.sectionHeading} display`} trigger="inview" />
+          </div>
+          <p className="body-copy">{about.offMap.body}</p>
+        </section>
+      </div>
 
-      <section className={styles.contact} aria-labelledby="contact-heading" data-quiet-zone data-vt-exit>
-        <SettleText as="h2" id="contact-heading" text={about.contact.heading} className={`${styles.contactHeading} display`} trigger="inview" shine />
-        <p className="body-copy">{about.contact.body}</p>
-        <Actions actions={about.actions} />
-      </section>
+      <ContactBand line={about.contactLine} />
     </main>
   );
 }

@@ -18,19 +18,20 @@
   min-height: calc(100svh - 96px - var(--peek));
 }
 
-.heroMeta {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 8px 24px;
-}
-
 .eyebrow {
   color: var(--color-glacier);
 }
 
-.origin {
-  color: var(--color-contour);
+/* The statement: the page's first sentence, visible from first paint (it may be the LCP). */
+.statement {
+  max-width: 30ch;
+  font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.75rem);
+  font-weight: 560;
+  line-height: 1.35;
+}
+
+.heroActions {
+  margin-top: 4px;
 }
 
 .name {
@@ -104,7 +105,7 @@
     column-gap: clamp(16px, 2vw, 32px);
   }
 
-  .heroMeta {
+  .eyebrow {
     grid-column: 1 / -1;
   }
 

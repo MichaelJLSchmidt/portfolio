@@ -234,7 +234,23 @@
   font-size: clamp(1.75rem, 3.2vw, 2.75rem);
 }
 
-.org {
+/* A camp's rarity: shape + letter + colour, as on the cards. */
+.rarity {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  color: var(--color-sheet);
+  font-weight: 700;
+}
+
+.rarity svg {
+  width: 12px;
+  height: 12px;
+  fill: var(--rarity);
+}
+
+.rarityNote {
   color: var(--color-contour);
 }
 

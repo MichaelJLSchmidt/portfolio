@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 // Motion primitives first: their CSS is shared by every route, and importing them after the
@@ -16,18 +17,25 @@ import { SummitSummary } from "@/components/SummitSummary";
 import { MorphTarget } from "@/components/transition/MorphTarget";
 import { RememberCard } from "@/components/transition/RememberCard";
 import { caseStudies } from "@/content/case-studies";
-import { caseStudyLabels as L, cardBySlug, cardHref, cards } from "@/content/cards";
+import { caseStudyLabels as L, cardBySlug, cardHref, cards, coordinatesLine } from "@/content/cards";
 import { site } from "@/content/site";
 import { readingMinutes, type CaseStudy as Study, type Evidence } from "@/lib/case-study";
 import { morphName } from "@/lib/morph";
+import { longestWord } from "@/lib/name-lines";
 import styles from "./page.module.css";
 
 export const dynamicParams = false;
 
+/**
+ * A static export refuses a dynamic route that generates no page, and a live build has no case
+ * study until the first real one is written: then the route generates one placeholder (a 404),
+ * which scripts/site/build.mjs removes with the rest of out/work/.
+ */
+const NO_CASE_STUDY = "_none";
+
 export function generateStaticParams() {
-  return Object.keys(caseStudies)
-    .filter((slug) => cardBySlug(slug))
-    .map((slug) => ({ slug }));
+  const slugs = Object.keys(caseStudies).filter((slug) => cardBySlug(slug));
+  return (slugs.length ? slugs : [NO_CASE_STUDY]).map((slug) => ({ slug }));
 }
 
 const entry = (slug: string) => {
@@ -67,8 +75,9 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
   if (!found) notFound();
   const { card, study } = found;
   const { summary } = study;
-  // The next card in the deck, wherever it leads (another case study or the About page).
-  const next = cards[(cards.indexOf(card) + 1) % cards.length];
+  // The next case study in deck order, looping back to the first; never another kind of page.
+  const studies = cards.filter((c) => caseStudies[c.slug]);
+  const next = studies.length > 1 ? studies[(studies.indexOf(card) + 1) % studies.length] : null;
   const hero = study.hero ? study.figures?.[study.hero] : undefined;
   const outcome = summary.outcome;
 
@@ -91,10 +100,18 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
         </MorphTarget>
         <div className={styles.titleBlock} data-quiet-zone>
           <p className={`${styles.coords} hud-label map-halo keep-halo`} data-reveal="" data-vt-exit>
-            {card.coordinates}
+            {coordinatesLine(card)}
           </p>
           <MorphTarget name={morphName("title", card.slug)} variant="title">
-            <SettleText as="h1" text={card.name} className={`${styles.title} display`} shine glint settleOnArrival />
+            <SettleText
+              as="h1"
+              text={card.name}
+              className={`${styles.title} display`}
+              style={{ "--title-chars": longestWord(card.name) } as CSSProperties}
+              shine
+              glint
+              settleOnArrival
+            />
           </MorphTarget>
           <p className={`${styles.type} map-halo`} data-reveal="" data-vt-exit>
             {study.typeLine ?? card.type}
@@ -114,11 +131,22 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
         exitOnReturn
         note={summary.note}
         rows={[
-          { label: L.problem, value: summary.problem, wide: true },
+          { label: L.mandate, value: summary.mandate, wide: true },
           { label: L.role, value: summary.role, wide: true },
-          { label: L.team, value: summary.team, stat: true },
-          { label: L.duration, value: summary.duration, stat: true },
-          { label: L.reach, value: summary.reach, stat: true },
+          { label: L.teamLed, value: summary.teamLed, wide: true },
+          summary.putInPlace?.length
+            ? {
+                label: L.putInPlace,
+                wide: true,
+                content: (
+                  <ul data-marks="">
+                    {summary.putInPlace.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                ),
+              }
+            : { label: L.putInPlace },
           { label: L.keyDecision, value: summary.keyDecision, wide: true },
           Array.isArray(outcome)
             ? {
@@ -173,15 +201,17 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
       </aside>
 
       <nav className={styles.next} aria-label={L.next} data-vt-exit>
-        <SignatureLink
-          href={cardHref(next)}
-          variant="display"
-          className={styles.nextLink}
-          before={<span className="hud-label">{L.next}</span>}
-          label={next.name}
-          labelClassName={`${styles.nextName} display`}
-          arrow="→"
-        />
+        {next && (
+          <SignatureLink
+            href={cardHref(next)}
+            variant="display"
+            className={styles.nextLink}
+            before={<span className="hud-label">{L.next}</span>}
+            label={next.name}
+            labelClassName={`${styles.nextName} display`}
+            arrow="→"
+          />
+        )}
         <Link href="/" scroll={false} className={`${styles.backToAll} hud-label`}>
           <span aria-hidden="true">←</span> {L.backToAll}
         </Link>

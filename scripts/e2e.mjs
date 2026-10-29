@@ -12,6 +12,13 @@
 //                                     that includes examples: SITE_MODE=basecamp or a preview)
 //   npm run test:e2e -- terrain       the terrain conductor, Bern, the readout, tiers and context
 //                                     loss (scripts/e2e-terrain.mjs; needs NEXT_PUBLIC_PREVIEW=1)
+//   npm run test:e2e -- deck          deck order, card link names and the Next expedition loop
+//                                     (scripts/e2e/deck.mjs; needs the examples)
+//   npm run test:e2e -- basecamp      the HUD label ↔ Basecamp H1 morph in full, calm and still
+//                                     (scripts/e2e/basecamp.mjs)
+//   npm run test:e2e -- ia            page structure, HUD order, example content (scripts/e2e/layout.mjs)
+//   npm run test:e2e -- phone         every route at 360 and 390 px: no overflow, HUD and footer
+//                                     (scripts/e2e/layout.mjs)
 //
 // Serves ./out like a static host (base path read from the build) and drives Chromium with
 // Playwright, which is not a dependency: `npm i -D playwright && npx playwright install chromium`,
@@ -23,6 +30,9 @@ import { createRequire } from "node:module";
 import { createServer } from "node:net";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { basecamp } from "./e2e/basecamp.mjs";
+import { deck } from "./e2e/deck.mjs";
+import { ia, phone, routes as builtRoutes } from "./e2e/layout.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const only = process.argv[2];
@@ -168,7 +178,10 @@ async function settle(page, { path, terrain }) {
       main,
       h1,
       ...(h1?.querySelectorAll('[class*="glyph"]') ?? []),
-      ...(main?.querySelectorAll("[data-reveal], [style*='view-transition-name']") ?? []),
+      // Reveals still waiting below the fold are not hidden: they play when scrolled to.
+      ...[...(main?.querySelectorAll("[data-reveal], [style*='view-transition-name']") ?? [])].filter(
+        (el) => !(el.getAttribute("data-reveal-state") === "wait" && el.getBoundingClientRect().top >= window.innerHeight),
+      ),
       // The deck cards after a return: every part rebuilt, the name readable.
       ...(main?.querySelectorAll("article[data-slug] [class*='nameBar'], article[data-slug] [class*='typeLine'], article[data-slug] [class*='rules'], article[data-slug] [class*='stats'], article[data-slug] [class*='collector']") ?? []),
     ]
@@ -195,9 +208,19 @@ async function settle(page, { path, terrain }) {
   });
 }
 
+// The card the round trips open: a flagged example (there is no real case study yet), so these
+// scenarios need a build that includes examples (SITE_MODE=basecamp or a preview).
+const FLOW = { slug: "test-project", path: "/work/test-project/", title: "Test Project", terrain: "lab-099" };
+const hasFlow = () => {
+  if (existsSync(join(root, `out${FLOW.path}index.html`))) return true;
+  console.log(`  skipped: no ${FLOW.path} in this build (build with SITE_MODE=basecamp)`);
+  return false;
+};
+
 // --- transitions -------------------------------------------------------------------------------
 async function transitions() {
-  const card = { slug: "kibon", path: "/work/kibon/", title: "kiBon 2.0", terrain: "dvb-001" };
+  if (!hasFlow()) return;
+  const card = FLOW;
   const modes = [
     { name: "full motion, transition runs", abort: null },
     { name: "full motion, previous return (?vt=classic)", abort: null, classic: true },
@@ -344,10 +367,12 @@ async function decode() {
       check("reference texels read back once", s.readPixels.calls === want16, `${s.readPixels.calls} readPixels`);
       check("read-back never blocks the main thread", s.readPixels.ms < 5, `${s.readPixels.ms.toFixed(2)} ms in readPixels`);
       // A card's terrain goes through the same path.
-      await page.locator('article[data-slug="kibon"] a').first().click();
-      const r = await settle(page, { path: "/work/kibon/", terrain: "dvb-001" });
-      check("card terrain shown after navigation", r.terrain === "dvb-001", `data-terrain=${r.terrain}`);
-      check(`card heightmap via ${want}`, files.includes(`morph/dvb-001${want}`), files.join(", "));
+      if (hasFlow()) {
+        await page.locator(`article[data-slug="${FLOW.slug}"] a`).first().click();
+        const r = await settle(page, { path: FLOW.path, terrain: FLOW.terrain });
+        check("card terrain shown after navigation", r.terrain === FLOW.terrain, `data-terrain=${r.terrain}`);
+        check(`card heightmap via ${want}`, files.includes(`morph/${FLOW.terrain}${want}`), files.join(", "));
+      }
     }
     check(mode.expect === "image" ? "no warning" : "one console warning naming the browser", mode.expect === "image" ? warnings.length === 0 : warnings.length === 1 && /\] (Chrome|Edge|Firefox|Safari|Opera) \d/.test(warnings[0]), warnings.join(" | "));
 
@@ -399,7 +424,7 @@ async function casestudy() {
     }, trail);
     check("trail is a visible, sticky nav labelled “On this page”", info.visible && info.position === "sticky", `position=${info.position}`);
     check("trail lists the six waypoints, not the H1", info.links.length === 6 && !info.h1Linked, info.links.join(" "));
-    check("“Jump to” chips hidden from 1200 px", !info.jumpVisible);
+    check("“On this page” chips hidden from 1200 px", !info.jumpVisible);
     check("waypoint headings have a scroll margin", parseFloat(info.margin) >= 80, info.margin);
     check("the example page is noindex", /noindex/.test(info.robots ?? ""), info.robots);
     await page.evaluate(() => document.getElementById("discovery").scrollIntoView({ block: "start" }));
@@ -445,7 +470,7 @@ async function casestudy() {
       width: document.documentElement.scrollWidth,
       markers: [...document.querySelectorAll("button[data-hotspot]")].map((b) => b.getBoundingClientRect()).map((r) => Math.min(r.width, r.height)),
     }), trail);
-    check("trail hidden, “Jump to” chips shown", !info.trail && info.jump);
+    check("trail hidden, “On this page” chips shown", !info.trail && info.jump);
     check("each waypoint ends with “Next waypoint” (5) and “Back to top” (6)", info.next === 5 && info.top === 6, `${info.next} next, ${info.top} back`);
     check("no sideways scrolling", info.width <= 390, `${info.width}px`);
     check("hotspot markers at least 24×24 px", info.markers.length === 5 && info.markers.every((m) => m >= 24), info.markers.join(", "));
@@ -654,7 +679,8 @@ const motionProbe = () => {
 };
 
 async function modes() {
-  const card = { slug: "kibon", path: "/work/kibon/", terrain: "dvb-001" };
+  if (!hasFlow()) return;
+  const card = FLOW;
   for (const mode of ["full", "calm", "still"]) {
     console.log(`\nmotion mode: ${mode}`);
     const { context, page, errors } = await open({ calm: mode === "calm", reduced: mode === "still", init: motionProbe });
@@ -662,13 +688,16 @@ async function modes() {
     if (mode !== "still") await page.waitForSelector('[data-field="on"]', { timeout: 20000 }).catch(() => {});
     const html = await page.evaluate(() => ({ motion: document.documentElement.dataset.motion, tier: document.documentElement.dataset.tier }));
     check(`html[data-motion="${mode}"]`, html.motion === mode, JSON.stringify(html));
-    // The switch: named, its state matches, and in still it says why it cannot turn motion back on.
+    // The switch: its visible label is its name (Label in Name), its state matches, its description
+    // says what it does, and in still also why it cannot turn motion back on.
+    const named = await page.getByRole("switch", { name: "Calm map", exact: true }).count();
     const sw = await page.evaluate(() => {
       const input = document.querySelector('header input[role="switch"]');
       const desc = input?.getAttribute("aria-describedby");
-      return { name: input?.getAttribute("aria-label"), checked: input?.checked, described: desc ? document.getElementById(desc)?.textContent ?? "" : "" };
+      return { label: input?.closest("label")?.textContent.trim(), checked: input?.checked, described: desc ? document.getElementById(desc)?.textContent ?? "" : "" };
     });
-    check("switch named “Reduce motion on this site”, state shown", sw.name === "Reduce motion on this site" && sw.checked === (mode !== "full"), JSON.stringify(sw));
+    check("switch named and labelled “Calm map”, state shown", named === 1 && /^calm map$/i.test(sw.label ?? "") && sw.checked === (mode !== "full"), JSON.stringify(sw));
+    check("switch described “Reduces motion on this site”", sw.described.startsWith("Reduces motion on this site"), sw.described);
     if (mode === "still") check("still: the switch explains why it is on", /reduced motion/i.test(sw.described), sw.described);
 
     // Hover and focus the deck heading area, open a card, try the next link, come back.
@@ -726,9 +755,7 @@ async function modes() {
 // Direct loads of every route: no hydration or console errors, and the motion attributes on <html>
 // survive hydration (a failed hydration re-creates the document and drops them).
 async function hydration() {
-  const routes = ["/", "/about/", "/work/kibon/", "/work/test-project/", "/lab/", "/lab/specimen/", "/no-such-page/"].filter(
-    (r) => r === "/no-such-page/" || existsSync(join(root, "out", r, "index.html")),
-  );
+  const routes = [...builtRoutes(root), "/lab/", "/lab/specimen/"].filter((r) => r === "/no-such-page/" || existsSync(join(root, "out", r, "index.html")));
   for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
     console.log(`\nhydration: direct loads at ${viewport.width}×${viewport.height}`);
     for (const route of routes) {
@@ -814,7 +841,7 @@ async function primitives() {
   for (const where of ["lab", "case study"]) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const page = await context.newPage();
-    await page.goto(where === "lab" ? `${base}/lab/specimen/?motion=full` : `${base}/work/kibon/`, { waitUntil: "networkidle" });
+    await page.goto(where === "lab" ? `${base}/lab/specimen/?motion=full` : `${base}${FLOW.path}`, { waitUntil: "networkidle" });
     const link = where === "lab" ? page.locator('a[data-variant="display"][data-lab-state="rest"]').first() : page.locator('a[data-variant="display"]').first();
     await link.scrollIntoViewIfNeeded();
     const state = () =>
@@ -858,6 +885,7 @@ async function primitives() {
 const scenarios = { transitions, modes, hydration, primitives, decode, casestudy };
 // The terrain conductor and the Bern terrain (scripts/e2e-terrain.mjs).
 Object.assign(scenarios, (await import("./e2e-terrain.mjs")).terrainScenarios({ browser, base, root, check, settle }));
+Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, basecamp, ia, phone }).map(([name, run]) => [name, () => run({ browser, base, basePath, root, check, open, settle })])));
 try {
   for (const [name, run] of Object.entries(scenarios)) if (!only || only === name) await run();
 } finally {

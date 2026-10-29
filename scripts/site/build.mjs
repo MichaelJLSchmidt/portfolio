@@ -92,7 +92,13 @@ if (mode === "construction") {
   );
 } else {
   const next = createRequire(import.meta.url).resolve("next/dist/bin/next");
+  // /work/[slug] needs at least one page in a static export: without a case study in this build
+  // it generates a placeholder, removed here with the rest of out/work/, and the deck says there
+  // is nothing to open yet.
+  const studies = await caseStudyCount(examples);
+  console.log(`Case studies: ${studies}${studies ? "" : " (no /work/ pages in this build)"}`);
   run([next, "build"]);
+  if (!studies) rmSync(join(out, "work"), { recursive: true, force: true });
   if (!examples) await stripExamples();
   // The motion lab is a review tool: never in a build without it (live), never in the sitemap.
   const lab = includesLab(process.env);
@@ -141,6 +147,13 @@ if (mode === "construction") {
 }
 console.log(`Built ${mode} into ${relative(root, out)}/`);
 
+/** Case studies in this build: the real ones, plus the flagged examples where included. */
+async function caseStudyCount(examples) {
+  await import("../lib/ts-hooks.mjs");
+  const { caseStudies } = await import("../../src/content/case-studies.ts");
+  return Object.values(caseStudies).filter((study) => examples || !study.example).length;
+}
+
 /** Removes the examples' files from out/, then fails if anything of theirs is left there. */
 async function stripExamples() {
   await import("../lib/ts-hooks.mjs");
@@ -157,7 +170,11 @@ async function stripExamples() {
     const parent = join(out, dirname(media.replace(/\/$/, "")));
     if (parent !== out && existsSync(parent) && !readdirSync(parent).length) rmSync(parent, { recursive: true });
   }
-  const needles = exampleCards.flatMap((c) => [c.name, `/work/${c.slug}`, c.artwork.terrainId, exampleMedia[c.slug]].filter(Boolean));
+  // The invented testimonials (home field notes written as ex("…")) belong to the examples too.
+  const { home } = await import("../../src/content/home.ts");
+  const { isExample } = await import("../../src/content/example-values.ts");
+  const quotes = home.fieldNotes.notes.map((n) => n.quote).filter(isExample);
+  const needles = [...exampleCards.flatMap((c) => [c.name, `/work/${c.slug}`, c.artwork.terrainId, exampleMedia[c.slug]].filter(Boolean)), ...quotes];
   const files = (dir) => readdirSync(dir).flatMap((name) => (statSync(join(dir, name)).isDirectory() ? files(join(dir, name)) : [join(dir, name)]));
   const leaks = files(out)
     .filter((f) => /\.(html|txt|js|json|css|xml|svg|map)$/.test(f))
@@ -169,5 +186,5 @@ async function stripExamples() {
     console.error(`Examples are excluded from this build, but out/ still mentions them:\n  ${leaks.join("\n  ")}`);
     process.exit(1);
   }
-  console.log(`Examples: none in out/ (checked for ${needles.map((n) => `"${n}"`).join(", ")})`);
+  console.log(`Examples: none in out/ (checked for ${needles.length - quotes.length} example names and paths and ${quotes.length} invented testimonials)`);
 }

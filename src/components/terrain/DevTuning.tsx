@@ -2,6 +2,7 @@
 
 import { Leva, button, folder, monitor, useControls } from "leva";
 import { useEffect } from "react";
+import { cards } from "@/content/cards";
 import { duration } from "@/styles/tokens";
 import { LINE_COLORS, fieldConfig, type FieldConfig } from "./field-settings";
 import { fieldStore } from "./field-store";
@@ -13,6 +14,8 @@ import { fieldStore } from "./field-store";
  */
 const TUNING_URL = "http://localhost:4319/contour-field";
 const durationTokens = Object.keys(duration);
+// The morph toggle targets the deck's first card (an example card in npm run dev).
+const morphCard = cards[0];
 
 export default function DevTuning() {
   const values = useControls("Contour field", {
@@ -57,8 +60,8 @@ export default function DevTuning() {
   useControls("Contour field", {
     "Interval (m)": monitor(() => fieldStore.get().intervalM ?? 0, { interval: 250 }),
     "Replay intro": button(() => fieldStore.set((s) => ({ replayIntro: s.replayIntro + 1 }))),
-    "Toggle morph (kiBon)": button(() =>
-      fieldStore.set((s) => ({ morphTarget: s.morphTarget ? null : "dvb-001" })),
+    [`Toggle morph (${morphCard?.name ?? "no card"})`]: button(() =>
+      fieldStore.set((s) => ({ morphTarget: s.morphTarget || !morphCard ? null : morphCard.artwork.terrainId })),
     ),
     "Save to config": button(async () => {
       const body = JSON.stringify(fieldStore.get().config, null, 2);

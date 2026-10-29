@@ -117,26 +117,26 @@ export function terrainScenarios({ browser, base, root, check, settle }) {
     check("tier A on a fine-pointer desktop (DPR cap 2)", s0?.tier === "desktop" && s0.dpr <= 2, JSON.stringify({ tier: s0?.tier, dpr: s0?.dpr }));
 
     // Pre-warm: hovering the card leans the field 12% towards its terrain, and back on leave.
-    const cardLink = page.locator('article[data-slug="kibon"] a').first();
+    const cardLink = page.locator('article[data-slug="seilschaft"] a').first();
     await cardLink.scrollIntoViewIfNeeded();
     await clearEvents(page);
-    await prewarm(page, cardLink, "dvb-001");
+    await prewarm(page, cardLink, "lab-097");
     await page.waitForTimeout(600);
     const warm = await state(page);
-    check("pre-warm: hover leans towards the card's terrain (uMorph 0.12)", Math.abs(warm.values.morph - 0.12) < 0.01 && warm.slots[1] === "dvb-001", JSON.stringify(warm.slots) + ` morph=${warm.values.morph.toFixed(3)}`);
+    check("pre-warm: hover leans towards the card's terrain (uMorph 0.12)", Math.abs(warm.values.morph - 0.12) < 0.01 && warm.slots[1] === "lab-097", JSON.stringify(warm.slots) + ` morph=${warm.values.morph.toFixed(3)}`);
     await page.mouse.move(2, 2);
     await page.waitForTimeout(700);
     const cold = await state(page);
     check("pre-warm: leaving eases back to 0", cold.values.morph === 0, `morph=${cold.values.morph}`);
 
     // Card: morph 700 ms, draw-on 900 ms, from the route commit.
-    await prewarm(page, cardLink, "dvb-001");
+    await prewarm(page, cardLink, "lab-097");
     await clearEvents(page);
     await cardLink.click();
-    await settle(page, { path: "/work/kibon/", terrain: "dvb-001" });
-    await landed(page, "dvb-001").catch(() => {});
+    await settle(page, { path: "/work/seilschaft/", terrain: "lab-097" });
+    await landed(page, "lab-097").catch(() => {});
     let evs = await events(page);
-    check("card: data-terrain=dvb-001", (await page.getAttribute("[data-field]", "data-terrain")) === "dvb-001");
+    check("card: data-terrain=lab-097", (await page.getAttribute("[data-field]", "data-terrain")) === "lab-097");
     checkTiming("card", timing(evs, "morph"), "morph", { delay: 0, duration: 700 });
     checkTiming("card", timing(evs, "reveal"), "reveal", { delay: 0, duration: 900 });
     check("card: quiet zones held, then released", evs.some((e) => e.type === "end" && e.channel === "hold" && e.to === 0), evs.filter((e) => e.channel === "hold").map((e) => `${e.type}→${e.to}`).join(" "));
@@ -235,9 +235,9 @@ export function terrainScenarios({ browser, base, root, check, settle }) {
       await fieldOn(page);
       await landed(page, "region");
       await clearEvents(page);
-      await page.locator('article[data-slug="kibon"] a').first().click();
-      await settle(page, { path: "/work/kibon/", terrain: "dvb-001" });
-      await landed(page, "dvb-001").catch(() => {});
+      await page.locator('article[data-slug="seilschaft"] a').first().click();
+      await settle(page, { path: "/work/seilschaft/", terrain: "lab-097" });
+      await landed(page, "lab-097").catch(() => {});
       let evs = await events(page);
       check("calm: the card's terrain morphs", evs.some((e) => e.type === "end" && e.channel === "morph" && e.duration === 700), "");
       check("calm: no draw-on", !evs.some((e) => e.channel === "reveal" || e.channel === "floor"), evs.map((e) => e.channel).filter(Boolean).join(","));
