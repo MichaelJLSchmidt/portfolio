@@ -108,7 +108,6 @@ function StatValue({ value, phase }: { value: string; phase: Roll }) {
  */
 export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNames = false, decorative = false, onOpen, navigate }: SummitCardProps) {
   const [active, setActive] = useState(false);
-  const [opening, setOpening] = useState(false);
   const [roll, setRoll] = useState<Roll>("rest");
   // The stats roll once: the nearby values for a frame, then the real ones.
   const startRoll = () => {
@@ -134,9 +133,13 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNa
   const terrain = cardTerrain(card.artwork.terrainId);
   const summit = terrain?.pins?.at(-1);
 
-  // The deck stays alive (hidden) while a case study is open: clear "opening" when it is hidden,
-  // so the chip shows again after navigating back.
-  useEffect(() => () => setOpening(false), []);
+  // Opening is a DOM attribute, not state: the tap re-renders nothing before its press state
+  // paints. The deck stays alive (hidden) while a case study is open: the attribute is cleared when
+  // the card is hidden, so the chip shows again after navigating back.
+  useEffect(() => {
+    const el = rootRef.current;
+    return () => el?.removeAttribute("data-opening");
+  }, []);
 
   // Arrival, once per session per card: as it enters the screen (data-arrive). Cards already on
   // screen are simply there.
@@ -243,7 +246,6 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNa
       data-rarity={card.rarity}
       data-size={size}
       data-active={active}
-      data-opening={opening}
       data-visited={visited || undefined}
       aria-labelledby={card.example ? `${nameId} ${exampleId}` : nameId}
       aria-hidden={decorative || undefined}
@@ -364,7 +366,7 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNa
               aria-label={`${cardLabels.open(card.name, card.type, card.rarity)}${visited ? `, ${cardLabels.visited}` : ""}`}
               onClick={(e) => {
                 // Hide hover-only chrome before the view transition snapshots the card.
-                setOpening(true);
+                e.currentTarget.closest("article")?.setAttribute("data-opening", "true");
                 onOpen?.();
                 if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
                 haptic("open");
