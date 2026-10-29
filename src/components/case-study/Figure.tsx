@@ -12,11 +12,11 @@ import styles from "./Figure.module.css";
  */
 const SIZES: Record<FigureSpec["surface"], Record<FigureSpec["size"], string>> = {
   sheet: {
-    wide: "(min-width: 1200px) min(1054px, calc(92vw - 338px)), (min-width: 640px) calc(92vw - 66px), calc(100vw - 40px)",
+    wide: "(min-width: 1280px) min(1054px, calc(92vw - 338px)), (min-width: 640px) calc(92vw - 66px), calc(100vw - 40px)",
     column: "(min-width: 800px) 654px, (min-width: 640px) calc(92vw - 66px), calc(100vw - 40px)",
   },
   night: {
-    wide: "(min-width: 1200px) min(1118px, calc(92vw - 274px)), (min-width: 640px) calc(92vw - 2px), 100vw",
+    wide: "(min-width: 1280px) min(1118px, calc(92vw - 274px)), (min-width: 640px) calc(92vw - 2px), 100vw",
     column: "(min-width: 800px) 718px, (min-width: 640px) calc(92vw - 2px), 100vw",
   },
 };

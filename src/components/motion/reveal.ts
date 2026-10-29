@@ -4,8 +4,9 @@ import { duration, levels, stagger } from "@/styles/tokens";
 
 /**
  * Reveals: blocks marked `data-reveal` ("" rises --dist-rise and fades, "card" rises
- * --dist-rise-card; in calm both only fade; "rule" draws, "sheet" unfolds from its fold edge) appear as they scroll into
- * view, once per session. Anything in the first viewport is shown from first paint and never
+ * --dist-rise-card; in calm both only fade; "rule" draws, "sheet" unfolds from its fold edge,
+ * "line" traces a drawn line such as the footer's elevation profile over the draw token) appear
+ * as they scroll into view, once per session. Anything in the first viewport is shown from first paint and never
  * hidden, so it can be the LCP element; only blocks below the fold wait (data-reveal-state).
  * Budgets (the reveal level): at most two groups animate at once, each within 600 ms (item stagger
  * for the first six); a group that would exceed that, or arrives while the page scrolls fast,
@@ -67,7 +68,9 @@ function play(group: Element[]) {
     (el as HTMLElement).style.setProperty("--reveal-delay", `${Math.min(i, stagger.item.max - 1) * step}ms`);
     set(el, "play");
   });
-  const total = Math.min(levels.reveal.maxMs, duration.reveal + (Math.min(group.length, stagger.item.max) - 1) * step);
+  // A traced line takes the draw token (it holds no text); everything else keeps the budget.
+  const own = Math.max(...group.map((el) => (el.getAttribute("data-reveal") === "line" ? duration.draw : 0)));
+  const total = Math.max(own, Math.min(levels.reveal.maxMs, duration.reveal + (Math.min(group.length, stagger.item.max) - 1) * step));
   window.setTimeout(() => {
     running--;
     group.forEach((el) => {

@@ -54,6 +54,17 @@ export type SettleTextProps = {
    * (the breath axes) and settles once the transition has landed. Direct loads settle as usual.
    */
   settleOnArrival?: boolean;
+  /**
+   * "page" (default): plays once per page per session. "site": once per session wherever it
+   * appears, for chrome that every page shares (the HUD).
+   */
+  scope?: "page" | "site";
+  /**
+   * Block mode: the box the run is reserved at. "widest" (default): the widest of the rest, reveal
+   * and breath axes. "rest": the rest axes (or --kt-box-wdth), for tight rows such as the HUD; the
+   * run lies over the box and spills past it for the moment of the settle, moving nothing.
+   */
+  reserve?: "widest" | "rest";
   style?: CSSProperties;
   ref?: Ref<SettleHandle>;
 };
@@ -81,12 +92,14 @@ export function SettleText({
   shine = false,
   quiet = false,
   settleOnArrival = false,
+  scope = "page",
+  reserve = "widest",
   style,
   ref,
 }: SettleTextProps) {
   const elRef = useRef<HTMLElement>(null);
   const pathname = usePathname();
-  const key = settleKey(pathname ?? "", id ?? text);
+  const key = settleKey(scope === "site" ? "" : (pathname ?? ""), id ?? text);
   const { mode: motion } = useMotionMode();
   const finePointer = useFinePointer();
 
@@ -274,6 +287,7 @@ export function SettleText({
       className={className ? `${styles.settle} ${className}` : styles.settle}
       data-mode={mode}
       data-role={role}
+      data-reserve={mode === "block" && reserve === "rest" ? "rest" : undefined}
       data-play={trigger === "paint" ? "true" : "rest"}
       data-settle-key={key}
       data-quiet-zone={quiet ? "" : undefined}

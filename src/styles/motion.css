@@ -42,6 +42,12 @@
   }
 }
 
+@keyframes reveal-trace {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   :root:not([data-motion="still"]) :is([data-reveal=""], [data-reveal="card"])[data-reveal-state="wait"] {
     opacity: 0;
@@ -67,6 +73,15 @@
 
   :root:not([data-motion="still"]) [data-reveal="rule"][data-reveal-state="play"] {
     animation: reveal-draw var(--dur-settle) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
+  }
+
+  /* A drawn line (the footer's elevation profile) traces from its start over the draw token. */
+  :root:not([data-motion="still"]) [data-reveal="line"][data-reveal-state="wait"] {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  :root:not([data-motion="still"]) [data-reveal="line"][data-reveal-state="play"] {
+    animation: reveal-trace var(--dur-draw) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
   }
 
   :root:not([data-motion="still"]) [data-reveal="sheet"][data-reveal-state="wait"] {

@@ -254,7 +254,7 @@
   color: var(--color-contour);
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .step:nth-child(even) {
     justify-content: flex-end;
   }
@@ -262,7 +262,7 @@
 
 /* Phones: the pinned panel (HUD clearance + readout + chart) takes at most ~38% of the
    visible height, so the plaques keep most of the screen. */
-@media (max-width: 700px) {
+@media (width < 640px) {
   .sticky {
     padding-block: 106px 22px;
   }

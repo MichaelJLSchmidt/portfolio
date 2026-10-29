@@ -111,6 +111,22 @@
   color: var(--kt-color);
 }
 
+/* Reserved at rest (reserve="rest"): the box at --kt-box-wdth (default: the rest axes), the run
+   over it without taking part in its size. */
+.settle[data-reserve="rest"] .block {
+  position: relative;
+}
+
+.settle[data-reserve="rest"] .block > .ghost {
+  font-stretch: var(--kt-box-wdth, var(--kt-rest-wdth));
+  font-weight: var(--kt-rest-wght);
+}
+
+.settle[data-reserve="rest"] .run {
+  position: absolute;
+  inset: 0 auto auto 0;
+}
+
 .settle[data-role="label"] .block,
 .settle[data-role="mono"] .block {
   white-space: nowrap;

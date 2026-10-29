@@ -1,11 +1,45 @@
+/* TerrainReadout.tsx: one line, its box reserved at the widest readout (ghosts), the visible run
+   over it, start-aligned so a shorter value never moves its first letter. */
 .readout {
   margin: 0;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
-/* Rolling digits keep the line's height and baseline. */
-.number {
-  display: inline-flex;
-  align-items: baseline;
+.box {
+  display: inline-grid;
+}
+
+.box > * {
+  grid-area: 1 / 1;
+}
+
+.ghost {
+  visibility: hidden;
+  font-stretch: var(--axis-mono-rest-wdth);
+}
+
+.run {
+  justify-self: start;
+}
+
+/* Below the large breakpoint, and where the HUD needs the room for the haptics switch: label and
+   altitude only. */
+.ghost[data-ghost="full"],
+.run :is([data-part="e"], [data-part="n"]) {
+  display: none;
+}
+
+@media (min-width: 1280px) {
+  :root:not([data-haptics]) .ghost[data-ghost="full"] {
+    display: revert;
+  }
+
+  :root:not([data-haptics]) .run :is([data-part="e"], [data-part="n"]) {
+    display: revert;
+  }
+
+  :root:not([data-haptics]) .ghost[data-ghost="compact"] {
+    display: none;
+  }
 }

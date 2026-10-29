@@ -34,7 +34,7 @@
 }
 
 /* Wider screens: a sentence row reads label | value, so the six rows scan down the left edge. */
-@media (min-width: 720px) {
+@media (min-width: 640px) {
   .grid > .wide {
     grid-template-columns: minmax(8rem, 13rem) minmax(0, 1fr);
     column-gap: 24px;
@@ -112,13 +112,13 @@
 }
 
 /* Phones: a stat that is a phrase takes the whole row instead of breaking inside a narrow column. */
-@media (max-width: 599px) {
+@media (width < 640px) {
   .grid > [data-long] {
     grid-column: 1 / -1;
   }
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .summary {
     padding: 32px 36px;
   }

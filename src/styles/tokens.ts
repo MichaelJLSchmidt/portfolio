@@ -73,6 +73,8 @@ export const axes = {
     reveal: { wdth: 112.5, wght: 500 },
     hover: { wdth: 100, wght: 500 },
     press: { wdth: 80, wght: 500 },
+    /** The HUD once the page has scrolled: Martian Mono's narrowest width. */
+    condensed: { wdth: 75, wght: 500 },
   },
 } as const;
 
@@ -113,6 +115,20 @@ export const duration = {
   glint: 900,
   /** A line or neatline drawing on. */
   draw: 900,
+  /** A small mark tracing itself: the logo's rings after a route change, a card's rarity shape. */
+  trace: 400,
+  /** Content that is not shared leaves the screen as a route starts. */
+  leave: 160,
+  /** Back and forward: the pages cross-fade (shared elements still morph). */
+  crossfade: 180,
+  /** A bottom sheet opening (the altimeter's jump list). */
+  sheet: 300,
+  /** A card's artwork contours shift by one interval on hover. */
+  shift: 600,
+  /** Hovering a link to another terrain leans the field towards it (and back on leave). */
+  prewarm: 400,
+  /** How long a toast stays before it leaves (not motion: a reading time). */
+  toast: 4000,
 } as const;
 
 export type DurationToken = keyof typeof duration;
@@ -171,6 +187,8 @@ export const distance = {
   lift: -6,
   /** Largest card tilt. */
   tiltMax: 5,
+  /** The HUD condenses once the page has scrolled this far. */
+  hudCondense: 120,
 } as const;
 
 /** Scale factors. */
@@ -236,6 +254,33 @@ export const haptics = {
 } as const;
 
 export type HapticEvent = keyof typeof haptics.patterns;
+
+/**
+ * Layout breakpoints (CSS px, min-width): at most three. Media queries can't read custom
+ * properties, so stylesheets write them literally, `(min-width: 960px)` or `(width < 960px)`;
+ * npm test checks that every width query in a stylesheet uses one of these.
+ */
+export const breakpoint = {
+  /** Past phones: the HUD shows the readout and the haptics switch; two-up grids. */
+  sm: 640,
+  /** The HUD's whole navigation; two-column hero, case-study and Basecamp headers; four-up grids. */
+  md: 1024,
+  /** The HUD's Bern time and the readout's coordinates; the trail beside a case study's waypoints. */
+  lg: 1280,
+} as const;
+
+export type Breakpoint = keyof typeof breakpoint;
+
+/** `(min-width: 960px)` for matchMedia. */
+export const mediaUp = (b: Breakpoint) => `(min-width: ${breakpoint[b]}px)`;
+
+/**
+ * Device profile (not a layout breakpoint): a fine pointer and a long edge of at least
+ * `desktopMinEdgePx` is the desktop tier (html[data-tier], the field's tier A).
+ */
+export const device = {
+  desktopMinEdgePx: 900,
+} as const;
 
 /** Stacking layers of the page (local stacking inside a component stays local). */
 export const layer = {

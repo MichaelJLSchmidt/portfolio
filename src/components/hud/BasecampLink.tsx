@@ -22,7 +22,7 @@ const withSlash = (path: string) => (path.endsWith("/") ? path : `${path}/`);
 export function BasecampLink({ label, className }: { label: string; className?: string }) {
   const pathname = usePathname();
   const here = withSlash(pathname ?? "") === BASECAMP;
-  const link = <SignatureLink href={BASECAMP} variant="nav" label={label} current={here} className={className} />;
+  const link = <SignatureLink href={BASECAMP} variant="nav" role="mono" settle label={label} current={here} className={className} />;
   if (here) return link;
   return (
     <MorphSwitch name={BASECAMP_MORPH} share="morph morph-title">

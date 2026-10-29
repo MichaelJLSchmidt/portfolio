@@ -1,0 +1,6 @@
+/* RollNumber.tsx: rolling digits keep the line's height and baseline, at tabular widths. */
+.roll {
+  display: inline-flex;
+  align-items: baseline;
+  font-variant-numeric: tabular-nums;
+}

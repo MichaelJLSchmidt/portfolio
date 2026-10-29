@@ -9,7 +9,7 @@ import { BERN } from "@/components/terrain/route-terrain";
 import { TerrainReadout } from "@/components/terrain/TerrainReadout";
 import { cards } from "@/content/cards";
 import { useMotionMode } from "@/lib/motion-mode";
-import { terrainLab as copy } from "./copy";
+import { terrainLab as copy } from "@/content/lab";
 import styles from "./TerrainLab.module.css";
 
 /** Morphs the field as a route change to `id` would (the backdrop sets it again on the next real route). */

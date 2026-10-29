@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { device } from "@/styles/tokens";
 import { settledScript } from "./settled";
 
 /**
@@ -32,8 +33,8 @@ const MODES: readonly MotionMode[] = ["full", "calm", "still"];
 const previewable = process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_PREVIEW === "1";
 
 // The tier rule matches the contour field's device profiles (field-settings.ts): a fine pointer
-// and a long edge of at least 900 px is "desktop"; constrained devices are "low".
-const tierScript = `var n=navigator,t="mobile";try{if((n.connection&&n.connection.saveData)||(n.deviceMemory||8)<4||(n.hardwareConcurrency||8)<4)t="low";else if(!matchMedia("(pointer: coarse)").matches&&Math.max(innerWidth,innerHeight)>=900)t="desktop"}catch(e){}`;
+// and a long edge of at least device.desktopMinEdgePx (900 px) is "desktop"; constrained devices are "low".
+const tierScript = `var n=navigator,t="mobile";try{if((n.connection&&n.connection.saveData)||(n.deviceMemory||8)<4||(n.hardwareConcurrency||8)<4)t="low";else if(!matchMedia("(pointer: coarse)").matches&&Math.max(innerWidth,innerHeight)>=${device.desktopMinEdgePx})t="desktop"}catch(e){}`;
 const forcedScript = previewable
   ? `try{f=new URLSearchParams(location.search).get("motion");if(!/^(full|calm|still)$/.test(f||""))f=null}catch(e){}`
   : "";

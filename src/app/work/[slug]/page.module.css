@@ -179,7 +179,7 @@
   min-width: 0;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .header {
     grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
     align-items: end;
@@ -187,7 +187,7 @@
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1280px) {
   .body {
     grid-template-columns: 13rem minmax(0, 1fr);
     align-items: start;

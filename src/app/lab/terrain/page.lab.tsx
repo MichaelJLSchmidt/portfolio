@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { terrainLab } from "./copy";
+import { terrainLab } from "@/content/lab";
 import { TerrainLab } from "./TerrainLab";
 import styles from "./TerrainLab.module.css";
 

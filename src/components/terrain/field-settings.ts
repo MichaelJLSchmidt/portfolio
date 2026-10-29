@@ -1,5 +1,5 @@
 import config from "@/config/contour-field.json";
-import { color, duration, type ColorToken, type DurationToken } from "@/styles/tokens";
+import { color, device, duration, type ColorToken, type DurationToken } from "@/styles/tokens";
 
 /**
  * Contour field tuning. Committed values live in src/config/contour-field.json
@@ -119,7 +119,7 @@ export function posterMedia(
 export function isMobileProfile(): boolean {
   if (typeof window === "undefined") return true;
   return (
-    window.matchMedia("(pointer: coarse)").matches || Math.max(window.innerWidth, window.innerHeight) < 900
+    window.matchMedia("(pointer: coarse)").matches || Math.max(window.innerWidth, window.innerHeight) < device.desktopMinEdgePx
   );
 }
 

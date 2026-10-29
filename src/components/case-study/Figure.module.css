@@ -536,7 +536,7 @@
 
 /* ------------------------------------------------------------------ phones */
 
-@media (max-width: 639px) {
+@media (width < 640px) {
   /* Edge to edge: through the page gutter on both sides. */
   .figure.figure {
     --pad: 20px;

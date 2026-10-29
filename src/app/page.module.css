@@ -90,7 +90,7 @@
   }
 }
 
-@media (min-width: 700px) {
+@media (min-width: 640px) {
   .hero {
     --name-fill: 0.8;
   }
@@ -98,7 +98,7 @@
 
 /* Desktop: a 12-column grid. Meta row on top; the name in the left eight columns; the lede
    and the cue in a clear right-hand column, sitting on the name's last baseline. */
-@media (min-width: 1000px) {
+@media (min-width: 1024px) {
   .hero {
     --name-fill: 0.62;
     grid-template-columns: repeat(12, minmax(0, 1fr));

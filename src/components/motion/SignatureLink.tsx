@@ -1,35 +1,53 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, type ComponentProps, type CSSProperties, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, type ComponentProps, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import { haptic } from "@/lib/haptics";
+import { isSettled, markSettled, settleKey } from "@/lib/settled";
 import { duration, levels, stagger, staggerStep } from "@/styles/tokens";
 import { Glint } from "./Glint";
 import { playGlint } from "./glint";
 import styles from "./SignatureLink.module.css";
 
-export type SignatureLinkVariant = "inline" | "standalone" | "display" | "nav";
+export type SignatureLinkVariant = "inline" | "standalone" | "display" | "nav" | "chip";
 
 export type SignatureLinkProps = Omit<ComponentProps<typeof Link>, "children"> & {
   /**
    * inline: a contour underline draws and the colour moves to glacier (a phrase in running text);
    * standalone: label letters breathe wider left to right and the arrow nudges;
    * display: the same on display type;
-   * nav: the breath plus a current state (`current`).
+   * nav: the breath plus a current state (`current`);
+   * chip: a pill whose label breathes and whose border brightens; pressed or current, it fills
+   * with the sheet colour.
    */
   variant: SignatureLinkVariant;
+  /**
+   * The letters' axes: label (Archivo, the default), mono (Martian Mono: HUD and eyebrow-style
+   * links) or display (the display variant's own).
+   */
+  role?: "label" | "mono" | "display";
   /** The link text (the letters that breathe). */
   label: string;
   /** Content before the label, e.g. an eyebrow line; part of the link's name. */
   before?: ReactNode;
   /** A decorative arrow after the label (standalone and display), nudged on hover or focus. */
   arrow?: string;
-  /** nav: this is the current page (aria-current="page"). */
-  current?: boolean;
+  /**
+   * nav and chip: the current page (true or "page": aria-current="page"), or the current place
+   * within a section ("location", e.g. Expeditions on a case study, the waypoint being read).
+   */
+  current?: boolean | "page" | "location";
+  /**
+   * The label's letters settle from the role's reveal axes at first paint, once per session (the
+   * HUD's links). The box stays reserved at the breath axes; the letters lie over it.
+   */
+  settle?: boolean;
   /** Class for the label (type style). */
   labelClassName?: string;
   /** "sheet" on the light sheet: the commit draws a moss-ink rule instead of the glint. */
   surface?: "dark" | "sheet";
+  /** A plain <a> instead of next/link: files and downloads (the CV), which are not routes. */
+  plain?: boolean;
 };
 
 /**
@@ -41,18 +59,46 @@ export type SignatureLinkProps = Omit<ComponentProps<typeof Link>, "children"> &
  */
 export function SignatureLink({
   variant,
+  role = variant === "display" ? "display" : "label",
   label,
   before,
   arrow,
   current = false,
+  settle = false,
   labelClassName,
   surface = "dark",
+  plain = false,
   className,
   onClick,
   style,
   ...props
 }: SignatureLinkProps) {
+  const Anchor = (plain ? "a" : Link) as typeof Link;
   const ref = useRef<HTMLAnchorElement>(null);
+  const key = settleKey("", `link:${label}`);
+
+  // The first-paint settle (CSS) is remembered once it has landed; a link mounted later in a
+  // session that already saw it renders at rest.
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (settle && el && isSettled(key)) el.setAttribute("data-settle", "done");
+  }, [settle, key]);
+  useEffect(() => {
+    const el = ref.current;
+    if (!settle || !el || el.getAttribute("data-settle") !== "true") return;
+    let live = true;
+    const running = el.getAnimations({ subtree: true }).filter((a) => /sl-settle/.test((a as CSSAnimation).animationName ?? ""));
+    const done = () => {
+      if (!live) return;
+      el.setAttribute("data-settle", "done");
+      markSettled(key);
+    };
+    if (!running.length) done();
+    else Promise.all(running.map((a) => a.finished)).then(done, done);
+    return () => {
+      live = false;
+    };
+  }, [settle, key]);
   const letters = [...label];
   const n = letters.length;
   // The ripple fits the response budget going in, and the 240 ms settle coming back.
@@ -66,28 +112,34 @@ export function SignatureLink({
     playGlint(ref.current);
   };
 
-  const vars = { ...style, "--l-n": n, "--l-in": `${stepIn}ms`, "--l-out": `${stepOut}ms` } as CSSProperties;
+  // The settle cascade fits the char stagger's cap.
+  const stepSettle = staggerStep(stagger.char, n);
+  const vars = { ...style, "--l-n": n, "--l-in": `${stepIn}ms`, "--l-out": `${stepOut}ms`, "--l-settle": `${stepSettle}ms` } as CSSProperties;
+  const currentValue = current === true ? "page" : current || undefined;
   const classes = [styles.link, className].filter(Boolean).join(" ");
 
   if (variant === "inline") {
     return (
-      <Link ref={ref} {...props} className={classes} data-variant="inline" style={style} onClick={commit}>
+      <Anchor ref={ref} {...props} className={classes} data-variant="inline" style={style} onClick={commit}>
         {before}
         <span className={styles.phrase}>
           {label}
           <Glint text={label} surface={surface} />
         </span>
-      </Link>
+      </Anchor>
     );
   }
 
   return (
-    <Link
+    <Anchor
       ref={ref}
       {...props}
       className={classes}
       data-variant={variant}
-      aria-current={variant === "nav" && current ? "page" : undefined}
+      data-role={role}
+      data-settle={settle ? "true" : undefined}
+      data-settle-key={settle ? key : undefined}
+      aria-current={variant === "nav" || variant === "chip" ? currentValue : undefined}
       style={vars}
       onClick={commit}
     >
@@ -111,6 +163,6 @@ export function SignatureLink({
           {arrow && <span className={styles.arrow}>{arrow}</span>}
         </span>
       </span>
-    </Link>
+    </Anchor>
   );
 }

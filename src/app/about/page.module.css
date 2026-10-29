@@ -31,7 +31,7 @@
   line-height: 1.35;
 }
 
-@media (min-width: 1000px) {
+@media (min-width: 1024px) {
   .header {
     grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
     column-gap: clamp(32px, 4vw, 72px);
@@ -75,7 +75,7 @@
 }
 
 /* Label beside value where there is room; above it on phones. */
-@media (min-width: 520px) {
+@media (min-width: 640px) {
   .legendRows > div {
     grid-template-columns: minmax(6.5rem, 9rem) minmax(0, 1fr);
   }
@@ -106,7 +106,7 @@
   color: var(--color-glacier);
 }
 
-@media (min-width: 1000px) {
+@media (min-width: 1024px) {
   .who {
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   }
@@ -133,13 +133,13 @@
   list-style: none;
 }
 
-@media (min-width: 700px) {
+@media (min-width: 640px) {
   .ropeRules {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1280px) {
   .ropeRules {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -170,7 +170,7 @@
   font-stretch: var(--type-condensed-wdth);
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .days {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -186,7 +186,7 @@
   display: grid;
 }
 
-@media (min-width: 1000px) {
+@media (min-width: 1024px) {
   .pair {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     column-gap: clamp(32px, 4vw, 72px);

@@ -481,7 +481,7 @@ function Field({ profile, paused, calm, onReady, onContextLost }: FieldProps) {
     if (my !== a.prewarmToken || a.prewarmId !== id || a.routing || !a.A || a.A.src.id === id) return;
     if (a.B?.src.id !== id) setB({ src, tex, interval: a.A.interval });
     log({ type: "prewarm", to: id ?? "region" });
-    play([prewarmStep(cfg.prewarm.morph, cfg.prewarm.durationMs)]);
+    play([prewarmStep(cfg.prewarm.morph, msOf(cfg.prewarm.duration))]);
   }
   function unprewarm(id: string | null) {
     const a = anim.current;
@@ -490,7 +490,7 @@ function Field({ profile, paused, calm, onReady, onContextLost }: FieldProps) {
     a.prewarmToken++;
     if (a.routing) return;
     log({ type: "prewarm-leave", to: id ?? "region" });
-    play([prewarmStep(0, fieldStore.get().config.prewarm.durationMs)]);
+    play([prewarmStep(0, msOf(fieldStore.get().config.prewarm.duration))]);
   }
 
   /** Every route change: hold the quiet zones (old and new page) until the transition is over. */

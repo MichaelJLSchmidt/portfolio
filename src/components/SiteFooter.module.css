@@ -5,18 +5,31 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px 24px;
-  padding: 48px var(--gutter) max(24px, env(safe-area-inset-bottom));
+  margin-top: 48px;
+  padding: 40px var(--gutter) max(24px, env(safe-area-inset-bottom));
   color: var(--color-sheet);
-  border-top: 1px solid var(--color-contour-dim);
 }
 
-.footer a {
-  color: var(--color-sheet);
-  text-underline-offset: 3px;
+/* The top edge: the Interlaken → Jungfrau elevation profile as a contour-coloured line. It
+   traces from the left once as the footer scrolls into view (data-reveal="line"). */
+.edge {
+  position: absolute;
+  inset: -40px 0 auto;
+  width: 100%;
+  height: 40px;
+  overflow: visible;
+  pointer-events: none;
 }
 
-/* Phones (and tablets in portrait): what the HUD moves out of its bar (Hud.module.css, below
-   880 px). */
+.edge path {
+  fill: none;
+  stroke: var(--color-contour);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+
+/* What the HUD leaves out of its bar (Hud.module.css): the navigation below the medium
+   breakpoint, the Bern time below the large one. */
 .nav {
   display: flex;
   flex-wrap: wrap;
@@ -34,7 +47,14 @@
   list-style: none;
 }
 
-@media (min-width: 880px) {
+@media (min-width: 1024px) {
+  .nav ul {
+    display: none;
+  }
+}
+
+/* From the large breakpoint the HUD shows the time. */
+@media (min-width: 1280px) {
   .nav {
     display: none;
   }
@@ -70,6 +90,7 @@
   display: none;
 }
 
+/* Phones only: from the small breakpoint the haptics switch sits in the HUD. */
 @media (min-width: 640px) {
   .credits {
     flex-direction: row;
@@ -79,5 +100,9 @@
 
   .sep {
     display: inline;
+  }
+
+  .haptics.haptics {
+    display: none;
   }
 }

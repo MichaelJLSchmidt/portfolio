@@ -9,6 +9,7 @@ import { spring as springEasing } from "motion";
 import { springCss, springsToCss } from "./motion-css.ts";
 import {
   axes,
+  breakpoint,
   color,
   cubicBezier,
   distance,
@@ -196,5 +197,35 @@ describe("no hard-coded motion values in stylesheets", () => {
       if (found.length > (allowance[rel] ?? 0)) over.push(`${rel}: ${found.map((l) => l.trim()).join(" | ")}`);
     }
     assert.deepEqual(over, []);
+  });
+});
+
+// At most three named breakpoints, and every width media query in a stylesheet is one of them:
+// `(min-width: Npx)` from a breakpoint up, `(width < Npx)` below it.
+describe("breakpoints", () => {
+  const files = (dir: string): string[] =>
+    readdirSync(dir).flatMap((name) => {
+      const p = join(dir, name);
+      return statSync(p).isDirectory() ? files(p) : p.endsWith(".css") ? [p] : [];
+    });
+  const root = new URL("..", import.meta.url).pathname;
+  it("three at most, ascending", () => {
+    const values = Object.values(breakpoint);
+    assert.ok(values.length <= 3);
+    assert.deepEqual([...values].sort((a, b) => a - b), values);
+  });
+  it("width queries use a breakpoint", () => {
+    const allowed = new Set<number>(Object.values(breakpoint));
+    const bad: string[] = [];
+    for (const file of files(root)) {
+      for (const line of readFileSync(file, "utf8").split("\n")) {
+        if (!/@media/.test(line)) continue;
+        if (/max-width/.test(line)) bad.push(`${file.slice(root.length)}: ${line.trim()} (write "width < N" instead)`);
+        for (const m of line.matchAll(/(?:min-width:\s*|width\s*[<>]=?\s*)(\d+(?:\.\d+)?)px/g)) {
+          if (!allowed.has(Number(m[1]))) bad.push(`${file.slice(root.length)}: ${line.trim()}`);
+        }
+      }
+    }
+    assert.deepEqual(bad, []);
   });
 });

@@ -201,7 +201,7 @@ export function terrainScenarios({ browser, base, root, check, settle }) {
       const { context, page, errors } = await open({ reduced: mode === "still" });
       await page.goto(`${base}/lab/terrain/?field=force`, { waitUntil: "load" });
       await page.waitForSelector("html[data-lab-ready]", { state: "attached", timeout: 30000 });
-      const text = () => page.locator("[data-terrain-readout] .visually-hidden").textContent();
+      const text = () => page.locator("main [data-terrain-readout] .visually-hidden").textContent();
       check(`${mode}: home readout`, (await text()) === "JUNGFRAU · ALT 4’158 M", await text());
       await page.locator('button[data-morph="bern"]').click();
       await page.waitForTimeout(900);
@@ -209,7 +209,7 @@ export function terrainScenarios({ browser, base, root, check, settle }) {
       // What is shown: the static parts, and each rolling group's own value (AnimateNumber keeps a
       // visually hidden copy of it as its first child; its digit columns hold every digit).
       const shown = await page.evaluate(() => {
-        const root = document.querySelector("[data-terrain-readout] > span[aria-hidden]").cloneNode(true);
+        const root = document.querySelector("main [data-terrain-readout] [data-run]").cloneNode(true);
         const rolls = root.querySelectorAll("[data-part] > span > *");
         for (const n of rolls) n.replaceWith(n.firstElementChild?.textContent ?? n.textContent);
         return { text: root.textContent.replace(/\s+/g, " ").trim(), rolls: rolls.length };

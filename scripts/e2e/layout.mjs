@@ -56,9 +56,11 @@ export async function ia({ base, basePath, root, check, open }) {
   // The HUD, left to right.
   const hud = await page.evaluate(() => {
     const header = document.querySelector("header[data-chrome]");
+    // An item's name: its aria-label, or the visually hidden copy settling labels and links keep.
+    const name = (el) => (el.getAttribute("aria-label") ?? el.querySelector(".visually-hidden")?.textContent ?? el.textContent).trim().replace(/\s+/g, " ");
     const items = [...header.querySelectorAll("a, [data-placeholder], time, input[role=switch]")]
       .filter((el) => el.getClientRects().length)
-      .map((el) => ({ text: (el.closest("label") ?? el).textContent.trim().replace(/\s+/g, " "), href: el.getAttribute("href"), x: el.getBoundingClientRect().left }))
+      .map((el) => ({ text: name(el.closest("label") ?? el), href: el.getAttribute("href"), x: el.getBoundingClientRect().left }))
       .sort((a, b) => a.x - b.x);
     return items.map((i) => `${i.text}${i.href ? ` (${i.href})` : ""}`);
   });
@@ -137,11 +139,16 @@ export async function phone({ browser, base, root, check }) {
       const r = await page.evaluate(() => {
         const vw = document.documentElement.clientWidth;
         const header = document.querySelector("header[data-chrome]");
-        const shown = [...header.children]
+        // The bar's three slots; the navigation counts item by item.
+        const shown = [...header.firstElementChild.children]
+          .flatMap((slot) => [...slot.children])
           .flatMap((el) => (el.tagName === "NAV" ? [...el.querySelectorAll("li")] : [el]))
           .filter((el) => el.getClientRects().length && !el.matches(".visually-hidden"));
-        // A signature link's name is its visually hidden copy (the letters around it are decoration).
-        const label = (el) => (el.querySelector("a .visually-hidden")?.textContent ?? el.textContent).trim().replace(/\s+/g, " ");
+        // An item's name: its aria-label, or the visually hidden copy settling labels and links keep.
+        const label = (el) => {
+          const target = el.matches("a, label") ? el : (el.querySelector("a, label") ?? el);
+          return (target.getAttribute("aria-label") ?? target.querySelector(".visually-hidden")?.textContent ?? target.textContent).trim().replace(/\s+/g, " ");
+        };
         const boxes = shown.map((el) => el.getBoundingClientRect());
         const overlaps = boxes.some((a, i) => boxes.some((b, j) => j > i && a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1));
         const footerNav = document.querySelector("footer nav");
@@ -157,7 +164,7 @@ export async function phone({ browser, base, root, check }) {
       check(`${route}: no sideways scrolling`, r.scroll <= r.vw, `${r.scroll}px for ${r.vw}px`);
       check(
         `${route}: HUD keeps mark, Basecamp and Calm map, inside the screen, no overlaps`,
-        r.inside && !r.overlaps && /Höhenlinie/.test(r.hud.join(" ")) && r.hud.some((t) => t === "Basecamp") && r.hud.some((t) => /Calm map/i.test(t)) && !r.hud.some((t) => /^Expeditions$/.test(t)),
+        r.inside && !r.overlaps && /Höhenlinie/.test(r.hud.join(" ")) && r.hud.some((t) => t === "Basecamp") && r.hud.some((t) => /^Calm map$/i.test(t)) && !r.hud.some((t) => /^Expeditions$/.test(t)),
         r.hud.join(" · "),
       );
       check(`${route}: the footer carries Expeditions, Contact, CV and the Bern time`, /Expeditions/.test(r.footer) && /Contact/.test(r.footer) && /CV/.test(r.footer) && /Bern/.test(r.footer), r.footer);
