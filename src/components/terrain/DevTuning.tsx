@@ -33,8 +33,8 @@ export default function DevTuning() {
     }),
     lineColor: { value: fieldConfig.lineColor, options: LINE_COLORS },
     indexColor: { value: fieldConfig.indexColor, options: LINE_COLORS },
-    headlampRadiusPx: { value: fieldConfig.headlampRadiusPx, min: 40, max: 400, step: 10 },
-    headlampFadeMs: { value: fieldConfig.headlampFadeMs, min: 0, max: 2000, step: 20 },
+    // The headlamp's radius, falloff and timing are shared with the type shine: `headlamp` in
+    // src/styles/tokens.ts. Only its gain on the lines is tuned here.
     // Lit lines keep their colour and reach this many times their strength.
     headlampGain: { value: fieldConfig.headlampGain, min: 1, max: 3, step: 0.05 },
     sweepGain: { value: fieldConfig.sweepGain, min: 1, max: 3, step: 0.05 },

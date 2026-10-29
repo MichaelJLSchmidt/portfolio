@@ -1,0 +1,105 @@
+/* Reveals (src/components/motion/reveal.ts): blocks below the fold wait, then rise, draw or unfold
+   once as they scroll into view. Nothing in the first viewport ever waits, and still mode never
+   hides anything (the waiting states only exist outside still). Durations keep a group within the
+   reveal level's 600 ms. */
+
+[data-reveal] {
+  --reveal-rise: var(--dist-rise);
+}
+
+[data-reveal="card"] {
+  --reveal-rise: var(--dist-rise-card);
+}
+
+@keyframes reveal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--reveal-rise));
+  }
+}
+
+@keyframes reveal-draw {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes reveal-unfold-top {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+}
+
+@keyframes reveal-unfold-left {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+
+@keyframes reveal-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) :is([data-reveal=""], [data-reveal="card"])[data-reveal-state="wait"] {
+    opacity: 0;
+    transform: translateY(var(--reveal-rise));
+  }
+
+  :root:not([data-motion="still"]) :is([data-reveal=""], [data-reveal="card"])[data-reveal-state="play"] {
+    animation: reveal-rise var(--dur-reveal) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
+  }
+
+  :root:not([data-motion="still"]) [data-reveal="rule"][data-reveal-state="wait"] {
+    transform: scaleX(0);
+  }
+
+  :root:not([data-motion="still"]) [data-reveal="rule"][data-reveal-state="play"] {
+    animation: reveal-draw var(--dur-settle) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
+  }
+
+  :root:not([data-motion="still"]) [data-reveal="sheet"][data-reveal-state="wait"] {
+    clip-path: inset(0 0 100% 0);
+  }
+
+  :root:not([data-motion="still"]) [data-reveal="sheet"][data-fold="left"][data-reveal-state="wait"] {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  :root:not([data-motion="still"]) [data-reveal="sheet"][data-reveal-state="wait"] > * {
+    opacity: 0;
+  }
+
+  :root:not([data-motion="still"]) [data-reveal="sheet"][data-reveal-state="play"] {
+    animation: reveal-unfold-top var(--dur-reveal) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
+  }
+
+  :root:not([data-motion="still"]) [data-reveal="sheet"][data-fold="left"][data-reveal-state="play"] {
+    animation-name: reveal-unfold-left;
+  }
+
+  /* The content follows once the sheet is open. */
+  :root:not([data-motion="still"]) [data-reveal="sheet"][data-reveal-state="play"] > * {
+    animation: reveal-fade var(--dur-short) var(--ease-settle) calc(var(--reveal-delay, 0ms) + var(--dur-reveal)) backwards;
+  }
+}
+
+/* Contour rule (ContourRule.tsx): a 1 px contour line, drawn from its start. */
+.contour-rule {
+  height: 0;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--color-contour-dim);
+  transform-origin: left center;
+}
+
+/* Map sheet (MapSheet.tsx): the light sheet with a contour hairline, sheet-safe inks only. */
+.map-sheet {
+  padding: clamp(20px, 2.6vw, 32px);
+  border: 1px solid var(--color-contour);
+  border-radius: 8px;
+  background: var(--color-sheet);
+  color: var(--color-ground);
+}

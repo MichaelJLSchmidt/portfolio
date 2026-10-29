@@ -1,0 +1,163 @@
+/*
+ * Settle text (SettleText.tsx). The rest state and the settle come from the axis tokens of the
+ * text's role (data-role: display, label, mono); a className may override --kt-color and the
+ * axes. Per-glyph properties are namespaced and registered without inheritance, so a --kt-shine
+ * or --kt-i never leaks into or out of a glyph.
+ */
+@property --kt-i {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --kt-shine {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+.settle {
+  /* Rest colour of the letters (the shine mixes from it towards glacier). Explicit, not
+     currentColor: Chrome mis-interpolates colour animations against a color-mix() with it. */
+  --kt-color: var(--color-sheet);
+  --kt-rest-wdth: var(--axis-display-rest-wdth);
+  --kt-rest-wght: var(--axis-display-rest-wght);
+  --kt-from-wdth: var(--axis-display-reveal-wdth);
+  --kt-from-wght: var(--axis-display-reveal-wght);
+  --kt-breath-wdth: var(--axis-display-hover-wdth);
+  --kt-breath-wght: var(--axis-display-hover-wght);
+  --kt-dur: var(--dur-settle-display);
+  position: relative;
+}
+
+.settle[data-role="label"] {
+  --kt-rest-wdth: var(--axis-label-rest-wdth);
+  --kt-rest-wght: var(--axis-label-rest-wght);
+  --kt-from-wdth: var(--axis-label-reveal-wdth);
+  --kt-from-wght: var(--axis-label-reveal-wght);
+  --kt-breath-wdth: var(--axis-label-hover-wdth);
+  --kt-breath-wght: var(--axis-label-hover-wght);
+  --kt-dur: var(--dur-settle);
+}
+
+.settle[data-role="mono"] {
+  --kt-rest-wdth: var(--axis-mono-rest-wdth);
+  --kt-rest-wght: var(--axis-mono-rest-wght);
+  --kt-from-wdth: var(--axis-mono-reveal-wdth);
+  --kt-from-wght: var(--axis-mono-reveal-wght);
+  --kt-breath-wdth: var(--axis-mono-hover-wdth);
+  --kt-breath-wght: var(--axis-mono-hover-wght);
+  --kt-dur: var(--dur-settle);
+}
+
+.letters {
+  display: inline;
+}
+
+.word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.unit {
+  position: relative;
+  display: inline-block;
+}
+
+.ghost,
+.glyph,
+.run,
+.glint {
+  font-stretch: var(--kt-rest-wdth);
+  font-weight: var(--kt-rest-wght);
+}
+
+/* Fixes the unit's box at its rest width. */
+.ghost {
+  visibility: hidden;
+}
+
+/* The visible letter (or word), centred over its ghost and free to change width: a layout root
+   of the ghost's size, so an axis change lays out this box alone. */
+.glyph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  contain: size layout style;
+  white-space: nowrap;
+  /* Shine: --kt-shine (0..1, the headlamp) mixes the rest colour towards glacier, at most
+     --headlamp-shine of the way. Colour only, no layout change. */
+  color: color-mix(in oklab, var(--kt-color), var(--color-glacier) calc(var(--kt-shine) * var(--headlamp-shine)));
+}
+
+/* Block: one run in a box reserved at its widest state (a ghost at the widest reveal or breath
+   axes), so a label can settle or breathe without moving anything around it. */
+.block {
+  display: inline-grid;
+}
+
+.block > * {
+  grid-area: 1 / 1;
+}
+
+.block > .ghost {
+  font-stretch: max(var(--kt-rest-wdth), var(--kt-from-wdth), var(--kt-breath-wdth));
+  font-weight: max(var(--kt-rest-wght), var(--kt-from-wght), var(--kt-breath-wght));
+}
+
+.run {
+  justify-self: start;
+  color: var(--kt-color);
+}
+
+.settle[data-role="label"] .block,
+.settle[data-role="mono"] .block {
+  white-space: nowrap;
+}
+
+/* The glint copy lies exactly over the letters at rest: per-letter boxes neither kern nor
+   ligate, so neither does the copy. */
+.settle:not([data-mode="block"]) > .glint {
+  font-kerning: none;
+  font-variant-ligatures: none;
+  overflow-wrap: normal;
+}
+
+@keyframes st-settle {
+  from {
+    font-stretch: var(--kt-from-wdth);
+    font-weight: var(--kt-from-wght);
+  }
+}
+
+@keyframes st-arrive {
+  from {
+    font-stretch: var(--kt-breath-wdth);
+    font-weight: var(--kt-breath-wght);
+  }
+}
+
+/* Full and calm settle (also without JavaScript, from first paint); still shows the rest state. */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .settle[data-play="wait"] :is(.glyph, .run) {
+    font-stretch: var(--kt-from-wdth);
+    font-weight: var(--kt-from-wght);
+  }
+
+  :root:not([data-motion="still"]) .settle[data-play="true"] :is(.glyph, .run) {
+    animation: st-settle var(--kt-dur) var(--ease-settle) backwards;
+    animation-delay: calc(var(--kt-i) * var(--kt-step, 0ms));
+  }
+
+  /* Arriving with a page transition: held just wide (the breath), then a short settle. */
+  :root:not([data-motion="still"]) .settle[data-arrive="hold"] :is(.glyph, .run) {
+    animation: none;
+    font-stretch: var(--kt-breath-wdth);
+    font-weight: var(--kt-breath-wght);
+  }
+
+  :root:not([data-motion="still"]) .settle[data-arrive="settle"] :is(.glyph, .run) {
+    animation: st-arrive var(--dur-settle) var(--ease-settle);
+  }
+}

@@ -4,9 +4,10 @@ import { beginReturn, finishReassembly } from "@/components/transition/return-tr
  * View transitions for route changes. React's <ViewTransition> starts them through
  * document.startViewTransition, so that call is wrapped once here:
  *
- * - Calm map / reduced motion: no View Transition at all. The wrapper throws before the API is
- *   reached, and React commits the navigation directly (its fallback when a transition cannot
- *   start). CalmRouteFade then fades the incoming page in.
+ * - Still mode (the OS asks for reduced motion): no View Transition at all. The wrapper throws
+ *   before the API is reached, and React commits the navigation directly (its fallback when a
+ *   transition cannot start). RouteFade then fades the incoming page in. Full and calm both
+ *   morph (motion-mode.ts).
  * - Otherwise the running transition is tracked (the native document.activeViewTransition is
  *   used where the browser has it), so components that mount inside one can wait for it to
  *   land, e.g. a heading that settles afterwards.
@@ -20,13 +21,14 @@ type Update = (() => Promise<void> | void) | null | undefined;
 
 let active: ViewTransition | null = null;
 
-export const calmNavigation = () =>
-  typeof document !== "undefined" && document.documentElement.getAttribute("data-motion") === "reduced";
+/** Still mode: routes change without View Transitions. */
+export const stillNavigation = () =>
+  typeof document !== "undefined" && document.documentElement.getAttribute("data-motion") === "still";
 
 if (typeof document !== "undefined" && typeof document.startViewTransition === "function") {
   const start = Document.prototype.startViewTransition;
   Document.prototype.startViewTransition = function (this: Document, ...args: Parameters<typeof start>) {
-    if (calmNavigation()) throw new DOMException("View transitions are off (reduced motion).", "InvalidStateError");
+    if (stillNavigation()) throw new DOMException("View transitions are off (still motion mode).", "InvalidStateError");
     // A card still rebuilding from the last return is complete before anything is captured.
     finishReassembly();
     const run = beginReturn();

@@ -16,6 +16,8 @@
     "verify:terrain": "node scripts/terrain/verify.mjs",
     "report:size": "node scripts/report-sizes.mjs",
     "report:transfer": "node scripts/report-transfer.mjs",
+    "report:motion": "node scripts/report-motion.mjs",
+    "record:motion": "node scripts/record-motion.mjs",
     "preview": "node scripts/serve-out.mjs",
     "check:contrast": "node scripts/check-contrast.mjs",
     "check:legibility": "node scripts/check-legibility.mjs",
@@ -23,7 +25,7 @@
     "check:figures": "node scripts/check-figures.mjs",
     "test:e2e": "node scripts/e2e.mjs",
     "test:hosting": "node scripts/e2e-hosting.mjs",
-    "test": "node --test src/hosting/*.test.ts",
+    "test": "node --test src/hosting/*.test.ts src/styles/*.test.ts src/lib/*.test.ts",
     "fonts:subset": "node scripts/site/fonts.mjs"
   },
   "dependencies": {

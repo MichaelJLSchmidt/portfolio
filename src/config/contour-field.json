@@ -5,8 +5,6 @@
   "indexLineWidthPx": 1.5,
   "lineColor": "contour",
   "indexColor": "contour",
-  "headlampRadiusPx": 120,
-  "headlampFadeMs": 600,
   "headlampGain": 1.5,
   "sweepGain": 2,
   "parallax": 0.011,

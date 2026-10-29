@@ -1,4 +1,7 @@
 import * as THREE from "three";
+import { headlamp } from "@/styles/tokens";
+
+const FALLOFF = headlamp.falloff.toFixed(3);
 
 /**
  * Full-screen contour shader. Heights come from RG-packed 16-bit WebPs; lines are drawn
@@ -95,7 +98,7 @@ void main() {
 
   // Headlamp: a soft Gaussian falloff around the pointer, reaching zero at the radius.
   float x = length(gl_FragCoord.xy - uHeadlampPos) / max(uHeadlampRadius, 1.0);
-  float lit = max(exp(-3.0 * x * x) - exp(-3.0), 0.0) / (1.0 - exp(-3.0)) * uHeadlampStrength;
+  float lit = max(exp(-${FALLOFF} * x * x) - exp(-${FALLOFF}), 0.0) / (1.0 - exp(-${FALLOFF})) * uHeadlampStrength;
 
   // Intro sweep: lines appear from the lowest ground upward, with a brighter leading edge.
   float sweepLevel = mix(range.x - 30.0, range.y + 60.0, uSweep);
@@ -187,7 +190,7 @@ export function createContourMaterial(): THREE.ShaderMaterial & { uniforms: Cont
     uLineColor: { value: new THREE.Vector3() },
     uIndexColor: { value: new THREE.Vector3() },
     uHeadlampPos: { value: new THREE.Vector2(-1e4, -1e4) },
-    uHeadlampRadius: { value: 120 },
+    uHeadlampRadius: { value: headlamp.radiusPx },
     uHeadlampStrength: { value: 0 },
     uHeadlampGain: { value: 1.5 },
     uSweepGain: { value: 2 },

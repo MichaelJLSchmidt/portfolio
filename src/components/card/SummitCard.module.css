@@ -92,8 +92,8 @@
 .name {
   margin: 0;
   font-size: max(18px, 7.4cqi);
-  font-weight: 800;
-  font-stretch: 72%;
+  font-weight: var(--axis-display-compact-wght);
+  font-stretch: var(--axis-display-compact-wdth);
   line-height: 0.86;
   text-transform: uppercase;
   text-wrap: balance;
@@ -127,7 +127,7 @@
   font-family: var(--font-martian), ui-monospace, monospace;
   font-size: 9.5px;
   font-weight: 700;
-  font-stretch: 87.5%;
+  font-stretch: var(--axis-mono-rest-wdth);
 }
 
 .coords {
@@ -137,7 +137,7 @@
   color: var(--color-contour);
   font-family: var(--font-martian), ui-monospace, monospace;
   font-size: max(9.5px, 2.5cqi);
-  font-stretch: 87.5%;
+  font-stretch: var(--axis-mono-rest-wdth);
   letter-spacing: 0.14em;
   line-height: 1.5;
   text-overflow: ellipsis;
@@ -238,7 +238,7 @@
   border-radius: 1cqi;
   background: var(--color-ground-raised);
   font-size: max(11.5px, 3.2cqi);
-  font-stretch: 88%;
+  font-stretch: var(--type-condensed-wdth);
   font-weight: 600;
   line-height: 1.2;
 }
@@ -313,7 +313,7 @@
   color: var(--color-contour);
   font-family: var(--font-martian), ui-monospace, monospace;
   font-size: max(8.5px, 2.25cqi);
-  font-stretch: 87.5%;
+  font-stretch: var(--axis-mono-rest-wdth);
   letter-spacing: 0.14em;
   text-overflow: ellipsis;
   text-transform: uppercase;
@@ -325,7 +325,7 @@
   color: var(--color-sheet);
   font-family: var(--font-martian), ui-monospace, monospace;
   font-size: max(20px, 5cqi);
-  font-stretch: 87.5%;
+  font-stretch: var(--axis-mono-rest-wdth);
   font-weight: 700;
   line-height: 1.1;
   white-space: nowrap;
@@ -339,7 +339,7 @@
   color: var(--color-contour);
   font-family: var(--font-martian), ui-monospace, monospace;
   font-size: max(9px, 2.3cqi);
-  font-stretch: 87.5%;
+  font-stretch: var(--axis-mono-rest-wdth);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -445,7 +445,7 @@
 }
 
 @media (any-pointer: coarse) {
-  .card[data-shimmer="true"] .glare {
+  :root[data-motion="full"] .card[data-shimmer="true"] .glare {
     inset: -50%;
     background: radial-gradient(
       closest-side circle at 50% 50%,
@@ -514,8 +514,6 @@
   opacity: 0;
   transition: none;
 }
-
-/* -------------------------------------------------------- reduced motion */
 
 /* ------------------------------------------------- return: card reassembly
    Coming back from the card's page, the card is rebuilt around its landed artwork
@@ -620,38 +618,52 @@
   }
 }
 
-:root[data-motion="reduced"] .card[data-reassemble] *,
-:root[data-motion="reduced"] .card[data-reassemble] .face::before {
+/* -------------------------------------------------------------- motion modes */
+
+/* The reassembly is part of the return transition: still mode has no view transitions, so a
+   card caught mid-rebuild when the OS switches simply shows. Calm keeps it, like the morph. */
+:root[data-motion="still"] .card[data-reassemble] *,
+:root[data-motion="still"] .card[data-reassemble] .face::before {
   animation: none !important;
   opacity: 1;
   transform: none;
 }
 
-:root[data-motion="reduced"] .tilt {
+/* Tilt, the pointer glare and the touch shimmer are full motion only: calm and still show a
+   flat card with static foil. */
+:root:not([data-motion="full"]) .tilt {
   transform: none;
 }
 
-/* Static foil, no pointer tracking, no shimmer. */
-:root[data-motion="reduced"] .card {
+:root:not([data-motion="full"]) .card {
   --px: 50%;
   --py: 38%;
 }
 
-:root[data-motion="reduced"] .card .glare {
-  animation: none;
-}
-
-:root[data-motion="reduced"] .foil,
-:root[data-motion="reduced"] .card[data-active="true"] .foil {
+:root:not([data-motion="full"]) .foil,
+:root:not([data-motion="full"]) .card[data-active="true"] .foil {
   opacity: 0.12;
   transition: none;
 }
 
-:root[data-motion="reduced"] .glare,
-:root[data-motion="reduced"] .openChip {
-  transition: none;
+:root:not([data-motion="full"]) .card[data-active="true"] .glare {
+  opacity: 0;
 }
 
-:root[data-motion="reduced"] .card[data-active="true"] .glare {
-  opacity: 0;
+/* Still: the open chip only fades (opacity within --dur-still); nothing moves. */
+:root[data-motion="still"] .openChip {
+  transform: none;
+  transition: opacity var(--dur-still) var(--ease-settle);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card[data-reassemble] *,
+  .card[data-reassemble] .face::before {
+    animation: none !important;
+  }
+
+  .openChip {
+    transform: none;
+    transition: none;
+  }
 }

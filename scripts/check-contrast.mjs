@@ -101,7 +101,7 @@ for (const line of lineColours) {
 }
 
 // Display type hover shine: the rest colour mixed at most half way towards glacier (oklab; the
-// luminance stays between the two ends; KineticText.module.css), over a heading zone's
+// luminance stays between the two ends; SettleText.module.css), over a heading zone's
 // brightest line.
 console.log("\nDisplay type hover shine (rest colour → half way to glacier, heading zone):");
 const zoneWorst = Math.max(...lineColours.map((line) => lumRgb(zoneBg(line))));

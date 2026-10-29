@@ -1,0 +1,72 @@
+/*
+ * The glint: one mint pass across text (dark surfaces), or a 1 px moss-ink rule drawing under it
+ * (the light sheet). An aria-hidden copy of the text lies over the original with transparent
+ * letters, and its background (a band --glint-band wide at --glint-angle) is clipped to those
+ * letters; the band moves by animating a registered gradient position, --glint-x. The copy sits
+ * on top, so it works whatever colour the letters below set for themselves (shine, rest colour),
+ * and nothing but that one layer repaints. Full motion only.
+ */
+@property --glint-x {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: -20%;
+}
+
+.glint {
+  position: absolute;
+  inset: 0;
+  color: transparent;
+  text-shadow: none;
+  background-image: linear-gradient(
+    var(--glint-angle),
+    transparent calc(var(--glint-x) - var(--glint-band) / 2),
+    var(--glint-color) var(--glint-x),
+    transparent calc(var(--glint-x) + var(--glint-band) / 2)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  pointer-events: none;
+  user-select: none;
+  visibility: hidden;
+}
+
+.rule {
+  position: absolute;
+  inset: auto 0 -0.12em;
+  height: 1px;
+  background: var(--color-moss-ink);
+  transform: scaleX(0);
+  transform-origin: left center;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+@keyframes glint-pass {
+  from {
+    --glint-x: calc(var(--glint-band) / -2);
+  }
+  to {
+    --glint-x: calc(100% + var(--glint-band) / 2);
+  }
+}
+
+@keyframes glint-rule {
+  60% {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+:root[data-motion="full"] .glint[data-glint="play"] {
+  visibility: visible;
+  animation: glint-pass var(--dur-glint) var(--ease-glint) both;
+}
+
+:root[data-motion="full"] .rule[data-glint="play"] {
+  visibility: visible;
+  animation: glint-rule var(--dur-glint) var(--ease-glint) both;
+}

@@ -71,8 +71,8 @@
   box-shadow: 0 0 0 4px rgb(200 245 176 / 0.18);
 }
 
-:root[data-motion="full"] .item::before,
-:root[data-motion="full"] .item::after {
+:root:is([data-motion="full"], [data-motion="calm"]) .item::before,
+:root:is([data-motion="full"], [data-motion="calm"]) .item::after {
   transition:
     background-color var(--dur-medium) var(--ease-trail),
     border-color var(--dur-medium) var(--ease-trail),

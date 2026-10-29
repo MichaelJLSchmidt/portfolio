@@ -3,8 +3,9 @@
 import { useEffect, useRef, type CSSProperties } from "react";
 import profile from "@terrain/profile.json";
 import type { Milestone } from "@/content/about";
-import { KineticText } from "@/components/type/KineticText";
-import { useReducedMotion } from "@/lib/motion-preference";
+import { SettleText } from "@/components/motion/SettleText";
+import { formatInteger } from "@/lib/format";
+import { useMotionMode } from "@/lib/motion-mode";
 import styles from "./AscentProfile.module.css";
 
 /**
@@ -12,8 +13,9 @@ import styles from "./AscentProfile.module.css";
  * terrain sampled along the leader card's trail; milestone plaques scroll beneath it, and
  * the climbed part of the line, a climber marker and an altitude readout follow the scroll
  * directly (painted in the scroll handler, no easing, so they never trail the finger).
- * The ordered list is the content; the chart is decorative. Without JS or with reduced
- * motion the whole line is drawn and every milestone is shown.
+ * The ordered list is the content; the chart is decorative. Without JS or in still mode the
+ * whole line is drawn and every milestone is shown; calm follows the scroll like full (a
+ * readout of the reader's own scrolling, not ambient motion).
  */
 
 const W = 1000;
@@ -42,7 +44,6 @@ const area = `${line}L${xOf(profile.lengthKm).toFixed(1)} ${H - PAD.bottom}L${xO
 const gridLines = Array.from({ length: Math.floor(yMax / 500) }, (_, i) => (i + 1) * 500).filter((m) => m > yMin && m < yMax);
 
 const pct = (v: number, total: number) => `${((v / total) * 100).toFixed(3)}%`;
-const numberFormat = new Intl.NumberFormat("de-CH", { maximumFractionDigits: 0 });
 
 export type AscentLabels = {
   heading: string;
@@ -65,14 +66,15 @@ export function AscentProfile({
   const stepsRef = useRef<HTMLOListElement>(null);
   const altRef = useRef<HTMLSpanElement>(null);
   const kmRef = useRef<HTMLSpanElement>(null);
-  const reduced = useReducedMotion();
+  const { mode } = useMotionMode();
+  const still = mode === "still";
 
   useEffect(() => {
     const root = rootRef.current;
     const list = stepsRef.current;
-    // Reduced motion keeps the static state from the server: full line, every milestone.
-    // (The hook reports reduced during hydration; the resolved attribute decides.)
-    if (!root || !list || reduced || document.documentElement.getAttribute("data-motion") === "reduced") return;
+    // Still mode keeps the static state from the server: full line, every milestone.
+    // (The hook reports still during hydration; the resolved attribute decides.)
+    if (!root || !list || still || document.documentElement.getAttribute("data-motion") === "still") return;
     const steps = [...list.querySelectorAll<HTMLLIElement>(":scope > li")];
     const progress = () => {
       // Focus line: halfway down the space left below the pinned chart.
@@ -103,7 +105,7 @@ export function AscentProfile({
       root.style.setProperty("--p", p.toFixed(4));
       root.style.setProperty("--cx", pct(xOf(p * profile.lengthKm), W));
       root.style.setProperty("--cy", pct(yOf(elevationAt(p)), H));
-      if (altRef.current) altRef.current.textContent = `${numberFormat.format(elevationAt(p))} m`;
+      if (altRef.current) altRef.current.textContent = `${formatInteger(elevationAt(p))} m`;
       if (kmRef.current) kmRef.current.textContent = (p * profile.lengthKm).toFixed(1);
       steps.forEach((s, i) => s.toggleAttribute("data-reached", milestones[i].at <= p + 0.004));
     };
@@ -118,16 +120,16 @@ export function AscentProfile({
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
-      // Back to the static state (e.g. Calm map switched on).
+      // Back to the static state (e.g. the OS switched to reduced motion).
       root.removeAttribute("data-live");
       paint(1);
     };
-  }, [milestones, reduced]);
+  }, [milestones, still]);
 
   return (
     <section ref={rootRef} className={styles.ascent} aria-labelledby="ascent-heading" style={{ "--p": 1 } as CSSProperties} data-vt-exit>
       <header className={styles.header} data-quiet-zone>
-        <KineticText as="h2" id="ascent-heading" text={labels.heading} className={`${styles.heading} display`} play="inview" />
+        <SettleText as="h2" id="ascent-heading" text={labels.heading} className={`${styles.heading} display`} trigger="inview" />
         <p className="body-copy">{labels.intro}</p>
       </header>
 
@@ -156,7 +158,7 @@ export function AscentProfile({
               .filter((m) => m % 1000 === 0)
               .map((m) => (
                 <span key={m} className={`${styles.gridLabel} hud-label`} style={{ top: pct(yOf(m), H) }}>
-                  {numberFormat.format(m)} m
+                  {formatInteger(m)} m
                 </span>
               ))}
             {stops.map((s) => (
@@ -182,7 +184,7 @@ export function AscentProfile({
             ))}
             <span className={styles.climber} />
             <p className={`${styles.readout} hud-label`}>
-              {labels.readout.altitude} <span ref={altRef}>{numberFormat.format(profile.elevation.max)} m</span> · {labels.readout.distance}{" "}
+              {labels.readout.altitude} <span ref={altRef}>{formatInteger(profile.elevation.max)} m</span> · {labels.readout.distance}{" "}
               <span ref={kmRef}>{profile.lengthKm.toFixed(1)}</span>
             </p>
           </div>

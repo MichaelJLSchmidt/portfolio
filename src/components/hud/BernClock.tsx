@@ -9,8 +9,12 @@ const format = new Intl.DateTimeFormat("en-GB", {
   hourCycle: "h23",
 });
 
-/** Live Bern time. Minute precision keeps the instrument calm (no per-second flicker). */
-export function BernClock({ label }: { label: string }) {
+/**
+ * Live Bern time. Minute precision keeps the instrument calm (no per-second flicker). The time
+ * keeps a fixed width (5ch, tabular figures), so filling in the "--:--" placeholder after
+ * hydration never moves the HUD.
+ */
+export function BernClock({ label, className }: { label: string; className?: string }) {
   const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
@@ -31,7 +35,7 @@ export function BernClock({ label }: { label: string }) {
   return (
     <span>
       {label}{" "}
-      <time dateTime={now?.toISOString()} suppressHydrationWarning>
+      <time className={className} dateTime={now?.toISOString()} suppressHydrationWarning>
         {now ? format.format(now) : "--:--"}
       </time>
     </span>

@@ -1,0 +1,190 @@
+/*
+ * The signature link (SignatureLink.tsx). One "on" switch, --on, is set by hover (fine pointers,
+ * under (hover: hover), so a tap never leaves a sticky hover) and by keyboard focus alike, and
+ * every declaration reads it: focus gets exactly the hover motion by construction.
+ *
+ *   breath   letters widen left to right (--l-in ripple per letter), and settle back right to
+ *            left (--l-out), each over --dur-breath; the whole breath stays within the response
+ *            budget going in and --dur-breath-out coming back;
+ *   nudge    the arrow moves --dist-nudge;
+ *   press    the weight narrows to the role's press axes (--dur-tap);
+ *   colour   the label mixes from its rest colour (--l-rest-color) to glacier (still mode keeps
+ *            only this, within --dur-still).
+ */
+.link {
+  --on: 0;
+  --press: 0;
+  --l-rest-wdth: var(--axis-label-rest-wdth);
+  --l-rest-wght: var(--axis-label-rest-wght);
+  --l-breath-wdth: var(--axis-label-hover-wdth);
+  --l-breath-wght: var(--axis-label-hover-wght);
+  --l-press-wdth: var(--axis-label-press-wdth);
+  --l-press-wght: var(--axis-label-press-wght);
+  --l-rest-color: var(--color-sheet);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.label,
+.phrase {
+  color: color-mix(in oklab, var(--l-rest-color), var(--color-glacier) calc(var(--on) * 100%));
+  transition: color var(--dur-still) var(--ease-settle);
+}
+
+.link[data-variant="display"] {
+  --l-rest-wdth: var(--axis-display-rest-wdth);
+  --l-rest-wght: var(--axis-display-rest-wght);
+  --l-breath-wdth: var(--axis-display-hover-wdth);
+  --l-breath-wght: var(--axis-display-hover-wght);
+  --l-press-wdth: var(--axis-display-press-wdth);
+  --l-press-wght: var(--axis-display-press-wght);
+}
+
+.link:focus-visible {
+  --on: 1;
+}
+
+@media (hover: hover) {
+  .link:hover {
+    --on: 1;
+  }
+}
+
+.link:active {
+  --press: 1;
+}
+
+/* The motion lab shows each state side by side (data-lab-state, review pages only). */
+.link[data-lab-state="on"] {
+  --on: 1;
+}
+
+.link[data-lab-state="press"] {
+  --on: 1;
+  --press: 1;
+}
+
+/* ---------------------------------------------------------------- breath variants */
+
+.label {
+  display: inline-grid;
+  position: relative;
+}
+
+.label > * {
+  grid-area: 1 / 1;
+}
+
+.ghost,
+.run {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25em;
+}
+
+/* The reserved box: the label at its breath axes, plus room for the arrow's nudge. */
+.ghost {
+  visibility: hidden;
+  font-stretch: var(--l-breath-wdth);
+  font-weight: max(var(--l-breath-wght), var(--l-rest-wght));
+  padding-inline-end: var(--dist-nudge);
+}
+
+.run {
+  justify-self: start;
+}
+
+.word {
+  position: relative;
+  display: inline-block;
+}
+
+.ch {
+  font-stretch: var(--l-rest-wdth);
+  font-weight: var(--l-rest-wght);
+}
+
+.arrow {
+  display: inline-block;
+  color: var(--color-glacier);
+}
+
+.link[data-variant="nav"][aria-current="page"] {
+  --l-rest-color: var(--color-glacier);
+}
+
+/* The current page (nav): glacier, with a contour rule under the label. */
+.link[data-variant="nav"] .label::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -0.3em;
+  height: 1px;
+  background: var(--color-glacier);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.link[data-variant="nav"][aria-current="page"] .label::after {
+  transform: none;
+}
+
+/* Full and calm: the axes and the arrow move. Still: colour only. */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .ch {
+    font-stretch: calc(var(--l-rest-wdth) + (var(--l-breath-wdth) - var(--l-rest-wdth)) * var(--on) * (1 - var(--press)) + (var(--l-press-wdth) - var(--l-rest-wdth)) * var(--press));
+    font-weight: calc(var(--l-rest-wght) + (var(--l-breath-wght) - var(--l-rest-wght)) * var(--on) * (1 - var(--press)) + (var(--l-press-wght) - var(--l-rest-wght)) * var(--press));
+    transition:
+      font-stretch var(--dur-breath) var(--ease-settle),
+      font-weight var(--dur-breath) var(--ease-settle);
+    /* In: left to right; out: right to left. The delay comes from the state being entered. */
+    transition-delay: calc(var(--on) * var(--kt-i) * var(--l-in) + (1 - var(--on)) * (var(--l-n) - 1 - var(--kt-i)) * var(--l-out));
+  }
+
+  :root:not([data-motion="still"]) .link:active .ch {
+    transition-duration: var(--dur-tap);
+    transition-delay: 0s;
+  }
+
+  :root:not([data-motion="still"]) .arrow {
+    transform: translateX(calc(var(--on) * var(--dist-nudge)));
+    transition: transform var(--dur-breath) var(--ease-settle);
+  }
+
+  :root:not([data-motion="still"]) .link[data-variant="nav"] .label::after {
+    transition: transform var(--dur-underline) var(--ease-settle);
+  }
+}
+
+/* ---------------------------------------------------------------- inline */
+
+.link[data-variant="inline"] .phrase {
+  position: relative;
+  display: inline-block;
+}
+
+/* A dim contour line always marks the link; on hover or focus a glacier line draws over it. */
+.link[data-variant="inline"] .phrase::before,
+.link[data-variant="inline"] .phrase::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -0.12em;
+  height: 1px;
+  background: var(--color-contour);
+}
+
+.link[data-variant="inline"] .phrase::after {
+  background: var(--color-glacier);
+  clip-path: inset(0 calc((1 - var(--on)) * 100%) 0 0);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .link[data-variant="inline"] .phrase::after {
+    transition: clip-path var(--dur-underline) var(--ease-settle);
+  }
+}
+
+/* The glint overlay lies over the letters at rest. */
+.glint {
+  font-stretch: var(--l-rest-wdth);
+  font-weight: var(--l-rest-wght);
+}

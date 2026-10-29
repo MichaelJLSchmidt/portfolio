@@ -18,7 +18,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, wri
 import { createRequire } from "node:module";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { BASECAMP_HOST, PRIMARY_DOMAIN, REDIRECT_DOMAINS, SITE_MODES, gate, includesExamples } from "../../src/hosting/config.ts";
+import { BASECAMP_HOST, PRIMARY_DOMAIN, REDIRECT_DOMAINS, SITE_MODES, gate, includesExamples, includesLab } from "../../src/hosting/config.ts";
 import { renderPage, serialize } from "../../src/hosting/page.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -94,6 +94,17 @@ if (mode === "construction") {
   const next = createRequire(import.meta.url).resolve("next/dist/bin/next");
   run([next, "build"]);
   if (!examples) await stripExamples();
+  // The motion lab is a review tool: never in a build without it (live), never in the sitemap.
+  const lab = includesLab(process.env);
+  if (!lab && existsSync(join(out, "lab"))) {
+    console.error("The motion lab is excluded from this build, but out/lab/ exists.");
+    process.exit(1);
+  }
+  if (existsSync(join(out, "sitemap.xml")) && readFileSync(join(out, "sitemap.xml"), "utf8").includes("/lab/")) {
+    console.error("The motion lab must never be listed in sitemap.xml.");
+    process.exit(1);
+  }
+  console.log(`Motion lab: ${lab ? "included (/lab/, noindex)" : "excluded"}`);
   if (mode === "live") {
     write("_redirects", lines(generated, domainRedirects));
     write("_headers", lines(generated, siteHeaders));

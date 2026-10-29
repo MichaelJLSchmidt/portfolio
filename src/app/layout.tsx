@@ -2,14 +2,17 @@ import type { Metadata, Viewport } from "next";
 import { archivo, archivoItalic, martianMono } from "./fonts";
 import { site } from "@/content/site";
 import { color, tokensToCss } from "@/styles/tokens";
-import { motionPreferenceScript } from "@/lib/motion-preference";
+import { motionModeScript } from "@/lib/motion-mode";
+import { springsToCss } from "@/styles/motion-css";
 import { TerrainBackdrop } from "@/components/terrain/TerrainBackdrop";
 import { Hud } from "@/components/hud/Hud";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SmoothScroll } from "@/components/SmoothScroll";
-import { CalmRouteFade } from "@/components/transition/CalmRouteFade";
+import { RouteFade } from "@/components/transition/RouteFade";
 import { HistoryTransitions } from "@/components/transition/HistoryTransitions";
+import { Reveals } from "@/components/motion/Reveals";
 import "./globals.css";
+import "@/styles/motion.css";
 
 const isPreview = process.env.NEXT_PUBLIC_PREVIEW === "1";
 
@@ -29,8 +32,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang={site.lang} className={`${archivo.variable} ${archivoItalic.variable} ${martianMono.variable}`} suppressHydrationWarning>
       <head>
-        <style dangerouslySetInnerHTML={{ __html: tokensToCss() }} />
-        <script dangerouslySetInnerHTML={{ __html: motionPreferenceScript }} />
+        <style dangerouslySetInnerHTML={{ __html: tokensToCss() + springsToCss() }} />
+        <script dangerouslySetInnerHTML={{ __html: motionModeScript }} />
       </head>
       <body>
         <a className="skip-link" href="#main">
@@ -39,7 +42,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <TerrainBackdrop />
         <SmoothScroll />
         <HistoryTransitions />
-        <CalmRouteFade />
+        <RouteFade />
+        <Reveals />
         <Hud />
         <div className="page">
           {children}

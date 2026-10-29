@@ -2,7 +2,11 @@
 // NEXT_PUBLIC_BASE_PATH=/portfolio NEXT_PUBLIC_PREVIEW=1 npm run build):
 //
 //   npm run test:e2e                  all scenarios
-//   npm run test:e2e -- transitions   aborted view transitions; Calm map and reduced motion
+//   npm run test:e2e -- transitions   aborted view transitions; the calm and still motion modes
+//   npm run test:e2e -- modes         full, calm and still on a card → case study → next round trip
+//   npm run test:e2e -- hydration     direct loads of every route: no hydration or console errors
+//   npm run test:e2e -- primitives    the motion lab: layout shift per primitive, focus parity
+//                                     (needs a build with the lab: SITE_MODE=basecamp or a preview)
 //   npm run test:e2e -- decode        heightmap decode check and its fallbacks
 //   npm run test:e2e -- casestudy     the case-study template on the example page (needs a build
 //                                     that includes examples: SITE_MODE=basecamp or a preview)
@@ -162,7 +166,7 @@ async function settle(page, { path, terrain }) {
       main,
       h1,
       ...(h1?.querySelectorAll('[class*="glyph"]') ?? []),
-      ...(main?.querySelectorAll(".reveal, [style*='view-transition-name']") ?? []),
+      ...(main?.querySelectorAll("[data-reveal], [style*='view-transition-name']") ?? []),
       // The deck cards after a return: every part rebuilt, the name readable.
       ...(main?.querySelectorAll("article[data-slug] [class*='nameBar'], article[data-slug] [class*='typeLine'], article[data-slug] [class*='rules'], article[data-slug] [class*='stats'], article[data-slug] [class*='collector']") ?? []),
     ]
@@ -173,7 +177,7 @@ async function settle(page, { path, terrain }) {
     if (nameColours.some((c) => c === "rgba(0, 0, 0, 0)")) hidden.push("card name (transparent)");
     return {
       path: location.pathname,
-      h1: h1?.getAttribute("aria-label") ?? null,
+      h1: (h1?.querySelector(".visually-hidden") ?? h1)?.textContent ?? null,
       arrive: h1?.getAttribute("data-arrive") ?? null,
       hidden: [...new Set(hidden)],
       openingCards,
@@ -198,13 +202,14 @@ async function transitions() {
     { name: "full motion, transition skipped", abort: "skip" },
     { name: "full motion, DOM update times out", abort: "timeout" },
     { name: "full motion, DOM update fails", abort: "fail" },
-    { name: "Calm map (no view transitions)", calm: true },
-    { name: "reduced motion emulated (no view transitions)", reduced: true },
+    { name: "calm (Calm map switch): view transitions, still field", calm: true },
+    { name: "still (reduced motion emulated): no view transitions", reduced: true },
   ];
   for (const mode of modes) {
     console.log(`\n${mode.name}`);
     const { context, page, errors } = await open(mode);
-    const fieldOn = !mode.calm && !mode.reduced;
+    // Full and calm run the field (calm holds it still); still shows the poster.
+    const fieldOn = !mode.reduced;
     await page.goto(`${base}/?field=force`, { waitUntil: "networkidle" });
     if (fieldOn) await page.waitForSelector('[data-field="on"]', { timeout: 20000 }).catch(() => {});
     const arm = () => page.evaluate((kind) => (window.__vt.abort = kind), mode.abort ?? null);
@@ -256,7 +261,7 @@ async function transitions() {
     await page.locator(`article[data-slug="${card.slug}"] a`).first().click();
     const reopen = await settle(page, { path: card.path, terrain: fieldOn ? card.terrain : null });
     expectPage(reopen, "open again", card);
-    if (mode.calm || mode.reduced) check("no View Transition API call", reopen.native === 0, `native calls=${reopen.native}`);
+    if (mode.reduced) check("no View Transition API call", reopen.native === 0, `native calls=${reopen.native}`);
     else check("View Transition API used", reopen.native >= 5, `native calls=${reopen.native}`);
     // React reports aborted transitions as recoverable errors (window.reportError): expected
     // here, since the aborts are simulated. Anything else is a failure.
@@ -602,7 +607,253 @@ async function casestudy() {
   }
 }
 
-const scenarios = { transitions, decode, casestudy };
+// --- motion modes ---------------------------------------------------------------------------------
+// Records what moves: CSS animations and transitions by property (with their durations), inline
+// transforms written by script, glint passes, and the field's WebGL draws. Installed before load.
+const motionProbe = () => {
+  window.__motion = { anims: [], transitions: [], styleTransforms: 0, glints: 0, draws: 0 };
+  const positional = /^(transform|translate|scale|rotate|font-stretch|font-weight|font-variation-settings|left|top|right|bottom|width|height|clip-path|background-position)$/;
+  document.addEventListener(
+    "animationstart",
+    (e) => {
+      const anim = e.target.getAnimations?.().find((a) => a.animationName === e.animationName);
+      const frames = anim?.effect?.getKeyframes?.() ?? [];
+      const props = [...new Set(frames.flatMap((f) => Object.keys(f)).filter((k) => !["offset", "easing", "composite", "computedOffset"].includes(k)))];
+      const timing = anim?.effect?.getComputedTiming?.() ?? {};
+      window.__motion.anims.push({ name: e.animationName, props, positional: props.some((p) => positional.test(p.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`))), ms: timing.duration, where: e.target.className?.toString?.().slice(0, 40) ?? e.target.tagName });
+    },
+    true,
+  );
+  document.addEventListener(
+    "transitionrun",
+    (e) => {
+      const ms = parseFloat(getComputedStyle(e.target).transitionDuration) * 1000;
+      window.__motion.transitions.push({ prop: e.propertyName, positional: positional.test(e.propertyName), where: e.target.className?.toString?.().slice(0, 40) ?? e.target.tagName, ms });
+    },
+    true,
+  );
+  document.addEventListener("DOMContentLoaded", () => {
+    new MutationObserver((records) => {
+      for (const r of records) {
+        if (r.attributeName === "data-glint" && r.target.getAttribute("data-glint") === "play") window.__motion.glints++;
+        if (r.attributeName === "style" && /transform|translate/.test(r.target.getAttribute("style") ?? "") && !/view-transition/.test(r.target.getAttribute("style") ?? "")) window.__motion.styleTransforms++;
+      }
+    }).observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ["style", "data-glint"] });
+  });
+  for (const ctx of [window.WebGL2RenderingContext, window.WebGLRenderingContext].filter(Boolean)) {
+    for (const fn of ["drawArrays", "drawElements"]) {
+      const original = ctx.prototype[fn];
+      ctx.prototype[fn] = function (...args) {
+        window.__motion.draws++;
+        return original.apply(this, args);
+      };
+    }
+  }
+};
+
+async function modes() {
+  const card = { slug: "kibon", path: "/work/kibon/", terrain: "dvb-001" };
+  for (const mode of ["full", "calm", "still"]) {
+    console.log(`\nmotion mode: ${mode}`);
+    const { context, page, errors } = await open({ calm: mode === "calm", reduced: mode === "still", init: motionProbe });
+    await page.goto(`${base}/?field=force`, { waitUntil: "networkidle" });
+    if (mode !== "still") await page.waitForSelector('[data-field="on"]', { timeout: 20000 }).catch(() => {});
+    const html = await page.evaluate(() => ({ motion: document.documentElement.dataset.motion, tier: document.documentElement.dataset.tier }));
+    check(`html[data-motion="${mode}"]`, html.motion === mode, JSON.stringify(html));
+    // The switch: named, its state matches, and in still it says why it cannot turn motion back on.
+    const sw = await page.evaluate(() => {
+      const input = document.querySelector('header input[role="switch"]');
+      const desc = input?.getAttribute("aria-describedby");
+      return { name: input?.getAttribute("aria-label"), checked: input?.checked, described: desc ? document.getElementById(desc)?.textContent ?? "" : "" };
+    });
+    check("switch named “Reduce motion on this site”, state shown", sw.name === "Reduce motion on this site" && sw.checked === (mode !== "full"), JSON.stringify(sw));
+    if (mode === "still") check("still: the switch explains why it is on", /reduced motion/i.test(sw.described), sw.described);
+
+    // Hover and focus the deck heading area, open a card, try the next link, come back.
+    await page.mouse.move(400, 400);
+    await page.mouse.move(700, 450, { steps: 8 });
+    await page.locator(`article[data-slug="${card.slug}"] a`).first().click();
+    await settle(page, { path: card.path, terrain: mode === "still" ? null : card.terrain });
+    const next = page.locator('nav[aria-label] a[data-variant="display"]').first();
+    await next.scrollIntoViewIfNeeded();
+    await next.hover();
+    await page.waitForTimeout(400);
+    await page.mouse.move(5, 5);
+    await next.focus();
+    await page.keyboard.press("Shift+Tab");
+    await page.keyboard.press("Tab");
+    await page.waitForTimeout(400);
+    // Idle on the case study: no ambient field frames in calm.
+    await page.waitForTimeout(800);
+    const idleStart = await page.evaluate(() => window.__motion.draws);
+    await page.waitForTimeout(2500);
+    const idleDraws = (await page.evaluate(() => window.__motion.draws)) - idleStart;
+    // Card → case study morphs; case study → case study has no shared element yet (no View
+    // Transition); back to the deck morphs again.
+    await next.click();
+    await page.waitForTimeout(1500);
+    await page.goBack();
+    await page.waitForTimeout(1500);
+    await page.goBack();
+    await settle(page, { path: "/", terrain: mode === "still" ? null : "region" });
+    const m = await page.evaluate(() => ({ ...window.__motion, native: window.__vt.native }));
+    const moved = [...m.anims.filter((a) => a.positional).map((a) => `${a.name}@${a.where}`), ...m.transitions.filter((t) => t.positional).map((t) => `${t.prop}@${t.where}`)];
+    if (mode === "still") {
+      check("still: no transform, width or position animation", moved.length === 0 && m.styleTransforms === 0, [...new Set(moved)].slice(0, 8).join(", ") + ` styleTransforms=${m.styleTransforms}`);
+      const slow = [...m.anims.filter((a) => a.ms > 200).map((a) => `${a.name} ${a.ms}ms`), ...m.transitions.filter((t) => t.ms > 200).map((t) => `${t.prop} ${t.ms}ms`)];
+      check("still: opacity and colour changes within 200 ms", slow.length === 0, [...new Set(slow)].slice(0, 6).join(", "));
+      check("still: no View Transition API call", m.native === 0, `native calls=${m.native}`);
+    } else {
+      check(`${mode}: View Transitions run`, m.native >= 2, `native calls=${m.native}`);
+      check(`${mode}: settles and breaths animate`, moved.length > 0, `${moved.length} positional animations`);
+    }
+    if (mode === "calm") {
+      check("calm: no ambient field frames while idle", idleDraws === 0, `${idleDraws} draws in 2.5 s`);
+      check("calm: no glint", m.glints === 0, `${m.glints} glints`);
+    }
+    if (mode === "full") {
+      check("full: the field keeps its ambient frames", idleDraws > 0, `${idleDraws} draws in 2.5 s`);
+      check("full: a glint marked the first arrival or the commit", m.glints >= 1, `${m.glints} glints`);
+    }
+    check("no page errors", errors.length === 0, errors.join("; "));
+    await context.close();
+  }
+}
+
+// --- hydration ------------------------------------------------------------------------------------
+// Direct loads of every route: no hydration or console errors, and the motion attributes on <html>
+// survive hydration (a failed hydration re-creates the document and drops them).
+async function hydration() {
+  const routes = ["/", "/about/", "/work/kibon/", "/work/test-project/", "/lab/", "/lab/specimen/", "/no-such-page/"].filter(
+    (r) => r === "/no-such-page/" || existsSync(join(root, "out", r, "index.html")),
+  );
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+    console.log(`\nhydration: direct loads at ${viewport.width}×${viewport.height}`);
+    for (const route of routes) {
+      const context = await browser.newContext({ viewport });
+      const page = await context.newPage();
+      const problems = [];
+      page.on("pageerror", (e) => problems.push(e.message.slice(0, 160)));
+      page.on("console", (m) => {
+        // The 404 page's own document request is expected to fail.
+        if (m.type() === "error" && !(route === "/no-such-page/" && /404/.test(m.text()))) problems.push(m.text().slice(0, 160));
+      });
+      await page.goto(`${base}${route}`, { waitUntil: "networkidle" });
+      await page.waitForTimeout(600);
+      const attrs = await page.evaluate(() => ["data-motion", "data-tier", "data-calm", "data-intro"].map((a) => `${a}=${document.documentElement.getAttribute(a)}`));
+      check(`${route}: no hydration or console errors`, problems.length === 0, problems.join(" | "));
+      check(`${route}: motion attributes kept`, !attrs.some((a) => a.endsWith("=null")), attrs.join(" "));
+      await context.close();
+    }
+  }
+}
+
+// --- primitives (motion lab) ----------------------------------------------------------------------
+// Each primitive is exercised on the lab's specimen sheet (hover, focus and press on everything
+// interactive, replay and glint buttons, the reveals scrolled into view) and its layout shift
+// summed from every shift whose sources lie inside it, input or not (at most 0.005 each). Focus parity: keyboard
+// focus gives the signature link exactly the hover state.
+async function primitives() {
+  if (!existsSync(join(root, "out/lab/specimen/index.html"))) {
+    console.log("\nprimitives: skipped (no motion lab in this build; build with SITE_MODE=basecamp)");
+    return;
+  }
+  for (const mode of ["full", "calm", "still"]) {
+    console.log(`\nprimitives: layout shift in ${mode}`);
+    const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: mode === "still" ? "reduce" : "no-preference" });
+    await context.addInitScript(() => {
+      window.__shifts = [];
+      new PerformanceObserver((list) => {
+        for (const e of list.getEntries()) window.__shifts.push({ value: e.value, nodes: e.sources.map((s) => s.node).filter(Boolean) });
+      }).observe({ type: "layout-shift", buffered: true });
+    });
+    const page = await context.newPage();
+    const errors = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+    await page.goto(`${base}/lab/specimen/?motion=${mode}`, { waitUntil: "networkidle" });
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForTimeout(1200);
+    const sections = await page.$$eval("[data-primitive]", (els) => els.map((e) => e.dataset.primitive));
+    for (const name of sections) {
+      const section = page.locator(`[data-primitive="${name}"]`);
+      await section.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(500);
+      // Only what the primitive's own motion shifts: loading (the web fonts' swap) is not part of it.
+      await page.evaluate(() => (window.__shifts.length = 0));
+      // Everything interactive in it: hover, focus, press; then the replay and glint buttons.
+      const targets = section.locator("a, button");
+      const n = await targets.count();
+      for (let i = 0; i < n; i++) {
+        const t = targets.nth(i);
+        if (!(await t.isVisible())) continue;
+        await t.hover();
+        await page.waitForTimeout(120);
+        const box = await t.boundingBox();
+        if (box && (await t.evaluate((el) => el.tagName === "BUTTON"))) {
+          await page.mouse.down();
+          await page.waitForTimeout(80);
+          await page.mouse.up();
+        }
+        await t.focus();
+      }
+      await page.mouse.move(2, 2);
+      await page.waitForTimeout(1300);
+      const cls = await page.evaluate((name) => {
+        const root = document.querySelector(`[data-primitive="${name}"]`);
+        return window.__shifts.filter((s) => s.nodes.some((n) => root.contains(n))).reduce((sum, s) => sum + s.value, 0);
+      }, name);
+      check(`${name}: layout shift ≤ 0.005`, cls <= 0.005, cls.toFixed(4));
+    }
+    check("no page errors", errors.length === 0, errors.join("; "));
+    await context.close();
+  }
+
+  console.log("\nprimitives: signature link focus parity");
+  for (const where of ["lab", "case study"]) {
+    const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const page = await context.newPage();
+    await page.goto(where === "lab" ? `${base}/lab/specimen/?motion=full` : `${base}/work/kibon/`, { waitUntil: "networkidle" });
+    const link = where === "lab" ? page.locator('a[data-variant="display"][data-lab-state="rest"]').first() : page.locator('a[data-variant="display"]').first();
+    await link.scrollIntoViewIfNeeded();
+    const state = () =>
+      link.evaluate((a) => ({
+        letters: [...a.querySelectorAll("[style*='--kt-i']")].map((c) => `${getComputedStyle(c).fontStretch}/${getComputedStyle(c).fontWeight}`).join(" "),
+        arrow: [...a.querySelectorAll("span")].filter((s) => s.textContent === "→" && s.getClientRects().length).map((s) => getComputedStyle(s).transform).join(" "),
+        colour: getComputedStyle(a.querySelector("span[class*='label']") ?? a).color,
+      }));
+    const rest = await state();
+    await link.hover();
+    await page.waitForTimeout(700);
+    const hovered = await state();
+    await page.mouse.move(2, 2);
+    await page.waitForTimeout(700);
+    await link.focus();
+    await page.keyboard.press("Shift+Tab");
+    await page.keyboard.press("Tab");
+    await page.waitForTimeout(700);
+    const focused = await state();
+    check(`${where}: hover changes the link`, JSON.stringify(rest) !== JSON.stringify(hovered), JSON.stringify(hovered).slice(0, 120));
+    check(`${where}: keyboard focus gives exactly the hover motion`, JSON.stringify(hovered) === JSON.stringify(focused), `${JSON.stringify(hovered).slice(0, 90)} vs ${JSON.stringify(focused).slice(0, 90)}`);
+    await context.close();
+  }
+
+  // Touch: no sticky hover after a tap ((hover: hover) guards).
+  {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    const page = await context.newPage();
+    await page.goto(`${base}/lab/specimen/?motion=full`, { waitUntil: "networkidle" });
+    const link = page.locator('a[data-variant="standalone"][data-lab-state="rest"]').first();
+    await link.scrollIntoViewIfNeeded();
+    const before = await link.evaluate((a) => getComputedStyle(a).getPropertyValue("--on").trim());
+    await link.tap();
+    await page.waitForTimeout(400);
+    const after = await link.evaluate((a) => (a.matches(":focus-visible") ? "focus" : getComputedStyle(a).getPropertyValue("--on").trim()));
+    check("touch: a tap leaves no sticky hover", before === "0" && after === "0", `before=${before} after=${after}`);
+    await context.close();
+  }
+}
+
+const scenarios = { transitions, modes, hydration, primitives, decode, casestudy };
 try {
   for (const [name, run] of Object.entries(scenarios)) if (!only || only === name) await run();
 } finally {

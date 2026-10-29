@@ -1,7 +1,7 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: var(--layer-backdrop);
   overflow: hidden;
   pointer-events: none;
   background: var(--color-ground);
@@ -81,7 +81,7 @@
   position: fixed;
   right: 16px;
   bottom: max(16px, env(safe-area-inset-bottom));
-  z-index: 40;
+  z-index: var(--layer-overlay);
   min-height: 44px;
   padding: 0 16px;
   border: 1px solid var(--color-contour);
@@ -91,12 +91,15 @@
   cursor: pointer;
 }
 
-.skip:hover {
-  border-color: var(--color-glacier);
-  color: var(--color-glacier);
+@media (hover: hover) {
+  .skip:hover {
+    border-color: var(--color-glacier);
+    color: var(--color-glacier);
+  }
 }
 
-/* Without the WebGL field the poster still breathes: a slow, compositor-only drift. */
+/* Without the WebGL field the poster still breathes: a slow, compositor-only drift (an
+   auto-playing loop: full motion only). */
 @keyframes poster-drift {
   from {
     transform: scale(1.06) translate3d(-1%, 0.6%, 0);
@@ -118,8 +121,8 @@
     poster-drift 48s var(--ease-summit) infinite alternate;
 }
 
-:root[data-motion="reduced"] .poster,
-:root[data-motion="reduced"] .canvas,
-:root[data-motion="reduced"] .vignette {
+:root[data-motion="still"] .poster,
+:root[data-motion="still"] .canvas,
+:root[data-motion="still"] .vignette {
   transition: none;
 }

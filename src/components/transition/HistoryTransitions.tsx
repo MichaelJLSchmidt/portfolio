@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { calmNavigation } from "@/lib/view-transition";
+import { stillNavigation } from "@/lib/view-transition";
 import { watchNavigationIntent } from "./return-transition";
 
 /**
@@ -10,8 +10,8 @@ import { watchNavigationIntent } from "./return-transition";
  * listener runs before Next's (capture phase), holds the event back and replays it on
  * the next task, where React treats it as a regular transition and runs the same
  * <ViewTransition> morph in reverse. Skipped when the browser already animated the
- * gesture itself (e.g. swipe back), and with Calm map / reduced motion, where navigation
- * runs without View Transitions.
+ * gesture itself (e.g. swipe back), and in still mode, where navigation runs without View
+ * Transitions.
  */
 let replaying = false;
 
@@ -22,7 +22,7 @@ export function HistoryTransitions() {
   useEffect(() => {
     if (typeof document.startViewTransition !== "function") return;
     const onPopState = (event: PopStateEvent & { hasUAVisualTransition?: boolean }) => {
-      if (replaying || event.hasUAVisualTransition || calmNavigation()) return;
+      if (replaying || event.hasUAVisualTransition || stillNavigation()) return;
       event.stopImmediatePropagation();
       const state = event.state;
       setTimeout(() => {

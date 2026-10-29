@@ -1,7 +1,7 @@
 "use client";
 
 import { useSyncExternalStore, type CSSProperties } from "react";
-import { KineticText } from "@/components/type/KineticText";
+import { SettleText } from "@/components/motion/SettleText";
 import { nameLines } from "@/lib/name-lines";
 
 // Dev and preview builds only: ?name=… shows the hero with another name, to check the layout
@@ -17,13 +17,13 @@ export function HeroName({ name, className }: { name: string; className?: string
   const lines = nameLines(override ?? name);
   const chars = Math.max(...lines.map((l) => l.length));
   return (
-    <KineticText
+    <SettleText
       as="h1"
       id="hero-name"
       text={lines.join("\n")}
       className={className}
-      delay={120}
-      proximity
+      shine
+      glint
       quiet
       style={{ "--name-chars": chars } as CSSProperties}
     />

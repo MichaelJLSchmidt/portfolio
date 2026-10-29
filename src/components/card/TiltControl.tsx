@@ -1,16 +1,16 @@
 "use client";
 
-import { useReducedMotion } from "@/lib/motion-preference";
+import { useMotionMode } from "@/lib/motion-mode";
 import { disableGyro, enableGyro, useGyroStatus } from "./gyro";
 import styles from "./Deck.module.css";
 
 type Labels = { enable: string; resume: string; on: string };
 
-/** Touch-only: gyroscope tilt starts only after this explicit tap. */
+/** Touch-only: gyroscope tilt starts only after this explicit tap. Full motion only (tilt stops in calm). */
 export function TiltControl({ labels }: { labels: Labels }) {
   const status = useGyroStatus();
-  const reduced = useReducedMotion();
-  if (status === "unavailable" || reduced) return null;
+  const { mode } = useMotionMode();
+  if (status === "unavailable" || mode !== "full") return null;
   const on = status === "on";
   return (
     <button

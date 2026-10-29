@@ -286,11 +286,19 @@
   }
 }
 
-:root[data-motion="reduced"] .plaque {
+/* Still: plaques in place, colour changes instant. */
+:root[data-motion="still"] .plaque {
   transform: none;
   transition: none;
 }
 
-:root[data-motion="reduced"] .index {
+:root[data-motion="still"] .index {
   transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plaque {
+    transform: none;
+    transition: none;
+  }
 }

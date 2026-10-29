@@ -37,7 +37,7 @@
   color: var(--color-sheet-ink);
   font-family: var(--font-martian), ui-monospace, monospace;
   font-size: var(--type-hud-size);
-  font-stretch: calc(var(--type-hud-wdth) * 1%);
+  font-stretch: var(--axis-mono-rest-wdth);
   letter-spacing: var(--type-hud-tracking);
   text-transform: uppercase;
 }
@@ -57,7 +57,7 @@
   font-family: var(--font-martian), ui-monospace, monospace;
   font-size: 1.3rem;
   font-weight: 700;
-  font-stretch: 87.5%;
+  font-stretch: var(--axis-mono-rest-wdth);
 }
 
 /* A stat that is a phrase ("~2,800 applications a year …"): text, set a little heavier. */

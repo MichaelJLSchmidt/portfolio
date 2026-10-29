@@ -41,6 +41,14 @@ export function includesExamples(env: Record<string, string | undefined>, dev = 
   return dev || env.NEXT_PUBLIC_PREVIEW === "1";
 }
 
+/**
+ * The motion lab (/lab/: every motion primitive in full, calm and still side by side) is a review
+ * tool: it exists exactly where flagged examples do (basecamp builds, local previews and
+ * `npm run dev`) and never in a live build. Its pages are named page.lab.tsx and only become
+ * routes where next.config.ts adds that extension.
+ */
+export const includesLab = includesExamples;
+
 export const gate = {
   /** Host-only cookie: Secure, Path=/ and no Domain attribute are required by the prefix. */
   cookie: "__Host-basecamp",

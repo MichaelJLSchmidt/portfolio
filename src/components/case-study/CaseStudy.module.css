@@ -42,7 +42,7 @@
   color: var(--color-sheet);
   font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.6rem);
   font-weight: 760;
-  font-stretch: 85%;
+  font-stretch: var(--type-finding-wdth);
   line-height: 1.08;
   letter-spacing: -0.01em;
   text-wrap: balance;
@@ -162,7 +162,7 @@
 .insightText {
   font-size: clamp(1.4rem, 1.05rem + 1.3vw, 2rem);
   font-weight: 720;
-  font-stretch: 88%;
+  font-stretch: var(--type-condensed-wdth);
   line-height: 1.2;
   text-wrap: balance;
 }
@@ -206,7 +206,7 @@
   color: var(--color-sheet);
   font-size: clamp(1.25rem, 1rem + 0.9vw, 1.6rem);
   font-weight: 760;
-  font-stretch: 88%;
+  font-stretch: var(--type-condensed-wdth);
   line-height: 1.15;
   scroll-margin-top: 96px;
 }
@@ -339,7 +339,7 @@
   font-family: var(--font-martian), ui-monospace, monospace;
   font-size: clamp(2rem, 1.5rem + 1.6vw, 2.6rem);
   font-weight: 700;
-  font-stretch: 87.5%;
+  font-stretch: var(--axis-mono-rest-wdth);
   line-height: 1.05;
 }
 

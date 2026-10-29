@@ -8,12 +8,17 @@ import { terrainIdForPath } from "@/content/cards";
 import { site } from "@/content/site";
 import { asset } from "@/lib/asset";
 import { whenIdle } from "@/lib/idle";
-import { cancelPendingIntro, useReducedMotion } from "@/lib/motion-preference";
+import { cancelPendingIntro, useMotionMode } from "@/lib/motion-mode";
 import { deviceProfile, fieldConfig, posterMedia, type DeviceProfile } from "./field-settings";
 import { fieldStore, useFieldStore } from "./field-store";
 import styles from "./TerrainBackdrop.module.css";
 
-type FieldComponent = ComponentType<{ profile: DeviceProfile; paused: boolean; onReady: () => void }>;
+type FieldComponent = ComponentType<{ profile: DeviceProfile; paused: boolean; calm: boolean; onReady: () => void }>;
+
+// The motion lab's frames (data-lab-frame) show the primitives alone, without the field. Only
+// builds with the lab carry the check.
+const previewable = process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_PREVIEW === "1";
+const labFrame = () => previewable && !!document.querySelector("[data-lab-frame]");
 
 // Dev-only tuning panel: the branch is removed from production builds.
 const DevTuning =
@@ -47,11 +52,13 @@ const finePosterMedia = posterMedia(meta.heightmaps, finePoster.intervalM, field
 
 /**
  * Fixed backdrop behind all content. First paint is the static contour poster (also the
- * reduced-motion and no-WebGL fallback); the WebGL field loads after the page is idle
- * and takes over once its first frame is drawn. Lives in the root layout: never remounts.
+ * still-mode and no-WebGL fallback); the WebGL field loads after the page is idle in full and
+ * calm (where it holds still and only morphs) and takes over once its first frame is drawn.
+ * Lives in the root layout: never remounts.
  */
 export function TerrainBackdrop() {
-  const reduced = useReducedMotion();
+  const { mode: motion } = useMotionMode();
+  const still = motion === "still";
   const pathname = usePathname();
   const mode = useFieldStore((s) => s.mode);
   const introPlaying = useFieldStore((s) => s.introPlaying);
@@ -63,14 +70,15 @@ export function TerrainBackdrop() {
   }, [pathname]);
 
   useEffect(() => {
-    // `reduced` is true during hydration (server snapshot), so read the resolved attribute
-    // before cancelling the intro; otherwise every first visit would lose it.
-    if (document.documentElement.getAttribute("data-motion") === "reduced") cancelPendingIntro();
-    if (reduced || field) return;
+    // The hook reports still during hydration (server snapshot), so read the resolved attribute
+    // before cancelling the intro; otherwise every first visit would lose it. The intro sweep
+    // plays in full motion only.
+    if (document.documentElement.getAttribute("data-motion") !== "full") cancelPendingIntro();
+    if (still || field) return;
     let cancelled = false;
     whenIdle(() => {
       if (cancelled) return;
-      if (!canRunField()) {
+      if (!canRunField() || labFrame()) {
         cancelPendingIntro();
         return;
       }
@@ -81,15 +89,16 @@ export function TerrainBackdrop() {
     return () => {
       cancelled = true;
     };
-  }, [reduced, field]);
+  }, [still, field]);
 
-  const showField = mode === "field" && !reduced;
+  const showField = mode === "field" && !still;
   const focus = meta.region.focus;
 
   return (
     <>
       <div
         className={styles.backdrop}
+        data-chrome=""
         data-field={showField ? "on" : "off"}
         data-terrain={showField ? (shownTerrain ?? "region") : undefined}
         aria-hidden="true"
@@ -110,7 +119,8 @@ export function TerrainBackdrop() {
           <div className={styles.canvas}>
             <field.Component
               profile={field.profile}
-              paused={reduced}
+              paused={still}
+              calm={motion === "calm"}
               onReady={() => fieldStore.set({ mode: "field" })}
             />
           </div>

@@ -99,6 +99,13 @@ export function beginReturn(): ReturnRun | null {
       finishReassembly();
       card.setAttribute("data-reassemble", "");
       reassembling = { card, timer: window.setTimeout(finishReassembly, REASSEMBLE_MS) };
+      // Done the moment its last part (the name shine) has played; the timer is the fallback.
+      const onEnd = (e: Event) => {
+        if (!(e as AnimationEvent).animationName.includes("card-name-shine")) return;
+        card.removeEventListener("animationend", onEnd);
+        if (reassembling?.card === card) finishReassembly();
+      };
+      card.addEventListener("animationend", onEnd);
     },
     finished() {
       unname();
