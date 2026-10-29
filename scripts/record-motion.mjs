@@ -80,7 +80,9 @@ const pause = (page, ms) => page.waitForTimeout(ms);
 try {
   console.log(`Recording into ${outDir}`);
   await record("lab", {}, async (page) => {
-    await page.goto(`${base}/lab/`, { waitUntil: "networkidle" });
+    // The lab signals when its three frames have hydrated (networkidle is unreliable there).
+    await page.goto(`${base}/lab/`, { waitUntil: "load" });
+    await page.waitForSelector("html[data-lab-ready]", { state: "attached", timeout: 30000 });
     await pause(page, 2500);
     const full = page.frameLocator('iframe[data-lab-column="full"]');
     await full.locator('[data-primitive="settle"] button').first().click();

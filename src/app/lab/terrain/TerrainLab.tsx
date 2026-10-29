@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
+import { useLabReady } from "@/components/lab/ready";
 import { MotionButton } from "@/components/motion/MotionButton";
 import { fieldStore, useFieldStore } from "@/components/terrain/field-store";
 import { BERN } from "@/components/terrain/route-terrain";
@@ -34,6 +35,7 @@ export function TerrainLab() {
   const shown = useFieldStore((s) => s.shownTerrain);
   const interval = useFieldStore((s) => s.intervalM);
   const search = useSearch();
+  useLabReady();
   const terrains = [
     { id: null, label: copy.morphs.region },
     ...cards.map((c) => ({ id: c.artwork.terrainId, label: copy.morphs.card(c.name) })),

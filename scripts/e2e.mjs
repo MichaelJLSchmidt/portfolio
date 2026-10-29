@@ -751,6 +751,19 @@ async function modes() {
   }
 }
 
+/**
+ * Loads a page. Lab pages signal readiness themselves (html[data-lab-ready], src/components/lab/
+ * ready.ts): "networkidle" is unreliable with the lab's three frames.
+ */
+async function load(page, url) {
+  if (new URL(url).pathname.includes("/lab/")) {
+    await page.goto(url, { waitUntil: "load" });
+    await page.waitForSelector("html[data-lab-ready]", { state: "attached", timeout: 30000 });
+  } else {
+    await page.goto(url, { waitUntil: "networkidle" });
+  }
+}
+
 // --- hydration ------------------------------------------------------------------------------------
 // Direct loads of every route: no hydration or console errors, and the motion attributes on <html>
 // survive hydration (a failed hydration re-creates the document and drops them).
@@ -767,7 +780,7 @@ async function hydration() {
         // The 404 page's own document request is expected to fail.
         if (m.type() === "error" && !(route === "/no-such-page/" && /404/.test(m.text()))) problems.push(m.text().slice(0, 160));
       });
-      await page.goto(`${base}${route}`, { waitUntil: "networkidle" });
+      await load(page, `${base}${route}`);
       await page.waitForTimeout(600);
       const attrs = await page.evaluate(() => ["data-motion", "data-tier", "data-calm", "data-intro"].map((a) => `${a}=${document.documentElement.getAttribute(a)}`));
       check(`${route}: no hydration or console errors`, problems.length === 0, problems.join(" | "));
@@ -799,7 +812,7 @@ async function primitives() {
     const page = await context.newPage();
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
-    await page.goto(`${base}/lab/specimen/?motion=${mode}`, { waitUntil: "networkidle" });
+    await load(page, `${base}/lab/specimen/?motion=${mode}`);
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(1200);
     const sections = await page.$$eval("[data-primitive]", (els) => els.map((e) => e.dataset.primitive));
@@ -841,7 +854,7 @@ async function primitives() {
   for (const where of ["lab", "case study"]) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const page = await context.newPage();
-    await page.goto(where === "lab" ? `${base}/lab/specimen/?motion=full` : `${base}${FLOW.path}`, { waitUntil: "networkidle" });
+    await load(page, where === "lab" ? `${base}/lab/specimen/?motion=full` : `${base}${FLOW.path}`);
     const link = where === "lab" ? page.locator('a[data-variant="display"][data-lab-state="rest"]').first() : page.locator('a[data-variant="display"]').first();
     await link.scrollIntoViewIfNeeded();
     const state = () =>
@@ -870,7 +883,7 @@ async function primitives() {
   {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     const page = await context.newPage();
-    await page.goto(`${base}/lab/specimen/?motion=full`, { waitUntil: "networkidle" });
+    await load(page, `${base}/lab/specimen/?motion=full`);
     const link = page.locator('a[data-variant="standalone"][data-lab-state="rest"]').first();
     await link.scrollIntoViewIfNeeded();
     const before = await link.evaluate((a) => getComputedStyle(a).getPropertyValue("--on").trim());

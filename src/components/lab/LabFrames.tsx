@@ -6,6 +6,7 @@ import { asset } from "@/lib/asset";
 import { SETTLED_STORAGE_KEY } from "@/lib/settled";
 import type { MotionMode } from "@/lib/motion-mode";
 import { MotionButton } from "@/components/motion/MotionButton";
+import { LAB_READY, markLabReady } from "./ready";
 import styles from "./Lab.module.css";
 
 const MODES: MotionMode[] = ["full", "calm", "still"];
@@ -15,8 +16,16 @@ export function LabFrames() {
   const frames = useRef<(HTMLIFrameElement | null)[]>([]);
 
   useEffect(() => {
+    // Ready once every frame has hydrated (ready.ts): frames that did before this effect ran are
+    // found by their attribute, later ones say so.
+    const checkReady = () => {
+      if (frames.current.filter((f) => f?.contentDocument?.documentElement.hasAttribute(LAB_READY)).length === MODES.length) markLabReady();
+    };
+    checkReady();
     const onMessage = (e: MessageEvent) => {
-      if (e.origin !== window.location.origin || e.data?.lab !== "scroll") return;
+      if (e.origin !== window.location.origin) return;
+      if (e.data?.lab === "ready") return checkReady();
+      if (e.data?.lab !== "scroll") return;
       for (const f of frames.current) {
         if (f?.contentWindow && f.contentWindow !== e.source) f.contentWindow.postMessage({ lab: "scrollTo", y: e.data.y }, window.location.origin);
       }

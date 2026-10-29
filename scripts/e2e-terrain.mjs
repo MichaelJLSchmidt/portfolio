@@ -199,7 +199,8 @@ export function terrainScenarios({ browser, base, root, check, settle }) {
     check("lab page is noindex", /<meta name="robots" content="noindex, nofollow"/.test(html), "");
     for (const mode of ["full", "still"]) {
       const { context, page, errors } = await open({ reduced: mode === "still" });
-      await page.goto(`${base}/lab/terrain/?field=force`, { waitUntil: "networkidle" });
+      await page.goto(`${base}/lab/terrain/?field=force`, { waitUntil: "load" });
+      await page.waitForSelector("html[data-lab-ready]", { state: "attached", timeout: 30000 });
       const text = () => page.locator("[data-terrain-readout] .visually-hidden").textContent();
       check(`${mode}: home readout`, (await text()) === "JUNGFRAU · ALT 4’158 M", await text());
       await page.locator('button[data-morph="bern"]').click();
