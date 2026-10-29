@@ -184,32 +184,6 @@ const projectCards: SummitCardData[] = [
       "UX Team Lead at DV Bern AG for more than eight years. Runs the workshops, drives the central Angular Material design system and designs straight into code. [SUMMARY]",
     href: "/about/",
   },
-  {
-    slug: "kibon",
-    name: "kiBon 2.0",
-    rarity: "U",
-    cost: "[#]",
-    costLabel: "Summit cost [#] of 5",
-    coordinates: "N 46°57′ · E 7°27′ · Bern · [YEARS]",
-    type: "Platform — Public sector · Kanton Bern",
-    set: { code: "DVB", name: "DV Bern", symbol: "grid" },
-    collector: { number: "001", language: "EN" },
-    keywords: [
-      { term: "UX Design", reminder: "the UX designer behind kiBon" },
-      { term: "User Story Mapping", reminder: "anchor method for planning 2.0" },
-      { term: "Facilitation", reminder: "neutral moderator of the client validation workshop" },
-    ],
-    flavor: "Childcare subsidies in one platform, for parents, providers and the administration.",
-    stats: [
-      { label: "Team", value: "[#]" },
-      { label: "Months", value: "[#]" },
-      { label: "Reach", value: "[#]" },
-    ],
-    artwork: { kind: "seeded", terrainId: "dvb-001" },
-    artworkAlt: "Contour map of a fictional massif generated for this project, with a dotted trail to the summit.",
-    summary:
-      "kiBon brings childcare subsidies for the Canton of Bern into one platform for parents, providers and the administration. Version 2.0 was planned with User Story Mapping. [SUMMARY]",
-  },
 ];
 
 /** The deck: project cards, then the flagged examples where the build includes them (last). */

@@ -108,7 +108,7 @@ async function gatedRun() {
     const chunk = `/_next/static/chunks/${firstFile(join(root, "out/_next/static/chunks"), (f) => f.endsWith(".js"))}`;
     const font = firstFile(join(root, "out", gate.assetsDir), (f) => f.endsWith(".woff2"));
 
-    for (const path of ["/", "/work/kibon/", "/about/", chunk, "/terrain/heightmap-1536.webp", `${gate.assetsDir}${font}`]) {
+    for (const path of ["/", "/work/test-project/", "/about/", chunk, "/terrain/heightmap-1536.webp", `${gate.assetsDir}${font}`]) {
       const res = await get(base, path);
       const html = await res.text();
       check(
@@ -121,8 +121,8 @@ async function gatedRun() {
         `${res.status} ${res.headers.get("content-type")}`,
       );
     }
-    const deep = await (await get(base, "/work/kibon/?from=e2e")).text();
-    check("the gate remembers the requested path", deep.includes('name="next" value="/work/kibon/?from=e2e"'));
+    const deep = await (await get(base, "/work/test-project/?from=e2e")).text();
+    check("the gate remembers the requested path", deep.includes('name="next" value="/work/test-project/?from=e2e"'));
 
     const asset = await get(base, `${gate.assets}${font}`);
     check("gate assets under /.basecamp/assets/ are public", asset.status === 200 && asset.headers.get("content-type") === "font/woff2", String(asset.status));
@@ -141,18 +141,18 @@ async function gatedRun() {
     // 403 on Netlify; the local server retries 403s under other paths and ends on the gate page.
     check("an unlock from a foreign origin is refused", [401, 403].includes(foreign.status) && !foreign.headers.get("set-cookie"), String(foreign.status));
 
-    const ok = await unlock(base, { password, next: "/work/kibon/" }, { Origin: `https://${PRIMARY_DOMAIN}` });
+    const ok = await unlock(base, { password, next: "/work/test-project/" }, { Origin: `https://${PRIMARY_DOMAIN}` });
     const setCookie = ok.headers.get("set-cookie") ?? "";
     check(
       "the right password (posted from PRIMARY_DOMAIN) sets the cookie and 303s to next",
       ok.status === 303 &&
-        ok.headers.get("location") === "/work/kibon/" &&
+        ok.headers.get("location") === "/work/test-project/" &&
         setCookie.startsWith(`${gate.cookie}=`) &&
         ["Path=/", "Secure", "HttpOnly", "SameSite=Lax", `Max-Age=${gate.maxAgeSeconds}`].every((a) => setCookie.includes(a)),
       `${ok.status} ${ok.headers.get("location")} ${setCookie}`,
     );
     const cookie = setCookie.split(";")[0];
-    for (const [path, type] of [["/work/kibon/", "text/html"], [chunk, "javascript"], ["/terrain/heightmap-1536.webp", "image/webp"]]) {
+    for (const [path, type] of [["/work/test-project/", "text/html"], [chunk, "javascript"], ["/terrain/heightmap-1536.webp", "image/webp"]]) {
       const res = await get(base, path, { headers: { Cookie: cookie } });
       check(
         `${path} with the cookie: the site, still noindex`,
@@ -232,7 +232,7 @@ async function productionRun() {
     );
     check("/ is indexable, with a canonical URL", html.includes(`rel="canonical" href="https://${PRIMARY_DOMAIN}/"`) && !html.includes("noindex"));
     check("/ sends the CSP from _headers", (home.headers.get("content-security-policy") ?? "").includes(`form-action https://${BASECAMP_HOST}`));
-    for (const path of ["/work/kibon/", "/about/", gate.lock, "/nothing/here"]) {
+    for (const path of ["/work/test-project/", "/about/", gate.lock, "/nothing/here"]) {
       const res = await get(base, path);
       check(`${path} redirects to / (302)`, res.status === 302 && new URL(res.headers.get("location"), base).pathname === "/", `${res.status} ${res.headers.get("location")}`);
     }

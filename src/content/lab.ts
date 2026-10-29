@@ -53,7 +53,7 @@ export const lab = {
         inline: "a phrase in running text",
         inlineBefore: "Read on, ",
         standalone: "All expeditions",
-        display: "kiBon 2.0",
+        display: "Seilschaft",
         eyebrow: "Next expedition",
         nav: "Basecamp",
         navCurrent: "The deck",

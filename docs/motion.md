@@ -148,7 +148,7 @@ contour field and the type shine both use it.
 ### SignatureLink
 
 ```tsx
-<SignatureLink href="/work/x/" variant="display" label="kiBon 2.0" arrow="→" before={<span>Next expedition</span>} />
+<SignatureLink href="/work/x/" variant="display" label="Seilschaft" arrow="→" before={<span>Next expedition</span>} />
 ```
 
 - `inline`: a contour underline draws (clip-path, `--dur-underline`) and the colour moves to glacier.

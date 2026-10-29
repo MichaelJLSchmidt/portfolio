@@ -35,7 +35,7 @@ const milestones: Milestone[] = [
     note: "Facilitation becomes a method, not a talent. [DETAIL]",
     at: 0.48,
   },
-  { year: "[YEAR]", title: "UX Designer", org: "DV Bern AG", note: "Public-sector platforms such as kiBon. [DETAIL]", at: 0.64 },
+  { year: "[YEAR]", title: "UX Designer", org: "DV Bern AG", note: "Public-sector platforms. [DETAIL]", at: 0.64 },
   {
     year: "[YEAR]",
     title: "UX Team Lead",

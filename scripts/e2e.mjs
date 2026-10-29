@@ -193,9 +193,19 @@ async function settle(page, { path, terrain }) {
   });
 }
 
+// The card the round trips open: a flagged example (there is no real case study yet), so these
+// scenarios need a build that includes examples (SITE_MODE=basecamp or a preview).
+const FLOW = { slug: "test-project", path: "/work/test-project/", title: "Test Project", terrain: "lab-099" };
+const hasFlow = () => {
+  if (existsSync(join(root, `out${FLOW.path}index.html`))) return true;
+  console.log(`  skipped: no ${FLOW.path} in this build (build with SITE_MODE=basecamp)`);
+  return false;
+};
+
 // --- transitions -------------------------------------------------------------------------------
 async function transitions() {
-  const card = { slug: "kibon", path: "/work/kibon/", title: "kiBon 2.0", terrain: "dvb-001" };
+  if (!hasFlow()) return;
+  const card = FLOW;
   const modes = [
     { name: "full motion, transition runs", abort: null },
     { name: "full motion, previous return (?vt=classic)", abort: null, classic: true },
@@ -342,10 +352,12 @@ async function decode() {
       check("reference texels read back once", s.readPixels.calls === want16, `${s.readPixels.calls} readPixels`);
       check("read-back never blocks the main thread", s.readPixels.ms < 5, `${s.readPixels.ms.toFixed(2)} ms in readPixels`);
       // A card's terrain goes through the same path.
-      await page.locator('article[data-slug="kibon"] a').first().click();
-      const r = await settle(page, { path: "/work/kibon/", terrain: "dvb-001" });
-      check("card terrain shown after navigation", r.terrain === "dvb-001", `data-terrain=${r.terrain}`);
-      check(`card heightmap via ${want}`, files.includes(`morph/dvb-001${want}`), files.join(", "));
+      if (hasFlow()) {
+        await page.locator(`article[data-slug="${FLOW.slug}"] a`).first().click();
+        const r = await settle(page, { path: FLOW.path, terrain: FLOW.terrain });
+        check("card terrain shown after navigation", r.terrain === FLOW.terrain, `data-terrain=${r.terrain}`);
+        check(`card heightmap via ${want}`, files.includes(`morph/${FLOW.terrain}${want}`), files.join(", "));
+      }
     }
     check(mode.expect === "image" ? "no warning" : "one console warning naming the browser", mode.expect === "image" ? warnings.length === 0 : warnings.length === 1 && /\] (Chrome|Edge|Firefox|Safari|Opera) \d/.test(warnings[0]), warnings.join(" | "));
 
@@ -652,7 +664,8 @@ const motionProbe = () => {
 };
 
 async function modes() {
-  const card = { slug: "kibon", path: "/work/kibon/", terrain: "dvb-001" };
+  if (!hasFlow()) return;
+  const card = FLOW;
   for (const mode of ["full", "calm", "still"]) {
     console.log(`\nmotion mode: ${mode}`);
     const { context, page, errors } = await open({ calm: mode === "calm", reduced: mode === "still", init: motionProbe });
@@ -724,7 +737,7 @@ async function modes() {
 // Direct loads of every route: no hydration or console errors, and the motion attributes on <html>
 // survive hydration (a failed hydration re-creates the document and drops them).
 async function hydration() {
-  const routes = ["/", "/about/", "/work/kibon/", "/work/test-project/", "/lab/", "/lab/specimen/", "/no-such-page/"].filter(
+  const routes = ["/", "/about/", "/work/test-project/", "/lab/", "/lab/specimen/", "/no-such-page/"].filter(
     (r) => r === "/no-such-page/" || existsSync(join(root, "out", r, "index.html")),
   );
   for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
@@ -812,7 +825,7 @@ async function primitives() {
   for (const where of ["lab", "case study"]) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const page = await context.newPage();
-    await page.goto(where === "lab" ? `${base}/lab/specimen/?motion=full` : `${base}/work/kibon/`, { waitUntil: "networkidle" });
+    await page.goto(where === "lab" ? `${base}/lab/specimen/?motion=full` : `${base}${FLOW.path}`, { waitUntil: "networkidle" });
     const link = where === "lab" ? page.locator('a[data-variant="display"][data-lab-state="rest"]').first() : page.locator('a[data-variant="display"]').first();
     await link.scrollIntoViewIfNeeded();
     const state = () =>

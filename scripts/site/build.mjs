@@ -92,7 +92,11 @@ if (mode === "construction") {
   );
 } else {
   const next = createRequire(import.meta.url).resolve("next/dist/bin/next");
-  run([next, "build"]);
+  // /work/[slug] needs at least one page in a static export: without a case study in this build
+  // the route is left out (next.config.ts), and the deck says there is nothing to open yet.
+  const studies = await caseStudyCount(examples);
+  console.log(`Case studies: ${studies}${studies ? "" : " (no /work/ route in this build)"}`);
+  run([next, "build"], studies ? {} : { SITE_CASE_STUDIES: "0" });
   if (!examples) await stripExamples();
   // The motion lab is a review tool: never in a build without it (live), never in the sitemap.
   const lab = includesLab(process.env);
@@ -140,6 +144,13 @@ if (mode === "construction") {
   }
 }
 console.log(`Built ${mode} into ${relative(root, out)}/`);
+
+/** Case studies in this build: the real ones, plus the flagged examples where included. */
+async function caseStudyCount(examples) {
+  await import("../lib/ts-hooks.mjs");
+  const { caseStudies } = await import("../../src/content/case-studies.ts");
+  return Object.values(caseStudies).filter((study) => examples || !study.example).length;
+}
 
 /** Removes the examples' files from out/, then fails if anything of theirs is left there. */
 async function stripExamples() {

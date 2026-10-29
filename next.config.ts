@@ -22,9 +22,14 @@ export default function nextConfig(phase: string): NextConfig {
   const examples = includesExamples(process.env, phase === PHASE_DEVELOPMENT_SERVER);
   // The motion lab's pages (page.lab.tsx) are routes only where the lab is included.
   const lab = includesLab(process.env, phase === PHASE_DEVELOPMENT_SERVER);
+  // The case-study page (page.work.tsx) is a route only where the build has a case study: a
+  // static export refuses a dynamic route that generates no page, and a live build has none until
+  // the first real one is written. scripts/site/build.mjs counts them and sets
+  // SITE_CASE_STUDIES=0 when there are none; anything else keeps the route.
+  const work = process.env.SITE_CASE_STUDIES !== "0";
   return {
     output: "export",
-    pageExtensions: lab ? ["tsx", "ts", "jsx", "js", "lab.tsx"] : ["tsx", "ts", "jsx", "js"],
+    pageExtensions: ["tsx", "ts", "jsx", "js", ...(lab ? ["lab.tsx"] : []), ...(work ? ["work.tsx"] : [])],
     // Every route becomes a folder with index.html, so deep links and reloads work on static hosts.
     trailingSlash: true,
     basePath,

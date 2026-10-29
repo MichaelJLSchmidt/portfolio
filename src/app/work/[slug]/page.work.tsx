@@ -22,6 +22,13 @@ import { readingMinutes, type CaseStudy as Study, type Evidence } from "@/lib/ca
 import { morphName } from "@/lib/morph";
 import styles from "./page.module.css";
 
+/**
+ * A case study (/work/<slug>/). Named page.work.tsx: it is a route only where the build has at
+ * least one case study (next.config.ts), because a static export refuses a dynamic route that
+ * generates no page. Its props are typed by hand, since route types exist only for routes.
+ */
+type Props = { params: Promise<{ slug: string }> };
+
 export const dynamicParams = false;
 
 export function generateStaticParams() {
@@ -36,7 +43,7 @@ const entry = (slug: string) => {
   return study && card ? { study, card } : null;
 };
 
-export async function generateMetadata({ params }: PageProps<"/work/[slug]">): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const found = entry((await params).slug);
   if (!found) return {};
   const { card, study } = found;
@@ -62,7 +69,7 @@ function evidenceKinds(study: Study): Evidence[] {
   return (["measured", "estimated", "qualitative"] as const).filter((k) => used.has(k));
 }
 
-export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
+export default async function CaseStudy({ params }: Props) {
   const found = entry((await params).slug);
   if (!found) notFound();
   const { card, study } = found;

@@ -78,19 +78,6 @@
       "morphWidth": 512
     },
     {
-      "id": "dvb-001",
-      "kind": "seeded",
-      "seed": 1,
-      "lines": 20,
-      "indexEvery": 4,
-      "aspect": 1.5,
-      "elevationRangeM": [
-        520,
-        2380
-      ],
-      "morphWidth": 512
-    },
-    {
       "id": "lab-099",
       "kind": "seeded",
       "example": true,

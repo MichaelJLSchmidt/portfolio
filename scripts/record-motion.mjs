@@ -111,7 +111,7 @@ try {
       await page.mouse.move(640, 300, { steps: 10 });
       await page.locator("#deck-heading").scrollIntoViewIfNeeded();
       await pause(page, 1200);
-      await page.locator('article[data-slug="kibon"] a').first().click();
+      await page.locator('article[data-slug="test-project"] a').first().click();
       await pause(page, 3000);
       const next = page.locator('a[data-variant="display"]').first();
       await next.scrollIntoViewIfNeeded();

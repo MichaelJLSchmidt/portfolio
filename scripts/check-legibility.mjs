@@ -138,8 +138,7 @@ function measure(bg1, text, bg2, textL, dark = false) {
 
 const pages = [
   { path: "/", name: "home" },
-  { path: "/work/kibon/", name: "case study" },
-  // The example uses every case-study building block; live builds don't include it.
+  // The examples use every case-study building block; live builds don't include them.
   ...(existsSync(join(out, "work/test-project/index.html")) ? [{ path: "/work/test-project/", name: "case-study example" }] : []),
   { path: "/about/", name: "Basecamp" },
 ];
