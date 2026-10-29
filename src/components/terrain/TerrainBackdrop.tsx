@@ -75,13 +75,22 @@ export function TerrainBackdrop() {
     // before cancelling the intro; otherwise every first visit would lose it. The intro sweep
     // plays in full motion only.
     if (document.documentElement.getAttribute("data-motion") !== "full") cancelPendingIntro();
-    // Still mode: no WebGL at all (the canvas is not rendered; the field mounts again after).
+    let cancelled = false;
+    // Still mode is tier C on any device: posters, no WebGL at all (the canvas is not rendered;
+    // the field mounts again after). The boot module still keeps the store's readout in step.
     if (still) {
-      fieldStore.set({ mode: "poster" });
+      fieldStore.set({ mode: "poster", tier: "low" });
+      whenIdle(() => {
+        if (!cancelled) import("./field-boot");
+      });
+      return () => {
+        cancelled = true;
+      };
+    }
+    if (field) {
+      fieldStore.set({ tier: field.profile.tier });
       return;
     }
-    if (field) return;
-    let cancelled = false;
     whenIdle(() => {
       if (cancelled) return;
       import("./field-boot").then((boot) => {

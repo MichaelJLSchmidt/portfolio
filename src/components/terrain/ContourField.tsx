@@ -441,16 +441,18 @@ function Field({ profile, paused, calm, onReady, onContextLost }: FieldProps) {
       bind("B", a.B);
       timeline.set("morph", 1 - m);
     }
+    // No terrain to go to (unknown, or its heightmap failed): settle on the one on screen.
     const src = sourceFor(id, profile);
-    if (!src) return;
+    if (!src) return plan(0, false);
     a.routing = a.loading = true;
     const asked = performance.now();
     let tex: THREE.Texture;
     try {
       tex = await loadHeightmap(gl, src.map);
     } catch {
-      if (my === a.routeToken) a.routing = a.loading = false;
-      return;
+      if (my !== a.routeToken) return;
+      a.loading = false;
+      return plan(0, false);
     }
     log({ type: "loaded", to: id ?? "region", ms: Math.round(performance.now() - asked), current: my === a.routeToken });
     if (my !== a.routeToken) return;
