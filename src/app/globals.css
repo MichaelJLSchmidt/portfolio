@@ -55,9 +55,45 @@ button {
   color: inherit;
 }
 
+/* Focus rings, never removed: mint on dark, moss-ink on the light sheet. A ring arrives 6 px out
+   and eases in to 3 px while it fades in (--dur-tap); still mode keeps the fade only. Forced
+   colours draw it in the system's highlight. */
 :focus-visible {
   outline: 2px solid var(--color-glacier);
-  outline-offset: 4px;
+  outline-offset: 3px;
+}
+
+:is(.map-sheet, [data-ink="sheet"], [data-surface="sheet"], .surface-copy) :focus-visible {
+  outline-color: var(--color-moss-ink);
+}
+
+@keyframes focus-ring {
+  from {
+    outline-color: transparent;
+    outline-offset: 6px;
+  }
+}
+
+@keyframes focus-fade {
+  from {
+    outline-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) :focus-visible {
+    animation: focus-ring var(--dur-tap) var(--ease-settle);
+  }
+}
+
+:root[data-motion="still"] :focus-visible {
+  animation: focus-fade var(--dur-tap) linear;
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline-color: Highlight;
+  }
 }
 
 /* The display cut's fallback while Archivo loads. next/font's own fallback is local(Arial), which
@@ -108,19 +144,48 @@ button {
   border: 0;
 }
 
+/* The skip link waits in place, invisible, and appears where it is: a 120 ms fade while its label
+   settles from the label's reveal width (still mode: the fade only). */
 .skip-link {
-  position: absolute;
-  left: 1rem;
-  top: 1rem;
+  position: fixed;
+  left: var(--gutter);
+  top: 12px;
   z-index: var(--layer-skip-link);
   padding: 0.5rem 0.875rem;
+  border-radius: 4px;
   background: var(--color-sheet);
   color: var(--color-ground);
-  transform: translateY(-200%);
+  font-stretch: var(--axis-label-rest-wdth);
+  font-weight: var(--axis-label-rest-wght);
+  text-decoration: none;
+  opacity: 0;
+  pointer-events: none;
 }
 
-.skip-link:focus-visible {
-  transform: none;
+.skip-link:focus {
+  opacity: 1;
+  pointer-events: auto;
+  outline-color: var(--color-moss-ink);
+}
+
+@keyframes skip-settle {
+  from {
+    opacity: 0;
+    font-stretch: var(--axis-label-reveal-wdth);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .skip-link:focus {
+    animation:
+      skip-settle var(--dur-tap) var(--ease-settle),
+      focus-ring var(--dur-tap) var(--ease-settle);
+  }
+}
+
+:root[data-motion="still"] .skip-link:focus {
+  animation: focus-fade var(--dur-tap) linear;
+  transition: opacity var(--dur-tap) linear;
 }
 
 @media (prefers-reduced-motion: reduce) {
