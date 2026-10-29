@@ -14,14 +14,14 @@
   padding-top: clamp(24px, 6vw, 96px);
 }
 
-/* Sized by its longest word (--title-chars, ~0.5 em per capital in the display cut), so it never
-   runs into the lead beside it. */
+/* Basecamp's one display size: its widest word (--title-em, measured at the display axes) fills
+   96% of the name's column, up to 12rem, so it never runs into the lead beside it. */
 .nameCell {
   container-type: inline-size;
 }
 
 .name {
-  font-size: min(clamp(3.5rem, 16vw, 12rem), calc(0.96 * 100cqi / (var(--title-chars, 8) * 0.5)));
+  font-size: min(calc(0.96 * 100cqi / var(--title-em, 5)), 12rem);
 }
 
 .lead {

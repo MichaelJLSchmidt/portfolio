@@ -9,7 +9,7 @@ import { SettleText } from "@/components/motion/SettleText";
 import { MorphTarget } from "@/components/transition/MorphTarget";
 import { about } from "@/content/about";
 import { BASECAMP_MORPH } from "@/lib/morph";
-import { longestWord } from "@/lib/name-lines";
+import { widestEm } from "@/lib/display-width";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -36,7 +36,8 @@ export default function About() {
               as="h1"
               text={about.header.heading}
               className={`${styles.name} display`}
-              style={{ "--title-chars": longestWord(about.header.heading) } as CSSProperties}
+              style={{ "--title-em": widestEm(about.header.heading) } as CSSProperties}
+              widths="display"
               shine
               glint
               settleOnArrival

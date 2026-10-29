@@ -42,8 +42,9 @@
   box-shadow: 0 24px 60px rgb(0 0 0 / 0.45);
 }
 
-/* The title is sized by its longest word (--title-chars, ~0.5 em per capital in the display cut),
-   so a long single word still fits this column. */
+/* One display size for every case-study title: the template's widest word (--title-em, measured)
+   fills 96% of this column, up to 8.5rem; a title with a wider word scales itself down
+   (--word-em). Shorter titles never grow. */
 .titleBlock {
   container-type: inline-size;
   display: grid;
@@ -57,8 +58,7 @@
 }
 
 .title {
-  font-size: min(clamp(3rem, 12vw, 8.5rem), calc(0.96 * 100cqi / (var(--title-chars, 8) * 0.5)));
-  overflow-wrap: anywhere;
+  font-size: min(calc(0.96 * 100cqi / max(var(--title-em, 5), var(--word-em, 5))), 8.5rem);
 }
 
 .type {

@@ -21,7 +21,7 @@ import { caseStudyLabels as L, cardBySlug, cardHref, cards, coordinatesLine } fr
 import { site } from "@/content/site";
 import { readingMinutes, type CaseStudy as Study, type Evidence } from "@/lib/case-study";
 import { morphName } from "@/lib/morph";
-import { longestWord } from "@/lib/name-lines";
+import { widestEm } from "@/lib/display-width";
 import styles from "./page.module.css";
 
 export const dynamicParams = false;
@@ -32,6 +32,13 @@ export const dynamicParams = false;
  * which scripts/site/build.mjs removes with the rest of out/work/.
  */
 const NO_CASE_STUDY = "_none";
+
+/**
+ * The case-study template's one display size: its widest current word (measured at the display
+ * axes) fills the title column. Shorter titles keep that size; a longer word scales its own
+ * title down (--word-em).
+ */
+const TITLE_EM = Math.max(...cards.filter((c) => caseStudies[c.slug]).map((c) => widestEm(c.name)), 4);
 
 export function generateStaticParams() {
   const slugs = Object.keys(caseStudies).filter((slug) => cardBySlug(slug));
@@ -107,7 +114,8 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
               as="h1"
               text={card.name}
               className={`${styles.title} display`}
-              style={{ "--title-chars": longestWord(card.name) } as CSSProperties}
+              style={{ "--title-em": TITLE_EM, "--word-em": widestEm(card.name) } as CSSProperties}
+              widths="display"
               shine
               glint
               settleOnArrival

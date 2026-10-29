@@ -64,6 +64,11 @@
   display: inline-block;
 }
 
+/* widths="display": the box takes the measured width (--u, em), not the font's. */
+.settle[data-widths="display"] .unit {
+  width: calc(var(--u) * 1em);
+}
+
 .ghost,
 .glyph,
 .run,

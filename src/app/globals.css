@@ -60,8 +60,26 @@ button {
   outline-offset: 4px;
 }
 
+/* The display cut's fallback while Archivo loads. next/font's own fallback is local(Arial), which
+   many phones don't have; this one takes the first of several common sans faces and gives it
+   Archivo's vertical metrics (ascent 0.878 em, descent 0.21 em, no line gap: the overrides are
+   divided by size-adjust, which narrows it towards the condensed cut). With every display letter
+   in a box of its measured width (SettleText widths="display"), the swap moves nothing. */
+@font-face {
+  font-family: "Archivo Display Fallback";
+  src: local("Arial"), local("Helvetica Neue"), local("Helvetica"), local("Roboto"), local("Liberation Sans"), local("Noto Sans"), local("DejaVu Sans"), local("Segoe UI");
+  size-adjust: 70%;
+  ascent-override: 125.43%;
+  descent-override: 30%;
+  line-gap-override: 0%;
+}
+
+:root {
+  --font-display: "Archivo", "Archivo Display Fallback", var(--font-archivo), system-ui, sans-serif;
+}
+
 .display {
-  font-family: var(--font-archivo), system-ui, sans-serif;
+  font-family: var(--font-display);
   font-weight: var(--axis-display-rest-wght);
   font-stretch: var(--axis-display-rest-wdth);
   line-height: var(--type-display-lh);

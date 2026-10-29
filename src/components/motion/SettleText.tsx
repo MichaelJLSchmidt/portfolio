@@ -11,6 +11,7 @@ import {
   type ReactNode,
   type Ref,
 } from "react";
+import { glyphEm, textEm } from "@/lib/display-width";
 import { headlampFalloff, watchHeadlamp } from "@/lib/headlamp";
 import { useFinePointer } from "@/lib/idle";
 import { currentMode, useMotionMode } from "@/lib/motion-mode";
@@ -65,6 +66,12 @@ export type SettleTextProps = {
    * run lies over the box and spills past it for the moment of the settle, moving nothing.
    */
   reserve?: "widest" | "rest";
+  /**
+   * "display": every letter's (or word's) box takes its measured width at the display rest axes
+   * (src/lib/display-width.ts) instead of the font's, so the web font arriving after the fallback
+   * moves nothing (display titles in the first viewport). Only for text at those axes.
+   */
+  widths?: "display";
   style?: CSSProperties;
   ref?: Ref<SettleHandle>;
 };
@@ -94,6 +101,7 @@ export function SettleText({
   settleOnArrival = false,
   scope = "page",
   reserve = "widest",
+  widths,
   style,
   ref,
 }: SettleTextProps) {
@@ -272,7 +280,7 @@ export function SettleText({
 
   let index = 0;
   const unit = (content: string, i: number): ReactNode => (
-    <span key={i} className={styles.unit}>
+    <span key={i} className={styles.unit} style={widths ? ({ "--u": (content.length === 1 ? glyphEm(content) : textEm(content)) ?? undefined } as CSSProperties) : undefined}>
       <span className={styles.ghost}>{content}</span>
       <span className={styles.glyph} data-st="glyph" style={{ "--kt-i": i } as CSSProperties}>
         {content}
@@ -288,6 +296,7 @@ export function SettleText({
       data-mode={mode}
       data-role={role}
       data-reserve={mode === "block" && reserve === "rest" ? "rest" : undefined}
+      data-widths={widths}
       data-play={trigger === "paint" ? "true" : "rest"}
       data-settle-key={key}
       data-quiet-zone={quiet ? "" : undefined}

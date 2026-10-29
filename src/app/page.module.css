@@ -2,11 +2,12 @@
   padding-top: 96px;
 }
 
-/* The name is the entry point, not the whole board. It sits on at most two lines (HeroName)
-   and is sized by its longest line, --name-chars capitals at up to ~0.5 em each in the display cut,
-   so any name length fits: ~92% of the measure on phones, 62% on desktop, and never more than
-   a quarter of the screen height. The hero stops --peek short of the first screen's bottom,
-   where the deck heading comes in. */
+/* The name is the entry point, not the whole board. It sits on at most two lines (HeroName),
+   in one display size: the site name's longest line (--name-em, measured at the display axes)
+   fills ~92% of the measure on phones, 80% from the small breakpoint, 62% on desktop, and never
+   more than a quarter of the screen height. A longer name scales itself down (--fit-em); a
+   shorter one keeps the size. The hero stops --peek short of the first screen's bottom, where
+   the deck heading comes in. */
 .hero {
   --peek: clamp(88px, 12svh, 140px);
   --name-fill: 0.92;
@@ -36,7 +37,7 @@
 
 .name {
   margin-inline: -0.02em;
-  font-size: min(calc(var(--name-fill) * 100cqi / (var(--name-chars, 10) * 0.5)), 26svh);
+  font-size: min(calc(var(--name-fill) * 100cqi / max(var(--name-em, 5), var(--fit-em, 5))), 26svh);
 }
 
 .aside {
