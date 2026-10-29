@@ -93,10 +93,12 @@ if (mode === "construction") {
 } else {
   const next = createRequire(import.meta.url).resolve("next/dist/bin/next");
   // /work/[slug] needs at least one page in a static export: without a case study in this build
-  // the route is left out (next.config.ts), and the deck says there is nothing to open yet.
+  // it generates a placeholder, removed here with the rest of out/work/, and the deck says there
+  // is nothing to open yet.
   const studies = await caseStudyCount(examples);
-  console.log(`Case studies: ${studies}${studies ? "" : " (no /work/ route in this build)"}`);
-  run([next, "build"], studies ? {} : { SITE_CASE_STUDIES: "0" });
+  console.log(`Case studies: ${studies}${studies ? "" : " (no /work/ pages in this build)"}`);
+  run([next, "build"]);
+  if (!studies) rmSync(join(out, "work"), { recursive: true, force: true });
   if (!examples) await stripExamples();
   // The motion lab is a review tool: never in a build without it (live), never in the sitemap.
   const lab = includesLab(process.env);
