@@ -89,7 +89,7 @@
 
 .legendRows dt {
   color: var(--color-sheet-ink);
-  font-family: var(--font-martian), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: var(--type-hud-size);
   font-stretch: var(--axis-mono-rest-wdth);
   letter-spacing: var(--type-hud-tracking);

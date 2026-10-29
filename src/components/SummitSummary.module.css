@@ -49,7 +49,7 @@
 
 .grid dt {
   color: var(--color-sheet-ink);
-  font-family: var(--font-martian), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: var(--type-hud-size);
   font-stretch: var(--axis-mono-rest-wdth);
   letter-spacing: var(--type-hud-tracking);
@@ -68,7 +68,7 @@
 }
 
 .stat {
-  font-family: var(--font-martian), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 1.3rem;
   font-weight: 700;
   font-stretch: var(--axis-mono-rest-wdth);
@@ -112,7 +112,7 @@
 
 .note {
   color: var(--color-sheet-ink);
-  font-family: var(--font-martian), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.75rem;
   letter-spacing: 0.06em;
 }

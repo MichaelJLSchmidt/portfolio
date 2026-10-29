@@ -11,7 +11,7 @@ html {
   text-size-adjust: 100%;
   background: var(--color-ground);
   color: var(--color-sheet);
-  font-family: var(--font-archivo), system-ui, sans-serif;
+  font-family: var(--font-text);
   font-size: 100%;
   font-stretch: 100%;
 }
@@ -96,11 +96,33 @@ button {
   }
 }
 
-/* The display cut's fallback while Archivo loads. next/font's own fallback is local(Arial), which
-   many phones don't have; this one takes the first of several common sans faces and gives it
-   Archivo's vertical metrics (ascent 0.878 em, descent 0.21 em, no line gap: the overrides are
-   divided by size-adjust, which narrows it towards the condensed cut). With every display letter
-   in a box of its measured width (SettleText widths="display"), the swap moves nothing. */
+/* Fallbacks while the web fonts load. next/font's own are local(Arial), which many phones and
+   Linux don't have; these take the first of several common faces and give them the web font's
+   metrics (overrides are divided by size-adjust), so the swap moves as little as possible:
+   - text: Archivo at wdth 100 (Liberation Sans and Arimo share Arial's widths: next/font's values);
+   - mono: Martian Mono at its rest width (0.65 em a character over a 0.6 em monospace; ascent
+     1 em, descent 0.2 em);
+   - display: Archivo's vertical metrics (ascent 0.878 em, descent 0.21 em) on a face narrowed
+     towards the condensed cut; with every display letter in a box of its measured width
+     (SettleText widths="display") the swap moves nothing. */
+@font-face {
+  font-family: "Archivo Text Fallback";
+  src: local("Arial"), local("Liberation Sans"), local("Arimo"), local("Helvetica Neue"), local("Helvetica"), local("Roboto"), local("Noto Sans");
+  size-adjust: 98.7%;
+  ascent-override: 88.96%;
+  descent-override: 21.28%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Martian Mono Local Fallback";
+  src: local("Menlo"), local("Liberation Mono"), local("DejaVu Sans Mono"), local("Roboto Mono"), local("Consolas"), local("Courier New");
+  size-adjust: 108.3%;
+  ascent-override: 92.34%;
+  descent-override: 18.47%;
+  line-gap-override: 0%;
+}
+
 @font-face {
   font-family: "Archivo Display Fallback";
   src: local("Arial"), local("Helvetica Neue"), local("Helvetica"), local("Roboto"), local("Liberation Sans"), local("Noto Sans"), local("DejaVu Sans"), local("Segoe UI");
@@ -111,6 +133,8 @@ button {
 }
 
 :root {
+  --font-text: "Archivo", "Archivo Text Fallback", var(--font-archivo), system-ui, sans-serif;
+  --font-mono: "Martian Mono", "Martian Mono Local Fallback", var(--font-martian), ui-monospace, monospace;
   --font-display: "Archivo", "Archivo Display Fallback", var(--font-archivo), system-ui, sans-serif;
 }
 
@@ -124,7 +148,7 @@ button {
 }
 
 .hud-label {
-  font-family: var(--font-martian), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: var(--type-hud-size);
   letter-spacing: var(--type-hud-tracking);
   font-stretch: var(--axis-mono-rest-wdth);

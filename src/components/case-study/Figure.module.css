@@ -80,7 +80,7 @@
 }
 
 .figLabel {
-  font-family: var(--font-martian), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.8125rem;
   font-weight: 500;
   letter-spacing: 0.02em;
@@ -141,7 +141,7 @@
   border-radius: 50%;
   background: var(--color-ground);
   color: var(--color-sheet);
-  font-family: var(--font-martian), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1;
@@ -200,7 +200,7 @@
   border-radius: 50%;
   background: var(--color-ground);
   color: var(--color-sheet);
-  font-family: var(--font-martian), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.8125rem;
   font-weight: 600;
   line-height: 1;

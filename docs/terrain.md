@@ -75,11 +75,13 @@ render it from the route with `formatInteger`; after hydration, changed numbers 
 `formatInteger` exactly) over the `terrain` token, and snap in still. Screen readers get the plain
 text once.
 
-**Mounting it in the HUD (a later phase):** render `<TerrainReadout className="hud-label" />` in
-`src/components/hud/Hud.tsx`. It needs no props, works without the WebGL field (tier C, still) and
-during server rendering. `ReadoutNumber` (Motion+) is a separate lazy chunk, so the HUD's initial
-JavaScript only grows by the readout's few lines. Reserve its width (it changes between terrains),
-for example with a fixed-width slot or by letting it wrap below the coordinates on phones.
+**In the HUD** (phase 3): the readout sits in the HUD's middle slot (`src/components/hud/Hud.tsx`),
+its box reserved at the widest readout there is (a ghost of it), so a change of terrain never moves
+anything. Below the large breakpoint (1280 px), and wherever vibration works (the haptics switch
+needs the room), it shows the label and the altitude only; below 640 px it is left out. Fictional
+card terrains show a name and an altitude, never coordinates. Its copy (the parts' names, the home
+region's summit) is in `src/content/readout.ts`. The numbers roll with `RollNumber`, the shared lazy
+Motion+ chunk.
 
 ## Device tiers
 
