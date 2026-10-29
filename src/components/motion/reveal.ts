@@ -8,6 +8,7 @@ import { duration, levels, stagger } from "@/styles/tokens";
  * "line" traces a drawn line such as the footer's elevation profile over the draw token, "list"
  * draws a list's ring bullets with the item stagger, "quote" draws a pull quote's rule and then
  * fades the quote in, "caption" fades in after its figure, "mark" draws a small mark's paths,
+ * "fade" fades in only (running text may take it), after its block's --fade-after;
  * "figure" unfolds a figure behind a scan line, its corner ticks after; a figure below the fold
  * shows a contour placeholder until its images have decoded) appear as they scroll into view, once
  * per session. Anything in the first viewport is shown from first paint and never
@@ -100,6 +101,7 @@ function play(group: Element[]) {
       const kind = el.getAttribute("data-reveal");
       if (kind === "line") return duration.draw;
       if (kind === "mark") return duration.trace;
+      if (kind === "fade") return duration.reveal + duration.tap;
       if (kind === "figure") return duration.settle + duration.short;
       // A sheet whose marks draw after it opens (the evidence legend's swatches).
       if (kind === "sheet" && el.hasAttribute("data-draws")) return duration.reveal / 2 + duration.trace + duration.short;

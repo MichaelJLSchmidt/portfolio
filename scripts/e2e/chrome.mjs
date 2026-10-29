@@ -80,7 +80,8 @@ export async function toast({ browser, base, check }) {
     const status = page.locator("#contact [role=status]");
     check("the toast's status region exists before it speaks", (await status.count()) === 1);
     await button.click();
-    await page.waitForTimeout(300);
+    // The clipboard write is asynchronous; under load the toast can take longer than a frame.
+    await page.waitForFunction(() => /COPIED/.test(document.querySelector("#contact [role=status]")?.textContent ?? ""), null, { timeout: 3000 }).catch(() => {});
     const copied = await page.evaluate(() => navigator.clipboard.readText());
     check("the address is on the clipboard", /@/.test(copied) && !copied.startsWith("mailto:"), copied);
     check("the label settles to COPIED", (await button.getAttribute("aria-label")) === null && /COPIED/.test(await button.textContent()), await button.textContent());

@@ -26,6 +26,12 @@
 //   npm run test:e2e -- cards         the deck's grid, phone list, arrival, hover, focus, press, marks,
 //                                     stats and the visited stamp (scripts/e2e/cards.mjs)
 //   npm run test:e2e -- views         Cards · Index in full, calm and still (scripts/e2e/cards.mjs)
+//   npm run test:e2e -- arrival       route arrivals: timing, focus on the H1, the trailhead morph,
+//                                     traversals, Basecamp, still (scripts/e2e/choreography.mjs)
+//   npm run test:e2e -- reading       the HUD waypoint readout, the trail, the altimeter bar, the
+//                                     career climb per mode, no endless loops (choreography.mjs)
+//   npm run test:e2e -- access        forced colours, headings read once, the haptics map
+//                                     (scripts/e2e/choreography.mjs)
 //
 // Serves ./out like a static host (base path read from the build) and drives Chromium with
 // Playwright, which is not a dependency: `npm i -D playwright && npx playwright install chromium`,
@@ -43,6 +49,7 @@ import { ia, phone, routes as builtRoutes } from "./e2e/layout.mjs";
 import { fontswap } from "./e2e/typography.mjs";
 import { hud, toast } from "./e2e/chrome.mjs";
 import { cards, views } from "./e2e/cards.mjs";
+import { access, arrival, reading } from "./e2e/choreography.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const only = process.argv[2];
@@ -163,10 +170,11 @@ async function settle(page, { path, terrain }) {
         const backdrop = document.querySelector("[data-field]");
         const h1 = [...document.querySelectorAll("main h1")].find((h) => h.getClientRects().length);
         const vt = document.getAnimations().some((a) => a.effect?.pseudoElement?.startsWith("::view-transition"));
-        // Entrances (reveals, settles) still running are not "left hidden": wait for them.
+        // Entrances (reveals, settles) still running are not "left hidden": wait for them. A
+        // scroll-driven animation (the career climb) runs as long as the page does: not one.
         const entering = document
           .getAnimations()
-          .some((a) => a.playState === "running" && a.effect?.getTiming().iterations !== Infinity);
+          .some((a) => a.playState === "running" && a.timeline === document.timeline && a.effect?.getTiming().iterations !== Infinity);
         return (
           !vt &&
           !entering &&
@@ -493,6 +501,8 @@ async function casestudy() {
     await fig.locator("button[data-lightbox-open]").waitFor({ state: "visible", timeout: 8000 }).catch(() => {});
     await fig.locator("button[data-lightbox-open]").tap();
     await page.waitForSelector("dialog[open]", { timeout: 5000 }).catch(() => {});
+    // The figure morphs into the overlay first (a view transition): interact once it has landed.
+    await page.waitForFunction(() => !document.getAnimations().some((a) => a.effect?.pseudoElement?.startsWith("::view-transition")), null, { timeout: 5000 }).catch(() => {});
     const box = await page.locator("dialog[open] [data-lightbox-stage]").boundingBox();
     const transform = () => page.evaluate(() => document.querySelector("dialog[open] img")?.style.transform ?? "");
     if (box) {
@@ -532,6 +542,8 @@ async function casestudy() {
     await button.focus();
     await page.keyboard.press("Enter");
     const opened = await waitFor(page, () => document.querySelector("dialog[data-lightbox][open]"));
+    // The figure morphs into the overlay first (a view transition): interact once it has landed.
+    await page.waitForFunction(() => !document.getAnimations().some((a) => a.effect?.pseudoElement?.startsWith("::view-transition")), null, { timeout: 5000 }).catch(() => {});
     const inside = await page.evaluate(() => {
       const d = document.querySelector("dialog[data-lightbox][open]");
       const img = d?.querySelector("img");
@@ -913,7 +925,7 @@ async function primitives() {
 const scenarios = { transitions, modes, hydration, primitives, decode, casestudy };
 // The terrain conductor and the Bern terrain (scripts/e2e-terrain.mjs).
 Object.assign(scenarios, (await import("./e2e-terrain.mjs")).terrainScenarios({ browser, base, root, check, settle }));
-Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, basecamp, ia, phone, fontswap, hud, toast, cards, views }).map(([name, run]) => [name, () => run({ browser, base, basePath, root, check, open, settle })])));
+Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, basecamp, ia, phone, fontswap, hud, toast, cards, views, arrival, reading, access }).map(([name, run]) => [name, () => run({ browser, base, basePath, root, check, open, settle })])));
 try {
   for (const [name, run] of Object.entries(scenarios)) if (!only || only === name) await run();
 } finally {

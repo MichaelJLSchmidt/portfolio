@@ -75,11 +75,15 @@ export default function About() {
 
       <section className={styles.section} aria-labelledby="rope-rules-heading">
         <SectionHead id="rope-rules-heading" eyebrow={about.ropeRules.eyebrow} heading={about.ropeRules.heading} />
+        {/* The rules' leads settle as a group, one after another (the item stagger). */}
         <ul className={styles.ropeRules}>
-          {about.ropeRules.rules.map((r) => (
+          {about.ropeRules.rules.map((r, i) => (
             <li key={r.lead} className="legend">
               <p className="body-copy">
-                <strong>{r.lead}</strong> {r.text}
+                <strong>
+                  <SettleText text={r.lead} mode="block" wrap role="text" trigger="inview" delay={Math.min(i, stagger.item.max - 1) * stagger.item.step} className={styles.ropeLead} />
+                </strong>{" "}
+                {r.text}
               </p>
             </li>
           ))}
@@ -88,15 +92,24 @@ export default function About() {
 
       <section className={styles.section} aria-labelledby="first-days-heading">
         <SectionHead id="first-days-heading" eyebrow={about.firstDays.eyebrow} heading={about.firstDays.heading} />
-        <ol className={styles.days}>
-          {about.firstDays.steps.map((s) => (
-            <li key={s.title} className={`${styles.day} legend`}>
-              <p className={`${styles.dayRange} hud-label`}>{s.days}</p>
-              <SettleText as="h3" text={s.title} mode="block" wrap role="text" trigger="inview" className={styles.dayTitle} />
-              <p className="body-copy">{s.text}</p>
-            </li>
-          ))}
-        </ol>
+        {/* A short contour trail draws between the three steps (across on desktop, down on phones). */}
+        <div className={styles.daysWrap}>
+          <svg className={styles.daysTrail} viewBox="0 0 300 28" preserveAspectRatio="none" aria-hidden="true" data-reveal="mark">
+            <path pathLength={1} d="M50 14C83 4 117 24 150 14S217 4 250 14" />
+          </svg>
+          <svg className={styles.daysTrailDown} viewBox="0 0 16 300" preserveAspectRatio="none" aria-hidden="true" data-reveal="mark">
+            <path pathLength={1} d="M8 6C2 56 14 106 8 150S2 244 8 294" />
+          </svg>
+          <ol className={styles.days}>
+            {about.firstDays.steps.map((s) => (
+              <li key={s.title} className={`${styles.day} legend`}>
+                <p className={`${styles.dayRange} hud-label`}>{s.days}</p>
+                <SettleText as="h3" text={s.title} mode="block" wrap role="text" trigger="inview" className={styles.dayTitle} />
+                <p className="body-copy">{s.text}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
       </section>
 
       <AscentProfile labels={about.ascent} camps={about.ascent.camps} stops={stops} />

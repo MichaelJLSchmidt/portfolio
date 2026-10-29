@@ -8,7 +8,11 @@ import styles from "./Home.module.css";
 // section is not rendered at all. (A real live build stops earlier: check:content lists them.)
 const showExamples = process.env.NEXT_PUBLIC_EXAMPLES === "1";
 
-/** "From the people on the rope": testimonials, each an example until real ones replace it. */
+/**
+ * "From the people on the rope": testimonials, each an example until real ones replace it. Each
+ * note is a sheet that unfolds as the notes come into view, one after another (the item stagger);
+ * the quotes themselves never move.
+ */
 export function FieldNotes() {
   const t = home.fieldNotes;
   const notes = t.notes.filter((n) => showExamples || !isExample(n.quote));
@@ -18,7 +22,7 @@ export function FieldNotes() {
       <SectionHead id="field-notes-heading" eyebrow={t.eyebrow} heading={t.heading} />
       <ul className={styles.notes}>
         {notes.map((n) => (
-          <li key={n.quote} className={`${styles.note} legend`}>
+          <li key={n.quote} className={`${styles.note} legend`} data-reveal="sheet" data-fold="top">
             <figure>
               {isExample(n.quote) && <p className={`${styles.exampleTag} hud-label`}>{t.exampleTag}</p>}
               <blockquote>

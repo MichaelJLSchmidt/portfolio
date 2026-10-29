@@ -1,16 +1,23 @@
 .main {
+  --main-top: 96px;
+  --main-gap: clamp(48px, 7vw, 112px);
   display: grid;
-  gap: clamp(48px, 7vw, 112px);
-  padding-top: 96px;
+  gap: var(--main-gap);
+  padding-top: var(--main-top);
 }
 
 /* ------------------------------------------------------------- header */
 
 /* The H1 is the HUD label's morph target: big, alone, with the lead beside it on desktop. */
+/* The field's zero-point pin sits at the centre of the screen, the Aare's start above it: both
+   stay in view and clear of text, so the header reaches 56 px past the screen's middle before the
+   legend begins (its text at the top on phones, beside the H1's baseline on desktop). */
 .header {
   display: grid;
   gap: 20px;
+  align-content: start;
   align-items: end;
+  min-height: calc(50svh + 56px - var(--main-top) - var(--main-gap));
   padding-top: clamp(24px, 6vw, 96px);
 }
 
@@ -39,6 +46,7 @@
 @media (min-width: 1024px) {
   .header {
     grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    align-content: end;
     column-gap: clamp(32px, 4vw, 72px);
   }
 
@@ -158,6 +166,59 @@
 @media (min-width: 1280px) {
   .ropeRules {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.ropeLead[data-role] {
+  --kt-rest-wdth: 100%;
+  --kt-rest-wght: 700;
+}
+
+/* First 90 days: three stages, left to right on desktop, joined by a short contour trail that
+   draws once as they come into view (data-reveal="mark"): across their tops on desktop, down
+   their left edge on phones. */
+.daysWrap {
+  position: relative;
+  padding-left: 28px;
+}
+
+.daysTrail,
+.daysTrailDown {
+  position: absolute;
+  overflow: visible;
+  fill: none;
+  stroke: var(--color-glacier);
+  stroke-linecap: round;
+  stroke-width: 1.5;
+}
+
+.daysTrail {
+  display: none;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 28px;
+}
+
+.daysTrailDown {
+  top: 12px;
+  bottom: 12px;
+  left: 2px;
+  width: 16px;
+  height: calc(100% - 24px);
+}
+
+@media (min-width: 1024px) {
+  .daysWrap {
+    padding: 36px 0 0;
+  }
+
+  .daysTrail {
+    display: block;
+  }
+
+  .daysTrailDown {
+    display: none;
   }
 }
 

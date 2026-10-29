@@ -76,19 +76,20 @@
   position: absolute;
   inset: 0;
   background: var(--color-contour);
+  transform-origin: top;
 }
 
-/* An auto-playing loop: full motion only, so never without JavaScript or in calm and still. */
-:root[data-motion="full"] .cueLine::after {
-  animation: cue 2.4s var(--ease-summit) infinite;
+/* The line draws down once from first paint, then rests (no loop: WCAG 2.2.2); still mode shows
+   it drawn. */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .cueLine::after {
+    animation: cue var(--dur-draw) var(--ease-settle) var(--dur-settle) backwards;
+  }
 }
 
 @keyframes cue {
   from {
-    transform: translateY(-100%);
-  }
-  to {
-    transform: translateY(100%);
+    transform: scaleY(0);
   }
 }
 

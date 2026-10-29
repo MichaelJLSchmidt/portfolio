@@ -229,6 +229,15 @@
     animation: reveal-fade var(--dur-short) var(--ease-settle) var(--dur-reveal) backwards;
   }
 
+  /* A fade (opacity only, so running text may take it): after --fade-after, set by its block. */
+  :root:not([data-motion="still"]) [data-reveal="fade"][data-reveal-state="wait"] {
+    opacity: 0;
+  }
+
+  :root:not([data-motion="still"]) [data-reveal="fade"][data-reveal-state="play"] {
+    animation: reveal-fade var(--dur-reveal) var(--ease-settle) calc(var(--reveal-delay, 0ms) + var(--fade-after, 0ms)) backwards;
+  }
+
   /* A caption fades in after its figure. */
   :root:not([data-motion="still"]) [data-reveal="caption"][data-reveal-state="wait"] {
     opacity: 0;

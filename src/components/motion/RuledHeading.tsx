@@ -17,6 +17,7 @@ export function RuledHeading({
   ruleClassName,
   role = "display",
   trigger = "inview",
+  glint = false,
 }: {
   as?: "h2" | "h3";
   id?: string;
@@ -26,6 +27,8 @@ export function RuledHeading({
   /** display (default: the display cut, letter boxes at their measured widths) or label. */
   role?: "display" | "label";
   trigger?: SettleTrigger;
+  /** One glint after its first settle this session (the page's last signature: the contact band). */
+  glint?: boolean;
 }) {
   return (
     <>
@@ -41,6 +44,7 @@ export function RuledHeading({
         trigger={trigger}
         delay={duration.short}
         channel="heading"
+        glint={glint}
         className={className}
       />
     </>

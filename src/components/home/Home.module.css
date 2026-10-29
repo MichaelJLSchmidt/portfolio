@@ -185,7 +185,9 @@
   --kt-rest-wght: 700;
 }
 
+/* The evidence line fades in --dur-tap after its rule's title has begun to settle. */
 .evidence {
+  --fade-after: var(--dur-tap);
   padding-top: 8px;
   border-top: 1px dashed var(--color-contour-dim);
   font-size: 1rem;
@@ -264,14 +266,16 @@
   list-style: none;
 }
 
+/* The chip variant's look (SignatureLink chip): a pill on a contour border. The formats are not
+   links or buttons, so the chips keep its look without its response. */
 .format {
   display: inline-flex;
   align-items: baseline;
   gap: 10px;
-  padding: 8px 14px;
-  border: 1px solid var(--color-contour-dim);
+  padding: 10px 16px;
+  border: 1px solid var(--color-contour);
   border-radius: 999px;
-  background: var(--color-ground);
+  background: color-mix(in srgb, var(--color-ground) 75%, transparent);
 }
 
 .formatName {

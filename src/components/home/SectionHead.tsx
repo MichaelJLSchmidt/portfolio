@@ -14,6 +14,7 @@ export function SectionHead({
   heading,
   trigger = "inview",
   align = "start",
+  glint = false,
   children,
 }: {
   /** The heading's id, for the section's aria-labelledby. */
@@ -22,12 +23,14 @@ export function SectionHead({
   heading: string;
   trigger?: "paint" | "inview";
   align?: "start" | "center";
+  /** The heading glints once after its first settle this session. */
+  glint?: boolean;
   children?: React.ReactNode;
 }) {
   return (
     <div className={styles.head} data-align={align} data-quiet-zone>
       <SettleText as="p" text={eyebrow} mode="chars" role="mono" trigger={trigger} className={`${styles.eyebrow} hud-label map-halo`} />
-      <RuledHeading id={id} text={heading} trigger={trigger} className={`${styles.heading} display`} ruleClassName={styles.headRule} />
+      <RuledHeading id={id} text={heading} trigger={trigger} glint={glint} className={`${styles.heading} display`} ruleClassName={styles.headRule} />
       {children}
     </div>
   );
