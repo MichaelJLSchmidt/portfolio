@@ -186,7 +186,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
 
       <div className={styles.body} data-vt-exit>
         <nav className={styles.jump} aria-labelledby="jump-heading">
-          <SettleText as="h2" id="jump-heading" text={L.jumpTo} mode="chars" role="mono" trigger="inview" className={`${styles.jumpHeading} hud-label`} />
+          <SettleText as="h2" id="jump-heading" text={L.jumpTo} mode="chars" role="mono" trigger="inview" quiet className={`${styles.jumpHeading} hud-label map-halo`} />
           <ul>
             {study.waypoints.map((w) => (
               <li key={w.id}>

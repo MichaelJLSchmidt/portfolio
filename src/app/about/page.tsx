@@ -64,7 +64,7 @@ export default function About() {
           </dl>
         </MapSheet>
         <div className={styles.bio}>
-          <SettleText as="h2" text={about.bio.heading} mode="chars" role="mono" trigger="inview" className={`${styles.bioHeading} hud-label map-halo`} />
+          <SettleText as="h2" text={about.bio.heading} mode="chars" role="mono" trigger="inview" className={`${styles.bioHeading} hud-label map-halo knockout`} />
           {about.bio.paragraphs.map((p) => (
             <p key={p} className="body-copy">
               {p}

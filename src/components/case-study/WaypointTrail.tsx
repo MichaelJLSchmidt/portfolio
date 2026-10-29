@@ -41,7 +41,7 @@ export function WaypointTrail({ slug, label, items }: { slug: string; label: str
 
   return (
     <nav className={styles.trail} aria-label={label}>
-      <p className={`${styles.title} hud-label`} aria-hidden="true">
+      <p className={`${styles.title} hud-label map-halo`} aria-hidden="true" data-quiet-zone>
         {label}
       </p>
       <ol ref={listRef} className={styles.list} style={{ "--n": items.length } as CSSProperties}>

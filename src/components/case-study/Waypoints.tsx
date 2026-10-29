@@ -303,10 +303,11 @@ export function Waypoints({ study, evidence }: { study: CaseStudy; evidence: Evi
                   label={L.nextWaypoint}
                   arrow="↓"
                   aria-label={`${L.nextWaypoint}: ${next.nav}`}
-                  className={`${styles.footLink} hud-label`}
+                  className={`${styles.footLink} hud-label map-halo`}
+                  data-quiet-zone
                 />
               )}
-              <SignatureLink href="#main" variant="standalone" role="mono" label={L.backToTop} arrow="↑" className={`${styles.footLink} hud-label`} />
+              <SignatureLink href="#main" variant="standalone" role="mono" label={L.backToTop} arrow="↑" className={`${styles.footLink} hud-label map-halo`} data-quiet-zone />
             </p>
           </section>
         );
