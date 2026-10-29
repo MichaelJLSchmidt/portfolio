@@ -1,0 +1,11 @@
+.readout {
+  margin: 0;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Rolling digits keep the line's height and baseline. */
+.number {
+  display: inline-flex;
+  align-items: baseline;
+}
