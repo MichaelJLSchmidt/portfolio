@@ -10,6 +10,10 @@ import { routes } from "./layout.mjs";
 
 const ENGINES = ["chromium", "webkit", "firefox"];
 
+// WebKit reports a route prefetch that the next page load cancels as a page error ("… due to
+// access control checks"); that is the test leaving the page, not the page failing.
+const cancelledPrefetch = (message) => /_rsc=.*due to access control checks/.test(message);
+
 export async function smoke({ playwright, base, basePath, root, check }) {
   for (const engine of ENGINES) {
     console.log(`\nsmoke: ${engine}`);
@@ -25,9 +29,9 @@ export async function smoke({ playwright, base, basePath, root, check }) {
         const context = await browser.newContext({ viewport: { width, height: width > 400 ? 900 : 740 } });
         const page = await context.newPage();
         const errors = [];
-        page.on("pageerror", (e) => errors.push(e.message));
+        page.on("pageerror", (e) => cancelledPrefetch(e.message) || errors.push(e.message));
         for (const path of routes(root)) {
-          await page.goto(`${base}${path}`, { waitUntil: "load" });
+          await page.goto(`${base}${path}`, { waitUntil: "networkidle" });
           await page.waitForTimeout(300);
           const r = await page.evaluate(() => {
             const visible = (el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden";
@@ -52,8 +56,8 @@ export async function smoke({ playwright, base, basePath, root, check }) {
       const context = await browser.newContext({ viewport: { width: 1280, height: 860 } });
       const page = await context.newPage();
       const errors = [];
-      page.on("pageerror", (e) => errors.push(e.message));
-      await page.goto(`${base}/`, { waitUntil: "load" });
+      page.on("pageerror", (e) => cancelledPrefetch(e.message) || errors.push(e.message));
+      await page.goto(`${base}/`, { waitUntil: "networkidle" });
       await page.keyboard.press("Tab");
       await page.keyboard.press("Tab");
       const focused = await page.evaluate(() => document.activeElement?.tagName);
