@@ -184,12 +184,12 @@
     display: grid;
     justify-items: center;
     gap: 2px;
-    color: var(--color-contour);
+    color: var(--color-paper-dusk);
     text-align: center;
   }
 
   .peaks li[data-current] {
-    color: var(--color-paper-dusk);
+    color: var(--color-glacier);
   }
 
   .here {

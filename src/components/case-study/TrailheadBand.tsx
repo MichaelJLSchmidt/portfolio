@@ -78,7 +78,7 @@ export function TrailheadBand({
             />
           </svg>
           <figcaption className="visually-hidden">{labels.ridge}</figcaption>
-          <ol className={styles.peaks}>
+          <ol className={styles.peaks} data-quiet-zone>
             {ridge.map((p, i) => (
               <li key={p.slug} style={{ "--x": `${(50 + i * 100) / 3}%` } as CSSProperties} data-current={p.current || undefined}>
                 <span className="hud-label">
