@@ -287,7 +287,9 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
 
           <section id="results" className={styles.section} aria-labelledby="results-heading" data-waypoint data-route="results" data-route-blaze="">
             <h2 id="results-heading" className={styles.resultsHeading}>
-              <span className={`${styles.stageLine} hud-label`}>{`${ascent.summit.label} · ${altitudeLabel(ascent.summit.altitudeM)}`}</span>
+              <span className={`${styles.stageLine} hud-label map-halo`} data-quiet-zone>
+                {`${ascent.summit.label} · ${altitudeLabel(ascent.summit.altitudeM)}`}
+              </span>
               <span className={`${styles.sectionHeading} display`}>{L.resultsHeading}</span>
             </h2>
             <ElevationProfile

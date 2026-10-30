@@ -122,7 +122,10 @@
     margin: 0;
   }
 
+  /* Straight on the field (the stages' lines sit on their legend panels): a quiet zone as wide
+     as the words. */
   .stageLine {
+    justify-self: start;
     color: var(--color-glacier);
   }
 
