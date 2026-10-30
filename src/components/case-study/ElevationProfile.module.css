@@ -84,12 +84,12 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0 0.6em;
-    color: var(--color-contour);
+    color: var(--color-paper-dusk);
     line-height: 1.5;
   }
 
   .altitude {
-    color: var(--color-paper-dusk);
+    color: var(--color-glacier);
   }
 
   .table {
