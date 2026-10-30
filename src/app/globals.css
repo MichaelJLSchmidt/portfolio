@@ -384,9 +384,11 @@
   }
 
   /* A page that draws the red route (RouteLayer) holds it behind its content: the main is its
-     containing block and its own stacking context. */
+     containing block and its own stacking context, one level above the footer that follows it,
+     so what main fixes to the screen (the toast, the altimeter bar) still paints over the footer. */
   main:has(> [data-route-layer]) {
     position: relative;
+    z-index: var(--layer-page);
     isolation: isolate;
   }
 
