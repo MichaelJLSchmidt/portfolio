@@ -32,6 +32,8 @@
 //                                     career climb per mode, no endless loops (choreography.mjs)
 //   npm run test:e2e -- access        forced colours, headings read once, the haptics map
 //                                     (scripts/e2e/choreography.mjs)
+//   npm run test:e2e -- smoke         a smoke subset in Chromium, WebKit and Firefox (each where
+//                                     Playwright has it installed; scripts/e2e/smoke.mjs)
 //
 // Serves ./out like a static host (base path read from the build) and drives Chromium with
 // Playwright, which is not a dependency: `npm i -D playwright && npx playwright install chromium`,
@@ -50,6 +52,7 @@ import { fontswap } from "./e2e/typography.mjs";
 import { hud, toast } from "./e2e/chrome.mjs";
 import { cards, views } from "./e2e/cards.mjs";
 import { access, arrival, reading } from "./e2e/choreography.mjs";
+import { smoke } from "./e2e/smoke.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const only = process.argv[2];
@@ -927,7 +930,7 @@ async function primitives() {
 const scenarios = { transitions, modes, hydration, primitives, decode, casestudy };
 // The terrain conductor and the Bern terrain (scripts/e2e-terrain.mjs).
 Object.assign(scenarios, (await import("./e2e-terrain.mjs")).terrainScenarios({ browser, base, root, check, settle }));
-Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, basecamp, ia, phone, fontswap, hud, toast, cards, views, arrival, reading, access }).map(([name, run]) => [name, () => run({ browser, base, basePath, root, check, open, settle })])));
+Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, basecamp, ia, phone, fontswap, hud, toast, cards, views, arrival, reading, access, smoke }).map(([name, run]) => [name, () => run({ browser, playwright, base, basePath, root, check, open, settle })])));
 try {
   for (const [name, run] of Object.entries(scenarios)) if (!only || only === name) await run();
 } finally {
