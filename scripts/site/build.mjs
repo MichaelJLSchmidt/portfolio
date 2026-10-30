@@ -176,7 +176,11 @@ async function stripExamples() {
     const parent = join(out, dirname(media.replace(/\/$/, "")));
     if (parent !== out && existsSync(parent) && !readdirSync(parent).length) rmSync(parent, { recursive: true });
   }
-  const needles = exampleCards.flatMap((c) => [c.name, `/work/${c.slug}`, c.artwork.terrainId, exampleMedia[c.slug]].filter(Boolean));
+  // An example's terrain is a real mountain (the Eiger, the Mönch, the Jungfrau), whose name other
+  // data may carry (the footer's Interlaken → Jungfrau trail): what may not remain is the
+  // example's own terrain files and the reference to them.
+  const terrainNeedles = (id) => (id ? [`/terrain/cards/${id}.svg`, `/terrain/morph/${id}.`, `"terrainId":"${id}"`] : []);
+  const needles = exampleCards.flatMap((c) => [c.name, `/work/${c.slug}`, ...terrainNeedles(c.artwork.terrainId), exampleMedia[c.slug]].filter(Boolean));
   const files = (dir) => readdirSync(dir).flatMap((name) => (statSync(join(dir, name)).isDirectory() ? files(join(dir, name)) : [join(dir, name)]));
   const leaks = files(out)
     .filter((f) => /\.(html|txt|js|json|css|xml|svg|map)$/.test(f))

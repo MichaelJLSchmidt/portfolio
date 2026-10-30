@@ -145,7 +145,7 @@
     text-underline-offset: 4px;
   }
 
-  /* The current waypoint: glacier, its letters breathing +8 (SettleText breath, --on). */
+  /* The current waypoint: glacier (its link below), and its pin full (--on). */
   .item[data-state="current"] {
     --on: 1;
   }

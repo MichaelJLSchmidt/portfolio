@@ -462,8 +462,8 @@
                constant brightness and the new text never waits;
      - travel: the shared artwork and title (card → header and H1, mini card → next header, HUD
                label → About H1) travel on the share spring (420 ms, --spring-share-*);
-     - then:   the new page's parts follow from the commit (data-arrive-at, SettleText `arrive`) and
-               the H1 settles once the morph has landed, its glint after it;
+     - then:   the new page's parts follow from the commit (data-arrive-at) and the H1 rests on
+               its weight once the morph has landed (the morph is its arrival);
      - field:  the background terrain morphs over --dur-terrain (700 ms) from the same commit.
      Browser back and forward (html[data-vt="traverse"]): a --dur-crossfade (180 ms) cross-fade plus
      the shared elements where both pages have them; no arrival choreography, no glint.
@@ -514,7 +514,7 @@
 
   /* Title: the box travels, the text does not scale. Both snapshots keep their own size,
      anchored top-left in the moving box, and cross-fade early, so the text stays sharp in
-     flight; the heading then settles on its axes once it has landed (SettleText). */
+     flight; the heading lands at rest (WeightTitle: a morphed title does not arrive again). */
   ::view-transition-old(.morph-title),
   ::view-transition-new(.morph-title) {
     inline-size: auto;

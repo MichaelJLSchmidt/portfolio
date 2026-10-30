@@ -502,8 +502,8 @@
 
   /* ------------------------------------------------------- visited stamp */
 
-  /* After its case study was visited: a small "SUMMITED" stamp on the artwork's corner, settling
-     once (SettleText; screen readers hear "Visited" in the link's name). */
+  /* After its case study was visited: a small "Visited" stamp on the artwork's corner (screen
+     readers hear "Visited" in the link's name). */
   .visited {
     position: absolute;
     top: calc(3.4cqi + 11cqi + 6cqi);
@@ -567,8 +567,8 @@
   /* ----------------------------------------------------------- arrival */
 
   /* Once per session, as the card enters (data-arrive, SummitCard.tsx): full motion deals it in,
-     rising --dist-rise-card and fading with the card stagger (--deal-delay); the name settles
-     with it (SettleText), the type line follows --dur-tap later, the scope pips fill one after
+     rising --dist-rise-card and fading with the card stagger (--deal-delay); the name arrives
+     with it, the type line follows --dur-tap later, the scope pips fill one after
      another and the rarity shape traces itself. Calm keeps the settles, pips and trace without
      the rise; still shows the card. */
   @keyframes card-arrive {
@@ -632,9 +632,7 @@
      title are still flying in):
      from --dur-settle    the neatline draws on along the outline in the rarity colour
                           (--dur-medium), and the name bar, type line, rules, stats and collector
-                          line rise in, --stagger-item apart (--dur-short each);
-     then                 a single glint crosses the card name (the Glint primitive, played by
-                          return-transition.ts once the neatline has closed). */
+                          line rise in, --stagger-item apart (--dur-short each). */
   .neatline {
     display: none;
     position: absolute;

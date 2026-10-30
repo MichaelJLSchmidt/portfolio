@@ -8,7 +8,7 @@ import { useSyncExternalStore } from "react";
  * progress through the waypoints (0 to 1, continuous). One scroll-spy per page (`startReadingSpy`,
  * run by WaypointTrail), measured in the read phase of Motion's frame loop, at most once a frame.
  *
- * The waypoint is state (the trail, the altimeter bar and the HUD readout render it); the progress
+ * The waypoint is state (the trail and the altimeter bar render it); the progress
  * changes every frame, so it is written straight to CSS custom properties (`--reading`) on the
  * elements that registered for it, never through React.
  */

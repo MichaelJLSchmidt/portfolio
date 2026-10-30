@@ -1,9 +1,9 @@
 // Text against what is actually behind it, measured on rendered screenshots in Chromium:
 // every running-text element (.body-copy, and .knockout blocks such as the footer and tables) and
 // every label straight over the field on
-// the home page, a case study, the case-study example (when the build includes it) and Basecamp,
-// at a desktop and a phone size, over the moving contour field at its worst (the headlamp lit
-// right on the text), over the field caught mid-morph during a route change (preview builds) and
+// the home page, a case study, the case-study example (when the build includes it) and About,
+// at a desktop and a phone size, over the contour field with the pointer right on the text (the
+// field takes no pointer input: nothing may change there), over the field caught mid-morph during a route change (preview builds) and
 // over the static poster (reduced motion, no WebGL). Text on opaque
 // surfaces (.surface-copy: the sheet colour of the banner, key insight and map-sheet captions, the
 // night frames of tiles and charts) is measured the same way, for either polarity.
@@ -146,21 +146,21 @@ const pages = [
   // The examples use every case-study building block; live builds don't include them.
   ...(existsSync(join(out, "work/test-project/index.html")) ? [{ path: "/work/test-project/", name: "case-study example" }] : []),
   ...["seilschaft", "gratweg"].filter((s) => existsSync(join(out, `work/${s}/index.html`))).map((s) => ({ path: `/work/${s}/`, name: `case study ${s}` })),
-  { path: "/about/", name: "Basecamp" },
+  { path: "/about/", name: "About" },
 ];
 const viewports = [
   { name: "desktop 1440×900", viewport: { width: 1440, height: 900 }, mobile: false },
   { name: "phone 390×844", viewport: { width: 390, height: 844 }, mobile: true },
 ];
 const modes = [
-  { name: "field, headlamp on the text", reduced: false },
+  { name: "field, pointer on the text", reduced: false },
   { name: "poster", reduced: true },
   // A route change caught halfway: the field frozen mid-morph towards another terrain, its quiet
   // zones held as the conductor holds them (preview builds: the field's debug hook).
-  { name: "mid-morph (route change), headlamp on the text", reduced: false, morph: true },
+  { name: "mid-morph (route change), pointer on the text", reduced: false, morph: true },
 ];
 
-// Narrow a run while iterating: LEGIBILITY_ONLY="Basecamp,desktop,field" (any of the words).
+// Narrow a run while iterating: LEGIBILITY_ONLY="About,desktop,field" (any of the words).
 const only = (process.env.LEGIBILITY_ONLY ?? "").split(",").filter(Boolean);
 const wanted = (name) => !only.length || only.some((w) => name.includes(w));
 const pick = (list) => (list.some((x) => wanted(x.name)) ? list.filter((x) => wanted(x.name)) : list);
@@ -305,7 +305,7 @@ for (const mode of pick(modes)) {
           );
           if (clip.y + clip.height > floor) clip.height = floor - clip.y;
           if (clip.width < 4 || clip.height < 4) break;
-          // The headlamp, right on the text: the pointer, or a finger held down on a phone.
+          // The pointer right on the text, or a finger held down on a phone.
           const cx = clip.x + clip.width / 2;
           const cy = clip.y + clip.height / 2;
           if (!mode.reduced) {

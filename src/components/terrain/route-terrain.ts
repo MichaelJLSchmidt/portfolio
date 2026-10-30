@@ -1,4 +1,4 @@
-/** The Basecamp terrain: an 8 × 8 km window around the zero point of the Swiss coordinates. */
+/** About's terrain: Bern, a 12 × 9 km window around the zero point of the Swiss coordinates. */
 export const BERN = "bern";
 
 /**

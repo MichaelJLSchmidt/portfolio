@@ -216,7 +216,6 @@ function Field({ profile, paused, calm, onReady, onContextLost }: FieldProps) {
 
   const timeline = useMemo(() => new Timeline(), []);
   const anim = useRef({
-    /** Map offset (UV), eased towards the pointer/scroll target: terrain moves slowly. */
     /** Slot A: the terrain on screen; slot B: where the field is heading (or leaning, pre-warm). */
     A: null as Slot | null,
     B: null as Slot | null,

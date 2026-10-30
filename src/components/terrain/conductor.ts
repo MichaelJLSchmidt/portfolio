@@ -14,7 +14,7 @@ import { BERN } from "./route-terrain";
  * - still: no field at all; the backdrop cross-fades its posters (200 ms).
  *
  * Recentre on Bern (every navigation to /about/) replaces the draw-on: over 0–700 ms the terrain
- * morphs and the interval eases in log space to Bern's (10 m), with no zoom push; over 200–900 ms
+ * morphs and the interval eases in log space to Bern's own, with no zoom push; over 200–900 ms
  * the Aare draws in ice; at 300 ms a crosshair pin pings once at the zero point. Leaving reverses
  * it: the interval returns with the morph, the river and the pin fade out in 240 ms. In calm the
  * river and the pin appear without drawing or pinging.

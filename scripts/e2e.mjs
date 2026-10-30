@@ -10,7 +10,7 @@
 //   npm run test:e2e -- decode        heightmap decode check and its fallbacks
 //   npm run test:e2e -- casestudy     the case-study template on the example page (needs a build
 //                                     that includes examples: SITE_MODE=basecamp or a preview)
-//   npm run test:e2e -- terrain       the terrain conductor, Bern, the readout, tiers and context
+//   npm run test:e2e -- terrain       the terrain conductor, Bern, tiers and context
 //                                     loss (scripts/e2e-terrain.mjs; needs NEXT_PUBLIC_PREVIEW=1)
 //   npm run test:e2e -- deck          deck order, card link names and the Next project loop
 //                                     (scripts/e2e/deck.mjs; needs the examples)
@@ -21,13 +21,13 @@
 //                                     (scripts/e2e/layout.mjs)
 //   npm run test:e2e -- fontswap      the web fonts held back on a throttled phone: CLS ≤ 0.05,
 //                                     display titles keep their boxes (scripts/e2e/typography.mjs)
-//   npm run test:e2e -- hud           the HUD's slots, condensing and readout (scripts/e2e/chrome.mjs)
+//   npm run test:e2e -- hud           the HUD's slots and condensing (scripts/e2e/chrome.mjs)
 //   npm run test:e2e -- toast         Copy address and its toast in full and still (scripts/e2e/chrome.mjs)
 //   npm run test:e2e -- cards         the deck's grid, phone list, arrival, hover, focus, press, marks,
 //                                     stats and the visited stamp (scripts/e2e/cards.mjs)
 //   npm run test:e2e -- arrival       route arrivals: timing, focus on the H1, the trailhead morph,
 //                                     traversals, Basecamp, still (scripts/e2e/choreography.mjs)
-//   npm run test:e2e -- reading       the HUD waypoint readout, the trail, the altimeter bar, the
+//   npm run test:e2e -- reading       the waypoint trail, the altimeter bar, the
 //                                     career profile per mode, no endless loops (choreography.mjs)
 //   npm run test:e2e -- route         the red route: one path through every waypoint, never across
 //                                     text, the phone margin, the blaze; full (scroll timeline,

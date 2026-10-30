@@ -327,7 +327,7 @@ const cards = {};
 for (const card of cfg.cards) cards[card.id] = await buildCard(card);
 
 // ---------------------------------------------------------------------------
-// 6. Ascent profile along the Interlaken → Jungfrau trail (Basecamp's career climb)
+// 6. Elevation profile along the Interlaken → Jungfrau trail (the footer's profile line)
 // ---------------------------------------------------------------------------
 {
   if (cfg.profile) {

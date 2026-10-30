@@ -288,11 +288,11 @@ export type HapticEvent = keyof typeof haptics.patterns;
  * npm test checks that every width query in a stylesheet uses one of these.
  */
 export const breakpoint = {
-  /** Past phones: the HUD shows the readout and the haptics switch; two-up grids. */
+  /** Past phones: the HUD shows the haptics switch; two-up grids. */
   sm: 640,
   /** The HUD's whole navigation; two-column hero, case-study and Basecamp headers; four-up grids. */
   md: 1024,
-  /** The HUD's Bern time and the readout's coordinates; the trail beside a case study's waypoints. */
+  /** The trail beside a case study's waypoints. */
   lg: 1280,
 } as const;
 
