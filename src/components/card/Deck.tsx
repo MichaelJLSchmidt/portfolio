@@ -67,10 +67,14 @@ export function Deck({ copy: t, cards, entries = {} }: { copy: typeof home.work;
               const drop = e ? (top - e.metres) / Math.max(1, top - low) : 0;
               return (
                 <li key={card.slug} className={styles.slot} style={{ "--drop": drop.toFixed(3), "--side": i % 2 ? 1 : -1 } as CSSProperties}>
-                  {e && <p className={`${styles.spot} hud-label`}>{e.spot}</p>}
+                  {e && (
+                    <p className={`${styles.spot} hud-label`} data-quiet-zone>
+                      {e.spot}
+                    </p>
+                  )}
                   <SummitCard card={card} transitionNames onOpen={() => rememberOrigin(card.slug)} />
                   {e && (
-                    <dl className={styles.caption}>
+                    <dl className={styles.caption} data-quiet-zone>
                       <div>
                         <dt className="hud-label">{t.caption.problem}</dt>
                         <dd>{e.problem}</dd>

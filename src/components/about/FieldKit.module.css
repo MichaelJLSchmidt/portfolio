@@ -63,7 +63,7 @@
   .proof {
     grid-area: proof;
     margin: 0;
-    color: var(--color-contour);
+    color: var(--color-paper-dusk);
   }
 
   .proofLabel {

@@ -61,7 +61,7 @@ export default function Home() {
         {/* The sheet's furniture: corner ticks at the region's real LV95 coordinates, a scale bar. */}
         <div className={styles.sheet} aria-hidden="true">
           {(Object.keys(ticks) as (keyof typeof ticks)[]).map((corner) => (
-            <span key={corner} className={`${styles.tick} hud-label`} data-corner={corner}>
+            <span key={corner} className={`${styles.tick} hud-label`} data-corner={corner} data-quiet-zone>
               <span>{ticks[corner][0]}</span>
               <span>{ticks[corner][1]}</span>
             </span>
@@ -74,7 +74,7 @@ export default function Home() {
               <li key={t}>{t}</li>
             ))}
           </ul>
-          <p className={`${styles.scale} hud-label`} aria-hidden="true">
+          <p className={`${styles.scale} hud-label`} aria-hidden="true" data-quiet-zone>
             <span className={styles.scaleBar} />
             {home.hero.scale(home.hero.scaleKm)}
           </p>

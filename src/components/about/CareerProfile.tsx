@@ -106,7 +106,7 @@ export function CareerProfile({ copy }: { copy: Copy }) {
               <path className={styles.walked} d={downLine} />
             </g>
           </svg>
-          <div className={styles.marks} aria-hidden="true">
+          <div className={styles.marks} aria-hidden="true" data-quiet-zone>
             {camps.map((c) => (
               <span key={c.title} className={styles.spot} data-summit={c.last ? "" : undefined} style={{ "--x": c.x, "--y": c.y, "--at": c.at, "--ex": c.ex } as CSSProperties} />
             ))}
@@ -143,7 +143,7 @@ export function CareerProfile({ copy }: { copy: Copy }) {
             </li>
           ))}
         </ol>
-        <figcaption className={`${styles.caption} hud-label`}>{copy.trail(places, (lengthM / 1000).toFixed(1))}</figcaption>
+        <figcaption className={`${styles.caption} hud-label`} data-quiet-zone>{copy.trail(places, (lengthM / 1000).toFixed(1))}</figcaption>
       </figure>
     </section>
   );

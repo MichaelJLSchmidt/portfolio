@@ -57,7 +57,7 @@
     align-items: center;
     gap: 10px;
     margin: 0;
-    color: var(--color-contour);
+    color: var(--color-paper-dusk);
   }
 
   .scaleBar {
@@ -79,7 +79,7 @@
     position: absolute;
     display: grid;
     gap: 2px;
-    color: var(--color-contour);
+    color: var(--color-paper-dusk);
     font-size: 0.625rem;
   }
 

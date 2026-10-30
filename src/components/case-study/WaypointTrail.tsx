@@ -51,7 +51,7 @@ export function WaypointTrail({ slug, label, items }: { slug: string; label: str
       <p className={`${styles.title} hud-label map-halo`} aria-hidden="true" data-quiet-zone>
         {label}
       </p>
-      <ol ref={listRef} className={styles.list} style={{ "--n": items.length } as CSSProperties}>
+      <ol ref={listRef} className={styles.list} style={{ "--n": items.length } as CSSProperties} data-quiet-zone>
         {items.map((item, i) => (
           <li
             key={item.id}

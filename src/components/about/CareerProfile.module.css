@@ -105,7 +105,7 @@
   .place,
   .scale {
     position: absolute;
-    color: var(--color-contour);
+    color: var(--color-paper-dusk);
     white-space: nowrap;
   }
 
@@ -135,7 +135,7 @@
   }
 
   .height {
-    color: var(--color-contour);
+    color: var(--color-paper-dusk);
   }
 
   .mastLabel {
@@ -143,11 +143,11 @@
     flex-wrap: wrap;
     gap: 2px 12px;
     margin: 0;
-    color: var(--color-contour);
+    color: var(--color-paper-dusk);
   }
 
   .tip {
-    color: var(--color-paper-dusk);
+    color: var(--color-glacier);
   }
 
   .outlook {
@@ -159,7 +159,7 @@
   }
 
   .caption {
-    color: var(--color-contour);
+    color: var(--color-paper-dusk);
   }
 
   /* ------------------------------------------------------------- phones: down the margin */

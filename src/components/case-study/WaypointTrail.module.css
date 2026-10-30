@@ -38,7 +38,7 @@
 
   .detail {
     display: block;
-    color: var(--color-contour);
+    color: var(--color-paper-dusk);
     font-size: 0.625rem;
     text-shadow: none;
   }
