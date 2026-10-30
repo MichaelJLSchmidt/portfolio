@@ -68,7 +68,7 @@ export function Deck({ copy: t, cards, entries = {} }: { copy: typeof home.work;
               return (
                 <li key={card.slug} className={styles.slot} style={{ "--drop": drop.toFixed(3), "--side": i % 2 ? 1 : -1 } as CSSProperties}>
                   {e && (
-                    <p className={`${styles.spot} hud-label`} data-quiet-zone>
+                    <p className={`${styles.spot} hud-label map-halo`} data-quiet-zone>
                       {e.spot}
                     </p>
                   )}

@@ -13,9 +13,13 @@
     padding-top: clamp(0px, 3vw, 40px);
   }
 
+  /* The example line: paper-dusk text (alpenglow is only 7.3:1 on the ground, with no margin for a
+     line under it), marked by an alpenglow rule. */
   .example {
     margin: 0;
-    color: var(--color-alpenglow);
+    padding-left: 8px;
+    border-left: 2px solid var(--color-alpenglow);
+    color: var(--color-paper-dusk);
   }
 
   /* Phones: a slim band of the terrain, so the result is in reach. */
