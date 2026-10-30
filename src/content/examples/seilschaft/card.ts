@@ -27,8 +27,8 @@ export const rawCard: SummitCardData = {
     impact: { before: "{{requests.before}}%", after: "{{requests.after}}%", note: "early" },
   },
   indexLine: { kind: "People", summary: "Built a UX practice from {{team.start}} to {{team.end}}", time: "{{project.years}} years" },
-  artwork: { kind: "seeded", terrainId: "lab-097" },
-  artworkAlt: "Contour map of a fictional massif generated for this example, with a dotted trail to the summit.",
+  artwork: { kind: "crop", terrainId: "eiger" },
+  artworkAlt: "Contour map of the Eiger from swisstopo data, with a dotted trail from Kleine Scheidegg by Eismeer and the Mittellegi hut along the ridge to the summit.",
   summary:
     "A fictional model case study: a {{team.start|word}}-person UX service desk became a {{team.end|word}}-person practice, and {{requests.after}}% of requests now reach UX before development starts.",
   example: true,

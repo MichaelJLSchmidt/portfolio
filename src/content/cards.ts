@@ -18,12 +18,15 @@ export type MapLabel = GeoPoint & { text: string; elevation?: string };
 
 export type Artwork =
   | {
-      /** A crop of the real swisstopo terrain; trail and pins are geographic. */
+      /**
+       * A crop of the real swisstopo terrain. Its trail and pins come from the terrain metadata
+       * (the verified places it was cut around, npm run terrain), or from geographic points here.
+       */
       kind: "crop";
       terrainId: string;
-      trail: GeoPoint[];
-      waypoints: Waypoint[];
-      labels: MapLabel[];
+      trail?: GeoPoint[];
+      waypoints?: Waypoint[];
+      labels?: MapLabel[];
     }
   | {
       /** Seeded terrain; trail and pins come from the generated terrain metadata. */

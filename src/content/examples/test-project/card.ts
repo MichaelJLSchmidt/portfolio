@@ -33,8 +33,8 @@ export const rawCard: SummitCardData = {
     impact: { before: "{{outcomes.complete.before}}%", after: "{{outcomes.complete.after}}%" },
   },
   indexLine: { kind: "Service", summary: "A subsidy form people finish", time: "{{project.months}} months" },
-  artwork: { kind: "seeded", terrainId: "lab-099" },
-  artworkAlt: "Contour map of a fictional massif generated for this example, with a dotted trail to the summit.",
+  artwork: { kind: "crop", terrainId: "moench" },
+  artworkAlt: "Contour map of the Mönch from swisstopo data, with a dotted trail from Eigergletscher by the Jungfraujoch and the Mönchsjoch hut up the southeast ridge to the summit.",
   summary:
     "A fictional model case study: a bilingual subsidy service where {{outcomes.complete.after}}% of applications are now complete on first submission. It demonstrates the case-study format.",
   example: true,

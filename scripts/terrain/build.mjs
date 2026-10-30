@@ -4,7 +4,7 @@
 //   npm run terrain -- --refresh re-download the elevation window
 //   npm run terrain -- --placeholder  skip the network and use procedural terrain
 //   npm run terrain -- --png     also write PNG copies of every heightmap (not used by the site)
-//   npm run terrain -- --only=lab-099   rebuild only these seeded card terrains (no download)
+//   npm run terrain -- --only=<id>      rebuild only these seeded card terrains (no download)
 //
 // Outputs (public/terrain): heightmap-{1024,1536,2048}.webp (lossless) with .bin raw-height
 // fallbacks, contours*.svg, cards/*.svg, morph/*.webp (+ .bin) and terrain.json (metadata the
@@ -97,18 +97,34 @@ async function writeHeightmap(name, data, width, height, encoding) {
 }
 
 // Card terrains (artwork SVG + morph heightmap for the contour field). Crop cards cut the real
-// terrain (they need the elevation grid); seeded cards are generated from their seed alone.
+// terrain (they need the elevation grid); seeded cards are generated from their seed alone. A
+// crop card with `trailPlaces` draws its trail through those verified places (src/content/
+// geo-data.json, npm run geo) and pins each one at its spot height; the last is the summit.
 const ART_W = 360;
+const geoPlaces = () => JSON.parse(readFileSync(join(root, "src/content/geo-data.json"), "utf8")).places;
 async function buildCard(card) {
   const artH = Math.round(ART_W / card.aspect);
   const morphW = card.morphWidth;
   const morphH = Math.round(morphW / card.aspect);
   let art, artMask = null, morph, bboxLv95 = null, trail = null, interval, index;
 
+  let placePins = null;
   if (card.kind === "crop") {
-    const [ce, cn] = wgs84ToLv95(card.center.lon, card.center.lat);
+    const [ce, cn] = card.centerLv95 ?? wgs84ToLv95(card.center.lon, card.center.lat);
     const wM = card.widthKm * 1000, hM = wM / card.aspect;
     bboxLv95 = [ce - wM / 2, cn - hM / 2, ce + wM / 2, cn + hM / 2].map((v) => Math.round(v));
+    if (card.trailPlaces) {
+      const [x0, y0, x1, y1] = bboxLv95;
+      const all = geoPlaces();
+      const at = card.trailPlaces.map((id) => {
+        const p = all[id];
+        if (!p?.e) throw new Error(`${card.id}: place "${id}" has no position in geo-data.json (npm run geo)`);
+        const clamp = (v) => Math.min(0.98, Math.max(0.02, v));
+        return { x: round(clamp((p.e - x0) / (x1 - x0)), 4), y: round(clamp((y1 - p.n) / (y1 - y0)), 4), elevationM: p.altitudeM };
+      });
+      trail = at.map((p) => [p.x, p.y]);
+      placePins = at;
+    }
     art = gaussianBlur(cropToBbox(grid, bboxLv95, ART_W, artH), ART_W, artH, 0.7);
     artMask = cropToBbox({ ...grid, data: lakeMask }, bboxLv95, ART_W, artH, 2);
     morph = gaussianBlur(cropToBbox(grid, bboxLv95, morphW, morphH, 3), morphW, morphH, cfg.heightmapBlurSigma ?? 0);
@@ -141,7 +157,9 @@ async function buildCard(card) {
   const morphEncoding = { channels: "RG", offset: round(Math.floor(mMin * 4) / 4), scale: cfg.quantisationM };
   const morphMap = await writeHeightmap(`morph/${card.id}`, morph, morphW, morphH, morphEncoding);
 
-  const pins = trail
+  const pins = placePins
+    ? placePins
+    : trail
     ? [0, 0.4, 0.72, 1].map((t) => {
         const [x, y] = trail[Math.round(t * (trail.length - 1))];
         return { x, y, elevationM: Math.round(sampleBilinear(art, ART_W, artH, x * ART_W, y * artH)) };
@@ -172,21 +190,26 @@ const range = (from, to, step) => {
   return out;
 };
 
-// --only: rebuild some seeded card terrains and update their metadata in place.
+// --only: rebuild some card terrains and update their metadata in place. Seeded cards need no
+// download; crop cards are cut once the elevation grid is in (below), and nothing else is written.
 const only = [...args].find((a) => a.startsWith("--only="))?.slice(7).split(",").filter(Boolean);
-if (only) {
+const onlyCards = only?.map((id) => {
+  const card = cfg.cards.find((c) => c.id === id);
+  if (!card) throw new Error(`--only: "${id}" is not a card in terrain.config.json`);
+  return card;
+});
+async function rebuildOnly(cards) {
   const metaFile = (example) => join(outDir, example ? "examples.json" : "terrain.json");
-  for (const id of only) {
-    const card = cfg.cards.find((c) => c.id === id);
-    if (!card || card.kind !== "seeded") throw new Error(`--only: "${id}" is not a seeded card in terrain.config.json`);
+  for (const card of cards) {
     const file = metaFile(card.example);
     const meta = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : { cards: {} };
-    meta.cards = { ...meta.cards, [id]: await buildCard(card) };
+    meta.cards = { ...meta.cards, [card.id]: await buildCard(card) };
     writeFileSync(file, `${JSON.stringify(meta, null, 2)}\n`);
-    log(`  updated public/terrain/${card.example ? "examples.json" : "terrain.json"} (${id})`);
+    log(`  updated public/terrain/${card.example ? "examples.json" : "terrain.json"} (${card.id})`);
   }
   process.exit(0);
 }
+if (onlyCards && onlyCards.every((c) => c.kind === "seeded")) await rebuildOnly(onlyCards);
 
 // ---------------------------------------------------------------------------
 // 1. Elevation source
@@ -264,6 +287,8 @@ for (const lake of cfg.lakes) {
   lakes.push({ name: lake.name, levelM: round(level, 1), areaKm2: round(areaKm2, 1) });
   log(`  lake ${lake.name}: level ${level.toFixed(1)} m, ${areaKm2.toFixed(1)} km² in frame`);
 }
+
+if (onlyCards) await rebuildOnly(onlyCards);
 
 // ---------------------------------------------------------------------------
 // 4. Contour posters (first paint, reduced motion, no-WebGL fallback), one per interval

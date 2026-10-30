@@ -1,29 +1,29 @@
 {
   "focus": {
-    "u": 0.5,
-    "v": 0.5
+    "u": 0.25,
+    "v": 0.5556
   },
   "heightmaps": [
     {
       "use": "desktop",
       "width": 1536,
-      "height": 1536,
+      "height": 1152,
       "gradientM": {
-        "p50": 0.28,
-        "p90": 1.34,
-        "p95": 1.89,
-        "p99": 2.91
+        "p50": 0.62,
+        "p90": 2.79,
+        "p95": 3.69,
+        "p99": 5.44
       }
     },
     {
       "use": "mobile",
       "width": 800,
-      "height": 800,
+      "height": 600,
       "gradientM": {
-        "p50": 0.54,
-        "p90": 2.56,
-        "p95": 3.61,
-        "p99": 5.5
+        "p50": 1.18,
+        "p90": 5.26,
+        "p95": 6.91,
+        "p99": 10.08
       }
     }
   ],
@@ -32,13 +32,13 @@
       "file": "/terrain/bern/contours-10.svg",
       "intervalM": 10,
       "width": 800,
-      "height": 800
+      "height": 600
     },
     {
       "file": "/terrain/bern/contours-20.svg",
       "intervalM": 20,
       "width": 800,
-      "height": 800
+      "height": 600
     }
   ]
 }

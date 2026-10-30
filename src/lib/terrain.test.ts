@@ -36,11 +36,11 @@ describe("contour intervals per terrain", () => {
     assert.deepEqual(bern.intervalsM, [...LOWLAND_INTERVALS]);
   });
 
-  it("keeps the spacing rule: Bern reaches 10 m on a laptop and a phone", () => {
+  it("keeps the spacing rule: Bern's 12 km window draws 20 m on a laptop and a phone", () => {
     const desktop = bernPosters.heightmaps.find((h) => h.use === "desktop")!;
     const mobile = bernPosters.heightmaps.find((h) => h.use === "mobile")!;
-    assert.equal(contourInterval(desktop, { width: 1440, height: 900 }, 1.06, { minSpacingPx: 3.25, steepPercentile: 95 }, bern.intervalsM), 10);
-    assert.equal(contourInterval(mobile, { width: 390, height: 844 }, 1.06, { minSpacingPx: 3, steepPercentile: 95 }, bern.intervalsM), 10);
+    assert.equal(contourInterval(desktop, { width: 1440, height: 900 }, 1.06, { minSpacingPx: 3.25, steepPercentile: 95 }, bern.intervalsM), 20);
+    assert.equal(contourInterval(mobile, { width: 390, height: 844 }, 1.06, { minSpacingPx: 3, steepPercentile: 95 }, bern.intervalsM), 20);
   });
 });
 
@@ -54,9 +54,9 @@ describe("route conductor", () => {
   });
 
   it("draws on over the draw token in full motion, never in calm", () => {
-    const full = planRoute("lab-097", "full", REST, { changes: true, revealFloor: 0.3 });
+    const full = planRoute("eiger", "full", REST, { changes: true, revealFloor: 0.3 });
     assert.deepEqual(ends(full, "reveal"), [[0, 900]]);
-    assert.equal(planRoute("lab-097", "calm", REST, { changes: true, revealFloor: 0.3 }).length, 0);
+    assert.equal(planRoute("eiger", "calm", REST, { changes: true, revealFloor: 0.3 }).length, 0);
   });
 
   it("recentres on Bern: the Aare draws over 200–900 ms, the pin pings at 300 ms", () => {

@@ -234,7 +234,7 @@ async function settle(page, { path, terrain }) {
 
 // The card the round trips open: a flagged example (there is no real case study yet), so these
 // scenarios need a build that includes examples (SITE_MODE=basecamp or a preview).
-const FLOW = { slug: "test-project", path: "/work/test-project/", title: "Test Project", terrain: "lab-099" };
+const FLOW = { slug: "test-project", path: "/work/test-project/", title: "Test Project", terrain: "moench" };
 const hasFlow = () => {
   if (existsSync(join(root, `out${FLOW.path}index.html`))) return true;
   console.log(`  skipped: no ${FLOW.path} in this build (build with SITE_MODE=basecamp)`);

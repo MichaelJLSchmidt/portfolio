@@ -145,7 +145,7 @@ try {
   for (const mode of ["full", "calm", "still"]) {
     const options = { reducedMotion: mode === "still" ? "reduce" : "no-preference" };
     const links = {
-      card: { selector: 'article[data-slug="seilschaft"] a', path: "/work/seilschaft/", terrain: "lab-097" },
+      card: { selector: 'article[data-slug="seilschaft"] a', path: "/work/seilschaft/", terrain: "eiger" },
       basecamp: { selector: 'header a[href$="/about/"]', path: "/about/", terrain: "bern" },
     };
     // SwiftShader and the encoder slow everything down: wait for each arrival (the route, then the

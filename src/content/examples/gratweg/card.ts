@@ -32,8 +32,8 @@ export const rawCard: SummitCardData = {
     summary: "One design system for {{landscape.products}} products",
     time: "{{project.years}} years",
   },
-  artwork: { kind: "seeded", terrainId: "lab-098" },
-  artworkAlt: "Contour map of a fictional ridge generated for this example, with a dotted trail along it to the summit.",
+  artwork: { kind: "crop", terrainId: "jungfrau" },
+  artworkAlt: "Contour map of the Jungfrau from swisstopo data, with a dotted trail from the Jungfraujoch by the Mönchsjoch hut and the Rottalsattel to the summit.",
   summary:
     "A fictional model case study: one design system for {{landscape.products}} public-sector products, funded by a business case and adopted without a big-bang migration.",
   example: true,
