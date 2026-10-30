@@ -112,7 +112,7 @@ export async function cards({ browser, base, root, check }) {
       pips: el.querySelector("[role=img][aria-label^='Scope']")?.getAttribute("aria-label"),
       filled: el.querySelectorAll("[class*=pipMark][data-on]").length,
       sizes: [...el.querySelectorAll("dd")].map((d) => getComputedStyle(d).fontSize),
-      impact: [...el.querySelectorAll("dd")].at(-1)?.querySelector(".visually-hidden")?.textContent,
+      impact: [...el.querySelectorAll("dd")].at(-1)?.firstChild?.textContent,
       note: [...el.querySelectorAll("dd")].at(-1)?.querySelector("small")?.textContent,
     }));
     check("scope pips read “Scope n of 5”, n filled", /^Scope (\d) of 5$/.test(marks.pips ?? "") && marks.filled === Number(marks.pips?.match(/\d/)?.[0]), JSON.stringify(marks));

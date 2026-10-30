@@ -58,7 +58,8 @@ export async function toast({ browser, base, check }) {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     const page = await context.newPage();
     await page.goto(`${base}/#contact`, { waitUntil: "load" });
-    const button = page.locator("#contact button", { hasText: "Copy address" });
+    // By either of its labels: the locator must still find it once it says "Copied".
+    const button = page.locator("#contact button", { hasText: /^(Copy address|Copied)$/ });
     if (!(await button.count())) {
       check("a Copy address button beside Email", false, "not found");
       await context.close();

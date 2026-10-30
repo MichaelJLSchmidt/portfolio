@@ -938,6 +938,12 @@ function Field({ profile, paused, calm, onReady, onContextLost }: FieldProps) {
   );
 }
 
+/**
+ * The field takes no pointer input: R3F's own event layer (a raycaster on every pointer move over
+ * its wrapper) stays off, so nothing in the field follows the cursor or costs a move handler.
+ */
+const noEvents = () => ({ enabled: false, priority: 0 });
+
 export default function ContourField({ profile, paused, calm, onReady, onContextLost }: FieldProps) {
   // Tier A: up to the DPR cap; tier B: a fixed 0.75 drawing-buffer scale at DPR 1.
   const dpr: number | [number, number] = profile.renderScale === 1 ? [1, profile.dprMax] : profile.dprMax * profile.renderScale;
@@ -950,6 +956,7 @@ export default function ContourField({ profile, paused, calm, onReady, onContext
       linear
       gl={{ antialias: false, alpha: false, depth: false, stencil: false, powerPreference: "low-power" }}
       style={{ position: "absolute", inset: 0 }}
+      events={noEvents}
       aria-hidden="true"
     >
       <Field profile={profile} paused={paused} calm={calm} onReady={onReady} onContextLost={onContextLost} />

@@ -8,22 +8,11 @@
 //             width change; a committed link keeps its blaze for the session, also on a reload
 //   portrait  the About portrait card: "Show facts" turns it to the facts (the photo face inert
 //             and hidden from screen readers), "Show photo" back; the label says what it shows
-//   pointer   nothing follows the cursor: no pointermove or mousemove listener but the Summit
-//             Card's tilt (registered while a fine pointer is over a card) and the lightbox drag
+//   pointer   nothing follows the cursor: moving the pointer inside a title, running text or the
+//             footer wordmark changes nothing in the page and draws no field frame (the unit test
+//             src/lib/pointer.test.ts keeps pointermove listeners to the card tilt and the
+//             lightbox drag)
 const ROUTES = ["/", "/about/", "/work/seilschaft/"];
-
-/** Records every pointermove / mousemove listener added, with the element it is on. */
-const listenerProbe = () => {
-  window.__moves = [];
-  const add = EventTarget.prototype.addEventListener;
-  EventTarget.prototype.addEventListener = function (type, fn, opts) {
-    if (/^(pointermove|mousemove|pointerrawupdate)$/.test(type)) {
-      const el = this instanceof Element ? this : null;
-      window.__moves.push({ type, on: el ? `${el.tagName.toLowerCase()}.${String(el.className).slice(0, 40)}` : String(this), card: !!el?.closest?.("article[data-slug]") });
-    }
-    return add.call(this, type, fn, opts);
-  };
-};
 
 const exists = async (page, url) => (await page.goto(url, { waitUntil: "load" }))?.ok();
 
@@ -167,19 +156,48 @@ export async function portrait({ browser, base, check }) {
 export async function pointer({ browser, base, check }) {
   console.log("\npointer: nothing follows the cursor");
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-  await context.addInitScript(listenerProbe);
+  await context.addInitScript(() => {
+    window.__draws = 0;
+    for (const c of [window.WebGL2RenderingContext, window.WebGLRenderingContext].filter(Boolean)) {
+      for (const fn of ["drawArrays", "drawElements"]) {
+        const o = c.prototype[fn];
+        c.prototype[fn] = function (...a) {
+          window.__draws++;
+          return o.apply(this, a);
+        };
+      }
+    }
+  });
   const page = await context.newPage();
   for (const route of ROUTES) {
     if (!(await exists(page, `${base}${route}`))) continue;
-    await page.waitForTimeout(800);
-    // Move over everything: titles, buttons, cards.
-    for (let y = 100; y < 900; y += 160) await page.mouse.move(200 + (y % 600), y, { steps: 3 });
-    await page.mouse.wheel(0, 1600);
-    await page.waitForTimeout(600);
-    for (let y = 100; y < 900; y += 160) await page.mouse.move(900 - (y % 500), y, { steps: 3 });
-    const moves = await page.evaluate(() => window.__moves);
-    const stray = moves.filter((m) => !m.card);
-    check(`${route}: pointermove only on a Summit Card (tilt)`, stray.length === 0, JSON.stringify(stray.slice(0, 3)));
+    await page.waitForTimeout(1500);
+    // Inside a title, running text and the footer wordmark (cards tilt on purpose: not here).
+    for (const selector of ["main h1", "main .body-copy", "footer a[data-flood]"]) {
+      const target = page.locator(selector).first();
+      if (!(await target.count())) continue;
+      await target.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(900);
+      const box = await target.boundingBox();
+      if (!box) continue;
+      const y = box.y + box.height / 2;
+      // Entering may answer (a flood, a pre-warm); let that finish, then move inside it.
+      await page.mouse.move(box.x + 4, y);
+      await page.waitForTimeout(1600);
+      await page.evaluate(() => {
+        window.__mut = 0;
+        window.__mo = new MutationObserver((r) => (window.__mut += r.length));
+        window.__mo.observe(document.documentElement, { attributes: true, childList: true, subtree: true, characterData: true });
+        window.__draws0 = window.__draws;
+      });
+      for (let i = 1; i <= 15; i++) await page.mouse.move(box.x + 4 + ((box.width - 8) * i) / 15, y + Math.sin(i) * Math.min(6, box.height / 4));
+      await page.waitForTimeout(300);
+      const r = await page.evaluate(() => {
+        window.__mo.disconnect();
+        return { mutations: window.__mut, draws: window.__draws - window.__draws0 };
+      });
+      check(`${route} ${selector}: moving inside it changes nothing`, r.mutations === 0 && r.draws === 0, JSON.stringify(r));
+    }
   }
   await context.close();
 }

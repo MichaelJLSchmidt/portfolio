@@ -165,7 +165,13 @@ export async function arrival({ browser, basePath, base, root, check }) {
     await landed(page, basePath, "/about/");
     const r = await page.evaluate(() => ({ vt: window.__vt.at(-1), arrival: window.__arrival }));
     check("About: the HUD label morphs into the H1", r.vt?.groups.includes("about-title"), JSON.stringify(r.vt?.groups));
-    check("About: the facts from 420 ms", r.arrival?.includes(420), JSON.stringify(r.arrival));
+    // The facts arrive with the page only where they are on screen as it lands.
+    const factsOnScreen = await page.evaluate(() => {
+      const sheet = document.querySelector("main .map-sheet");
+      const b = sheet?.getBoundingClientRect();
+      return !!b && b.top < innerHeight && b.bottom > 0;
+    });
+    check("About: the facts from 420 ms (when on screen)", !factsOnScreen || r.arrival?.includes(420), JSON.stringify({ factsOnScreen, arrival: r.arrival }));
     const f = await focusInfo(page);
     check("About: focus on the H1 (not lost with the HUD link)", f.tag === "h1", JSON.stringify(f));
     check("no page errors", errors.length === 0, errors.join("; "));
@@ -220,7 +226,7 @@ export async function reading({ browser, base, root, check }) {
     check("altimeter bar: hidden above the first waypoint", !(await shown()));
     await page.evaluate(() => document.querySelectorAll("section[data-waypoint]")[1].scrollIntoView({ block: "start" }));
     await page.waitForTimeout(800);
-    const label = await page.evaluate(() => document.querySelector("nav[data-shown] button .visually-hidden")?.textContent);
+    const label = await page.evaluate(() => document.querySelector("nav[data-shown] button")?.textContent?.trim());
     check("altimeter bar: shown, with the current waypoint", (await shown()) && !!label, label);
     await page.locator("nav[data-shown] button").tap();
     await page.waitForTimeout(500);
@@ -366,7 +372,7 @@ export async function access({ browser, base, root, check }) {
     await page.locator('nav[aria-label="Next project"]').scrollIntoViewIfNeeded();
     await page.waitForTimeout(800);
     await buzz();
-    await page.locator('nav[aria-label="Next project"] > div > a').tap();
+    await page.locator('a[aria-describedby="next-project-label"]').tap();
     await page.waitForTimeout(1500);
     check("haptics: Next project commits with 10 ms", (await buzz()).includes("10"));
     await context.close();
