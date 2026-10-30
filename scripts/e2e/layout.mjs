@@ -91,9 +91,15 @@ export async function ia({ base, basePath, root, check, open }) {
       const r = await still.page.evaluate(() => {
         const h1 = document.querySelector("main h1");
         const vw = document.documentElement.clientWidth;
-        const range = document.createRange();
-        range.selectNodeContents(h1);
-        const rights = [...range.getClientRects()].filter((r) => r.width > 2 && r.height > 2).map((r) => r.right);
+        // Every visible piece of text in the title (not a visually hidden copy of it).
+        const rights = [];
+        const walker = document.createTreeWalker(h1, NodeFilter.SHOW_TEXT);
+        for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+          if (node.parentElement.closest(".visually-hidden") || !node.textContent.trim()) continue;
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          rights.push(...[...range.getClientRects()].filter((r) => r.width > 2 && r.height > 2).map((r) => r.right));
+        }
         const texts = [...h1.closest("header").querySelectorAll("p")].map((p) => Math.round(p.getBoundingClientRect().right));
         return { right: Math.round(Math.max(...rights)), box: Math.round(h1.getBoundingClientRect().right), vw, texts };
       });
