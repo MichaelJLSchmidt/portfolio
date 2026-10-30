@@ -62,7 +62,7 @@ export function WaypointTrail({ slug, label, items }: { slug: string; label: str
             <span className={styles.ping} aria-hidden="true" />
             <a href={`#${item.id}`} className={styles.link} aria-current={i === active ? "true" : undefined}>
               <span className={styles.label}>{item.nav}</span>
-              {item.detail && <span className={`${styles.detail} hud-label`}>{item.detail}</span>}
+              {item.detail && <span className={`${styles.detail} hud-label map-halo`}>{item.detail}</span>}
             </a>
           </li>
         ))}

@@ -81,10 +81,10 @@ export function TrailheadBand({
           <ol className={styles.peaks} data-quiet-zone>
             {ridge.map((p, i) => (
               <li key={p.slug} style={{ "--x": `${(50 + i * 100) / 3}%` } as CSSProperties} data-current={p.current || undefined}>
-                <span className="hud-label">
+                <span className="hud-label map-halo">
                   {p.name} · {p.altitude}
                 </span>
-                {p.current && <span className={`${styles.here} hud-label`}>{labels.youAreHere}</span>}
+                {p.current && <span className={`${styles.here} hud-label map-halo`}>{labels.youAreHere}</span>}
               </li>
             ))}
           </ol>

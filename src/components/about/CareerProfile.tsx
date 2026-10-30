@@ -114,20 +114,20 @@ export function CareerProfile({ copy }: { copy: Copy }) {
             {stops.map((s, i) => (
               <span
                 key={s.id}
-                className={`${styles.place} hud-label`}
+                className={`${styles.place} hud-label map-halo`}
                 data-edge={i === 0 ? "start" : s === summit ? "end" : undefined}
                 style={{ "--x": pct(ax(s.atM), ACROSS.w), "--y": pct(ay(elevationAt(s.atM)), ACROSS.h) } as CSSProperties}
               >
                 {s.label}
               </span>
             ))}
-            <span className={`${styles.scale} hud-label`} style={{ "--y": pct(ay(SCALE_M), ACROSS.h) } as CSSProperties}>
+            <span className={`${styles.scale} hud-label map-halo`} style={{ "--y": pct(ay(SCALE_M), ACROSS.h) } as CSSProperties}>
               {altitudeLabel(SCALE_M)}
             </span>
           </div>
           {/* The mast above the summit: a dashed line up to its tip, the outlook beside it. */}
           <div className={styles.mast} data-quiet-zone>
-            <p className={`${styles.mastLabel} hud-label`}>
+            <p className={`${styles.mastLabel} hud-label map-halo`}>
               <span className={styles.tip}>{copy.tip(formatInteger(tip))}</span>
               <span lang="de">{copy.mast}</span>
             </p>
@@ -137,13 +137,13 @@ export function CareerProfile({ copy }: { copy: Copy }) {
         <ol className={styles.camps} aria-label={copy.caption} data-quiet-zone style={{ "--columns": columns } as CSSProperties}>
           {camps.map((c) => (
             <li key={c.title} className={styles.camp} data-summit={c.last ? "" : undefined} style={{ "--at": c.at, "--ex": c.ex } as CSSProperties}>
-              {!c.last && <span className={`${styles.year} hud-label`}>{c.year}</span>}
+              {!c.last && <span className={`${styles.year} hud-label map-halo`}>{c.year}</span>}
               <strong className={styles.role}>{c.last ? copy.summit(c.title, c.year) : c.title}</strong>
-              <span className={`${styles.height} hud-label`}>{altitudeLabel(c.e)}</span>
+              <span className={`${styles.height} hud-label map-halo`}>{altitudeLabel(c.e)}</span>
             </li>
           ))}
         </ol>
-        <figcaption className={`${styles.caption} hud-label`} data-quiet-zone>{copy.trail(places, (lengthM / 1000).toFixed(1))}</figcaption>
+        <figcaption className={`${styles.caption} hud-label map-halo`} data-quiet-zone>{copy.trail(places, (lengthM / 1000).toFixed(1))}</figcaption>
       </figure>
     </section>
   );

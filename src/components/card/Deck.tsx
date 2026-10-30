@@ -76,15 +76,15 @@ export function Deck({ copy: t, cards, entries = {} }: { copy: typeof home.work;
                   {e && (
                     <dl className={styles.caption} data-quiet-zone>
                       <div>
-                        <dt className="hud-label">{t.caption.problem}</dt>
+                        <dt className="hud-label map-halo">{t.caption.problem}</dt>
                         <dd>{e.problem}</dd>
                       </div>
                       <div>
-                        <dt className="hud-label">{t.caption.result}</dt>
+                        <dt className="hud-label map-halo">{t.caption.result}</dt>
                         <dd>{e.result}</dd>
                       </div>
                       <div>
-                        <dt className="hud-label">{t.caption.role}</dt>
+                        <dt className="hud-label map-halo">{t.caption.role}</dt>
                         <dd>{e.role}</dd>
                       </div>
                     </dl>

@@ -48,7 +48,7 @@ export function FieldKit({ copy }: { copy: typeof about.skills }) {
           </svg>
           <h3 className={styles.name}>{s.name}</h3>
           <p className={`${styles.text} body-copy`}>{s.text}</p>
-          <p className={`${styles.proof} hud-label`}>
+          <p className={`${styles.proof} hud-label map-halo`}>
             <span className={styles.proofLabel}>{copy.proofLabel}</span> {s.proof}
           </p>
         </li>

@@ -125,14 +125,14 @@ export default function About() {
           <SectionHead id="cards-heading" heading={about.cards.heading} />
           <p className="body-copy">{about.cards.body}</p>
           <div className={styles.binderList} data-quiet-zone>
-            <p className={`${styles.binderListLabel} hud-label`}>{binder.listLabel}</p>
+            <p className={`${styles.binderListLabel} hud-label map-halo`}>{binder.listLabel}</p>
             <dl>
               {pockets.flatMap((p) =>
                 p.kind === "empty"
                   ? []
                   : [
                       <div key={p.name}>
-                        <dt className="hud-label">{p.name}</dt>
+                        <dt className="hud-label map-halo">{p.name}</dt>
                         <dd>{p.line}</dd>
                       </div>,
                     ],
