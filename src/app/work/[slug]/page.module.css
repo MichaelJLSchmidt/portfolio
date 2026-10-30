@@ -3,9 +3,15 @@
 @layer components {
   .main {
     display: grid;
-    gap: clamp(40px, 5vw, 80px);
-    padding-top: 96px;
+    gap: var(--space-section);
+    padding-top: clamp(64px, 8vw, 96px);
     padding-bottom: 64px;
+  }
+
+  /* The way back sits close above the spread, not a section gap away. */
+  .crumbs {
+    display: flex;
+    margin-bottom: calc(8px - var(--space-section));
   }
 
   .crumb {
@@ -15,13 +21,6 @@
     min-height: 44px;
   }
 
-  /* A definite track, not an auto one: the title's size depends on its column (cqi), and an auto
-     track re-measures that column, and with it the whole page, on every layout. */
-  .header {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 24px;
-  }
 
   .artSlot,
   .art {
@@ -41,32 +40,12 @@
     box-shadow: 0 24px 60px rgb(0 0 0 / 0.45);
   }
 
-  /* One display size for every case-study title: the template's widest word (--title-em, measured)
-     fills 96% of this column, up to 8.5rem; a title with a wider word scales itself down
-     (--word-em). Shorter titles never grow. */
-  .titleBlock {
-    container-type: inline-size;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 14px;
-    align-content: end;
-  }
 
-  .coords {
-    color: var(--color-paper-dusk);
-  }
 
   .title {
     font-size: min(calc(0.96 * 100cqi / max(var(--title-em, 5), var(--word-em, 5))), 8.5rem);
   }
 
-  .type {
-    margin: 0;
-    font-family: var(--font-text-condensed);
-    font-size: 1.125rem;
-    font-weight: 600;
-    font-stretch: var(--type-condensed-wdth);
-  }
 
   /* "7 min read · 60-second skim below" */
   .meta {
@@ -102,13 +81,13 @@
     list-style: none;
   }
 
-  /* The jump chips: SignatureLink's chip variant (breath, brightening border, sheet when pressed). */
+  /* The jump list: inline trail links. */
   .chip {
     font-size: 0.9375rem;
   }
 
-  /* Below 1200 px: "Jump to" chips at the top, the waypoints in one column. From 1200 px the
-     "On this page" trail stays beside them instead. */
+  /* Below 1280 px: "On this page" links at the top, the stages in one column. From 1280 px the
+     timeline stays beside them instead. */
   .body {
     display: grid;
     gap: 40px;
@@ -118,18 +97,43 @@
     display: none;
   }
 
-  .waypoints {
+  /* The stages, then the reversed decision, the after-launch log and the results. */
+  .stages {
     display: grid;
-    gap: clamp(72px, 9vw, 128px);
+    gap: var(--space-section);
     min-width: 0;
   }
 
-  @media (min-width: 1024px) {
-    .header {
-      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-      align-items: end;
-      gap: clamp(32px, 4vw, 72px);
-    }
+  .section {
+    display: grid;
+    gap: 24px;
+    min-width: 0;
+    scroll-margin-top: 96px;
+  }
+
+  .sectionHeading {
+    color: var(--color-paper-dusk);
+    font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.6rem);
+  }
+
+  .resultsHeading {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+  }
+
+  .stageLine {
+    color: var(--color-glacier);
+  }
+
+  .closing {
+    display: grid;
+    gap: 12px;
+    max-width: 52rem;
+  }
+
+  .credits {
+    font-size: 0.9375rem;
   }
 
   @media (min-width: 1280px) {

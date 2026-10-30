@@ -25,8 +25,26 @@ export const data = {
   v1: { components: 23 },
   team: { core: 3, designers: 1, developers: 2, contributors: 12 },
   governance: { rfcDays: 10, officeHoursPerWeek: 2, officeHours: "twice a week", fastLaneDays: 2, deprecationMonths: 6 },
-  decisions: { count: 3, customYears: 2 },
+  decisions: { count: 3, customYears: 2, coreOnlyHires: 2 },
   reflection: { tokenRounds: 2 },
+  /** Dates on the page: launch, the decision we reversed, the after-launch log. */
+  log: {
+    launch: "June 2023",
+    fastLane: "October 2023",
+    firstScreen: "November 2023",
+    hiccup: "April 2024",
+    fix: "May 2024",
+    release2: "September 2024",
+    allOn: "January 2025",
+  },
+  /** The decision we reversed (an RFC for every change): teams that forked components meanwhile. */
+  reversal: { forks: 3 },
+  /** Support tickets about typing a date, the week after the date-picker update and after the fix. */
+  support: { tickets: 37, ticketsAfter: 2 },
+  /** Usability test after version two: citizens who completed the address form without help. */
+  release2: { participants: 12, completedBefore: 7, completedAfter: 11 },
+  /** Roles in the team beyond the core team and the contributors. */
+  roles: { accessibility: 1, sponsor: 1 },
   audit: {
     before: auditBefore,
     after: auditAfter,
@@ -101,4 +119,7 @@ export const consistency: [string, boolean][] = [
   ["office hours: twice a week", d.governance.officeHoursPerWeek === 2 && d.governance.officeHours === "twice a week"],
   ["the products already on Angular Material are among all products", d.landscape.onMaterial <= d.landscape.products],
   ["option ratings stay within the scale", (["custom", "kit", "material"] as const).every((k) => Object.values(d.options[k]).every((n) => n >= 0 && n <= d.options.scale))],
+  ["the forks came from product teams", d.reversal.forks <= d.landscape.products],
+  ["tickets fell after the date-picker fix", d.support.ticketsAfter < d.support.tickets],
+  ["more citizens completed the address form after version two, out of the same participants", d.release2.completedBefore < d.release2.completedAfter && d.release2.completedAfter <= d.release2.participants],
 ];

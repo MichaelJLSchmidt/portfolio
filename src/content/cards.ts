@@ -111,17 +111,33 @@ export const cardLabels = {
 export const caseStudyLabels = {
   /** The page title's second part: "<name> — Case study · <name source>". */
   caseStudy: "Case study",
+  /** Above the H1 of a flagged example. */
+  exampleLine: "Example — fictional case study",
+  problem: "The problem",
+  result: "The result",
+  /** Under the result's climb line: "+3’400 m from Interlaken Ost". */
+  gain: (from: string) => `from ${from}`,
+  facts: { role: "Role", team: "Team", time: "Time" },
   summaryHeading: "Summary",
-  mandate: "The brief",
+  /** The summary's margin: "Sheet 2/3" (this case study among the three). */
+  sheet: (n: number, of: number) => `Sheet ${n}/${of}`,
+  scale: "1 : 25 000",
+  brief: "The brief",
+  outcome: "Outcome",
   role: "My role",
   teamLed: "Team I led",
   putInPlace: "What I put in place",
   keyDecision: "Key decision",
-  outcome: "Outcome",
   didNotDo: "What I did not do",
   jumpTo: "On this page",
   onThisPage: "On this page",
-  nextWaypoint: "Next section",
+  /** A stage's mono line: "Stage 3 · Kleine Scheidegg · 2’061 m". */
+  stage: (n: number) => `Stage ${n}`,
+  stageLine: (n: number, place: string, altitude: string) => `Stage ${n} · ${place} · ${altitude}`,
+  /** The phone's reading bar: "Stage 2 of 6 · Grindelwald". */
+  stageOf: (n: number, of: number, place: string) => `Stage ${n} of ${of} · ${place}`,
+  sideNote: (n: number) => `Side note ${n}`,
+  nextWaypoint: "Next stage",
   backToTop: "Back to top",
   readingTime: (minutes: number) => `${minutes} min read`,
   skim: "60-second summary below",
@@ -146,11 +162,24 @@ export const caseStudyLabels = {
   noteMarker: (n: number, title: string) => `Note ${n}: ${title}`,
   keyInsight: "Key insight",
   decision: (n: number) => `Decision ${n}`,
-  chose: "Chose",
-  cost: "Cost",
-  mitigation: "Mitigation",
-  chosen: "Chosen",
-  outcomeColumns: ["Metric", "Before", "After", "Evidence"] as const,
+  /** The fork diagram's words: status in text, never colour alone. */
+  fork: {
+    options: "Options",
+    chosen: "Chosen",
+    notChosen: "Not chosen",
+    reversed: "Reversed",
+    pros: "For",
+    cons: "Against",
+    cost: "Cost",
+    turnedBack: (date: string) => `Turned back · ${date}`,
+  },
+  reversedHeading: "A decision we reversed",
+  afterLaunchHeading: "What happened after launch",
+  logColumns: ["Date", "What we observed"] as const,
+  resultsHeading: "Results",
+  resultColumns: { metric: "Metric", before: "Before", after: "After", wonAt: "Won at" },
+  lookingBack: "Looking back",
+  team: "Team",
   evidence: {
     measured: { label: "Measured", text: "counted in system logs or a manual file count" },
     estimated: { label: "Estimated", text: "extrapolated from a sample" },
@@ -159,11 +188,13 @@ export const caseStudyLabels = {
   evidenceLegend: "Evidence",
   credits: "Credits",
   next: "Next project",
+  previous: "Previous project",
+  youAreHere: "You are here",
+  /** The ridge of the three projects in the Next project band. */
+  ridge: "The three projects",
   back: "All projects",
   backToAll: "All projects",
   example: "Fictional example",
-  /** The phone's reading bar: "Section 2 of 6". */
-  section: (n: number, of: number) => `Section ${n} of ${of}`,
 };
 
 /** Real project cards. None is written yet: a live build's deck is empty and says so (Deck). */

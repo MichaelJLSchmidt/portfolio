@@ -138,7 +138,7 @@ for (const src of dataSources) {
 for (const [slug, study] of Object.entries(caseStudies)) {
   const figures = study.figures ?? {};
   let insights = 0;
-  for (const w of study.waypoints) {
+  for (const w of study.stages) {
     for (const b of w.blocks) {
       if (b.kind === "insight") insights++;
       if (b.kind === "figure" && !figures[b.id]) fail(`${slug} ${w.id}`, `figure "${b.id}" is not defined`);

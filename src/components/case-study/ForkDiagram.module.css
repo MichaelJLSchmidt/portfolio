@@ -1,0 +1,213 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+/*
+ * The fork diagram (ForkDiagram.tsx). Each option is a row: a branch drawn from the trunk on the
+ * left (an SVG stretched to the row's height, its strokes kept at 1.5 px), then the option's card.
+ * Route red marks the way taken only: solid, running on past the card (::after); a way not taken
+ * is dashed contour grey ending at a tick; a reversed way is solid to a dated turn-back marker.
+ */
+@layer components {
+  .fork {
+    display: grid;
+    gap: 16px;
+  }
+
+  .heading {
+    color: var(--color-paper-dusk);
+    font-size: clamp(1.25rem, 1rem + 0.9vw, 1.6rem);
+    font-stretch: var(--type-condensed-wdth);
+    font-weight: 760;
+    line-height: 1.15;
+    scroll-margin-top: 96px;
+  }
+
+  .junction {
+    height: 64px;
+    margin-bottom: -6px;
+  }
+
+  .signpost {
+    width: 120px;
+    height: 64px;
+    overflow: visible;
+  }
+
+  .post {
+    stroke: var(--color-contour);
+    stroke-width: 3;
+  }
+
+  .arm {
+    fill: var(--color-ground-raised);
+    stroke: var(--color-contour);
+    stroke-width: 1;
+  }
+
+  .tipWhite {
+    fill: var(--color-paper-dusk);
+  }
+
+  .tipRed {
+    fill: var(--color-signal);
+  }
+
+  .options {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .option {
+    position: relative;
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  .branch {
+    width: 48px;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .branch path {
+    fill: none;
+    stroke-width: 1.5px;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .trunk {
+    stroke: var(--color-contour);
+  }
+
+  .way,
+  .deadEnd {
+    stroke: var(--color-contour);
+  }
+
+  .option[data-status="rejected"] .way {
+    stroke-dasharray: 4 4;
+  }
+
+  .option[data-status="chosen"] .way,
+  .option[data-status="reversed"] .way {
+    stroke: var(--color-signal);
+    stroke-width: 2px;
+  }
+
+  .card {
+    display: grid;
+    gap: 10px;
+    margin-block: 8px;
+    padding: 14px 16px;
+    border: 1px solid var(--color-contour-dim);
+    border-radius: 6px;
+    background: var(--color-ground);
+  }
+
+  /* The way taken runs on past its option, to the panel's edge. */
+  .option[data-status="chosen"] .card {
+    border-color: var(--color-signal);
+  }
+
+  .option[data-status="chosen"]::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -24px;
+    width: 24px;
+    border-top: 2px solid var(--color-signal);
+  }
+
+  .optionHead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 12px;
+    margin: 0;
+  }
+
+  .label {
+    color: var(--color-paper-dusk);
+    font-weight: 700;
+  }
+
+  .status {
+    color: var(--color-contour);
+  }
+
+  .option[data-status="chosen"] .status {
+    color: var(--color-glacier);
+  }
+
+  .option[data-status="reversed"] .status {
+    color: var(--color-alpenglow);
+  }
+
+  .facts {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+  }
+
+  @media (min-width: 640px) {
+    .facts {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .facts > div:last-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .facts dt {
+    color: var(--color-contour);
+  }
+
+  .facts dd {
+    margin: 2px 0 0;
+  }
+
+  .facts ul {
+    margin: 0;
+    padding-left: 1.1em;
+  }
+
+  /* A reversed way: the turn-back marker and its date. */
+  .turnedBack {
+    position: relative;
+    margin: 0;
+    padding-left: 28px;
+    font-size: 0.9375rem;
+  }
+
+  .turnedBack::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.2em;
+    width: 14px;
+    height: 10px;
+    border: 2px solid var(--color-alpenglow);
+    border-left: 0;
+    border-radius: 0 8px 8px 0;
+  }
+
+  .turnedBackLabel {
+    color: var(--color-alpenglow);
+  }
+
+  @media (forced-colors: active) {
+    .branch path,
+    .post {
+      stroke: CanvasText;
+    }
+
+    .tipRed {
+      fill: CanvasText;
+    }
+  }
+}

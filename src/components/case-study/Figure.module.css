@@ -80,15 +80,21 @@
     line-height: 1.55;
   }
 
+  /* Mono, like a map's marginal notes; sentence case for the caption itself. */
   .captionText {
-    font-weight: 430;
+    font-size: 0.75rem;
+    line-height: 1.7;
+    letter-spacing: 0.06em;
+    text-transform: none;
+  }
+
+  .source {
+    color: var(--color-contour);
   }
 
   .figLabel {
-    font-family: var(--font-mono);
-    font-size: 0.8125rem;
-    font-weight: 500;
-    letter-spacing: 0.02em;
+    font-weight: 600;
+    text-transform: uppercase;
     white-space: nowrap;
   }
 
@@ -324,6 +330,8 @@
     right: 12px;
   }
 
+  /* The handle is a map-sheet seam: where two sheets meet, a hairline with the sheets' edge ticks
+     at top and bottom, and a square grip in the middle with a sheet-turn mark on each side. */
   .compareHandle {
     position: absolute;
     z-index: 2;
@@ -331,8 +339,19 @@
     bottom: 0;
     left: var(--pos);
     width: 0;
-    border-left: 2px solid var(--color-ground);
+    border-left: 1.5px solid var(--color-ground);
+    box-shadow: 1.5px 0 0 var(--color-paper-dusk);
     pointer-events: none;
+  }
+
+  .compareHandle::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 -7px;
+    width: 14px;
+    background:
+      linear-gradient(var(--color-ground), var(--color-ground)) 0 0 / 14px 1.5px no-repeat,
+      linear-gradient(var(--color-ground), var(--color-ground)) 0 100% / 14px 1.5px no-repeat;
   }
 
   .compareHandle::after {
@@ -340,32 +359,19 @@
     position: absolute;
     top: 50%;
     left: -1px;
-    width: 40px;
-    height: 40px;
-    border: 2px solid var(--color-paper-dusk);
-    border-radius: 50%;
+    width: 36px;
+    height: 44px;
+    border: 1.5px solid var(--color-paper-dusk);
+    border-radius: 2px;
     background:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 6 3 12l6 6M15 6l6 6-6 6' fill='none' stroke='%23DDE3E3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 7 4 12l5 5M15 7l5 5-5 5M12 3v18' fill='none' stroke='%23C9C5B4' stroke-width='1.5' stroke-linecap='square'/%3E%3C/svg%3E")
         center / 22px no-repeat,
       var(--color-ground);
-    box-shadow: 0 2px 8px rgb(27 28 24 / 0.35);
     transform: translate(-50%, -50%);
   }
 
-  /* The native range covers the frame: drag anywhere, or use the arrow keys. */
-  .compareRange {
-    position: absolute;
-    z-index: 3;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    opacity: 0;
-    cursor: ew-resize;
-  }
-
   .compareStage:has(.compareRange:focus-visible) .compareHandle::after {
-    outline: 3px solid var(--color-moss-ink);
+    outline: 2px solid var(--color-glacier);
     outline-offset: 3px;
   }
 

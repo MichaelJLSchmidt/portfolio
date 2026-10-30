@@ -201,3 +201,39 @@ export async function pointer({ browser, base, check }) {
   }
   await context.close();
 }
+
+/**
+ * inp: the Next project tap on a throttled phone (CPU ×4, 390 × 844): the interaction's longest
+ * event duration (Event Timing, the same measure as INP) stays within 200 ms.
+ */
+export async function inp({ browser, base, check }) {
+  console.log("\ninp: Next project on a throttled phone");
+  for (const slug of ["seilschaft", "test-project"]) {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+    await context.addInitScript(() => {
+      window.__events = [];
+      new PerformanceObserver((list) => {
+        for (const e of list.getEntries()) if (e.interactionId) window.__events.push({ name: e.name, duration: e.duration, id: e.interactionId });
+      }).observe({ type: "event", durationThreshold: 16, buffered: true });
+    });
+    const page = await context.newPage();
+    if (!(await exists(page, `${base}/work/${slug}/`))) {
+      await context.close();
+      continue;
+    }
+    const cdp = await context.newCDPSession(page);
+    await page.waitForTimeout(1500);
+    const link = page.locator('a[aria-describedby="next-project-label"]');
+    await link.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(1500);
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
+    await page.evaluate(() => (window.__events = []));
+    await link.tap();
+    await page.waitForTimeout(2500);
+    const events = await page.evaluate(() => window.__events);
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
+    const worst = events.reduce((m, e) => Math.max(m, e.duration), 0);
+    check(`${slug}: Next project responds within 200 ms (throttled phone)`, events.length > 0 && worst <= 200, `${Math.round(worst)} ms (${events.map((e) => `${e.name} ${Math.round(e.duration)}`).join(", ")})`);
+    await context.close();
+  }
+}

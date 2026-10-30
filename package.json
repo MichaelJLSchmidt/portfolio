@@ -29,7 +29,7 @@
     "check:wording": "node scripts/check-wording.mjs",
     "test:e2e": "node scripts/e2e.mjs",
     "test:hosting": "node scripts/e2e-hosting.mjs",
-    "test": "node --test src/hosting/*.test.ts src/styles/*.test.ts src/lib/*.test.ts",
+    "test": "node --import ./scripts/lib/ts-hooks.mjs --test src/hosting/*.test.ts src/styles/*.test.ts src/lib/*.test.ts",
     "fonts:subset": "node scripts/site/fonts.mjs",
     "titles": "node scripts/measure-titles.mjs",
     "wordmark": "node scripts/wordmark.mjs",

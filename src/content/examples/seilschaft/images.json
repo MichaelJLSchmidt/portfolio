@@ -56,7 +56,7 @@
         "bytes": 29884
       }
     ],
-    "hash": "30ebb87d13576cb6",
+    "hash": "acaf7e3852bbc7eb",
     "text": "Product teams with a named designer Every half year · a team counts once it can name its designer · measured 0 2 4 6 8 10 12 14 all 14 teams H2 2021 H1 2022 H2 2022 H1 2023 H2 2023 H1 2024 H2 2024 3 of 14 11 of 14 SEILSCHAFT · FICTIONAL EXAMPLE · FIG. 9"
   },
   "sl-hero": {
@@ -128,7 +128,7 @@
         "bytes": 83998
       }
     ],
-    "hash": "4935053e402f9292",
+    "hash": "f4d9031fbf0e0712",
     "text": "From a ticket queue to a practice FICTIONAL EXAMPLE BEFORE · SERVICE DESK 2021 PT 1 PT 2 PT 3 PT 4 PT 5 PT 6 PT 7 PT 8 PT 9 PT 10 PT 11 PT 12 PT 13 PT 14 Ticket queue first come, first served resigned designer LATE · VISUAL · ONE TICKET AT A TIME Two designers · one queue · 14 product teams AFTER · HUB AND SPOKE 2024 PERMITS PT 1 PT 2 PT 3 PT 4 designer PAYMENTS PT 5 PT 6 PT 7 PT 8 designer SOCIAL SERVICES PT 9 PT 10 PT 11 designer INTERNAL TOOLS PT 12 PT 13 PT 14 designer UX practice crit · standards research · intake Six people · four product clusters · shared crit and standards SEILSCHAFT · FICTIONAL EXAMPLE · HERO"
   },
   "sl-intake-board": {
@@ -200,7 +200,7 @@
         "bytes": 97070
       }
     ],
-    "hash": "fcf8f3f63829ccbe",
+    "hash": "e726f7026663449b",
     "text": "intake.hochmatt-informatik.example/board UX intake Hochmatt Informatik · public to every product team All clusters Permits Payments Social services Internal tools Explore 3 Enter when the problem is not yet clear, or nobody has asked users. Why do renewals stall at the payment step? Payments research Parking permits for care workers Permits concept Family allowance: first contact by phone or online? Social services research Shape 4 Enter when the problem is clear and the team has a release window. Building permit: upload and plan check Permits sprint design Invoice portal for suppliers Payments prototype in code Case notes for social workers Social services sprint design Address change, one step instead of three Permits usability test Polish 2 Enter when the flow stays as it is and only the screen changes. Max 2 days from templates. Why: so a quick fix never quietly becomes a redesign. Error messages on the dog-tax form Payments template: errors Empty states in the room-booking tool Internal tools template: empty Declined 2 Every “no” says why, in public. “Make the whole portal look modern” Not a request yet: book an Explore talk first. New icons for one release, next week Polish needs the flow to stay as it is; this one changes. SEILSCHAFT · FICTIONAL EXAMPLE · FIG. 4"
   },
   "sl-interviews": {
@@ -272,7 +272,7 @@
         "bytes": 134680
       }
     ],
-    "hash": "805732f4bd20b9a4",
+    "hash": "5465d17c865afd92",
     "text": "Interview synthesis: 14 product owners One interview per team, 45 minutes, same questions · main reason per owner 11 of 14 would involve UX earlier if they knew what they would get and when NO SLOT IN THE PLAN UX arrives as a favour at the end “Our quarter is planned before design hears about it.” P1 (Permits) “We’d book UX if there were a slot to book.” P2 (Payments) “Design comes after the sprint plan, every time.” P3 (Social services) “I never know when it’s too early to ask.” P4 (Permits) “There is no line for UX in our roadmap.” P5 (Payments) SCOPE FEAR early design might change the promise “Early design changes what we promised.” P6 (Payments) “A late ticket feels safer.” P7 (Social services) “Research might move our deadline.” P8 (Permits) NO NAME nobody knows who picks it up “Who is our designer, actually?” P9 (Social services) “Every ticket gets someone new.” P10 (Permits) “I don’t know whom to call.” P11 (Payments) WOULD NOT little to gain, or fewer meetings “Internal tool, a handful of users.” P12 (Internal tools) “Back-office screens; nobody complains.” P13 (Internal tools) “Honestly: fewer meetings, please.” P14 (Social services) would involve UX earlier would not P = product owner · cluster in brackets SEILSCHAFT · FICTIONAL EXAMPLE · FIG. 2"
   },
   "sl-ladder": {
@@ -344,7 +344,7 @@
         "bytes": 70694
       }
     ],
-    "hash": "db6692faf62cc540",
+    "hash": "99e736d904ceb970",
     "text": "Career ladder, an excerpt Behaviour, not titles · each level reviewed with a date and a next step CO-WRITTEN WITH HR LEVEL 1 Designer LEVEL 2 Senior designer LEVEL 3 Principal designer LEVEL 4 Lead PLANNING HORIZON The task in front of them A release A quarter, across teams The practice, a year ahead COLLABORATION Their product owner Brings developers and research in early Aligns several teams on one pattern Aligns units outside product LEAVES BEHIND A shipped screen A documented pattern A standard others use A team that works without them EXAMPLE Fixes errors from the template Runs the usability test Writes the date-picker rule Hires and grows the team Counts in salary reviews, not only in the team Promotions go through it unchanged SEILSCHAFT · FICTIONAL EXAMPLE · FIG. 7"
   },
   "sl-onboarding": {
@@ -416,7 +416,7 @@
         "bytes": 62832
       }
     ],
-    "hash": "79ddbed5e1756ed7",
+    "hash": "b4612355f10f33b4",
     "text": "Onboarding trail: ship, then read Every new hire walks it, the senior included · a mentor walks alongside 30 DAYS 1–30 Listen Sit in on crit and a research day; meet your cluster’s product owners. Ships: a Polish ticket from templates 60 DAYS 31–60 Shape with a mentor Design a release with a product team, the mentor in every review. Ships: a Shape project, presented at crit 90 DAYS 61–90 Lead a study Plan and run research with citizens from the pool. Ships: a first Explore study of your own SEILSCHAFT · FICTIONAL EXAMPLE · FIG. 6"
   },
   "sl-requests-chart": {
@@ -476,7 +476,7 @@
         "bytes": 39262
       }
     ],
-    "hash": "bb8f9cc262a7b25b",
+    "hash": "51fae6d6b2fcb7a0",
     "text": "Requests reaching UX before development starts Share of all requests on the intake board, per quarter · measured 0% 25% 50% 75% 100% Q3 2021 Q4 Q1 2022 Q2 Q3 Q4 Q1 2023 Q2 Q3 Q4 Q1 2024 Q2 18% 71% Intake live Designers seated in clusters Research day and pool SEILSCHAFT · FICTIONAL EXAMPLE · FIG. 8"
   },
   "sl-rituals": {
@@ -548,7 +548,7 @@
         "bytes": 47454
       }
     ],
-    "hash": "7a263e391aced225",
+    "hash": "6b8ca21d86136c3c",
     "text": "The team’s rhythm, one quarter Booked a year ahead · nothing else may take these slots MONTH ONE MONTH TWO MONTH THREE W1 W2 W3 W4 W5 W6 W7 W8 W9 W10 W11 W12 W13 Weekly crit 45 minutes, every week, all 6 of us 45′ 45′ 45′ 45′ 45′ 45′ 45′ 45′ 45′ 45′ 45′ 45′ 45′ Research day Monthly, from a pool of 140 citizens Day Day Day Showcase Quarterly, open to every product team Show Crit: written notes, one owner per follow-up, the presenter decides what to take Pool: citizens who agreed to be contacted SEILSCHAFT · FICTIONAL EXAMPLE · FIG. 5"
   },
   "sl-scorecard": {
@@ -608,7 +608,7 @@
         "bytes": 68626
       }
     ],
-    "hash": "ee59bf36cb29c3bd",
+    "hash": "92c77c1ff259819f",
     "text": "Work-sample scorecard Paid 2-hour session · a real, anonymised request Candidate C · panel of 3 CRITERION WEAK EVIDENCE STRONG EVIDENCE PANEL Framing Starts drawing screens at once Restates the problem, names what is unknown A B C Evidence Relies on taste and best practice Asks for data and users before proposing A B C Collaboration Presents a finished answer Brings the product owner and a developer in A B C Craft Polished, but skips states and errors A clear, accessible flow at the right fidelity A B C Reflection Defends every choice Names the weakest part of their own work A B C Each panellist scores alone, then the panel compares Hire: senior SEILSCHAFT · FICTIONAL EXAMPLE · FIG. 3"
   },
   "sl-steering-onepager": {
@@ -668,7 +668,7 @@
         "bytes": 74258
       }
     ],
-    "hash": "3d36cfd507576713",
+    "hash": "c98dbc244ee99bd4",
     "text": "Steering board · Digital Services Hochmatt Informatik · 2021 From a service desk to a UX practice A staged ask: grow only as far as the evidence carries us. THE PROBLEM, IN OUR OWN TICKETS 64% of requests arrive two weeks or less before release 420 h of rework after release in the last year 11 of 14 product teams have never met a designer THE STAGED ASK HIRE · THEN CHECK One intake for every request within six months. HIRE · THEN CHECK A named designer for the four teams with the most citizen traffic. REVIEW · MONTH 12 The board decides: grow the practice, or stop where it is. Head of Digital Services APPROVED SEILSCHAFT · FICTIONAL EXAMPLE · FIG. 1"
   }
 }

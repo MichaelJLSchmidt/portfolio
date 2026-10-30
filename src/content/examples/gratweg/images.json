@@ -56,7 +56,7 @@
         "bytes": 39314
       }
     ],
-    "hash": "5d82d7077190f984",
+    "hash": "397e8cad6d347e10",
     "text": "Accessibility issues per product External WCAG 2.1 AA audit, before and after adoption · measured −64% issues in total Building permits 42 15 Tax portal 35 13 Parking permits 51 18 School enrolment 28 10 Dog registry 39 14 Waste calendar 47 17 Business register 33 12 Address change 30 11 Fishing licences 45 16 before after GRATWEG · FICTIONAL EXAMPLE · FIG. 7"
   },
   "gw-adoption": {
@@ -128,7 +128,7 @@
         "bytes": 55462
       }
     ],
-    "hash": "c176c994001bafd5",
+    "hash": "c3b13d411dc02d75",
     "text": "design.hochmatt-informatik.example/adoption Design system · adoption Counted from each product’s dependencies, every night Public to every team 9 of 9 products on the system 0 3 6 9 Start Month 6 Month 12 Month 18 Month 24 Product Status Since Building permits ✓ On system Month 6 · pilot Tax portal ✓ On system Month 6 · pilot Parking permits ✓ On system Month 12 School enrolment ✓ On system Month 12 Dog registry ✓ On system Month 15 Waste calendar ✓ On system Month 18 Business register ✓ On system Month 18 Address change ✓ On system Month 21 Fishing licences ✓ On system Month 24 GRATWEG · FICTIONAL EXAMPLE · FIG. 6"
   },
   "gw-before-after": {
@@ -200,7 +200,7 @@
         "bytes": 85430
       }
     ],
-    "hash": "11253956834042d9",
+    "hash": "5cb6e176527b7425",
     "text": "The same form in three products Address step, with one field left empty · before and after the design system BEFORE · THREE LOOKS parkieren.hochmatt.example Parkkarte beantragen Strasse und Nummer PLZ und Ort FEHLER: Pflichtfeld WEITER steuern.hochmatt.example Adresse für die Steuererklärung Strasse und Nummer PLZ und Ort Ungültige Eingabe! Weiter umzug.hochmatt.example Umzug melden Strasse und Nummer PLZ und Ort Ort fehlt Weiter AFTER · ONE SYSTEM parkieren.hochmatt.example Parkkarte beantragen Strasse und Nummer PLZ und Ort Bitte geben Sie PLZ und Ort an. Weiter steuern.hochmatt.example Adresse für die Steuererklärung Strasse und Nummer PLZ und Ort Bitte geben Sie PLZ und Ort an. Weiter umzug.hochmatt.example Umzug melden Strasse und Nummer PLZ und Ort Bitte geben Sie PLZ und Ort an. Weiter GRATWEG · FICTIONAL EXAMPLE · FIG. 8"
   },
   "gw-coalition": {
@@ -260,7 +260,7 @@
         "bytes": 79924
       }
     ],
-    "hash": "84db5952e9c28d87",
+    "hash": "1f26d34ce68925b4",
     "text": "To the steering board · Digital Services Hochmatt Informatik · 2023 One design system for our citizen services THE PROBLEM Seven of nine products fail WCAG 2.1 AA. Four UI libraries, eleven primary blues, six date pickers. Citizens think they deal with different authorities. THE BUSINESS CASE 480 hours spent rebuilding one date picker, counted by the nine teams themselves THE PILOT WE ASK FOR Six months, two products chosen by pain, not prestige A core team of three; contributors from the product teams Continue only if both pilot products ship a release on the system CO-SIGNED BY Lead developer, tax portal Lead developer, permits Lead developer, payments Accessibility officer Head of Digital Services GRATWEG · FICTIONAL EXAMPLE · FIG. 1"
   },
   "gw-governance": {
@@ -332,7 +332,7 @@
         "bytes": 79460
       }
     ],
-    "hash": "ee743735047c74b2",
+    "hash": "8de32f9658f4a8a8",
     "text": "Governance: the core team owns, contributors propose One page per change · nobody waits in silence Core team decides FAST LANE · AN ICON, A TOKEN VALUE, A FIX FULL RFC · A NEW COMPONENT OR A CHANGED BEHAVIOUR 12 contributors from the product teams One-page RFC problem, proposal, who it affects Core-team member decides within 2 days Open for comments every team can read and reply Core team decides within a 10-day decision window Built by the contributor a core-team reviewer pairs Declined the reason is written on the RFC Release notes with the contributor’s name Core team of 3 1 designer, 2 component developers small everything else accepted accepted declined GRATWEG · FICTIONAL EXAMPLE · FIG. 4"
   },
   "gw-hero": {
@@ -404,7 +404,7 @@
         "bytes": 85586
       }
     ],
-    "hash": "395aa66aeecf3d0c",
+    "hash": "029b9a6edd6acda5",
     "text": "11 blues, 9 products FICTIONAL EXAMPLE Swatch audit of every primary blue in use · header and button per product Building permits #1D4F91 Weiter Tax portal #1F5AA6 #2A66B8 Weiter Parking permits #0E4A8A Weiter School enrolment #2C5D9E Weiter Dog registry #164C7E #225D94 Weiter Waste calendar #3366AA Weiter Business register #18457F Weiter Address change #2B4F8C Weiter Fishing licences #1A5C9C Weiter One token: color.primary The same blue in every product, from one source in Figma AFTER THE SYSTEM GRATWEG · FICTIONAL EXAMPLE · HERO"
   },
   "gw-options": {
@@ -476,7 +476,7 @@
         "bytes": 72582
       }
     ],
-    "hash": "e47e9703e6ce1255",
+    "hash": "af7b4ee8df7fc2db",
     "text": "What do we build on? Rated by the core team and the coalition · filled dots are better (for cost: cheaper) Custom component library Time to first benefit Accessibility Cost to run Brand fit Full control, and we maintain every line of it. Commercial kit Time to first benefit Accessibility Cost to run Brand fit Fast start, but a licence and a second visual language. CHOSEN Angular Material + our own tokens Time to first benefit Accessibility Cost to run Brand fit Teams already use it; accessibility comes built in. The compromises, signed once by brand: Material’s focus ring stays, dense tables keep their spacing, and the elevation shadows are toned down rather than removed. GRATWEG · FICTIONAL EXAMPLE · FIG. 3"
   },
   "gw-pareto": {
@@ -536,7 +536,7 @@
         "bytes": 37356
       }
     ],
-    "hash": "94d5118009507d1a",
+    "hash": "e2c958a3c74c5df5",
     "text": "UI inventory: a few patterns do most of the work 1,240 instances across 9 products · 61 patterns, sorted by use · measured 0% 50% 80% 100% 80% of screens First version: 23 patterns The other 38 Most used Least used GRATWEG · FICTIONAL EXAMPLE · FIG. 2"
   },
   "gw-pipeline": {
@@ -608,7 +608,7 @@
         "bytes": 63294
       }
     ],
-    "hash": "a578d2c5951a13b0",
+    "hash": "3d6e8c9872de1c2b",
     "text": "The token pipeline: change once, ship everywhere Nobody edits a colour by hand · the brand team reviews tokens, not screens Figma variables Designers change a token, with its name and contrast note. DESIGN · BRAND CI ● Read-only key Reads the variables on every change; it can never write back. PIPELINE Style Dictionary color.primary color.primary-dark space.step Turns tokens into code for every platform we need. PIPELINE Angular Material theme @include mat.theme(…) The generated theme, with our tokens in place of Material’s. CORE TEAM Product packages Each product updates one package and gets every change. PRODUCT TEAMS GRATWEG · FICTIONAL EXAMPLE · FIG. 5"
   }
 }

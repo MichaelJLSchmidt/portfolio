@@ -112,7 +112,12 @@ export async function arrival({ browser, basePath, base, root, check }) {
     const t = await page.evaluate(() => ({ vt: window.__vt.at(-1), arrival: window.__arrival, glints: window.__glints }));
     check("deck → case study: the artwork and the name travel", t.vt?.groups.includes("art-seilschaft") && t.vt?.groups.includes("title-seilschaft"), JSON.stringify(t.vt?.groups));
     check("the old page leaves over 160 ms", t.vt?.root === 160, String(t.vt?.root));
-    check("the summary unfolds from 380 ms", t.arrival?.unfold.includes(380), JSON.stringify(t.arrival));
+    // The summary arrives with the page only where it is on screen as the page lands.
+    const summaryOnScreen = await page.evaluate(() => {
+      const b = document.getElementById("summary-heading")?.closest("section")?.getBoundingClientRect();
+      return !!b && b.top < innerHeight && b.bottom > 0;
+    });
+    check("the summary unfolds from 380 ms (when on screen)", !summaryOnScreen || t.arrival?.unfold.includes(380), JSON.stringify({ summaryOnScreen, arrival: t.arrival }));
     check("the H1 is a weight title and never glints", (await page.locator("h1[data-title]").count()) === 1 && !t.glints.includes("H1"), JSON.stringify(t.glints));
     const f = await focusInfo(page);
     check("focus on the new page's H1", f.tag === "h1" && f.tabindex === "-1", JSON.stringify(f));

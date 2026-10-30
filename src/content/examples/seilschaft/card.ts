@@ -19,7 +19,7 @@ export const rawCard: SummitCardData = {
     { term: "Grow", reminder: "a {{ladder.levels|word}}-level career ladder, {{team.promotions}} internal promotions." },
     { term: "Protect", reminder: "one intake, {{intake.tiers|word}} tiers, no more {{desk.lateWeeks|word}}-week ambushes." },
   ],
-  flavor: "“We stopped taking tickets and started taking seats.” — team retro, {{years.retro}}",
+  flavor: "The team stopped taking tickets and took a seat in each product cluster.",
   stats: {
     teamLed: "{{team.start}} → {{team.end}}",
     time: "{{project.years}} YRS",

@@ -19,8 +19,7 @@ export const rawCard: SummitCardData = {
     { term: "Govern", reminder: "a core team, {{team.contributors}} contributors and one RFC page per change." },
     { term: "Adopt", reminder: "“touch it, migrate it”, never a big-bang migration." },
   ],
-  flavor:
-    "“Every app had its own blue. People thought they were dealing with {{landscape.products|word}} different authorities.” — usability test note, {{years.testNote}}",
+  flavor: "Every app had its own blue, so people took them for {{landscape.products|word}} different authorities.",
   stats: {
     teamLed: "{{team.core}} + {{team.contributors}}",
     time: "{{project.years}} YRS",

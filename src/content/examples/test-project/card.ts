@@ -25,7 +25,7 @@ export const rawCard: SummitCardData = {
     },
     { term: "Ship", reminder: "discovery to staged rollout in {{project.months}} months, WCAG 2.1 AA audited." },
   ],
-  flavor: "“The form was asking the wrong person.” — field note, week {{discovery.fieldNoteWeek}}",
+  flavor: "The form was asking the wrong person for the right information.",
   stats: {
     teamLed: "{{team.designersLed}} + {{team.productDev}}",
     time: "{{project.months}} MO",

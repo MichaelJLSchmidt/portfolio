@@ -1,382 +1,11 @@
 @layer reset, tokens, base, layout, components, utilities;
 
-/* Case-study building blocks (Waypoints.tsx, Evidence.tsx, FictionBanner.tsx). Running text sits
-   on legend panels (.legend, globals.css); the insight and the banner on raised ground with a
-   hairline (the summary is the only paper surface). Labels on the dark panels are glacier or
-   paper-dusk: npm run check:legibility asks 7:1 of text there. */
-
-/* ---------------------------------------------------------------- waypoints */
+/* Shared case-study parts: evidence badges and their legend (Evidence.tsx), the trailhead band at
+   the end of the page (TrailheadBand.tsx) and the phone's altimeter bar with its jump sheet
+   (AltimeterBar.tsx). Labels on the dark panels are glacier or paper-dusk: npm run
+   check:legibility asks 7:1 of text there. The page's layouts have their own stylesheets. */
 
 @layer components {
-  .waypoint {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: clamp(24px, 3vw, 40px);
-    justify-items: start;
-    scroll-margin-top: 96px;
-  }
-
-  .waypoint > * {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .panel {
-    display: grid;
-    gap: 18px;
-    max-width: 46rem;
-  }
-
-  /* "Label — finding": the label as a waypoint marker, the finding as the heading's voice. */
-  .heading {
-    display: grid;
-    gap: 10px;
-    margin-bottom: 4px;
-    scroll-margin-top: 96px;
-  }
-
-  .headingLabel {
-    color: var(--color-glacier);
-    font-weight: 600;
-  }
-
-  .headingLabelText {
-    color: var(--color-glacier);
-    font-weight: 600;
-  }
-
-  /* The rule that leads a waypoint heading. */
-  .headingRule {
-    width: min(100%, 12rem);
-  }
-
-  .headingFinding {
-    display: block;
-    color: var(--color-paper-dusk);
-    font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.6rem);
-    font-weight: 760;
-    font-stretch: var(--type-condensed-wdth);
-    line-height: 1.08;
-    letter-spacing: -0.01em;
-    text-wrap: balance;
-  }
-
-  .panel strong {
-    font-weight: 700;
-  }
-
-  .listIntro {
-    margin-bottom: -8px;
-  }
-
-  .list {
-    display: grid;
-    gap: 10px;
-    margin: 0;
-    padding-left: 0;
-    list-style: none;
-  }
-
-  /* Contour-ring bullets: they draw once, item after item, as the list comes into view. */
-  .list:not([data-ordered]) li {
-    position: relative;
-    padding-left: 1.5em;
-  }
-
-  .list:not([data-ordered]) li::before {
-    content: "";
-    position: absolute;
-    top: 0.55em;
-    left: 0.2em;
-    width: 0.55em;
-    height: 0.55em;
-    border: 1.5px solid var(--color-glacier);
-    border-radius: 50%;
-  }
-
-  /* Numbered insights: circled numbers, like the markers on the affinity map (Fig. 3). */
-  .list[data-ordered] {
-    padding: 0;
-    list-style: none;
-    counter-reset: insight;
-  }
-
-  .list[data-ordered] li {
-    position: relative;
-    padding-left: 44px;
-    counter-increment: insight;
-  }
-
-  .list[data-ordered] li::before {
-    content: counter(insight);
-    position: absolute;
-    top: 0.1em;
-    left: 0;
-    display: grid;
-    place-items: center;
-    width: 30px;
-    height: 30px;
-    border: 1.5px solid var(--color-glacier);
-    border-radius: 50%;
-    color: var(--color-glacier);
-    font-family: var(--font-mono);
-    font-size: 0.8125rem;
-    font-weight: 600;
-    line-height: 1;
-  }
-
-  .credits {
-    font-size: 0.9375rem;
-  }
-
-  /* Below 1200 px: "Next waypoint ↓ / Back to top ↑" at the end of each waypoint. */
-  .foot {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 28px;
-  }
-
-  .footLink {
-    color: var(--color-glacier);
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    text-shadow:
-      0 0 2px var(--color-ground),
-      0 0 6px var(--color-ground),
-      0 0 14px var(--color-ground);
-  }
-
-  @media (min-width: 1280px) {
-    .foot {
-      display: none;
-    }
-  }
-
-  /* ------------------------------------------------------------- key insight */
-
-  .insight {
-    display: grid;
-    gap: 10px;
-    max-width: 46rem;
-    padding: clamp(22px, 3vw, 32px) clamp(22px, 3vw, 36px);
-    border: 1px solid var(--color-contour-dim);
-    border-left: 6px solid var(--color-glacier);
-    border-radius: 12px;
-    background: var(--color-ground-raised);
-    color: var(--color-paper-dusk);
-  }
-
-  .insightLabel {
-    color: var(--color-glacier);
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-  }
-
-  .insightText {
-    font-size: clamp(1.4rem, 1.05rem + 1.3vw, 2rem);
-    font-weight: 720;
-    font-stretch: var(--type-condensed-wdth);
-    line-height: 1.2;
-    text-wrap: balance;
-  }
-
-
-  /* ------------------------------------------------------------------ decisions */
-
-  .decision {
-    display: grid;
-    gap: 18px;
-    max-width: 52rem;
-  }
-
-  .decisionTitle {
-    color: var(--color-paper-dusk);
-    font-size: clamp(1.25rem, 1rem + 0.9vw, 1.6rem);
-    font-weight: 760;
-    font-stretch: var(--type-condensed-wdth);
-    line-height: 1.15;
-    scroll-margin-top: 96px;
-  }
-
-  .tableScroll {
-    max-width: 100%;
-    overflow-x: auto;
-    border: 1px solid var(--color-contour-dim);
-    border-radius: 8px;
-  }
-
-  .table {
-    width: 100%;
-    min-width: 36rem;
-    border-collapse: collapse;
-    color: var(--color-paper-dusk);
-    font-size: 0.9375rem;
-    line-height: 1.45;
-  }
-
-  .table caption {
-    padding: 12px 14px;
-    color: var(--color-glacier);
-    font-family: var(--font-mono);
-    font-size: var(--type-mono-size);
-    letter-spacing: var(--type-mono-tracking);
-    text-align: left;
-    text-transform: uppercase;
-  }
-
-  .table th,
-  .table td {
-    padding: 11px 14px;
-    border-top: 1px solid var(--color-contour-dim);
-    text-align: left;
-    vertical-align: top;
-  }
-
-  .table thead th {
-    color: var(--color-glacier);
-    font-family: var(--font-mono);
-    font-size: var(--type-mono-size);
-    font-weight: 500;
-    letter-spacing: var(--type-mono-tracking);
-    text-transform: uppercase;
-  }
-
-  .table tbody th {
-    font-weight: 650;
-  }
-
-  .table tr[data-chosen] {
-    background: rgb(200 245 176 / 0.07);
-  }
-
-  .table tr[data-chosen] th {
-    position: relative;
-  }
-
-  .chosenMark {
-    position: absolute;
-    top: 6px;
-    left: 2px;
-    width: 6px;
-    height: calc(100% - 12px);
-    overflow: visible;
-    fill: none;
-    stroke: var(--color-glacier);
-    stroke-linecap: round;
-    stroke-width: 2;
-  }
-
-
-  .chosen {
-    display: inline-block;
-    margin-left: 8px;
-    padding: 1px 8px;
-    border: 1px solid var(--color-glacier);
-    border-radius: 999px;
-    color: var(--color-glacier);
-    vertical-align: 0.1em;
-  }
-
-  .verdict {
-    display: grid;
-    gap: 12px;
-    max-width: none;
-  }
-
-  .verdict > div {
-    display: grid;
-    grid-template-columns: 7.5rem minmax(0, 1fr);
-    gap: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--color-contour-dim);
-  }
-
-  .verdict dt {
-    padding-top: 0.35em;
-    color: var(--color-glacier);
-    font-weight: 600;
-  }
-
-  .verdict dd {
-    margin: 0;
-  }
-
-  .verdict [data-term="chose"] dd {
-    font-weight: 700;
-  }
-
-  @media (width < 640px) {
-    .verdict > div {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 2px;
-    }
-  }
-
-  /* ----------------------------------------------------------- metrics, outcomes */
-
-  .metrics {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-    gap: 16px;
-    max-width: 52rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .metric {
-    display: grid;
-    gap: 6px;
-    align-content: start;
-    padding: 20px 22px;
-    border: 1px solid var(--color-contour-dim);
-    border-radius: 8px;
-    background: var(--color-ground-raised);
-    color: var(--color-paper-dusk);
-  }
-
-  .metricValue {
-    color: var(--color-glacier);
-    font-family: var(--font-mono);
-    font-size: clamp(2rem, 1.5rem + 1.6vw, 2.6rem);
-    font-weight: 700;
-    font-stretch: var(--type-mono-wdth);
-    line-height: 1.05;
-  }
-
-  .metricLabel {
-    font-weight: 650;
-    line-height: 1.3;
-  }
-
-  .metricDetail {
-    font-size: 0.9375rem;
-  }
-
-  .metric .badge {
-    margin-top: 8px;
-  }
-
-  .outcomes {
-    display: grid;
-    gap: 20px;
-    max-width: 52rem;
-  }
-
-  .after {
-    font-weight: 700;
-  }
-
-  .note {
-    display: block;
-    margin-top: 4px;
-    font-size: 0.875rem;
-  }
-
   /* ----------------------------------------------------------------- evidence */
 
   /* Shape plus text: the shape is coloured, the word is in the text colour. */
@@ -478,42 +107,6 @@
     margin: 0;
   }
 
-  /* ------------------------------------------------------------------- banner */
-
-  .banner {
-    --sheet-dur: var(--dur-unfold);
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    max-width: 62rem;
-    padding: 14px 20px;
-    border: 1px solid var(--color-contour-dim);
-    border-left: 3px solid var(--color-alpenglow);
-    border-radius: 8px;
-    background: var(--color-ground-raised);
-    color: var(--color-paper-dusk);
-    font-size: 1rem;
-    line-height: 1.5;
-  }
-
-  .bannerStamp {
-    flex: none;
-    width: 28px;
-    height: 28px;
-    fill: none;
-    stroke: var(--color-alpenglow);
-    stroke-width: 1.5;
-  }
-
-  .bannerLabel {
-    color: var(--color-alpenglow);
-    font-family: var(--font-mono);
-    font-size: 0.8125rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
   /* The trailhead band (TrailheadBand.tsx): "Next project" and the next card's name beside its
      mini card (stacked on phones), the way back to all projects below. */
   .trailhead {
@@ -556,6 +149,75 @@
   .nextName {
     color: var(--color-paper-dusk);
     font-size: clamp(2.5rem, 9vw, 7rem);
+  }
+
+  /* The ridge of the three projects, in panorama order, at their real summit heights. */
+  .ridge {
+    position: relative;
+    width: min(100%, 36rem);
+    margin: 0 0 24px;
+  }
+
+  .ridgeLine {
+    display: block;
+    width: 100%;
+    height: 60px;
+    overflow: visible;
+  }
+
+  .ridgeLine path {
+    fill: color-mix(in srgb, var(--color-contour) 10%, transparent);
+    stroke: var(--color-contour);
+    stroke-width: 1.5px;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .peaks {
+    display: flex;
+    justify-content: space-around;
+    margin: 6px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .peaks li {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    color: var(--color-contour);
+    text-align: center;
+  }
+
+  .peaks li[data-current] {
+    color: var(--color-paper-dusk);
+  }
+
+  .here {
+    color: var(--color-glacier);
+  }
+
+  /* Phones: "Previous project" and "Next project" as two targets at least 48 px tall. */
+  .pager {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    width: 100%;
+    margin: 24px 0 0;
+  }
+
+  /* More specific than the trail link's own 44 px minimum. */
+  .pager a.pagerLink {
+    justify-content: center;
+    min-height: 48px;
+    border: 1.5px solid var(--color-contour);
+    border-radius: 2px;
+    color: var(--color-paper-dusk);
+  }
+
+  @media (min-width: 640px) {
+    .pager {
+      display: none;
+    }
   }
 
   .backToAll {

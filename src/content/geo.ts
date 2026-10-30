@@ -80,3 +80,23 @@ export const aboutClimb = {
   tower: { foot: places["bantiger-tower"], tip: secondary["bantiger-tower-tip"] },
   points: data.aboutClimb.points as [number, number][],
 };
+
+/** An ascent's places in order: the trailhead (stage 1), the six stages, the summit. */
+export type AscentPlace = Place & { id: PlaceId };
+
+/**
+ * The ascent a case study climbs, from its card's terrain (the mountain the card was cut around):
+ * the six stages with their places and altitudes, and the summit (the Results). Null for a terrain
+ * that is not one of the three ascents.
+ */
+export function ascentOf(terrainId: string | null | undefined): { id: AscentId; via: string; stages: AscentPlace[]; summit: AscentPlace; lastStation: number } | null {
+  if (!terrainId || !(terrainId in ascents)) return null;
+  const a = ascents[terrainId as AscentId];
+  return {
+    id: terrainId as AscentId,
+    via: a.via,
+    stages: a.stages.map((id) => ({ id, ...places[id] })),
+    summit: { id: a.summit, ...places[a.summit] },
+    lastStation: lastStation(a),
+  };
+}

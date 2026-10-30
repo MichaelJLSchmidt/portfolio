@@ -1,0 +1,138 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+/*
+ * The legend sheet (LegendSheet.tsx): dusk paper with paper-safe inks only (paper-ink,
+ * paper-ink-2, moss-ink, alpenglow-ink, the route's paper red for marks). Grid ticks at the
+ * corners (two crossing hairlines each, drawn as backgrounds of one layer), the sheet number and
+ * a scale bar in the margin. The unfold takes --dur-legend-unfold (motion.css, data-reveal="sheet").
+ */
+@layer components {
+  .sheet {
+    --sheet-dur: var(--dur-legend-unfold);
+    position: relative;
+    display: grid;
+    gap: 18px;
+    scroll-margin-top: 96px;
+    padding: clamp(22px, 3vw, 36px);
+    border-radius: 4px;
+    background: var(--color-paper-dusk);
+    color: var(--color-paper-ink);
+  }
+
+  /* Corner ticks: 14 px hairlines, 8 px in from each corner. */
+  .ticks {
+    position: absolute;
+    inset: 8px;
+    pointer-events: none;
+    background:
+      linear-gradient(var(--color-paper-ink-2), var(--color-paper-ink-2)) 0 0 / 14px 1px no-repeat,
+      linear-gradient(var(--color-paper-ink-2), var(--color-paper-ink-2)) 0 0 / 1px 14px no-repeat,
+      linear-gradient(var(--color-paper-ink-2), var(--color-paper-ink-2)) 100% 0 / 14px 1px no-repeat,
+      linear-gradient(var(--color-paper-ink-2), var(--color-paper-ink-2)) 100% 0 / 1px 14px no-repeat,
+      linear-gradient(var(--color-paper-ink-2), var(--color-paper-ink-2)) 0 100% / 14px 1px no-repeat,
+      linear-gradient(var(--color-paper-ink-2), var(--color-paper-ink-2)) 0 100% / 1px 14px no-repeat,
+      linear-gradient(var(--color-paper-ink-2), var(--color-paper-ink-2)) 100% 100% / 14px 1px no-repeat,
+      linear-gradient(var(--color-paper-ink-2), var(--color-paper-ink-2)) 100% 100% / 1px 14px no-repeat;
+  }
+
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px 24px;
+  }
+
+  .heading {
+    margin: 0;
+    color: var(--color-moss-ink);
+    font-weight: 700;
+  }
+
+  .margin {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 0;
+    color: var(--color-paper-ink-2);
+  }
+
+  .scale {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* The scale bar: alternate filled and open segments, like a map's. */
+  .scaleBar {
+    width: 64px;
+    height: 5px;
+    border: 1px solid var(--color-paper-ink);
+    background: linear-gradient(90deg, var(--color-paper-ink) 0 25%, transparent 25% 50%, var(--color-paper-ink) 50% 75%, transparent 75%);
+  }
+
+  .rows {
+    display: grid;
+    margin: 0;
+  }
+
+  .rows > div {
+    display: grid;
+    gap: 6px;
+    padding-block: 12px;
+    border-top: 1px solid color-mix(in srgb, var(--color-paper-ink-2) 45%, transparent);
+  }
+
+  @media (min-width: 640px) {
+    .rows > div {
+      grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr);
+      column-gap: 24px;
+    }
+  }
+
+  .rows dt {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--color-paper-ink-2);
+  }
+
+  .rows dd {
+    margin: 0;
+    font-size: var(--type-body-size);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .rows dd ul {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    padding-left: 1.1em;
+  }
+
+  .symbol {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    overflow: visible;
+  }
+
+  .symbol path {
+    fill: none;
+    stroke: var(--color-paper-ink);
+    stroke-width: 1.25;
+    stroke-linejoin: round;
+  }
+
+  .note {
+    margin: 0;
+    color: var(--color-paper-ink-2);
+  }
+
+  @media (forced-colors: active) {
+    .sheet {
+      border: 1px solid CanvasText;
+    }
+  }
+}

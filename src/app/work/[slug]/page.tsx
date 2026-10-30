@@ -7,18 +7,22 @@ import { WeightTitle } from "@/components/type/WeightTitle";
 import { flood } from "@/content/flood";
 import { TrailLink } from "@/components/interaction/TrailLink";
 import { CardArtwork } from "@/components/card/CardArtwork";
-import { EvidenceBadge } from "@/components/case-study/Evidence";
+import { EvidenceBadge, EvidenceLegend } from "@/components/case-study/Evidence";
 import { AltimeterBar } from "@/components/case-study/AltimeterBar";
-import { FictionBanner } from "@/components/case-study/FictionBanner";
-import { TrailheadBand } from "@/components/case-study/TrailheadBand";
+import { Descent } from "@/components/case-study/Descent";
+import { ElevationProfile } from "@/components/case-study/ElevationProfile";
 import { Figure } from "@/components/case-study/Figure";
+import { LegendSheet } from "@/components/case-study/LegendSheet";
+import { DecisionFork, Stages } from "@/components/case-study/Stages";
+import { TrailheadBand } from "@/components/case-study/TrailheadBand";
+import { TrailheadSpread } from "@/components/case-study/TrailheadSpread";
 import { WaypointTrail } from "@/components/case-study/WaypointTrail";
-import { Waypoints } from "@/components/case-study/Waypoints";
-import { SummitSummary } from "@/components/SummitSummary";
+import { Logbook } from "@/components/logbook/Logbook";
 import { MorphTarget } from "@/components/transition/MorphTarget";
 import { RememberCard } from "@/components/transition/RememberCard";
 import { caseStudies } from "@/content/case-studies";
-import { caseStudyLabels as L, cardBySlug, cards, coordinatesLine } from "@/content/cards";
+import { caseStudyLabels as L, cardBySlug, cards, type SummitCardData } from "@/content/cards";
+import { altitudeLabel, ascentOf } from "@/content/geo";
 import { readingMinutes, type CaseStudy as Study, type Evidence } from "@/lib/case-study";
 import { morphName } from "@/lib/morph";
 import { titleEm } from "@/lib/title-axes";
@@ -70,27 +74,61 @@ export async function generateMetadata({ params }: PageProps<"/work/[slug]">): P
 
 /** Every evidence kind the page uses, in a fixed order, for the legend. */
 function evidenceKinds(study: Study): Evidence[] {
-  const used = new Set<Evidence>();
-  if (Array.isArray(study.summary.outcome)) study.summary.outcome.forEach((o) => used.add(o.evidence));
-  for (const w of study.waypoints) {
-    for (const b of w.blocks) {
-      if (b.kind === "metrics") b.items.forEach((m) => used.add(m.evidence));
-      if (b.kind === "outcomes") b.rows.forEach((r) => used.add(r.evidence));
-    }
-  }
+  const used = new Set<Evidence>([...study.summary.outcome.map((o) => o.evidence), ...study.results.rows.map((r) => r.evidence)]);
   return (["measured", "estimated", "qualitative"] as const).filter((k) => used.has(k));
 }
+
+const terrainOf = (card: SummitCardData) => (card.artwork.kind === "crop" ? card.artwork.terrainId : null);
+
+/** Timeline spacing: a node's distance to the next follows the real altitude gain, at least 34 px. */
+const SPACE = { min: 34, total: 420 };
 
 export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
   const found = entry((await params).slug);
   if (!found) notFound();
   const { card, study } = found;
   const { summary } = study;
-  // The next case study in deck order, looping back to the first; never another kind of page.
+  const ascent = ascentOf(terrainOf(card));
+  if (!ascent) throw new Error(`Case study "${card.slug}": its card's terrain is not one of the ascents in geo.ts.`);
+  const places = ascent.stages;
+  // The case studies in deck order: the next and previous loop round; the ridge shows all three.
   const studies = cards.filter((c) => caseStudies[c.slug]);
-  const next = studies.length > 1 ? studies[(studies.indexOf(card) + 1) % studies.length] : null;
+  const at = studies.indexOf(card);
+  const next = studies.length > 1 ? studies[(at + 1) % studies.length] : null;
+  const previous = studies.length > 1 ? studies[(at - 1 + studies.length) % studies.length] : null;
+  const ridge = studies.flatMap((c) => {
+    const a = ascentOf(terrainOf(c));
+    return a
+      ? [
+          {
+            slug: c.slug,
+            name: a.summit.label,
+            altitude: altitudeLabel(a.summit.altitudeM),
+            metres: a.summit.altitudeM,
+            current: c === card,
+          },
+        ]
+      : [];
+  });
   const hero = study.hero ? study.figures?.[study.hero] : undefined;
-  const outcome = summary.outcome;
+  const kinds = evidenceKinds(study);
+  // The timeline: each stage as far from the next as the climb between them, the results at the summit.
+  const heights = [...places.map((p) => p.altitudeM), ascent.summit.altitudeM];
+  const gainTotal = heights[heights.length - 1] - heights[0];
+  const trail = [
+    ...study.stages.map((s, i) => ({
+      id: s.id,
+      nav: s.nav,
+      place: places[i].label,
+      detail: `${places[i].label} · ${altitudeLabel(places[i].altitudeM)}`,
+      space: Math.round(Math.max(SPACE.min, ((heights[i + 1] - heights[i]) / gainTotal) * SPACE.total)),
+    })),
+    {
+      id: "results",
+      nav: L.resultsHeading,
+      detail: `${ascent.summit.label} · ${altitudeLabel(ascent.summit.altitudeM)}`,
+    },
+  ];
 
   return (
     <main id="main" className={`${styles.main} container`} data-rarity={card.rarity} data-card={card.slug}>
@@ -103,31 +141,49 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
         </TrailLink>
       </nav>
 
-      {study.banner && <FictionBanner label={study.banner.label} text={study.banner.text} />}
-
-      <header className={styles.header}>
-        <MorphTarget name={morphName("art", card.slug)} variant="art" className={styles.artSlot}>
-          <CardArtwork artwork={card.artwork} alt={card.artworkAlt} className={styles.art} stamp={card.example ? L.example : undefined} />
-        </MorphTarget>
-        <div className={styles.titleBlock} data-quiet-zone>
-          <p className={`${styles.coords} hud-label map-halo keep-halo`} data-reveal="" data-vt-exit>
-            {coordinatesLine(card)}
-          </p>
+      <TrailheadSpread
+        example={study.example ? L.exampleLine : undefined}
+        artwork={
+          <MorphTarget name={morphName("art", card.slug)} variant="art" className={styles.artSlot}>
+            <CardArtwork artwork={card.artwork} alt={card.artworkAlt} className={styles.art} stamp={card.example ? L.example : undefined} />
+          </MorphTarget>
+        }
+        title={
           <MorphTarget name={morphName("title", card.slug)} variant="title">
             <WeightTitle
               as="h1"
               text={card.name}
               flood={flood.caseStudyTitle}
               className={styles.title}
-              style={{ "--title-em": TITLE_EM, "--word-em": titleEm(card.name, { words: true }) } as CSSProperties}
+              style={
+                {
+                  "--title-em": TITLE_EM,
+                  "--word-em": titleEm(card.name, { words: true }),
+                } as CSSProperties
+              }
             />
           </MorphTarget>
-          <div data-vt-exit>
-            <p className={`${styles.type} map-halo`}>{study.typeLine ?? card.type}</p>
-          </div>
-          <p className="body-copy" data-vt-exit>
-            {study.lede}
-          </p>
+        }
+        typeLine={study.typeLine ?? card.type}
+        problem={study.problem}
+        impactLine={study.impactLine}
+        climb={{
+          from: {
+            label: places[0].label,
+            altitude: altitudeLabel(places[0].altitudeM),
+          },
+          to: {
+            label: ascent.summit.label,
+            altitude: altitudeLabel(ascent.summit.altitudeM),
+          },
+          gain: `+${altitudeLabel(gainTotal)}`,
+        }}
+        facts={[
+          { label: L.facts.role, value: study.facts.role },
+          { label: L.facts.team, value: study.facts.team },
+          { label: L.facts.time, value: study.facts.time },
+        ]}
+        meta={
           <p className={`${styles.meta} hud-label map-halo`} data-vt-exit>
             <span>{L.readingTime(readingMinutes(study))}</span>
             {" · "}
@@ -135,49 +191,54 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
               {L.skim}
             </TrailLink>
           </p>
-        </div>
-      </header>
+        }
+        labels={{
+          problem: L.problem,
+          result: L.result,
+          gain: L.gain(places[0].label),
+        }}
+      />
 
-      <SummitSummary
+      <LegendSheet
         id="summary-heading"
         heading={L.summaryHeading}
-        exitOnReturn
+        sheet={L.sheet(at + 1, studies.length)}
+        scale={L.scale}
         arriveAt={ARRIVE_SUMMARY}
         note={summary.note}
         rows={[
-          { label: L.mandate, value: summary.mandate, wide: true },
-          { label: L.role, value: summary.role, wide: true },
-          { label: L.teamLed, value: summary.teamLed, wide: true },
-          summary.putInPlace?.length
-            ? {
-                label: L.putInPlace,
-                wide: true,
-                content: (
-                  <ul data-marks="">
-                    {summary.putInPlace.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                ),
-              }
-            : { label: L.putInPlace },
-          { label: L.keyDecision, value: summary.keyDecision, wide: true },
-          Array.isArray(outcome)
-            ? {
-                label: L.outcome,
-                wide: true,
-                content: (
-                  <ul>
-                    {outcome.map((o) => (
-                      <li key={o.text}>
-                        <span>{o.text}</span>
-                        <EvidenceBadge kind={o.evidence} />
-                      </li>
-                    ))}
-                  </ul>
-                ),
-              }
-            : { label: L.outcome, value: outcome, wide: true },
+          { symbol: "brief", label: L.brief, value: summary.brief },
+          {
+            symbol: "outcome",
+            label: L.outcome,
+            content: (
+              <ul>
+                {summary.outcome.map((o) => (
+                  <li key={o.text}>
+                    <span>{o.text}</span> <EvidenceBadge kind={o.evidence} />
+                  </li>
+                ))}
+              </ul>
+            ),
+          },
+          { symbol: "role", label: L.role, value: summary.role },
+          { symbol: "team", label: L.teamLed, value: summary.teamLed },
+          {
+            symbol: "putInPlace",
+            label: L.putInPlace,
+            content: (
+              <ul>
+                {summary.putInPlace.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            ),
+          },
+          {
+            symbol: "keyDecision",
+            label: L.keyDecision,
+            value: summary.keyDecision,
+          },
         ]}
       />
 
@@ -193,7 +254,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
             {L.jumpTo}
           </h2>
           <ul>
-            {study.waypoints.map((w) => (
+            {trail.map((w) => (
               <li key={w.id}>
                 <TrailLink href={`#${w.id}`} variant="inline" className={styles.chip}>
                   {w.nav}
@@ -203,15 +264,79 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
           </ul>
         </nav>
         <div className={styles.trail}>
-          <WaypointTrail slug={card.slug} label={L.onThisPage} items={study.waypoints.map((w) => ({ id: w.id, nav: w.nav }))} />
+          <WaypointTrail slug={card.slug} label={L.onThisPage} items={trail} />
         </div>
-        <div className={styles.waypoints}>
-          <Waypoints study={study} evidence={evidenceKinds(study)} />
+        <div className={styles.stages}>
+          <Stages study={study} places={places} />
+
+          <section className={styles.section} aria-labelledby="reversed-heading">
+            <h2 id="reversed-heading" className={`${styles.sectionHeading} display`}>
+              {L.reversedHeading}
+            </h2>
+            <DecisionFork decision={study.reversedDecision} heading={study.reversedDecision.title} />
+          </section>
+
+          <section className={styles.section} aria-labelledby="after-launch-heading">
+            <h2 id="after-launch-heading" className={`${styles.sectionHeading} display`}>
+              {L.afterLaunchHeading}
+            </h2>
+            <Logbook caption={study.afterLaunch.caption} columns={L.logColumns} rows={study.afterLaunch.entries.map((e) => [e.date, e.text])} />
+          </section>
+
+          <section id="results" className={styles.section} aria-labelledby="results-heading" data-waypoint>
+            <h2 id="results-heading" className={styles.resultsHeading}>
+              <span className={`${styles.stageLine} hud-label`}>{`${ascent.summit.label} · ${altitudeLabel(ascent.summit.altitudeM)}`}</span>
+              <span className={`${styles.sectionHeading} display`}>{L.resultsHeading}</span>
+            </h2>
+            <ElevationProfile
+              caption={study.results.caption}
+              stages={places.map((p) => ({
+                label: p.label,
+                altitude: altitudeLabel(p.altitudeM),
+                metres: p.altitudeM,
+              }))}
+              summit={{
+                label: ascent.summit.label,
+                altitude: altitudeLabel(ascent.summit.altitudeM),
+                metres: ascent.summit.altitudeM,
+              }}
+              rows={study.results.rows.map((r) => ({
+                metric: r.metric,
+                before: r.before,
+                after: r.after,
+                stage: r.stage,
+                badge: <EvidenceBadge kind={r.evidence} />,
+              }))}
+              labels={{ ...L.resultColumns, stage: L.stage }}
+            />
+            <EvidenceLegend kinds={kinds} notes={study.results.legend} />
+          </section>
         </div>
       </div>
 
-      <TrailheadBand next={next} labels={{ nav: L.next, next: L.next, backToAll: L.backToAll }} />
-      <AltimeterBar slug={card.slug} items={study.waypoints.map((w) => ({ id: w.id, nav: w.nav }))} labels={{ bar: L.onThisPage, sheet: L.jumpTo, close: L.close }} />
+      <Descent lookingBack={{ heading: L.lookingBack, lessons: study.lookingBack }} team={{ heading: L.team, roles: study.team }} />
+      <div className={`${styles.closing} legend`} data-vt-exit>
+        <p className="body-copy">
+          <strong>{L.didNotDo}: </strong>
+          {study.didNotDo}
+        </p>
+        <p className={`${styles.credits} body-copy`}>{study.credits}</p>
+      </div>
+
+      <TrailheadBand
+        next={next}
+        previous={previous}
+        ridge={ridge}
+        labels={{
+          nav: L.next,
+          next: L.next,
+          previous: L.previous,
+          backToAll: L.backToAll,
+          youAreHere: L.youAreHere,
+          ridge: L.ridge,
+        }}
+      />
+      <AltimeterBar slug={card.slug} items={trail} labels={{ bar: L.onThisPage, sheet: L.jumpTo, close: L.close }} />
     </main>
   );
 }

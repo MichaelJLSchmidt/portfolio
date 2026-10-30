@@ -33,7 +33,14 @@
   .item {
     --dot: var(--color-contour);
     position: relative;
-    padding: 0 0 22px 28px;
+    padding: 0 0 var(--space, 22px) 28px;
+  }
+
+  .detail {
+    display: block;
+    color: var(--color-contour);
+    font-size: 0.625rem;
+    text-shadow: none;
   }
 
   /* The segment to the next node, drawn as dots, and the glacier fill over it: scroll-linked, the
@@ -119,7 +126,9 @@
   .link {
     color: var(--color-paper-dusk);
     display: inline-flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
     min-height: 26px;
     font-size: 0.9375rem;
     line-height: 1.3;

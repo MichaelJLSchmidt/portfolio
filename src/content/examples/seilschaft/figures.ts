@@ -60,10 +60,11 @@ export const images: Record<string, ImageSpec> = {
 };
 
 export const figures: Record<string, FigureSpec> = {
-  "sl-hero": { kind: "image", image: "sl-hero", surface: "night", size: "wide" },
+  "sl-hero": { kind: "image", image: "sl-hero", surface: "night", size: "wide", source: "Team structure, {{years.start}} and {{years.end}} (fictional)" },
   "sl-steering-onepager": {
     kind: "image",
     image: "sl-steering-onepager",
+    source: "Steering-board proposal, {{years.start}} (fictional)",
     surface: "sheet",
     size: "column",
     zoom: true,
@@ -92,6 +93,7 @@ export const figures: Record<string, FigureSpec> = {
   "sl-interviews": {
     kind: "image",
     image: "sl-interviews",
+    source: "Product-owner interviews (fictional)",
     surface: "sheet",
     size: "wide",
     zoom: true,
@@ -114,6 +116,7 @@ export const figures: Record<string, FigureSpec> = {
   "sl-scorecard": {
     kind: "image",
     image: "sl-scorecard",
+    source: "Hiring scorecard (fictional)",
     surface: "sheet",
     size: "column",
     zoom: true,
@@ -135,6 +138,7 @@ export const figures: Record<string, FigureSpec> = {
   "sl-intake-board": {
     kind: "image",
     image: "sl-intake-board",
+    source: "Team intake board (fictional)",
     surface: "sheet",
     size: "wide",
     zoom: true,
@@ -156,6 +160,7 @@ export const figures: Record<string, FigureSpec> = {
   "sl-rituals": {
     kind: "image",
     image: "sl-rituals",
+    source: "Team calendar (fictional)",
     surface: "sheet",
     size: "wide",
     caption: "The team’s rhythm: weekly crit, a monthly research day and a quarterly showcase. Nothing else may book these slots.",
@@ -163,6 +168,7 @@ export const figures: Record<string, FigureSpec> = {
   "sl-onboarding": {
     kind: "image",
     image: "sl-onboarding",
+    source: "Onboarding plan (fictional)",
     surface: "sheet",
     size: "wide",
     caption: "The onboarding trail. Each stage ends with something the new hire has shipped, not read.",
@@ -170,6 +176,7 @@ export const figures: Record<string, FigureSpec> = {
   "sl-ladder": {
     kind: "image",
     image: "sl-ladder",
+    source: "Career ladder, written with HR (fictional)",
     surface: "sheet",
     size: "wide",
     zoom: true,
@@ -197,6 +204,7 @@ export const figures: Record<string, FigureSpec> = {
   "sl-requests-chart": {
     kind: "image",
     image: "sl-requests-chart",
+    source: "Team intake log, {{years.start}}–{{years.end}} (fictional data)",
     surface: "night",
     size: "column",
     caption: "Share of requests reaching UX before development, per quarter. The intake made demand visible; the clusters moved it earlier.",
@@ -204,6 +212,7 @@ export const figures: Record<string, FigureSpec> = {
   "sl-designers-chart": {
     kind: "image",
     image: "sl-designers-chart",
+    source: "Team assignments, {{years.start}}–{{years.end}} (fictional data)",
     surface: "night",
     size: "column",
     caption: "Product teams with a named designer, every half year. Each new seat went to a cluster, not a ticket.",

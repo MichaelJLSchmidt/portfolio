@@ -36,6 +36,7 @@
 //   npm run test:e2e -- flood         the contour flood by mouse, keyboard and touch, in each mode
 //   npm run test:e2e -- trail         trail links: the red line, no width change, the blaze
 //   npm run test:e2e -- portrait      the About portrait card turning to its facts and back
+//   npm run test:e2e -- inp           the Next project tap on a throttled phone (INP ≤ 200 ms)
 //   npm run test:e2e -- pointer       no pointermove listener but the card tilt (scripts/e2e/interaction.mjs)
 //   npm run test:e2e -- smoke         a smoke subset in Chromium, WebKit and Firefox (each where
 //                                     Playwright has it installed; scripts/e2e/smoke.mjs)
@@ -58,7 +59,7 @@ import { hud, toast } from "./e2e/chrome.mjs";
 import { cards } from "./e2e/cards.mjs";
 import { access, arrival, reading } from "./e2e/choreography.mjs";
 import { smoke } from "./e2e/smoke.mjs";
-import { flood, pointer, portrait, trail } from "./e2e/interaction.mjs";
+import { flood, inp, pointer, portrait, trail } from "./e2e/interaction.mjs";
 import { wordingHits } from "./check-wording.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -454,9 +455,9 @@ async function casestudy() {
       };
     }, trail);
     check("trail is a visible, sticky nav labelled “On this page”", info.visible && info.position === "sticky", `position=${info.position}`);
-    check("trail lists the six waypoints, not the H1", info.links.length === 6 && !info.h1Linked, info.links.join(" "));
+    check("trail lists the six stages and the results, not the H1", info.links.length === 7 && info.links.at(-1) === "#results" && !info.h1Linked, info.links.join(" "));
     check("“On this page” chips hidden from 1200 px", !info.jumpVisible);
-    check("waypoint headings have a scroll margin", parseFloat(info.margin) >= 80, info.margin);
+    check("stage headings have a scroll margin", parseFloat(info.margin) >= 80, info.margin);
     check("the example page is noindex", /noindex/.test(info.robots ?? ""), info.robots);
     await page.evaluate(() => document.getElementById("discovery").scrollIntoView({ block: "start" }));
     const spied = await waitFor(page, (t) => document.querySelector(`${t} a[aria-current="true"]`)?.getAttribute("href") === "#discovery", trail);
@@ -490,6 +491,76 @@ async function casestudy() {
     await context.close();
   }
 
+  console.log("\ncase-study template: the layouts (spread, legend sheet, stages, fork, logbook, results, descent)");
+  {
+    const { context, page, errors } = await open();
+    await page.goto(url, { waitUntil: "networkidle" });
+    const t = await page.evaluate(() => {
+      const text = (el) => el?.textContent.replace(/\s+/g, " ").trim() ?? "";
+      const sections = [...document.querySelectorAll("section[data-waypoint]")];
+      const forks = [...document.querySelectorAll('ol[aria-label="Options"]')].map((ol) => [...ol.children].map((li) => text(li.querySelector("p")).match(/(Not chosen|Chosen|Reversed)$/)?.[1] ?? "?"));
+      const note = document.querySelector('aside[aria-label^="Side note"]');
+      const para = note?.parentElement?.querySelector("p");
+      const results = document.querySelector("#results table");
+      const log = document.querySelector('[aria-labelledby="after-launch-heading"] table');
+      return {
+        problem: text(document.querySelector("main header h2")),
+        result: text(document.getElementById("result-heading")),
+        gain: text(document.querySelector("#result-heading ~ div")),
+        legend: [...document.querySelectorAll('[aria-labelledby="summary-heading"] dt')].map(text),
+        sheet: text(document.querySelector('[aria-labelledby="summary-heading"] p')),
+        stageLines: sections.slice(0, 6).map((s) => text(s.querySelector("h2 span"))),
+        notes: document.querySelectorAll('aside[aria-label^="Side note"]').length,
+        noteBeside: note && para ? note.getBoundingClientRect().left >= para.getBoundingClientRect().right : null,
+        forks,
+        reversed: text(document.getElementById("reversed-heading")?.closest("section")),
+        forkSvgHidden: [...document.querySelectorAll('ol[aria-label="Options"] svg')].every((svg) => svg.closest('[aria-hidden="true"]')),
+        log: log ? { caption: !!log.querySelector("caption"), rows: log.querySelectorAll("tbody tr").length } : null,
+        results: results ? { caption: !!results.querySelector("caption"), rows: results.querySelectorAll("tbody tr").length, won: text(results.querySelector("tbody td:nth-child(3)")) } : null,
+        lessons: [...document.querySelectorAll('[aria-labelledby="looking-back"] li')].map((li) => text(li.lastElementChild)),
+        team: document.querySelectorAll('[aria-labelledby="team"] li').length,
+        ridge: text(document.querySelector('nav[aria-label="Next project"] figure ol')),
+      };
+    });
+    check("spread: “The problem” and “The result” with the altitude gained", t.problem === "The problem" && t.result === "The result" && /^\+[\d’]+ m/i.test(t.gain), `${t.problem} | ${t.result} | ${t.gain.slice(0, 60)}`);
+    check("legend sheet: the brief, outcome, role, team, what I put in place, key decision", t.legend.join("|") === "The brief|Outcome|My role|Team I led|What I put in place|Key decision", t.legend.join(" | "));
+    check("legend sheet: “Sheet n/3” and a scale", /Sheet \d\/3/.test(t.sheet), t.sheet);
+    check("six stage lines with place and altitude, starting in Interlaken", t.stageLines.length === 6 && /^Stage 1 · Interlaken Ost · 567 m$/i.test(t.stageLines[0]) && t.stageLines.every((l, i) => new RegExp(`^Stage ${i + 1} · .+ · [\\d’]+ m$`, "i").test(l)), t.stageLines.join(" | "));
+    check("side notes sit in the margin beside their paragraph", t.notes >= 2 && t.noteBeside === true, `${t.notes} notes, beside=${t.noteBeside}`);
+    check("forks: an ordered list of options, each with its status in text, exactly one chosen", t.forks.length >= 2 && t.forks.every((f) => f.length >= 2 && f.filter((x) => x === "Chosen").length === 1 && !f.includes("?")), JSON.stringify(t.forks));
+    check("a decision we reversed: one reversed option, dated", /Reversed/.test(t.reversed) && /Turned back · /.test(t.reversed), t.reversed.slice(0, 80));
+    check("the fork drawings are hidden from screen readers", t.forkSvgHidden);
+    check("after launch: a table with a caption and dated rows", t.log?.caption && t.log.rows >= 3, JSON.stringify(t.log));
+    check("results: a table with a caption, each won at a stage", t.results?.caption && t.results.rows >= 3 && /^Stage \d · /.test(t.results.won), JSON.stringify(t.results));
+    check("looking back: every lesson says what I would do next time", t.lessons.length >= 2 && t.lessons.every((l) => l.startsWith("Next time I would")), t.lessons.length);
+    check("team: roles on a rope", t.team >= 3, String(t.team));
+    check("next project: the ridge of three peaks with “You are here”", /You are here/.test(t.ridge) && /Eiger/.test(t.ridge) && /Jungfrau/.test(t.ridge), t.ridge);
+    check("no page errors", errors.length === 0, errors.join("; "));
+    await context.close();
+  }
+  {
+    const context = await browser.newContext({ viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true });
+    const page = await context.newPage();
+    await page.goto(url, { waitUntil: "networkidle" });
+    const m = await page.evaluate(() => {
+      const note = document.querySelector('aside[aria-label^="Side note"]');
+      const para = note?.parentElement?.querySelector("p");
+      const facts = document.getElementById("result-heading")?.closest("section")?.querySelector("dl")?.getBoundingClientRect();
+      const pager = [...document.querySelectorAll('nav[aria-label="Next project"] p a')].map((a) => Math.round(a.getBoundingClientRect().height));
+      return {
+        noteAfter: note && para ? note.getBoundingClientRect().top >= para.getBoundingClientRect().bottom - 1 : null,
+        spread: facts ? +((facts.bottom + scrollY) / innerHeight).toFixed(2) : null,
+        pager,
+        width: document.documentElement.scrollWidth,
+      };
+    });
+    check("phone: side notes follow their paragraph", m.noteAfter === true);
+    check("phone: the spread ends (role line) within about 1.4 screens at 360×740", m.spread !== null && m.spread <= 1.4, String(m.spread));
+    check("phone: “Previous project” and “Next project” targets at least 48 px", m.pager.length === 2 && m.pager.every((h) => h >= 48), m.pager.join(", "));
+    check("phone 360: no sideways scrolling", m.width <= 360, `${m.width}px`);
+    await context.close();
+  }
+
   console.log("\ncase-study template: phone 390×844");
   {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
@@ -498,13 +569,13 @@ async function casestudy() {
     const info = await page.evaluate((trail) => ({
       trail: !!document.querySelector(trail)?.getClientRects().length,
       jump: !!document.querySelector("#jump-heading")?.getClientRects().length,
-      next: [...document.querySelectorAll("section[data-waypoint] a")].filter((a) => /^Next section/.test(a.textContent) && a.getClientRects().length).length,
+      next: [...document.querySelectorAll("section[data-waypoint] a")].filter((a) => /^Next stage/.test(a.textContent) && a.getClientRects().length).length,
       top: [...document.querySelectorAll('section[data-waypoint] a[href="#main"]')].filter((a) => a.getClientRects().length).length,
       width: document.documentElement.scrollWidth,
       markers: [...document.querySelectorAll("button[data-hotspot]")].map((b) => b.getBoundingClientRect()).map((r) => Math.min(r.width, r.height)),
     }), trail);
     check("trail hidden, “On this page” chips shown", !info.trail && info.jump);
-    check("each section ends with “Next section” (5) and “Back to top” (6)", info.next === 5 && info.top === 6, `${info.next} next, ${info.top} back`);
+    check("each stage ends with “Next stage” (5) and “Back to top” (6)", info.next === 5 && info.top === 6, `${info.next} next, ${info.top} back`);
     check("no sideways scrolling", info.width <= 390, `${info.width}px`);
     check("hotspot markers at least 24×24 px", info.markers.length === 5 && info.markers.every((m) => m >= 24), info.markers.join(", "));
     // The lightbox on touch: two fingers pinch, one finger pans.
@@ -656,7 +727,7 @@ async function casestudy() {
         notes: [...document.querySelectorAll("figure[data-kind=hotspots] [data-note]")].filter(visible).length,
         describe: [...document.querySelectorAll("details > summary")].filter((s) => s.textContent === "Describe this diagram").length,
         trailLinks: document.querySelectorAll('nav[aria-label="On this page"] a').length,
-        banner: document.querySelector('[role="note"]')?.textContent ?? "",
+        banner: document.querySelector("main header p")?.textContent ?? "",
         missingAlt: [...document.querySelectorAll("main img")].filter((i) => !i.hasAttribute("alt")).length,
       };
     });
@@ -664,8 +735,8 @@ async function casestudy() {
     check("“Open full-size image” link instead of the lightbox", !!r.fallback && r.enlargeHidden, r.fallback);
     check("hotspot notes listed", r.notes === 5, `${r.notes} notes`);
     check("long descriptions behind “Describe this diagram”", r.describe >= 5, `${r.describe}`);
-    check("trail links present", r.trailLinks === 6);
-    check("fictional-example banner present", /FICTIONAL EXAMPLE|Fictional example/i.test(r.banner), r.banner.slice(0, 60));
+    check("trail links present", r.trailLinks === 7, String(r.trailLinks));
+    check("the example line above the H1", /^Example — fictional case study$/i.test(r.banner.trim()), r.banner.slice(0, 60));
     check("every image has an alt attribute", r.missingAlt === 0, `${r.missingAlt} without`);
     await context.close();
   }
@@ -974,7 +1045,7 @@ async function wording() {
 const scenarios = { transitions, modes, hydration, primitives, decode, casestudy, wording };
 // The terrain conductor and the Bern terrain (scripts/e2e-terrain.mjs).
 Object.assign(scenarios, (await import("./e2e-terrain.mjs")).terrainScenarios({ browser, base, root, check, settle }));
-Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, about, ia, phone, fontswap, hud, toast, cards, arrival, reading, access, flood, trail, portrait, pointer, smoke }).map(([name, run]) => [name, () => run({ browser, playwright, base, basePath, root, check, open, settle })])));
+Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, about, ia, phone, fontswap, hud, toast, cards, arrival, reading, access, flood, trail, portrait, pointer, inp, smoke }).map(([name, run]) => [name, () => run({ browser, playwright, base, basePath, root, check, open, settle })])));
 try {
   for (const [name, run] of Object.entries(scenarios)) if (!only || only === name) await run();
 } finally {
