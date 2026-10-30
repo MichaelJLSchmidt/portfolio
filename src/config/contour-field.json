@@ -7,7 +7,7 @@
   "indexColor": "contour",
   "quietStrength": 0.22,
   "quietFeatherPx": 48,
-  "bodyQuietStrength": 0.09,
+  "bodyQuietStrength": 0.07,
   "bodyQuietFeatherPx": 64,
   "zoomBase": 1.06,
   "morphZoom": 0.14,

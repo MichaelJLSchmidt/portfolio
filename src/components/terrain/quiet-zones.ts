@@ -2,7 +2,7 @@
  * Quiet zones ask the contour field to fade its lines behind text, the way contour lines
  * break under the labels of a printed map. Two strengths:
  * - "heading": elements marked `data-quiet-zone` (display type, page headers), lines at ~25%;
- * - "body": running text (`.body-copy`) and other text blocks (`.knockout`), lines at ~9%
+ * - "body": running text (`.body-copy`) and other text blocks (`.knockout`), lines at ~7%
  *   with a wider feather, so they visibly break around the copy.
  * The field reads their viewport rectangles, kept current with a ResizeObserver (size and
  * layout changes), scroll and resize events, a MutationObserver for zones that arrive or

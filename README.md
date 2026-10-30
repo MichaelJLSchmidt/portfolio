@@ -9,7 +9,7 @@ The signature pieces:
    monochrome map. It holds still while a page is read and takes no pointer input; on a page change it morphs to
    the next terrain (a case study's mountain, Bern on About). Quiet zones, like contours interrupted under the
    labels of a printed map, fade the lines behind headings (`data-quiet-zone`) to 22% with a 48 px feather and
-   behind running text (`.body-copy`, or `.knockout` for other text blocks) to 9% with a 64 px feather. Longer
+   behind running text (`.body-copy`, or `.knockout` for other text blocks) to 7% with a 64 px feather. Longer
    reading blocks also sit on a map-legend panel (`.legend`). `docs/terrain.md` has the details.
 2. **Summit Card**: spring tilt and contour foil under a fine pointer. Fully data-driven and accessible; the whole
    card links to its case study.
@@ -479,8 +479,9 @@ Attribution: "Terrain data © swisstopo" appears in the footer of every page (an
 - Contrast is checked by `npm run check:contrast`: text over the field at least 7:1 (in a quiet zone, on the HUD
   backdrop, knocked out), text on paper (the case-study summary) and raised surfaces at least 4.5:1, meaningful
   marks (the route, focus rings, outlines, rarity shapes) at least 3:1. On paper only `paperInk`, `paperInk2`,
-  `mossInk` and `alpenglowInk` carry text. Contour-coloured labels keep their halo (`.keep-halo`), and the
-  poster fallback keeps all halos and its vignette.
+  `mossInk` and `alpenglowInk` carry text. Labels on a drawing or where lines crowd keep their halo inside a
+  quiet zone (`.keep-halo`), and the poster fallback keeps all halos and its vignette; both add a hard halo, a
+  ground stroke under the glyphs (`--type-halo-stroke`).
 - Body text is measured as rendered: `npm run check:legibility` screenshots every `.body-copy` block (and the
   footer and tables, `.knockout`) and every label over the field on the home page, a case study, the case-study
   example (when built) and About, at 1440×900 and 390×844, over the field, over the field caught mid-morph

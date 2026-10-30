@@ -37,9 +37,9 @@ scroll), none while the page is read.
   (400 ms), and back on leave. Cards' `prefetchTerrain()` preloads on hover and focus in every mode.
 - **Quiet zones through a route change:** from the commit until the View Transition has finished
   and the field's own motion is over, every quiet zone holds the strongest knockout (body text's
-  9%, 64 px feather), and so does the column both pages' text covers; then it eases back over
+  7%, 64 px feather), and so does the column both pages' text covers; then it eases back over
   `medium`. At rest headings (`data-quiet-zone`) fade the lines behind them to 22% with a 48 px
-  feather, running text (`.body-copy`, `.knockout`) to 9% with a 64 px feather.
+  feather, running text (`.body-copy`, `.knockout`) to 7% with a 64 px feather.
 
 ### No pointer input
 

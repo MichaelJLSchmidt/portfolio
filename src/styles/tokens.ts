@@ -61,6 +61,8 @@ export const type = {
   compact: { wdth: 72, wght: 800 },
   /** Condensed Archivo for type lines and insight text. */
   condensed: { wdth: 88 },
+  /** Map labels' hard halo where lines run close: a ground stroke under the glyphs, in px (half each side). */
+  halo: { stroke: 4 },
 } as const;
 
 /**
@@ -364,6 +366,7 @@ export function tokensToCss({ motion = true }: { motion?: boolean } = {}): strin
     `--type-compact-wdth:${type.compact.wdth}%`,
     `--type-compact-wght:${type.compact.wght}`,
     `--type-condensed-wdth:${type.condensed.wdth}%`,
+    `--type-halo-stroke:${type.halo.stroke}px`,
     `--title-from-wght:${titleAxes.from.wght}`,
     `--title-rest-wght:${titleAxes.rest.wght}`,
     `--title-rest-wdth:${titleAxes.rest.wdth}`,

@@ -212,14 +212,22 @@ for (const mode of pick(modes)) {
         },
         { BODY, LEGACY },
       );
-      // Where fixed overlays at the top of the screen (the HUD) end.
+      // Where fixed overlays at the top of the screen (the HUD) end, with the backdrop that fades
+      // out below the bar (its ::before at rest, ::after once the page has scrolled).
       const cover = await page.evaluate(() =>
         Math.ceil(
           Math.max(
             0,
             ...[...document.querySelectorAll("body *")]
               .filter((el) => getComputedStyle(el).position === "fixed" && el.getClientRects().length)
-              .map((el) => el.getBoundingClientRect())
+              .map((el) => {
+                const r = el.getBoundingClientRect();
+                const fades = ["::before", "::after"]
+                  .map((p) => getComputedStyle(el, p))
+                  .filter((s) => s.content !== "none")
+                  .map((s) => r.top + (parseFloat(s.top) || 0) + (parseFloat(s.height) || 0));
+                return { top: r.top, height: r.height, bottom: Math.max(r.bottom, ...fades) };
+              })
               .filter((r) => r.top <= 0 && r.height < window.innerHeight / 3)
               .map((r) => r.bottom),
           ),

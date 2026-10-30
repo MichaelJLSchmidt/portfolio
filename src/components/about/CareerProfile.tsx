@@ -114,7 +114,7 @@ export function CareerProfile({ copy }: { copy: Copy }) {
             {stops.map((s, i) => (
               <span
                 key={s.id}
-                className={`${styles.place} hud-label map-halo`}
+                className={`${styles.place} hud-label map-halo keep-halo`}
                 data-edge={i === 0 ? "start" : s === summit ? "end" : undefined}
                 style={{ "--x": pct(ax(s.atM), ACROSS.w), "--y": pct(ay(elevationAt(s.atM)), ACROSS.h) } as CSSProperties}
               >
@@ -143,7 +143,7 @@ export function CareerProfile({ copy }: { copy: Copy }) {
             </li>
           ))}
         </ol>
-        <figcaption className={`${styles.caption} hud-label map-halo`} data-quiet-zone>{copy.trail(places, (lengthM / 1000).toFixed(1))}</figcaption>
+        <figcaption className={`${styles.caption} hud-label map-halo keep-halo`} data-quiet-zone>{copy.trail(places, (lengthM / 1000).toFixed(1))}</figcaption>
       </figure>
     </section>
   );

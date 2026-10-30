@@ -107,7 +107,7 @@ void main() {
 
   // Quiet zones: lines fade to the zone's strength inside its rectangle, feathered outwards,
   // like contours interrupted under a map's labels. Headings keep ~25% of a line, body text
-  // ~9%; where zones overlap, the stronger knockout wins. Through a route change every zone,
+  // ~7%; where zones overlap, the stronger knockout wins. Through a route change every zone,
   // and the column both pages' text shares, holds the strongest knockout.
   float keep = 1.0;
   for (int i = 0; i < MAX_QUIET; i++) {
