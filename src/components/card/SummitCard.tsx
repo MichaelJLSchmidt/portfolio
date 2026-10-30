@@ -96,7 +96,7 @@ const afterPaint = () => new Promise<void>((done) => requestAnimationFrame(() =>
 
 /**
  * A Summit Card: a data-driven trading-card-style project card. The whole card is one link to
- * its case study, named "Open expedition: <name>, <type>, rarity <letter>" (", Visited" once its
+ * its case study, named "Open case study: <name>, <type>, rarity <letter>" (", Visited" once its
  * case study has been opened).
  *
  * Motion (docs/motion.md): it arrives once per session as it enters (full: rises 12 px and fades

@@ -59,7 +59,6 @@ export default function DevTuning() {
 
   useControls("Contour field", {
     "Interval (m)": monitor(() => fieldStore.get().intervalM ?? 0, { interval: 250 }),
-    "Replay intro": button(() => fieldStore.set((s) => ({ replayIntro: s.replayIntro + 1 }))),
     [`Toggle morph (${morphCard?.name ?? "no card"})`]: button(() =>
       fieldStore.set((s) => ({ morphTarget: s.morphTarget || !morphCard ? null : morphCard.artwork.terrainId })),
     ),

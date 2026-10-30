@@ -46,18 +46,6 @@
     opacity: 1;
   }
 
-  /* First visit: the poster waits dimmed while the field loads and draws the map on.
-     If the field never arrives, the animation brings the poster back by itself. */
-  :root[data-intro="pending"] .poster {
-    opacity: 0.3;
-    animation: poster-fallback var(--dur-medium) var(--ease-trail) 4s both;
-  }
-
-  @keyframes poster-fallback {
-    to {
-      opacity: 1;
-    }
-  }
 
   .backdrop[data-field="on"] .poster {
     animation: none;
@@ -101,50 +89,7 @@
     opacity: 0;
   }
 
-  .skip {
-    position: fixed;
-    right: 16px;
-    bottom: max(16px, env(safe-area-inset-bottom));
-    z-index: var(--layer-overlay);
-    min-height: 44px;
-    padding: 0 16px;
-    border: 1px solid var(--color-contour);
-    border-radius: 999px;
-    background: rgb(27 28 24 / 0.8);
-    color: var(--color-sheet);
-    cursor: pointer;
-  }
 
-  @media (hover: hover) {
-    .skip:hover {
-      border-color: var(--color-glacier);
-      color: var(--color-glacier);
-    }
-  }
-
-  /* Without the WebGL field the poster still breathes: a slow, compositor-only drift. An
-     auto-playing loop, so it is the field's ambient (WCAG 2.2.2): desktop in full motion only, and
-     the Calm map switch stops it. */
-  @keyframes poster-drift {
-    from {
-      transform: scale(1.06) translate3d(-1%, 0.6%, 0);
-    }
-    to {
-      transform: scale(1.1) translate3d(1%, -0.8%, 0);
-    }
-  }
-
-  :root[data-motion="full"][data-tier="desktop"] .backdrop[data-field="off"] .poster {
-    animation: poster-drift 48s var(--ease-summit) infinite alternate;
-    will-change: transform;
-  }
-
-  /* First visit: keep the "field never arrived" fallback alongside the drift. */
-  :root[data-motion="full"][data-tier="desktop"][data-intro="pending"] .backdrop[data-field="off"] .poster {
-    animation:
-      poster-fallback var(--dur-medium) var(--ease-trail) 4s both,
-      poster-drift 48s var(--ease-summit) infinite alternate;
-  }
 
   :root[data-motion="still"] .poster,
   :root[data-motion="still"] .canvas,

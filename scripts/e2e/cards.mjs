@@ -1,4 +1,4 @@
-// The deck and its cards (phase 4): `npm run test:e2e -- cards` and `-- views`. Needs a build with
+// The deck and its cards (phase 4): `npm run test:e2e -- cards`. Needs a build with
 // the flagged examples (SITE_MODE=basecamp or a preview).
 //
 //   cards  the spread grid (0°, 63:88, three columns on desktop) and the phone list (one column,
@@ -6,8 +6,6 @@
 //          (lift −6 px, tilt ≤ 5°, foil ≤ 0.18 on R and M only), keyboard focus (lift, never tilt),
 //          calm (no tilt, no foil); press 0.98; scope pips ("Scope n of 5"); one stat size, the
 //          impact's after-value with "from <before>"; the visited stamp; no gyroscope control.
-//   views  "Cards" · "Index": the rows, the View Transition in full, a cross-fade in calm, none in
-//          still; the view remembered for the session; back from a row focuses that row.
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
@@ -24,7 +22,7 @@ export async function cards({ browser, base, root, check }) {
     await context.addInitScript(
       ({ calm, dealt }) => {
         try {
-          sessionStorage.setItem("summit:intro-played", "1");
+          
           if (dealt) sessionStorage.setItem("summit:deck-dealt", "1");
           if (calm) localStorage.setItem("summit:calm-map", "1");
         } catch {}
@@ -46,7 +44,7 @@ export async function cards({ browser, base, root, check }) {
     await page.locator(card(ORDER[0])).scrollIntoViewIfNeeded();
     await page.waitForTimeout(800);
     const r = await page.evaluate(() => {
-      const arts = [...document.querySelectorAll("#expeditions article[data-slug]")];
+      const arts = [...document.querySelectorAll("#work article[data-slug]")];
       const boxes = arts.map((a) => a.getBoundingClientRect());
       const tilt = arts.map((a) => a.querySelector("[class*=tilt]"));
       return {
@@ -86,7 +84,7 @@ export async function cards({ browser, base, root, check }) {
     check("hover tilts it, at most 5°", hover.rx + hover.ry > 0.2 && hover.rx <= 5.01 && hover.ry <= 5.01, `rx ${hover.rx} ry ${hover.ry}`);
     check("the foil shows on the hovered card, at most 0.18", hover.foil !== null && hover.foil > 0 && hover.foil <= 0.18, String(hover.foil));
     const others = await page.evaluate(() =>
-      [...document.querySelectorAll("#expeditions article[data-slug]")].filter((a) => a.dataset.active !== "true").map((a) => Number(getComputedStyle(a.querySelector("[class*=foil]") ?? a).opacity)),
+      [...document.querySelectorAll("#work article[data-slug]")].filter((a) => a.dataset.active !== "true").map((a) => Number(getComputedStyle(a.querySelector("[class*=foil]") ?? a).opacity)),
     );
     check("no foil on the cards not hovered", others.every((o) => o === 0 || o === 1), JSON.stringify(others));
     // Press: 0.98.
@@ -142,24 +140,24 @@ export async function cards({ browser, base, root, check }) {
   {
     const { context, page } = await newPage({ dealt: false });
     await page.goto(`${base}/`, { waitUntil: "load" });
-    await page.waitForSelector("#expeditions article[data-arrive]", { state: "attached" });
-    const before = await page.$$eval("#expeditions article[data-slug]", (as) => as.map((a) => a.dataset.arrive));
+    await page.waitForSelector("#work article[data-arrive]", { state: "attached" });
+    const before = await page.$$eval("#work article[data-slug]", (as) => as.map((a) => a.dataset.arrive));
     check("below the fold the cards wait to arrive", before.every((s) => s === "wait"), before.join(","));
-    await page.locator("#deck-heading").scrollIntoViewIfNeeded();
+    await page.locator("#work-heading").scrollIntoViewIfNeeded();
     await page.evaluate(() => window.scrollBy(0, 300));
     const samples = [];
     for (let i = 0; i < 6; i++) {
       await page.waitForTimeout(60);
-      samples.push(await page.$$eval("#expeditions article[data-slug]", (as) => as.map((a) => getComputedStyle(a).transform)));
+      samples.push(await page.$$eval("#work article[data-slug]", (as) => as.map((a) => getComputedStyle(a).transform)));
     }
     await page.waitForTimeout(900);
-    const after = await page.$$eval("#expeditions article[data-slug]", (as) => as.map((a) => a.dataset.arrive));
+    const after = await page.$$eval("#work article[data-slug]", (as) => as.map((a) => a.dataset.arrive));
     const rotated = samples.flat().filter((t) => t !== "none" && !/^matrix\(1, 0, 0, 1,/.test(t));
     check("they arrive as they come into view", after.every((s) => s === "in"), after.join(","));
     check("the deal rises and fades, never rotates", rotated.length === 0, rotated.slice(0, 2).join(" | "));
     await page.reload({ waitUntil: "load" });
     await page.waitForTimeout(600);
-    const again = await page.$$eval("#expeditions article[data-slug]", (as) => as.map((a) => a.dataset.arrive));
+    const again = await page.$$eval("#work article[data-slug]", (as) => as.map((a) => a.dataset.arrive));
     check("once per session: after a reload they are simply there", again.every((s) => s === "done"), again.join(","));
     await context.close();
   }
@@ -169,7 +167,7 @@ export async function cards({ browser, base, root, check }) {
     const { context, page } = await newPage({ viewport: { width: 390, height: 844 }, mobile: true });
     await page.goto(`${base}/`, { waitUntil: "load" });
     const r = await page.evaluate(() => {
-      const arts = [...document.querySelectorAll("#expeditions article[data-slug]")];
+      const arts = [...document.querySelectorAll("#work article[data-slug]")];
       const list = arts[0].closest("ul");
       return {
         snap: getComputedStyle(document.documentElement).scrollSnapType,
@@ -185,7 +183,7 @@ export async function cards({ browser, base, root, check }) {
     await context.close();
   }
 
-  // Visited: after its case study, the card shows "SUMMITED" and its name says "Visited".
+  // Visited: after its case study, the card shows the "Visited" stamp and its name says "Visited".
   {
     const { context, page } = await newPage();
     await page.goto(`${base}/work/gratweg/`, { waitUntil: "load" });
@@ -195,77 +193,12 @@ export async function cards({ browser, base, root, check }) {
     const v = await page.evaluate(() => {
       const el = document.querySelector('article[data-slug="gratweg"]');
       const other = document.querySelector('article[data-slug="seilschaft"]');
-      return { stamp: el.querySelector("[class*=visited] .visually-hidden")?.textContent, label: el.querySelector("a").getAttribute("aria-label"), other: !!other.querySelector("[class*=visited]") };
+      const stamp = el.querySelector("[class*=visited]");
+      return { stamp: (stamp?.querySelector(".visually-hidden") ?? stamp)?.textContent.trim(), label: el.querySelector("a").getAttribute("aria-label"), other: !!other.querySelector("[class*=visited]") };
     });
-    check("a visited card shows the SUMMITED stamp", v.stamp === "SUMMITED", String(v.stamp));
+    check("a visited card shows the “Visited” stamp", v.stamp === "Visited", String(v.stamp));
     check("screen readers hear “Visited”", /, Visited$/.test(v.label ?? ""), v.label);
     check("cards not visited have no stamp", !v.other);
-    await context.close();
-  }
-}
-
-export async function views({ browser, base, root, check }) {
-  console.log("\nviews: Cards · Index");
-  if (!existsSync(join(root, "out/work/seilschaft/index.html"))) {
-    console.log("  skipped: no example case studies in this build");
-    return;
-  }
-  for (const mode of ["full", "calm", "still"]) {
-    const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: mode === "still" ? "reduce" : "no-preference" });
-    await context.addInitScript((calm) => {
-      try {
-        sessionStorage.setItem("summit:intro-played", "1");
-        sessionStorage.setItem("summit:deck-dealt", "1");
-        if (calm) localStorage.setItem("summit:calm-map", "1");
-      } catch {}
-      window.__vtCalls = 0;
-      window.__vtFlags = [];
-      const start = Document.prototype.startViewTransition;
-      if (start)
-        Document.prototype.startViewTransition = function (...args) {
-          window.__vtCalls++;
-          window.__vtFlags.push(document.documentElement.getAttribute("data-vt"));
-          return start.apply(this, args);
-        };
-    }, mode === "calm");
-    const page = await context.newPage();
-    const errors = [];
-    page.on("pageerror", (e) => errors.push(e.message.slice(0, 160)));
-    await page.goto(`${base}/`, { waitUntil: "load" });
-    const toIndex = page.locator("#expeditions").getByRole("button", { name: "Index", exact: true });
-    await toIndex.scrollIntoViewIfNeeded();
-    await toIndex.click();
-    await page.waitForTimeout(700);
-    const r = await page.evaluate(() => ({
-      rows: [...document.querySelectorAll("[data-index-slug] a")].map((a) => a.textContent.includes("—") && a.querySelector(".visually-hidden")?.textContent),
-      cards: document.querySelectorAll("#expeditions article[data-slug]").length,
-      pressed: [...document.querySelectorAll("#expeditions [role=group] button")].map((b) => `${b.textContent.trim().slice(0, 5)}=${b.getAttribute("aria-pressed")}`),
-      calls: window.__vtCalls,
-      flags: window.__vtFlags,
-    }));
-    check(`${mode}: Index lists one row per card, in deck order`, JSON.stringify(r.rows) === JSON.stringify(["Seilschaft", "Gratweg", "Test Project"]) && r.cards === 0, JSON.stringify(r.rows));
-    check(`${mode}: the pressed button shows the view`, r.pressed.some((p) => /^Index=true/.test(p)) && r.pressed.some((p) => /^Cards=false/.test(p)), r.pressed.join(" "));
-    if (mode === "full") check("full: the switch is a View Transition (the names morph)", r.calls === 1 && r.flags[0] === "view", JSON.stringify(r));
-    if (mode === "calm") check("calm: a View Transition that only cross-fades", r.calls === 1 && r.flags[0] === "view-calm", JSON.stringify(r));
-    if (mode === "still") check("still: the view switches at once (no View Transition)", r.calls === 0, String(r.calls));
-    // Remembered for the session.
-    await page.reload({ waitUntil: "load" });
-    const remembered = await page.waitForSelector("[data-index-slug]", { timeout: 10000 }).then(() => true, () => false);
-    check(`${mode}: the view is remembered after a reload`, remembered && (await page.locator("[data-index-slug]").count()) === 3);
-    if (mode === "full") {
-      // A row pre-warms its terrain on hover, opens its case study, and gets the focus back.
-      const row = page.locator('[data-index-slug="gratweg"] a');
-      await row.focus();
-      await page.keyboard.press("Enter");
-      await page.waitForURL(/\/work\/gratweg\/$/);
-      await page.waitForTimeout(1500);
-      await page.goBack();
-      await page.waitForURL((u) => !/\/work\//.test(u.pathname));
-      await page.waitForTimeout(1500);
-      const focused = await page.evaluate(() => document.activeElement?.closest("[data-index-slug]")?.dataset.indexSlug ?? null);
-      check("back from a row: the focus is on that row", focused === "gratweg", String(focused));
-    }
-    check(`${mode}: no page errors`, errors.length === 0, errors.join("; "));
     await context.close();
   }
 }

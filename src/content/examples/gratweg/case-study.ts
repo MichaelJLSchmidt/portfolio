@@ -234,11 +234,6 @@ export const rawCaseStudy: CaseStudy = {
           kind: "p",
           text: "A deprecation policy kept the system honest. A component is retired with a release note, a replacement and a date, and stays supported for {{governance.deprecationMonths|word}} months. Teams that touch a deprecated screen move it; teams that don’t get a reminder from the dashboard, not from me.",
         },
-        {
-          kind: "quote",
-          text: "The date picker was the first component I ever deleted with joy.",
-          attribution: "Lead developer, tax portal team (fictional)",
-        },
       ],
     },
     {

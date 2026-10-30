@@ -4,9 +4,9 @@
  * src/components/case-study render it. Every case study uses the same building blocks:
  *
  * - six or so waypoints, each headed "Label — finding" (the heading states what was found);
- * - blocks inside a waypoint: paragraphs, lists, figures, one key insight, one pull quote,
- *   decisions (h3, options table, chose / cost / mitigation), metric tiles and outcome tables
- *   with evidence badges.
+ * - blocks inside a waypoint: paragraphs, lists, figures, one key insight, decisions (h3,
+ *   options table, chose / cost / mitigation), metric tiles and outcome tables with evidence
+ *   badges. No quotes or testimonials.
  */
 
 /** How a number was obtained. Shown as shape plus text, never colour alone. */
@@ -49,8 +49,6 @@ export type Block =
   | { kind: "figure"; id: string }
   /** The one key insight of the page (an aside with a visible label). */
   | { kind: "insight"; text: string }
-  /** At most one pull quote per page. */
-  | { kind: "quote"; text: string; attribution: string }
   | Decision
   | { kind: "metrics"; label: string; items: Metric[] }
   /** Outcome table; `legend` says what each evidence kind means here (the legend shows them). */
@@ -197,9 +195,6 @@ export function bodyText(study: Pick<CaseStudy, "waypoints" | "figures" | "credi
           break;
         case "insight":
           parts.push(b.text);
-          break;
-        case "quote":
-          parts.push(b.text, b.attribution);
           break;
         case "decision":
           parts.push(b.title, ...(b.text ?? []), b.chose, b.cost, b.mitigation, b.after ?? "");

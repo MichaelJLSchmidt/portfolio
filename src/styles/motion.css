@@ -215,22 +215,6 @@
       animation: reveal-fade var(--dur-short) var(--ease-settle) calc(var(--reveal-delay, 0ms) + var(--dur-settle)) backwards;
     }
 
-    /* A pull quote: its rule (::before) draws down, then the quote fades in; nothing moves. */
-    :root:not([data-motion="still"]) [data-reveal="quote"][data-reveal-state="wait"]::before {
-      transform: scaleY(0);
-    }
-
-    :root:not([data-motion="still"]) [data-reveal="quote"][data-reveal-state="wait"] > * {
-      opacity: 0;
-    }
-
-    :root:not([data-motion="still"]) [data-reveal="quote"][data-reveal-state="play"]::before {
-      animation: reveal-draw-down var(--dur-reveal) var(--ease-settle) backwards;
-    }
-
-    :root:not([data-motion="still"]) [data-reveal="quote"][data-reveal-state="play"] > * {
-      animation: reveal-fade var(--dur-short) var(--ease-settle) var(--dur-reveal) backwards;
-    }
 
     /* A fade (opacity only, so running text may take it): after --fade-after, set by its block. */
     :root:not([data-motion="still"]) [data-reveal="fade"][data-reveal-state="wait"] {

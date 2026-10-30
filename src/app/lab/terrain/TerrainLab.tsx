@@ -6,7 +6,6 @@ import { useLabReady } from "@/components/lab/ready";
 import { MotionButton } from "@/components/motion/MotionButton";
 import { fieldStore, useFieldStore } from "@/components/terrain/field-store";
 import { BERN } from "@/components/terrain/route-terrain";
-import { TerrainReadout } from "@/components/terrain/TerrainReadout";
 import { cards } from "@/content/cards";
 import { useMotionMode } from "@/lib/motion-mode";
 import { terrainLab as copy } from "@/content/lab";
@@ -80,7 +79,6 @@ export function TerrainLab() {
         <h2 id="lab-readout" className="hud-label">
           {copy.readout.heading}
         </h2>
-        <TerrainReadout className={`${styles.readout} hud-label`} />
         <dl className={styles.state}>
           <div>
             <dt>{copy.state.field}</dt>

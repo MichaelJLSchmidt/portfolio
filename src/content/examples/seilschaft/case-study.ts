@@ -242,11 +242,6 @@ export const rawCaseStudy: CaseStudy = {
           kind: "p",
           text: "The {{team.end|ordinal}} seat came from inside. A front-end developer who had sat in on every crit for a year moved across as our UX engineer, and prototypes in code became part of Shape rather than a special request.",
         },
-        {
-          kind: "quote",
-          text: "For the first time we knew in January who our designer would be in June.",
-          attribution: "Product owner, permit services (fictional)",
-        },
       ],
     },
     {

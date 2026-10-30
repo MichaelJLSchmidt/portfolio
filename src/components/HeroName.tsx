@@ -27,7 +27,6 @@ export function HeroName({ name, className }: { name: string; className?: string
       id="hero-name"
       text={lines.join("\n")}
       className={className}
-      shine
       glint
       quiet
       widths="display"

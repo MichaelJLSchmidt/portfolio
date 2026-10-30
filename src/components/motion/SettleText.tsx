@@ -12,12 +12,10 @@ import {
   type Ref,
 } from "react";
 import { glyphEm, textEm, type MeasuredCut } from "@/lib/display-width";
-import { headlampFalloff, watchHeadlamp } from "@/lib/headlamp";
-import { useFinePointer } from "@/lib/idle";
-import { currentMode, useModeIf } from "@/lib/motion-mode";
+import { currentMode } from "@/lib/motion-mode";
 import { isSettled, markSettled, settleKey } from "@/lib/settled";
 import { activeViewTransition, transitionKind } from "@/lib/view-transition";
-import { duration, headlamp, stagger, staggerStep, type AxisRole } from "@/styles/tokens";
+import { stagger, staggerStep, type AxisRole } from "@/styles/tokens";
 import { Glint } from "./Glint";
 import { playGlint, takeArrivalGlint } from "./glint";
 import { scrollingFast } from "./reveal";
@@ -51,8 +49,6 @@ export type SettleTextProps = {
   trigger?: SettleTrigger;
   /** A single mint glint after the first arrival this session (full motion, dark surfaces). */
   glint?: boolean;
-  /** Letters near a fine pointer shine part of the way to glacier (the headlamp; full motion only). */
-  shine?: boolean;
   /** Marks the text as a quiet zone: the contour field fades its lines behind it. */
   quiet?: boolean;
   /**
@@ -129,7 +125,6 @@ export function SettleText({
   role = mode === "block" ? "label" : "display",
   trigger = "paint",
   glint = false,
-  shine = false,
   quiet = false,
   settleOnArrival = false,
   arrive,
@@ -146,9 +141,6 @@ export function SettleText({
   const elRef = useRef<HTMLElement>(null);
   const pathname = usePathname();
   const key = settleKey(scope === "site" ? "" : (pathname ?? ""), id ?? text);
-  // The mode only matters to the shine (a switch to calm re-renders no other settle text).
-  const motion = useModeIf(shine);
-  const finePointer = useFinePointer();
 
   const lines = text.split("\n");
   // A wrapping block lays out like chars mode and settles all at once.
@@ -303,70 +295,6 @@ export function SettleText({
     // setPlay and landed read props that are fixed for the element's life.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trigger, key]);
-
-  // Pointer shine: the headlamp lights the letters near a fine pointer, colour only. A 0..1
-  // `--kt-shine` per glyph eases on Motion's frame loop (up in the headlamp's rise, back over its
-  // fade) and is written only where it changed.
-  useEffect(() => {
-    const el = elRef.current;
-    if (!el || !shine || mode === "block" || motion !== "full" || !finePointer) return;
-    const glyphs = [...el.querySelectorAll<HTMLElement>("[data-st='glyph']")];
-    const current = new Float32Array(glyphs.length);
-    const target = new Float32Array(glyphs.length);
-    let centres: { x: number; y: number }[] = [];
-    let radius: number = headlamp.radiusPx;
-    let loop: typeof import("@/lib/frameloop") | null = null;
-    let queued: import("@/lib/frameloop").Process | null = null;
-    const rise = duration[headlamp.rise] / 3;
-    const fall = headlamp.fadeMs / 3;
-
-    const measure = () => {
-      centres = glyphs.map((g) => {
-        const r = g.getBoundingClientRect();
-        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-      });
-      radius = Math.max(headlamp.radiusPx, parseFloat(getComputedStyle(el).fontSize) * headlamp.radiusEm);
-    };
-    const step = ({ delta }: { delta: number }) => {
-      queued = null;
-      const dt = Math.min(delta || 16, 250);
-      let moving = false;
-      for (let i = 0; i < glyphs.length; i++) {
-        // Time constants: each transition takes about three of them.
-        const tau = target[i] > current[i] ? rise : fall;
-        let next = current[i] + (target[i] - current[i]) * (1 - Math.exp(-dt / tau));
-        if (Math.abs(target[i] - next) < 0.004) next = target[i];
-        if (next === current[i]) continue;
-        if (Math.abs(next - current[i]) > 0.0005 || next === target[i]) glyphs[i].style.setProperty("--kt-shine", next.toFixed(3));
-        current[i] = next;
-        if (next !== target[i]) moving = true;
-      }
-      if (moving) kick();
-    };
-    const kick = () => {
-      if (!queued && loop) queued = loop.frame.render(step);
-    };
-    const unwatch = watchHeadlamp((lamp) => {
-      if (!centres.length) measure();
-      for (let i = 0; i < centres.length; i++) {
-        target[i] = lamp.on ? headlampFalloff(Math.hypot(lamp.x - centres[i].x, lamp.y - centres[i].y) / radius) : 0;
-      }
-      kick();
-    });
-    const invalidate = () => {
-      centres = [];
-    };
-    import("@/lib/frameloop").then((m) => (loop = m));
-    window.addEventListener("scroll", invalidate, { passive: true });
-    window.addEventListener("resize", invalidate);
-    return () => {
-      unwatch();
-      if (queued) loop?.cancelFrame(queued);
-      window.removeEventListener("scroll", invalidate);
-      window.removeEventListener("resize", invalidate);
-      glyphs.forEach((g) => g.style.removeProperty("--kt-shine"));
-    };
-  }, [shine, mode, motion, finePointer, text]);
 
   let index = 0;
   // The condensed cut fixes the word space as well: a gap of its measured width ends each word

@@ -1,5 +1,5 @@
-// The night-summit page's assets and model, shared by the under-construction page
-// (construction mode) and the Basecamp gate (basecamp mode): fonts, posters, CSS from the
+// The under-construction page's assets and model, shared by the under-construction page
+// (construction mode) and the password gate (basecamp mode): fonts, posters, CSS from the
 // design tokens, the tiny inline script and the copy from src/content/about.ts.
 import { createHash } from "node:crypto";
 import { copyFileSync, mkdirSync, readFileSync } from "node:fs";
@@ -60,21 +60,18 @@ function css({ fonts, poster }) {
     `html{-webkit-text-size-adjust:100%;text-size-adjust:100%;background:var(--color-ground)}`,
     `body{margin:0;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;color:var(--color-sheet);font:400 var(--type-body-size)/var(--type-body-lh) "Archivo Text",system-ui,sans-serif}`,
     // Terrain: the poster dimmed so its regular lines show at 23% (it draws them at the
-    // field's desktop strength), the headlamp (the same poster, brighter, masked to a circle
-    // around the pointer) and a vignette that keeps the text legible.
+    // field's desktop strength) and a vignette that keeps the text legible. Nothing follows the
+    // pointer.
     `.terrain{position:fixed;inset:0;z-index:-1;overflow:hidden}`,
-    `.poster,.lamp{position:absolute;inset:0;background:var(--poster) center/cover no-repeat}`,
+    `.poster{position:absolute;inset:0;background:var(--poster) center/cover no-repeat}`,
     `.poster{opacity:${Math.min(1, 0.23 / fieldConfig.desktop.lineOpacity).toFixed(2)}}`,
-    `.lamp{--x:50vw;--y:50vh;opacity:0;filter:brightness(1.9);-webkit-mask:radial-gradient(circle min(36vmax,340px) at var(--x) var(--y),#000 0,rgb(0 0 0/.55) 45%,transparent 100%);mask:radial-gradient(circle min(36vmax,340px) at var(--x) var(--y),#000 0,rgb(0 0 0/.55) 45%,transparent 100%);transition:opacity var(--dur-long) var(--ease-trail)}`,
-    `.lamp.on{opacity:1;transition-duration:var(--dur-short)}`,
     `.terrain::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgb(27 28 24/.9),transparent 18%,transparent 82%,rgb(27 28 24/.9)),radial-gradient(130% 85% at 0% 55%,rgb(27 28 24/.88) 0,rgb(27 28 24/.6) 45%,rgb(27 28 24/0) 80%)}`,
-    `@media (prefers-reduced-motion:reduce){.lamp{display:none}}`,
     // The site's cartographic halo (.map-halo): text stays legible over any line, lit or not.
     `.hud,main,footer{text-shadow:0 0 2px var(--color-ground),0 0 6px var(--color-ground),0 0 14px var(--color-ground)}`,
     `input,button{text-shadow:none}`,
     `.label{${label}}`,
     `.hud{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 20px;margin:0;padding:max(14px,env(safe-area-inset-top)) max(var(--gutter),env(safe-area-inset-right)) 14px max(var(--gutter),env(safe-area-inset-left));color:var(--color-contour)}`,
-    `.hud p{margin:0}.hud .clock{margin-left:auto}.hud [hidden]{display:none}`,
+    `.hud p{margin:0}.hud .brand{color:var(--color-glacier);font-weight:700}`,
     `main{flex:1;display:flex;flex-direction:column;justify-content:center;width:100%;max-width:76rem;margin:0 auto;padding:clamp(28px,7vh,88px) max(var(--gutter),env(safe-area-inset-right)) clamp(28px,7vh,88px) max(var(--gutter),env(safe-area-inset-left))}`,
     `.name{margin:0 0 .28em;font:800 clamp(3.25rem,14.5vw,10.5rem)/var(--type-display-lh) "Archivo Display",system-ui,sans-serif;text-transform:uppercase;letter-spacing:-.01em;overflow-wrap:anywhere}`,
     `.role{margin:0;font-size:clamp(1.0625rem,2.2vw,1.375rem);line-height:1.4;text-wrap:balance}`,
@@ -103,37 +100,21 @@ function css({ fonts, poster }) {
     `:focus-visible{outline:2px solid var(--color-glacier);outline-offset:3px}`,
     `.field input:focus-visible{outline-offset:2px}`,
     `.error{margin:12px 0 0;color:var(--color-signal)}`,
-    // Reduced motion: the underline appears at once, the headlamp stays off (above).
-    `@media (prefers-reduced-motion:reduce){.line,.lamp{transition:none}}`,
+    // Reduced motion: the underline appears at once.
+    `@media (prefers-reduced-motion:reduce){.line{transition:none}}`,
     `.closed{margin:0;color:var(--color-contour)}`,
     `footer{padding:14px max(var(--gutter),env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(var(--gutter),env(safe-area-inset-left));color:var(--color-contour)}`,
     `footer a{color:inherit;text-underline-offset:.35em}footer a:hover{color:var(--color-sheet)}`,
   ].join("");
 }
 
-// Live Bern time (minute precision, like the site's HUD clock), the headlamp glow, and the
-// submit button's "CHECKING…" while the password is checked. The clock always runs (a changing
-// time is content, not motion); the headlamp stays off with reduced motion. Without JavaScript
-// the page is complete, just without these.
+// The submit button's "Checking…" while the password is checked. Without JavaScript the page is
+// complete, just without it.
 const script = `(()=>{
-const reduce=matchMedia("(prefers-reduced-motion: reduce)"),clock=document.querySelector("[data-clock]"),lamp=document.querySelector(".lamp");
-const format=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Zurich",hour:"2-digit",minute:"2-digit",hourCycle:"h23"});
-const tick=()=>{const now=new Date();clock.textContent=format.format(now);clock.dateTime=now.toISOString();setTimeout(tick,60000-now.getTime()%60000)};
-const apply=()=>{if(reduce.matches)lamp.classList.remove("on")};
-const move=(e)=>{if(reduce.matches)return;lamp.style.setProperty("--x",e.clientX+"px");lamp.style.setProperty("--y",e.clientY+"px");lamp.classList.add("on")};
-const off=()=>lamp.classList.remove("on");
-addEventListener("pointermove",move,{passive:true});
-addEventListener("pointerdown",move,{passive:true});
-addEventListener("pointerup",(e)=>{if(e.pointerType!=="mouse")off()});
-addEventListener("pointercancel",off);
-addEventListener("pointerout",(e)=>{if(!e.relatedTarget)off()});
-reduce.addEventListener("change",apply);
 const submit=document.querySelector("[data-pending]");
 const idle=submit&&submit.textContent;
 if(submit)submit.form.addEventListener("submit",(e)=>{if(submit.getAttribute("aria-disabled")==="true"){e.preventDefault();return}submit.textContent=submit.dataset.pending;submit.setAttribute("aria-disabled","true")});
 addEventListener("pageshow",(e)=>{if(e.persisted&&submit){submit.textContent=idle;submit.removeAttribute("aria-disabled")}});
-clock.parentElement.hidden=false;
-tick();
 })();`.replace(/\n/g, "");
 
 /** The page model (see src/hosting/page.ts) for assets copied by `copyAssets`. */
@@ -149,7 +130,7 @@ export function pageModel(assets, { canonical }) {
     status: holding.status,
     contact: holding.contact.map(({ label, href }) => ({ label, href })),
     placeholder: about.placeholderAction,
-    hud: holding.hud,
+    brand: holding.brand,
     access: holding.access,
     credit: { label: site.footer.credit, href: site.footer.creditHref },
     css: css(assets),

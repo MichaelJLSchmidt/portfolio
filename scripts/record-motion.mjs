@@ -111,7 +111,7 @@ try {
     await record(`round-trip-${mode}`, options, async (page, context) => {
       await context.addInitScript((calm) => {
         try {
-          sessionStorage.setItem("summit:intro-played", "1");
+          
           if (calm) localStorage.setItem("summit:calm-map", "1");
         } catch {}
       }, mode === "calm");
@@ -159,7 +159,7 @@ try {
       await record(`terrain-${name}-${mode}`, options, async (page, context) => {
         await context.addInitScript((calm) => {
           try {
-            sessionStorage.setItem("summit:intro-played", "1");
+            
             if (calm) localStorage.setItem("summit:calm-map", "1");
           } catch {}
         }, mode === "calm");
@@ -182,7 +182,7 @@ try {
   const visit = async (context) =>
     context.addInitScript(() => {
       try {
-        sessionStorage.setItem("summit:intro-played", "1");
+        
       } catch {}
     });
   const scrollThrough = async (page, steps, dy, wait) => {

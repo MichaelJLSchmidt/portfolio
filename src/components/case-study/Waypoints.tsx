@@ -12,7 +12,7 @@ import styles from "./CaseStudy.module.css";
 
 /** Consecutive running text shares one legend panel; everything else stands on its own. */
 type Group = { text: Block[] } | { block: Block };
-const isText = (b: Block) => b.kind === "p" || b.kind === "list" || b.kind === "quote";
+const isText = (b: Block) => b.kind === "p" || b.kind === "list";
 
 function groups(blocks: Block[]): Group[] {
   const out: Group[] = [];
@@ -57,23 +57,9 @@ function TextBlock({ block }: { block: Block }) {
         </>
       );
     }
-    case "quote":
-      return <PullQuote text={block.text} attribution={block.attribution} />;
     default:
       return null;
   }
-}
-
-/** At most one per page: a <blockquote> with its attribution. Its rule draws, then it fades in. */
-export function PullQuote({ text, attribution }: { text: string; attribution: string }) {
-  return (
-    <figure className={styles.quote} data-reveal="quote">
-      <blockquote>
-        <p className="body-copy italic">{text}</p>
-      </blockquote>
-      <figcaption className="hud-label">— {attribution}</figcaption>
-    </figure>
-  );
 }
 
 /** The page's one key insight: an aside on the sheet colour with a visible label; it unfolds like a map sheet. */

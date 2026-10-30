@@ -17,11 +17,6 @@
     text-align: center;
   }
 
-  .eyebrow {
-    --kt-color: var(--color-glacier);
-    color: var(--color-glacier);
-  }
-
   .headRule {
     width: min(100%, 12rem);
     transform-origin: center;
@@ -34,25 +29,6 @@
 
   .intro {
     max-width: 40ch;
-  }
-
-  /* "Cards" · "Index": two pressed-or-not buttons; the pressed one fills with the sheet colour. */
-  .views {
-    display: inline-flex;
-    gap: 8px;
-    margin-top: 8px;
-  }
-
-  .viewButton {
-    min-width: 7.5rem;
-    border-color: var(--color-contour);
-    color: var(--color-sheet);
-  }
-
-  .viewButton[aria-pressed="true"] {
-    border-color: var(--color-sheet);
-    background: var(--color-sheet);
-    color: var(--color-ground);
   }
 
   /* Cards: a flat spread grid in deck order, every card at rest at 0°, in the 63:88 card ratio
@@ -96,60 +72,5 @@
     .slot {
       scroll-snap-align: center;
     }
-  }
-
-  /* Index: one row per card, the name in the display cut and its index line beside it. */
-  .index {
-    display: grid;
-    width: min(100%, 64rem);
-    margin: 0 auto;
-    padding: 0;
-    list-style: none;
-  }
-
-  .row + .row {
-    border-top: 1px solid var(--color-contour-dim);
-  }
-
-  .rowLink {
-    position: relative;
-    display: grid;
-    align-items: baseline;
-    gap: 4px 24px;
-    padding: 18px 4px;
-  }
-
-  /* From the small breakpoint the names make a column, so the lines start together. */
-  @media (min-width: 640px) {
-    .rowLink {
-      grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
-    }
-  }
-
-  /* The rule that draws under the hovered or focused row. */
-  .rowLink::after {
-    content: "";
-    position: absolute;
-    inset: auto 0 -1px;
-    height: 1px;
-    background: var(--color-glacier);
-    transform: scaleX(var(--on));
-    transform-origin: left center;
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    :root:not([data-motion="still"]) .rowLink::after {
-      transition: transform var(--dur-underline) var(--ease-settle);
-    }
-  }
-
-  .rowName {
-    font-size: clamp(2rem, 5vw, 3.5rem);
-  }
-
-  .rowLine {
-    color: var(--color-sheet);
-    font-size: 1.0625rem;
-    line-height: 1.4;
   }
 }

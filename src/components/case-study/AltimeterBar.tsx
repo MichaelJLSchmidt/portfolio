@@ -2,14 +2,14 @@
 
 import { useEffect, useId, useRef } from "react";
 import { SettleText, type SettleHandle } from "@/components/motion/SettleText";
-import { readoutCopy } from "@/content/readout";
+import { caseStudyLabels } from "@/content/cards";
 import { haptic } from "@/lib/haptics";
 import { meterReading, useReading } from "./reading";
 import styles from "./CaseStudy.module.css";
 
 /**
  * The altimeter bar, below the large breakpoint (where the "On this page" trail has no room): a
- * bar along the bottom of the screen once the reader reaches the first waypoint, "WAYPOINT 2 / 6"
+ * bar along the bottom of the screen once the reader reaches the first waypoint, "Section 2 of 6"
  * and the waypoint's name, which settles on every change of waypoint, over a thin contour that
  * fills with the reading progress. Tapping it opens the waypoints as a bottom sheet (a modal
  * <dialog>: focus inside, Esc closes, focus returns), rising over --dur-sheet (300 ms; still mode
@@ -66,7 +66,7 @@ export function AltimeterBar({
         <span className={styles.altimeterLine} aria-hidden="true" />
         <button type="button" className={styles.altimeterButton} aria-haspopup="dialog" aria-controls={`${id}sheet`} onClick={open} tabIndex={current ? undefined : -1}>
           <span className={`${styles.altimeterCount} hud-label`}>
-            {readoutCopy.waypoint} {active + 1} / {count || items.length}
+            {caseStudyLabels.section(active + 1, count || items.length)}
           </span>
           <SettleText ref={nameRef} text={current?.nav ?? items[0]?.nav ?? ""} mode="block" role="label" trigger="manual" className={styles.altimeterName} />
           <span className={styles.altimeterArrow} aria-hidden="true">

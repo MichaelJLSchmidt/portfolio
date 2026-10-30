@@ -31,58 +31,6 @@
     vector-effect: non-scaling-stroke;
   }
 
-  /* What the HUD leaves out of its bar (Hud.module.css): the navigation below the medium
-     breakpoint, the Bern time below the large one. */
-  .nav {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 4px 20px;
-    width: 100%;
-  }
-
-  .nav ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 20px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  @media (min-width: 1024px) {
-    .nav ul {
-      display: none;
-    }
-  }
-
-  /* From the large breakpoint the HUD shows the time. */
-  @media (min-width: 1280px) {
-    .nav {
-      display: none;
-    }
-  }
-
-  .navLink {
-    display: inline-flex;
-    align-items: center;
-    min-height: 32px;
-  }
-
-  /* Not a link yet (no CV URL): the [URL] tag says so; the colour stays the footer's, legible over
-     the field. */
-  .placeholder {
-    gap: 0.5em;
-  }
-
-  .clock {
-    display: inline-flex;
-    align-items: center;
-    min-height: 32px;
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* One line where it fits; stacked on narrow screens, so no separator is left dangling. */
   .credits {
     display: flex;
     flex-direction: column;

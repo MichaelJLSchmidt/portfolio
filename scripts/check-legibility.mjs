@@ -178,7 +178,7 @@ for (const mode of pick(modes)) {
     });
     await context.addInitScript(() => {
       try {
-        sessionStorage.setItem("summit:intro-played", "1");
+        
         sessionStorage.setItem("summit:deck-dealt", "1");
       } catch {}
     });

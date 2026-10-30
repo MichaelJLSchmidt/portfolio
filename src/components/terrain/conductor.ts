@@ -189,6 +189,11 @@ export class Timeline {
     return this.running.size > 0 || this.pending.length > 0;
   }
 
+  /** Any channel is heading somewhere (running or queued). */
+  get active(): boolean {
+    return this.running.size > 0 || this.pending.length > 0;
+  }
+
   /** The channel is heading somewhere (running or queued). */
   busy(channel: Channel): boolean {
     return this.running.has(channel) || this.pending.some((p) => p.channel === channel);

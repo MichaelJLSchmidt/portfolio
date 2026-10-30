@@ -47,7 +47,7 @@ Installing needs `MOTION_TOKEN` in the environment (see README). Never write the
 - Motion: three modes on `html[data-motion]` (full; calm, the Calm map switch; still, OS reduced motion) via
   `useMotionMode()`; apply the primitives and tokens in `docs/motion.md`, every effect with calm and still twins.
 - Keep heavy code out of the initial bundle (Three/R3F and Motion load lazily) and keep transfer per visit small.
-- Case studies: waypoint headings state the finding; at most one key insight and one pull quote per page. A case
+- Case studies: waypoint headings state the finding; at most one key insight per page, no quotes. A case
   study with a data file writes every number as a `{{token}}` (`src/lib/fill.ts`), in copy and artefacts alike;
   after changing data or an artefact, run `npm run images` (check:figures fails on stale images).
 - Next.js docs for the installed version live in `node_modules/next/dist/docs/`.

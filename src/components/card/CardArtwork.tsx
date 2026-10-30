@@ -26,7 +26,7 @@ export function CardArtwork({
   style?: CSSProperties;
   /** A rubber stamp across the map, e.g. "Fictional example" (visual; say it in text nearby too). */
   stamp?: string;
-  /** Optional overlay (e.g. the "Open expedition log" chip). */
+  /** Optional overlay (e.g. the "Open case study" chip). */
   children?: ReactNode;
 }) {
   const terrain = cardTerrain(artwork.terrainId);

@@ -24,6 +24,7 @@
     "check:legibility": "node scripts/check-legibility.mjs",
     "check:content": "node scripts/check-content.mjs",
     "check:figures": "node scripts/check-figures.mjs",
+    "check:wording": "node scripts/check-wording.mjs",
     "test:e2e": "node scripts/e2e.mjs",
     "test:hosting": "node scripts/e2e-hosting.mjs",
     "test": "node --test src/hosting/*.test.ts src/styles/*.test.ts src/lib/*.test.ts",

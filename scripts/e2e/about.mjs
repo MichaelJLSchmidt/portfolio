@@ -1,12 +1,12 @@
-// The Basecamp morph: the HUD's Basecamp label grows into the Basecamp H1 and shrinks back. In full
+// The About morph: the HUD's About label grows into the About H1 and shrinks back. In full
 // and calm every navigation to and from /about/ runs a View Transition with the shared group
 // (none aborted: a duplicate name would abort the capture), the H1 settles once it has landed, and
 // at rest at most one rendered element holds the name. In still no View Transition runs at all.
-// Which terrain /about/ shows is not asserted here. Run with: npm run test:e2e -- basecamp
+// Which terrain /about/ shows is not asserted here. Run with: npm run test:e2e -- about
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
-const NAME = "basecamp-title";
+const NAME = "about-title";
 
 // Records every transition that reaches the browser: how it ended and which groups it drew.
 const recordTransitions = () => {
@@ -36,10 +36,10 @@ const recordTransitions = () => {
   };
 };
 
-export async function basecamp({ base, basePath, root, check, open, settle }) {
+export async function about({ base, basePath, root, check, open, settle }) {
   const study = ["test-project", "seilschaft"].find((s) => existsSync(join(root, "out/work", s, "index.html")));
   for (const mode of ["full", "calm", "still"]) {
-    console.log(`\nbasecamp morph: ${mode}`);
+    console.log(`\nabout morph: ${mode}`);
     const { context, page, errors } = await open({ calm: mode === "calm", reduced: mode === "still", init: recordTransitions });
     const morphs = mode !== "still";
     const trace = () => page.evaluate(() => ({ list: window.__bc.slice(), native: window.__vt.native }));
@@ -74,8 +74,8 @@ export async function basecamp({ base, basePath, root, check, open, settle }) {
     };
 
     await page.goto(`${base}/`, { waitUntil: "networkidle" });
-    const there = await step("HUD Basecamp → Basecamp", () => hud().click(), "/about/");
-    check("the H1 reads Basecamp", there.h1 === "Basecamp", there.h1);
+    const there = await step("HUD About → About", () => hud().click(), "/about/");
+    check("the H1 reads About", there.h1 === "About", there.h1);
     if (morphs) {
       const arrived = await page.evaluate(() => document.querySelector("main h1")?.getAttribute("data-arrive"));
       check("the H1 settled after the morph landed", arrived === "done", `data-arrive=${arrived}`);
@@ -83,11 +83,11 @@ export async function basecamp({ base, basePath, root, check, open, settle }) {
     const current = await hud().getAttribute("aria-current");
     check("the HUD link shows the current page", current === "page", current);
     await step("browser back → home", () => page.goBack(), "/");
-    await step("HUD Basecamp again (page re-shown)", () => hud().click(), "/about/");
+    await step("HUD About again (page re-shown)", () => hud().click(), "/about/");
     await step("HUD mark → home", () => page.locator(`header a[href="${basePath}/"]`).first().click(), "/");
     if (study) {
       await page.goto(`${base}/work/${study}/`, { waitUntil: "networkidle" });
-      await step("case study → Basecamp", () => hud().click(), "/about/");
+      await step("case study → About", () => hud().click(), "/about/");
       await step("browser back → case study", () => page.goBack(), `/work/${study}/`);
     }
     const duplicate = errors.filter((e) => /duplicate|view-transition-name|InvalidStateError/i.test(e));

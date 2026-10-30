@@ -24,7 +24,7 @@
     padding-top: clamp(24px, 6vw, 96px);
   }
 
-  /* Basecamp's one display size: its widest word (--title-em, measured at the display axes) fills
+  /* About's one display size: its widest word (--title-em, measured at the display axes) fills
      96% of the name's column, up to 12rem, so it never runs into the lead beside it. */
   .nameCell {
     container-type: inline-size;

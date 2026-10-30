@@ -12,8 +12,8 @@ import { haptic } from "@/lib/haptics";
 import styles from "./CaseStudy.module.css";
 
 /**
- * The trailhead band at the end of a case study: "Next expedition" with the next card's name as a
- * display link, its mini card beside it, and the way back to every expedition below (its arrow
+ * The trailhead band at the end of a case study: "Next project" with the next card's name as a
+ * display link, its mini card beside it, and the way back to all projects below (its arrow
  * nudges back). Committing to the next case study (either link: the press state, the commit
  * haptic) morphs the mini card's artwork and name into that page's header and H1 (commit-morph.ts)
  * inside a view transition of the band's own (React animates no change between two case studies,

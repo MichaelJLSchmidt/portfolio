@@ -1,13 +1,8 @@
 @layer reset, tokens, base, layout, components, utilities;
 
-/* The HUD (Hud.tsx): a fixed bar of three slots, mark and navigation | readout | time and
-   switches, each its own grid column so they never run into each other.
-
-   Breakpoints (tokens): below 640 px the bar keeps the mark, Basecamp and Calm map; from 640 px
-   the readout (label and altitude) and the haptics switch join; from 1024 px the whole
-   navigation; from 1280 px the Bern time and the readout's coordinates (below, the footer holds
-   what the bar leaves out). Where vibration works the readout keeps its compact form, so the
-   haptics switch fits beside Calm map.
+/* The HUD (Hud.tsx): one fixed bar of two slots, the navigation (brand · Work · About) and the
+   switches, each its own grid column so they never run into each other. Everything stays inline
+   on phones; the haptics switch joins from 640 px (below, it is in the footer).
 
    Height 56 px. Once the page has scrolled (data-condensed, HudFrame.tsx) the backdrop
    strengthens, the bar's row moves up to sit in 44 px and the mono labels narrow from wdth 87.5
@@ -97,13 +92,6 @@
     gap: clamp(10px, 1.6vw, 16px);
   }
 
-  .middle {
-    grid-column: 2;
-    display: none;
-    justify-content: center;
-    min-width: 0;
-  }
-
   .links {
     margin: 0;
     padding: 0;
@@ -123,12 +111,12 @@
     }
 
     /* Every label's visible run follows --hud-wdth; its box stays reserved. */
-    :root:not([data-motion="still"]) .hud :is([data-st="run"], .timeRun, [data-run]) {
+    :root:not([data-motion="still"]) .hud :is([data-st="run"], [data-run]) {
       transition: font-stretch var(--dur-settle) var(--ease-settle);
     }
   }
 
-  .hud :is([data-st="run"], .timeRun, [data-run]) {
+  .hud :is([data-st="run"], [data-run]) {
     font-stretch: var(--hud-wdth);
   }
 
@@ -225,81 +213,14 @@
     --l-rest-wdth: var(--hud-wdth);
   }
 
-  /* The CV until its file exists: visible and inert (check:content lists it); sheet, so it reads at
-     7:1 or more over the bar's backdrop. */
-  .placeholder {
-    gap: 0.5em;
-    color: var(--color-sheet);
-  }
-
-  /* ---------------------------------------------------------------- readout and clock */
-
-  .readout {
-    color: var(--color-sheet);
-  }
-
-  .clock {
-    align-items: center;
-    gap: 8px;
-    color: var(--color-sheet);
-    white-space: nowrap;
-  }
-
-  .time {
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* "00:00" at the rest axes reserves the box; the digits roll over it. */
-  .timeBox {
-    display: inline-grid;
-  }
-
-  .timeBox > * {
-    grid-area: 1 / 1;
-  }
-
-  .timeGhost {
-    visibility: hidden;
-    font-stretch: var(--axis-mono-rest-wdth);
-  }
-
-  .timeRun {
-    display: inline-flex;
-    justify-self: start;
-  }
-
-  .hud .bar .clockLabel {
-    --kt-color: currentColor;
-    --kt-rest-wdth: var(--hud-wdth);
-    --kt-box-wdth: var(--axis-mono-rest-wdth);
-  }
-
   /* ---------------------------------------------------------------- breakpoints */
 
-  .bar .sm,
-  .bar .md,
-  .bar .lg {
+  .bar .sm {
     display: none;
   }
 
   @media (min-width: 640px) {
-    .middle {
-      display: flex;
-    }
-
     .bar .toggle.sm {
-      display: inline-flex;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .bar li.md {
-      display: list-item;
-    }
-  }
-
-  @media (min-width: 1280px) {
-    .bar .clock.lg {
       display: inline-flex;
     }
   }

@@ -50,7 +50,7 @@ export type CardStats = {
   impact?: { before: string; after: string; note?: string };
 };
 
-/** One line for an index of expeditions: "<name> — <kind> · <summary> · <time>". */
+/** One line for an index of projects: "<name> — <kind> · <summary> · <time>". */
 export type IndexLine = { kind: string; summary: string; time: string };
 
 export type SetSymbol = "peak" | "grid" | "lab";
@@ -86,9 +86,9 @@ export type SummitCardData = {
 };
 
 export const cardLabels = {
-  openLog: "Open expedition log",
+  openLog: "Open case study",
   /** The card link's accessible name. */
-  open: (name: string, type: string, rarity: string) => `Open expedition: ${name}, ${type}, rarity ${rarity}`,
+  open: (name: string, type: string, rarity: string) => `Open case study: ${name}, ${type}, rarity ${rarity}`,
   costPrefix: "Summit cost",
   /** The cost pips, read as the project's scope (the pips are drawn, not read). */
   scope: (n: number, of: number) => `Scope ${n} of ${of}`,
@@ -97,7 +97,7 @@ export const cardLabels = {
   /** Under the impact's after-value: where it started. */
   from: (before: string) => `from ${before}`,
   /** A card whose case study was visited: the stamp, and what screen readers hear. */
-  visitedStamp: "SUMMITED",
+  visitedStamp: "Visited",
   visited: "Visited",
   collector: "Collector line",
   rarity: (r: string) => `Rarity ${r}`,
@@ -106,8 +106,10 @@ export const cardLabels = {
 };
 
 export const caseStudyLabels = {
-  summaryHeading: "Summit summary",
-  mandate: "Mandate",
+  /** The page title's second part: "<name> — Case study · <name source>". */
+  caseStudy: "Case study",
+  summaryHeading: "Summary",
+  mandate: "The brief",
   role: "My role",
   teamLed: "Team I led",
   putInPlace: "What I put in place",
@@ -116,10 +118,10 @@ export const caseStudyLabels = {
   didNotDo: "What I did not do",
   jumpTo: "On this page",
   onThisPage: "On this page",
-  nextWaypoint: "Next waypoint",
+  nextWaypoint: "Next section",
   backToTop: "Back to top",
   readingTime: (minutes: number) => `${minutes} min read`,
-  skim: "60-second skim below",
+  skim: "60-second summary below",
   figure: (n: number) => `Fig. ${n}`,
   describe: "Describe this diagram",
   enlarge: "Enlarge",
@@ -153,10 +155,12 @@ export const caseStudyLabels = {
   },
   evidenceLegend: "Evidence",
   credits: "Credits",
-  next: "Next expedition",
-  back: "All expeditions",
-  backToAll: "All expeditions",
+  next: "Next project",
+  back: "All projects",
+  backToAll: "All projects",
   example: "Fictional example",
+  /** The phone's reading bar: "Section 2 of 6". */
+  section: (n: number, of: number) => `Section ${n} of ${of}`,
 };
 
 /** Real project cards. None is written yet: a live build's deck is empty and says so (Deck). */

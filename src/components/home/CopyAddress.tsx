@@ -12,8 +12,8 @@ import styles from "./Home.module.css";
 type Note = { text: string; ok: boolean } | null;
 
 /**
- * "Copy address" beside Email: copies the address, settles its label to "COPIED" and raises a
- * toast ("COPIED — see you at the trailhead.") with one glint and the success haptic. The toast
+ * "Copy address" beside Email: copies the address, settles its label to "Copied" and raises a
+ * toast ("Email address copied.") with one glint and the success haptic. The toast
  * is a status message (role="status", in place before it speaks), stays --dur-toast (4 s) and
  * pauses while it is hovered or holds focus; its dismiss button closes it. If the clipboard is
  * unavailable it says so and shows the address instead.

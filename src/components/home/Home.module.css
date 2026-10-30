@@ -1,6 +1,6 @@
 @layer reset, tokens, base, layout, components, utilities;
 
-/* Home sections (and the contact band Basecamp shares). Colours, type and motion come from the
+/* Home sections (and the contact section About shares). Colours, type and motion come from the
    tokens; running text keeps its knockout (.body-copy) or sits on a legend panel (.legend). */
 
 @layer components {

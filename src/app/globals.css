@@ -360,7 +360,7 @@
                fades in over the same, a plus-lighter crossfade, so the shared map and HUD keep
                constant brightness and the new text never waits;
      - travel: the shared artwork and title (card → header and H1, mini card → next header, HUD
-               label → Basecamp H1) travel on the share spring (420 ms, --spring-share-*);
+               label → About H1) travel on the share spring (420 ms, --spring-share-*);
      - then:   the new page's parts follow from the commit (data-arrive-at, SettleText `arrive`) and
                the H1 settles once the morph has landed, its glint after it;
      - field:  the background terrain morphs over --dur-terrain (700 ms) from the same commit.

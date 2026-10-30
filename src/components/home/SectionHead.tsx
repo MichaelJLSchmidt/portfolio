@@ -19,7 +19,7 @@ export function SectionHead({
 }: {
   /** The heading's id, for the section's aria-labelledby. */
   id: string;
-  eyebrow: string;
+  eyebrow?: string;
   heading: string;
   trigger?: "paint" | "inview";
   align?: "start" | "center";
@@ -29,7 +29,7 @@ export function SectionHead({
 }) {
   return (
     <div className={styles.head} data-align={align} data-quiet-zone>
-      <SettleText as="p" text={eyebrow} mode="chars" role="mono" trigger={trigger} className={`${styles.eyebrow} hud-label map-halo knockout`} />
+      {eyebrow && <SettleText as="p" text={eyebrow} mode="chars" role="mono" trigger={trigger} className={`${styles.eyebrow} hud-label map-halo knockout`} />}
       <RuledHeading id={id} text={heading} trigger={trigger} glint={glint} className={`${styles.heading} display`} ruleClassName={styles.headRule} />
       {children}
     </div>

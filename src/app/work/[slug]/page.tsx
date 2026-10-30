@@ -18,7 +18,6 @@ import { MorphTarget } from "@/components/transition/MorphTarget";
 import { RememberCard } from "@/components/transition/RememberCard";
 import { caseStudies } from "@/content/case-studies";
 import { caseStudyLabels as L, cardBySlug, cards, coordinatesLine } from "@/content/cards";
-import { site } from "@/content/site";
 import { readingMinutes, type CaseStudy as Study, type Evidence } from "@/lib/case-study";
 import { morphName } from "@/lib/morph";
 import { widestEm } from "@/lib/display-width";
@@ -58,7 +57,7 @@ export async function generateMetadata({ params }: PageProps<"/work/[slug]">): P
   const { card, study } = found;
   const name = study.example ? `${card.name} (${L.example.toLowerCase()})` : card.name;
   return {
-    title: `${name} — Expedition log · ${site.hero.name}`,
+    title: `${name} — ${L.caseStudy}`,
     description: study.metaDescription ?? study.lede,
     // Fictional examples are never indexed, in any build.
     robots: study.example ? { index: false, follow: false } : undefined,
@@ -115,7 +114,6 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
               className={`${styles.title} display`}
               style={{ "--title-em": TITLE_EM, "--word-em": widestEm(card.name) } as CSSProperties}
               widths="display"
-              shine
               glint
               settleOnArrival
             />

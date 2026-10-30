@@ -5,19 +5,18 @@
 //
 // Covered: morphs to a card terrain and to Bern (data-terrain, and the conductor's timing from the
 // hook: each tween starts at the route commit and runs its token's duration, ±50 ms); back and
-// forward; the interval reaching 10 m on Bern and the Aare on screen after its draw; the readout;
+// forward; the interval reaching 10 m on Bern and the Aare on screen after its draw; the field
+// holding still while a page is read (no idle frames, none for a moving pointer);
 // pre-warm; calm (no draw-on), still (posters, no WebGL context); context loss (poster, restore,
 // then tier C); tier B (no idle frames under touch emulation); the field pausing behind a dialog;
 // no console errors. SwiftShader's frame times say nothing about real devices: the timing checks
 // bracket each tween's end between two frames and report the gap.
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 
 const TOLERANCE_MS = 50;
 
 export function terrainScenarios({ browser, base, root, check, settle }) {
-  const bern = JSON.parse(readFileSync(join(root, "public/terrain/bern/summary.json"), "utf8"));
-  const bernReadout = `BERN · E 2’600’000 · N 1’200’000 · ALT ${bern.zeroPoint.altitudeM} M`;
 
   /** A page with the intro played; console errors and page errors are collected. */
   async function open({ viewport = { width: 960, height: 600 }, calm = false, reduced = false, mobile = false, init } = {}) {
@@ -28,7 +27,7 @@ export function terrainScenarios({ browser, base, root, check, settle }) {
     });
     await context.addInitScript((calm) => {
       try {
-        sessionStorage.setItem("summit:intro-played", "1");
+        
         sessionStorage.setItem("summit:deck-dealt", "1");
         if (calm) localStorage.setItem("summit:calm-map", "1");
       } catch {}
@@ -188,46 +187,25 @@ export function terrainScenarios({ browser, base, root, check, settle }) {
     await context.close();
   }
 
-  async function readout() {
-    if (!existsSync(join(root, "out/lab/terrain/index.html"))) {
-      console.log("\nterrain: readout skipped (no lab in this build; build with SITE_MODE=basecamp)");
-      return;
-    }
-    console.log("\nterrain: the readout (lab page)");
-    const html = readFileSync(join(root, "out/lab/terrain/index.html"), "utf8");
-    check("server-rendered readout of the home region", html.includes("JUNGFRAU · ALT 4’158 M"), "");
-    check("lab page is noindex", /<meta name="robots" content="noindex, nofollow"/.test(html), "");
-    for (const mode of ["full", "still"]) {
-      const { context, page, errors } = await open({ reduced: mode === "still" });
-      await page.goto(`${base}/lab/terrain/?field=force`, { waitUntil: "load" });
-      await page.waitForSelector("html[data-lab-ready]", { state: "attached", timeout: 30000 });
-      const text = () => page.locator("main [data-terrain-readout] .visually-hidden").textContent();
-      check(`${mode}: home readout`, (await text()) === "JUNGFRAU · ALT 4’158 M", await text());
-      await page.locator('button[data-morph="bern"]').click();
-      await page.waitForTimeout(900);
-      check(`${mode}: Bern readout`, (await text()) === bernReadout, await text());
-      // What is shown: the static parts, and each rolling group's own value (AnimateNumber keeps a
-      // visually hidden copy of it as its first child; its digit columns hold every digit).
-      const shown = await page.evaluate(() => {
-        const root = document.querySelector("main [data-terrain-readout] [data-run]").cloneNode(true);
-        const rolls = root.querySelectorAll("[data-part] > span > *");
-        const alt = root.querySelectorAll('[data-part="alt"] > span > *').length;
-        for (const n of rolls) n.replaceWith(n.firstElementChild?.textContent ?? n.textContent);
-        return { text: root.textContent.replace(/\s+/g, " ").trim(), rolls: rolls.length, alt };
-      });
-      check(`${mode}: the shown digits match the text`, shown.text === bernReadout, shown.text);
-      if (mode === "still") check("still: numbers snap (no rolling digits)", shown.rolls === 0, `${shown.rolls} rolling groups`);
-      // The altitude changed, so it rolls (AnimateNumber); the coordinates appear with Bern, at their value.
-      else check("full: a changed number rolls (the altitude, AnimateNumber)", shown.alt === 1, `${shown.alt} rolling altitude groups, ${shown.rolls} in all`);
-      const card = await page.locator('button[data-morph]:not([data-morph="bern"]):not([data-morph="region"])').first();
-      if (await card.count()) {
-        await card.click();
-        await page.waitForTimeout(900);
-        check(`${mode}: a card's readout`, /ALT \d/.test(await text()), await text());
-      }
-      check(`${mode}: no console errors`, errors.length === 0, errors.join(" | "));
-      await context.close();
-    }
+  /** The field holds still while a page is read: no frames when idle, none for a moving pointer. */
+  async function stillness() {
+    console.log("\nterrain: the field holds still while reading");
+    const { context, page, errors } = await open();
+    await page.goto(`${base}/?field=force`, { waitUntil: "networkidle" });
+    await fieldOn(page);
+    await landed(page, "region");
+    await page.waitForTimeout(800);
+    const frames = () => page.evaluate(() => window.__terrain.frames);
+    let before = await frames();
+    await page.waitForTimeout(1500);
+    check("idle: no frames while the page is read", (await frames()) === before, `${(await frames()) - before} frames in 1.5 s`);
+    before = await frames();
+    await page.mouse.move(200, 200);
+    await page.mouse.move(900, 500, { steps: 20 });
+    await page.waitForTimeout(400);
+    check("a moving pointer draws no frames (nothing follows the cursor)", (await frames()) === before, `${(await frames()) - before} frames`);
+    check("no console errors", errors.length === 0, errors.join(" | "));
+    await context.close();
   }
 
   async function modes() {
@@ -363,7 +341,7 @@ export function terrainScenarios({ browser, base, root, check, settle }) {
   return {
     terrain: async () => {
       await conductor();
-      await readout();
+      await stillness();
       await modes();
       await robustness();
     },

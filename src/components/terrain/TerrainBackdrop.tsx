@@ -5,11 +5,9 @@ import { usePathname } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState, type ComponentType } from "react";
 import meta from "@terrain/terrain.json";
 import bern from "@terrain/bern/posters.json";
-import { site } from "@/content/site";
 import { asset } from "@/lib/asset";
-import { haptic } from "@/lib/haptics";
 import { whenIdle } from "@/lib/idle";
-import { cancelPendingIntro, useMotionMode } from "@/lib/motion-mode";
+import { useMotionMode } from "@/lib/motion-mode";
 import { fieldConfig, posterMedia, type DeviceProfile } from "./field-settings";
 import { fieldStore, useFieldStore } from "./field-store";
 import { BERN, routeTerrain } from "./route-terrain";
@@ -53,7 +51,6 @@ export function TerrainBackdrop() {
   const pathname = usePathname();
   const routeId = routeTerrain(pathname);
   const mode = useFieldStore((s) => s.mode);
-  const introPlaying = useFieldStore((s) => s.introPlaying);
   const shownTerrain = useFieldStore((s) => s.shownTerrain);
   const tier = useFieldStore((s) => s.tier);
   const [field, setField] = useState<{ Component: FieldComponent; profile: DeviceProfile } | null>(null);
@@ -72,21 +69,12 @@ export function TerrainBackdrop() {
   }, [pathname, routeId]);
 
   useEffect(() => {
-    // The hook reports still during hydration (server snapshot), so read the resolved attribute
-    // before cancelling the intro; otherwise every first visit would lose it. The intro sweep
-    // plays in full motion only.
-    if (document.documentElement.getAttribute("data-motion") !== "full") cancelPendingIntro();
     let cancelled = false;
     // Still mode is tier C on any device: posters, no WebGL at all (the canvas is not rendered;
-    // the field mounts again after). The boot module still keeps the store's readout in step.
+    // the field mounts again after).
     if (still) {
       fieldStore.set({ mode: "poster", tier: "low" });
-      whenIdle(() => {
-        if (!cancelled) import("./field-boot");
-      });
-      return () => {
-        cancelled = true;
-      };
+      return;
     }
     if (field) {
       fieldStore.set({ tier: field.profile.tier });
@@ -95,18 +83,12 @@ export function TerrainBackdrop() {
     whenIdle(() => {
       if (cancelled) return;
       // The motion lab's frames never show the field: they load nothing for it.
-      if (labFrame()) {
-        cancelPendingIntro();
-        return;
-      }
+      if (labFrame()) return;
       import("./field-boot").then((boot) => {
         if (cancelled) return;
         const resolved = boot.resolveTier();
         fieldStore.set({ tier: resolved });
-        if (resolved === "low") {
-          cancelPendingIntro();
-          return;
-        }
+        if (resolved === "low") return;
         const profile = boot.profileFor(resolved);
         import("./ContourField").then((m) => {
           if (!cancelled) setField({ Component: m.default, profile });
@@ -183,18 +165,6 @@ export function TerrainBackdrop() {
         <div className={styles.scrim} />
         <div className={styles.vignette} />
       </div>
-      {introPlaying && showField && (
-        <button
-          type="button"
-          className={`${styles.skip} hud-label`}
-          onClick={() => {
-            haptic("press");
-            fieldStore.set((s) => ({ skipIntro: s.skipIntro + 1 }));
-          }}
-        >
-          {site.hud.skipIntro}
-        </button>
-      )}
       <DevTuning />
     </>
   );

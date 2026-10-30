@@ -577,7 +577,7 @@
     cursor: pointer;
   }
 
-  /* "Open expedition log" chip: on hover/focus with a mouse, always on touch. */
+  /* "Open case study" chip: on hover/focus with a mouse, always on touch. */
   .openChip {
     position: absolute;
     right: 2cqi;

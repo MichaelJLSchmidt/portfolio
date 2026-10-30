@@ -12,10 +12,10 @@
 //                                     that includes examples: SITE_MODE=basecamp or a preview)
 //   npm run test:e2e -- terrain       the terrain conductor, Bern, the readout, tiers and context
 //                                     loss (scripts/e2e-terrain.mjs; needs NEXT_PUBLIC_PREVIEW=1)
-//   npm run test:e2e -- deck          deck order, card link names and the Next expedition loop
+//   npm run test:e2e -- deck          deck order, card link names and the Next project loop
 //                                     (scripts/e2e/deck.mjs; needs the examples)
-//   npm run test:e2e -- basecamp      the HUD label ↔ Basecamp H1 morph in full, calm and still
-//                                     (scripts/e2e/basecamp.mjs)
+//   npm run test:e2e -- about         the HUD label ↔ About H1 morph in full, calm and still
+//                                     (scripts/e2e/about.mjs)
 //   npm run test:e2e -- ia            page structure, HUD order, example content (scripts/e2e/layout.mjs)
 //   npm run test:e2e -- phone         every route at 360 and 390 px: no overflow, HUD and footer
 //                                     (scripts/e2e/layout.mjs)
@@ -25,13 +25,14 @@
 //   npm run test:e2e -- toast         Copy address and its toast in full and still (scripts/e2e/chrome.mjs)
 //   npm run test:e2e -- cards         the deck's grid, phone list, arrival, hover, focus, press, marks,
 //                                     stats and the visited stamp (scripts/e2e/cards.mjs)
-//   npm run test:e2e -- views         Cards · Index in full, calm and still (scripts/e2e/cards.mjs)
 //   npm run test:e2e -- arrival       route arrivals: timing, focus on the H1, the trailhead morph,
 //                                     traversals, Basecamp, still (scripts/e2e/choreography.mjs)
 //   npm run test:e2e -- reading       the HUD waypoint readout, the trail, the altimeter bar, the
 //                                     career climb per mode, no endless loops (choreography.mjs)
 //   npm run test:e2e -- access        forced colours, headings read once, the haptics map
 //                                     (scripts/e2e/choreography.mjs)
+//   npm run test:e2e -- wording       no old names, CV or job-seeking phrases in the built HTML
+//                                     (scripts/check-wording.mjs)
 //   npm run test:e2e -- smoke         a smoke subset in Chromium, WebKit and Firefox (each where
 //                                     Playwright has it installed; scripts/e2e/smoke.mjs)
 //
@@ -45,14 +46,15 @@ import { createRequire } from "node:module";
 import { createServer } from "node:net";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { basecamp } from "./e2e/basecamp.mjs";
+import { about } from "./e2e/about.mjs";
 import { deck } from "./e2e/deck.mjs";
 import { ia, phone, routes as builtRoutes } from "./e2e/layout.mjs";
 import { fontswap } from "./e2e/typography.mjs";
 import { hud, toast } from "./e2e/chrome.mjs";
-import { cards, views } from "./e2e/cards.mjs";
+import { cards } from "./e2e/cards.mjs";
 import { access, arrival, reading } from "./e2e/choreography.mjs";
 import { smoke } from "./e2e/smoke.mjs";
+import { wordingHits } from "./check-wording.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const only = process.argv[2];
@@ -101,7 +103,7 @@ async function open({ calm = false, reduced = false, classic = false, init } = {
   await context.addInitScript(
     ({ calm, classic }) => {
       try {
-        sessionStorage.setItem("summit:intro-played", "1");
+        
         if (calm) localStorage.setItem("summit:calm-map", "1");
         if (classic) sessionStorage.setItem("summit:vt", "classic");
       } catch {}
@@ -491,13 +493,13 @@ async function casestudy() {
     const info = await page.evaluate((trail) => ({
       trail: !!document.querySelector(trail)?.getClientRects().length,
       jump: !!document.querySelector("#jump-heading")?.getClientRects().length,
-      next: [...document.querySelectorAll("section[data-waypoint] a")].filter((a) => /^Next waypoint/.test(a.textContent) && a.getClientRects().length).length,
+      next: [...document.querySelectorAll("section[data-waypoint] a")].filter((a) => /^Next section/.test(a.textContent) && a.getClientRects().length).length,
       top: [...document.querySelectorAll('section[data-waypoint] a[href="#main"]')].filter((a) => a.getClientRects().length).length,
       width: document.documentElement.scrollWidth,
       markers: [...document.querySelectorAll("button[data-hotspot]")].map((b) => b.getBoundingClientRect()).map((r) => Math.min(r.width, r.height)),
     }), trail);
     check("trail hidden, “On this page” chips shown", !info.trail && info.jump);
-    check("each waypoint ends with “Next waypoint” (5) and “Back to top” (6)", info.next === 5 && info.top === 6, `${info.next} next, ${info.top} back`);
+    check("each section ends with “Next section” (5) and “Back to top” (6)", info.next === 5 && info.top === 6, `${info.next} next, ${info.top} back`);
     check("no sideways scrolling", info.width <= 390, `${info.width}px`);
     check("hotspot markers at least 24×24 px", info.markers.length === 5 && info.markers.every((m) => m >= 24), info.markers.join(", "));
     // The lightbox on touch: two fingers pinch, one finger pans.
@@ -814,7 +816,7 @@ async function hydration() {
       });
       await load(page, `${base}${route}`);
       await page.waitForTimeout(600);
-      const attrs = await page.evaluate(() => ["data-motion", "data-tier", "data-calm", "data-intro"].map((a) => `${a}=${document.documentElement.getAttribute(a)}`));
+      const attrs = await page.evaluate(() => ["data-motion", "data-tier", "data-calm"].map((a) => `${a}=${document.documentElement.getAttribute(a)}`));
       check(`${route}: no hydration or console errors`, problems.length === 0, problems.join(" | "));
       check(`${route}: motion attributes kept`, !attrs.some((a) => a.endsWith("=null")), attrs.join(" "));
       await context.close();
@@ -927,10 +929,20 @@ async function primitives() {
   }
 }
 
-const scenarios = { transitions, modes, hydration, primitives, decode, casestudy };
+/** Plain wording in every built page (scripts/check-wording.mjs). */
+async function wording() {
+  console.log("\nwording: the built HTML");
+  const hits = wordingHits(join(root, "out"));
+  for (const word of ["Höhenlinie", "Expedition", "Basecamp", "CV", ".pdf", "open to", "available for", "looking for"]) {
+    const found = hits.filter((h) => h.word.toLowerCase().startsWith(word.toLowerCase().replace(/^\./, ".")));
+    check(`no “${word}” in any page`, found.length === 0, found.slice(0, 3).map((h) => `${h.file}: ${h.context}`).join(" | "));
+  }
+}
+
+const scenarios = { transitions, modes, hydration, primitives, decode, casestudy, wording };
 // The terrain conductor and the Bern terrain (scripts/e2e-terrain.mjs).
 Object.assign(scenarios, (await import("./e2e-terrain.mjs")).terrainScenarios({ browser, base, root, check, settle }));
-Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, basecamp, ia, phone, fontswap, hud, toast, cards, views, arrival, reading, access, smoke }).map(([name, run]) => [name, () => run({ browser, playwright, base, basePath, root, check, open, settle })])));
+Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, about, ia, phone, fontswap, hud, toast, cards, arrival, reading, access, smoke }).map(([name, run]) => [name, () => run({ browser, playwright, base, basePath, root, check, open, settle })])));
 try {
   for (const [name, run] of Object.entries(scenarios)) if (!only || only === name) await run();
 } finally {

@@ -10,10 +10,10 @@ import styles from "./Hud.module.css";
 const RINGS = [2.75, 5.25, 7.75];
 
 /**
- * The HUD's mark: a set symbol of three contour rings and the wordmark, linking home. Hovering or
- * focusing it moves the rings one step outward (a response); after a route change they trace
- * themselves again over --dur-trace (400 ms). The wordmark settles in mono on first load. The
- * link's name is "Höhenlinie, home".
+ * The HUD's brand link: a set symbol of three contour rings and the brand, linking home. Hovering
+ * or focusing it moves the rings one step outward (a response); after a route change they trace
+ * themselves again over --dur-trace (400 ms). Its name is "<brand>, home" (site.nav.home), which
+ * starts with the visible brand.
  */
 export function HudMark({ label, name }: { label: string; name: string }) {
   const pathname = usePathname();

@@ -189,41 +189,6 @@
     text-wrap: balance;
   }
 
-  /* ---------------------------------------------------------------- pull quote */
-
-  /* The quote's rule is drawn (::before) as the quote comes into view, then the quote fades in. */
-  .quote {
-    position: relative;
-    display: grid;
-    gap: 10px;
-    padding-left: 22px;
-  }
-
-  .quote::before {
-    content: "";
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 3px;
-    background: var(--color-glacier);
-    transform-origin: top center;
-  }
-
-  .quote p {
-    font-size: clamp(1.25rem, 1rem + 0.9vw, 1.6rem);
-    line-height: 1.35;
-  }
-
-  .quote p::before {
-    content: "“";
-  }
-
-  .quote p::after {
-    content: "”";
-  }
-
-  .quote figcaption {
-    color: var(--color-glacier);
-  }
 
   /* ------------------------------------------------------------------ decisions */
 
@@ -559,8 +524,8 @@
     text-transform: uppercase;
   }
 
-  /* The trailhead band (TrailheadBand.tsx): "Next expedition" and the next card's name beside its
-     mini card (stacked on phones), the way back to every expedition below. */
+  /* The trailhead band (TrailheadBand.tsx): "Next project" and the next card's name beside its
+     mini card (stacked on phones), the way back to all projects below. */
   .trailhead {
     display: grid;
     justify-items: start;

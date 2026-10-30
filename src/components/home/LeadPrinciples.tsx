@@ -5,17 +5,17 @@ import { SectionHead } from "./SectionHead";
 import styles from "./Home.module.css";
 
 /**
- * "How I lead": four rules, each with the evidence that it is practised, on legend panels. As the
- * rules come into view their titles settle as a group (one after another, the item stagger), and
- * each evidence line fades in --dur-tap after its title; the text never moves.
+ * "How I lead": four principles, each with the evidence that it is practised, on legend panels.
+ * As the principles come into view their titles settle as a group (one after another, the item
+ * stagger), and each evidence line fades in --dur-tap after its title; the text never moves.
  */
-export function TrailRules() {
-  const t = home.trailRules;
+export function LeadPrinciples() {
+  const t = home.lead;
   return (
-    <section className={styles.section} aria-labelledby="trail-rules-heading">
-      <SectionHead id="trail-rules-heading" eyebrow={t.eyebrow} heading={t.heading} />
+    <section className={styles.section} aria-labelledby="lead-heading">
+      <SectionHead id="lead-heading" heading={t.heading} />
       <ol className={styles.rules}>
-        {t.rules.map((r, i) => (
+        {t.principles.map((r, i) => (
           <li key={r.title} className={`${styles.rule} legend`}>
             <span className={`${styles.ruleNo} hud-label`} aria-hidden="true">
               {String(i + 1).padStart(2, "0")}

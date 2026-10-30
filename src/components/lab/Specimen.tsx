@@ -115,11 +115,6 @@ export function Specimen() {
         </div>
       </section>
 
-      <section className={styles.section} data-primitive="shine">
-        <h2 className="hud-label">{S.shine.title}</h2>
-        <p className={styles.note}>{S.shine.note}</p>
-        <SettleText as="p" id="lab-shine" text={S.shine.text} className={`${styles.big} display`} trigger="manual" shine />
-      </section>
 
       <section className={styles.section} data-primitive="link">
         <h2 className="hud-label">{S.link.title}</h2>

@@ -1,4 +1,4 @@
-# Höhenlinie — The Summit Deck
+# Portfolio — The Summit Deck
 
 Portfolio of a UX Team Lead / Senior UX Designer from Interlaken. Art direction: a night hike across a
 topographic contour map. Projects are presented as original "Summit Cards".
@@ -31,12 +31,12 @@ and a single mint glint marks a first arrival or a committed action. A gentle sh
 no glow) follows a fine pointer, lit by the same headlamp as the field. Three motion modes (full, calm, still)
 and every primitive are shown side by side in the motion lab (`/lab/`, preview builds only).
 
-The pages put leadership proof before the work, for hiring managers who skim. Home: the hero, the Summit log
-(what changed), the Trail rules (how I lead), the Expeditions (the deck), Field notes, Workshops and Contact.
-Basecamp (`/about/`) is reached from the HUD, whose Basecamp label morphs into the page's H1: the map legend,
-the bio, how I work with a team, the first 90 days, the career climb drawn on the real ascent from Interlaken to
-the Jungfrau, and contact. The HUD is the main navigation (mark · Expeditions · Basecamp · Contact · CV · Bern
-time · Calm map); below 880 px it keeps the mark, Basecamp and the switch, and the footer holds the rest.
+The pages put leadership before the work, for hiring managers who skim, in plain words: the visuals
+play, the wording never does. Home: the name and its tags, a short intro, How I lead, Selected work
+(the Summit Cards, `/#work`), Earlier work and Get in touch. About (`/about/`) is reached from the
+HUD, whose About label morphs into the page's H1. The HUD is the only navigation: the brand (home) ·
+Work · About · the Calm map switch (and the haptics switch where vibration works), inline on every
+screen size. The display name and the brand are one setting each in `src/content/site.ts`.
 
 ## Stack
 

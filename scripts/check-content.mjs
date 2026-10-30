@@ -173,7 +173,7 @@ if (!total) {
 }
 const counts = [list.length && `${list.length} placeholder(s)`, exampleList.length && `${exampleList.length} example value(s)`].filter(Boolean).join(" and ");
 if (build && (mode === "basecamp" || preview)) {
-  console.warn(`Content: ${counts} remain (shown in this ${mode === "basecamp" ? "Basecamp" : "preview"} build). npm run check:content lists them.`);
+  console.warn(`Content: ${counts} remain (shown in this ${mode === "basecamp" ? "gated preview" : "preview"} build). npm run check:content lists them.`);
   process.exit(0);
 }
 const short = (v, n = 34) => (v.length > n ? `${v.slice(0, n - 1)}…` : v);

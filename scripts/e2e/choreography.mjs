@@ -2,10 +2,9 @@
 //   arrival   deck → case study: focus on the H1, the arrival's parts timed from the commit
 //             (type and meta lines at 260 ms, the summary from 380 ms), the H1's commit glint;
 //             the trailhead band's mini card morphing into the next case study; browser back as a
-//             180 ms traversal; Basecamp from the HUD (H1 focused, lead and legend from 420 ms);
+//             180 ms traversal; About from the HUD (H1 focused, lead and facts from 420 ms);
 //             still mode: no view transition, focus still on the H1.
-//   reading   the case study while it is read: the HUD's "WAYPOINT n / N" readout, the trail's
-//             scroll-linked fill and current waypoint, the altimeter bar on a phone (shown from
+//   reading   the case study while it is read: the trail's scroll-linked fill and current waypoint, the altimeter bar on a phone (shown from
 //             the first waypoint, its sheet: focus inside, Esc, focus back, a jump focuses the
 //             waypoint's heading); the career climb in full, calm and still; no endless loop on
 //             the home page but the field's.
@@ -23,7 +22,7 @@ async function newPage(browser, { viewport = { width: 1440, height: 900 }, mobil
   await context.addInitScript(
     ({ calm }) => {
       try {
-        sessionStorage.setItem("summit:intro-played", "1");
+        
         sessionStorage.setItem("summit:deck-dealt", "1");
         if (calm) localStorage.setItem("summit:calm-map", "1");
       } catch {}
@@ -120,12 +119,12 @@ export async function arrival({ browser, basePath, base, root, check }) {
     check("focus on the new page's H1", f.tag === "h1" && f.tabindex === "-1", JSON.stringify(f));
 
     // Case study → next: the trailhead band's mini card morphs into the next header.
-    await page.locator('nav[aria-label="Next expedition"]').scrollIntoViewIfNeeded();
+    await page.locator('nav[aria-label="Next project"]').scrollIntoViewIfNeeded();
     await page.waitForTimeout(1500);
-    const next = await page.locator('nav[aria-label="Next expedition"] > div > a').getAttribute("href");
+    const next = await page.locator('nav[aria-label="Next project"] > div > a').getAttribute("href");
     const slug = next.split("/").filter(Boolean).at(-1);
     await page.evaluate(() => (window.__glints = []));
-    await page.locator('nav[aria-label="Next expedition"] > div > a').click();
+    await page.locator('nav[aria-label="Next project"] > div > a').click();
     await landed(page, basePath, `/work/${slug}/`);
     await page.waitForTimeout(1500);
     const n = await page.evaluate(() => ({ vt: window.__vt.at(-1), glints: window.__glints, n: window.__vt.length }));
@@ -148,7 +147,7 @@ export async function arrival({ browser, basePath, base, root, check }) {
     await context.close();
   }
 
-  // Basecamp from the HUD: the label morphs into the H1, which takes focus.
+  // About from the HUD: the label morphs into the H1, which takes focus.
   {
     const { context, page, errors } = await newPage(browser);
     await page.goto(`${base}/work/seilschaft/`, { waitUntil: "load" });
@@ -165,10 +164,10 @@ export async function arrival({ browser, basePath, base, root, check }) {
     await page.locator(`header a[href="${basePath}/about/"]`).first().click();
     await landed(page, basePath, "/about/");
     const r = await page.evaluate(() => ({ vt: window.__vt.at(-1), arrival: window.__arrival }));
-    check("Basecamp: the HUD label morphs into the H1", r.vt?.groups.includes("basecamp-title"), JSON.stringify(r.vt?.groups));
-    check("Basecamp: lead and legend from 420 ms", r.arrival?.includes(420), JSON.stringify(r.arrival));
+    check("About: the HUD label morphs into the H1", r.vt?.groups.includes("about-title"), JSON.stringify(r.vt?.groups));
+    check("About: lead and facts from 420 ms", r.arrival?.includes(420), JSON.stringify(r.arrival));
     const f = await focusInfo(page);
-    check("Basecamp: focus on the H1 (not lost with the HUD link)", f.tag === "h1", JSON.stringify(f));
+    check("About: focus on the H1 (not lost with the HUD link)", f.tag === "h1", JSON.stringify(f));
     check("no page errors", errors.length === 0, errors.join("; "));
     await context.close();
   }
@@ -191,7 +190,7 @@ export async function reading({ browser, base, root, check }) {
   console.log("\nreading: the case study as it is read, the career climb, loops");
   if (!hasExamples(root)) return console.log("  skipped: build with SITE_MODE=basecamp");
 
-  // Desktop: the HUD readout and the trail.
+  // Desktop: the trail.
   {
     const { context, page, errors } = await newPage(browser);
     await page.goto(`${base}/work/gratweg/`, { waitUntil: "load" });
@@ -200,22 +199,14 @@ export async function reading({ browser, base, root, check }) {
       await page.evaluate((i) => document.querySelectorAll("section[data-waypoint]")[i].scrollIntoView({ block: "start" }), i);
       await page.waitForTimeout(700);
       return page.evaluate(() => ({
-        readout: document.querySelector("header [data-terrain-readout] .visually-hidden")?.textContent ?? "",
         current: document.querySelector('nav a[aria-current="true"]')?.getAttribute("href"),
         reading: Number(getComputedStyle(document.querySelector("nav ol[style]")).getPropertyValue("--reading")),
       }));
     };
     const one = await at(0);
     const three = await at(2);
-    check("HUD readout: WAYPOINT 1 / N and an altitude", /^WAYPOINT 1 \/ \d · ALT [\d’]+ M$/.test(one.readout), one.readout);
-    const alt = (s) => Number(s.match(/ALT ([\d’]+)/)?.[1].replace(/’/g, ""));
-    check("the altitude climbs with the waypoints", /^WAYPOINT 3 \//.test(three.readout) && alt(three.readout) > alt(one.readout), `${one.readout} → ${three.readout}`);
     check("the trail marks the current waypoint", one.current?.startsWith("#") && three.current !== one.current, `${one.current} → ${three.current}`);
     check("the trail fills with the scroll", three.reading > one.reading && three.reading > 0, `${one.reading} → ${three.reading}`);
-    await page.evaluate(() => window.scrollTo(0, 0));
-    await page.waitForTimeout(500);
-    const top = await page.evaluate(() => document.querySelector("header [data-terrain-readout] .visually-hidden")?.textContent ?? "");
-    check("above the waypoints the readout is the terrain's again", !/^WAYPOINT/.test(top), top);
     check("no page errors", errors.length === 0, errors.join("; "));
     await context.close();
   }
@@ -330,9 +321,6 @@ export async function access({ browser, base, root, check }) {
       });
       check(`${path}: every heading's name read once`, headings.length > 0 && doubled.length === 0, doubled.slice(0, 3).join(" | ") || `${headings.length} headings`);
     }
-    // The readout is plain text, the toast a status.
-    const readout = await page.evaluate(() => document.querySelector("[data-terrain-readout] .visually-hidden")?.textContent ?? "");
-    check("the readout reads as plain text", /^[A-Z].* · ALT [\d’]+ M$|^WAYPOINT \d/.test(readout), readout);
     await context.close();
   }
 
@@ -343,7 +331,7 @@ export async function access({ browser, base, root, check }) {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, userAgent });
     await context.addInitScript(() => {
       try {
-        sessionStorage.setItem("summit:intro-played", "1");
+        
         sessionStorage.setItem("summit:deck-dealt", "1");
       } catch {}
       window.__buzz = [];
@@ -356,16 +344,18 @@ export async function access({ browser, base, root, check }) {
     await page.mouse.wheel(0, 600);
     await page.waitForTimeout(600);
     check("haptics: nothing on scroll or reveals", (await buzz()).length === 0);
-    const idx = page.getByRole("button", { name: "Index", exact: true });
-    await idx.scrollIntoViewIfNeeded();
+    const copy = page.locator("#contact button", { hasText: "Copy address" });
+    await copy.scrollIntoViewIfNeeded();
     await page.waitForTimeout(400);
     await buzz();
-    await idx.tap();
-    await page.waitForTimeout(300);
-    check("haptics: a button ticks 6 ms", (await buzz()).includes("6"));
-    await page.getByRole("button", { name: "Cards", exact: true }).tap();
-    await page.waitForTimeout(600);
+    // Calm map on (calm has no haptics by default), then off again: that press ticks.
+    await page.locator("label:has(input[role=switch])").first().tap();
+    await page.waitForTimeout(400);
     await buzz();
+    await page.locator("label:has(input[role=switch])").first().tap();
+    await page.waitForTimeout(300);
+    check("haptics: a switch ticks 6 ms", (await buzz()).includes("6"));
+    await page.waitForTimeout(300);
     const card = page.locator("article[data-slug] a").first();
     await card.scrollIntoViewIfNeeded();
     await page.waitForTimeout(400);
@@ -373,12 +363,12 @@ export async function access({ browser, base, root, check }) {
     await card.tap();
     await page.waitForTimeout(1500);
     check("haptics: opening a card ticks 8 ms", (await buzz()).includes("8"));
-    await page.locator('nav[aria-label="Next expedition"]').scrollIntoViewIfNeeded();
+    await page.locator('nav[aria-label="Next project"]').scrollIntoViewIfNeeded();
     await page.waitForTimeout(800);
     await buzz();
-    await page.locator('nav[aria-label="Next expedition"] > div > a').tap();
+    await page.locator('nav[aria-label="Next project"] > div > a').tap();
     await page.waitForTimeout(1500);
-    check("haptics: Next expedition commits with 10 ms", (await buzz()).includes("10"));
+    check("haptics: Next project commits with 10 ms", (await buzz()).includes("10"));
     await context.close();
   }
 }

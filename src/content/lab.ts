@@ -10,7 +10,7 @@ export const lab = {
   replay: "Replay all",
   modes: {
     full: { name: "Full", note: "Everything. The default." },
-    calm: { name: "Calm", note: "Calm map switch: responses, settles and morphs; no glints, shine, tilt, loops or ambient motion." },
+    calm: { name: "Calm", note: "Calm map switch: responses, settles and morphs; no glints, tilt, loops or ambient motion." },
     still: { name: "Still", note: "Reduced motion from the OS: no positional or width animation; colour and opacity within 200 ms." },
   },
   frameTitle: (mode: string) => `Motion primitives in ${mode} mode`,
@@ -33,7 +33,7 @@ export const lab = {
         note: "Arrives slightly wide and condenses to its set width. Chars (display), words, and a block reserved at its widest.",
         chars: "Summit\nCard",
         words: "Contour lines tighten near a summit",
-        label: "Open expedition log",
+        label: "Open case study",
         mono: "N 46°41′ · E 7°52′",
       },
       glint: {
@@ -52,11 +52,11 @@ export const lab = {
         note: "Hover and keyboard focus breathe the same way; press narrows the weight; a commit glints.",
         inline: "a phrase in running text",
         inlineBefore: "Read on, ",
-        standalone: "All expeditions",
+        standalone: "All projects",
         display: "Seilschaft",
-        eyebrow: "Next expedition",
-        nav: "Basecamp",
-        navCurrent: "Expeditions",
+        eyebrow: "Next project",
+        nav: "About",
+        navCurrent: "Work",
       },
       button: {
         title: "Motion button",
@@ -83,20 +83,20 @@ export const lab = {
 export const terrainLab = {
   meta: {
     title: "Terrain lab",
-    description: "The contour field's route morphs, readout, motion modes and device tiers.",
+    description: "The contour field's route morphs, motion modes and device tiers.",
   },
   heading: "Terrain lab",
   intro:
-    "The contour field conducts every route change: the terrain morphs in 700 ms and, in full motion, the destination's lines draw on from the valleys upward. Basecamp recentres on Bern, where every Swiss map is measured from. Morph here without navigating, or follow the real routes; the mode and tier switches reload this page.",
+    "The contour field conducts every route change: the terrain morphs in 700 ms and, in full motion, the destination's lines draw on from the valleys upward. About recentres on Bern, where every Swiss map is measured from. Morph here without navigating, or follow the real routes; the mode and tier switches reload this page.",
   morphs: {
     heading: "Route morphs",
-    note: "Each button morphs the field as a route change would, with the readout.",
+    note: "Each button morphs the field as a route change would.",
     region: "Home · Jungfrau region",
-    bern: "Basecamp · Bern",
+    bern: "About · Bern",
     card: (name: string) => `Card · ${name}`,
   },
-  routes: { heading: "Real routes", home: "Home", about: "Basecamp" },
-  readout: { heading: "Readout" },
+  routes: { heading: "Real routes", home: "Home", about: "About" },
+  readout: { heading: "State" },
   modes: {
     heading: "Motion mode",
     note: "Reloads this page in one mode. The OS setting for reduced motion still wins.",

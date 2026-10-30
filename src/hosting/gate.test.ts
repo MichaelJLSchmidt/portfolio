@@ -158,8 +158,8 @@ const page: PageModel = {
   status: "Status",
   contact: [{ label: "Email", href: null }],
   placeholder: (label) => `[${label.toUpperCase()}]`,
-  hud: { coordinates: "N", altitude: "ALT", clock: "Bern" },
-  access: { heading: "Trail under construction", label: "Password", submit: "Enter", pending: "CHECKING…", error: "That’s not the password.", closed: "Closed.", username: "basecamp" },
+  brand: "MJLS",
+  access: { heading: "Under construction", label: "Password", submit: "Look around →", pending: "Checking…", error: "That’s not the password.", closed: "Closed.", username: "preview" },
   credit: { label: "Credit", href: null },
   css: "",
   script: "",
@@ -250,7 +250,7 @@ describe("gate handler", () => {
     const html = await res.text();
     assert.match(html, /role="alert">That’s not the password\.</);
     // The submit button carries its pending label for the inline script ("CHECKING…").
-    assert.match(html, /<button type="submit" data-pending="CHECKING…">Enter<\/button>/);
+    assert.match(html, /<button type="submit" data-pending="Checking…">Look around →<\/button>/);
     // The field's underline, drawn on focus.
     assert.match(html, /<span class="input"><input id="password"[^>]*><span class="line" aria-hidden="true"><\/span><\/span>/);
     assert.match(html, /aria-invalid="true" aria-describedby="access-error"/);
@@ -311,13 +311,13 @@ describe("gate handler", () => {
 });
 
 // The page's own copy (src/content/about.ts): the under-construction page and the gate.
-describe("the night-summit page's copy", () => {
-  it("reads as the trail under construction", async () => {
+describe("the under-construction page's copy", () => {
+  it("reads plainly", async () => {
     await import("../../scripts/lib/ts-hooks.mjs");
     const { holding } = await import("../content/about.ts");
-    assert.equal(holding.access.heading, "Trail under construction");
-    assert.equal(holding.status, "The route is being marked. If you were given the password, step in.");
+    assert.equal(holding.access.heading, "Under construction");
+    assert.equal(holding.status, "This site is being built. If you have the password, you can look around.");
     assert.equal(holding.access.error, "That’s not the password. Check the message you received, or write to me.");
-    assert.equal(holding.access.pending, "CHECKING…");
+    assert.equal(holding.access.pending, "Checking…");
   });
 });
