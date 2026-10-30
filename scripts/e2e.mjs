@@ -461,16 +461,18 @@ async function casestudy() {
     check("Tab moves along the trail", focused === "#decisions", `focus on ${focused}`);
     await page.keyboard.press("Enter");
     const followed = await waitFor(page, (t) => location.hash === "#decisions" && document.querySelector(`${t} a[aria-current="true"]`)?.getAttribute("href") === "#decisions", trail);
-    // Smooth scrolling (Lenis, fine pointers) is still gliding: wait until the page stops moving.
-    await page.waitForFunction(
-      () =>
-        new Promise((done) => {
-          const y = window.scrollY;
-          setTimeout(() => done(window.scrollY === y), 250);
-        }),
-      null,
-      { timeout: 8000, polling: 300 },
-    ).catch(() => {});
+    // Smooth scrolling (Lenis, fine pointers) is still gliding: wait until it has landed below the
+    // HUD (a stalled frame under load can look like a page at rest), or at most 8 s.
+    await page
+      .waitForFunction(
+        () => {
+          const top = document.getElementById("decisions").getBoundingClientRect().top;
+          return top >= 40 && top <= 160;
+        },
+        null,
+        { timeout: 8000, polling: 200 },
+      )
+      .catch(() => {});
     const top = await page.evaluate(() => Math.round(document.getElementById("decisions").getBoundingClientRect().top));
     check("Enter jumps to the waypoint and the trail follows", followed, `hash=${await page.evaluate(() => location.hash)}`);
     check("the waypoint lands below the HUD", top >= 40 && top <= 160, `top=${top}px`);
