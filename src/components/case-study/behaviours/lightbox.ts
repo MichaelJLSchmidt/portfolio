@@ -1,4 +1,4 @@
-import { caseStudyLabels as L } from "@/content/cards";
+import { caseStudyLabels as L } from "@/content/case-study-labels";
 import { haptic } from "@/lib/haptics";
 import { activeViewTransition, stillNavigation } from "@/lib/view-transition";
 

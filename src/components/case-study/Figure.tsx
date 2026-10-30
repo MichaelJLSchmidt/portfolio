@@ -1,5 +1,5 @@
 import { useId, type ReactNode } from "react";
-import { caseStudyLabels as L } from "@/content/cards";
+import { caseStudyLabels as L } from "@/content/case-study-labels";
 import { asset } from "@/lib/asset";
 import type { FigureSpec, ImageAsset, ImageSpec, LongDescription } from "@/lib/case-study";
 import { Enhance } from "./Enhance";

@@ -32,6 +32,8 @@
 //   npm run test:e2e -- route         the red route: one path through every waypoint, never across
 //                                     text, the phone margin, the blaze; full (scroll timeline,
 //                                     Lenis), the fallback, calm, still (scripts/e2e/route.mjs)
+//   npm run test:e2e -- axe           axe-core WCAG 2.2 A/AA on every route: full, calm, still, a
+//                                     phone, forced colours (scripts/e2e/axe.mjs)
 //   npm run test:e2e -- access        forced colours, headings read once, the haptics map
 //                                     (scripts/e2e/choreography.mjs)
 //   npm run test:e2e -- wording       no old names, CV or job-seeking phrases in the built HTML
@@ -64,6 +66,7 @@ import { access, arrival, reading } from "./e2e/choreography.mjs";
 import { smoke } from "./e2e/smoke.mjs";
 import { flood, inp, pointer, portrait, trail } from "./e2e/interaction.mjs";
 import { route } from "./e2e/route.mjs";
+import { axe } from "./e2e/axe.mjs";
 import { wordingHits } from "./check-wording.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -1063,7 +1066,7 @@ async function wording() {
 const scenarios = { transitions, modes, hydration, primitives, decode, casestudy, wording };
 // The terrain conductor and the Bern terrain (scripts/e2e-terrain.mjs).
 Object.assign(scenarios, (await import("./e2e-terrain.mjs")).terrainScenarios({ browser, base, root, check, settle }));
-Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, about, ia, phone, fontswap, hud, toast, cards, arrival, reading, access, flood, trail, portrait, pointer, inp, smoke, route }).map(([name, run]) => [name, () => run({ browser, playwright, base, basePath, root, check, open, settle })])));
+Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, about, ia, phone, fontswap, hud, toast, cards, arrival, reading, access, flood, trail, portrait, pointer, inp, smoke, route, axe }).map(([name, run]) => [name, () => run({ browser, playwright, base, basePath, root, check, open, settle })])));
 try {
   for (const [name, run] of Object.entries(scenarios)) if (!only || only === name) await run();
 } finally {

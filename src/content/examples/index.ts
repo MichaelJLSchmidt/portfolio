@@ -1,5 +1,4 @@
 import type { SummitCardData } from "@/content/cards";
-import terrains from "@terrain/examples.json";
 import { card as gratweg } from "./gratweg/card";
 import { card as seilschaft } from "./seilschaft/card";
 import { card as testProject } from "./test-project/card";
@@ -18,8 +17,8 @@ import { card as testProject } from "./test-project/card";
 // Eiger (Seilschaft), the Mönch (Test Project), the Jungfrau (Gratweg).
 export const exampleCards: SummitCardData[] = [seilschaft, testProject, gratweg];
 
-/** The examples' card terrains (public/terrain/examples.json, written by npm run terrain). */
-export const exampleTerrains: Record<string, unknown> = terrains.cards;
+/** The examples' card terrains, in their own module (./terrains). */
+export { exampleTerrains } from "./terrains";
 
 /** Each example's encoded images under public/, by slug. */
 export const exampleMedia: Record<string, string> = {

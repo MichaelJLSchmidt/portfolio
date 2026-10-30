@@ -1,5 +1,5 @@
 import { useId, type CSSProperties } from "react";
-import { caseStudyLabels as L } from "@/content/cards";
+import { caseStudyLabels as L } from "@/content/case-study-labels";
 import type { AscentPlace } from "@/content/geo";
 import { altitudeLabel } from "@/content/geo";
 import { decisionNumbers, figureNumbers, noteNumbers, type Block, type CaseStudy, type Decision, type ListItem } from "@/lib/case-study";

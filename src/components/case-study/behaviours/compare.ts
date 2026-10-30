@@ -1,4 +1,4 @@
-import { caseStudyLabels as L } from "@/content/cards";
+import { caseStudyLabels as L } from "@/content/case-study-labels";
 import { haptic } from "@/lib/haptics";
 import { currentMode } from "@/lib/motion-mode";
 import { isSettled, markSettled, settleKey } from "@/lib/settled";

@@ -16,7 +16,7 @@ import { LegendSheet } from "@/components/case-study/LegendSheet";
 import { DecisionFork, Stages } from "@/components/case-study/Stages";
 import { TrailheadBand } from "@/components/case-study/TrailheadBand";
 import { TrailheadSpread } from "@/components/case-study/TrailheadSpread";
-import { RouteLayer } from "@/components/route/RouteLayer";
+import { Route } from "@/components/route/Route";
 import { WaypointTrail } from "@/components/case-study/WaypointTrail";
 import { Logbook } from "@/components/logbook/Logbook";
 import { MorphTarget } from "@/components/transition/MorphTarget";
@@ -134,7 +134,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
   return (
     <main id="main" className={`${styles.main} container`} data-rarity={card.rarity} data-card={card.slug}>
       {/* data-vt-exit: the page's own content, which leaves first on the way back (return-transition.ts). */}
-      <RouteLayer />
+      <Route />
       <RememberCard slug={card.slug} />
       <nav className={styles.crumbs} aria-label={L.back} data-vt-exit>
         {/* No scroll to the top: the deck brings the card back into view itself (Deck). */}

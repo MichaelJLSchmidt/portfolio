@@ -90,7 +90,8 @@ export type SummitCardData = {
 
 // The labels and the per-card helpers live apart from the cards' data, so client components that
 // need only them (the case-study bands, the card itself) don't bundle every card.
-export { cardLabels, caseStudyLabels, cardHref, coordinatesLine, cardStats, COST_SCALE } from "./card-labels";
+export { cardLabels, cardHref, coordinatesLine, cardStats, COST_SCALE } from "./card-labels";
+export { caseStudyLabels } from "./case-study-labels";
 
 /** Real project cards. None is written yet: a live build's deck is empty and says so (Deck). */
 const projectCards: SummitCardData[] = [];

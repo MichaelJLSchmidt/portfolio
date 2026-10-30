@@ -7,7 +7,7 @@ import { ContactBand } from "@/components/home/ContactBand";
 import { EarlierWork } from "@/components/home/EarlierWork";
 import { LeadPrinciples } from "@/components/home/LeadPrinciples";
 import { TrailLink } from "@/components/interaction/TrailLink";
-import { RouteLayer } from "@/components/route/RouteLayer";
+import { Route } from "@/components/route/Route";
 import { about } from "@/content/about";
 import { cards } from "@/content/cards";
 import { caseStudies } from "@/content/case-studies";
@@ -52,7 +52,7 @@ export default function Home() {
   const facts = about.who.facts.rows.filter((r) => (home.intro.facts.rows as readonly string[]).includes(r.label));
   return (
     <main id="main" className={`${styles.main} container`}>
-      <RouteLayer />
+      <Route />
       <section
         className={styles.hero}
         aria-labelledby="hero-name"

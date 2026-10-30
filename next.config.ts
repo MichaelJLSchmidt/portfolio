@@ -42,6 +42,12 @@ export default function nextConfig(phase: string): NextConfig {
     },
     turbopack: examples
       ? undefined
-      : { resolveAlias: { "@/content/examples": "./src/content/examples/none.ts", "@/content/examples/case-studies": "./src/content/examples/none.ts" } },
+      : {
+          resolveAlias: {
+            "@/content/examples": "./src/content/examples/none.ts",
+            "@/content/examples/case-studies": "./src/content/examples/none.ts",
+            "@/content/examples/terrains": "./src/content/examples/none.ts",
+          },
+        },
   };
 }
