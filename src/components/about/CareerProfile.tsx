@@ -143,7 +143,7 @@ export function CareerProfile({ copy }: { copy: Copy }) {
             </li>
           ))}
         </ol>
-        <figcaption className={`${styles.caption} hud-label map-halo keep-halo`} data-quiet-zone>{copy.trail(places, (lengthM / 1000).toFixed(1))}</figcaption>
+        <figcaption className={`${styles.caption} hud-label map-halo keep-halo knockout`}>{copy.trail(places, (lengthM / 1000).toFixed(1))}</figcaption>
       </figure>
     </section>
   );
