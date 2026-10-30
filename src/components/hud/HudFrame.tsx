@@ -5,9 +5,8 @@ import { distance } from "@/styles/tokens";
 
 /**
  * The HUD's frame: a fixed bar that is never hidden. Once the page has scrolled past
- * distance.hudCondense (120 px) it condenses (data-condensed): its backdrop strengthens, the bar
- * narrows from 56 to 44 px and its mono labels from wdth 87.5 towards 75 (Hud.module.css). Every
- * label sits in a box reserved at its rest width, so condensing moves nothing; still mode only
+ * distance.hudCondense (120 px) it condenses (data-condensed): its backdrop strengthens and the
+ * bar narrows from 56 to 44 px (Hud.module.css); the labels keep their width. Still mode only
  * strengthens the backdrop. One passive scroll listener, read once per frame.
  */
 export function HudFrame({ className, children }: { className?: string; children: ReactNode }) {

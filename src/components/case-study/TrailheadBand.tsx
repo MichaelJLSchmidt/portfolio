@@ -6,7 +6,8 @@ import { SummitCard } from "@/components/card/SummitCard";
 import { TrailLink } from "@/components/interaction/TrailLink";
 import { nameOnCommit } from "@/components/transition/commit-morph";
 import { transitionTo } from "@/components/transition/route-transition";
-import { cardHref, type SummitCardData } from "@/content/cards";
+import { cardHref } from "@/content/card-labels";
+import type { SummitCardData } from "@/content/cards";
 import { haptic } from "@/lib/haptics";
 import styles from "./CaseStudy.module.css";
 

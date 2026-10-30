@@ -91,7 +91,6 @@ export const duration = {
   medium: 360,
   long: 560,
   scenic: 900,
-  cinematic: 1400,
   /** Press response. */
   tap: 120,
   /** A tilted card springs or tweens back flat as the pointer leaves. */
@@ -198,8 +197,6 @@ export const stagger = {
  * parts follow, all landed by `duration.arrival`. Text never waits: it is readable throughout.
  */
 export const arrival = {
-  /** A case study's type and meta lines settle. */
-  lines: 260,
   /** A case study's summary sheet unfolds (to the arrival's end). */
   summary: 380,
   /** About: the lead and the facts arrive, the H1 having landed. */
@@ -212,8 +209,6 @@ export const distance = {
   rise: 8,
   /** Cards rise this far as they reveal. */
   riseCard: 12,
-  /** Arrows and small marks nudge this far on hover or focus. */
-  nudge: 4,
   /** A trail link's arrow steps forward this far, in two steps. */
   trailStep: 3,
   /** The home intro settles this far as its weight eases in. */

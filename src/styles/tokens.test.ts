@@ -243,3 +243,39 @@ describe("breakpoints", () => {
     assert.deepEqual(bad, []);
   });
 });
+
+// The route's red is for the route alone: the red route and the lines that are routes (an ascent's
+// profile, the way a decision took, a drawing's path and blaze, a career's walked line), trail
+// links and their blazes. A new use belongs to one of those, or to another colour.
+describe("route red", () => {
+  const ROUTE_FILES = new Set([
+    "components/route/RouteLayer.module.css",
+    "components/interaction/TrailLink.module.css",
+    "components/interaction/TrailLink.tsx",
+    "components/case-study/ElevationProfile.module.css",
+    "components/case-study/ForkDiagram.module.css",
+    "components/case-study/TrailheadSpread.module.css",
+    "components/home/Home.module.css",
+    "components/about/CareerProfile.module.css",
+  ]);
+  const files = (dir: string): string[] =>
+    readdirSync(dir).flatMap((name) => {
+      const p = join(dir, name);
+      return statSync(p).isDirectory() ? files(p) : /\.(css|tsx?)$/.test(p) && !/\.test\.ts$/.test(p) ? [p] : [];
+    });
+  const root = new URL("..", import.meta.url).pathname;
+  it("only routes, trail links and blazes use it", () => {
+    const users = files(root)
+      .filter((f) => !f.endsWith("styles/tokens.ts"))
+      .filter((f) => /--color-(signal|route-paper)\b|color\.(signal|routePaper)\b/.test(readFileSync(f, "utf8")))
+      .map((f) => f.slice(root.length));
+    assert.deepEqual(
+      users.filter((f) => !ROUTE_FILES.has(f)),
+      [],
+    );
+  });
+  it("nor the gate and the under-construction page (built from scripts/site/holding.mjs)", () => {
+    const holding = readFileSync(new URL("../../scripts/site/holding.mjs", import.meta.url), "utf8");
+    assert.doesNotMatch(holding, /--color-(signal|route-paper)\b/);
+  });
+});

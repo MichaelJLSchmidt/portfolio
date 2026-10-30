@@ -7,6 +7,7 @@ import { ContactBand } from "@/components/home/ContactBand";
 import { EarlierWork } from "@/components/home/EarlierWork";
 import { LeadPrinciples } from "@/components/home/LeadPrinciples";
 import { TrailLink } from "@/components/interaction/TrailLink";
+import { RouteLayer } from "@/components/route/RouteLayer";
 import { about } from "@/content/about";
 import { cards } from "@/content/cards";
 import { caseStudies } from "@/content/case-studies";
@@ -31,7 +32,8 @@ const ticks = {
 /**
  * Home: a map sheet's title (the name, its tags, the sheet's corner ticks and scale bar), a short
  * intro, how I lead, the work (Selected work, id="work"), earlier work and the way in (Get in
- * touch). Leadership comes before the work, for hiring managers who skim.
+ * touch). Leadership comes before the work, for hiring managers who skim. The red route runs from
+ * the title through the four drawings of How I lead and along the ridge of cards to Get in touch.
  */
 /** Each card's caption and summit, for the ridge (the deck itself is a client component). */
 function deckEntries(): Record<string, DeckEntry> {
@@ -50,6 +52,7 @@ export default function Home() {
   const facts = about.who.facts.rows.filter((r) => (home.intro.facts.rows as readonly string[]).includes(r.label));
   return (
     <main id="main" className={`${styles.main} container`}>
+      <RouteLayer />
       <section
         className={styles.hero}
         aria-labelledby="hero-name"
@@ -65,7 +68,7 @@ export default function Home() {
           ))}
         </div>
         <HeroName name={site.hero.name} className={`${styles.name} display`} />
-        <div className={styles.under}>
+        <div className={styles.under} data-route="hero">
           <ul className={`${styles.tags} hud-label map-halo`} data-quiet-zone>
             {home.hero.tags.map((t) => (
               <li key={t}>{t}</li>
@@ -94,7 +97,7 @@ export default function Home() {
         </dl>
       </section>
       <LeadPrinciples />
-      <Deck copy={home.work} entries={deckEntries()} />
+      <Deck copy={home.work} cards={cards} entries={deckEntries()} />
       <EarlierWork />
       <ContactBand />
     </main>

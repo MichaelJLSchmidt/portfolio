@@ -8,7 +8,6 @@ export const rawCard: SummitCardData = {
   name: "Gratweg",
   rarity: "M",
   cost: "{{card.cost}}",
-  costLabel: "Summit cost {{card.cost}} of {{card.costScale}}",
   rarityNote: "started and led a platform across teams",
   coordinates: "Hochmatt (fictional)",
   type: "Platform — Design system · Lead (fictional)",

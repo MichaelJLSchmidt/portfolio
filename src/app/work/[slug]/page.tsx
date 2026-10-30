@@ -16,6 +16,7 @@ import { LegendSheet } from "@/components/case-study/LegendSheet";
 import { DecisionFork, Stages } from "@/components/case-study/Stages";
 import { TrailheadBand } from "@/components/case-study/TrailheadBand";
 import { TrailheadSpread } from "@/components/case-study/TrailheadSpread";
+import { RouteLayer } from "@/components/route/RouteLayer";
 import { WaypointTrail } from "@/components/case-study/WaypointTrail";
 import { Logbook } from "@/components/logbook/Logbook";
 import { MorphTarget } from "@/components/transition/MorphTarget";
@@ -133,6 +134,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
   return (
     <main id="main" className={`${styles.main} container`} data-rarity={card.rarity} data-card={card.slug}>
       {/* data-vt-exit: the page's own content, which leaves first on the way back (return-transition.ts). */}
+      <RouteLayer />
       <RememberCard slug={card.slug} />
       <nav className={styles.crumbs} aria-label={L.back} data-vt-exit>
         {/* No scroll to the top: the deck brings the card back into view itself (Deck). */}
@@ -267,7 +269,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
           <WaypointTrail slug={card.slug} label={L.onThisPage} items={trail} />
         </div>
         <div className={styles.stages}>
-          <Stages study={study} places={places} />
+          <Stages study={study} places={places} lastStation={ascent.lastStation} />
 
           <section className={styles.section} aria-labelledby="reversed-heading">
             <h2 id="reversed-heading" className={`${styles.sectionHeading} display`}>
@@ -283,7 +285,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
             <Logbook caption={study.afterLaunch.caption} columns={L.logColumns} rows={study.afterLaunch.entries.map((e) => [e.date, e.text])} />
           </section>
 
-          <section id="results" className={styles.section} aria-labelledby="results-heading" data-waypoint>
+          <section id="results" className={styles.section} aria-labelledby="results-heading" data-waypoint data-route="results" data-route-blaze="">
             <h2 id="results-heading" className={styles.resultsHeading}>
               <span className={`${styles.stageLine} hud-label`}>{`${ascent.summit.label} · ${altitudeLabel(ascent.summit.altitudeM)}`}</span>
               <span className={`${styles.sectionHeading} display`}>{L.resultsHeading}</span>

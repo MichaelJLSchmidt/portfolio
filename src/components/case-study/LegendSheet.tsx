@@ -31,7 +31,8 @@ export type LegendRow = {
  * surface on the site). Grid ticks at its corners, "Sheet n/3" and a scale bar in its margin,
  * then one row per fact: the map symbol, the mono label and the sentence (labels above the
  * sentences on phones). It unfolds from its top edge in --dur-legend-unfold as it arrives (the
- * text is there throughout); calm and still show it unfolded. Paper-safe inks only.
+ * text is there throughout; calm unfolds it the same way, still shows it unfolded). Paper-safe
+ * inks only.
  */
 export function LegendSheet({
   id,

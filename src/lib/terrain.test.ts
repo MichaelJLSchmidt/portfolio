@@ -4,8 +4,10 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 await import("../../scripts/lib/ts-hooks.mjs");
-const { BERN, routeTerrain } = await import("../components/terrain/route-terrain.ts");
-const { cards, cardHref, terrainIdForPath } = await import("../content/cards.ts");
+const { BERN, routeTerrain, setCardTerrains } = await import("../components/terrain/route-terrain.ts");
+const { cards, cardHref, cardTerrains, terrainIdForPath } = await import("../content/cards.ts");
+// What the root layout writes on <html data-card-terrains>.
+setCardTerrains(cardTerrains());
 const { REST, Timeline, morphStep, planRoute, prewarmStep } = await import("../components/terrain/conductor.ts");
 const { contourInterval, intervalSet, LOWLAND_INTERVALS, CONTOUR_INTERVALS } = await import("../components/terrain/field-settings.ts");
 const bern = (await import("../../public/terrain/bern/summary.json", { with: { type: "json" } })).default;
@@ -17,7 +19,7 @@ describe("routeTerrain", () => {
     assert.equal(routeTerrain("/about"), BERN);
   });
 
-  it("delegates every other path to the cards module unchanged", () => {
+  it("agrees with the cards module on every other path (through the layout's map)", () => {
     for (const path of ["/", "/no-such-page/", "/lab/", "/lab/terrain/", null, ...cards.map(cardHref).filter((h) => !h.startsWith("/about"))]) {
       assert.equal(routeTerrain(path), terrainIdForPath(path), String(path));
     }

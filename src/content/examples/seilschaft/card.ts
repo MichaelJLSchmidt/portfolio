@@ -8,7 +8,6 @@ export const rawCard: SummitCardData = {
   name: "Seilschaft",
   rarity: "R",
   cost: "{{card.cost}}",
-  costLabel: "Summit cost {{card.cost}} of {{card.costScale}}",
   rarityNote: "built and led the practice",
   coordinates: "Hochmatt (fictional)",
   type: "People — Practice building · Lead (fictional)",

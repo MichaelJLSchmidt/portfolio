@@ -12,8 +12,8 @@
    Linux don't have; these take the first of several common faces and give them the web font's
    metrics (overrides are divided by size-adjust), so the swap moves as little as possible:
    - text: Archivo at wdth 100 (Liberation Sans and Arimo share Arial's widths: next/font's values);
-   - mono: Martian Mono at its rest width (0.65 em a character over a 0.6 em monospace; ascent
-     1 em, descent 0.2 em);
+   - mono: Martian Mono at the labels' width (wdth 87.5: 0.65 em a character, measured with
+     HarfBuzz, over a 0.6 em monospace; ascent 1 em, descent 0.2 em);
    - display: Archivo's vertical metrics (ascent 0.878 em, descent 0.21 em) on a face narrowed to
      the titles' rest cut (wdth 75, wght 800: 0.83 of the text width in capitals, measured with
      HarfBuzz), so a title keeps its lines through the swap;
@@ -383,6 +383,13 @@
     }
   }
 
+  /* A page that draws the red route (RouteLayer) holds it behind its content: the main is its
+     containing block and its own stacking context. */
+  main:has(> [data-route-layer]) {
+    position: relative;
+    isolation: isolate;
+  }
+
   /* Centred page measure with fluid gutters; content no longer hugs the left edge on wide screens. */
   .container {
     width: 100%;
@@ -557,33 +564,6 @@
   :root[data-vt="traverse"]::view-transition-new(.morph):only-child {
     animation-duration: var(--dur-crossfade);
     animation-timing-function: linear;
-  }
-
-  /* The deck's Cards ⇄ Index switch (html[data-vt="view"], Deck.tsx): each card's name morphs into
-     its row's name, and the page cross-fades, over --dur-medium (360 ms). Calm (data-vt="view-calm")
-     only cross-fades: the shared names are switched off for that transition. */
-  :root[data-vt="view"]::view-transition-group(.morph),
-  :root[data-vt="view"]::view-transition-old(root),
-  :root[data-vt="view"]::view-transition-new(root) {
-    animation-duration: var(--dur-medium);
-    animation-timing-function: var(--ease-settle);
-  }
-
-  :root[data-vt="view"]::view-transition-old(.morph-title) {
-    animation: vt-title-old var(--dur-medium) linear both;
-  }
-
-  :root[data-vt="view"]::view-transition-new(.morph-title) {
-    animation: vt-title-new var(--dur-medium) linear both;
-  }
-
-  :root[data-vt="view-calm"] [style*="view-transition-name"] {
-    view-transition-name: none !important;
-  }
-
-  :root[data-vt="view-calm"]::view-transition-old(root),
-  :root[data-vt="view-calm"]::view-transition-new(root) {
-    animation-duration: var(--dur-medium);
   }
 
   /* Back into the deck: "card reassembly" (html[data-vt="return"], return-transition.ts).

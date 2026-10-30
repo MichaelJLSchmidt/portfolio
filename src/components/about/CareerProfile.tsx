@@ -9,8 +9,8 @@ import styles from "./CareerProfile.module.css";
  * The career so far as the real trail from Ittigen up to the Bantiger (src/content/geo.ts: the
  * terrain sampled along the hiking trail from swisstopo elevation data). The roles stand on it as
  * spot heights; above the summit a dashed line climbs the transmitter mast to about 1'129 m, with
- * the outlook beside it. Across the page from the md breakpoint; on phones the trail runs down
- * the left margin (the climb turned a quarter clockwise: up is to the right, so the mast reaches
+ * the outlook beside it. Across the page from the sm breakpoint (640 px); on phones the trail runs
+ * down the left margin (the climb turned a quarter clockwise: up is to the right, so the mast reaches
  * out across the screen).
  *
  * The roles, their heights, the outlook and the trail's places are text in the DOM; the drawing

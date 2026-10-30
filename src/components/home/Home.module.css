@@ -80,7 +80,8 @@
   /* ---------------------------------------------------------------- switchback */
 
   /* How I lead: one column on phones (each illustration, at most 220 px, above its principle);
-     from the md breakpoint the turns alternate left and right and a route zig-zags between them. */
+     from the md breakpoint the turns alternate left and right, and the page's red route
+     (RouteLayer) zig-zags between their drawings through the gaps. */
   .switchback {
     position: relative;
     display: grid;
@@ -201,84 +202,6 @@
     .turn[data-side="right"] .illo {
       order: 2;
     }
-
-    /* The route between the turns: from under one turn's drawing down into the gap, across it
-       (never through a principle), and down into the next drawing. The drawings are 220 × 147
-       and centred on their turn. */
-    .switchback {
-      --gap: clamp(32px, 5vw, 64px);
-    }
-
-    .turn:not(:last-child)::after,
-    .turn:not(:first-child)::before {
-      content: "";
-      position: absolute;
-      border: 0 solid var(--color-signal);
-      pointer-events: none;
-      opacity: 0.6;
-    }
-
-    .turn:not(:last-child)::after {
-      top: calc(50% + 78px);
-      right: 110px;
-      left: 110px;
-      height: calc(50% - 78px + var(--gap) / 2);
-      border-bottom-width: 2px;
-      border-left-width: 2px;
-      border-bottom-left-radius: 24px;
-    }
-
-    .turn[data-side="right"]:not(:last-child)::after {
-      border-left-width: 0;
-      border-right-width: 2px;
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 24px;
-    }
-
-    .turn:not(:first-child)::before {
-      top: calc(var(--gap) / -2);
-      left: 109px;
-      height: calc(50% - 78px + var(--gap) / 2);
-      border-left-width: 2px;
-    }
-
-    .turn[data-side="right"]:not(:first-child)::before {
-      right: 109px;
-      left: auto;
-    }
-  }
-
-
-  /* ---------------------------------------------------------------- field notes */
-
-  .notes {
-    display: grid;
-    gap: 16px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .note figure {
-    display: grid;
-    gap: 12px;
-    margin: 0;
-  }
-
-  .note blockquote {
-    margin: 0;
-  }
-
-  @media (min-width: 1024px) {
-    .notes {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-
-  .proof strong {
-    color: var(--color-glacier);
-    font-family: var(--font-mono);
-    font-stretch: var(--type-mono-wdth);
   }
 
   /* ---------------------------------------------------------------- contact */

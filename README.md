@@ -3,40 +3,40 @@
 Portfolio of a UX Team Lead / Senior UX Designer from Interlaken. Art direction: a night hike across a
 topographic contour map. Projects are presented as original "Summit Cards".
 
-This repository currently holds the foundation plus three technical spikes for the signature effects:
+The signature pieces:
 
-1. **Persistent contour field**: one WebGL canvas behind all routes. It draws real swisstopo contours as a calm,
-   monochrome map (neutral lines only, also on case-study terrains and during morphs) with:
-   - a small pointer "headlamp" that only raises the strength of the lines under it;
-   - gentle parallax (pointer and scroll) and a slow drift;
-   - an intro sweep and terrain morphs;
-   - quiet zones, like contours interrupted under the labels of a printed map: headings (`data-quiet-zone`)
-     fade the lines behind them to 25% with a 48 px feather; running text (`.body-copy`, or `.knockout` for
-     other text blocks) to 9% with a 64 px feather, so the lines visibly break around the copy. Longer reading
-     blocks also sit on a map-legend panel (`.legend`). See "Accessibility and motion".
-2. **Summit Card**: spring tilt and contour foil. Fully data-driven and accessible; the whole card links to its
-   case study.
-3. **Card → case study transition**: a choreographed view-transition morph from the deck into `/work/[slug]`,
-   synchronised with the field. The way back is a "card reassembly": the page's own content leaves first, the
-   artwork and title fly back into the card, and the card is rebuilt around them (neatline, parts, a glacier
-   shine on its name). Durations and their reasoning are in `src/app/globals.css`; the reassembly is in
-   `src/components/transition/return-transition.ts`.
+1. **Persistent contour field**: one WebGL canvas behind all routes, drawing real swisstopo contours as a calm,
+   monochrome map. It holds still while a page is read and takes no pointer input; on a page change it morphs to
+   the next terrain (a case study's mountain, Bern on About). Quiet zones, like contours interrupted under the
+   labels of a printed map, fade the lines behind headings (`data-quiet-zone`) to 22% with a 48 px feather and
+   behind running text (`.body-copy`, or `.knockout` for other text blocks) to 9% with a 64 px feather. Longer
+   reading blocks also sit on a map-legend panel (`.legend`). `docs/terrain.md` has the details.
+2. **Summit Card**: spring tilt and contour foil under a fine pointer. Fully data-driven and accessible; the whole
+   card links to its case study.
+3. **Card → case study transition**: a view-transition morph from the deck into `/work/[slug]`, synchronised with
+   the field. The way back is a "card reassembly": the page's own content leaves first, the artwork and title fly
+   back into the card, and the card is rebuilt around them (its neatline, then its parts;
+   `src/components/transition/return-transition.ts`).
+4. **The red route**: one red path down the home page and each case study through its waypoints, walked with the
+   scroll (`src/components/route/RouteLayer.tsx`); on About the career profile is the route.
 
 Production currently serves a static under-construction page; the full site lives on the `basecamp` branch behind
 a password gate (see "Hosting on Netlify").
 
-Motion has one verb, "settle" (`docs/motion.md`): headlines arrive slightly wide and condense into the display
-cut (`src/components/motion/SettleText.tsx`), interactive text breathes wider on hover or focus and settles back,
-and a single mint glint marks a first arrival or a committed action. A gentle shine (at most half way to glacier,
-no glow) follows a fine pointer, lit by the same headlamp as the field. Three motion modes (full, calm, still)
-and every primitive are shown side by side in the motion lab (`/lab/`, preview builds only).
+Motion (`docs/motion.md`): every page is readable from its first frame, the map holds still while a page is read,
+and motion answers the reader. Display titles arrive on their weight at a fixed line length (`WeightTitle`), a
+glacier "contour flood" spreads through titles and buttons on hover, focus or a tap, trail links draw a red line,
+and the About portrait card turns over to its facts. Nothing follows the pointer but the card tilt. Three motion
+modes (full, calm, still) and the primitives are shown side by side in the motion lab (`/lab/`, preview builds
+only).
 
 The pages put leadership before the work, for hiring managers who skim, in plain words: the visuals
 play, the wording never does. Home: the name and its tags, a short intro, How I lead, Selected work
 (the Summit Cards, `/#work`), Earlier work and Get in touch. About (`/about/`) is reached from the
 HUD, whose About label morphs into the page's H1. The HUD is the only navigation: the brand (home) ·
 Work · About · the Calm map switch (and the haptics switch where vibration works), inline on every
-screen size. The display name and the brand are one setting each in `src/content/site.ts`.
+screen size. The display name and the brand are one setting each in `src/content/site.ts`; `docs/content.md`
+says where all copy lives and what is still to fill.
 
 ## Stack
 
@@ -44,11 +44,12 @@ screen size. The display name and the brand are one setting each in `src/content
 | -------------------------- | ----------------------------------------------------------------------------------- |
 | Framework                  | Next.js 16 (App Router), React 19.3, TypeScript, static export (`output: "export"`) |
 | Field                      | three + @react-three/fiber, custom GLSL (WebGL2), leva for dev-only tuning          |
-| Motion                     | `motion` (frame loop, springs), React `<ViewTransition>`; tokens and primitives in `docs/motion.md` |
-| Smooth scroll              | Lenis, fine-pointer desktop only                                                    |
+| Motion                     | `motion` (frame loop, springs), React `<ViewTransition>`, CSS scroll and view timelines; tokens and primitives in `docs/motion.md`. Motion+ is installed (hence `MOTION_TOKEN`) but no route imports it |
+| Smooth scroll              | Lenis, fine-pointer desktop in full motion only                                     |
 | Fonts                      | Archivo (wdth + wght, italic) and Martian Mono via `next/font/google`, self-hosted; the italic face loads only once italic text nears the screen (`src/lib/italic-face.ts`) |
 | Hosting                    | Netlify: static files, plus one Edge Function (the Basecamp gate) off production   |
-| Terrain                    | Node scripts with geotiff.js and d3-contour                                         |
+| Terrain                    | Node scripts with geotiff.js and d3-contour; swisstopo services for place data      |
+| Type tools                 | harfbuzzjs and fontverter at build time (the titles' width knots, the footer wordmark) |
 
 ## Local development
 
@@ -79,20 +80,27 @@ Never commit the token. `.env*` files are git-ignored; `.env.example` lists the 
 | `npm run preview`        | Serves `out/` like a static host, including the base path and gzip               |
 | `npm run lint`           | ESLint (Next.js core-web-vitals + TypeScript rules)                               |
 | `npm run typecheck`      | Generates route types, then `tsc --noEmit`                                        |
-| `npm run check:contrast` | WCAG contrast of the token colour pairs, quiet zones, body text and the type shine |
+| `npm run check:contrast` | WCAG contrast of the token colour pairs: text over the field 7:1, on paper and raised surfaces 4.5:1, marks 3:1 |
 | `npm run check:legibility` | Body text against its real background on rendered screenshots (field and poster) |
-| `npm run check:content`  | Lists every content placeholder still to fill, with file, line and field          |
+| `npm run check:content`  | Lists every placeholder and example value still to replace, with file, line and field (`docs/content.md`) |
 | `npm run check:figures`  | Numbers in copy, card and charts match their data file; images are current        |
-| `npm test`               | Unit tests of the Basecamp gate (`node:test`)                                      |
-| `npm run test:e2e`       | Chromium checks against `out/`: view transitions, motion modes, hydration, motion primitives, decode, case-study template, deck and Next loop, Basecamp morph, page structure, phone layouts, HUD and toast, font swap, cards and views, route arrivals and focus, reading (trail, altimeter bar, career climb) |
+| `npm run check:wording`  | No old names, CV, `.pdf` links or job-seeking phrases in any built page (the build runs it) |
+| `npm test`               | Unit tests (`node:test`): the gate, tokens and stylesheets, the case-study model, formatting, the terrain conductor, the red route's geometry, no pointer following |
+| `npm run test:e2e`       | Chromium checks against `out/`, one scenario with `-- <name>` (listed in `scripts/e2e.mjs`): view transitions, motion modes, hydration, primitives, decode, case-study template, terrain, deck and Next loop, About morph, page structure, phone layouts, HUD and toast, font swap, cards, arrivals and focus, reading, the red route, flood, trail links, portrait, pointer, INP, wording, a cross-browser smoke subset |
 | `npm run test:hosting`   | Gated and production deploys under netlify-cli (build, edge runtime, redirects)   |
 | `npm run report:size`    | Initial JS/CSS/fonts per route, lazy chunks, terrain assets (gzip)               |
 | `npm run report:transfer` | One page's transfer on a phone and a desktop, first view and full scroll         |
 | `npm run report:motion`  | Layout time in a page's first 3.5 s on a phone with the CPU slowed 4×; Lighthouse with `--lighthouse` |
-| `npm run record:motion`  | Review videos: the motion lab, a round trip in each mode, the home page, Basecamp via the nav and the case-study loop (`motion-recordings/`) |
+| `npm run record:motion`  | Review videos: the motion lab, a round trip and the terrain conductor in each mode, the home page, About via the nav and the case-study loop (`motion-recordings/`) |
 | `npm run images`         | Renders and encodes the case-study artefact images (see "Case studies")           |
 | `npm run terrain`        | Regenerates `public/terrain` from swisstopo data                                  |
+| `npm run terrain:bern`   | Regenerates the About terrain in `public/terrain/bern` (`docs/terrain.md`)       |
+| `npm run geo`            | Regenerates the verified place data in `src/content/geo-data.json` from swisstopo |
 | `npm run verify:terrain` | Checks that the committed heightmaps decode to the exact source heights          |
+| `npm run titles`         | Solves the display titles' width knots into `src/lib/title-axes.json` (build and dev run it) |
+| `npm run wordmark`       | Draws the footer wordmark from the brand into `src/components/footer/wordmark.json` (build and dev run it) |
+| `npm run flood`          | Regenerates the contour flood's sprites in `src/components/interaction`          |
+| `npm run portrait`       | Encodes the About portrait from a cut-out PNG (`docs/content.md`)                 |
 | `npm run fonts:subset`   | Regenerates the under-construction page's WOFF2 subsets in `src/hosting/fonts`    |
 
 Without `SITE_MODE`, `npm run build` builds the full site (`live`). To check that every asset goes through
@@ -115,10 +123,10 @@ automatically. Every other runtime URL (heightmaps, terrain SVGs, textures, fetc
 
 ### Content and placeholders
 
-All copy lives in `src/content`. Facts still to confirm are written as `[PLACEHOLDERS]` (links as `href: null`);
-they stay visible in preview builds so gaps are easy to spot. Card stats (team led, time, scope, impact) and
-the Summit summary's rows are optional: a stat row shows only the stats that have a value and disappears when
-none has one, and a summary row without a value is left out.
+All copy lives in `src/content` (`docs/content.md` has the map, the name source, the case-study model and what
+is still to supply). Facts still to confirm are written as `[PLACEHOLDERS]` (links as `href: null`); they stay
+visible in preview builds so gaps are easy to spot. Card stats (team led, time, scope, impact) are optional: a
+stat row shows only the stats that have a value and disappears when none has one.
 `npm run check:content` lists every remaining placeholder with file, line and field. `npm run build` runs it for
 its `SITE_MODE`:
 
@@ -130,30 +138,28 @@ its `SITE_MODE`:
 A local build with `NEXT_PUBLIC_PREVIEW=1` only warns in every mode. Flagged examples (see "Case studies")
 are fictional on purpose: `check:content` skips them and names them once, and live builds don't contain them.
 
-**Example values.** The home page and Basecamp tell the intended story with invented figures, quotes, legend
-entries, dates, the bio and the evidence lines of the trail rules. Each is written as `ex("…")`
-(`src/content/example-values.ts`): it renders as written, `check:content` lists it with file, line and field
-next to the placeholders, and a live build stops on it until a real value replaces it. The invented field
-notes (testimonials) go further: they render only where flagged examples do, each tagged "Example quote", and
-a build without examples fails if any of them is left in `out/`. While its figures are examples, the Summit
-log shows the small print "Example figures. Real numbers replace them before launch."
+**Example values.** The home page and About tell the intended story with invented figures, dates, facts, the
+bio, the evidence lines of How I lead, the Earlier work entries and the binder's lines. Each is written as
+`ex("…")` (`src/content/example-values.ts`): it renders as written, `check:content` lists it with file, line
+and field next to the placeholders, and a live build stops on it until a real value replaces it.
 
 ### Tuning the contour field
 
-In `npm run dev`, a collapsed "Tuning (dev only)" leva panel controls every uniform: contour spacing and line
-strengths per device, index lines, line widths, neutral line colours, headlamp (radius, gain, fade), the intro
-edge's gain, drift, intro and morph durations.
+In `npm run dev`, a collapsed "Tuning (dev only)" leva panel controls the field: contour spacing and line
+strengths per device, index lines, line widths, neutral line colours, the draw-on front's gain, quiet-zone
+strengths and feathers, the base zoom and the card terrains' zoom push, the morph duration and the frame budget.
 
-The field is a monochrome map: lines take neutral colours only, and the headlamp and the intro sweep's leading
-edge only raise the strength of the same line colour (`headlampGain`, `sweepGain`). Line strength and spacing are
+The field is a monochrome map: lines take neutral colours only (the Aare on About is the one coloured line), and
+the draw-on front only raises the strength of the same line colour (`revealGain`). Line strength and spacing are
 set per device profile, `desktop` (a fine pointer and a long edge of at least 900 px) and `mobile` (everything
 else); both currently draw regular lines at 30% and index lines at 50%.
 
-The contour interval adapts to the screen. It is the smallest of 50, 100, 200, 250 and 500 m that keeps lines on
-steep terrain (the map's 95th-percentile gradient) at least `minSpacingPx` CSS pixels apart at the map's
-on-screen scale; every 5th line is an index line. With the committed `minSpacingPx` (3.25 on desktop, 3 on
-mobile) phones in portrait get 200 m (250 m on 320 px wide screens), laptops and desktops up to ~1920 px 200 m,
-tablets in portrait and 2560 px desktops 100 m. The panel shows the interval in use; resizes glide to the new
+The contour interval adapts to the screen. It is the smallest step of the terrain's set (50, 100, 200, 250 and
+500 m in the Alps; 10, 20 and 50 m for Bern, under 1000 m of relief) that keeps lines on steep terrain (the map's
+95th-percentile gradient) at least `minSpacingPx` CSS pixels apart at the map's on-screen scale; every 5th line
+is an index line. With the committed `minSpacingPx` (3.25 on desktop, 3 on mobile) the region draws 200 m on
+phones (250 m on 320 px wide screens), small tablets and laptops and desktops up to ~1920 px, and 100 m on large
+portrait tablets (820 × 1180) and 2560 px desktops. The panel shows the interval in use; resizes glide to the new
 interval, and morphs blend between the two terrains' intervals. "Save to config" writes the values to
 `src/config/contour-field.json`, which is committed. Colours and durations are stored as token names. Leva is
 never part of the production build. Add `?field=force` to a URL to skip the low-spec check, which is useful in
@@ -161,34 +167,41 @@ headless browsers.
 
 ## Case studies
 
-Every case study (`/work/<slug>/`) is built from the same blocks. The content model is in
-`src/lib/case-study.ts`, the copy in `src/content/case-studies.ts`, the components in
-`src/components/case-study`. `src/content/examples` holds three complete, fictional model case studies at one
-fictional employer: Seilschaft (people: building a UX practice), Gratweg (platform: a design system) and Test
-Project (service: a subsidy form), in that deck order, each one's "Next expedition" leading to the next and the
-last back to the first. Test Project uses every block; read it as the reference.
+Every case study (`/work/<slug>/`) is built from the same parts, an ascent from trailhead to summit. The content
+model is in `src/lib/case-study.ts` (`docs/content.md` walks through it), the copy in
+`src/content/case-studies.ts`, the components in `src/components/case-study`. `src/content/examples` holds
+three complete, fictional model case studies at one fictional employer: Seilschaft (people: building a UX
+practice), Test Project (service: a subsidy form) and Gratweg (platform: a design system), in that deck order,
+the panorama from Interlaken (the Eiger, the Mönch, the Jungfrau), each one's "Next project" leading to the
+next and the last back to the first. Test Project uses every block; read it as the reference.
 
-- **Leadership fields:** every case study states its mandate, the team I led, what I put in place, one "What I
-  did not do" line (before the credits) and its credits. The Summit summary reads MANDATE · MY ROLE · TEAM I LED ·
-  WHAT I PUT IN PLACE · KEY DECISION · OUTCOME. On the card the stats are TEAM LED, TIME and IMPACT (before →
-  after, what it counts below), the scope joins the coordinates line, and an index line ("Seilschaft — People ·
-  Built a UX practice from 2 to 6 · 3 years") lists the card on the home page.
-
-- **Header:** the terrain header and its morph from the card stay; under the deck line a type line and the meta
-  line "7 min read · 60-second skim below" (reading time from the body, counted like Medium: 265 words a minute
-  plus 12 s for the first figure, a second less for each next one, at least 3 s; the link goes to the Summit
-  summary). The product hero (`hero`) sits directly after the summary.
-- **Waypoints:** each heading states its finding, "Label — finding"; decisions are h3 blocks.
-- **In-page navigation:** from 1200 px a sticky "On this page" trail beside the content (a `nav`, one link per
-  waypoint, a dotted contour trail that fills up to the waypoint being read, `aria-current="true"`); below
-  1200 px the "On this page" chips near the top and "Next waypoint ↓ / Back to top ↑" at the end of each waypoint.
+- **Trailhead spread:** the H1 the card's name morphs into, the type line, "The problem" in two or three
+  sentences, and "The result" as the climb: the impact line over the altitude gained from the trailhead to the
+  summit, then role · team · time. Under it "7 min read · 60-second summary below" (reading time counted like
+  Medium: 265 words a minute plus 12 s for the first figure, a second less for each next one, at least 3 s).
+- **Summary:** the legend sheet, the site's only paper surface: corner ticks, "Sheet n/3", a scale bar and a map
+  symbol per row (the brief, outcome, my role, team I led, what I put in place, key decision). The product hero
+  sits after it.
+- **Six stages:** each opens with a mono line (stage, place and altitude from `src/content/geo.ts`) and its
+  finding as the H2; running text at 60–68 characters with numbered side notes in the margin (inline on
+  phones), figures, decisions as fork diagrams (a signpost junction: the chosen way solid red, the others dashed
+  to a dead end, an ordered list of the options with what spoke for and against them and their cost) and at
+  most one key insight.
+- **Then:** a decision we reversed (with its dated turn-back), what happened after launch (a logbook), the
+  results as an elevation profile over a real table (each result's stage), the evidence legend (measured,
+  estimated, qualitative: shape plus text), looking back and the team on a rope, what I did not do and the
+  credits, and the Next project band (a ridge of the three peaks with "You are here").
+- **In-page navigation:** from 1280 px a sticky "On this page" trail beside the stages, each node as far from the
+  next as the climb between them, filling as the reader scrolls (`aria-current="true"` on the current stage);
+  below 1280 px the "On this page" links near the top, "Next stage ↓ / Back to top ↑" at the end of each stage
+  and the altimeter bar ("Stage 2 of 6 · Grindelwald") with its jump sheet.
 - **Figures** (`Figure.tsx`): `<figure>` with `<picture>` (AVIF, then WebP, width descriptors, `sizes`, explicit
   width and height), lazy unless `priority` (eager, `fetchpriority="high"`, only for an image in the first
-  viewport), a tiny blurred placeholder, and the caption "Fig. n — What it shows. Why it matters." (numbered in
-  order of appearance, about 30 words at most). Complex diagrams add a long description behind "Describe this
-  diagram". Two surfaces: the map sheet (sheet colour, 32 px inside, contour hairline, 8 px corners) for light UI
-  and diagrams, the night frame (raised ground) for charts and the hero; column (~720 px) or wide (~1120 px),
-  full width on phones.
+  viewport), a tiny blurred placeholder, and a mono caption "Fig. n · what it shows · source" (numbered in order
+  of appearance, about 30 words at most). Complex diagrams add a long description behind "Describe this
+  diagram". Two surfaces, both raised ground with a hairline: the sheet (32 px inside, 8 px corners) for light UI
+  and diagrams, the night frame for charts and the hero; column (~720 px) or wide (~1120 px), full width on
+  phones.
 - **Lightbox** (`zoom: true`): an "Enlarge" button on a native `<dialog>`; focus moves in, Esc closes, focus
   returns; the largest source loads on open; pinch and pan on touch, click or wheel zoom and +/−/reset (names
   carry the zoom level) on desktop; no zoom animation with reduced motion. Without JavaScript the figure offers
@@ -197,13 +210,11 @@ last back to the first. Test Project uses every block; read it as the reference.
   After / Side by side" buttons; without JavaScript both images stack with their own alt text.
 - **Hotspots** (`kind: "hotspots"`): numbered marker buttons on the image highlight the matching note in the
   caption's visible ordered list; positions come from the image manifest.
-- **Key insight** (one per page), **pull quote** (one per page), **decision** (options table, then chose / cost /
-  mitigation), **metric tiles** and **outcome table** with evidence badges MEASURED, ESTIMATED, QUALITATIVE
-  (shape plus text) and a legend.
 
 Lightbox, comparison and hotspot code load lazily, only on pages that use them, once the figure comes near the
-viewport (`Enhance.tsx`). `npm run check:figures` enforces the "one per page" and caption rules for every case
-study.
+viewport (`Enhance.tsx`). `npm run check:figures` enforces the "one key insight per page" and caption rules for
+every case study; `validateCaseStudy` (run by `check:content` in every build but construction) rejects an
+incomplete one.
 
 ### Numbers come from a data file
 
@@ -217,8 +228,8 @@ from the copy, card or chart it must appear in, or when a committed image is old
 
 ### Flagged examples
 
-A card and case study marked `example: true` (`src/content/examples`) are fictional: a banner above the H1, a
-"Fictional example" stamp on the card, "fictional" in the type line, noindex on the page, a footer strip on every
+A card and case study marked `example: true` (`src/content/examples`) are fictional: an example line above the
+H1, a "Fictional example" stamp on the card, "fictional" in the type line, noindex on the page, a footer strip on every
 image. Where they appear (`includesExamples` in `src/hosting/config.ts`):
 
 | Build                                         | Examples                                                   |
@@ -275,8 +286,9 @@ Netlify builds this repository with continuous deployment. The domains are confi
 - **construction**: only the under-construction page. A small Node script renders it from the design tokens and
   `src/content/about.ts` (no Next.js, no Three.js): static HTML with inline CSS, self-hosted WOFF2 subsets of
   Archivo and Martian Mono, and the contour poster (200 m on small screens, 100 m where the site's field draws
-  100 m too). The only script runs the live Bern clock and the pointer/touch headlamp; both stay off with
-  reduced motion, and the page is complete without JavaScript. Every other path redirects (302) to `/`, and
+  100 m too). Nothing moves on its own and nothing follows the pointer; the only script sets the gate's
+  submit button to "Checking…" while the password is checked, and the page is complete without JavaScript. Its
+  name and brand come from the name source (`docs/content.md`). Every other path redirects (302) to `/`, and
   `REDIRECT_DOMAINS` redirect (301) to `PRIMARY_DOMAIN`. A phone visit transfers about 80 KB
   (`npm run report:size` after a construction build).
 - **basecamp**: the full static export, plus the gate as a Netlify Edge Function. The build writes it to
@@ -299,7 +311,7 @@ deploy: pages, RSC payloads, scripts and terrain data. Only the gate's own asset
   401, `Cache-Control: no-store`.
 - The form posts `password` and `next` to `/.basecamp/unlock`. The password is compared with
   `BASECAMP_PASSWORD` in constant time (both sides hashed first). The request is accepted only from
-  `https://PRIMARY_DOMAIN` (the production page's "Basecamp access" form), from the gated host itself, or
+  `https://PRIMARY_DOMAIN` (the password form on the production page), from the gated host itself, or
   without an Origin header.
 - On success the gate sets `__Host-basecamp` (Secure, HttpOnly, SameSite=Lax, Path=/, 30 days). Its value is
   an expiry plus an HMAC-SHA-256 signature; the key is derived from the password, so changing the password logs
@@ -377,7 +389,8 @@ password stops working, so everyone has to enter the new one.
   - `heightmap-1024.webp` (53 m/px, 382 KB), `heightmap-1536.webp` (35 m/px, 710 KB) and
     `heightmap-2048.webp` (26 m/px, 1.1 MB): elevation packed into R (high byte) and G (low byte), 1 m steps,
     light σ=1 blur, stored as **lossless WebP** (about 40% smaller than PNG). Decoded in the shader as
-    `h = offset + (R·65280 + G·255)·scale`. Phones and small screens load the 1024 map, desktops the 1536 map.
+    `h = offset + (R·65280 + G·255)·scale`. Phones and small screens load the 1024 map, desktops the 1536 map
+    (from 1400 device pixels on the long edge).
     The 2048 map is only used in preview builds with `?hm=2048` (also `?hm=1024` / `?hm=1536`), to compare
     them side by side.
   - `terrain.json`: elevation range, LV95/WGS84 bbox, pixel scale, encoding, lakes and card metadata.
@@ -387,17 +400,20 @@ password stops working, so everyone has to enter the new one.
     query computed from the same spacing rule as the field (per device profile) picks one, so the poster and the
     field show the same interval (100 m on the largest screens and tablets in portrait, 200 m on phones, laptops
     and desktops up to ~1920 px).
-  - `cards/*.svg`: seeded-noise terrains for project cards (seed = collector number, ~20 lines, every 4th an
-    index line), and crop cards cut from the real terrain (200 m lines, lakes as filled shapes found as flat
-    surfaces in the DTM; no card uses one at the moment).
-  - `morph/*.webp`: per-card heightmaps the field morphs to on case-study pages.
+  - `cards/*.svg`: card terrains. Crop cards are cut from the real terrain, their trail drawn through verified
+    places from `src/content/geo-data.json` (`npm run geo`) and pinned at their spot heights; the three examples'
+    cards are crops around the Eiger, the Mönch and the Jungfrau (150 m lines, under 10 KB each). Seeded-noise
+    cards (seed = collector number) are still supported; none is configured.
+  - `morph/*.webp`: per-card heightmaps the field morphs to on case-study pages (448 px wide, about 40 KB).
   - `examples.json`: the card terrains of flagged examples (cards marked `"example": true` in the config), kept
     out of `terrain.json` so live bundles don't carry them.
   - `profile.json`: the elevation profile along the Interlaken → Jungfrau trail (`profile` in the config, 240
-    points, ~1 KB gzipped) for Basecamp's career climb.
+    points, ~1 KB gzipped), drawn along the footer's top edge.
 - `npm run terrain -- --refresh` re-downloads; `-- --placeholder` builds from procedural terrain without the
-  network; `-- --png` also writes PNG copies (git-ignored, not used by the site); `-- --only=lab-099` rebuilds only
-  the named seeded card terrains and updates their metadata, without touching the region.
+  network; `-- --png` also writes PNG copies (git-ignored, not used by the site); `-- --only=<id>` rebuilds only
+  the named card terrains and updates their metadata, without touching the region.
+- About's terrain (Bern) has its own pipeline, `npm run terrain:bern`, and the place data its own, `npm run geo`
+  (`docs/terrain.md`).
 - `*.bin` next to every heightmap: the same heights as raw 16-bit values (gradient-predicted, zigzag-coded,
   gzipped by the pipeline), about 10% smaller than the WebP. The site only fetches them in a session where a
   browser decoded a WebP to different values (see "Heightmap decode check").
@@ -429,57 +445,60 @@ Attribution: "Terrain data © swisstopo" appears in the footer of every page (an
 ## Accessibility and motion
 
 - Semantic HTML first. The hero name is server-rendered text, so LCP is text, not the canvas.
-- All interactions work with the keyboard. Each card is a single link, named "Open expedition: <name>, <type>,
-  rarity <letter>", with the focus ring around the card. Focus returns to the originating card after navigating
-  back.
-- Settling headlines keep a hidden rest-state copy of each letter, so the animation never changes layout (no CLS).
-  The accessible name is the plain text.
-- Text in the first viewport is visible from first paint; only blocks below the fold reveal (`data-reveal`).
+- All interactions work with the keyboard. Each card is a single link, named "Open case study: <name>, <type>,
+  rarity <letter>" (", Visited" once its case study was opened), with the focus ring around the card. Focus returns
+  to the originating card after navigating back.
+- Display titles are one text node each (`WeightTitle`): their arrival eases the weight at a fixed line length, so
+  it never changes layout (no CLS), and a light weight is still the whole word. Decorative copies (the flood,
+  a button's reserved labels) draw their text from `data-echo`, so screen readers read every text once.
+- Text in the first viewport is visible from first paint; only blocks below the fold reveal (`data-reveal`). Body
+  text, table cells and numbers never animate.
 - Three motion modes on `html[data-motion]`, resolved before first paint (`docs/motion.md` has the full matrix):
   - **full**, the default;
   - **calm**, the "Calm map" switch (stored in localStorage; its visible label is its name, and its
-    description reads "Reduces motion on this site"): view-transition morphs, responses and title settles
-    stay; reveals fade without their rise; ambient field motion, the headlamp, parallax, the intro sweep,
-    glints, pointer shine, tilt, loops and Lenis stop; the field holds still and only morphs between routes;
+    description reads "Reduces motion on this site"): view-transition morphs and responses stay; reveals fade
+    without their rise; title arrivals, pings, the foil sweep, tilt, foil, the field's draw-on and Lenis stop;
+    the field only morphs between routes; the red route steps from waypoint to waypoint;
   - **still**, when the OS asks for reduced motion (also without JavaScript): the field becomes the static
     poster, nothing moves or changes width, colour and opacity changes take 200 ms at most, and no View
     Transition runs at all: pages change directly and the incoming page fades in over 150 ms (opacity only);
     focus return and scroll restoration work as in full motion. Still always wins over the switch, which then
     shows on and says why.
+- Nothing follows the pointer but the Summit Card's tilt and foil (`src/lib/pointer.test.ts`,
+  `npm run test:e2e -- pointer`). The route's red is used only for the red route, trail links and their blazes
+  (the "route red" test in `src/styles/tokens.test.ts`).
 - After every route change focus moves to the new page's H1, so screen readers announce it (going back to the
   deck focuses the card you came from instead). Browser back and forward cross-fade in 180 ms with the shared
   elements; links run the arrival choreography (`docs/motion.md`, Route transitions).
 - Navigation finishes cleanly even when a view transition is skipped, times out or fails: React commits the
-  route change anyway, and the arriving heading settles. `npm run test:e2e -- transitions` simulates all three
-  (forward, browser back, forward again, the in-page back link, open again) plus calm, still and
-  the previous return (`?vt=classic`), and checks the page, focus, the field's terrain (`data-terrain` on the
-  backdrop), the return's phases (exit, travel, card rebuild; browser back: the traversal cross-fade) and that
-  nothing is left hidden. It needs
-  Playwright with Chromium and a build in `out/`.
+  route change anyway. `npm run test:e2e -- transitions` simulates all three (forward, browser back, forward
+  again, the in-page back link, open again) plus calm, still and the previous return (`?vt=classic`), and checks
+  the page, focus, the field's terrain (`data-terrain` on the backdrop), the return's phases (exit, travel, card
+  rebuild; browser back: the traversal cross-fade) and that nothing is left hidden. It needs Playwright with
+  Chromium and a build in `out/`.
+- Contrast is checked by `npm run check:contrast`: text over the field at least 7:1 (in a quiet zone, on the HUD
+  backdrop, knocked out), text on paper (the case-study summary) and raised surfaces at least 4.5:1, meaningful
+  marks (the route, focus rings, outlines, rarity shapes) at least 3:1. On paper only `paperInk`, `paperInk2`,
+  `mossInk` and `alpenglowInk` carry text. Contour-coloured labels keep their halo (`.keep-halo`), and the
+  poster fallback keeps all halos and its vignette.
+- Body text is measured as rendered: `npm run check:legibility` screenshots every `.body-copy` block (and the
+  footer and tables, `.knockout`) and every label over the field on the home page, a case study, the case-study
+  example (when built) and About, at 1440×900 and 390×844, over the field, over the field caught mid-morph
+  (preview builds) and over the poster. It requires at least 7:1 against the brightest background pixel under or
+  next to a glyph, and lines under the glyphs at most 15% of a lit line. Text on opaque surfaces
+  (`.surface-copy`: captions, the summary, the key insight) is measured too; dark text on paper needs 4.5:1 (no
+  lines run behind it). It also fails when a page is wider than the phone (it would pan sideways).
 
 ### Preview-only switches
 
-Dev and preview builds (`NEXT_PUBLIC_PREVIEW=1`, so the Basecamp deploy) understand three query parameters;
+Dev and preview builds (`NEXT_PUBLIC_PREVIEW=1`, so the Basecamp deploy) understand these query parameters;
 production builds compile them out:
 
 - `?motion=full|calm|still` loads the page in that motion mode (the OS setting for reduced motion still wins);
-
 - `?name=…` shows the hero with another name, to check the layout for other lengths (the name is set on at
   most two lines and sized by its longest line);
 - `?vt=classic` switches the way back to the deck to the previous plain morph for the rest of the session, and
-  `?vt=new` back to the card reassembly. This switch is temporary.
-- WCAG AA contrast is checked by `npm run check:contrast`, including sheet and glacier text over the faded
-  lines of a quiet zone, body text over its knockout and legend panels, and display type at every step of its
-  hover shine. Contour-coloured labels keep their halo (`.keep-halo`), and the poster fallback keeps all halos
-  and its vignette.
-- Body text is measured as rendered: `npm run check:legibility` screenshots every `.body-copy` block (and the
-  footer and tables, `.knockout`) on the home page, a case study, the case-study example (when built) and
-  Basecamp, at 1440×900 and 390×844, over the field with the headlamp lit right on the text and over the poster.
-  It requires at least 7:1 against the brightest background pixel under or next to a glyph, and lines under the
-  glyphs at most 15% of a lit line. Text on opaque surfaces (`.surface-copy`: captions, the summary, the banner,
-  the key insight, metric tiles) is measured too; dark text on the sheet colour needs 4.5:1 (no lines run
-  behind it). It also fails when a page is wider than the phone (it would pan sideways).
-- The HUD clock always shows the live Bern time, calm and still included (a changing time is content, not
-  motion); it keeps a fixed width, so filling it in after hydration moves nothing. The dot next to it is a
-  static neutral marker. Below 880 px (phones, tablets in portrait) it moves into the footer with
-  Expeditions, Contact and CV.
+  `?vt=new` back to the card reassembly. This switch is temporary;
+- `?tier=desktop|mobile|low` (or `A`, `B`, `C`), `?dpr=…` and `?hm=1024|1536|2048` set the field's tier, DPR cap
+  and heightmap for one page load (`docs/terrain.md`). `?field=force`, which skips the field's low-spec checks
+  (headless browsers), works in every build.

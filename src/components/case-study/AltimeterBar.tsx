@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef } from "react";
-import { caseStudyLabels } from "@/content/cards";
+import { caseStudyLabels } from "@/content/card-labels";
 import { haptic } from "@/lib/haptics";
 import { meterReading, useReading } from "./reading";
 import styles from "./CaseStudy.module.css";

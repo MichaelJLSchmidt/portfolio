@@ -58,9 +58,9 @@
      is centred --stem-x from the title's end and --stem-w wide (the T of Archivo at the display
      axes); the card is 1.3 times the type size tall, its foot --card-drop below the line, its
      centre 0.22 of its width left of the stem, and the shoulders start 0.38 of its height above
-     its foot. Landscape screens from 768 px take this layout: Bern's framing follows the
+     its foot. Landscape screens from 640 px take this layout: Bern's framing follows the
      orientation, not the width. */
-  @media (orientation: landscape) and (min-width: 768px) {
+  @media (orientation: landscape) and (min-width: 640px) {
     .header {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }

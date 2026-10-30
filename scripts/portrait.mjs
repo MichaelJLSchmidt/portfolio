@@ -11,8 +11,8 @@
 //   person's own colours.
 // - --contours: faint contour lines (8%) over the background part of the cut-out, faded out over
 //   the face (an ellipse around the upper middle, where a head-and-shoulders portrait has it).
-// - Writes src/content/portrait.json (sizes and sources); about.ts reads it and the placeholder
-//   goes away. Deterministic for the same input.
+// - Writes src/content/portrait.json (sizes and sources). Then, in src/content/about.ts, import it
+//   as `portrait.image` and delete `missing` (docs/content.md). Deterministic for the same input.
 import { mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";

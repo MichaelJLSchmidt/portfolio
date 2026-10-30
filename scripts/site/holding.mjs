@@ -91,15 +91,15 @@ function css({ fonts, poster }) {
     `.field input{flex:1;min-width:0;min-height:48px;margin:0;padding:0 14px;border:1px solid var(--color-contour);border-radius:2px;background:rgb(27 28 24/.88);color:var(--color-paper-dusk);font:inherit}`,
     `.line{position:absolute;inset:auto 0 0;height:2px;background:var(--color-glacier);transform:scaleX(0);transform-origin:left center;transition:transform var(--dur-trail) var(--ease-settle);pointer-events:none}`,
     `.input:focus-within .line{transform:none}`,
-    // An error is the signal colour and the message, never a shake.
-    `.field input[aria-invalid=true]{border-color:var(--color-signal)}`,
-    `.field input[aria-invalid=true]+.line{background:var(--color-signal)}`,
+    // An error is alpenglow and the message, never a shake (red is the route's alone).
+    `.field input[aria-invalid=true]{border-color:var(--color-alpenglow)}`,
+    `.field input[aria-invalid=true]+.line{background:var(--color-alpenglow)}`,
     `.field button{flex:0 0 auto;min-height:48px;margin:0;padding:0 18px;border:0;border-radius:2px;background:var(--color-glacier);color:var(--color-ground);${label};font-size:.8125rem;letter-spacing:.08em;cursor:pointer}`,
     `.field button:hover{background:var(--color-paper-dusk)}`,
     `.field button[aria-disabled=true]{cursor:progress}`,
     `:focus-visible{outline:2px solid var(--color-glacier);outline-offset:3px}`,
     `.field input:focus-visible{outline-offset:2px}`,
-    `.error{margin:12px 0 0;color:var(--color-signal)}`,
+    `.error{margin:12px 0 0;color:var(--color-alpenglow)}`,
     // Reduced motion: the underline appears at once.
     `@media (prefers-reduced-motion:reduce){.line{transition:none}}`,
     `.closed{margin:0;color:var(--color-contour)}`,

@@ -5,7 +5,8 @@ import styles from "./Home.module.css";
  * The four "How I lead" illustrations: monoline drawings (1.5 px, non-scaling, in the contour
  * colour; route red only where a line is the route), a few dozen paths each, inlined and hidden
  * from screen readers (the principle's text says what they show). Every path has pathLength 1, so
- * the stylesheet can draw it on with the scroll in full motion (Home.module.css).
+ * the stylesheet can draw it on with the scroll in full motion (Home.module.css). Each is a
+ * waypoint of the page's red route, which passes behind it (RouteLayer).
  */
 const route = (d: string) => <path className={styles.illoRoute} d={d} pathLength={1} />;
 const line = (d: string) => <path d={d} pathLength={1} />;
@@ -83,7 +84,7 @@ export function LeadIllustration({ name }: { name: string }) {
   const drawing = drawings[name];
   if (!drawing) return null;
   return (
-    <svg className={styles.illo} viewBox="0 0 240 160" aria-hidden="true" focusable="false">
+    <svg className={styles.illo} viewBox="0 0 240 160" aria-hidden="true" focusable="false" data-route={`lead-${name}`} data-route-anchor="center">
       {drawing}
     </svg>
   );

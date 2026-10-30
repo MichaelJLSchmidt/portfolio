@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, type CSSProperties } from "react";
-import { cards } from "@/content/cards";
+import type { SummitCardData } from "@/content/cards";
 import { flood } from "@/content/flood";
 import type { home } from "@/content/home";
 import { rememberOrigin, takeOrigin } from "@/components/transition/return-focus";
@@ -18,10 +18,10 @@ export type DeckEntry = { problem: string; result: string; role: string; spot: s
  * panorama seen from Interlaken), each raised by its real summit height, with a plain caption
  * under it (problem, result, role). Phones: a vertical stack at 86% width, alternately offset,
  * each card with its spot height beside it. No carousel. Each card arrives once per session as it
- * enters (SummitCard). The copy and the captions arrive as props from the server page: importing
- * the content here would put it into this client component's bundle.
+ * enters (SummitCard). The cards, the copy and the captions arrive as props from the server page:
+ * importing the content here would put it into this client component's bundle.
  */
-export function Deck({ copy: t, entries = {} }: { copy: typeof home.work; entries?: Record<string, DeckEntry> }) {
+export function Deck({ copy: t, cards, entries = {} }: { copy: typeof home.work; cards: readonly SummitCardData[]; entries?: Record<string, DeckEntry> }) {
   // Coming back from a card's page: that card is in view and focused. A layout effect, so it
   // happens before a view transition captures the deck, which then rebuilds the card where the
   // reader sees it (return-transition.ts).
@@ -50,7 +50,7 @@ export function Deck({ copy: t, entries = {} }: { copy: typeof home.work; entrie
       </div>
       {!empty && (
         <div className={styles.ridge}>
-          <svg className={styles.ridgeLine} viewBox="0 0 300 100" preserveAspectRatio="none" aria-hidden="true">
+          <svg className={styles.ridgeLine} viewBox="0 0 300 100" preserveAspectRatio="none" aria-hidden="true" data-route="ridge" data-route-anchor="ridge">
             <path
               d={`M0 100${cards
                 .map((c, i) => {

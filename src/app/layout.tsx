@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { archivo, archivoItalic, martianMono } from "./fonts";
+import { cardTerrains } from "@/content/cards";
 import { site } from "@/content/site";
 import { color, tokensToCss } from "@/styles/tokens";
 import { motionModeScript } from "@/lib/motion-mode";
@@ -36,7 +37,12 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang={site.lang} className={`${archivo.variable} ${archivoItalic.variable} ${martianMono.variable}`} suppressHydrationWarning>
+    <html
+      lang={site.lang}
+      className={`${archivo.variable} ${archivoItalic.variable} ${martianMono.variable}`}
+      data-card-terrains={JSON.stringify(cardTerrains())}
+      suppressHydrationWarning
+    >
       <head>
         {/* The tokens' custom properties, in the tokens layer (globals.css explains the layers). */}
         <style dangerouslySetInnerHTML={{ __html: `${LAYER_ORDER}@layer tokens{${tokensToCss()}${springsToCss()}}` }} />

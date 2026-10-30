@@ -29,6 +29,9 @@
 //                                     traversals, Basecamp, still (scripts/e2e/choreography.mjs)
 //   npm run test:e2e -- reading       the HUD waypoint readout, the trail, the altimeter bar, the
 //                                     career profile per mode, no endless loops (choreography.mjs)
+//   npm run test:e2e -- route         the red route: one path through every waypoint, never across
+//                                     text, the phone margin, the blaze; full (scroll timeline,
+//                                     Lenis), the fallback, calm, still (scripts/e2e/route.mjs)
 //   npm run test:e2e -- access        forced colours, headings read once, the haptics map
 //                                     (scripts/e2e/choreography.mjs)
 //   npm run test:e2e -- wording       no old names, CV or job-seeking phrases in the built HTML
@@ -60,6 +63,7 @@ import { cards } from "./e2e/cards.mjs";
 import { access, arrival, reading } from "./e2e/choreography.mjs";
 import { smoke } from "./e2e/smoke.mjs";
 import { flood, inp, pointer, portrait, trail } from "./e2e/interaction.mjs";
+import { route } from "./e2e/route.mjs";
 import { wordingHits } from "./check-wording.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -752,6 +756,11 @@ const motionProbe = () => {
   addEventListener("scroll", () => note(`scroll ${Math.round(scrollY)}`), true);
   document.addEventListener("animationstart", (e) => note(`anim ${e.animationName}`), true);
   document.addEventListener("transitionrun", (e) => note(`trans ${e.propertyName} ${String(e.target.className?.baseVal ?? e.target.className).slice(0, 30)}`), true);
+  // Focus moves (a focus ring's transition, a pre-warm on focus) and pointer crossings, by target.
+  document.addEventListener("focusin", (e) => note(`focusin ${e.target.tagName} ${(e.target.getAttribute?.("href") ?? "").slice(0, 30)}`), true);
+  document.addEventListener("focusout", (e) => note(`focusout ${e.target.tagName}`), true);
+
+  document.addEventListener("pointerover", (e) => note(`pointerover ${e.target.tagName}.${String(e.target.className?.baseVal ?? e.target.className).slice(0, 24)}`), true);
   const positional = /^(transform|translate|scale|rotate|font-stretch|font-weight|font-variation-settings|left|top|right|bottom|width|height|clip-path|background-position)$/;
   document.addEventListener(
     "animationstart",
@@ -846,20 +855,29 @@ async function modes() {
     ).catch(() => {});
     // Responses to that input (a pre-warm of the next terrain on focus, which waits for its
     // heightmap) finish first: wait until the field has drawn nothing for 700 ms.
+    // One loop in the page (polls that overlap could start the idle window between two of those
+    // responses): it ends once 1.5 s pass without a draw, or after 8 s. The pre-warm's heightmap
+    // can land well after the focus has left on the software renderer, and its frame is a response.
     await page.evaluate(() => document.activeElement?.blur());
-    await page.waitForFunction(
+    await page.evaluate(
       () =>
         new Promise((done) => {
-          const n = window.__motion.draws;
-          setTimeout(() => done(window.__motion.draws === n), 700);
+          const start = performance.now();
+          let n = window.__motion.draws;
+          let quietSince = start;
+          const tick = () => {
+            const now = performance.now();
+            if (window.__motion.draws !== n) [n, quietSince] = [window.__motion.draws, now];
+            if (now - quietSince >= 1500 || now - start > 8000) return done();
+            setTimeout(tick, 50);
+          };
+          tick();
         }),
-      null,
-      { timeout: 10000, polling: 100 },
-    ).catch(() => {});
+    );
     const idleStart = await page.evaluate(() => [window.__motion.draws, performance.now()]);
     await page.waitForTimeout(2500);
     const idleDraws = (await page.evaluate(() => window.__motion.draws)) - idleStart[0];
-    const idleLog = await page.evaluate((t0) => window.__motion.log.filter((l) => Number(l.split(" ")[0]) > t0 - 500 && !l.endsWith(" draw")).slice(0, 12).join(" | "), idleStart[1]);
+    const idleLog = await page.evaluate((t0) => `idle from ${Math.round(t0)}: ` + window.__motion.log.filter((l) => Number(l.split(" ")[0]) > t0 - 1500).filter((l) => !/ trans /.test(l)).slice(0, 24).join(" | "), idleStart[1]);
     // Card → case study morphs; case study → case study has no shared element yet (no View
     // Transition); back to the deck morphs again.
     await next.click();
@@ -1045,7 +1063,7 @@ async function wording() {
 const scenarios = { transitions, modes, hydration, primitives, decode, casestudy, wording };
 // The terrain conductor and the Bern terrain (scripts/e2e-terrain.mjs).
 Object.assign(scenarios, (await import("./e2e-terrain.mjs")).terrainScenarios({ browser, base, root, check, settle }));
-Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, about, ia, phone, fontswap, hud, toast, cards, arrival, reading, access, flood, trail, portrait, pointer, inp, smoke }).map(([name, run]) => [name, () => run({ browser, playwright, base, basePath, root, check, open, settle })])));
+Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, about, ia, phone, fontswap, hud, toast, cards, arrival, reading, access, flood, trail, portrait, pointer, inp, smoke, route }).map(([name, run]) => [name, () => run({ browser, playwright, base, basePath, root, check, open, settle })])));
 try {
   for (const [name, run] of Object.entries(scenarios)) if (!only || only === name) await run();
 } finally {

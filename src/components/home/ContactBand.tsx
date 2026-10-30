@@ -8,7 +8,7 @@ import styles from "./Home.module.css";
 /** "Get in touch": the closing section on home and About (#contact): email, LinkedIn, Copy address. */
 export function ContactBand() {
   return (
-    <section id="contact" className={`${styles.section} ${styles.contact}`} aria-labelledby="contact-heading">
+    <section id="contact" className={`${styles.section} ${styles.contact}`} aria-labelledby="contact-heading" data-route="contact">
       <SectionHead id="contact-heading" heading={contact.heading} align="center" flood={flood.sections.contact}>
         <p className={`${styles.contactLine} body-copy`}>{contact.line}</p>
       </SectionHead>

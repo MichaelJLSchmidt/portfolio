@@ -389,16 +389,6 @@
     white-space: nowrap;
   }
 
-  .statRoll {
-    display: inline-flex;
-    align-items: baseline;
-  }
-
-  /* The words between the numbers keep their spaces inside the flex row. */
-  .statRoll > span:not([class]) {
-    white-space: pre;
-  }
-
   /* Under the impact's after-value: "from <before>" (and what it counts). */
   .statNote {
     display: block;

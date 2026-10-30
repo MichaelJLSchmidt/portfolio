@@ -100,9 +100,11 @@ export function DecisionFork({ decision: d, heading, headingLevel = 3 }: { decis
  * characters with numbered side notes in a narrow margin (inline mono blocks on phones);
  * figures, decisions (fork diagrams) and the one key insight between. The sticky timeline beside
  * it is the page's (WaypointTrail). Below the large breakpoint each stage ends with
- * "Next stage ↓ / Back to top ↑".
+ * "Next stage ↓ / Back to top ↑". Each stage is a waypoint of the red route (RouteLayer); the
+ * stages after the ascent's last railway station are climbed on foot, so the route is a blaze
+ * from the first of them.
  */
-export function Stages({ study, places }: { study: CaseStudy; places: readonly AscentPlace[] }) {
+export function Stages({ study, places, lastStation }: { study: CaseStudy; places: readonly AscentPlace[]; lastStation: number }) {
   const figures = figureNumbers(study);
   const decisions = decisionNumbers(study);
   const notes = noteNumbers(study);
@@ -112,7 +114,15 @@ export function Stages({ study, places }: { study: CaseStudy; places: readonly A
         const place = places[index];
         const next = study.stages[index + 1];
         return (
-          <section key={stage.id} id={stage.id} className={styles.stage} aria-labelledby={`${stage.id}-heading`} data-waypoint>
+          <section
+            key={stage.id}
+            id={stage.id}
+            className={styles.stage}
+            aria-labelledby={`${stage.id}-heading`}
+            data-waypoint
+            data-route={stage.id}
+            data-route-blaze={index > lastStation ? "" : undefined}
+          >
             {groups(stage.blocks).map((part, g) => {
               const heading = g === 0 && (
                 <h2 id={`${stage.id}-heading`} className={styles.heading}>

@@ -39,7 +39,7 @@ export function TrailheadSpread({
   labels: { problem: string; result: string; gain: string };
 }) {
   return (
-    <header className={styles.spread}>
+    <header className={styles.spread} data-route="trailhead">
       {example && (
         <p className={`${styles.example} hud-label map-halo`} data-vt-exit>
           {example}

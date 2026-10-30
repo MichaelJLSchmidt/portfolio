@@ -43,7 +43,7 @@ Installing needs `MOTION_TOKEN` in the environment (see README). Never write the
 - Every runtime asset URL that doesn't go through `next/link` or `next/image` (textures, terrain SVGs, fetch calls)
   must use `asset()` from `src/lib/asset.ts`, or it breaks in a sub-path build.
 - Accessibility: semantic HTML first, content readable without JavaScript, keyboard operable, WCAG AA contrast
-  (on the sheet colour only sheet-ink, moss-ink, alpenglow-ink or ground).
+  (on paper only paper-ink, paper-ink-2, moss-ink or alpenglow-ink: `paperSafeInk`); red only for the route.
 - Motion: three modes on `html[data-motion]` (full; calm, the Calm map switch; still, OS reduced motion) via
   `useMotionMode()`; apply the primitives and tokens in `docs/motion.md`, every effect with calm and still twins.
 - Keep heavy code out of the initial bundle (Three/R3F and Motion load lazily) and keep transfer per visit small.

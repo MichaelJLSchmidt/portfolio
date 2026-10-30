@@ -5,9 +5,8 @@
    on phones; the haptics switch joins from 640 px (below, it is in the footer).
 
    Height 56 px. Once the page has scrolled (data-condensed, HudFrame.tsx) the backdrop
-   strengthens, the bar's row moves up to sit in 44 px and the mono labels narrow from wdth 87.5
-   to 75 inside boxes reserved at their rest width, so nothing moves. Still mode keeps the row and
-   the widths and only strengthens the backdrop. */
+   strengthens and the bar's row moves up to sit in 44 px; the labels keep their width, so nothing
+   beside them moves. Still mode keeps the row and only strengthens the backdrop. */
 
 @layer components {
   .hud {

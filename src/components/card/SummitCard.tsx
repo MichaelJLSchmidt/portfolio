@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Suspense, lazy, useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { COST_SCALE, cardHref, cardLabels, cardStats, coordinatesLine, type SummitCardData } from "@/content/cards";
+import { COST_SCALE, cardHref, cardLabels, cardStats, coordinatesLine } from "@/content/card-labels";
+import type { SummitCardData } from "@/content/cards";
 import { withValues } from "@/lib/content";
 import { haptic } from "@/lib/haptics";
 import { useFinePointer, useIdle } from "@/lib/idle";
