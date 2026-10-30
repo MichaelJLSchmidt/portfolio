@@ -16,7 +16,8 @@
 //     of a glacier-bright line (a fixed yardstick: lit lines used to turn glacier; they now stay
 //     neutral and fainter).
 // Pass: contrast ≥ 7:1 for light text, line strength ≤ 15% over the field; dark text on the sheet
-// colour (no field lines behind it) ≥ 4.5:1, the WCAG AA level its inks are chosen for.
+// colour (no field lines behind it) ≥ 4.5:1, the WCAG AA level its inks are chosen for, and so is
+// light text on an opaque panel (raised ground: a logbook, a results table), which hides the field.
 //
 //   npm run check:legibility           (a build in out/, Playwright as for npm run test:e2e)
 //   npm run check:legibility -- --list (print every element, not only the worst per page)
@@ -255,7 +256,15 @@ for (const mode of pick(modes)) {
             max = Math.max(max, l);
           }
           const dark = max < 0.2;
-          return { textL: dark ? max : min, dark, label: el.textContent.trim().replace(/\s+/g, " ").slice(0, 44) };
+          // An opaque background between the text and the field (up to the body): a panel.
+          let panel = false;
+          for (let n = el; n && n !== document.body; n = n.parentElement) {
+            if (rgba(getComputedStyle(n).backgroundColor)[3] >= 250) {
+              panel = true;
+              break;
+            }
+          }
+          return { textL: dark ? max : min, dark, panel, label: el.textContent.trim().replace(/\s+/g, " ").slice(0, 44) };
         }, i);
         // The box is taken once the element has settled (an entrance or a plaque still rising
         // would shift it under the clip), and checked again after the shots.
@@ -340,13 +349,14 @@ for (const mode of pick(modes)) {
         }
         const m = measure(b1, t, b2, info.textL, info.dark);
         if (!m) continue;
-        const ok = info.dark ? m.contrast >= MIN_CONTRAST_ON_SHEET : m.contrast >= MIN_CONTRAST && (mode.reduced || m.strength <= MAX_LINE);
+        const onSheet = info.dark || info.panel;
+        const ok = onSheet ? m.contrast >= MIN_CONTRAST_ON_SHEET : m.contrast >= MIN_CONTRAST && (mode.reduced || m.strength <= MAX_LINE);
         if (!ok) failures++;
-        const row = { mode: mode.name, vp: vp.name, page: p.name, label: info.label, dark: info.dark, ...m, ok };
+        const row = { mode: mode.name, vp: vp.name, page: p.name, label: info.label, dark: info.dark, panel: info.panel, ...m, ok };
         rows.push(row);
         if (listAll) print(row);
-        // Worst per page relative to its own threshold (dark text on the sheet has a lower one).
-        const margin = (x) => x.contrast / (x.dark ? MIN_CONTRAST_ON_SHEET : MIN_CONTRAST);
+        // Worst per page relative to its own threshold (the sheet and panels have a lower one).
+        const margin = (x) => x.contrast / (x.dark || x.panel ? MIN_CONTRAST_ON_SHEET : MIN_CONTRAST);
         if (!worst || margin(row) < margin(worst)) worst = row;
       }
       if (!listAll && worst) print(worst, " (worst on the page)");
@@ -356,7 +366,7 @@ for (const mode of pick(modes)) {
 }
 
 function print(r, suffix = "") {
-  const line = r.dark ? "on sheet " : `line ${(r.strength * 100).toFixed(0).padStart(3)}%`;
+  const line = r.dark ? "on sheet " : r.panel ? "on panel " : `line ${(r.strength * 100).toFixed(0).padStart(3)}%`;
   console.log(`${r.ok ? "pass" : "FAIL"}  ${r.contrast.toFixed(2).padStart(6)}:1  ${line}  ${r.mode} · ${r.vp} · ${r.page}: "${r.label}"${suffix}`);
 }
 
@@ -370,5 +380,5 @@ for (const mode of modes) {
 }
 await browser.close();
 server.kill();
-if (failures) console.error(`\n${failures} text block(s) below ${MIN_CONTRAST}:1 (${MIN_CONTRAST_ON_SHEET}:1 for dark text on the sheet) or with lines above ${MAX_LINE * 100}% under the glyphs.`);
+if (failures) console.error(`\n${failures} text block(s) below ${MIN_CONTRAST}:1 (${MIN_CONTRAST_ON_SHEET}:1 on the sheet or a panel) or with lines above ${MAX_LINE * 100}% under the glyphs.`);
 process.exit(failures ? 1 : 0);
