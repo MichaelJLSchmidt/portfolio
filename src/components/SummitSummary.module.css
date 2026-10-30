@@ -1,132 +1,137 @@
+@layer reset, tokens, base, layout, components, utilities;
+
 /* Summit summary: sheet colour, so only sheet-safe inks (ground, sheet-ink, moss-ink, alpenglow-ink). */
-.summary {
-  --sheet-dur: var(--dur-medium);
-  display: grid;
-  gap: 20px;
-  scroll-margin-top: 96px;
-  padding: 24px;
-  border-radius: 12px;
-  background: var(--color-sheet);
-  color: var(--color-ground);
-}
 
-.heading {
-  --kt-color: var(--color-moss-ink);
-  color: var(--color-moss-ink);
-  font-weight: 700;
-}
-
-.heading[data-role] {
-  --kt-rest-wght: 700;
-  --kt-from-wght: 700;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px 24px;
-  margin: 0;
-}
-
-.grid > div {
-  display: grid;
-  gap: 4px;
-  align-content: start;
-  padding-top: 12px;
-  border-top: 1px solid rgb(90 92 82 / 0.45);
-}
-
-.wide {
-  grid-column: 1 / -1;
-}
-
-/* Wider screens: a sentence row reads label | value, so the six rows scan down the left edge. */
-@media (min-width: 640px) {
-  .grid > .wide {
-    grid-template-columns: minmax(8rem, 13rem) minmax(0, 1fr);
-    column-gap: 24px;
+@layer components {
+  .summary {
+    --sheet-dur: var(--dur-medium);
+    display: grid;
+    gap: 20px;
+    scroll-margin-top: 96px;
+    padding: 24px;
+    border-radius: 12px;
+    background: var(--color-sheet);
+    color: var(--color-ground);
   }
-}
 
-.grid dt {
-  color: var(--color-sheet-ink);
-  font-family: var(--font-mono);
-  font-size: var(--type-hud-size);
-  font-stretch: var(--axis-mono-rest-wdth);
-  letter-spacing: var(--type-hud-tracking);
-  text-transform: uppercase;
-}
+  .heading {
+    --kt-color: var(--color-moss-ink);
+    color: var(--color-moss-ink);
+    font-weight: 700;
+  }
 
-.grid dd {
-  margin: 0;
-}
+  .heading[data-role] {
+    --kt-rest-wght: 700;
+    --kt-from-wght: 700;
+  }
 
-/* Three columns are narrow on the smallest phones: a long word wraps inside its column
-   instead of widening the page. */
-.grid dt,
-.grid dd {
-  overflow-wrap: anywhere;
-}
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px 24px;
+    margin: 0;
+  }
 
-.stat {
-  font-family: var(--font-mono);
-  font-size: 1.3rem;
-  font-weight: 700;
-  font-stretch: var(--axis-mono-rest-wdth);
-}
+  .grid > div {
+    display: grid;
+    gap: 4px;
+    align-content: start;
+    padding-top: 12px;
+    border-top: 1px solid rgb(90 92 82 / 0.45);
+  }
 
-/* A stat that is a phrase ("~2,800 applications a year …"): text, set a little heavier. */
-.statText {
-  font-weight: 650;
-  line-height: 1.4;
-}
-
-/* Outcomes as a list, each with its evidence badge. */
-.grid dd ul {
-  display: grid;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.grid dd li {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px 10px;
-}
-
-/* A plain list (what I put in place): a short dash marks each item. */
-.grid dd ul[data-marks] li {
-  display: block;
-  position: relative;
-  padding-left: 1.1em;
-}
-
-.grid dd ul[data-marks] li::before {
-  content: "–";
-  position: absolute;
-  left: 0;
-  color: var(--color-sheet-ink);
-}
-
-.note {
-  color: var(--color-sheet-ink);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-}
-
-/* Phones: a stat that is a phrase takes the whole row instead of breaking inside a narrow column. */
-@media (width < 640px) {
-  .grid > [data-long] {
+  .wide {
     grid-column: 1 / -1;
   }
-}
 
-@media (min-width: 1024px) {
-  .summary {
-    padding: 32px 36px;
+  /* Wider screens: a sentence row reads label | value, so the six rows scan down the left edge. */
+  @media (min-width: 640px) {
+    .grid > .wide {
+      grid-template-columns: minmax(8rem, 13rem) minmax(0, 1fr);
+      column-gap: 24px;
+    }
+  }
+
+  .grid dt {
+    color: var(--color-sheet-ink);
+    font-family: var(--font-mono);
+    font-size: var(--type-hud-size);
+    font-stretch: var(--axis-mono-rest-wdth);
+    letter-spacing: var(--type-hud-tracking);
+    text-transform: uppercase;
+  }
+
+  .grid dd {
+    margin: 0;
+  }
+
+  /* Three columns are narrow on the smallest phones: a long word wraps inside its column
+     instead of widening the page. */
+  .grid dt,
+  .grid dd {
+    overflow-wrap: anywhere;
+  }
+
+  .stat {
+    font-family: var(--font-mono);
+    font-size: 1.3rem;
+    font-weight: 700;
+    font-stretch: var(--axis-mono-rest-wdth);
+  }
+
+  /* A stat that is a phrase ("~2,800 applications a year …"): text, set a little heavier. */
+  .statText {
+    font-weight: 650;
+    line-height: 1.4;
+  }
+
+  /* Outcomes as a list, each with its evidence badge. */
+  .grid dd ul {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .grid dd li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 10px;
+  }
+
+  /* A plain list (what I put in place): a short dash marks each item. */
+  .grid dd ul[data-marks] li {
+    display: block;
+    position: relative;
+    padding-left: 1.1em;
+  }
+
+  .grid dd ul[data-marks] li::before {
+    content: "–";
+    position: absolute;
+    left: 0;
+    color: var(--color-sheet-ink);
+  }
+
+  .note {
+    color: var(--color-sheet-ink);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+  }
+
+  /* Phones: a stat that is a phrase takes the whole row instead of breaking inside a narrow column. */
+  @media (width < 640px) {
+    .grid > [data-long] {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .summary {
+      padding: 32px 36px;
+    }
   }
 }

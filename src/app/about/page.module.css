@@ -1,287 +1,291 @@
-.main {
-  --main-top: 96px;
-  --main-gap: clamp(48px, 7vw, 112px);
-  display: grid;
-  gap: var(--main-gap);
-  padding-top: var(--main-top);
-}
+@layer reset, tokens, base, layout, components, utilities;
 
-/* ------------------------------------------------------------- header */
+@layer components {
+  .main {
+    --main-top: 96px;
+    --main-gap: clamp(48px, 7vw, 112px);
+    display: grid;
+    gap: var(--main-gap);
+    padding-top: var(--main-top);
+  }
 
-/* The H1 is the HUD label's morph target: big, alone, with the lead beside it on desktop. */
-/* The field's zero-point pin sits at the centre of the screen, the Aare's start above it: both
-   stay in view and clear of text, so the header reaches 56 px past the screen's middle before the
-   legend begins (its text at the top on phones, beside the H1's baseline on desktop). */
-.header {
-  display: grid;
-  gap: 20px;
-  align-content: start;
-  align-items: end;
-  min-height: calc(50svh + 56px - var(--main-top) - var(--main-gap));
-  padding-top: clamp(24px, 6vw, 96px);
-}
+  /* ------------------------------------------------------------- header */
 
-/* Basecamp's one display size: its widest word (--title-em, measured at the display axes) fills
-   96% of the name's column, up to 12rem, so it never runs into the lead beside it. */
-.nameCell {
-  container-type: inline-size;
-}
-
-.name {
-  font-size: min(calc(0.96 * 100cqi / var(--title-em, 5)), 12rem);
-}
-
-.lead {
-  max-width: 36ch;
-  font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.75rem);
-  font-weight: 560;
-  line-height: 1.35;
-}
-
-.lead[data-role] {
-  --kt-rest-wdth: 100%;
-  --kt-rest-wght: 560;
-}
-
-@media (min-width: 1024px) {
+  /* The H1 is the HUD label's morph target: big, alone, with the lead beside it on desktop. */
+  /* The field's zero-point pin sits at the centre of the screen, the Aare's start above it: both
+     stay in view and clear of text, so the header reaches 56 px past the screen's middle before the
+     legend begins (its text at the top on phones, beside the H1's baseline on desktop). */
   .header {
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-    align-content: end;
-    column-gap: clamp(32px, 4vw, 72px);
+    display: grid;
+    gap: 20px;
+    align-content: start;
+    align-items: end;
+    min-height: calc(50svh + 56px - var(--main-top) - var(--main-gap));
+    padding-top: clamp(24px, 6vw, 96px);
+  }
+
+  /* Basecamp's one display size: its widest word (--title-em, measured at the display axes) fills
+     96% of the name's column, up to 12rem, so it never runs into the lead beside it. */
+  .nameCell {
+    container-type: inline-size;
+  }
+
+  .name {
+    font-size: min(calc(0.96 * 100cqi / var(--title-em, 5)), 12rem);
   }
 
   .lead {
-    align-self: end;
-    padding-bottom: 1.2em;
+    max-width: 36ch;
+    font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.75rem);
+    font-weight: 560;
+    line-height: 1.35;
   }
-}
 
-/* ------------------------------------------------------------- legend and bio */
-
-.who {
-  display: grid;
-  gap: clamp(28px, 4vw, 56px);
-  align-items: start;
-}
-
-.legend {
-  display: grid;
-  gap: 14px;
-}
-
-.legendHeading {
-  --kt-color: var(--color-moss-ink);
-  color: var(--color-moss-ink);
-  font-weight: 700;
-}
-
-.legendHeading[data-role] {
-  --kt-rest-wght: 700;
-  --kt-from-wght: 700;
-}
-
-.legendRows {
-  display: grid;
-  gap: 0;
-  margin: 0;
-}
-
-.legendRows > div {
-  display: grid;
-  gap: 2px 16px;
-  padding-block: 10px;
-  border-top: 1px solid rgb(90 92 82 / 0.45);
-}
-
-/* Label beside value where there is room; above it on phones. */
-@media (min-width: 640px) {
-  .legendRows > div {
-    grid-template-columns: minmax(6.5rem, 9rem) minmax(0, 1fr);
+  .lead[data-role] {
+    --kt-rest-wdth: 100%;
+    --kt-rest-wght: 560;
   }
-}
 
-.legendRows dt {
-  color: var(--color-sheet-ink);
-  font-family: var(--font-mono);
-  font-size: var(--type-hud-size);
-  font-stretch: var(--axis-mono-rest-wdth);
-  letter-spacing: var(--type-hud-tracking);
-  line-height: 1.9;
-  text-transform: uppercase;
-}
+  @media (min-width: 1024px) {
+    .header {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      align-content: end;
+      column-gap: clamp(32px, 4vw, 72px);
+    }
 
-.legendLabel[data-role] {
-  --kt-color: var(--color-sheet-ink);
-}
+    .lead {
+      align-self: end;
+      padding-bottom: 1.2em;
+    }
+  }
 
-.legendRows dd {
-  margin: 0;
-  color: var(--color-ground);
-  overflow-wrap: anywhere;
-}
+  /* ------------------------------------------------------------- legend and bio */
 
-.bio {
-  display: grid;
-  gap: 18px;
-}
-
-.bioHeading {
-  --kt-color: var(--color-glacier);
-  color: var(--color-glacier);
-}
-
-@media (min-width: 1024px) {
   .who {
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    display: grid;
+    gap: clamp(28px, 4vw, 56px);
+    align-items: start;
   }
-}
 
-/* ------------------------------------------------------------- sections */
+  .legend {
+    display: grid;
+    gap: 14px;
+  }
 
-.section {
-  display: grid;
-  gap: clamp(20px, 3vw, 40px);
-  align-content: start;
-}
+  .legendHeading {
+    --kt-color: var(--color-moss-ink);
+    color: var(--color-moss-ink);
+    font-weight: 700;
+  }
 
-.sectionHeading {
-  font-size: clamp(2.5rem, 8vw, 6.5rem);
-}
+  .legendHeading[data-role] {
+    --kt-rest-wght: 700;
+    --kt-from-wght: 700;
+  }
 
-/* Rope rules: six short agreements, two or three to a row. */
-.ropeRules {
-  display: grid;
-  gap: 16px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
+  .legendRows {
+    display: grid;
+    gap: 0;
+    margin: 0;
+  }
 
-@media (min-width: 640px) {
+  .legendRows > div {
+    display: grid;
+    gap: 2px 16px;
+    padding-block: 10px;
+    border-top: 1px solid rgb(90 92 82 / 0.45);
+  }
+
+  /* Label beside value where there is room; above it on phones. */
+  @media (min-width: 640px) {
+    .legendRows > div {
+      grid-template-columns: minmax(6.5rem, 9rem) minmax(0, 1fr);
+    }
+  }
+
+  .legendRows dt {
+    color: var(--color-sheet-ink);
+    font-family: var(--font-mono);
+    font-size: var(--type-hud-size);
+    font-stretch: var(--axis-mono-rest-wdth);
+    letter-spacing: var(--type-hud-tracking);
+    line-height: 1.9;
+    text-transform: uppercase;
+  }
+
+  .legendLabel[data-role] {
+    --kt-color: var(--color-sheet-ink);
+  }
+
+  .legendRows dd {
+    margin: 0;
+    color: var(--color-ground);
+    overflow-wrap: anywhere;
+  }
+
+  .bio {
+    display: grid;
+    gap: 18px;
+  }
+
+  .bioHeading {
+    --kt-color: var(--color-glacier);
+    color: var(--color-glacier);
+  }
+
+  @media (min-width: 1024px) {
+    .who {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    }
+  }
+
+  /* ------------------------------------------------------------- sections */
+
+  .section {
+    display: grid;
+    gap: clamp(20px, 3vw, 40px);
+    align-content: start;
+  }
+
+  .sectionHeading {
+    font-size: clamp(2.5rem, 8vw, 6.5rem);
+  }
+
+  /* Rope rules: six short agreements, two or three to a row. */
   .ropeRules {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: grid;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
-}
 
-@media (min-width: 1280px) {
-  .ropeRules {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  @media (min-width: 640px) {
+    .ropeRules {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
-}
 
-.ropeLead[data-role] {
-  --kt-rest-wdth: 100%;
-  --kt-rest-wght: 700;
-}
+  @media (min-width: 1280px) {
+    .ropeRules {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
 
-/* First 90 days: three stages, left to right on desktop, joined by a short contour trail that
-   draws once as they come into view (data-reveal="mark"): across their tops on desktop, down
-   their left edge on phones. */
-.daysWrap {
-  position: relative;
-  padding-left: 28px;
-}
+  .ropeLead[data-role] {
+    --kt-rest-wdth: 100%;
+    --kt-rest-wght: 700;
+  }
 
-.daysTrail,
-.daysTrailDown {
-  position: absolute;
-  overflow: visible;
-  fill: none;
-  stroke: var(--color-glacier);
-  stroke-linecap: round;
-  stroke-width: 1.5;
-}
-
-.daysTrail {
-  display: none;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 28px;
-}
-
-.daysTrailDown {
-  top: 12px;
-  bottom: 12px;
-  left: 2px;
-  width: 16px;
-  height: calc(100% - 24px);
-}
-
-@media (min-width: 1024px) {
+  /* First 90 days: three stages, left to right on desktop, joined by a short contour trail that
+     draws once as they come into view (data-reveal="mark"): across their tops on desktop, down
+     their left edge on phones. */
   .daysWrap {
-    padding: 36px 0 0;
+    position: relative;
+    padding-left: 28px;
+  }
+
+  .daysTrail,
+  .daysTrailDown {
+    position: absolute;
+    overflow: visible;
+    fill: none;
+    stroke: var(--color-glacier);
+    stroke-linecap: round;
+    stroke-width: 1.5;
   }
 
   .daysTrail {
-    display: block;
+    display: none;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 28px;
   }
 
   .daysTrailDown {
-    display: none;
+    top: 12px;
+    bottom: 12px;
+    left: 2px;
+    width: 16px;
+    height: calc(100% - 24px);
   }
-}
 
-/* First 90 days: three stages, left to right on desktop. */
-.days {
-  display: grid;
-  gap: 16px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
+  @media (min-width: 1024px) {
+    .daysWrap {
+      padding: 36px 0 0;
+    }
 
-.day {
-  display: grid;
-  gap: 8px;
-  align-content: start;
-}
+    .daysTrail {
+      display: block;
+    }
 
-.dayRange {
-  color: var(--color-glacier);
-}
+    .daysTrailDown {
+      display: none;
+    }
+  }
 
-.dayTitle {
-  font-size: clamp(1.5rem, 2.4vw, 2rem);
-  font-weight: 700;
-  font-stretch: var(--type-condensed-wdth);
-}
-
-/* A small settle from the breath above its condensed rest axes (SettleText role "text"). */
-.dayTitle[data-role] {
-  --kt-rest-wdth: var(--type-condensed-wdth);
-  --kt-rest-wght: 700;
-}
-
-@media (min-width: 1024px) {
+  /* First 90 days: three stages, left to right on desktop. */
   .days {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: grid;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
-}
 
-/* Craft and off the map, side by side on desktop. */
-.pair {
-  display: grid;
-  gap: clamp(48px, 7vw, 112px);
-}
+  .day {
+    display: grid;
+    gap: 8px;
+    align-content: start;
+  }
 
-.offMapHead {
-  display: grid;
-  gap: 10px;
-}
+  .dayRange {
+    color: var(--color-glacier);
+  }
 
-.headRule {
-  width: min(100%, 12rem);
-}
+  .dayTitle {
+    font-size: clamp(1.5rem, 2.4vw, 2rem);
+    font-weight: 700;
+    font-stretch: var(--type-condensed-wdth);
+  }
 
-@media (min-width: 1024px) {
+  /* A small settle from the breath above its condensed rest axes (SettleText role "text"). */
+  .dayTitle[data-role] {
+    --kt-rest-wdth: var(--type-condensed-wdth);
+    --kt-rest-wght: 700;
+  }
+
+  @media (min-width: 1024px) {
+    .days {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  /* Craft and off the map, side by side on desktop. */
   .pair {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: clamp(32px, 4vw, 72px);
+    display: grid;
+    gap: clamp(48px, 7vw, 112px);
   }
 
-  /* No eyebrow here: the heading lines up with the one beside it. */
   .offMapHead {
-    padding-top: calc(var(--type-hud-size) * 1.4 + 10px);
+    display: grid;
+    gap: 10px;
+  }
+
+  .headRule {
+    width: min(100%, 12rem);
+  }
+
+  @media (min-width: 1024px) {
+    .pair {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: clamp(32px, 4vw, 72px);
+    }
+
+    /* No eyebrow here: the heading lines up with the one beside it. */
+    .offMapHead {
+      padding-top: calc(var(--type-hud-size) * 1.4 + 10px);
+    }
   }
 }

@@ -1,806 +1,810 @@
-.card {
-  --px: 50%;
-  --py: 50%;
-  --on: 0;
-  --rarity: var(--color-contour);
-  --radius: 4.2cqi;
-  position: relative;
-  width: 100%;
-  max-width: 420px;
-  container-type: inline-size;
-}
+@layer reset, tokens, base, layout, components, utilities;
 
-/* The trailhead band's mini card: 60% of a deck card. */
-.card[data-size="mini"] {
-  max-width: 252px;
-}
+@layer components {
+  .card {
+    --px: 50%;
+    --py: 50%;
+    --on: 0;
+    --rarity: var(--color-contour);
+    --radius: 4.2cqi;
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    container-type: inline-size;
+  }
 
-/* Hovered (a mouse or pen) or keyboard-focused: one switch, --on, read by the lift, the name's
-   breath, the keyword chips, the contours and the foil. Touch never sets it. */
-.card[data-active="true"],
-.card:has(.cardLink:focus-visible) {
-  --on: 1;
-}
+  /* The trailhead band's mini card: 60% of a deck card. */
+  .card[data-size="mini"] {
+    max-width: 252px;
+  }
 
-.card[data-rarity="U"] {
-  --rarity: var(--color-ice);
-}
+  /* Hovered (a mouse or pen) or keyboard-focused: one switch, --on, read by the lift, the name's
+     breath, the keyword chips, the contours and the foil. Touch never sets it. */
+  .card[data-active="true"],
+  .card:has(.cardLink:focus-visible) {
+    --on: 1;
+  }
 
-.card[data-rarity="R"] {
-  --rarity: var(--color-alpenglow);
-}
+  .card[data-rarity="U"] {
+    --rarity: var(--color-ice);
+  }
 
-.card[data-rarity="M"] {
-  --rarity: var(--color-summit-gold);
-}
+  .card[data-rarity="R"] {
+    --rarity: var(--color-alpenglow);
+  }
 
-/* ---------------------------------------------------------------- 3D rig */
+  .card[data-rarity="M"] {
+    --rarity: var(--color-summit-gold);
+  }
 
-.stage {
-  perspective: var(--dist-perspective);
-}
+  /* ---------------------------------------------------------------- 3D rig */
 
-/* Lift: −6 px on the card spring (full and calm); press scales to 0.98 (touch too). */
-@media (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion="still"]) .stage {
-    translate: 0 calc(var(--on) * var(--dist-lift));
+  .stage {
+    perspective: var(--dist-perspective);
+  }
+
+  /* Lift: −6 px on the card spring (full and calm); press scales to 0.98 (touch too). */
+  @media (prefers-reduced-motion: no-preference) {
+    :root:not([data-motion="still"]) .stage {
+      translate: 0 calc(var(--on) * var(--dist-lift));
+      transition:
+        translate var(--spring-card),
+        scale var(--spring-press);
+    }
+
+    :root:not([data-motion="still"]) .card:has(.cardLink:active) .stage,
+    :root:not([data-motion="still"]) .card[data-opening="true"] .stage {
+      scale: var(--scale-card-press);
+    }
+  }
+
+  .tilt {
+    position: relative;
+    aspect-ratio: 63 / 88;
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  }
+
+  .face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25cqi;
+    overflow: hidden;
+    padding: 3.4cqi;
+    border: 1px solid color-mix(in oklab, var(--color-contour-dim), var(--color-contour) calc(var(--on) * 100%));
+    border-radius: var(--radius);
+    background:
+      radial-gradient(130% 70% at 50% 0%, var(--color-ground-raised), transparent 75%),
+      var(--color-ground);
+    /* Lifted, the shadow deepens and falls further. */
+    box-shadow:
+      0 calc(1.5cqi + var(--on) * 2cqi) calc(5cqi + var(--on) * 5cqi) rgb(0 0 0 / calc(0.5 + var(--on) * 0.15)),
+      0 0 0 1px rgb(0 0 0 / 0.4);
+    color: var(--color-sheet);
     transition:
-      translate var(--spring-card),
-      scale var(--spring-press);
+      border-color var(--dur-still) var(--ease-settle),
+      box-shadow var(--dur-medium) var(--ease-settle);
   }
 
-  :root:not([data-motion="still"]) .card:has(.cardLink:active) .stage,
-  :root:not([data-motion="still"]) .card[data-opening="true"] .stage {
-    scale: var(--scale-card-press);
+  /* Inset neatline in the rarity colour. */
+  .face::before {
+    content: "";
+    position: absolute;
+    inset: 1.6cqi;
+    z-index: 3;
+    border: 1px solid var(--rarity);
+    border-radius: calc(var(--radius) - 1.6cqi);
+    pointer-events: none;
   }
-}
 
-.tilt {
-  position: relative;
-  aspect-ratio: 63 / 88;
-  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-}
+  /* -------------------------------------------------------------- anatomy */
 
-.face {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25cqi;
-  overflow: hidden;
-  padding: 3.4cqi;
-  border: 1px solid color-mix(in oklab, var(--color-contour-dim), var(--color-contour) calc(var(--on) * 100%));
-  border-radius: var(--radius);
-  background:
-    radial-gradient(130% 70% at 50% 0%, var(--color-ground-raised), transparent 75%),
-    var(--color-ground);
-  /* Lifted, the shadow deepens and falls further. */
-  box-shadow:
-    0 calc(1.5cqi + var(--on) * 2cqi) calc(5cqi + var(--on) * 5cqi) rgb(0 0 0 / calc(0.5 + var(--on) * 0.15)),
-    0 0 0 1px rgb(0 0 0 / 0.4);
-  color: var(--color-sheet);
-  transition:
-    border-color var(--dur-still) var(--ease-settle),
-    box-shadow var(--dur-medium) var(--ease-settle);
-}
-
-/* Inset neatline in the rarity colour. */
-.face::before {
-  content: "";
-  position: absolute;
-  inset: 1.6cqi;
-  z-index: 3;
-  border: 1px solid var(--rarity);
-  border-radius: calc(var(--radius) - 1.6cqi);
-  pointer-events: none;
-}
-
-/* -------------------------------------------------------------- anatomy */
-
-.nameBar,
-.coords,
-.typeLine,
-.rules,
-.stats,
-.collector {
-  position: relative;
-  z-index: 2;
-  margin: 0;
-}
-
-.nameBar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2cqi;
-  min-height: 11cqi;
-  padding-inline: 1.4cqi 0.4cqi;
-}
-
-.nameBox {
-  position: relative;
-  min-width: 0;
-}
-
-/* The name's box when it is named for a commit only (transitionNames="commit"). */
-.nameSlot {
-  min-width: 0;
-}
-
-.name {
-  margin: 0;
-  font-size: max(18px, 7.4cqi);
-  font-weight: var(--axis-display-compact-wght);
-  font-stretch: var(--axis-display-compact-wdth);
-  line-height: 0.86;
-  text-transform: uppercase;
-}
-
-/* The name settles as the card arrives and breathes +8 when the card is hovered or focused
-   (SettleText role "text", breath). */
-.name[data-role] {
-  --kt-color: var(--color-sheet);
-  --kt-rest-wdth: var(--axis-display-compact-wdth);
-  --kt-rest-wght: var(--axis-display-compact-wght);
-  --kt-dur: var(--dur-settle-display);
-}
-
-/* A Mythic card's gold glint lies over the mint one (its own scope, so each plays alone). */
-.goldGlint {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.nameGlint {
-  font-size: max(18px, 7.4cqi);
-  font-weight: var(--axis-display-compact-wght);
-  font-stretch: var(--axis-display-compact-wdth);
-  line-height: 0.86;
-  text-transform: uppercase;
-}
-
-/* Scope pips: small contour rings, the first n filled. They fill left to right as the card
-   arrives (the word stagger). */
-.pips {
-  display: inline-flex;
-  flex: none;
-  gap: 0.9cqi;
-}
-
-.pipMark {
-  width: max(7px, 2.1cqi);
-  height: max(7px, 2.1cqi);
-  border: 1.25px solid var(--color-contour);
-  border-radius: 50%;
-}
-
-.pipMark[data-on] {
-  border-color: var(--rarity);
-  background: var(--rarity);
-}
-
-.coords {
-  overflow: hidden;
-  padding: 0.7cqi 1.4cqi;
-  border-block: 1px solid var(--color-contour-dim);
-  color: var(--color-contour);
-  font-family: var(--font-mono);
-  font-size: max(9.5px, 2.5cqi);
-  font-stretch: var(--axis-mono-rest-wdth);
-  letter-spacing: 0.14em;
-  line-height: 1.5;
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-/* Artwork window: nominally ~45% of the card, shrinks before any text would clip. */
-.artwork {
-  position: relative;
-  flex: 0 1 44%;
-  min-height: 24%;
-  overflow: hidden;
-  border: 1px solid var(--color-contour-dim);
-  border-radius: 1.6cqi;
-  background: var(--color-ground);
-}
-
-/* Wrapper only used by the layoutId fallback (browsers without View Transitions). */
-.artSlot {
-  display: flex;
-  flex: 0 1 44%;
-  flex-direction: column;
-  min-height: 24%;
-}
-
-.artSlot > .artwork {
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
-.terrain,
-.overlay {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-/* Hovered or focused, the contours shift by one interval (the massif grows a line's width
-   around its summit) over --dur-shift. */
-.terrain {
-  object-fit: cover;
-  transform-origin: var(--summit-x, 50%) var(--summit-y, 50%);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion="still"]) .terrain {
-    scale: calc(1 + var(--on) * 0.06);
-    transition: scale var(--dur-shift) var(--ease-settle);
+  .nameBar,
+  .coords,
+  .typeLine,
+  .rules,
+  .stats,
+  .collector {
+    position: relative;
+    z-index: 2;
+    margin: 0;
   }
-}
 
-.trail {
-  fill: none;
-  stroke: var(--color-glacier);
-  stroke-dasharray: 0 5.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2.4;
-}
-
-.pin {
-  fill: var(--color-ground);
-  stroke: var(--color-glacier);
-  stroke-width: 1.6;
-}
-
-.pinSummit {
-  fill: var(--color-glacier);
-  stroke: var(--color-ground);
-  stroke-width: 1;
-}
-
-.pinLabel,
-.lakeLabel {
-  font-family: var(--font-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  paint-order: stroke;
-  stroke: var(--color-ground);
-  stroke-width: 3px;
-  stroke-linejoin: round;
-}
-
-.pinLabel {
-  fill: var(--color-sheet);
-  font-weight: 600;
-}
-
-.lakeLabel {
-  fill: var(--color-ice);
-}
-
-.labelElevation {
-  fill: var(--color-contour);
-  font-weight: 400;
-}
-
-.typeLine {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2cqi;
-  padding: 1.1cqi 1.8cqi;
-  border: 1px solid var(--color-contour-dim);
-  border-radius: 1cqi;
-  background: var(--color-ground-raised);
-  font-size: max(11.5px, 3.2cqi);
-  font-stretch: var(--type-condensed-wdth);
-  font-weight: 600;
-  line-height: 1.2;
-}
-
-.setSymbol {
-  flex: none;
-  width: max(14px, 4.2cqi);
-  height: auto;
-  fill: var(--rarity);
-}
-
-/* Rules box: sheet colour, so only sheet-safe inks (ground, sheet-ink) are used on it. */
-.rules {
-  display: flex;
-  flex: 1 0 auto;
-  flex-direction: column;
-  gap: 1.3cqi;
-  padding: 1.9cqi 2.4cqi;
-  border-radius: 1cqi;
-  background: var(--color-sheet);
-  color: var(--color-ground);
-  font-size: max(11px, 3.05cqi);
-  line-height: 1.32;
-}
-
-.keywords {
-  display: grid;
-  gap: 0.6cqi;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-/* Keyword chips: a pill whose term breathes +8, one chip after another, while the card is hovered
-   or focused; its box is reserved at the breath, so the reminder beside it never moves. */
-.term {
-  display: inline-grid;
-  padding: 0 0.45em;
-  border: 1px solid rgb(27 28 24 / 0.35);
-  border-radius: 999px;
-  font-weight: 750;
-}
-
-.term > * {
-  grid-area: 1 / 1;
-}
-
-.termGhost {
-  visibility: hidden;
-  font-stretch: calc(var(--axis-label-rest-wdth) + var(--axis-display-hover-wdth) - var(--axis-display-rest-wdth));
-}
-
-.termRun {
-  justify-self: center;
-  font-stretch: var(--axis-label-rest-wdth);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion="still"]) .termRun {
-    font-stretch: calc(var(--axis-label-rest-wdth) + var(--on) * (var(--axis-display-hover-wdth) - var(--axis-display-rest-wdth)));
-    transition: font-stretch var(--dur-breath) var(--ease-settle);
-    transition-delay: calc(var(--on) * var(--k) * var(--stagger-item));
+  .nameBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2cqi;
+    min-height: 11cqi;
+    padding-inline: 1.4cqi 0.4cqi;
   }
-}
 
-.reminder,
-.flavor {
-  color: var(--color-sheet-ink);
-}
+  .nameBox {
+    position: relative;
+    min-width: 0;
+  }
 
-.hairline {
-  margin: 0;
-  border: 0;
-  border-top: 1px solid var(--color-sheet-ink);
-  opacity: 0.5;
-}
+  /* The name's box when it is named for a commit only (transitionNames="commit"). */
+  .nameSlot {
+    min-width: 0;
+  }
 
-/* One rule above the stats, one size for every value across the deck. */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(var(--cells, 3), 1fr);
-  border-top: 1px solid var(--color-contour-dim);
-}
+  .name {
+    margin: 0;
+    font-size: max(18px, 7.4cqi);
+    font-weight: var(--axis-display-compact-wght);
+    font-stretch: var(--axis-display-compact-wdth);
+    line-height: 0.86;
+    text-transform: uppercase;
+  }
 
-.stat {
-  display: flex;
-  flex-direction: column-reverse;
-  justify-content: center;
-  gap: 0.3cqi;
-  min-width: 0;
-  padding: 1cqi 1cqi;
-  text-align: center;
-}
+  /* The name settles as the card arrives and breathes +8 when the card is hovered or focused
+     (SettleText role "text", breath). */
+  .name[data-role] {
+    --kt-color: var(--color-sheet);
+    --kt-rest-wdth: var(--axis-display-compact-wdth);
+    --kt-rest-wght: var(--axis-display-compact-wght);
+    --kt-dur: var(--dur-settle-display);
+  }
 
-.stat dt {
-  overflow: hidden;
-  color: var(--color-contour);
-  font-family: var(--font-mono);
-  font-size: max(8.5px, 2.25cqi);
-  font-stretch: var(--axis-mono-rest-wdth);
-  letter-spacing: 0.14em;
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
+  /* A Mythic card's gold glint lies over the mint one (its own scope, so each plays alone). */
+  .goldGlint {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
 
-.stat dd {
-  margin: 0;
-  color: var(--color-sheet);
-  font-family: var(--font-mono);
-  font-size: max(20px, 5cqi);
-  font-stretch: var(--axis-mono-rest-wdth);
-  font-weight: 700;
-  line-height: 1.1;
-  white-space: nowrap;
-}
+  .nameGlint {
+    font-size: max(18px, 7.4cqi);
+    font-weight: var(--axis-display-compact-wght);
+    font-stretch: var(--axis-display-compact-wdth);
+    line-height: 0.86;
+    text-transform: uppercase;
+  }
 
-.statRoll {
-  display: inline-flex;
-  align-items: baseline;
-}
+  /* Scope pips: small contour rings, the first n filled. They fill left to right as the card
+     arrives (the word stagger). */
+  .pips {
+    display: inline-flex;
+    flex: none;
+    gap: 0.9cqi;
+  }
 
-/* The words between the numbers keep their spaces inside the flex row. */
-.statRoll > span:not([class]) {
-  white-space: pre;
-}
+  .pipMark {
+    width: max(7px, 2.1cqi);
+    height: max(7px, 2.1cqi);
+    border: 1.25px solid var(--color-contour);
+    border-radius: 50%;
+  }
 
-/* Under the impact's after-value: "from <before>" (and what it counts). */
-.statNote {
-  display: block;
-  margin-top: 0.2em;
-  color: var(--color-contour);
-  font-size: max(8.5px, 2.25cqi);
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
+  .pipMark[data-on] {
+    border-color: var(--rarity);
+    background: var(--rarity);
+  }
 
-.collector {
-  display: flex;
-  align-items: center;
-  gap: 0.7em;
-  padding-inline: 1.4cqi;
-  color: var(--color-contour);
-  font-family: var(--font-mono);
-  font-size: max(9px, 2.3cqi);
-  font-stretch: var(--axis-mono-rest-wdth);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
+  .coords {
+    overflow: hidden;
+    padding: 0.7cqi 1.4cqi;
+    border-block: 1px solid var(--color-contour-dim);
+    color: var(--color-contour);
+    font-family: var(--font-mono);
+    font-size: max(9.5px, 2.5cqi);
+    font-stretch: var(--axis-mono-rest-wdth);
+    letter-spacing: 0.14em;
+    line-height: 1.5;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
 
-.pip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35em;
-  color: var(--rarity);
-  font-weight: 700;
-}
+  /* Artwork window: nominally ~45% of the card, shrinks before any text would clip. */
+  .artwork {
+    position: relative;
+    flex: 0 1 44%;
+    min-height: 24%;
+    overflow: hidden;
+    border: 1px solid var(--color-contour-dim);
+    border-radius: 1.6cqi;
+    background: var(--color-ground);
+  }
 
-.pip svg {
-  width: 1.15em;
-  height: 1.15em;
-  fill: currentColor;
-}
+  /* Wrapper only used by the layoutId fallback (browsers without View Transitions). */
+  .artSlot {
+    display: flex;
+    flex: 0 1 44%;
+    flex-direction: column;
+    min-height: 24%;
+  }
 
-/* A rubber stamp across the map (flagged examples: "Fictional example"). Alpenglow on a ground
-   plate, so it stays readable over any contour. Sized to the nearest container: the card, or the
-   case-study header's artwork slot. */
-.stamp {
-  position: absolute;
-  top: 9%;
-  left: 5%;
-  z-index: 1;
-  padding: 0.35em 0.7em;
-  border: 2px double var(--color-alpenglow);
-  border-radius: 0.4em;
-  background: rgb(27 28 24 / 0.86);
-  color: var(--color-alpenglow);
-  font-family: var(--font-mono);
-  font-size: max(10px, 2.6cqi);
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  line-height: 1.2;
-  text-transform: uppercase;
-  transform: rotate(-5deg);
-  pointer-events: none;
-}
+  .artSlot > .artwork {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
 
-/* --------------------------------------------------------- foil & glare */
+  .terrain,
+  .overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
 
-/* Contour foil (rarity R and M): a glacier-ice-gold gradient seen through the card's own contour
-   lines (the terrain as a mask), screen-blended, at most 0.18, on the hovered or focused card
-   only. The gradient follows the pointer (--px, --py). Full motion; calm and still show none. */
-.foil {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  border-radius: inherit;
-  background: linear-gradient(
-    115deg,
-    var(--color-glacier) calc(var(--px) - 40%),
-    var(--color-ice) var(--px),
-    var(--color-summit-gold) calc(var(--px) + 40%)
-  );
-  mix-blend-mode: screen;
-  -webkit-mask: var(--foil-mask) center / cover no-repeat;
-  mask: var(--foil-mask) center / cover no-repeat;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--dur-medium) var(--ease-trail);
-}
+  /* Hovered or focused, the contours shift by one interval (the massif grows a line's width
+     around its summit) over --dur-shift. */
+  .terrain {
+    object-fit: cover;
+    transform-origin: var(--summit-x, 50%) var(--summit-y, 50%);
+  }
 
-:root[data-motion="full"] .card:is([data-active="true"], :has(.cardLink:focus-visible)) .foil {
-  opacity: calc(0.12 + var(--hyp, 0) * 0.06);
-}
+  @media (prefers-reduced-motion: no-preference) {
+    :root:not([data-motion="still"]) .terrain {
+      scale: calc(1 + var(--on) * 0.06);
+      transition: scale var(--dur-shift) var(--ease-settle);
+    }
+  }
 
-/* The pointer's glare (fine pointers, full motion). */
-.glare {
-  position: absolute;
-  inset: 0;
-  z-index: 4;
-  border-radius: inherit;
-  background: radial-gradient(
-    farthest-corner circle at var(--px) var(--py),
-    rgb(255 255 255 / 0.55) 0%,
-    rgb(255 255 255 / 0.12) 32%,
-    rgb(0 0 0 / 0.3) 95%
-  );
-  mix-blend-mode: soft-light;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--dur-medium) var(--ease-trail);
-}
+  .trail {
+    fill: none;
+    stroke: var(--color-glacier);
+    stroke-dasharray: 0 5.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.4;
+  }
 
-:root[data-motion="full"] .card[data-active="true"] .glare {
-  opacity: 1;
-}
+  .pin {
+    fill: var(--color-ground);
+    stroke: var(--color-glacier);
+    stroke-width: 1.6;
+  }
 
-/* ------------------------------------------------------- visited stamp */
+  .pinSummit {
+    fill: var(--color-glacier);
+    stroke: var(--color-ground);
+    stroke-width: 1;
+  }
 
-/* After its case study was visited: a small "SUMMITED" stamp on the artwork's corner, settling
-   once (SettleText; screen readers hear "Visited" in the link's name). */
-.visited {
-  position: absolute;
-  top: calc(3.4cqi + 11cqi + 6cqi);
-  right: 4.6cqi;
-  z-index: 5;
-  padding: 0.25em 0.6em;
-  border: 1px solid var(--color-glacier);
-  border-radius: 999px;
-  background: rgb(27 28 24 / 0.86);
-  color: var(--color-glacier);
-  font-size: max(9px, 2.3cqi);
-  pointer-events: none;
-}
+  .pinLabel,
+  .lakeLabel {
+    font-family: var(--font-mono);
+    font-size: 8.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    paint-order: stroke;
+    stroke: var(--color-ground);
+    stroke-width: 3px;
+    stroke-linejoin: round;
+  }
 
-.visited[data-role] {
-  --kt-color: var(--color-glacier);
-}
+  .pinLabel {
+    fill: var(--color-sheet);
+    font-weight: 600;
+  }
 
-/* ------------------------------------------------------------- the link */
+  .lakeLabel {
+    fill: var(--color-ice);
+  }
 
-/* One transparent anchor over the whole face: the card is a single link. Its focus ring is the
-   global one (globals.css), around the whole card. */
-.cardLink {
-  position: absolute;
-  inset: 0;
-  z-index: 6;
-  border-radius: var(--radius);
-}
+  .labelElevation {
+    fill: var(--color-contour);
+    font-weight: 400;
+  }
 
-.stage {
-  cursor: pointer;
-}
+  .typeLine {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2cqi;
+    padding: 1.1cqi 1.8cqi;
+    border: 1px solid var(--color-contour-dim);
+    border-radius: 1cqi;
+    background: var(--color-ground-raised);
+    font-size: max(11.5px, 3.2cqi);
+    font-stretch: var(--type-condensed-wdth);
+    font-weight: 600;
+    line-height: 1.2;
+  }
 
-/* "Open expedition log" chip: on hover/focus with a mouse, always on touch. */
-.openChip {
-  position: absolute;
-  right: 2cqi;
-  bottom: 2cqi;
-  z-index: 2;
-  padding: 0.55em 0.9em;
-  border-radius: 999px;
-  background: var(--color-glacier);
-  color: var(--color-ground);
-  font-size: max(10px, 2.5cqi);
-  font-weight: 700;
-  opacity: calc(var(--on));
-  transform: translateY(calc((1 - var(--on)) * 0.6em));
-  transition:
-    opacity var(--dur-short) var(--ease-trail),
-    transform var(--dur-medium) var(--ease-trail);
-}
+  .setSymbol {
+    flex: none;
+    width: max(14px, 4.2cqi);
+    height: auto;
+    fill: var(--rarity);
+  }
 
-@media (hover: none) {
-  .openChip {
+  /* Rules box: sheet colour, so only sheet-safe inks (ground, sheet-ink) are used on it. */
+  .rules {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+    gap: 1.3cqi;
+    padding: 1.9cqi 2.4cqi;
+    border-radius: 1cqi;
+    background: var(--color-sheet);
+    color: var(--color-ground);
+    font-size: max(11px, 3.05cqi);
+    line-height: 1.32;
+  }
+
+  .keywords {
+    display: grid;
+    gap: 0.6cqi;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Keyword chips: a pill whose term breathes +8, one chip after another, while the card is hovered
+     or focused; its box is reserved at the breath, so the reminder beside it never moves. */
+  .term {
+    display: inline-grid;
+    padding: 0 0.45em;
+    border: 1px solid rgb(27 28 24 / 0.35);
+    border-radius: 999px;
+    font-weight: 750;
+  }
+
+  .term > * {
+    grid-area: 1 / 1;
+  }
+
+  .termGhost {
+    visibility: hidden;
+    font-stretch: calc(var(--axis-label-rest-wdth) + var(--axis-display-hover-wdth) - var(--axis-display-rest-wdth));
+  }
+
+  .termRun {
+    justify-self: center;
+    font-stretch: var(--axis-label-rest-wdth);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :root:not([data-motion="still"]) .termRun {
+      font-stretch: calc(var(--axis-label-rest-wdth) + var(--on) * (var(--axis-display-hover-wdth) - var(--axis-display-rest-wdth)));
+      transition: font-stretch var(--dur-breath) var(--ease-settle);
+      transition-delay: calc(var(--on) * var(--k) * var(--stagger-item));
+    }
+  }
+
+  .reminder,
+  .flavor {
+    color: var(--color-sheet-ink);
+  }
+
+  .hairline {
+    margin: 0;
+    border: 0;
+    border-top: 1px solid var(--color-sheet-ink);
+    opacity: 0.5;
+  }
+
+  /* One rule above the stats, one size for every value across the deck. */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(var(--cells, 3), 1fr);
+    border-top: 1px solid var(--color-contour-dim);
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: center;
+    gap: 0.3cqi;
+    min-width: 0;
+    padding: 1cqi 1cqi;
+    text-align: center;
+  }
+
+  .stat dt {
+    overflow: hidden;
+    color: var(--color-contour);
+    font-family: var(--font-mono);
+    font-size: max(8.5px, 2.25cqi);
+    font-stretch: var(--axis-mono-rest-wdth);
+    letter-spacing: 0.14em;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .stat dd {
+    margin: 0;
+    color: var(--color-sheet);
+    font-family: var(--font-mono);
+    font-size: max(20px, 5cqi);
+    font-stretch: var(--axis-mono-rest-wdth);
+    font-weight: 700;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+
+  .statRoll {
+    display: inline-flex;
+    align-items: baseline;
+  }
+
+  /* The words between the numbers keep their spaces inside the flex row. */
+  .statRoll > span:not([class]) {
+    white-space: pre;
+  }
+
+  /* Under the impact's after-value: "from <before>" (and what it counts). */
+  .statNote {
+    display: block;
+    margin-top: 0.2em;
+    color: var(--color-contour);
+    font-size: max(8.5px, 2.25cqi);
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .collector {
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+    padding-inline: 1.4cqi;
+    color: var(--color-contour);
+    font-family: var(--font-mono);
+    font-size: max(9px, 2.3cqi);
+    font-stretch: var(--axis-mono-rest-wdth);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .pip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    color: var(--rarity);
+    font-weight: 700;
+  }
+
+  .pip svg {
+    width: 1.15em;
+    height: 1.15em;
+    fill: currentColor;
+  }
+
+  /* A rubber stamp across the map (flagged examples: "Fictional example"). Alpenglow on a ground
+     plate, so it stays readable over any contour. Sized to the nearest container: the card, or the
+     case-study header's artwork slot. */
+  .stamp {
+    position: absolute;
+    top: 9%;
+    left: 5%;
+    z-index: 1;
+    padding: 0.35em 0.7em;
+    border: 2px double var(--color-alpenglow);
+    border-radius: 0.4em;
+    background: rgb(27 28 24 / 0.86);
+    color: var(--color-alpenglow);
+    font-family: var(--font-mono);
+    font-size: max(10px, 2.6cqi);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    transform: rotate(-5deg);
+    pointer-events: none;
+  }
+
+  /* --------------------------------------------------------- foil & glare */
+
+  /* Contour foil (rarity R and M): a glacier-ice-gold gradient seen through the card's own contour
+     lines (the terrain as a mask), screen-blended, at most 0.18, on the hovered or focused card
+     only. The gradient follows the pointer (--px, --py). Full motion; calm and still show none. */
+  .foil {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    background: linear-gradient(
+      115deg,
+      var(--color-glacier) calc(var(--px) - 40%),
+      var(--color-ice) var(--px),
+      var(--color-summit-gold) calc(var(--px) + 40%)
+    );
+    mix-blend-mode: screen;
+    -webkit-mask: var(--foil-mask) center / cover no-repeat;
+    mask: var(--foil-mask) center / cover no-repeat;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-medium) var(--ease-trail);
+  }
+
+  :root[data-motion="full"] .card:is([data-active="true"], :has(.cardLink:focus-visible)) .foil {
+    opacity: calc(0.12 + var(--hyp, 0) * 0.06);
+  }
+
+  /* The pointer's glare (fine pointers, full motion). */
+  .glare {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    border-radius: inherit;
+    background: radial-gradient(
+      farthest-corner circle at var(--px) var(--py),
+      rgb(255 255 255 / 0.55) 0%,
+      rgb(255 255 255 / 0.12) 32%,
+      rgb(0 0 0 / 0.3) 95%
+    );
+    mix-blend-mode: soft-light;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-medium) var(--ease-trail);
+  }
+
+  :root[data-motion="full"] .card[data-active="true"] .glare {
     opacity: 1;
-    transform: none;
   }
-}
 
-.card[data-opening="true"] .openChip {
-  opacity: 0;
-  transition: none;
-}
+  /* ------------------------------------------------------- visited stamp */
 
-/* ----------------------------------------------------------- arrival */
+  /* After its case study was visited: a small "SUMMITED" stamp on the artwork's corner, settling
+     once (SettleText; screen readers hear "Visited" in the link's name). */
+  .visited {
+    position: absolute;
+    top: calc(3.4cqi + 11cqi + 6cqi);
+    right: 4.6cqi;
+    z-index: 5;
+    padding: 0.25em 0.6em;
+    border: 1px solid var(--color-glacier);
+    border-radius: 999px;
+    background: rgb(27 28 24 / 0.86);
+    color: var(--color-glacier);
+    font-size: max(9px, 2.3cqi);
+    pointer-events: none;
+  }
 
-/* Once per session, as the card enters (data-arrive, SummitCard.tsx): full motion deals it in,
-   rising --dist-rise-card and fading with the card stagger (--deal-delay); the name settles
-   with it (SettleText), the type line follows --dur-tap later, the scope pips fill one after
-   another and the rarity shape traces itself. Calm keeps the settles, pips and trace without
-   the rise; still shows the card. */
-@keyframes card-arrive {
-  from {
+  .visited[data-role] {
+    --kt-color: var(--color-glacier);
+  }
+
+  /* ------------------------------------------------------------- the link */
+
+  /* One transparent anchor over the whole face: the card is a single link. Its focus ring is the
+     global one (globals.css), around the whole card. */
+  .cardLink {
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    border-radius: var(--radius);
+  }
+
+  .stage {
+    cursor: pointer;
+  }
+
+  /* "Open expedition log" chip: on hover/focus with a mouse, always on touch. */
+  .openChip {
+    position: absolute;
+    right: 2cqi;
+    bottom: 2cqi;
+    z-index: 2;
+    padding: 0.55em 0.9em;
+    border-radius: 999px;
+    background: var(--color-glacier);
+    color: var(--color-ground);
+    font-size: max(10px, 2.5cqi);
+    font-weight: 700;
+    opacity: calc(var(--on));
+    transform: translateY(calc((1 - var(--on)) * 0.6em));
+    transition:
+      opacity var(--dur-short) var(--ease-trail),
+      transform var(--dur-medium) var(--ease-trail);
+  }
+
+  @media (hover: none) {
+    .openChip {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .card[data-opening="true"] .openChip {
+    opacity: 0;
+    transition: none;
+  }
+
+  /* ----------------------------------------------------------- arrival */
+
+  /* Once per session, as the card enters (data-arrive, SummitCard.tsx): full motion deals it in,
+     rising --dist-rise-card and fading with the card stagger (--deal-delay); the name settles
+     with it (SettleText), the type line follows --dur-tap later, the scope pips fill one after
+     another and the rarity shape traces itself. Calm keeps the settles, pips and trace without
+     the rise; still shows the card. */
+  @keyframes card-arrive {
+    from {
+      opacity: 0;
+      transform: translateY(var(--dist-rise-card));
+    }
+  }
+
+  @keyframes card-fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes pip-fill {
+    from {
+      background-color: transparent;
+    }
+  }
+
+  @keyframes rarity-trace {
+    from {
+      stroke-dashoffset: 1;
+      fill-opacity: 0;
+    }
+    70% {
+      fill-opacity: 0;
+    }
+  }
+
+  :root[data-motion="full"] .card[data-arrive="wait"] {
     opacity: 0;
     transform: translateY(var(--dist-rise-card));
   }
-}
 
-@keyframes card-fade {
-  from {
-    opacity: 0;
-  }
-}
-
-@keyframes pip-fill {
-  from {
-    background-color: transparent;
-  }
-}
-
-@keyframes rarity-trace {
-  from {
-    stroke-dashoffset: 1;
-    fill-opacity: 0;
-  }
-  70% {
-    fill-opacity: 0;
-  }
-}
-
-:root[data-motion="full"] .card[data-arrive="wait"] {
-  opacity: 0;
-  transform: translateY(var(--dist-rise-card));
-}
-
-:root[data-motion="full"] .card[data-arrive="in"] {
-  animation: card-arrive var(--dur-reveal) var(--ease-settle) var(--deal-delay, 0ms) backwards;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion="still"]) .card[data-arrive="in"] .typeLine {
-    animation: card-fade var(--dur-reveal) var(--ease-settle) calc(var(--deal-delay, 0ms) + var(--dur-tap)) backwards;
+  :root[data-motion="full"] .card[data-arrive="in"] {
+    animation: card-arrive var(--dur-reveal) var(--ease-settle) var(--deal-delay, 0ms) backwards;
   }
 
-  :root:not([data-motion="still"]) .card[data-arrive="in"] .pipMark[data-on] {
-    animation: pip-fill var(--dur-tap) var(--ease-settle) calc(var(--deal-delay, 0ms) + var(--dur-tap) + var(--p) * var(--stagger-word)) backwards;
+  @media (prefers-reduced-motion: no-preference) {
+    :root:not([data-motion="still"]) .card[data-arrive="in"] .typeLine {
+      animation: card-fade var(--dur-reveal) var(--ease-settle) calc(var(--deal-delay, 0ms) + var(--dur-tap)) backwards;
+    }
+
+    :root:not([data-motion="still"]) .card[data-arrive="in"] .pipMark[data-on] {
+      animation: pip-fill var(--dur-tap) var(--ease-settle) calc(var(--deal-delay, 0ms) + var(--dur-tap) + var(--p) * var(--stagger-word)) backwards;
+    }
+
+    :root:not([data-motion="still"]) .card[data-arrive="in"] .pip path {
+      stroke: currentColor;
+      stroke-width: 1.2;
+      stroke-dasharray: 1;
+      animation: rarity-trace var(--dur-trace) var(--ease-settle) calc(var(--deal-delay, 0ms) + var(--dur-tap)) backwards;
+    }
   }
 
-  :root:not([data-motion="still"]) .card[data-arrive="in"] .pip path {
-    stroke: currentColor;
-    stroke-width: 1.2;
-    stroke-dasharray: 1;
-    animation: rarity-trace var(--dur-trace) var(--ease-settle) calc(var(--deal-delay, 0ms) + var(--dur-tap)) backwards;
-  }
-}
-
-/* ------------------------------------------------- return: card reassembly
-   Coming back from the card's page, the card is rebuilt around its landed artwork
-   (data-reassemble, set by return-transition.ts once the deck is back in the DOM; the art and
-   title are still flying in):
-   from --dur-settle    the neatline draws on along the outline in the rarity colour
-                        (--dur-medium), and the name bar, type line, rules, stats and collector
-                        line rise in, --stagger-item apart (--dur-short each);
-   then                 a single glint crosses the card name (the Glint primitive, played by
-                        return-transition.ts once the neatline has closed). */
-.neatline {
-  display: none;
-  position: absolute;
-  inset: 1.6cqi;
-  z-index: 3;
-  width: calc(100% - 3.2cqi);
-  height: calc(100% - 3.2cqi);
-  overflow: visible;
-  pointer-events: none;
-}
-
-.neatline rect {
-  x: 0.5px;
-  y: 0.5px;
-  width: calc(100% - 1px);
-  height: calc(100% - 1px);
-  rx: calc(var(--radius) - 1.6cqi);
-  fill: none;
-  stroke: var(--rarity);
-  stroke-width: 1px;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-}
-
-.card[data-reassemble] .neatline {
-  display: block;
-}
-
-/* The waiting states are base styles, not animation fill: a CSS animation applies nothing until
-   its start time resolves, which can be a frame after the deck is captured. */
-.card[data-reassemble] .neatline rect {
-  animation: neatline-draw var(--dur-medium) var(--ease-summit) var(--dur-settle) forwards;
-}
-
-/* The static neatline takes over once the drawn one has closed. */
-.card[data-reassemble] .face::before {
-  opacity: 0;
-  animation: neatline-handover 0s calc(var(--dur-settle) + var(--dur-medium)) forwards;
-}
-
-.card[data-reassemble] :is(.nameBar, .coords, .typeLine, .rules, .stats, .collector) {
-  opacity: 0;
-  transform: translateY(var(--dist-rise));
-  animation: card-part-rise var(--dur-short) var(--ease-drop) forwards;
-  animation-delay: calc(var(--dur-settle) + var(--part, 0) * var(--stagger-item));
-}
-
-.card[data-reassemble] .typeLine {
-  --part: 1;
-}
-
-.card[data-reassemble] .rules {
-  --part: 2;
-}
-
-.card[data-reassemble] .stats {
-  --part: 3;
-}
-
-.card[data-reassemble] .collector {
-  --part: 4;
-}
-
-@keyframes neatline-draw {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes neatline-handover {
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes card-part-rise {
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-/* -------------------------------------------------------------- motion modes */
-
-/* The reassembly is part of the return transition: still mode has no view transitions, so a
-   card caught mid-rebuild when the OS switches simply shows. Calm keeps it, like the morph. */
-:root[data-motion="still"] .card[data-reassemble] *,
-:root[data-motion="still"] .card[data-reassemble] .face::before {
-  animation: none !important;
-  opacity: 1;
-  transform: none;
-}
-
-/* Tilt and the glare are full motion only: calm and still show a flat card. */
-:root:not([data-motion="full"]) .tilt {
-  transform: none;
-}
-
-:root:not([data-motion="full"]) .card {
-  --px: 50%;
-  --py: 38%;
-}
-
-/* Still: the open chip only fades (opacity within --dur-still); nothing moves. */
-:root[data-motion="still"] .openChip {
-  transform: none;
-  transition: opacity var(--dur-still) var(--ease-settle);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .card[data-reassemble] *,
-  .card[data-reassemble] .face::before {
-    animation: none !important;
-  }
-
-  .openChip {
-    transform: none;
-    transition: none;
-  }
-}
-
-/* Forced colours: no foil or glare over the card. */
-@media (forced-colors: active) {
-  .foil,
-  .glare {
+  /* ------------------------------------------------- return: card reassembly
+     Coming back from the card's page, the card is rebuilt around its landed artwork
+     (data-reassemble, set by return-transition.ts once the deck is back in the DOM; the art and
+     title are still flying in):
+     from --dur-settle    the neatline draws on along the outline in the rarity colour
+                          (--dur-medium), and the name bar, type line, rules, stats and collector
+                          line rise in, --stagger-item apart (--dur-short each);
+     then                 a single glint crosses the card name (the Glint primitive, played by
+                          return-transition.ts once the neatline has closed). */
+  .neatline {
     display: none;
+    position: absolute;
+    inset: 1.6cqi;
+    z-index: 3;
+    width: calc(100% - 3.2cqi);
+    height: calc(100% - 3.2cqi);
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .neatline rect {
+    x: 0.5px;
+    y: 0.5px;
+    width: calc(100% - 1px);
+    height: calc(100% - 1px);
+    rx: calc(var(--radius) - 1.6cqi);
+    fill: none;
+    stroke: var(--rarity);
+    stroke-width: 1px;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+
+  .card[data-reassemble] .neatline {
+    display: block;
+  }
+
+  /* The waiting states are base styles, not animation fill: a CSS animation applies nothing until
+     its start time resolves, which can be a frame after the deck is captured. */
+  .card[data-reassemble] .neatline rect {
+    animation: neatline-draw var(--dur-medium) var(--ease-summit) var(--dur-settle) forwards;
+  }
+
+  /* The static neatline takes over once the drawn one has closed. */
+  .card[data-reassemble] .face::before {
+    opacity: 0;
+    animation: neatline-handover 0s calc(var(--dur-settle) + var(--dur-medium)) forwards;
+  }
+
+  .card[data-reassemble] :is(.nameBar, .coords, .typeLine, .rules, .stats, .collector) {
+    opacity: 0;
+    transform: translateY(var(--dist-rise));
+    animation: card-part-rise var(--dur-short) var(--ease-drop) forwards;
+    animation-delay: calc(var(--dur-settle) + var(--part, 0) * var(--stagger-item));
+  }
+
+  .card[data-reassemble] .typeLine {
+    --part: 1;
+  }
+
+  .card[data-reassemble] .rules {
+    --part: 2;
+  }
+
+  .card[data-reassemble] .stats {
+    --part: 3;
+  }
+
+  .card[data-reassemble] .collector {
+    --part: 4;
+  }
+
+  @keyframes neatline-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes neatline-handover {
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes card-part-rise {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* -------------------------------------------------------------- motion modes */
+
+  /* The reassembly is part of the return transition: still mode has no view transitions, so a
+     card caught mid-rebuild when the OS switches simply shows. Calm keeps it, like the morph. */
+  :root[data-motion="still"] .card[data-reassemble] *,
+  :root[data-motion="still"] .card[data-reassemble] .face::before {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Tilt and the glare are full motion only: calm and still show a flat card. */
+  :root:not([data-motion="full"]) .tilt {
+    transform: none;
+  }
+
+  :root:not([data-motion="full"]) .card {
+    --px: 50%;
+    --py: 38%;
+  }
+
+  /* Still: the open chip only fades (opacity within --dur-still); nothing moves. */
+  :root[data-motion="still"] .openChip {
+    transform: none;
+    transition: opacity var(--dur-still) var(--ease-settle);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card[data-reassemble] *,
+    .card[data-reassemble] .face::before {
+      animation: none !important;
+    }
+
+    .openChip {
+      transform: none;
+      transition: none;
+    }
+  }
+
+  /* Forced colours: no foil or glare over the card. */
+  @media (forced-colors: active) {
+    .foil,
+    .glare {
+      display: none;
+    }
   }
 }

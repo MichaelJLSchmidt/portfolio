@@ -1,23 +1,27 @@
-.main {
-  display: grid;
-  gap: 16px;
-  align-content: center;
-  min-height: 80svh;
-  padding-top: 112px;
-  padding-bottom: 64px;
-}
+@layer reset, tokens, base, layout, components, utilities;
 
-/* Glacier like every eyebrow: alpenglow would read below 7:1 over the field. */
-.eyebrow {
-  --kt-color: var(--color-glacier);
-  color: var(--color-glacier);
-}
+@layer components {
+  .main {
+    display: grid;
+    gap: 16px;
+    align-content: center;
+    min-height: 80svh;
+    padding-top: 112px;
+    padding-bottom: 64px;
+  }
 
-.heading {
-  font-size: clamp(3rem, 14vw, 9rem);
-}
+  /* Glacier like every eyebrow: alpenglow would read below 7:1 over the field. */
+  .eyebrow {
+    --kt-color: var(--color-glacier);
+    color: var(--color-glacier);
+  }
 
-.line {
-  max-width: 36ch;
-  font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
+  .heading {
+    font-size: clamp(3rem, 14vw, 9rem);
+  }
+
+  .line {
+    max-width: 36ch;
+    font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
+  }
 }

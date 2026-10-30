@@ -1,150 +1,155 @@
+@layer reset, tokens, base, layout, components, utilities;
+
 /* The top padding is small: the heading has to peek into the first screen (see the hero). */
-.deck {
-  display: grid;
-  gap: clamp(32px, 4.5vw, 72px);
-  padding-block: clamp(20px, 3vw, 40px) clamp(64px, 10vw, 160px);
-  scroll-margin-top: 72px;
-}
 
-.header {
-  display: grid;
-  gap: 16px;
-  justify-items: center;
-  text-align: center;
-}
-
-.eyebrow {
-  --kt-color: var(--color-glacier);
-  color: var(--color-glacier);
-}
-
-.headRule {
-  width: min(100%, 12rem);
-  transform-origin: center;
-}
-
-.heading {
-  font-size: clamp(2.75rem, 10vw, 9rem);
-  scroll-margin-top: 96px;
-}
-
-.intro {
-  max-width: 40ch;
-}
-
-/* "Cards" · "Index": two pressed-or-not buttons; the pressed one fills with the sheet colour. */
-.views {
-  display: inline-flex;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.viewButton {
-  min-width: 7.5rem;
-  border-color: var(--color-contour);
-  color: var(--color-sheet);
-}
-
-.viewButton[aria-pressed="true"] {
-  border-color: var(--color-sheet);
-  background: var(--color-sheet);
-  color: var(--color-ground);
-}
-
-/* Cards: a flat spread grid in deck order, every card at rest at 0°, in the 63:88 card ratio
-   (SummitCard). One column of full-width cards on phones, two from the small breakpoint, three
-   from the medium one. */
-.cards {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  justify-items: center;
-  gap: clamp(28px, 4vw, 56px);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.slot {
-  display: grid;
-  justify-items: center;
-  width: 100%;
-}
-
-@media (min-width: 640px) {
-  .cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+@layer components {
+  .deck {
+    display: grid;
+    gap: clamp(32px, 4.5vw, 72px);
+    padding-block: clamp(20px, 3vw, 40px) clamp(64px, 10vw, 160px);
+    scroll-margin-top: 72px;
   }
-}
 
-@media (min-width: 1024px) {
-  .cards {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .header {
+    display: grid;
+    gap: 16px;
+    justify-items: center;
+    text-align: center;
   }
-}
 
-/* Phones: the cards snap into place as they scroll (y, proximity, so a reader in between is
-   never pulled). No haptic: snapping is scrolling. */
-@media (width < 640px) {
-  :root:has(.cards[data-snap]) {
-    scroll-snap-type: y proximity;
+  .eyebrow {
+    --kt-color: var(--color-glacier);
+    color: var(--color-glacier);
+  }
+
+  .headRule {
+    width: min(100%, 12rem);
+    transform-origin: center;
+  }
+
+  .heading {
+    font-size: clamp(2.75rem, 10vw, 9rem);
+    scroll-margin-top: 96px;
+  }
+
+  .intro {
+    max-width: 40ch;
+  }
+
+  /* "Cards" · "Index": two pressed-or-not buttons; the pressed one fills with the sheet colour. */
+  .views {
+    display: inline-flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .viewButton {
+    min-width: 7.5rem;
+    border-color: var(--color-contour);
+    color: var(--color-sheet);
+  }
+
+  .viewButton[aria-pressed="true"] {
+    border-color: var(--color-sheet);
+    background: var(--color-sheet);
+    color: var(--color-ground);
+  }
+
+  /* Cards: a flat spread grid in deck order, every card at rest at 0°, in the 63:88 card ratio
+     (SummitCard). One column of full-width cards on phones, two from the small breakpoint, three
+     from the medium one. */
+  .cards {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: clamp(28px, 4vw, 56px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
   .slot {
-    scroll-snap-align: center;
+    display: grid;
+    justify-items: center;
+    width: 100%;
   }
-}
 
-/* Index: one row per card, the name in the display cut and its index line beside it. */
-.index {
-  display: grid;
-  width: min(100%, 64rem);
-  margin: 0 auto;
-  padding: 0;
-  list-style: none;
-}
+  @media (min-width: 640px) {
+    .cards {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
 
-.row + .row {
-  border-top: 1px solid var(--color-contour-dim);
-}
+  @media (min-width: 1024px) {
+    .cards {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
 
-.rowLink {
-  position: relative;
-  display: grid;
-  align-items: baseline;
-  gap: 4px 24px;
-  padding: 18px 4px;
-}
+  /* Phones: the cards snap into place as they scroll (y, proximity, so a reader in between is
+     never pulled). No haptic: snapping is scrolling. */
+  @media (width < 640px) {
+    :root:has(.cards[data-snap]) {
+      scroll-snap-type: y proximity;
+    }
 
-/* From the small breakpoint the names make a column, so the lines start together. */
-@media (min-width: 640px) {
+    .slot {
+      scroll-snap-align: center;
+    }
+  }
+
+  /* Index: one row per card, the name in the display cut and its index line beside it. */
+  .index {
+    display: grid;
+    width: min(100%, 64rem);
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+  }
+
+  .row + .row {
+    border-top: 1px solid var(--color-contour-dim);
+  }
+
   .rowLink {
-    grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+    position: relative;
+    display: grid;
+    align-items: baseline;
+    gap: 4px 24px;
+    padding: 18px 4px;
   }
-}
 
-/* The rule that draws under the hovered or focused row. */
-.rowLink::after {
-  content: "";
-  position: absolute;
-  inset: auto 0 -1px;
-  height: 1px;
-  background: var(--color-glacier);
-  transform: scaleX(var(--on));
-  transform-origin: left center;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion="still"]) .rowLink::after {
-    transition: transform var(--dur-underline) var(--ease-settle);
+  /* From the small breakpoint the names make a column, so the lines start together. */
+  @media (min-width: 640px) {
+    .rowLink {
+      grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+    }
   }
-}
 
-.rowName {
-  font-size: clamp(2rem, 5vw, 3.5rem);
-}
+  /* The rule that draws under the hovered or focused row. */
+  .rowLink::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 -1px;
+    height: 1px;
+    background: var(--color-glacier);
+    transform: scaleX(var(--on));
+    transform-origin: left center;
+  }
 
-.rowLine {
-  color: var(--color-sheet);
-  font-size: 1.0625rem;
-  line-height: 1.4;
+  @media (prefers-reduced-motion: no-preference) {
+    :root:not([data-motion="still"]) .rowLink::after {
+      transition: transform var(--dur-underline) var(--ease-settle);
+    }
+  }
+
+  .rowName {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .rowLine {
+    color: var(--color-sheet);
+    font-size: 1.0625rem;
+    line-height: 1.4;
+  }
 }

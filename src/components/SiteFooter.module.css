@@ -1,108 +1,112 @@
-.footer {
-  position: relative;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px 24px;
-  margin-top: 48px;
-  padding: 40px var(--gutter) max(24px, env(safe-area-inset-bottom));
-  color: var(--color-sheet);
-}
+@layer reset, tokens, base, layout, components, utilities;
 
-/* The top edge: the Interlaken → Jungfrau elevation profile as a contour-coloured line. It
-   traces from the left once as the footer scrolls into view (data-reveal="line"). */
-.edge {
-  position: absolute;
-  inset: -40px 0 auto;
-  width: 100%;
-  height: 40px;
-  overflow: visible;
-  pointer-events: none;
-}
-
-.edge path {
-  fill: none;
-  stroke: var(--color-contour);
-  stroke-width: 1px;
-  vector-effect: non-scaling-stroke;
-}
-
-/* What the HUD leaves out of its bar (Hud.module.css): the navigation below the medium
-   breakpoint, the Bern time below the large one. */
-.nav {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 20px;
-  width: 100%;
-}
-
-.nav ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 20px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-@media (min-width: 1024px) {
-  .nav ul {
-    display: none;
-  }
-}
-
-/* From the large breakpoint the HUD shows the time. */
-@media (min-width: 1280px) {
-  .nav {
-    display: none;
-  }
-}
-
-.navLink {
-  display: inline-flex;
-  align-items: center;
-  min-height: 32px;
-}
-
-/* Not a link yet (no CV URL): the [URL] tag says so; the colour stays the footer's, legible over
-   the field. */
-.placeholder {
-  gap: 0.5em;
-}
-
-.clock {
-  display: inline-flex;
-  align-items: center;
-  min-height: 32px;
-  font-variant-numeric: tabular-nums;
-}
-
-/* One line where it fits; stacked on narrow screens, so no separator is left dangling. */
-.credits {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.sep {
-  display: none;
-}
-
-/* Phones only: from the small breakpoint the haptics switch sits in the HUD. */
-@media (min-width: 640px) {
-  .credits {
-    flex-direction: row;
+@layer components {
+  .footer {
+    position: relative;
+    display: flex;
     flex-wrap: wrap;
-    gap: 0 0.6em;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 24px;
+    margin-top: 48px;
+    padding: 40px var(--gutter) max(24px, env(safe-area-inset-bottom));
+    color: var(--color-sheet);
+  }
+
+  /* The top edge: the Interlaken → Jungfrau elevation profile as a contour-coloured line. It
+     traces from the left once as the footer scrolls into view (data-reveal="line"). */
+  .edge {
+    position: absolute;
+    inset: -40px 0 auto;
+    width: 100%;
+    height: 40px;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .edge path {
+    fill: none;
+    stroke: var(--color-contour);
+    stroke-width: 1px;
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* What the HUD leaves out of its bar (Hud.module.css): the navigation below the medium
+     breakpoint, the Bern time below the large one. */
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 20px;
+    width: 100%;
+  }
+
+  .nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 20px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 1024px) {
+    .nav ul {
+      display: none;
+    }
+  }
+
+  /* From the large breakpoint the HUD shows the time. */
+  @media (min-width: 1280px) {
+    .nav {
+      display: none;
+    }
+  }
+
+  .navLink {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+  }
+
+  /* Not a link yet (no CV URL): the [URL] tag says so; the colour stays the footer's, legible over
+     the field. */
+  .placeholder {
+    gap: 0.5em;
+  }
+
+  .clock {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* One line where it fits; stacked on narrow screens, so no separator is left dangling. */
+  .credits {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
 
   .sep {
-    display: inline;
+    display: none;
   }
 
-  .haptics.haptics {
-    display: none;
+  /* Phones only: from the small breakpoint the haptics switch sits in the HUD. */
+  @media (min-width: 640px) {
+    .credits {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0 0.6em;
+    }
+
+    .sep {
+      display: inline;
+    }
+
+    .haptics.haptics {
+      display: none;
+    }
   }
 }

@@ -1,3 +1,5 @@
+@layer reset, tokens, base, layout, components, utilities;
+
 /* Case-study figures (Figure.tsx). Two surfaces:
    - map sheet: the sheet colour, 32 px inside, a 1 px contour hairline and 8 px corners, for light
      UI and diagrams (light UI never sits straight on the dark ground). On it only sheet-safe inks:
@@ -5,670 +7,673 @@
    - night frame: raised ground, for charts and the hero.
    Column (~720 px) or wide (~1120 px), full width on phones. The `sizes` in Figure.tsx follow
    these widths. */
-.figure {
-  --pad: 32px;
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: start;
-  gap: 20px 24px;
-  width: 100%;
-  margin: 0;
-  border-radius: 8px;
-}
 
-/* With a lightbox: "Enlarge" sits beside the caption. */
-.figure[data-zoom] {
-  grid-template-columns: minmax(0, 1fr) auto;
-}
-
-.figure[data-size="column"] {
-  max-width: 720px;
-}
-
-.figure[data-size="wide"] {
-  max-width: 1120px;
-}
-
-.figure[data-surface="sheet"] {
-  --tick: var(--color-moss-ink);
-  padding: var(--pad);
-  border: 1px solid var(--color-contour);
-  background: var(--color-sheet);
-  color: var(--color-ground);
-}
-
-.figure[data-surface="night"] {
-  overflow: hidden;
-  border: 1px solid var(--color-contour-dim);
-  background: var(--color-ground-raised);
-  color: var(--color-sheet);
-}
-
-.figure[data-surface="night"] > :not(.media, .compare, dialog) {
-  margin-inline: 24px;
-}
-
-.figure[data-surface="night"] > :last-child {
-  margin-bottom: 24px;
-}
-
-.media,
-.compare {
-  position: relative;
-  grid-column: 1 / -1;
-}
-
-.figure img {
-  display: block;
-  width: 100%;
-  height: auto;
-  background: center / cover no-repeat;
-}
-
-/* ------------------------------------------------------------------ caption */
-
-.caption {
-  display: grid;
-  gap: 12px;
-  max-width: 62ch;
-  font-size: 1rem;
-  line-height: 1.55;
-}
-
-.captionText {
-  font-weight: 430;
-}
-
-.figLabel {
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-}
-
-.figure[data-surface="sheet"] .figLabel {
-  color: var(--color-moss-ink);
-}
-
-.figure[data-surface="night"] .figLabel,
-.lightbox .figLabel {
-  color: var(--color-glacier);
-}
-
-.long summary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5em;
-  min-height: 44px;
-  font-weight: 650;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-
-.figure[data-surface="sheet"] .long summary {
-  color: var(--color-moss-ink);
-}
-
-.figure[data-surface="night"] .long summary {
-  color: var(--color-glacier);
-}
-
-.long ul {
-  display: grid;
-  gap: 4px;
-  margin: 4px 0 0;
-  padding-left: 1.25em;
-  font-size: 0.9375rem;
-}
-
-.long ul ul {
-  margin-top: 4px;
-}
-
-/* --------------------------------------------------------------- hotspots */
-
-.hotspot {
-  position: absolute;
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  margin: -16px 0 0 -16px;
-  padding: 0;
-  border: 2px solid var(--color-sheet);
-  border-radius: 50%;
-  background: var(--color-ground);
-  color: var(--color-sheet);
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1;
-  box-shadow: 0 2px 8px rgb(27 28 24 / 0.35);
-  cursor: pointer;
-}
-
-.hotspot[aria-pressed="true"] {
-  background: var(--color-moss-ink);
-}
-
-.hotspot:focus-visible {
-  outline: 3px solid var(--color-moss-ink);
-  outline-offset: 2px;
-}
-
-/* A pressed marker grows a little: a response, kept in calm. */
-@media (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion="still"]) .hotspot {
-    transition:
-      background var(--dur-short) var(--ease-trail),
-      transform var(--dur-short) var(--ease-trail);
-  }
-
-  :root:not([data-motion="still"]) .hotspot[aria-pressed="true"] {
-    transform: scale(1.12);
-  }
-}
-
-/* One ping per pin, in turn (hotspots.ts): a ring leaves the pin and fades. */
-.hotspot::after {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  border: 2px solid var(--color-glacier);
-  border-radius: 50%;
-  opacity: 0;
-  pointer-events: none;
-}
-
-@keyframes hotspot-ping {
-  from {
-    opacity: 0.9;
-    transform: scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: scale(2.2);
-  }
-}
-
-:root[data-motion="full"] .hotspot[data-ping]::after {
-  animation: hotspot-ping var(--dur-long) var(--ease-settle) var(--ping-delay, 0ms) backwards;
-}
-
-/* The pressed pin's title in a mini sheet beside it: it unfolds from the pin's side, its letters
-   settling; still mode shows it at once. */
-.media :global([data-hotspot-label]) {
-  position: absolute;
-  z-index: 2;
-  margin: -12px 0 0 22px;
-  padding: 3px 10px;
-  border: 1px solid var(--color-contour);
-  border-radius: 4px;
-  background: var(--color-sheet);
-  color: var(--color-ground);
-  font-family: var(--font-mono);
-  font-size: var(--type-hud-size);
-  font-stretch: var(--axis-mono-rest-wdth);
-  letter-spacing: var(--type-hud-tracking);
-  text-transform: uppercase;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-.media :global([data-hotspot-label][data-side="start"]) {
-  margin-left: 0;
-  transform: translateX(calc(-100% - 22px));
-}
-
-@keyframes hotspot-label-unfold {
-  from {
-    clip-path: inset(0 100% 0 0);
-    font-stretch: var(--axis-mono-reveal-wdth);
-  }
-}
-
-@keyframes hotspot-label-unfold-start {
-  from {
-    clip-path: inset(0 0 0 100%);
-    font-stretch: var(--axis-mono-reveal-wdth);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion="still"]) .media :global([data-hotspot-label][data-play]) {
-    animation: hotspot-label-unfold var(--dur-unfold) var(--ease-settle);
-  }
-
-  :root:not([data-motion="still"]) .media :global([data-hotspot-label][data-play][data-side="start"]) {
-    animation-name: hotspot-label-unfold-start;
-  }
-}
-
-.notes {
-  display: grid;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: note;
-}
-
-.notes li {
-  display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
-  gap: 12px;
-  align-items: baseline;
-  padding: 8px 10px;
-  border-left: 3px solid transparent;
-  border-radius: 6px;
-  counter-increment: note;
-}
-
-.notes li::before {
-  content: counter(note);
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--color-ground);
-  color: var(--color-sheet);
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  line-height: 1;
-  align-self: start;
-}
-
-.notes li[data-active] {
-  border-left-color: var(--color-moss-ink);
-  background: rgb(47 107 58 / 0.12);
-}
-
-.notes li[data-active]::before {
-  background: var(--color-moss-ink);
-}
-
-/* ------------------------------------------------------------ before/after */
-
-.compareStage {
-  position: relative;
-  display: grid;
-}
-
-.compareAfter,
-.compareBefore {
-  position: relative;
-  grid-area: 1 / 1;
-}
-
-/* The "before" image lies over the "after" one and shows only the left share (--pos) of the frame. */
-.compareBefore {
-  z-index: 1;
-  clip-path: inset(0 calc(100% - var(--pos)) 0 0);
-}
-
-.compareTag {
-  position: absolute;
-  top: 12px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: var(--color-ground);
-  color: var(--color-sheet);
-  font-weight: 600;
-}
-
-/* The labels breathe while the slider is hovered, focused or held. */
-@media (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion="still"]) .compareTag {
-    transition: font-stretch var(--dur-breath) var(--ease-settle);
-  }
-
-  :root:not([data-motion="still"]) .compareStage:is(:active, :has(.compareRange:focus-visible)) .compareTag {
-    font-stretch: var(--axis-mono-hover-wdth);
-  }
-}
-
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion="still"]) .compareStage:hover .compareTag {
-    font-stretch: var(--axis-mono-hover-wdth);
-  }
-}
-
-.compareBefore .compareTag {
-  left: 12px;
-}
-
-.compareAfter .compareTag {
-  right: 12px;
-}
-
-.compareHandle {
-  position: absolute;
-  z-index: 2;
-  top: 0;
-  bottom: 0;
-  left: var(--pos);
-  width: 0;
-  border-left: 2px solid var(--color-ground);
-  pointer-events: none;
-}
-
-.compareHandle::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: -1px;
-  width: 40px;
-  height: 40px;
-  border: 2px solid var(--color-sheet);
-  border-radius: 50%;
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 6 3 12l6 6M15 6l6 6-6 6' fill='none' stroke='%23DDE3E3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
-      center / 22px no-repeat,
-    var(--color-ground);
-  box-shadow: 0 2px 8px rgb(27 28 24 / 0.35);
-  transform: translate(-50%, -50%);
-}
-
-/* The native range covers the frame: drag anywhere, or use the arrow keys. */
-.compareRange {
-  position: absolute;
-  z-index: 3;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  opacity: 0;
-  cursor: ew-resize;
-}
-
-.compareStage:has(.compareRange:focus-visible) .compareHandle::after {
-  outline: 3px solid var(--color-moss-ink);
-  outline-offset: 3px;
-}
-
-.compareViews {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.compareViews button {
-  min-height: 44px;
-  padding: 0 18px;
-  border: 1px solid var(--color-sheet-ink);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--color-ground);
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.compareViews button[aria-pressed="true"] {
-  border-color: var(--color-ground);
-  background: var(--color-ground);
-  color: var(--color-sheet);
-}
-
-.compareViews button:focus-visible {
-  outline: 3px solid var(--color-moss-ink);
-  outline-offset: 2px;
-}
-
-.compare[data-view="side"] .compareStage {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.compare[data-view="side"] .compareBefore {
-  grid-area: 1 / 1;
-  clip-path: none;
-}
-
-.compare[data-view="side"] .compareAfter {
-  grid-area: 1 / 2;
-}
-
-.compare[data-view="side"] :is(.compareRange, .compareHandle) {
-  display: none;
-}
-
-/* Without JavaScript (no data-motion on <html>): both images stacked, each with its alt text. */
-:root:not([data-motion]) .compareStage {
-  grid-template-columns: minmax(0, 1fr);
-  gap: 16px;
-}
-
-:root:not([data-motion]) .compareBefore {
-  grid-area: 1 / 1;
-  clip-path: none;
-}
-
-:root:not([data-motion]) .compareAfter {
-  grid-area: 2 / 1;
-}
-
-:root:not([data-motion]) :is(.compareRange, .compareHandle, .compareViews) {
-  display: none;
-}
-
-/* ---------------------------------------------------------------- lightbox */
-
-/* "Open full-size image" without JavaScript; "Enlarge" once the lightbox is attached. */
-.zoomOpen {
-  grid-column: 2;
-  grid-row: 2;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 0 16px;
-  border: 1px solid currentColor;
-  border-radius: 999px;
-  background: transparent;
-  color: inherit;
-  font-weight: 600;
-  text-decoration: none;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.zoomOpen[hidden] {
-  display: none;
-}
-
-.figure[data-surface="sheet"] .zoomOpen {
-  color: var(--color-ground);
-}
-
-.zoomOpen:hover {
-  background: var(--color-ground);
-  color: var(--color-sheet);
-}
-
-.figure[data-surface="sheet"] .zoomOpen:focus-visible {
-  outline-color: var(--color-moss-ink);
-}
-
-.zoomOpen svg {
-  width: 14px;
-  height: 14px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-}
-
-.lightbox {
-  width: calc(100vw - 32px);
-  max-width: 1880px;
-  height: calc(100dvh - 32px);
-  max-height: none;
-  padding: 0;
-  border: 1px solid var(--color-contour-dim);
-  border-radius: 12px;
-  background: var(--color-ground);
-  color: var(--color-sheet);
-}
-
-.lightbox[open] {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto auto;
-}
-
-.lightbox::backdrop {
-  background: rgb(13 14 12 / 0.88);
-}
-
-.lightboxBar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px 16px;
-  padding: 10px 12px 10px 20px;
-  border-bottom: 1px solid var(--color-contour-dim);
-}
-
-.lightboxBar > p {
-  color: var(--color-glacier);
-}
-
-.zoomControls {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-left: auto;
-}
-
-.zoomControls button,
-.lightboxClose {
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0 12px;
-  border: 1px solid var(--color-contour-dim);
-  border-radius: 999px;
-  background: var(--color-ground-raised);
-  color: var(--color-sheet);
-  font-size: 1.125rem;
-  cursor: pointer;
-}
-
-.zoomControls button.hud-label,
-.lightboxClose {
-  font-size: var(--type-hud-size);
-}
-
-.zoomControls button:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-
-.zoomControls button:hover:not(:disabled),
-.lightboxClose:hover {
-  border-color: var(--color-glacier);
-  color: var(--color-glacier);
-}
-
-.zoomLevel {
-  min-width: 5ch;
-  color: var(--color-contour);
-  text-align: center;
-}
-
-.lightboxStage {
-  position: relative;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  padding: 12px;
-  background: var(--color-ground-raised);
-  cursor: zoom-in;
-  touch-action: none;
-}
-
-/* Light UI stays on the sheet colour in the lightbox too. */
-.figure[data-surface="sheet"] .lightboxStage {
-  background: var(--color-sheet);
-}
-
-.lightboxStage[data-zoomed="true"] {
-  cursor: grab;
-}
-
-.lightboxStage img {
-  width: auto;
-  max-width: 100%;
-  height: auto;
-  max-height: 100%;
-  transform-origin: center;
-  user-select: none;
-  -webkit-user-drag: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion="still"]) .lightboxStage:not([data-gesture]) img {
-    transition: transform var(--dur-short) var(--ease-trail);
-  }
-}
-
-.lightboxHint {
-  padding: 10px 20px 0;
-  color: var(--color-contour);
-}
-
-.lightboxCaption {
-  max-width: 80ch;
-  padding: 6px 20px 16px;
-}
-
-/* ------------------------------------------------------------------ phones */
-
-@media (width < 640px) {
-  /* Edge to edge: through the page gutter on both sides. */
-  .figure.figure {
-    --pad: 20px;
+@layer components {
+  .figure {
+    --pad: 32px;
+    position: relative;
+    display: grid;
     grid-template-columns: minmax(0, 1fr);
-    width: calc(100% + 2 * var(--gutter));
-    max-width: none;
-    margin-inline: calc(-1 * var(--gutter));
-    border-radius: 0;
+    align-items: start;
+    gap: 20px 24px;
+    width: 100%;
+    margin: 0;
+    border-radius: 8px;
   }
 
-  .figure[data-surface] {
-    border-inline: 0;
+  /* With a lightbox: "Enlarge" sits beside the caption. */
+  .figure[data-zoom] {
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  .zoomOpen {
-    grid-column: 1;
-    grid-row: auto;
-    justify-self: start;
+  .figure[data-size="column"] {
+    max-width: 720px;
   }
+
+  .figure[data-size="wide"] {
+    max-width: 1120px;
+  }
+
+  .figure[data-surface="sheet"] {
+    --tick: var(--color-moss-ink);
+    padding: var(--pad);
+    border: 1px solid var(--color-contour);
+    background: var(--color-sheet);
+    color: var(--color-ground);
+  }
+
+  .figure[data-surface="night"] {
+    overflow: hidden;
+    border: 1px solid var(--color-contour-dim);
+    background: var(--color-ground-raised);
+    color: var(--color-sheet);
+  }
+
+  .figure[data-surface="night"] > :not(.media, .compare, dialog) {
+    margin-inline: 24px;
+  }
+
+  .figure[data-surface="night"] > :last-child {
+    margin-bottom: 24px;
+  }
+
+  .media,
+  .compare {
+    position: relative;
+    grid-column: 1 / -1;
+  }
+
+  .figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: center / cover no-repeat;
+  }
+
+  /* ------------------------------------------------------------------ caption */
+
+  .caption {
+    display: grid;
+    gap: 12px;
+    max-width: 62ch;
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .captionText {
+    font-weight: 430;
+  }
+
+  .figLabel {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  .figure[data-surface="sheet"] .figLabel {
+    color: var(--color-moss-ink);
+  }
+
+  .figure[data-surface="night"] .figLabel,
+  .lightbox .figLabel {
+    color: var(--color-glacier);
+  }
+
+  .long summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    min-height: 44px;
+    font-weight: 650;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  .figure[data-surface="sheet"] .long summary {
+    color: var(--color-moss-ink);
+  }
+
+  .figure[data-surface="night"] .long summary {
+    color: var(--color-glacier);
+  }
+
+  .long ul {
+    display: grid;
+    gap: 4px;
+    margin: 4px 0 0;
+    padding-left: 1.25em;
+    font-size: 0.9375rem;
+  }
+
+  .long ul ul {
+    margin-top: 4px;
+  }
+
+  /* --------------------------------------------------------------- hotspots */
 
   .hotspot {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    margin: -16px 0 0 -16px;
+    padding: 0;
+    border: 2px solid var(--color-sheet);
+    border-radius: 50%;
+    background: var(--color-ground);
+    color: var(--color-sheet);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1;
+    box-shadow: 0 2px 8px rgb(27 28 24 / 0.35);
+    cursor: pointer;
+  }
+
+  .hotspot[aria-pressed="true"] {
+    background: var(--color-moss-ink);
+  }
+
+  .hotspot:focus-visible {
+    outline: 3px solid var(--color-moss-ink);
+    outline-offset: 2px;
+  }
+
+  /* A pressed marker grows a little: a response, kept in calm. */
+  @media (prefers-reduced-motion: no-preference) {
+    :root:not([data-motion="still"]) .hotspot {
+      transition:
+        background var(--dur-short) var(--ease-trail),
+        transform var(--dur-short) var(--ease-trail);
+    }
+
+    :root:not([data-motion="still"]) .hotspot[aria-pressed="true"] {
+      transform: scale(1.12);
+    }
+  }
+
+  /* One ping per pin, in turn (hotspots.ts): a ring leaves the pin and fades. */
+  .hotspot::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border: 2px solid var(--color-glacier);
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  @keyframes hotspot-ping {
+    from {
+      opacity: 0.9;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(2.2);
+    }
+  }
+
+  :root[data-motion="full"] .hotspot[data-ping]::after {
+    animation: hotspot-ping var(--dur-long) var(--ease-settle) var(--ping-delay, 0ms) backwards;
+  }
+
+  /* The pressed pin's title in a mini sheet beside it: it unfolds from the pin's side, its letters
+     settling; still mode shows it at once. */
+  .media :global([data-hotspot-label]) {
+    position: absolute;
+    z-index: 2;
+    margin: -12px 0 0 22px;
+    padding: 3px 10px;
+    border: 1px solid var(--color-contour);
+    border-radius: 4px;
+    background: var(--color-sheet);
+    color: var(--color-ground);
+    font-family: var(--font-mono);
+    font-size: var(--type-hud-size);
+    font-stretch: var(--axis-mono-rest-wdth);
+    letter-spacing: var(--type-hud-tracking);
+    text-transform: uppercase;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .media :global([data-hotspot-label][data-side="start"]) {
+    margin-left: 0;
+    transform: translateX(calc(-100% - 22px));
+  }
+
+  @keyframes hotspot-label-unfold {
+    from {
+      clip-path: inset(0 100% 0 0);
+      font-stretch: var(--axis-mono-reveal-wdth);
+    }
+  }
+
+  @keyframes hotspot-label-unfold-start {
+    from {
+      clip-path: inset(0 0 0 100%);
+      font-stretch: var(--axis-mono-reveal-wdth);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :root:not([data-motion="still"]) .media :global([data-hotspot-label][data-play]) {
+      animation: hotspot-label-unfold var(--dur-unfold) var(--ease-settle);
+    }
+
+    :root:not([data-motion="still"]) .media :global([data-hotspot-label][data-play][data-side="start"]) {
+      animation-name: hotspot-label-unfold-start;
+    }
+  }
+
+  .notes {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: note;
+  }
+
+  .notes li {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 12px;
+    align-items: baseline;
+    padding: 8px 10px;
+    border-left: 3px solid transparent;
+    border-radius: 6px;
+    counter-increment: note;
+  }
+
+  .notes li::before {
+    content: counter(note);
+    display: grid;
+    place-items: center;
     width: 28px;
     height: 28px;
-    margin: -14px 0 0 -14px;
+    border-radius: 50%;
+    background: var(--color-ground);
+    color: var(--color-sheet);
+    font-family: var(--font-mono);
     font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1;
+    align-self: start;
+  }
+
+  .notes li[data-active] {
+    border-left-color: var(--color-moss-ink);
+    background: rgb(47 107 58 / 0.12);
+  }
+
+  .notes li[data-active]::before {
+    background: var(--color-moss-ink);
+  }
+
+  /* ------------------------------------------------------------ before/after */
+
+  .compareStage {
+    position: relative;
+    display: grid;
+  }
+
+  .compareAfter,
+  .compareBefore {
+    position: relative;
+    grid-area: 1 / 1;
+  }
+
+  /* The "before" image lies over the "after" one and shows only the left share (--pos) of the frame. */
+  .compareBefore {
+    z-index: 1;
+    clip-path: inset(0 calc(100% - var(--pos)) 0 0);
+  }
+
+  .compareTag {
+    position: absolute;
+    top: 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--color-ground);
+    color: var(--color-sheet);
+    font-weight: 600;
+  }
+
+  /* The labels breathe while the slider is hovered, focused or held. */
+  @media (prefers-reduced-motion: no-preference) {
+    :root:not([data-motion="still"]) .compareTag {
+      transition: font-stretch var(--dur-breath) var(--ease-settle);
+    }
+
+    :root:not([data-motion="still"]) .compareStage:is(:active, :has(.compareRange:focus-visible)) .compareTag {
+      font-stretch: var(--axis-mono-hover-wdth);
+    }
+  }
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    :root:not([data-motion="still"]) .compareStage:hover .compareTag {
+      font-stretch: var(--axis-mono-hover-wdth);
+    }
+  }
+
+  .compareBefore .compareTag {
+    left: 12px;
+  }
+
+  .compareAfter .compareTag {
+    right: 12px;
+  }
+
+  .compareHandle {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    bottom: 0;
+    left: var(--pos);
+    width: 0;
+    border-left: 2px solid var(--color-ground);
+    pointer-events: none;
+  }
+
+  .compareHandle::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -1px;
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--color-sheet);
+    border-radius: 50%;
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 6 3 12l6 6M15 6l6 6-6 6' fill='none' stroke='%23DDE3E3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+        center / 22px no-repeat,
+      var(--color-ground);
+    box-shadow: 0 2px 8px rgb(27 28 24 / 0.35);
+    transform: translate(-50%, -50%);
+  }
+
+  /* The native range covers the frame: drag anywhere, or use the arrow keys. */
+  .compareRange {
+    position: absolute;
+    z-index: 3;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: ew-resize;
+  }
+
+  .compareStage:has(.compareRange:focus-visible) .compareHandle::after {
+    outline: 3px solid var(--color-moss-ink);
+    outline-offset: 3px;
+  }
+
+  .compareViews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .compareViews button {
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1px solid var(--color-sheet-ink);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-ground);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .compareViews button[aria-pressed="true"] {
+    border-color: var(--color-ground);
+    background: var(--color-ground);
+    color: var(--color-sheet);
+  }
+
+  .compareViews button:focus-visible {
+    outline: 3px solid var(--color-moss-ink);
+    outline-offset: 2px;
   }
 
   .compare[data-view="side"] .compareStage {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .compare[data-view="side"] .compareBefore {
+    grid-area: 1 / 1;
+    clip-path: none;
   }
 
   .compare[data-view="side"] .compareAfter {
+    grid-area: 1 / 2;
+  }
+
+  .compare[data-view="side"] :is(.compareRange, .compareHandle) {
+    display: none;
+  }
+
+  /* Without JavaScript (no data-motion on <html>): both images stacked, each with its alt text. */
+  :root:not([data-motion]) .compareStage {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  :root:not([data-motion]) .compareBefore {
+    grid-area: 1 / 1;
+    clip-path: none;
+  }
+
+  :root:not([data-motion]) .compareAfter {
     grid-area: 2 / 1;
   }
 
+  :root:not([data-motion]) :is(.compareRange, .compareHandle, .compareViews) {
+    display: none;
+  }
+
+  /* ---------------------------------------------------------------- lightbox */
+
+  /* "Open full-size image" without JavaScript; "Enlarge" once the lightbox is attached. */
+  .zoomOpen {
+    grid-column: 2;
+    grid-row: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .zoomOpen[hidden] {
+    display: none;
+  }
+
+  .figure[data-surface="sheet"] .zoomOpen {
+    color: var(--color-ground);
+  }
+
+  .zoomOpen:hover {
+    background: var(--color-ground);
+    color: var(--color-sheet);
+  }
+
+  .figure[data-surface="sheet"] .zoomOpen:focus-visible {
+    outline-color: var(--color-moss-ink);
+  }
+
+  .zoomOpen svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+
   .lightbox {
-    width: 100vw;
-    height: 100dvh;
-    border: 0;
-    border-radius: 0;
+    width: calc(100vw - 32px);
+    max-width: 1880px;
+    height: calc(100dvh - 32px);
+    max-height: none;
+    padding: 0;
+    border: 1px solid var(--color-contour-dim);
+    border-radius: 12px;
+    background: var(--color-ground);
+    color: var(--color-sheet);
+  }
+
+  .lightbox[open] {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+  }
+
+  .lightbox::backdrop {
+    background: rgb(13 14 12 / 0.88);
+  }
+
+  .lightboxBar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    padding: 10px 12px 10px 20px;
+    border-bottom: 1px solid var(--color-contour-dim);
+  }
+
+  .lightboxBar > p {
+    color: var(--color-glacier);
+  }
+
+  .zoomControls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+  }
+
+  .zoomControls button,
+  .lightboxClose {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid var(--color-contour-dim);
+    border-radius: 999px;
+    background: var(--color-ground-raised);
+    color: var(--color-sheet);
+    font-size: 1.125rem;
+    cursor: pointer;
+  }
+
+  .zoomControls button.hud-label,
+  .lightboxClose {
+    font-size: var(--type-hud-size);
+  }
+
+  .zoomControls button:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .zoomControls button:hover:not(:disabled),
+  .lightboxClose:hover {
+    border-color: var(--color-glacier);
+    color: var(--color-glacier);
+  }
+
+  .zoomLevel {
+    min-width: 5ch;
+    color: var(--color-contour);
+    text-align: center;
+  }
+
+  .lightboxStage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    padding: 12px;
+    background: var(--color-ground-raised);
+    cursor: zoom-in;
+    touch-action: none;
+  }
+
+  /* Light UI stays on the sheet colour in the lightbox too. */
+  .figure[data-surface="sheet"] .lightboxStage {
+    background: var(--color-sheet);
+  }
+
+  .lightboxStage[data-zoomed="true"] {
+    cursor: grab;
+  }
+
+  .lightboxStage img {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 100%;
+    transform-origin: center;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :root:not([data-motion="still"]) .lightboxStage:not([data-gesture]) img {
+      transition: transform var(--dur-short) var(--ease-trail);
+    }
+  }
+
+  .lightboxHint {
+    padding: 10px 20px 0;
+    color: var(--color-contour);
+  }
+
+  .lightboxCaption {
+    max-width: 80ch;
+    padding: 6px 20px 16px;
+  }
+
+  /* ------------------------------------------------------------------ phones */
+
+  @media (width < 640px) {
+    /* Edge to edge: through the page gutter on both sides. */
+    .figure.figure {
+      --pad: 20px;
+      grid-template-columns: minmax(0, 1fr);
+      width: calc(100% + 2 * var(--gutter));
+      max-width: none;
+      margin-inline: calc(-1 * var(--gutter));
+      border-radius: 0;
+    }
+
+    .figure[data-surface] {
+      border-inline: 0;
+    }
+
+    .zoomOpen {
+      grid-column: 1;
+      grid-row: auto;
+      justify-self: start;
+    }
+
+    .hotspot {
+      width: 28px;
+      height: 28px;
+      margin: -14px 0 0 -14px;
+      font-size: 0.8125rem;
+    }
+
+    .compare[data-view="side"] .compareStage {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .compare[data-view="side"] .compareAfter {
+      grid-area: 2 / 1;
+    }
+
+    .lightbox {
+      width: 100vw;
+      height: 100dvh;
+      border: 0;
+      border-radius: 0;
+    }
   }
 }

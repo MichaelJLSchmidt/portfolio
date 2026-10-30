@@ -1,26 +1,31 @@
+@layer reset, tokens, base, layout, components, utilities;
+
 /* RollNumber.tsx: rolling digits keep the line's height and baseline, at tabular widths. */
-.roll {
-  display: inline-flex;
-  align-items: baseline;
-  font-variant-numeric: tabular-nums;
-}
 
-/* RollValue.tsx: the value as written holds the box; the rolling copy lies over it. */
-.value {
-  position: relative;
-  display: inline-block;
-}
+@layer components {
+  .roll {
+    display: inline-flex;
+    align-items: baseline;
+    font-variant-numeric: tabular-nums;
+  }
 
-.ghost {
-  visibility: hidden;
-}
+  /* RollValue.tsx: the value as written holds the box; the rolling copy lies over it. */
+  .value {
+    position: relative;
+    display: inline-block;
+  }
 
-.run {
-  position: absolute;
-  inset: 0 auto auto 0;
-  white-space: nowrap;
-}
+  .ghost {
+    visibility: hidden;
+  }
 
-.run > span:not([class]) {
-  white-space: pre;
+  .run {
+    position: absolute;
+    inset: 0 auto auto 0;
+    white-space: nowrap;
+  }
+
+  .run > span:not([class]) {
+    white-space: pre;
+  }
 }

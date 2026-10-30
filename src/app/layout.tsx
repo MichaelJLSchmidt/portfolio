@@ -17,6 +17,9 @@ import "@/styles/motion.css";
 
 const isPreview = process.env.NEXT_PUBLIC_PREVIEW === "1";
 
+/** The cascade layers, lowest first; every stylesheet starts with the same statement. */
+const LAYER_ORDER = "@layer reset, tokens, base, layout, components, utilities;";
+
 export const metadata: Metadata = {
   title: site.title,
   description: site.description,
@@ -33,7 +36,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang={site.lang} className={`${archivo.variable} ${archivoItalic.variable} ${martianMono.variable}`} suppressHydrationWarning>
       <head>
-        <style dangerouslySetInnerHTML={{ __html: tokensToCss() + springsToCss() }} />
+        {/* The tokens' custom properties, in the tokens layer (globals.css explains the layers). */}
+        <style dangerouslySetInnerHTML={{ __html: `${LAYER_ORDER}@layer tokens{${tokensToCss()}${springsToCss()}}` }} />
         <script dangerouslySetInnerHTML={{ __html: motionModeScript }} />
       </head>
       <body>

@@ -1,153 +1,157 @@
-.main {
-  display: grid;
-  gap: clamp(40px, 5vw, 80px);
-  padding-top: 96px;
-  padding-bottom: 64px;
-}
+@layer reset, tokens, base, layout, components, utilities;
 
-.crumb {
-  --l-rest-color: var(--color-glacier);
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-}
-
-/* A definite track, not an auto one: the title's size depends on its column (cqi), and an auto
-   track re-measures that column, and with it the whole page, on every layout. */
-.header {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 24px;
-}
-
-.artSlot,
-.art {
-  width: 100%;
-  aspect-ratio: 3 / 2;
-  border-radius: 12px;
-}
-
-/* The artwork's stamp (flagged examples) sizes itself to the artwork. */
-.art {
-  container-type: inline-size;
-}
-
-.art {
-  height: auto;
-  border-color: var(--color-contour-dim);
-  box-shadow: 0 24px 60px rgb(0 0 0 / 0.45);
-}
-
-/* One display size for every case-study title: the template's widest word (--title-em, measured)
-   fills 96% of this column, up to 8.5rem; a title with a wider word scales itself down
-   (--word-em). Shorter titles never grow. */
-.titleBlock {
-  container-type: inline-size;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 14px;
-  align-content: end;
-}
-
-.coords {
-  color: var(--color-sheet);
-}
-
-.title {
-  font-size: min(calc(0.96 * 100cqi / max(var(--title-em, 5), var(--word-em, 5))), 8.5rem);
-}
-
-.type {
-  margin: 0;
-  font-family: var(--font-text-condensed);
-  font-size: 1.125rem;
-  font-weight: 600;
-  font-stretch: var(--type-condensed-wdth);
-}
-
-.type[data-role] {
-  --kt-rest-wdth: var(--type-condensed-wdth);
-  --kt-rest-wght: 600;
-}
-
-/* "7 min read · 60-second skim below" */
-.meta {
-  color: var(--color-sheet);
-}
-
-.skim {
-  --l-rest-color: var(--color-glacier);
-}
-
-/* The product hero, directly after the Summit summary. */
-.hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  justify-items: center;
-}
-
-.jump {
-  display: grid;
-  gap: 12px;
-}
-
-.jumpHeading {
-  --kt-color: var(--color-sheet);
-  color: var(--color-sheet);
-}
-
-.jump ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-/* The jump chips: SignatureLink's chip variant (breath, brightening border, sheet when pressed). */
-.chip {
-  font-size: 0.9375rem;
-}
-
-/* Below 1200 px: "Jump to" chips at the top, the waypoints in one column. From 1200 px the
-   "On this page" trail stays beside them instead. */
-.body {
-  display: grid;
-  gap: 40px;
-}
-
-.trail {
-  display: none;
-}
-
-.waypoints {
-  display: grid;
-  gap: clamp(72px, 9vw, 128px);
-  min-width: 0;
-}
-
-@media (min-width: 1024px) {
-  .header {
-    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-    align-items: end;
-    gap: clamp(32px, 4vw, 72px);
+@layer components {
+  .main {
+    display: grid;
+    gap: clamp(40px, 5vw, 80px);
+    padding-top: 96px;
+    padding-bottom: 64px;
   }
-}
 
-@media (min-width: 1280px) {
-  .body {
-    grid-template-columns: 13rem minmax(0, 1fr);
-    align-items: start;
-    gap: 64px;
+  .crumb {
+    --l-rest-color: var(--color-glacier);
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  /* A definite track, not an auto one: the title's size depends on its column (cqi), and an auto
+     track re-measures that column, and with it the whole page, on every layout. */
+  .header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .artSlot,
+  .art {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    border-radius: 12px;
+  }
+
+  /* The artwork's stamp (flagged examples) sizes itself to the artwork. */
+  .art {
+    container-type: inline-size;
+  }
+
+  .art {
+    height: auto;
+    border-color: var(--color-contour-dim);
+    box-shadow: 0 24px 60px rgb(0 0 0 / 0.45);
+  }
+
+  /* One display size for every case-study title: the template's widest word (--title-em, measured)
+     fills 96% of this column, up to 8.5rem; a title with a wider word scales itself down
+     (--word-em). Shorter titles never grow. */
+  .titleBlock {
+    container-type: inline-size;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    align-content: end;
+  }
+
+  .coords {
+    color: var(--color-sheet);
+  }
+
+  .title {
+    font-size: min(calc(0.96 * 100cqi / max(var(--title-em, 5), var(--word-em, 5))), 8.5rem);
+  }
+
+  .type {
+    margin: 0;
+    font-family: var(--font-text-condensed);
+    font-size: 1.125rem;
+    font-weight: 600;
+    font-stretch: var(--type-condensed-wdth);
+  }
+
+  .type[data-role] {
+    --kt-rest-wdth: var(--type-condensed-wdth);
+    --kt-rest-wght: 600;
+  }
+
+  /* "7 min read · 60-second skim below" */
+  .meta {
+    color: var(--color-sheet);
+  }
+
+  .skim {
+    --l-rest-color: var(--color-glacier);
+  }
+
+  /* The product hero, directly after the Summit summary. */
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
   }
 
   .jump {
-    display: none;
+    display: grid;
+    gap: 12px;
+  }
+
+  .jumpHeading {
+    --kt-color: var(--color-sheet);
+    color: var(--color-sheet);
+  }
+
+  .jump ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* The jump chips: SignatureLink's chip variant (breath, brightening border, sheet when pressed). */
+  .chip {
+    font-size: 0.9375rem;
+  }
+
+  /* Below 1200 px: "Jump to" chips at the top, the waypoints in one column. From 1200 px the
+     "On this page" trail stays beside them instead. */
+  .body {
+    display: grid;
+    gap: 40px;
   }
 
   .trail {
-    display: block;
-    align-self: stretch;
+    display: none;
+  }
+
+  .waypoints {
+    display: grid;
+    gap: clamp(72px, 9vw, 128px);
+    min-width: 0;
+  }
+
+  @media (min-width: 1024px) {
+    .header {
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+      align-items: end;
+      gap: clamp(32px, 4vw, 72px);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .body {
+      grid-template-columns: 13rem minmax(0, 1fr);
+      align-items: start;
+      gap: 64px;
+    }
+
+    .jump {
+      display: none;
+    }
+
+    .trail {
+      display: block;
+      align-self: stretch;
+    }
   }
 }

@@ -1,196 +1,201 @@
+@layer reset, tokens, base, layout, components, utilities;
+
 /* The motion lab (/lab/): three frames side by side, and the specimen sheet inside each. */
-.main {
-  display: grid;
-  gap: 24px;
-  padding-top: 96px;
-  padding-bottom: 64px;
-}
 
-.header {
-  display: grid;
-  gap: 12px;
-  max-width: 72ch;
-}
+@layer components {
+  .main {
+    display: grid;
+    gap: 24px;
+    padding-top: 96px;
+    padding-bottom: 64px;
+  }
 
-.title {
-  font-size: clamp(2.75rem, 7vw, 6rem);
-}
+  .header {
+    display: grid;
+    gap: 12px;
+    max-width: 72ch;
+  }
 
-.columns {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
-  gap: 16px;
-}
+  .title {
+    font-size: clamp(2.75rem, 7vw, 6rem);
+  }
 
-/* Headings and frames share two rows across the columns, so the frames line up. */
-.column {
-  display: grid;
-  grid-row: span 2;
-  grid-template-rows: subgrid;
-  row-gap: 8px;
-  min-width: 0;
-}
+  .columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+    gap: 16px;
+  }
 
-.columnHead {
-  display: grid;
-  gap: 4px;
-  color: var(--color-glacier);
-}
+  /* Headings and frames share two rows across the columns, so the frames line up. */
+  .column {
+    display: grid;
+    grid-row: span 2;
+    grid-template-rows: subgrid;
+    row-gap: 8px;
+    min-width: 0;
+  }
 
-.columnNote {
-  color: var(--color-contour);
-  font-size: 0.875rem;
-  line-height: 1.4;
-}
+  .columnHead {
+    display: grid;
+    gap: 4px;
+    color: var(--color-glacier);
+  }
 
-.frame {
-  width: 100%;
-  height: min(78svh, 900px);
-  border: 1px solid var(--color-contour-dim);
-  border-radius: 8px;
-  background: var(--color-ground);
-}
+  .columnNote {
+    color: var(--color-contour);
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
 
-/* ------------------------------------------------------------ specimen */
+  .frame {
+    width: 100%;
+    height: min(78svh, 900px);
+    border: 1px solid var(--color-contour-dim);
+    border-radius: 8px;
+    background: var(--color-ground);
+  }
 
-/* A frame shows the primitives without the site's chrome (HUD, field, footer: data-chrome). */
-:root:has(.specimen) [data-chrome] {
-  display: none !important;
-}
+  /* ------------------------------------------------------------ specimen */
 
-.specimen {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 48px;
-  padding: 24px 20px 96px;
-}
+  /* A frame shows the primitives without the site's chrome (HUD, field, footer: data-chrome). */
+  :root:has(.specimen) [data-chrome] {
+    display: none !important;
+  }
 
-.scroller {
-  overflow-x: auto;
-}
+  .specimen {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
+    padding: 24px 20px 96px;
+  }
 
-.readout {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 24px;
-  margin: 0;
-  color: var(--color-glacier);
-}
+  .scroller {
+    overflow-x: auto;
+  }
 
-.readout div {
-  display: flex;
-  gap: 8px;
-}
+  .readout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    margin: 0;
+    color: var(--color-glacier);
+  }
 
-.readout dt {
-  color: var(--color-contour);
-}
+  .readout div {
+    display: flex;
+    gap: 8px;
+  }
 
-.readout dd {
-  margin: 0;
-}
+  .readout dt {
+    color: var(--color-contour);
+  }
 
-.section {
-  display: grid;
-  gap: 16px;
-  padding-top: 24px;
-  border-top: 1px solid var(--color-contour-dim);
-}
+  .readout dd {
+    margin: 0;
+  }
 
-.section > h2 {
-  color: var(--color-glacier);
-}
+  .section {
+    display: grid;
+    gap: 16px;
+    padding-top: 24px;
+    border-top: 1px solid var(--color-contour-dim);
+  }
 
-.note {
-  max-width: 52ch;
-  color: var(--color-contour);
-  font-size: 0.9375rem;
-  line-height: 1.5;
-}
+  .section > h2 {
+    color: var(--color-glacier);
+  }
 
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 16px 24px;
-}
+  .note {
+    max-width: 52ch;
+    color: var(--color-contour);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
 
-.big {
-  font-size: clamp(2.5rem, 9vw, 4.5rem);
-}
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 24px;
+  }
 
-.mid {
-  font-size: clamp(1.75rem, 5vw, 2.75rem);
-}
+  .big {
+    font-size: clamp(2.5rem, 9vw, 4.5rem);
+  }
 
-.glintHost {
-  position: relative;
-  margin: 0;
-}
+  .mid {
+    font-size: clamp(1.75rem, 5vw, 2.75rem);
+  }
 
-.sheetRow {
-  padding: 16px 20px;
-  border-radius: 8px;
-  background: var(--color-sheet);
-}
+  .glintHost {
+    position: relative;
+    margin: 0;
+  }
 
-.sheetText {
-  color: var(--color-ground);
-  font-size: 1.25rem;
-  font-weight: 700;
-}
+  .sheetRow {
+    padding: 16px 20px;
+    border-radius: 8px;
+    background: var(--color-sheet);
+  }
 
-.states {
-  border-collapse: collapse;
-}
+  .sheetText {
+    color: var(--color-ground);
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
 
-.states th,
-.states td {
-  padding: 8px 12px 8px 0;
-  text-align: start;
-  vertical-align: middle;
-}
+  .states {
+    border-collapse: collapse;
+  }
 
-.states th {
-  color: var(--color-contour);
-  font-weight: 400;
-}
+  .states th,
+  .states td {
+    padding: 8px 12px 8px 0;
+    text-align: start;
+    vertical-align: middle;
+  }
 
-.displayLinks {
-  display: grid;
-  gap: 24px;
-}
+  .states th {
+    color: var(--color-contour);
+    font-weight: 400;
+  }
 
-.nextLink {
-  display: inline-grid;
-  gap: 8px;
-  justify-self: start;
-  color: var(--color-glacier);
-}
+  .displayLinks {
+    display: grid;
+    gap: 24px;
+  }
 
-.nextName {
-  --l-rest-color: var(--color-sheet);
-  font-size: clamp(2.25rem, 7vw, 3.5rem);
-}
+  .nextLink {
+    display: inline-grid;
+    gap: 8px;
+    justify-self: start;
+    color: var(--color-glacier);
+  }
 
-.spacer {
-  display: grid;
-  align-items: end;
-  min-height: 110svh;
-  color: var(--color-contour);
-}
+  .nextName {
+    --l-rest-color: var(--color-sheet);
+    font-size: clamp(2.25rem, 7vw, 3.5rem);
+  }
 
-.block {
-  margin: 0;
-}
+  .spacer {
+    display: grid;
+    align-items: end;
+    min-height: 110svh;
+    color: var(--color-contour);
+  }
 
-.cardBlock {
-  padding: 20px;
-  border: 1px solid var(--color-contour-dim);
-  border-radius: 12px;
-  background: var(--color-ground-raised);
-}
+  .block {
+    margin: 0;
+  }
 
-.sheet {
-  max-width: 40ch;
+  .cardBlock {
+    padding: 20px;
+    border: 1px solid var(--color-contour-dim);
+    border-radius: 12px;
+    background: var(--color-ground-raised);
+  }
+
+  .sheet {
+    max-width: 40ch;
+  }
 }

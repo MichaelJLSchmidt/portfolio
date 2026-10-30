@@ -1,3 +1,5 @@
+@layer reset, tokens, base, layout, components, utilities;
+
 /*
  * The glint: one mint pass across text (dark surfaces), or a 1 px moss-ink rule drawing under it
  * (the light sheet). An aria-hidden copy of the text lies over the original with transparent
@@ -12,66 +14,68 @@
   initial-value: -20%;
 }
 
-.glint {
-  position: absolute;
-  inset: 0;
-  color: transparent;
-  text-shadow: none;
-  background-image: linear-gradient(
-    var(--glint-angle),
-    transparent calc(var(--glint-x) - var(--glint-band) / 2),
-    var(--glint-color) var(--glint-x),
-    transparent calc(var(--glint-x) + var(--glint-band) / 2)
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  pointer-events: none;
-  user-select: none;
-  visibility: hidden;
-}
-
-/* A Mythic card's pass: summit gold instead of mint. */
-.glint[data-tone="gold"] {
-  --glint-color: color-mix(in srgb, var(--color-summit-gold) 60%, transparent);
-}
-
-.rule {
-  position: absolute;
-  inset: auto 0 -0.12em;
-  height: 1px;
-  background: var(--color-moss-ink);
-  transform: scaleX(0);
-  transform-origin: left center;
-  pointer-events: none;
-  visibility: hidden;
-}
-
-@keyframes glint-pass {
-  from {
-    --glint-x: calc(var(--glint-band) / -2);
+@layer components {
+  .glint {
+    position: absolute;
+    inset: 0;
+    color: transparent;
+    text-shadow: none;
+    background-image: linear-gradient(
+      var(--glint-angle),
+      transparent calc(var(--glint-x) - var(--glint-band) / 2),
+      var(--glint-color) var(--glint-x),
+      transparent calc(var(--glint-x) + var(--glint-band) / 2)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    pointer-events: none;
+    user-select: none;
+    visibility: hidden;
   }
-  to {
-    --glint-x: calc(100% + var(--glint-band) / 2);
-  }
-}
 
-@keyframes glint-rule {
-  60% {
-    opacity: 1;
-    transform: none;
+  /* A Mythic card's pass: summit gold instead of mint. */
+  .glint[data-tone="gold"] {
+    --glint-color: color-mix(in srgb, var(--color-summit-gold) 60%, transparent);
   }
-  to {
-    opacity: 0;
-    transform: none;
+
+  .rule {
+    position: absolute;
+    inset: auto 0 -0.12em;
+    height: 1px;
+    background: var(--color-moss-ink);
+    transform: scaleX(0);
+    transform-origin: left center;
+    pointer-events: none;
+    visibility: hidden;
   }
-}
 
-:root[data-motion="full"] .glint[data-glint="play"] {
-  visibility: visible;
-  animation: glint-pass var(--dur-glint) var(--ease-glint) both;
-}
+  @keyframes glint-pass {
+    from {
+      --glint-x: calc(var(--glint-band) / -2);
+    }
+    to {
+      --glint-x: calc(100% + var(--glint-band) / 2);
+    }
+  }
 
-:root[data-motion="full"] .rule[data-glint="play"] {
-  visibility: visible;
-  animation: glint-rule var(--dur-glint) var(--ease-glint) both;
+  @keyframes glint-rule {
+    60% {
+      opacity: 1;
+      transform: none;
+    }
+    to {
+      opacity: 0;
+      transform: none;
+    }
+  }
+
+  :root[data-motion="full"] .glint[data-glint="play"] {
+    visibility: visible;
+    animation: glint-pass var(--dur-glint) var(--ease-glint) both;
+  }
+
+  :root[data-motion="full"] .rule[data-glint="play"] {
+    visibility: visible;
+    animation: glint-rule var(--dur-glint) var(--ease-glint) both;
+  }
 }

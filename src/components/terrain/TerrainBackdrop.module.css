@@ -1,157 +1,161 @@
-.backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: var(--layer-backdrop);
-  overflow: hidden;
-  pointer-events: none;
-  background: var(--color-ground);
-  contain: strict;
-}
+@layer reset, tokens, base, layout, components, utilities;
 
-.layer,
-.poster,
-.canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
+@layer components {
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--layer-backdrop);
+    overflow: hidden;
+    pointer-events: none;
+    background: var(--color-ground);
+    contain: strict;
+  }
 
-/* One poster per terrain the backdrop can show: the region, and Basecamp's (Bern, the Aare in
-   ice, the zero-point pin). A route change cross-fades the layers in 200 ms, opacity only: what
-   still mode and tier C see instead of the field's morph. */
-.layer {
-  transition: opacity var(--dur-still) linear;
-}
+  .layer,
+  .poster,
+  .canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
 
-.backdrop[data-poster="bern"] .layer[data-layer="region"],
-.backdrop[data-poster="region"] .layer[data-layer="bern"] {
-  opacity: 0;
-}
+  /* One poster per terrain the backdrop can show: the region, and Basecamp's (Bern, the Aare in
+     ice, the zero-point pin). A route change cross-fades the layers in 200 ms, opacity only: what
+     still mode and tier C see instead of the field's morph. */
+  .layer {
+    transition: opacity var(--dur-still) linear;
+  }
 
-.poster {
-  object-fit: cover;
-  transition: opacity var(--dur-medium) var(--ease-trail);
-}
+  .backdrop[data-poster="bern"] .layer[data-layer="region"],
+  .backdrop[data-poster="region"] .layer[data-layer="bern"] {
+    opacity: 0;
+  }
 
-.canvas {
-  opacity: 0;
-  transition: opacity var(--dur-medium) var(--ease-trail);
-}
+  .poster {
+    object-fit: cover;
+    transition: opacity var(--dur-medium) var(--ease-trail);
+  }
 
-.backdrop[data-field="on"] .canvas {
-  opacity: 1;
-}
+  .canvas {
+    opacity: 0;
+    transition: opacity var(--dur-medium) var(--ease-trail);
+  }
 
-/* First visit: the poster waits dimmed while the field loads and draws the map on.
-   If the field never arrives, the animation brings the poster back by itself. */
-:root[data-intro="pending"] .poster {
-  opacity: 0.3;
-  animation: poster-fallback var(--dur-medium) var(--ease-trail) 4s both;
-}
-
-@keyframes poster-fallback {
-  to {
+  .backdrop[data-field="on"] .canvas {
     opacity: 1;
   }
-}
 
-.backdrop[data-field="on"] .poster {
-  animation: none;
-  opacity: 0;
-  transition-delay: var(--dur-medium);
-}
+  /* First visit: the poster waits dimmed while the field loads and draws the map on.
+     If the field never arrives, the animation brings the poster back by itself. */
+  :root[data-intro="pending"] .poster {
+    opacity: 0.3;
+    animation: poster-fallback var(--dur-medium) var(--ease-trail) 4s both;
+  }
 
-/* The WebGL context is lost: the poster is back at once. */
-.backdrop[data-field="lost"] .layer,
-.backdrop[data-field="lost"] .poster,
-.backdrop[data-field="lost"] .canvas,
-.backdrop[data-field="lost"] .vignette {
-  transition: none;
-}
+  @keyframes poster-fallback {
+    to {
+      opacity: 1;
+    }
+  }
 
-/* The band under the HUD. */
-.scrim,
-.vignette {
-  position: absolute;
-  inset: 0;
-}
+  .backdrop[data-field="on"] .poster {
+    animation: none;
+    opacity: 0;
+    transition-delay: var(--dur-medium);
+  }
 
-.scrim {
-  background: linear-gradient(to bottom, rgb(27 28 24 / 0.5), rgb(27 28 24 / 0) 18%);
-}
+  /* The WebGL context is lost: the poster is back at once. */
+  .backdrop[data-field="lost"] .layer,
+  .backdrop[data-field="lost"] .poster,
+  .backdrop[data-field="lost"] .canvas,
+  .backdrop[data-field="lost"] .vignette {
+    transition: none;
+  }
 
-/* Keeps text legible over the static poster. The running field fades its lines behind
-   text instead (quiet zones), so the vignette fades out with the poster. */
-.vignette {
-  background: linear-gradient(to top, rgb(27 28 24 / 0.75), rgb(27 28 24 / 0) 55%);
-  transition: opacity var(--dur-medium) var(--ease-trail);
-}
-
-@media (min-width: 1024px) {
+  /* The band under the HUD. */
+  .scrim,
   .vignette {
-    background: linear-gradient(to right, rgb(27 28 24 / 0.7), rgb(27 28 24 / 0.15) 60%, rgb(27 28 24 / 0));
+    position: absolute;
+    inset: 0;
   }
-}
 
-.backdrop[data-field="on"] .vignette {
-  opacity: 0;
-}
-
-.skip {
-  position: fixed;
-  right: 16px;
-  bottom: max(16px, env(safe-area-inset-bottom));
-  z-index: var(--layer-overlay);
-  min-height: 44px;
-  padding: 0 16px;
-  border: 1px solid var(--color-contour);
-  border-radius: 999px;
-  background: rgb(27 28 24 / 0.8);
-  color: var(--color-sheet);
-  cursor: pointer;
-}
-
-@media (hover: hover) {
-  .skip:hover {
-    border-color: var(--color-glacier);
-    color: var(--color-glacier);
+  .scrim {
+    background: linear-gradient(to bottom, rgb(27 28 24 / 0.5), rgb(27 28 24 / 0) 18%);
   }
-}
 
-/* Without the WebGL field the poster still breathes: a slow, compositor-only drift. An
-   auto-playing loop, so it is the field's ambient (WCAG 2.2.2): desktop in full motion only, and
-   the Calm map switch stops it. */
-@keyframes poster-drift {
-  from {
-    transform: scale(1.06) translate3d(-1%, 0.6%, 0);
+  /* Keeps text legible over the static poster. The running field fades its lines behind
+     text instead (quiet zones), so the vignette fades out with the poster. */
+  .vignette {
+    background: linear-gradient(to top, rgb(27 28 24 / 0.75), rgb(27 28 24 / 0) 55%);
+    transition: opacity var(--dur-medium) var(--ease-trail);
   }
-  to {
-    transform: scale(1.1) translate3d(1%, -0.8%, 0);
+
+  @media (min-width: 1024px) {
+    .vignette {
+      background: linear-gradient(to right, rgb(27 28 24 / 0.7), rgb(27 28 24 / 0.15) 60%, rgb(27 28 24 / 0));
+    }
   }
-}
 
-:root[data-motion="full"][data-tier="desktop"] .backdrop[data-field="off"] .poster {
-  animation: poster-drift 48s var(--ease-summit) infinite alternate;
-  will-change: transform;
-}
+  .backdrop[data-field="on"] .vignette {
+    opacity: 0;
+  }
 
-/* First visit: keep the "field never arrived" fallback alongside the drift. */
-:root[data-motion="full"][data-tier="desktop"][data-intro="pending"] .backdrop[data-field="off"] .poster {
-  animation:
-    poster-fallback var(--dur-medium) var(--ease-trail) 4s both,
-    poster-drift 48s var(--ease-summit) infinite alternate;
-}
+  .skip {
+    position: fixed;
+    right: 16px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    z-index: var(--layer-overlay);
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid var(--color-contour);
+    border-radius: 999px;
+    background: rgb(27 28 24 / 0.8);
+    color: var(--color-sheet);
+    cursor: pointer;
+  }
 
-:root[data-motion="still"] .poster,
-:root[data-motion="still"] .canvas,
-:root[data-motion="still"] .vignette {
-  transition: none;
-}
+  @media (hover: hover) {
+    .skip:hover {
+      border-color: var(--color-glacier);
+      color: var(--color-glacier);
+    }
+  }
 
-/* Forced colours: no field and no poster; the page is the system's background. */
-@media (forced-colors: active) {
-  .backdrop {
-    display: none;
+  /* Without the WebGL field the poster still breathes: a slow, compositor-only drift. An
+     auto-playing loop, so it is the field's ambient (WCAG 2.2.2): desktop in full motion only, and
+     the Calm map switch stops it. */
+  @keyframes poster-drift {
+    from {
+      transform: scale(1.06) translate3d(-1%, 0.6%, 0);
+    }
+    to {
+      transform: scale(1.1) translate3d(1%, -0.8%, 0);
+    }
+  }
+
+  :root[data-motion="full"][data-tier="desktop"] .backdrop[data-field="off"] .poster {
+    animation: poster-drift 48s var(--ease-summit) infinite alternate;
+    will-change: transform;
+  }
+
+  /* First visit: keep the "field never arrived" fallback alongside the drift. */
+  :root[data-motion="full"][data-tier="desktop"][data-intro="pending"] .backdrop[data-field="off"] .poster {
+    animation:
+      poster-fallback var(--dur-medium) var(--ease-trail) 4s both,
+      poster-drift 48s var(--ease-summit) infinite alternate;
+  }
+
+  :root[data-motion="still"] .poster,
+  :root[data-motion="still"] .canvas,
+  :root[data-motion="still"] .vignette {
+    transition: none;
+  }
+
+  /* Forced colours: no field and no poster; the page is the system's background. */
+  @media (forced-colors: active) {
+    .backdrop {
+      display: none;
+    }
   }
 }

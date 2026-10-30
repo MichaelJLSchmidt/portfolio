@@ -1,3 +1,5 @@
+@layer reset, tokens, base, layout, components, utilities;
+
 /*
  * The signature link (SignatureLink.tsx). One "on" switch, --on, is set by hover (fine pointers,
  * under (hover: hover), so a tap never leaves a sticky hover) and by keyboard focus alike, and
@@ -11,265 +13,268 @@
  *   colour   the label mixes from its rest colour (--l-rest-color) to glacier (still mode keeps
  *            only this, within --dur-still).
  */
-.link {
-  --on: 0;
-  --press: 0;
-  --l-rest-wdth: var(--axis-label-rest-wdth);
-  --l-rest-wght: var(--axis-label-rest-wght);
-  --l-breath-wdth: var(--axis-label-hover-wdth);
-  --l-breath-wght: var(--axis-label-hover-wght);
-  --l-press-wdth: var(--axis-label-press-wdth);
-  --l-press-wght: var(--axis-label-press-wght);
-  --l-from-wdth: var(--axis-label-reveal-wdth);
-  --l-from-wght: var(--axis-label-reveal-wght);
-  --l-rest-color: var(--color-sheet);
-  text-decoration: none;
-  -webkit-tap-highlight-color: transparent;
-}
 
-.label,
-.phrase {
-  color: color-mix(in oklab, var(--l-rest-color), var(--color-glacier) calc(var(--on) * 100%));
-  transition: color var(--dur-still) var(--ease-settle);
-}
+@layer components {
+  .link {
+    --on: 0;
+    --press: 0;
+    --l-rest-wdth: var(--axis-label-rest-wdth);
+    --l-rest-wght: var(--axis-label-rest-wght);
+    --l-breath-wdth: var(--axis-label-hover-wdth);
+    --l-breath-wght: var(--axis-label-hover-wght);
+    --l-press-wdth: var(--axis-label-press-wdth);
+    --l-press-wght: var(--axis-label-press-wght);
+    --l-from-wdth: var(--axis-label-reveal-wdth);
+    --l-from-wght: var(--axis-label-reveal-wght);
+    --l-rest-color: var(--color-sheet);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
 
-.link:is([data-variant="display"], [data-role="display"]) {
-  --l-rest-wdth: var(--axis-display-rest-wdth);
-  --l-rest-wght: var(--axis-display-rest-wght);
-  --l-breath-wdth: var(--axis-display-hover-wdth);
-  --l-breath-wght: var(--axis-display-hover-wght);
-  --l-press-wdth: var(--axis-display-press-wdth);
-  --l-press-wght: var(--axis-display-press-wght);
-  --l-from-wdth: var(--axis-display-reveal-wdth);
-  --l-from-wght: var(--axis-display-reveal-wght);
-}
+  .label,
+  .phrase {
+    color: color-mix(in oklab, var(--l-rest-color), var(--color-glacier) calc(var(--on) * 100%));
+    transition: color var(--dur-still) var(--ease-settle);
+  }
 
-/* Martian Mono (the HUD, eyebrow-style links). A container may narrow the rest width further
-   (the HUD after scroll) through --l-rest-wdth: the box is reserved at the breath axes. */
-.link[data-role="mono"] {
-  --l-rest-wdth: var(--axis-mono-rest-wdth);
-  --l-rest-wght: var(--axis-mono-rest-wght);
-  --l-breath-wdth: var(--axis-mono-hover-wdth);
-  --l-breath-wght: var(--axis-mono-hover-wght);
-  --l-press-wdth: var(--axis-mono-press-wdth);
-  --l-press-wght: var(--axis-mono-press-wght);
-  --l-from-wdth: var(--axis-mono-reveal-wdth);
-  --l-from-wght: var(--axis-mono-reveal-wght);
-}
+  .link:is([data-variant="display"], [data-role="display"]) {
+    --l-rest-wdth: var(--axis-display-rest-wdth);
+    --l-rest-wght: var(--axis-display-rest-wght);
+    --l-breath-wdth: var(--axis-display-hover-wdth);
+    --l-breath-wght: var(--axis-display-hover-wght);
+    --l-press-wdth: var(--axis-display-press-wdth);
+    --l-press-wght: var(--axis-display-press-wght);
+    --l-from-wdth: var(--axis-display-reveal-wdth);
+    --l-from-wght: var(--axis-display-reveal-wght);
+  }
 
-.link:focus-visible {
-  --on: 1;
-}
+  /* Martian Mono (the HUD, eyebrow-style links). A container may narrow the rest width further
+     (the HUD after scroll) through --l-rest-wdth: the box is reserved at the breath axes. */
+  .link[data-role="mono"] {
+    --l-rest-wdth: var(--axis-mono-rest-wdth);
+    --l-rest-wght: var(--axis-mono-rest-wght);
+    --l-breath-wdth: var(--axis-mono-hover-wdth);
+    --l-breath-wght: var(--axis-mono-hover-wght);
+    --l-press-wdth: var(--axis-mono-press-wdth);
+    --l-press-wght: var(--axis-mono-press-wght);
+    --l-from-wdth: var(--axis-mono-reveal-wdth);
+    --l-from-wght: var(--axis-mono-reveal-wght);
+  }
 
-@media (hover: hover) {
-  .link:hover {
+  .link:focus-visible {
     --on: 1;
   }
-}
 
-.link:active {
-  --press: 1;
-}
-
-/* The motion lab shows each state side by side (data-lab-state, review pages only). */
-.link[data-lab-state="on"] {
-  --on: 1;
-}
-
-.link[data-lab-state="press"] {
-  --on: 1;
-  --press: 1;
-}
-
-/* ---------------------------------------------------------------- breath variants */
-
-.label {
-  display: inline-grid;
-  position: relative;
-}
-
-.label > * {
-  grid-area: 1 / 1;
-}
-
-.ghost,
-.run {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.25em;
-}
-
-/* The reserved box: the label at its breath axes, plus room for the arrow's nudge. */
-.ghost {
-  visibility: hidden;
-  font-stretch: var(--l-breath-wdth);
-  font-weight: max(var(--l-breath-wght), var(--l-rest-wght));
-  padding-inline-end: var(--dist-nudge);
-}
-
-/* The label role (Archivo): before the web font, the fallback that is as wide as its breath. */
-.link[data-role="label"] .ghost {
-  font-family: var(--font-text-breath);
-}
-
-/* A leading arrow (back links) nudges back, so the room is at the start. */
-.link[data-arrow="start"] .ghost {
-  padding-inline: var(--dist-nudge) 0;
-}
-
-.link[data-arrow="start"] .run {
-  justify-self: end;
-}
-
-.run {
-  justify-self: start;
-}
-
-.word {
-  position: relative;
-  display: inline-block;
-}
-
-.ch {
-  font-stretch: var(--l-rest-wdth);
-  font-weight: var(--l-rest-wght);
-}
-
-.arrow {
-  display: inline-block;
-  color: var(--color-glacier);
-}
-
-.link[data-variant="nav"][aria-current] {
-  --l-rest-color: var(--color-glacier);
-}
-
-/* The current page (nav): glacier, with a contour rule under the label. */
-.link[data-variant="nav"] .label::after {
-  content: "";
-  position: absolute;
-  inset: auto 0 -0.3em;
-  height: 1px;
-  background: var(--color-glacier);
-  transform: scaleX(0);
-  transform-origin: left center;
-}
-
-.link[data-variant="nav"][aria-current] .label::after {
-  transform: none;
-}
-
-/* ---------------------------------------------------------------- settle (first paint) */
-
-/* The box stays reserved at the breath axes; the run lies over it, so letters wider than the box
-   for the moment of the settle (they spill into the gap beside the link) never move anything. */
-.link[data-settle] .run {
-  position: absolute;
-  inset: 0 auto auto 0;
-}
-
-@keyframes sl-settle {
-  from {
-    font-stretch: var(--l-from-wdth);
-    font-weight: var(--l-from-wght);
+  @media (hover: hover) {
+    .link:hover {
+      --on: 1;
+    }
   }
-}
 
-/* ---------------------------------------------------------------- chip */
+  .link:active {
+    --press: 1;
+  }
 
-/* A pill: the label breathes, the border brightens from contour to glacier; pressed or current,
-   the chip fills with the sheet colour (ground text on it, sheet-safe). */
-.link[data-variant="chip"] {
-  --l-chip-fill: 0;
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 16px;
-  border: 1px solid color-mix(in oklab, var(--color-contour), var(--color-glacier) calc(var(--on) * 100%));
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--color-sheet) calc(var(--l-chip-fill) * 100%), rgb(27 28 24 / 0.75));
-  transition:
-    border-color var(--dur-still) var(--ease-settle),
-    background-color var(--dur-still) var(--ease-settle);
-}
+  /* The motion lab shows each state side by side (data-lab-state, review pages only). */
+  .link[data-lab-state="on"] {
+    --on: 1;
+  }
 
-.link[data-variant="chip"]:is(:active, [aria-current], [data-lab-state="press"]) {
-  --l-chip-fill: 1;
-  --l-rest-color: var(--color-ground);
-  --on: 0;
-  border-color: var(--color-sheet);
-}
+  .link[data-lab-state="press"] {
+    --on: 1;
+    --press: 1;
+  }
 
-.link[data-variant="chip"]:is(:active, [aria-current]) .label {
-  color: var(--color-ground);
-}
+  /* ---------------------------------------------------------------- breath variants */
 
-/* Full and calm: the axes and the arrow move. Still: colour only. */
-@media (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion="still"]) .ch {
-    font-stretch: calc(var(--l-rest-wdth) + (var(--l-breath-wdth) - var(--l-rest-wdth)) * var(--on) * (1 - var(--press)) + (var(--l-press-wdth) - var(--l-rest-wdth)) * var(--press));
-    font-weight: calc(var(--l-rest-wght) + (var(--l-breath-wght) - var(--l-rest-wght)) * var(--on) * (1 - var(--press)) + (var(--l-press-wght) - var(--l-rest-wght)) * var(--press));
+  .label {
+    display: inline-grid;
+    position: relative;
+  }
+
+  .label > * {
+    grid-area: 1 / 1;
+  }
+
+  .ghost,
+  .run {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.25em;
+  }
+
+  /* The reserved box: the label at its breath axes, plus room for the arrow's nudge. */
+  .ghost {
+    visibility: hidden;
+    font-stretch: var(--l-breath-wdth);
+    font-weight: max(var(--l-breath-wght), var(--l-rest-wght));
+    padding-inline-end: var(--dist-nudge);
+  }
+
+  /* The label role (Archivo): before the web font, the fallback that is as wide as its breath. */
+  .link[data-role="label"] .ghost {
+    font-family: var(--font-text-breath);
+  }
+
+  /* A leading arrow (back links) nudges back, so the room is at the start. */
+  .link[data-arrow="start"] .ghost {
+    padding-inline: var(--dist-nudge) 0;
+  }
+
+  .link[data-arrow="start"] .run {
+    justify-self: end;
+  }
+
+  .run {
+    justify-self: start;
+  }
+
+  .word {
+    position: relative;
+    display: inline-block;
+  }
+
+  .ch {
+    font-stretch: var(--l-rest-wdth);
+    font-weight: var(--l-rest-wght);
+  }
+
+  .arrow {
+    display: inline-block;
+    color: var(--color-glacier);
+  }
+
+  .link[data-variant="nav"][aria-current] {
+    --l-rest-color: var(--color-glacier);
+  }
+
+  /* The current page (nav): glacier, with a contour rule under the label. */
+  .link[data-variant="nav"] .label::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 -0.3em;
+    height: 1px;
+    background: var(--color-glacier);
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  .link[data-variant="nav"][aria-current] .label::after {
+    transform: none;
+  }
+
+  /* ---------------------------------------------------------------- settle (first paint) */
+
+  /* The box stays reserved at the breath axes; the run lies over it, so letters wider than the box
+     for the moment of the settle (they spill into the gap beside the link) never move anything. */
+  .link[data-settle] .run {
+    position: absolute;
+    inset: 0 auto auto 0;
+  }
+
+  @keyframes sl-settle {
+    from {
+      font-stretch: var(--l-from-wdth);
+      font-weight: var(--l-from-wght);
+    }
+  }
+
+  /* ---------------------------------------------------------------- chip */
+
+  /* A pill: the label breathes, the border brightens from contour to glacier; pressed or current,
+     the chip fills with the sheet colour (ground text on it, sheet-safe). */
+  .link[data-variant="chip"] {
+    --l-chip-fill: 0;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid color-mix(in oklab, var(--color-contour), var(--color-glacier) calc(var(--on) * 100%));
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-sheet) calc(var(--l-chip-fill) * 100%), rgb(27 28 24 / 0.75));
     transition:
-      font-stretch var(--dur-breath) var(--ease-settle),
-      font-weight var(--dur-breath) var(--ease-settle);
-    /* In: left to right; out: right to left. The delay comes from the state being entered. */
-    transition-delay: calc(var(--on) * var(--kt-i) * var(--l-in) + (1 - var(--on)) * (var(--l-n) - 1 - var(--kt-i)) * var(--l-out));
+      border-color var(--dur-still) var(--ease-settle),
+      background-color var(--dur-still) var(--ease-settle);
   }
 
-  :root:not([data-motion="still"]) .link:active .ch {
-    transition-duration: var(--dur-tap);
-    transition-delay: 0s;
+  .link[data-variant="chip"]:is(:active, [aria-current], [data-lab-state="press"]) {
+    --l-chip-fill: 1;
+    --l-rest-color: var(--color-ground);
+    --on: 0;
+    border-color: var(--color-sheet);
   }
 
-  :root:not([data-motion="still"]) .arrow {
-    transform: translateX(calc(var(--on) * var(--dist-nudge)));
-    transition: transform var(--dur-breath) var(--ease-settle);
+  .link[data-variant="chip"]:is(:active, [aria-current]) .label {
+    color: var(--color-ground);
   }
 
-  :root:not([data-motion="still"]) .link[data-arrow="start"] .arrow {
-    transform: translateX(calc(var(--on) * -1 * var(--dist-nudge)));
+  /* Full and calm: the axes and the arrow move. Still: colour only. */
+  @media (prefers-reduced-motion: no-preference) {
+    :root:not([data-motion="still"]) .ch {
+      font-stretch: calc(var(--l-rest-wdth) + (var(--l-breath-wdth) - var(--l-rest-wdth)) * var(--on) * (1 - var(--press)) + (var(--l-press-wdth) - var(--l-rest-wdth)) * var(--press));
+      font-weight: calc(var(--l-rest-wght) + (var(--l-breath-wght) - var(--l-rest-wght)) * var(--on) * (1 - var(--press)) + (var(--l-press-wght) - var(--l-rest-wght)) * var(--press));
+      transition:
+        font-stretch var(--dur-breath) var(--ease-settle),
+        font-weight var(--dur-breath) var(--ease-settle);
+      /* In: left to right; out: right to left. The delay comes from the state being entered. */
+      transition-delay: calc(var(--on) * var(--kt-i) * var(--l-in) + (1 - var(--on)) * (var(--l-n) - 1 - var(--kt-i)) * var(--l-out));
+    }
+
+    :root:not([data-motion="still"]) .link:active .ch {
+      transition-duration: var(--dur-tap);
+      transition-delay: 0s;
+    }
+
+    :root:not([data-motion="still"]) .arrow {
+      transform: translateX(calc(var(--on) * var(--dist-nudge)));
+      transition: transform var(--dur-breath) var(--ease-settle);
+    }
+
+    :root:not([data-motion="still"]) .link[data-arrow="start"] .arrow {
+      transform: translateX(calc(var(--on) * -1 * var(--dist-nudge)));
+    }
+
+    :root:not([data-motion="still"]) .link[data-variant="nav"] .label::after {
+      transition: transform var(--dur-underline) var(--ease-settle);
+    }
+
+    :root:not([data-motion="still"]) .link[data-settle="true"] .ch {
+      animation: sl-settle var(--dur-settle) var(--ease-settle) backwards;
+      animation-delay: calc(var(--kt-i) * var(--l-settle));
+    }
   }
 
-  :root:not([data-motion="still"]) .link[data-variant="nav"] .label::after {
-    transition: transform var(--dur-underline) var(--ease-settle);
+  /* ---------------------------------------------------------------- inline */
+
+  .link[data-variant="inline"] .phrase {
+    position: relative;
+    display: inline-block;
   }
 
-  :root:not([data-motion="still"]) .link[data-settle="true"] .ch {
-    animation: sl-settle var(--dur-settle) var(--ease-settle) backwards;
-    animation-delay: calc(var(--kt-i) * var(--l-settle));
+  /* A dim contour line always marks the link; on hover or focus a glacier line draws over it. */
+  .link[data-variant="inline"] .phrase::before,
+  .link[data-variant="inline"] .phrase::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 -0.12em;
+    height: 1px;
+    background: var(--color-contour);
   }
-}
 
-/* ---------------------------------------------------------------- inline */
-
-.link[data-variant="inline"] .phrase {
-  position: relative;
-  display: inline-block;
-}
-
-/* A dim contour line always marks the link; on hover or focus a glacier line draws over it. */
-.link[data-variant="inline"] .phrase::before,
-.link[data-variant="inline"] .phrase::after {
-  content: "";
-  position: absolute;
-  inset: auto 0 -0.12em;
-  height: 1px;
-  background: var(--color-contour);
-}
-
-.link[data-variant="inline"] .phrase::after {
-  background: var(--color-glacier);
-  clip-path: inset(0 calc((1 - var(--on)) * 100%) 0 0);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion="still"]) .link[data-variant="inline"] .phrase::after {
-    transition: clip-path var(--dur-underline) var(--ease-settle);
+  .link[data-variant="inline"] .phrase::after {
+    background: var(--color-glacier);
+    clip-path: inset(0 calc((1 - var(--on)) * 100%) 0 0);
   }
-}
 
-/* The glint overlay lies over the letters at rest. */
-.glint {
-  font-stretch: var(--l-rest-wdth);
-  font-weight: var(--l-rest-wght);
+  @media (prefers-reduced-motion: no-preference) {
+    :root:not([data-motion="still"]) .link[data-variant="inline"] .phrase::after {
+      transition: clip-path var(--dur-underline) var(--ease-settle);
+    }
+  }
+
+  /* The glint overlay lies over the letters at rest. */
+  .glint {
+    font-stretch: var(--l-rest-wdth);
+    font-weight: var(--l-rest-wght);
+  }
 }

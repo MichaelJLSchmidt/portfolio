@@ -1,84 +1,89 @@
+@layer reset, tokens, base, layout, components, utilities;
+
 /* The terrain lab (/lab/terrain/): the page sits over the live field, panels on the legend surface. */
-.main {
-  display: grid;
-  gap: 32px;
-  padding-top: 96px;
-  padding-bottom: 64px;
-}
 
-.header {
-  display: grid;
-  gap: 12px;
-  max-width: 72ch;
-}
+@layer components {
+  .main {
+    display: grid;
+    gap: 32px;
+    padding-top: 96px;
+    padding-bottom: 64px;
+  }
 
-.title {
-  font-size: clamp(2.75rem, 7vw, 6rem);
-}
+  .header {
+    display: grid;
+    gap: 12px;
+    max-width: 72ch;
+  }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
-  gap: 16px;
-}
+  .title {
+    font-size: clamp(2.75rem, 7vw, 6rem);
+  }
 
-.panel {
-  display: grid;
-  align-content: start;
-  gap: 12px;
-  padding: 20px;
-  border: 1px solid var(--color-contour-dim);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--color-ground-raised) 88%, transparent);
-  color: var(--color-sheet);
-}
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+    gap: 16px;
+  }
 
-.panel h2,
-.panel h3 {
-  margin: 0;
-  color: var(--color-glacier);
-}
+  .panel {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+    padding: 20px;
+    border: 1px solid var(--color-contour-dim);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--color-ground-raised) 88%, transparent);
+    color: var(--color-sheet);
+  }
 
-.note {
-  margin: 0;
-  color: var(--color-sheet);
-  font-size: 0.875rem;
-  line-height: 1.45;
-}
+  .panel h2,
+  .panel h3 {
+    margin: 0;
+    color: var(--color-glacier);
+  }
 
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 16px;
-  align-items: center;
-}
+  .note {
+    margin: 0;
+    color: var(--color-sheet);
+    font-size: 0.875rem;
+    line-height: 1.45;
+  }
 
-.row a {
-  color: var(--color-sheet);
-}
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    align-items: center;
+  }
 
-.row a[aria-current="true"] {
-  color: var(--color-glacier);
-}
+  .row a {
+    color: var(--color-sheet);
+  }
 
-.readout {
-  color: var(--color-glacier);
-  overflow-x: auto;
-}
+  .row a[aria-current="true"] {
+    color: var(--color-glacier);
+  }
 
-.state {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 8px 16px;
-  margin: 0;
-}
+  .readout {
+    color: var(--color-glacier);
+    overflow-x: auto;
+  }
 
-.state dt {
-  color: var(--color-sheet);
-  font-size: 0.75rem;
-}
+  .state {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px 16px;
+    margin: 0;
+  }
 
-.state dd {
-  margin: 0;
-  font-variant-numeric: tabular-nums;
+  .state dt {
+    color: var(--color-sheet);
+    font-size: 0.75rem;
+  }
+
+  .state dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
 }
