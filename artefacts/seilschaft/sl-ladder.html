@@ -1,0 +1,107 @@
+<!-- Career ladder excerpt: four levels as columns, rising like a profile, with example behaviours
+     per level for planning horizon, collaboration and what a person leaves behind. Co-written with
+     HR, so it counts in salary reviews. -->
+<style>
+  .ladder {
+    position: absolute;
+    inset: 0;
+    padding: 24px 30px 18px;
+  }
+  .top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .top p {
+    margin-top: 4px;
+  }
+  .hr {
+    color: var(--color-moss-ink);
+    border-color: var(--color-moss-ink);
+  }
+  .table {
+    display: grid;
+    grid-template-columns: 150px repeat(4, 1fr);
+    gap: 0 12px;
+    align-items: end;
+    margin-top: 18px;
+  }
+  .level {
+    display: grid;
+    gap: 2px;
+    padding: 10px 12px;
+    border-radius: 8px 8px 0 0;
+    background: var(--color-ground);
+    color: var(--color-sheet);
+  }
+  .level small {
+    color: var(--color-glacier);
+    font-family: var(--label);
+    font-size: 11px;
+    font-stretch: var(--label-wdth);
+    letter-spacing: 0.08em;
+  }
+  .level b {
+    font-size: 16px;
+  }
+  .rowname {
+    align-self: start;
+    padding: 12px 0 0;
+    font-family: var(--label);
+    font-size: 11.5px;
+    font-stretch: var(--label-wdth);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .cell {
+    align-self: stretch;
+    padding: 12px;
+    border-left: 1px solid rgb(90 92 82 / 0.4);
+    border-right: 1px solid rgb(90 92 82 / 0.4);
+    border-bottom: 1px solid rgb(90 92 82 / 0.4);
+    background: #fff;
+    font-size: 13.5px;
+    line-height: 1.35;
+  }
+  .cell.ex {
+    background: transparent;
+    color: var(--color-sheet-ink);
+    font-style: italic;
+  }
+  .foot {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 14px;
+  }
+</style>
+<div class="ladder">
+  <div class="top">
+    <div>
+      <h1 class="title">Career ladder, an excerpt</h1>
+      <p class="label muted">Behaviour, not titles · each level reviewed with a date and a next step</p>
+    </div>
+    <span class="chip hr">Co-written with HR</span>
+  </div>
+  <div class="table" id="t"></div>
+  <p class="foot label muted"><span>Counts in salary reviews, not only in the team</span><span>Promotions go through it unchanged</span></p>
+</div>
+<script>
+  const L = window.DATA.ladder;
+  const levels = ["Designer", "Senior designer", "Principal designer", "Lead"];
+  if (levels.length !== L.levels) throw new Error("one column per level");
+  const rows = [
+    ["Planning horizon", ["The task in front of them", "A release", "A quarter, across teams", "The practice, a year ahead"]],
+    ["Collaboration", ["Their product owner", "Brings developers and research in early", "Aligns several teams on one pattern", "Aligns units outside product"]],
+    ["Leaves behind", ["A shipped screen", "A documented pattern", "A standard others use", "A team that works without them"]],
+    ["Example", ["Fixes errors from the template", "Runs the usability test", "Writes the date-picker rule", "Hires and grows the team"]],
+  ];
+  const t = document.getElementById("t");
+  let html = `<div></div>`;
+  // Columns step up like a profile: each level's head sits a little higher.
+  levels.forEach((name, i) => (html += `<div class="level" style="margin-top:${(levels.length - 1 - i) * 18}px"><small>LEVEL ${i + 1}</small><b>${name}</b></div>`));
+  for (const [name, cells] of rows) {
+    html += `<div class="rowname">${name}</div>`;
+    cells.forEach((c) => (html += `<div class="cell ${name === "Example" ? "ex" : ""}">${c}</div>`));
+  }
+  t.innerHTML = html;
+</script>

@@ -1,0 +1,152 @@
+<!-- The token pipeline in five steps, left to right: Figma variables, CI with a read-only key,
+     Style Dictionary, the generated Angular Material theme, and the product packages that every
+     product updates. -->
+<style>
+  .head {
+    position: absolute;
+    top: 22px;
+    left: 30px;
+    right: 30px;
+  }
+  .head p {
+    margin-top: 4px;
+  }
+  .steps {
+    position: absolute;
+    left: 30px;
+    right: 30px;
+    top: 112px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 40px;
+  }
+  .step {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    min-height: 220px;
+    padding: 14px 16px;
+    border: 1.5px solid var(--color-ground);
+    border-radius: 10px;
+    background: #fff;
+  }
+  .step + .step::before {
+    content: "";
+    position: absolute;
+    left: -36px;
+    top: 50%;
+    width: 30px;
+    height: 2px;
+    background: var(--color-ground);
+  }
+  .step + .step::after {
+    content: "";
+    position: absolute;
+    left: -12px;
+    top: calc(50% - 6px);
+    border: 7px solid transparent;
+    border-left: 9px solid var(--color-ground);
+  }
+  .step h2 {
+    font-size: 16px;
+    line-height: 1.2;
+  }
+  .step p {
+    color: var(--color-sheet-ink);
+    font-size: 13px;
+    line-height: 1.35;
+  }
+  .step .who {
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px dashed rgb(90 92 82 / 0.5);
+    color: var(--color-ground);
+    font-family: var(--label);
+    font-size: 11px;
+    font-stretch: var(--label-wdth);
+    letter-spacing: 0.06em;
+  }
+  .step.moss {
+    border: 3px solid var(--color-moss-ink);
+  }
+  .code {
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: var(--color-ground);
+    color: var(--color-glacier);
+    font-family: var(--label);
+    font-size: 11px;
+    font-stretch: var(--label-wdth);
+    line-height: 1.5;
+  }
+  .swatches {
+    display: flex;
+    gap: 5px;
+  }
+  .swatches b {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+  }
+  .lock {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-moss-ink);
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .pk {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+  .pk i {
+    height: 16px;
+    border-radius: 3px;
+    background: var(--hm-blue);
+  }
+</style>
+<div class="diagram contours">
+  <div class="head">
+    <h1 class="title">The token pipeline: change once, ship everywhere</h1>
+    <p class="label muted">Nobody edits a colour by hand · the brand team reviews tokens, not screens</p>
+  </div>
+  <div class="steps">
+    <section class="step">
+      <h2>Figma variables</h2>
+      <div class="swatches"><b style="background: var(--hm-blue)"></b><b style="background: var(--hm-blue-dark)"></b><b style="background: var(--hm-blue-tint)"></b><b style="background: var(--hm-error)"></b></div>
+      <p>Designers change a token, with its name and contrast note.</p>
+      <span class="who">DESIGN · BRAND</span>
+    </section>
+    <section class="step">
+      <h2>CI</h2>
+      <span class="lock">● Read-only key</span>
+      <p>Reads the variables on every change; it can never write back.</p>
+      <span class="who">PIPELINE</span>
+    </section>
+    <section class="step">
+      <h2>Style Dictionary</h2>
+      <span class="code">color.primary<br />color.primary-dark<br />space.step</span>
+      <p>Turns tokens into code for every platform we need.</p>
+      <span class="who">PIPELINE</span>
+    </section>
+    <section class="step moss">
+      <h2>Angular Material theme</h2>
+      <span class="code">@include mat.theme(…)</span>
+      <p>The generated theme, with our tokens in place of Material’s.</p>
+      <span class="who">CORE TEAM</span>
+    </section>
+    <section class="step">
+      <h2>Product packages</h2>
+      <span class="pk" id="pk"></span>
+      <p>Each product updates one package and gets every change.</p>
+      <span class="who">PRODUCT TEAMS</span>
+    </section>
+  </div>
+</div>
+<script>
+  document.getElementById("pk").innerHTML = Array.from({ length: window.DATA.landscape.products }, () => "<i></i>").join("");
+</script>

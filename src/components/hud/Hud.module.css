@@ -1,111 +1,324 @@
+/* The HUD (Hud.tsx): a fixed bar of three slots, mark and navigation | readout | time and
+   switches, each its own grid column so they never run into each other.
+
+   Breakpoints (tokens): below 640 px the bar keeps the mark, Basecamp and Calm map; from 640 px
+   the readout (label and altitude) and the haptics switch join; from 1024 px the whole
+   navigation; from 1280 px the Bern time and the readout's coordinates (below, the footer holds
+   what the bar leaves out). Where vibration works the readout keeps its compact form, so the
+   haptics switch fits beside Calm map.
+
+   Height 56 px. Once the page has scrolled (data-condensed, HudFrame.tsx) the backdrop
+   strengthens, the bar's row moves up to sit in 44 px and the mono labels narrow from wdth 87.5
+   to 75 inside boxes reserved at their rest width, so nothing moves. Still mode keeps the row and
+   the widths and only strengthens the backdrop. */
 .hud {
+  --c: 0;
+  /* The width every mono label of the bar rests at. */
+  --hud-wdth: var(--axis-mono-rest-wdth);
   position: fixed;
   inset: 0 0 auto;
   z-index: var(--layer-hud);
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  padding: max(12px, env(safe-area-inset-top)) 16px 12px;
+  height: calc(56px + env(safe-area-inset-top));
+  padding: env(safe-area-inset-top) var(--gutter) 0;
   pointer-events: none;
-  background: linear-gradient(to bottom, rgb(27 28 24 / 0.92), rgb(27 28 24 / 0));
 }
 
-.cluster {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  white-space: nowrap;
+/* The backdrop: ground under the bar, fading into the page below it. ::before at rest, ::after
+   (solid under a 44 px bar) once the page has scrolled; the two cross-fade. */
+.hud::before,
+.hud::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.hud::before {
+  height: calc(100% + 28px);
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-ground) 92%, transparent) calc(100% - 28px),
+    color-mix(in srgb, var(--color-ground) 0%, transparent)
+  );
+}
+
+.hud::after {
+  height: calc(44px + env(safe-area-inset-top) + 24px);
+  background: linear-gradient(to bottom, var(--color-ground) calc(100% - 24px), color-mix(in srgb, var(--color-ground) 0%, transparent));
+  opacity: 0;
+}
+
+.hud[data-condensed]::after {
+  opacity: 1;
+}
+
+.hud[data-condensed]::before {
+  opacity: 0;
+}
+
+.hud::before,
+.hud::after {
+  transition: opacity var(--dur-still) var(--ease-settle);
+}
+
+.bar {
+  container: hud-bar / inline-size;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: clamp(10px, 2vw, 20px);
+  height: 56px;
+}
+
+.bar > * {
   pointer-events: auto;
 }
 
-.right {
-  align-items: flex-end;
+.start,
+.end,
+.links {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 2vw, 20px);
 }
 
+.start {
+  grid-column: 1;
+}
+
+.end {
+  grid-column: 3;
+  justify-content: flex-end;
+  gap: clamp(10px, 1.6vw, 16px);
+}
+
+.middle {
+  grid-column: 2;
+  display: none;
+  justify-content: center;
+  min-width: 0;
+}
+
+.links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Condensed (full and calm): the row moves up into a 44 px bar, the labels narrow. */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .hud[data-condensed] {
+    --c: 1;
+    --hud-wdth: var(--axis-mono-condensed-wdth);
+  }
+
+  :root:not([data-motion="still"]) .bar {
+    transform: translateY(calc(var(--c) * -6px));
+    transition: transform var(--dur-settle) var(--ease-settle);
+  }
+
+  /* Every label's visible run follows --hud-wdth; its box stays reserved. */
+  :root:not([data-motion="still"]) .hud :is([data-st="run"], .timeRun, [data-run]) {
+    transition: font-stretch var(--dur-settle) var(--ease-settle);
+  }
+}
+
+.hud :is([data-st="run"], .timeRun, [data-run]) {
+  font-stretch: var(--hud-wdth);
+}
+
+/* ---------------------------------------------------------------- the mark */
+
 .mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 32px;
   color: var(--color-glacier);
   font-weight: 700;
   text-decoration: none;
+  white-space: nowrap;
 }
 
-.row {
-  display: inline-flex;
-  align-items: center;
-  gap: 16px;
+/* (.hud .bar …: these set axes over the primitives' own role defaults.) */
+.hud .bar .markText {
+  --kt-color: var(--color-glacier);
+  --kt-rest-wdth: var(--hud-wdth);
+  --kt-box-wdth: var(--axis-mono-rest-wdth);
+  --kt-rest-wght: 700;
+  --kt-from-wght: 700;
+  --kt-breath-wght: 700;
 }
+
+/* The narrowest phones (under 360 px): the rings alone carry the mark (its name stays). */
+@container hud-bar (width < 320px) {
+  .markText {
+    display: none;
+  }
+}
+
+/* The set symbol: three contour rings. Hover or focus moves each one step outward; after a route
+   change they trace themselves again. */
+.rings {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  overflow: visible;
+}
+
+.rings circle {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .rings circle {
+    transition: transform var(--dur-breath) var(--ease-settle);
+    transition-delay: calc(var(--ring) * var(--stagger-char));
+  }
+
+  :root:not([data-motion="still"]) .mark:focus-visible .rings circle {
+    transform: scale(var(--ring-step));
+  }
+
+  :root:not([data-motion="still"]) .rings[data-redraw] circle {
+    stroke-dasharray: 1;
+    animation: ring-trace var(--dur-trace) var(--ease-settle) both;
+    animation-delay: calc(var(--ring) * var(--stagger-char));
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .mark:hover .rings circle {
+    transform: scale(var(--ring-step));
+  }
+}
+
+@keyframes ring-trace {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ---------------------------------------------------------------- navigation */
 
 .navLink {
   display: inline-flex;
   align-items: center;
   min-height: 32px;
+  white-space: nowrap;
+}
+
+.hud .bar .navLink {
+  --l-rest-wdth: var(--hud-wdth);
+}
+
+/* The CV until its file exists: visible and inert (check:content lists it); sheet, so it reads at
+   7:1 or more over the bar's backdrop. */
+.placeholder {
+  gap: 0.5em;
   color: var(--color-sheet);
-  text-decoration: none;
 }
 
-@media (hover: hover) {
-  .navLink:hover {
-    color: var(--color-glacier);
-  }
-}
+/* ---------------------------------------------------------------- readout and clock */
 
-.credit,
-.coords {
-  color: var(--color-contour);
-}
-
-/* Phones: the credit stays in the footer, so the clock and the controls keep their room
-   instead of running off the right edge. */
-@media (max-width: 479px) {
-  .credit {
-    display: none;
-  }
-}
-
-.coords {
-  display: none;
-  padding-top: 2px;
-}
-
-@media (min-width: 900px) {
-  .coords {
-    display: block;
-  }
+.readout {
+  color: var(--color-sheet);
 }
 
 .clock {
-  display: inline-flex;
   align-items: center;
   gap: 8px;
   color: var(--color-sheet);
+  white-space: nowrap;
 }
 
 .time {
-  display: inline-block;
-  min-width: 5ch;
   font-variant-numeric: tabular-nums;
-  text-align: end;
 }
 
-/* A quiet, static marker in the map's neutral line colour. */
-.live {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--color-contour);
+/* "00:00" at the rest axes reserves the box; the digits roll over it. */
+.timeBox {
+  display: inline-grid;
+}
+
+.timeBox > * {
+  grid-area: 1 / 1;
+}
+
+.timeGhost {
+  visibility: hidden;
+  font-stretch: var(--axis-mono-rest-wdth);
+}
+
+.timeRun {
+  display: inline-flex;
+  justify-self: start;
+}
+
+.hud .bar .clockLabel {
+  --kt-color: currentColor;
+  --kt-rest-wdth: var(--hud-wdth);
+  --kt-box-wdth: var(--axis-mono-rest-wdth);
+}
+
+/* ---------------------------------------------------------------- breakpoints */
+
+.bar .sm,
+.bar .md,
+.bar .lg {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .middle {
+    display: flex;
+  }
+
+  .bar .toggle.sm {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 1024px) {
+  .bar li.md {
+    display: list-item;
+  }
+}
+
+@media (min-width: 1280px) {
+  .bar .clock.lg {
+    display: inline-flex;
+  }
 }
 
 /* Switches (CalmToggle.tsx): a native checkbox drawn as the track, a thumb over it. The "on"
-   look follows html[data-motion] for the motion switch (right from first paint) and the
-   checkbox for the haptics switch. */
+   look follows <html> for the motion switch (right from first paint: data-calm, the visitor's
+   choice, set at once on a flip, or the still mode) and the checkbox for the haptics switch.
+   Off reads in sheet (7:1 over the backdrop), on in glacier. */
 .toggle {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   min-height: 32px;
-  color: var(--color-contour);
+  color: var(--color-sheet);
+  white-space: nowrap;
   cursor: pointer;
   transition: color var(--dur-micro) var(--ease-settle);
+}
+
+.hud .bar .toggleText {
+  --kt-color: currentColor;
+  --kt-rest-wdth: var(--hud-wdth);
+  --kt-box-wdth: var(--axis-mono-rest-wdth);
 }
 
 .switch {
@@ -130,11 +343,6 @@
   cursor: inherit;
 }
 
-.input:focus-visible {
-  outline: 2px solid var(--color-glacier);
-  outline-offset: 4px;
-}
-
 .thumb {
   position: absolute;
   top: 3px;
@@ -146,30 +354,12 @@
   pointer-events: none;
 }
 
-/* Both state labels share one cell, so the switch keeps its width when it flips. */
-.state {
-  display: inline-grid;
-}
-
-.state > * {
-  grid-area: 1 / 1;
-}
-
-.state > [data-state="on"],
-:root:is([data-motion="calm"], [data-motion="still"]) .state > [data-state="off"] {
-  visibility: hidden;
-}
-
-:root:is([data-motion="calm"], [data-motion="still"]) .state > [data-state="on"] {
-  visibility: visible;
-}
-
-:root:is([data-motion="calm"], [data-motion="still"]) .toggle:not(.haptics),
+:root:is([data-calm="1"], [data-motion="still"]) .toggle:not(.haptics),
 .haptics[data-on="true"] {
   color: var(--color-glacier);
 }
 
-:root:is([data-motion="calm"], [data-motion="still"]) .toggle:not(.haptics) .thumb,
+:root:is([data-calm="1"], [data-motion="still"]) .toggle:not(.haptics) .thumb,
 .haptics[data-on="true"] .thumb {
   transform: translateX(10px);
 }
@@ -187,6 +377,6 @@
 }
 
 /* Vibration exists only on some devices (html[data-haptics], set before first paint). */
-:root:not([data-haptics]) .haptics {
+:root:not([data-haptics]) .haptics.haptics {
   display: none;
 }

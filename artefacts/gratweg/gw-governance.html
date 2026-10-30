@@ -1,0 +1,99 @@
+<!-- Governance: contributors propose on a one-page RFC; small changes take the fast lane, the
+     rest a full RFC with a decision window; every decision lands in the release notes with the
+     contributor's name. The core team owns the decisions (moss-ink). -->
+<style>
+  .head {
+    position: absolute;
+    top: 22px;
+    left: 30px;
+    right: 30px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .head p {
+    margin-top: 4px;
+  }
+  .key {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+  }
+  .key span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sw {
+    width: 24px;
+    height: 16px;
+    border: 3px solid var(--color-moss-ink);
+    border-radius: 4px;
+    background: #fff;
+  }
+  .d-box {
+    align-items: flex-start;
+    font-size: 14.5px;
+  }
+  .d-box small {
+    font-size: 12.5px;
+  }
+  .lane {
+    position: absolute;
+    left: 30px;
+    right: 30px;
+    padding: 6px 10px;
+    border-radius: 6px 6px 0 0;
+    border-bottom: 2px solid var(--color-ground);
+  }
+  .people {
+    display: flex;
+    gap: 4px;
+    margin-top: 6px;
+  }
+  .people i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-ground);
+  }
+</style>
+<div class="diagram contours">
+  <div class="head">
+    <div>
+      <h1 class="title">Governance: the core team owns, contributors propose</h1>
+      <p class="label muted">One page per change · nobody waits in silence</p>
+    </div>
+    <div class="key label"><span><i class="sw"></i>Core team decides</span></div>
+  </div>
+</div>
+<script src="/shared/diagram.js"></script>
+<script>
+  const D = window.DATA;
+  const root = document.querySelector(".diagram");
+  const d = Diagram(root);
+  const lane = (top, h, text, bg) => root.insertAdjacentHTML("beforeend", `<div class="lane label-caps" style="top:${top}px;height:${h}px;background:${bg}">${text}</div>`);
+  lane(100, 30, "Fast lane · an icon, a token value, a fix", "rgb(200 245 176 / 0.5)");
+  lane(344, 30, "Full RFC · a new component or a changed behaviour", "rgb(143 199 232 / 0.4)");
+
+  const dots = Array.from({ length: D.team.contributors }, () => "<i></i>").join("");
+  d.box("contrib", { x: 40, y: 236, w: 190, h: 96, html: `${D.team.contributors} contributors<small>from the product teams</small><span class="people">${dots}</span>` });
+  d.box("rfc", { x: 290, y: 236, w: 170, h: 96, html: "One-page RFC<small>problem, proposal, who it affects</small>" });
+  d.box("fast", { x: 530, y: 150, w: 210, h: 90, cls: "moss", html: `Core-team member decides<small>within ${D.governance.fastLaneDays} days</small>` });
+  d.box("comments", { x: 530, y: 378, w: 190, h: 90, html: `Open for comments<small>every team can read and reply</small>` });
+  d.box("decide", { x: 780, y: 378, w: 210, h: 90, cls: "moss", html: `Core team decides<small>within a ${D.governance.rfcDays}-day decision window</small>` });
+  d.box("build", { x: 800, y: 150, w: 170, h: 90, html: "Built by the contributor<small>a core-team reviewer pairs</small>" });
+  d.box("declined", { x: 1030, y: 388, w: 140, h: 70, cls: "soft", html: "Declined<small>the reason is written on the RFC</small>" });
+  d.box("notes", { x: 1030, y: 236, w: 140, h: 96, cls: "dark", html: "Release notes<small>with the contributor’s name</small>" });
+  d.box("core", { x: 40, y: 470, w: 190, h: 96, cls: "moss", html: `Core team of ${D.team.core}<small>${D.team.designers} designer, ${D.team.developers} component developers</small>` });
+
+  d.wire("contrib", "rfc");
+  d.wire("rfc", "fast", { from: "t", to: "l", label: "small", labelAt: [375, 196] });
+  d.wire("rfc", "comments", { from: "b", to: "l", label: "everything else", labelAt: [375, 400] });
+  d.wire("comments", "decide");
+  d.wire("fast", "build", { label: "accepted", labelAt: [770, 182] });
+  d.wire("decide", "build", { from: "t", to: "b", label: "accepted", labelAt: [885, 300] });
+  d.wire("decide", "declined", { label: "declined", labelAt: [1010, 400] });
+  d.wire("build", "notes", { from: "r", to: "t", tt: 0.5 });
+  d.wire("core", "decide", { from: "r", to: "b", cls: "moss dashed", arrow: false, tt: 0.5 });
+</script>

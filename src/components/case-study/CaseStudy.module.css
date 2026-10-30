@@ -37,6 +37,16 @@
   font-weight: 600;
 }
 
+.headingLabelText[data-role] {
+  --kt-color: var(--color-glacier);
+  --kt-rest-wght: 600;
+}
+
+/* The rule that leads a waypoint heading. */
+.headingRule {
+  width: min(100%, 12rem);
+}
+
 .headingFinding {
   display: block;
   color: var(--color-sheet);
@@ -48,8 +58,10 @@
   text-wrap: balance;
 }
 
-.headingFinding::first-letter {
-  text-transform: uppercase;
+/* The finding settles a little from the breath above its rest axes (SettleText role "text"). */
+.headingFinding[data-role] {
+  --kt-rest-wdth: var(--type-finding-wdth);
+  --kt-rest-wght: 760;
 }
 
 .panel strong {
@@ -64,11 +76,25 @@
   display: grid;
   gap: 10px;
   margin: 0;
-  padding-left: 1.25em;
+  padding-left: 0;
+  list-style: none;
 }
 
-.list li::marker {
-  color: var(--color-glacier);
+/* Contour-ring bullets: they draw once, item after item, as the list comes into view. */
+.list:not([data-ordered]) li {
+  position: relative;
+  padding-left: 1.5em;
+}
+
+.list:not([data-ordered]) li::before {
+  content: "";
+  position: absolute;
+  top: 0.55em;
+  left: 0.2em;
+  width: 0.55em;
+  height: 0.55em;
+  border: 1.5px solid var(--color-glacier);
+  border-radius: 50%;
 }
 
 /* Numbered insights: circled numbers, like the markers on the affinity map (Fig. 3). */
@@ -96,7 +122,7 @@
   border: 1.5px solid var(--color-glacier);
   border-radius: 50%;
   color: var(--color-glacier);
-  font-family: var(--font-martian), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.8125rem;
   font-weight: 600;
   line-height: 1;
@@ -113,25 +139,18 @@
   gap: 4px 28px;
 }
 
-.foot a {
+.footLink {
+  --l-rest-color: var(--color-glacier);
   display: inline-flex;
   align-items: center;
-  gap: 0.5em;
   min-height: 44px;
-  color: var(--color-glacier);
-  text-decoration: none;
   text-shadow:
     0 0 2px var(--color-ground),
     0 0 6px var(--color-ground),
     0 0 14px var(--color-ground);
 }
 
-.foot a:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-@media (min-width: 1200px) {
+@media (min-width: 1280px) {
   .foot {
     display: none;
   }
@@ -152,7 +171,7 @@
 
 .insightLabel {
   color: var(--color-moss-ink);
-  font-family: var(--font-martian), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -169,16 +188,25 @@
 
 /* ---------------------------------------------------------------- pull quote */
 
+/* The quote's rule is drawn (::before) as the quote comes into view, then the quote fades in. */
 .quote {
+  position: relative;
   display: grid;
   gap: 10px;
   padding-left: 22px;
-  border-left: 3px solid var(--color-glacier);
+}
+
+.quote::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--color-glacier);
+  transform-origin: top center;
 }
 
 .quote p {
   font-size: clamp(1.25rem, 1rem + 0.9vw, 1.6rem);
-  font-style: italic;
   line-height: 1.35;
 }
 
@@ -211,6 +239,12 @@
   scroll-margin-top: 96px;
 }
 
+/* A small settle from the breath above its condensed rest axes (SettleText role "text"). */
+.decisionTitle[data-role] {
+  --kt-rest-wdth: var(--type-condensed-wdth);
+  --kt-rest-wght: 760;
+}
+
 .tableScroll {
   max-width: 100%;
   overflow-x: auto;
@@ -230,7 +264,7 @@
 .table caption {
   padding: 12px 14px;
   color: var(--color-glacier);
-  font-family: var(--font-martian), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: var(--type-hud-size);
   letter-spacing: var(--type-hud-tracking);
   text-align: left;
@@ -247,7 +281,7 @@
 
 .table thead th {
   color: var(--color-glacier);
-  font-family: var(--font-martian), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: var(--type-hud-size);
   font-weight: 500;
   letter-spacing: var(--type-hud-tracking);
@@ -263,8 +297,22 @@
 }
 
 .table tr[data-chosen] th {
-  box-shadow: inset 3px 0 0 var(--color-glacier);
+  position: relative;
 }
+
+.chosenMark {
+  position: absolute;
+  top: 6px;
+  left: 2px;
+  width: 6px;
+  height: calc(100% - 12px);
+  overflow: visible;
+  fill: none;
+  stroke: var(--color-glacier);
+  stroke-linecap: round;
+  stroke-width: 2;
+}
+
 
 .chosen {
   display: inline-block;
@@ -304,7 +352,7 @@
   font-weight: 700;
 }
 
-@media (max-width: 479px) {
+@media (width < 640px) {
   .verdict > div {
     grid-template-columns: minmax(0, 1fr);
     gap: 2px;
@@ -336,7 +384,7 @@
 
 .metricValue {
   color: var(--color-glacier);
-  font-family: var(--font-martian), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: clamp(2rem, 1.5rem + 1.6vw, 2.6rem);
   font-weight: 700;
   font-stretch: var(--axis-mono-rest-wdth);
@@ -381,7 +429,7 @@
   align-items: center;
   gap: 6px;
   color: var(--color-sheet);
-  font-family: var(--font-martian), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -420,6 +468,36 @@
   --evidence: var(--color-sheet-ink);
 }
 
+/* The legend's swatches draw as it unfolds: the outline, then the fill. */
+@keyframes swatch-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+@keyframes swatch-fill {
+  from {
+    fill-opacity: 0;
+  }
+}
+
+.evidenceLegend svg :is(circle, path) {
+  stroke-dasharray: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .evidenceLegend[data-reveal-state="wait"] svg :is(circle, path) {
+    stroke-dashoffset: 1;
+    fill-opacity: 0;
+  }
+
+  :root:not([data-motion="still"]) .evidenceLegend[data-reveal-state="play"] svg :is(circle, path) {
+    animation:
+      swatch-draw var(--dur-trace) var(--ease-settle) calc(var(--reveal-dur, var(--dur-reveal)) * 0.5) backwards,
+      swatch-fill var(--dur-short) linear calc(var(--reveal-dur, var(--dur-reveal)) * 0.5 + var(--dur-trace)) backwards;
+  }
+}
+
 .evidenceLegend {
   display: grid;
   gap: 8px;
@@ -446,11 +524,13 @@
 /* ------------------------------------------------------------------- banner */
 
 .banner {
+  --sheet-dur: var(--dur-unfold);
   display: flex;
   align-items: flex-start;
   gap: 14px;
   max-width: 62rem;
   padding: 14px 20px;
+  border-left: 3px solid var(--color-alpenglow-ink);
   border-radius: 8px;
   background: var(--color-sheet);
   color: var(--color-ground);
@@ -469,9 +549,222 @@
 
 .bannerLabel {
   color: var(--color-alpenglow-ink);
-  font-family: var(--font-martian), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+/* The trailhead band (TrailheadBand.tsx): "Next expedition" and the next card's name beside its
+   mini card (stacked on phones), the way back to every expedition below. */
+.trailhead {
+  display: grid;
+  justify-items: start;
+  padding-top: 32px;
+  border-top: 1px solid var(--color-contour-dim);
+}
+
+.trailheadNext {
+  display: grid;
+  gap: 24px;
+  align-items: center;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .trailheadNext {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+/* A definite width: the card is a size container, so it has no width of its own to give an auto
+   track (60% of the deck card's 420 px). Not rendered until it nears the screen, so the italic
+   face its rules text uses loads only then (63:88 reserves its height meanwhile). */
+.trailheadCard {
+  width: 252px;
+  max-width: 100%;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 252px auto 352px;
+}
+
+.nextLink {
+  display: inline-grid;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--color-glacier);
+}
+
+.nextName {
+  --l-rest-color: var(--color-sheet);
+  font-size: clamp(2.5rem, 9vw, 7rem);
+}
+
+.backToAll {
+  --l-rest-color: var(--color-glacier);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 16px;
+}
+
+/* The altimeter bar (AltimeterBar.tsx), below the large breakpoint: fixed along the bottom once
+   the first waypoint is reached, a thin contour along its top edge filling with the reading
+   progress (--reading). */
+.altimeter {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: var(--layer-hud);
+  display: none;
+  padding: 0 max(16px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(16px, env(safe-area-inset-left));
+  border-top: 1px solid var(--color-contour-dim);
+  background: color-mix(in srgb, var(--color-ground) 94%, transparent);
+}
+
+@media (width < 1280px) {
+  .altimeter[data-shown] {
+    display: block;
+  }
+
+  /* The page ends above the bar. */
+  :global(body):has(.altimeter[data-shown]) {
+    padding-bottom: 64px;
+  }
+}
+
+.altimeterLine {
+  position: absolute;
+  inset: -1px 0 auto;
+  height: 1px;
+  background: var(--color-glacier);
+  transform: scaleX(var(--reading, 0));
+  transform-origin: left center;
+}
+
+.altimeterButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-sheet);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.altimeterCount {
+  flex: none;
+  color: var(--color-glacier);
+}
+
+.altimeterName {
+  --kt-color: var(--color-sheet);
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.altimeterArrow {
+  flex: none;
+  color: var(--color-glacier);
+}
+
+/* The jump list: a bottom sheet (a modal dialog) that rises over --dur-sheet; still mode fades it
+   in. */
+.jumpSheet {
+  inset: auto 0 0;
+  width: 100%;
+  max-width: none;
+  max-height: min(80svh, 32rem);
+  margin: 0;
+  padding: 0 16px max(16px, env(safe-area-inset-bottom));
+  border: 0;
+  border-top: 1px solid var(--color-contour);
+  border-radius: 12px 12px 0 0;
+  background: var(--color-ground);
+  color: var(--color-sheet);
+}
+
+.jumpSheet::backdrop {
+  background: color-mix(in srgb, var(--color-ground) 60%, transparent);
+}
+
+@keyframes sheet-rise {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes sheet-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .jumpSheet[open] {
+    animation: sheet-rise var(--dur-sheet) var(--ease-settle);
+  }
+
+  :root:not([data-motion="still"]) .jumpSheet[open]::backdrop {
+    animation: sheet-fade var(--dur-sheet) linear;
+  }
+}
+
+:root[data-motion="still"] .jumpSheet[open] {
+  animation: sheet-fade var(--dur-still) linear;
+}
+
+.jumpSheetBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+}
+
+.jumpSheetBar h2 {
+  margin: 0;
+  color: var(--color-sheet);
+}
+
+.jumpSheetClose {
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--color-glacier);
+  cursor: pointer;
+}
+
+.jumpSheetList {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.jumpSheetList a {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-height: 48px;
+  padding: 12px 0;
+  border-top: 1px solid var(--color-contour-dim);
+  color: var(--color-sheet);
+  font-size: 1.0625rem;
+  text-decoration: none;
+}
+
+.jumpSheetList a[aria-current="true"] {
+  color: var(--color-glacier);
+}
+
+.jumpSheetList :global(.hud-label) {
+  color: var(--color-sheet);
 }

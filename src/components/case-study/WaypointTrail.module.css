@@ -1,6 +1,7 @@
 /* "On this page" (WaypointTrail.tsx): a vertical contour trail, the dotted line of the card
-   artwork's trail. Segments behind the current waypoint fill with glacier dots; the current node
-   is a filled pin. Labels are on the dark ground beside the content, so they keep a halo. */
+   artwork's trail. It fills with glacier as the reader scrolls; passed nodes are glacier rings,
+   the current node a filled pin. Labels are on the dark ground beside the content, so they keep a
+   halo. */
 .trail {
   position: sticky;
   top: 112px;
@@ -11,7 +12,7 @@
 }
 
 .title {
-  color: var(--color-contour);
+  color: var(--color-sheet);
   text-shadow:
     0 0 2px var(--color-ground),
     0 0 6px var(--color-ground),
@@ -31,16 +32,48 @@
   padding: 0 0 22px 28px;
 }
 
-/* The segment to the next node, drawn as dots. */
+/* The segment to the next node, drawn as dots, and the glacier fill over it: scroll-linked, the
+   segment's share of the reading progress (--reading, 0..1, written by reading.ts). */
 .item:not(:last-child)::after {
+  --seg: clamp(0, var(--reading, 0) * var(--n, 1) - var(--i, 0), 1);
   content: "";
   position: absolute;
   top: 18px;
   bottom: -2px;
   left: 6px;
   width: 4px;
-  background: radial-gradient(circle, var(--dot) 1.1px, transparent 1.5px) center top / 4px 7px repeat-y;
+  background:
+    linear-gradient(var(--color-glacier), var(--color-glacier)) center top / 2px calc(var(--seg) * 100%) no-repeat,
+    radial-gradient(circle, var(--dot) 1.1px, transparent 1.5px) center top / 4px 7px repeat-y;
   opacity: 0.8;
+}
+
+/* One ping as the waypoint becomes current (full motion): a ring leaves the pin and fades. */
+.ping {
+  position: absolute;
+  top: 7px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border: 1.6px solid var(--color-glacier);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes pin-ping {
+  from {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+
+:root[data-motion="full"] .item[data-ping] .ping {
+  animation: pin-ping var(--dur-long) var(--ease-settle);
 }
 
 /* The node: open pin ahead, glacier ring passed, filled glacier pin for the current waypoint. */
@@ -80,6 +113,7 @@
 }
 
 .link {
+  --kt-color: var(--color-sheet);
   display: inline-flex;
   align-items: center;
   min-height: 26px;
@@ -94,12 +128,23 @@
 }
 
 .link:hover {
+  --kt-color: var(--color-glacier);
   color: var(--color-glacier);
   text-decoration: underline;
   text-underline-offset: 4px;
 }
 
+/* The current waypoint: glacier, its letters breathing +8 (SettleText breath, --on). */
+.item[data-state="current"] {
+  --on: 1;
+}
+
 .link[aria-current="true"] {
+  --kt-color: var(--color-glacier);
   color: var(--color-glacier);
-  font-weight: 700;
+}
+
+.label[data-role] {
+  --kt-rest-wdth: 100%;
+  --kt-rest-wght: 500;
 }

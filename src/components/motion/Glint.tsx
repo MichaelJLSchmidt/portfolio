@@ -7,10 +7,22 @@ import styles from "./Glint.module.css";
  * a 1 px moss-ink rule draws instead, since a mint band would not read there.
  * Server-safe: no hooks.
  */
-export function Glint({ text, surface = "dark", className }: { text: string; surface?: "dark" | "sheet"; className?: string }) {
-  if (surface === "sheet") return <span className={className ? `${styles.rule} ${className}` : styles.rule} data-glint="" aria-hidden="true" />;
+export function Glint({
+  text,
+  surface = "dark",
+  tone = "mint",
+  className,
+  ...data
+}: {
+  text: string;
+  surface?: "dark" | "sheet";
+  /** "gold": the summit-gold pass a Mythic card plays (its rarity colour); mint otherwise. */
+  tone?: "mint" | "gold";
+  className?: string;
+} & { [key: `data-${string}`]: string }) {
+  if (surface === "sheet") return <span {...data} className={className ? `${styles.rule} ${className}` : styles.rule} data-glint="" aria-hidden="true" />;
   return (
-    <span className={className ? `${styles.glint} ${className}` : styles.glint} data-glint="" aria-hidden="true">
+    <span {...data} className={className ? `${styles.glint} ${className}` : styles.glint} data-glint="" data-tone={tone === "gold" ? "gold" : undefined} aria-hidden="true">
       {text.split("\n").map((line, i) => (
         <Fragment key={i}>
           {i > 0 && <br />}

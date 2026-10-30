@@ -1,0 +1,674 @@
+{
+  "sl-designers-chart": {
+    "width": 1920,
+    "height": 1080,
+    "placeholder": "data:image/webp;base64,UklGRkYAAABXRUJQVlA4IDoAAACQAwCdASoYAA4APu1iqU2ppaQiMAgBMB2JZ1/2Wx4U/2ZAquGwAP7uquT5A951hcp6Pt3i5H5KC8AA",
+    "alt": "images.sl-designers-chart.alt",
+    "caption": "figures.sl-designers-chart.caption",
+    "figure": 9,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/seilschaft/sl-designers-chart-640.avif",
+        "bytes": 7329
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/seilschaft/sl-designers-chart-960.avif",
+        "bytes": 11844
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/seilschaft/sl-designers-chart-1280.avif",
+        "bytes": 15153
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/seilschaft/sl-designers-chart-1920.avif",
+        "bytes": 17432
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/seilschaft/sl-designers-chart-640.webp",
+        "bytes": 8996
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/seilschaft/sl-designers-chart-960.webp",
+        "bytes": 14790
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/seilschaft/sl-designers-chart-1280.webp",
+        "bytes": 19606
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/seilschaft/sl-designers-chart-1920.webp",
+        "bytes": 31312
+      }
+    ],
+    "hash": "35114e175628d511",
+    "text": "Product teams with a named designer Every half year · a team counts once it can name its designer · measured 0 2 4 6 8 10 12 14 all 14 teams H2 2021 H1 2022 H2 2022 H1 2023 H2 2023 H1 2024 H2 2024 3 of 14 11 of 14 SEILSCHAFT · FICTIONAL EXAMPLE · FIG. 9"
+  },
+  "sl-hero": {
+    "width": 2560,
+    "height": 1440,
+    "placeholder": "data:image/webp;base64,UklGRmQAAABXRUJQVlA4IFgAAACwAwCdASoYAA4APu1iqk2ppaQiMAgBMB2JaQAAW+pCzDUQ2Rd3AAD5QkJPxXID2LD4gHxuMGZ6ZOBsIId673/9m++3OjXoEzC2IPLe1JTxKimcoozIBAAA",
+    "alt": "images.sl-hero.alt",
+    "caption": null,
+    "figure": null,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/seilschaft/sl-hero-640.avif",
+        "bytes": 12029
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/seilschaft/sl-hero-960.avif",
+        "bytes": 21364
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/seilschaft/sl-hero-1280.avif",
+        "bytes": 28766
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/seilschaft/sl-hero-1920.avif",
+        "bytes": 45696
+      },
+      {
+        "format": "avif",
+        "width": 2560,
+        "src": "/media/seilschaft/sl-hero-2560.avif",
+        "bytes": 54127
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/seilschaft/sl-hero-640.webp",
+        "bytes": 15698
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/seilschaft/sl-hero-960.webp",
+        "bytes": 27880
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/seilschaft/sl-hero-1280.webp",
+        "bytes": 39562
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/seilschaft/sl-hero-1920.webp",
+        "bytes": 63938
+      },
+      {
+        "format": "webp",
+        "width": 2560,
+        "src": "/media/seilschaft/sl-hero-2560.webp",
+        "bytes": 86636
+      }
+    ],
+    "hash": "62028809bebb20c6",
+    "text": "From a ticket queue to a practice FICTIONAL EXAMPLE BEFORE · SERVICE DESK 2021 PT 1 PT 2 PT 3 PT 4 PT 5 PT 6 PT 7 PT 8 PT 9 PT 10 PT 11 PT 12 PT 13 PT 14 Ticket queue first come, first served resigned designer LATE · VISUAL · ONE TICKET AT A TIME Two designers · one queue · 14 product teams AFTER · HUB AND SPOKE 2024 PERMITS PT 1 PT 2 PT 3 PT 4 designer PAYMENTS PT 5 PT 6 PT 7 PT 8 designer SOCIAL SERVICES PT 9 PT 10 PT 11 designer INTERNAL TOOLS PT 12 PT 13 PT 14 designer UX practice crit · standards research · intake Six people · four product clusters · shared crit and standards SEILSCHAFT · FICTIONAL EXAMPLE · HERO"
+  },
+  "sl-intake-board": {
+    "width": 2400,
+    "height": 1200,
+    "placeholder": "data:image/webp;base64,UklGRkQAAABXRUJQVlA4IDgAAABQAwCdASoYAAwAPu1krU2ppaSiMAgBMB2JaQAAW/Cw0K1IgAD+7fl2Jp/jNrTCPWxH5xYhHrg8AA==",
+    "alt": "images.sl-intake-board.alt",
+    "caption": "figures.sl-intake-board.caption",
+    "figure": 4,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/seilschaft/sl-intake-board-640.avif",
+        "bytes": 11744
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/seilschaft/sl-intake-board-960.avif",
+        "bytes": 22275
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/seilschaft/sl-intake-board-1280.avif",
+        "bytes": 32693
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/seilschaft/sl-intake-board-1920.avif",
+        "bytes": 54370
+      },
+      {
+        "format": "avif",
+        "width": 2400,
+        "src": "/media/seilschaft/sl-intake-board-2400.avif",
+        "bytes": 60010
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/seilschaft/sl-intake-board-640.webp",
+        "bytes": 14706
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/seilschaft/sl-intake-board-960.webp",
+        "bytes": 29282
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/seilschaft/sl-intake-board-1280.webp",
+        "bytes": 43760
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/seilschaft/sl-intake-board-1920.webp",
+        "bytes": 75314
+      },
+      {
+        "format": "webp",
+        "width": 2400,
+        "src": "/media/seilschaft/sl-intake-board-2400.webp",
+        "bytes": 95860
+      }
+    ],
+    "hash": "034f4f85e3bfeaaf",
+    "text": "intake.hochmatt-informatik.example/board UX intake Hochmatt Informatik · public to every product team All clusters Permits Payments Social services Internal tools Explore 3 Enter when the problem is not yet clear, or nobody has asked users. Why do renewals stall at the payment step? Payments research Parking permits for care workers Permits concept Family allowance: first contact by phone or online? Social services research Shape 4 Enter when the problem is clear and the team has a release window. Building permit: upload and plan check Permits sprint design Invoice portal for suppliers Payments prototype in code Case notes for social workers Social services sprint design Address change, one step instead of three Permits usability test Polish 2 Enter when the flow stays as it is and only the screen changes. Max 2 days from templates. Why: so a quick fix never quietly becomes a redesign. Error messages on the dog-tax form Payments template: errors Empty states in the room-booking tool Internal tools template: empty Declined 2 Every “no” says why, in public. “Make the whole portal look modern” Not a request yet: book an Explore talk first. New icons for one release, next week Polish needs the flow to stay as it is; this one changes. SEILSCHAFT · FICTIONAL EXAMPLE · FIG. 4"
+  },
+  "sl-interviews": {
+    "width": 2400,
+    "height": 1200,
+    "placeholder": "data:image/webp;base64,UklGRm4AAABXRUJQVlA4IGIAAADwAwCdASoYAAwAPu1orU6ppiSiMAgBMB2JQBOiP2wHjdWS/LPYnDuAAP7nFelJ80Dn41OefPViiV3L4tIyUQkNND71ypPlei8C0EaRfsk/wSahkUc2lCr4U+lflWGsNAwAAA==",
+    "alt": "images.sl-interviews.alt",
+    "caption": "figures.sl-interviews.caption",
+    "figure": 2,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/seilschaft/sl-interviews-640.avif",
+        "bytes": 16507
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/seilschaft/sl-interviews-960.avif",
+        "bytes": 30646
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/seilschaft/sl-interviews-1280.avif",
+        "bytes": 42221
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/seilschaft/sl-interviews-1920.avif",
+        "bytes": 69144
+      },
+      {
+        "format": "avif",
+        "width": 2400,
+        "src": "/media/seilschaft/sl-interviews-2400.avif",
+        "bytes": 77915
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/seilschaft/sl-interviews-640.webp",
+        "bytes": 21822
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/seilschaft/sl-interviews-960.webp",
+        "bytes": 41530
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/seilschaft/sl-interviews-1280.webp",
+        "bytes": 61736
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/seilschaft/sl-interviews-1920.webp",
+        "bytes": 103216
+      },
+      {
+        "format": "webp",
+        "width": 2400,
+        "src": "/media/seilschaft/sl-interviews-2400.webp",
+        "bytes": 135294
+      }
+    ],
+    "hash": "9a9074cfd9de6d67",
+    "text": "Interview synthesis: 14 product owners One interview per team, 45 minutes, same questions · main reason per owner 11 of 14 would involve UX earlier if they knew what they would get and when NO SLOT IN THE PLAN UX arrives as a favour at the end “Our quarter is planned before design hears about it.” P1 (Permits) “We’d book UX if there were a slot to book.” P2 (Payments) “Design comes after the sprint plan, every time.” P3 (Social services) “I never know when it’s too early to ask.” P4 (Permits) “There is no line for UX in our roadmap.” P5 (Payments) SCOPE FEAR early design might change the promise “Early design changes what we promised.” P6 (Payments) “A late ticket feels safer.” P7 (Social services) “Research might move our deadline.” P8 (Permits) NO NAME nobody knows who picks it up “Who is our designer, actually?” P9 (Social services) “Every ticket gets someone new.” P10 (Permits) “I don’t know whom to call.” P11 (Payments) WOULD NOT little to gain, or fewer meetings “Internal tool, a handful of users.” P12 (Internal tools) “Back-office screens; nobody complains.” P13 (Internal tools) “Honestly: fewer meetings, please.” P14 (Social services) would involve UX earlier would not P = product owner · cluster in brackets SEILSCHAFT · FICTIONAL EXAMPLE · FIG. 2"
+  },
+  "sl-ladder": {
+    "width": 2400,
+    "height": 1000,
+    "placeholder": "data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAACQAwCdASoYAAoAPu1yrU+pp6QiMAgBMB2JaQAAVGPzCTwEUP4kAP7nLZDxdNix46ZXc3BY2fJHTcF9ByGo1B/vB2x2wgAA",
+    "alt": "images.sl-ladder.alt",
+    "caption": "figures.sl-ladder.caption",
+    "figure": 7,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/seilschaft/sl-ladder-640.avif",
+        "bytes": 10200
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/seilschaft/sl-ladder-960.avif",
+        "bytes": 18810
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/seilschaft/sl-ladder-1280.avif",
+        "bytes": 27368
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/seilschaft/sl-ladder-1920.avif",
+        "bytes": 41896
+      },
+      {
+        "format": "avif",
+        "width": 2400,
+        "src": "/media/seilschaft/sl-ladder-2400.avif",
+        "bytes": 45460
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/seilschaft/sl-ladder-640.webp",
+        "bytes": 12510
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/seilschaft/sl-ladder-960.webp",
+        "bytes": 23736
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/seilschaft/sl-ladder-1280.webp",
+        "bytes": 35318
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/seilschaft/sl-ladder-1920.webp",
+        "bytes": 55962
+      },
+      {
+        "format": "webp",
+        "width": 2400,
+        "src": "/media/seilschaft/sl-ladder-2400.webp",
+        "bytes": 72024
+      }
+    ],
+    "hash": "cc3e26d176be270b",
+    "text": "Career ladder, an excerpt Behaviour, not titles · each level reviewed with a date and a next step CO-WRITTEN WITH HR LEVEL 1 Designer LEVEL 2 Senior designer LEVEL 3 Principal designer LEVEL 4 Lead PLANNING HORIZON The task in front of them A release A quarter, across teams The practice, a year ahead COLLABORATION Their product owner Brings developers and research in early Aligns several teams on one pattern Aligns units outside product LEAVES BEHIND A shipped screen A documented pattern A standard others use A team that works without them EXAMPLE Fixes errors from the template Runs the usability test Writes the date-picker rule Hires and grows the team Counts in salary reviews, not only in the team Promotions go through it unchanged SEILSCHAFT · FICTIONAL EXAMPLE · FIG. 7"
+  },
+  "sl-onboarding": {
+    "width": 2400,
+    "height": 800,
+    "placeholder": "data:image/webp;base64,UklGRkQAAABXRUJQVlA4IDgAAABQAwCdASoYAAgAPu1iqU2ppaOiMAgBMB2JaQDE2CP/3KVGuAD+3wWvyQsoNIJsH+8o4b4MmCkAAA==",
+    "alt": "images.sl-onboarding.alt",
+    "caption": "figures.sl-onboarding.caption",
+    "figure": 6,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/seilschaft/sl-onboarding-640.avif",
+        "bytes": 9074
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/seilschaft/sl-onboarding-960.avif",
+        "bytes": 15808
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/seilschaft/sl-onboarding-1280.avif",
+        "bytes": 23169
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/seilschaft/sl-onboarding-1920.avif",
+        "bytes": 36763
+      },
+      {
+        "format": "avif",
+        "width": 2400,
+        "src": "/media/seilschaft/sl-onboarding-2400.avif",
+        "bytes": 39780
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/seilschaft/sl-onboarding-640.webp",
+        "bytes": 12236
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/seilschaft/sl-onboarding-960.webp",
+        "bytes": 21900
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/seilschaft/sl-onboarding-1280.webp",
+        "bytes": 31586
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/seilschaft/sl-onboarding-1920.webp",
+        "bytes": 52906
+      },
+      {
+        "format": "webp",
+        "width": 2400,
+        "src": "/media/seilschaft/sl-onboarding-2400.webp",
+        "bytes": 67802
+      }
+    ],
+    "hash": "89d53eaaec1449ed",
+    "text": "Onboarding trail: ship, then read Every new hire walks it, the senior included · a mentor walks alongside 30 DAYS 1–30 Listen Sit in on crit and a research day; meet your cluster’s product owners. Ships: a Polish ticket from templates 60 DAYS 31–60 Shape with a mentor Design a release with a product team, the mentor in every review. Ships: a Shape project, presented at crit 90 DAYS 61–90 Lead a study Plan and run research with citizens from the pool. Ships: a first Explore study of your own SEILSCHAFT · FICTIONAL EXAMPLE · FIG. 6"
+  },
+  "sl-requests-chart": {
+    "width": 1920,
+    "height": 1080,
+    "placeholder": "data:image/webp;base64,UklGRkoAAABXRUJQVlA4ID4AAABwAwCdASoYAA4APu1iqU2ppaQiMAgBMB2JZwAAg+/o5II4JGAA/u57NO350Nfl1ngO3IvgqOt5kAqdERwAAA==",
+    "alt": "images.sl-requests-chart.alt",
+    "caption": "figures.sl-requests-chart.caption",
+    "figure": 8,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/seilschaft/sl-requests-chart-640.avif",
+        "bytes": 9097
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/seilschaft/sl-requests-chart-960.avif",
+        "bytes": 14982
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/seilschaft/sl-requests-chart-1280.avif",
+        "bytes": 20315
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/seilschaft/sl-requests-chart-1920.avif",
+        "bytes": 24479
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/seilschaft/sl-requests-chart-640.webp",
+        "bytes": 10856
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/seilschaft/sl-requests-chart-960.webp",
+        "bytes": 18928
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/seilschaft/sl-requests-chart-1280.webp",
+        "bytes": 25836
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/seilschaft/sl-requests-chart-1920.webp",
+        "bytes": 41258
+      }
+    ],
+    "hash": "fd89bb79e33754b5",
+    "text": "Requests reaching UX before development starts Share of all requests on the intake board, per quarter · measured 0% 25% 50% 75% 100% Q3 2021 Q4 Q1 2022 Q2 Q3 Q4 Q1 2023 Q2 Q3 Q4 Q1 2024 Q2 18% 71% Intake live Designers seated in clusters Research day and pool SEILSCHAFT · FICTIONAL EXAMPLE · FIG. 8"
+  },
+  "sl-rituals": {
+    "width": 2400,
+    "height": 1080,
+    "placeholder": "data:image/webp;base64,UklGRkoAAABXRUJQVlA4ID4AAABwAwCdASoYAAsAPu1krU2ppaSiMAgBMB2JZwAAW+r5qJX2CzgA/ucZkObHtpGCK8cvdAUrGNT8WZ4c/cyAAA==",
+    "alt": "images.sl-rituals.alt",
+    "caption": "figures.sl-rituals.caption",
+    "figure": 5,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/seilschaft/sl-rituals-640.avif",
+        "bytes": 8678
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/seilschaft/sl-rituals-960.avif",
+        "bytes": 14201
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/seilschaft/sl-rituals-1280.avif",
+        "bytes": 20553
+      },
+      {
+        "format": "avif",
+        "width": 1920,
+        "src": "/media/seilschaft/sl-rituals-1920.avif",
+        "bytes": 31337
+      },
+      {
+        "format": "avif",
+        "width": 2400,
+        "src": "/media/seilschaft/sl-rituals-2400.avif",
+        "bytes": 31023
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/seilschaft/sl-rituals-640.webp",
+        "bytes": 9816
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/seilschaft/sl-rituals-960.webp",
+        "bytes": 16782
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/seilschaft/sl-rituals-1280.webp",
+        "bytes": 24802
+      },
+      {
+        "format": "webp",
+        "width": 1920,
+        "src": "/media/seilschaft/sl-rituals-1920.webp",
+        "bytes": 38632
+      },
+      {
+        "format": "webp",
+        "width": 2400,
+        "src": "/media/seilschaft/sl-rituals-2400.webp",
+        "bytes": 48868
+      }
+    ],
+    "hash": "71d8d81eb2c12885",
+    "text": "The team’s rhythm, one quarter Booked a year ahead · nothing else may take these slots MONTH ONE MONTH TWO MONTH THREE W1 W2 W3 W4 W5 W6 W7 W8 W9 W10 W11 W12 W13 Weekly crit 45 minutes, every week, all 6 of us 45′ 45′ 45′ 45′ 45′ 45′ 45′ 45′ 45′ 45′ 45′ 45′ 45′ Research day Monthly, from a pool of 140 citizens Day Day Day Showcase Quarterly, open to every product team Show Crit: written notes, one owner per follow-up, the presenter decides what to take Pool: citizens who agreed to be contacted SEILSCHAFT · FICTIONAL EXAMPLE · FIG. 5"
+  },
+  "sl-scorecard": {
+    "width": 1600,
+    "height": 1040,
+    "placeholder": "data:image/webp;base64,UklGRkgAAABXRUJQVlA4IDwAAABQAwCdASoYABAALrV2u12jqampiYC0S0gABdo9FPzle5MtgAD+9NP/mFI1mPr6Z+9mPjdpPRaEVNcWsAA=",
+    "alt": "images.sl-scorecard.alt",
+    "caption": "figures.sl-scorecard.caption",
+    "figure": 3,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/seilschaft/sl-scorecard-640.avif",
+        "bytes": 16813
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/seilschaft/sl-scorecard-960.avif",
+        "bytes": 29075
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/seilschaft/sl-scorecard-1280.avif",
+        "bytes": 38917
+      },
+      {
+        "format": "avif",
+        "width": 1600,
+        "src": "/media/seilschaft/sl-scorecard-1600.avif",
+        "bytes": 42609
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/seilschaft/sl-scorecard-640.webp",
+        "bytes": 23302
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/seilschaft/sl-scorecard-960.webp",
+        "bytes": 38064
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/seilschaft/sl-scorecard-1280.webp",
+        "bytes": 53478
+      },
+      {
+        "format": "webp",
+        "width": 1600,
+        "src": "/media/seilschaft/sl-scorecard-1600.webp",
+        "bytes": 68120
+      }
+    ],
+    "hash": "053702b5753e77d3",
+    "text": "Work-sample scorecard Paid 2-hour session · a real, anonymised request Candidate C · panel of 3 CRITERION WEAK EVIDENCE STRONG EVIDENCE PANEL Framing Starts drawing screens at once Restates the problem, names what is unknown A B C Evidence Relies on taste and best practice Asks for data and users before proposing A B C Collaboration Presents a finished answer Brings the product owner and a developer in A B C Craft Polished, but skips states and errors A clear, accessible flow at the right fidelity A B C Reflection Defends every choice Names the weakest part of their own work A B C Each panellist scores alone, then the panel compares Hire: senior SEILSCHAFT · FICTIONAL EXAMPLE · FIG. 3"
+  },
+  "sl-steering-onepager": {
+    "width": 1600,
+    "height": 1200,
+    "placeholder": "data:image/webp;base64,UklGRl4AAABXRUJQVlA4IFIAAACQAwCdASoYABIAPu1krE6ppaQiKA1RMB2JaWllABxcuJxyA2vAAP7wFgWWXfXB7vc2rjfEGuMue8KQK9BL1W+9x8xD/Kmx3/oa673CZvLcIAAA",
+    "alt": "images.sl-steering-onepager.alt",
+    "caption": "figures.sl-steering-onepager.caption",
+    "figure": 1,
+    "sources": [
+      {
+        "format": "avif",
+        "width": 640,
+        "src": "/media/seilschaft/sl-steering-onepager-640.avif",
+        "bytes": 16364
+      },
+      {
+        "format": "avif",
+        "width": 960,
+        "src": "/media/seilschaft/sl-steering-onepager-960.avif",
+        "bytes": 27318
+      },
+      {
+        "format": "avif",
+        "width": 1280,
+        "src": "/media/seilschaft/sl-steering-onepager-1280.avif",
+        "bytes": 37999
+      },
+      {
+        "format": "avif",
+        "width": 1600,
+        "src": "/media/seilschaft/sl-steering-onepager-1600.avif",
+        "bytes": 42908
+      },
+      {
+        "format": "webp",
+        "width": 640,
+        "src": "/media/seilschaft/sl-steering-onepager-640.webp",
+        "bytes": 24160
+      },
+      {
+        "format": "webp",
+        "width": 960,
+        "src": "/media/seilschaft/sl-steering-onepager-960.webp",
+        "bytes": 40818
+      },
+      {
+        "format": "webp",
+        "width": 1280,
+        "src": "/media/seilschaft/sl-steering-onepager-1280.webp",
+        "bytes": 56200
+      },
+      {
+        "format": "webp",
+        "width": 1600,
+        "src": "/media/seilschaft/sl-steering-onepager-1600.webp",
+        "bytes": 74016
+      }
+    ],
+    "hash": "f89881a3580b8242",
+    "text": "Steering board · Digital Services Hochmatt Informatik · 2021 From a service desk to a UX practice A staged ask: grow only as far as the evidence carries us. THE PROBLEM, IN OUR OWN TICKETS 64% of requests arrive two weeks or less before release 420 h of rework after release in the last year 11 of 14 product teams have never met a designer THE STAGED ASK HIRE · THEN CHECK One intake for every request within six months. HIRE · THEN CHECK A named designer for the four teams with the most citizen traffic. REVIEW · MONTH 12 The board decides: grow the practice, or stop where it is. Head of Digital Services APPROVED SEILSCHAFT · FICTIONAL EXAMPLE · FIG. 1"
+  }
+}

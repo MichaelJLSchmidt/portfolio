@@ -12,11 +12,11 @@ import styles from "./Figure.module.css";
  */
 const SIZES: Record<FigureSpec["surface"], Record<FigureSpec["size"], string>> = {
   sheet: {
-    wide: "(min-width: 1200px) min(1054px, calc(92vw - 338px)), (min-width: 640px) calc(92vw - 66px), calc(100vw - 40px)",
+    wide: "(min-width: 1280px) min(1054px, calc(92vw - 338px)), (min-width: 640px) calc(92vw - 66px), calc(100vw - 40px)",
     column: "(min-width: 800px) 654px, (min-width: 640px) calc(92vw - 66px), calc(100vw - 40px)",
   },
   night: {
-    wide: "(min-width: 1200px) min(1118px, calc(92vw - 274px)), (min-width: 640px) calc(92vw - 2px), 100vw",
+    wide: "(min-width: 1280px) min(1118px, calc(92vw - 274px)), (min-width: 640px) calc(92vw - 2px), 100vw",
     column: "(min-width: 800px) 718px, (min-width: 640px) calc(92vw - 2px), 100vw",
   },
 };
@@ -101,6 +101,10 @@ function need(assets: Record<string, ImageAsset>, id: string): ImageAsset {
  * sizes: column or wide. Variants: a lightbox ("Enlarge"), a before/after comparison and
  * numbered hotspots. Their code loads lazily (Enhance); without JavaScript the figure is
  * complete: a full-size link, both images stacked, a visible list of notes.
+ *
+ * Motion: below the fold the figure unfolds from the top behind a 1 px scan line over
+ * --dur-settle, then its corner ticks show and the caption fades in after it; until its image has
+ * decoded it shows a contour placeholder, and the image cross-fades in (reveal.ts, "figure").
  */
 export function Figure({ spec, images, assets, number }: Props) {
   const id = useId();
@@ -115,7 +119,7 @@ export function Figure({ spec, images, assets, number }: Props) {
     const before = need(assets, spec.before);
     const after = need(assets, spec.after);
     media = (
-      <div className={styles.compare} data-compare data-view="slider" style={{ "--pos": "50%" } as React.CSSProperties}>
+      <div className={styles.compare} data-compare data-view="slider" data-reveal="figure" style={{ "--pos": "50%" } as React.CSSProperties}>
         {/* Before first: the reading order without JavaScript, and for screen readers. */}
         <div className={styles.compareStage}>
           <div className={styles.compareBefore} data-compare-before>
@@ -162,7 +166,7 @@ export function Figure({ spec, images, assets, number }: Props) {
     const alt = images[spec.image].alt;
     zoomImage = spec.zoom ? { img, alt } : null;
     media = (
-      <div className={styles.media}>
+      <div className={styles.media} data-reveal="figure">
         <Picture img={img} alt={alt} sizes={sizes} priority={spec.priority} />
         {spec.kind === "hotspots" &&
           spec.notes.map((note, i) => {
@@ -200,7 +204,7 @@ export function Figure({ spec, images, assets, number }: Props) {
       {media}
       {zoomImage && <Zoom {...zoomImage} label={label} caption={spec.caption} />}
       {(spec.caption || spec.long) && (
-        <figcaption className={`${styles.caption} surface-copy`}>
+        <figcaption className={`${styles.caption} surface-copy`} data-reveal="caption">
           {spec.caption && (
             <p id={captionId} className={styles.captionText}>
               {label && <span className={styles.figLabel}>{label} — </span>}

@@ -1,0 +1,73 @@
+<!-- Product teams with a named designer, every half year, as a step chart against the total
+     number of teams; one row of team dots per half year below shows who has one. -->
+<style>
+  .chart {
+    position: absolute;
+    inset: 0;
+    padding: 26px 34px 18px;
+    color: var(--color-sheet);
+  }
+  /* Contour grey is 4.4:1 on the raised ground: labels here use the sheet colour. */
+  .chart > p {
+    margin-top: 6px;
+    color: var(--color-sheet);
+  }
+  .title {
+    color: var(--color-sheet);
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: 380px;
+    margin-top: 18px;
+    overflow: visible;
+  }
+  .grid {
+    stroke: var(--color-contour-dim);
+    stroke-width: 1;
+  }
+  .lbl {
+    fill: var(--color-sheet);
+    font-family: var(--label);
+    font-size: 11.5px;
+    font-stretch: var(--label-wdth);
+  }
+  .val {
+    fill: var(--color-sheet);
+    font-family: var(--label);
+    font-size: 20px;
+    font-stretch: var(--label-wdth);
+    font-weight: 700;
+  }
+</style>
+<div class="chart">
+  <h1 class="title">Product teams with a named designer</h1>
+  <p class="label">Every half year · a team counts once it can name its designer · measured</p>
+  <svg id="c"></svg>
+</div>
+<script>
+  const D = window.DATA;
+  const h = D.named.halfYearly;
+  const total = D.org.productTeams;
+  const svg = document.getElementById("c");
+  const W = svg.clientWidth, H = 380, L = 44, R = 120, T = 14, B = 40;
+  const x = (i) => L + (i / (h.length - 1)) * (W - L - R);
+  const y = (v) => T + (1 - v / total) * (H - T - B);
+  let s = "";
+  for (let v = 0; v <= total; v += 2) s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text class="lbl" x="${L - 10}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  s += `<line x1="${L}" x2="${W - R}" y1="${y(total)}" y2="${y(total)}" stroke="#DDE3E3" stroke-dasharray="6 5"/><text class="lbl" x="${W - R + 10}" y="${y(total) + 4}">all ${total} teams</text>`;
+  let d = `M${x(0)} ${y(h[0])}`;
+  for (let i = 1; i < h.length; i++) d += `H${x(i)}V${y(h[i])}`;
+  s += `<path d="${d}H${x(h.length - 1)}V${y(0)}H${x(0)}Z" fill="#C8F5B0" opacity="0.14"/>`;
+  s += `<path d="${d}" fill="none" stroke="#C8F5B0" stroke-width="3.5"/>`;
+  h.forEach((v, i) => {
+    s += `<circle cx="${x(i)}" cy="${y(v)}" r="5" fill="#C8F5B0"/>`;
+    // Half years from the second half of the first year.
+    const k = i + 1;
+    s += `<text class="lbl" x="${x(i)}" y="${H - 18}" text-anchor="middle">${k % 2 ? "H2" : "H1"}</text><text class="lbl" x="${x(i)}" y="${H - 2}" text-anchor="middle">${D.years.start + Math.floor(k / 2)}</text>`;
+  });
+  s += `<text class="val" x="${x(0) + 10}" y="${y(h[0]) - 12}">${D.named.before} of ${total}</text>`;
+  s += `<text class="val" x="${x(h.length - 1) + 12}" y="${y(h[h.length - 1]) + 7}">${D.named.after} of ${total}</text>`;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.innerHTML = s;
+</script>

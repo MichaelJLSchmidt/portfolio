@@ -1,5 +1,6 @@
 /* Summit summary: sheet colour, so only sheet-safe inks (ground, sheet-ink, moss-ink, alpenglow-ink). */
 .summary {
+  --sheet-dur: var(--dur-medium);
   display: grid;
   gap: 20px;
   scroll-margin-top: 96px;
@@ -10,8 +11,14 @@
 }
 
 .heading {
+  --kt-color: var(--color-moss-ink);
   color: var(--color-moss-ink);
   font-weight: 700;
+}
+
+.heading[data-role] {
+  --kt-rest-wght: 700;
+  --kt-from-wght: 700;
 }
 
 .grid {
@@ -33,9 +40,17 @@
   grid-column: 1 / -1;
 }
 
+/* Wider screens: a sentence row reads label | value, so the six rows scan down the left edge. */
+@media (min-width: 640px) {
+  .grid > .wide {
+    grid-template-columns: minmax(8rem, 13rem) minmax(0, 1fr);
+    column-gap: 24px;
+  }
+}
+
 .grid dt {
   color: var(--color-sheet-ink);
-  font-family: var(--font-martian), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: var(--type-hud-size);
   font-stretch: var(--axis-mono-rest-wdth);
   letter-spacing: var(--type-hud-tracking);
@@ -54,7 +69,7 @@
 }
 
 .stat {
-  font-family: var(--font-martian), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 1.3rem;
   font-weight: 700;
   font-stretch: var(--axis-mono-rest-wdth);
@@ -82,21 +97,35 @@
   gap: 2px 10px;
 }
 
+/* A plain list (what I put in place): a short dash marks each item. */
+.grid dd ul[data-marks] li {
+  display: block;
+  position: relative;
+  padding-left: 1.1em;
+}
+
+.grid dd ul[data-marks] li::before {
+  content: "–";
+  position: absolute;
+  left: 0;
+  color: var(--color-sheet-ink);
+}
+
 .note {
   color: var(--color-sheet-ink);
-  font-family: var(--font-martian), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.75rem;
   letter-spacing: 0.06em;
 }
 
 /* Phones: a stat that is a phrase takes the whole row instead of breaking inside a narrow column. */
-@media (max-width: 599px) {
+@media (width < 640px) {
   .grid > [data-long] {
     grid-column: 1 / -1;
   }
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .summary {
     padding: 32px 36px;
   }

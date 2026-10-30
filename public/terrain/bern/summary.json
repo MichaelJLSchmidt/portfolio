@@ -1,0 +1,15 @@
+{
+  "id": "bern",
+  "label": "Bern",
+  "placeholder": false,
+  "zeroPoint": {
+    "e": 2600000,
+    "n": 1200000,
+    "altitudeM": 554
+  },
+  "intervalsM": [
+    10,
+    20,
+    50
+  ]
+}

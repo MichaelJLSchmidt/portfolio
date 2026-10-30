@@ -30,6 +30,11 @@
   visibility: hidden;
 }
 
+/* A Mythic card's pass: summit gold instead of mint. */
+.glint[data-tone="gold"] {
+  --glint-color: color-mix(in srgb, var(--color-summit-gold) 60%, transparent);
+}
+
 .rule {
   position: absolute;
   inset: auto 0 -0.12em;

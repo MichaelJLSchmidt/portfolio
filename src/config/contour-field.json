@@ -17,9 +17,16 @@
   "zoomBase": 1.06,
   "morphZoom": 0.14,
   "intro": "cinematic",
-  "morph": "cinematic",
+  "morph": "terrain",
+  "reveal": "draw",
+  "revealFloor": 0.3,
+  "prewarm": {
+    "morph": 0.12,
+    "duration": "prewarm"
+  },
   "desktop": {
     "dprMax": 2,
+    "renderScale": 1,
     "heightmap": "desktop",
     "heightmapMinDevicePx": 1400,
     "minSpacingPx": 3.25,
@@ -29,7 +36,8 @@
     "ambientFps": 30
   },
   "mobile": {
-    "dprMax": 1.5,
+    "dprMax": 1,
+    "renderScale": 0.75,
     "heightmap": "mobile",
     "minSpacingPx": 3,
     "lineOpacity": 0.3,
@@ -38,5 +46,18 @@
     "ambientFps": 24
   },
   "frameBudgetMs": 22,
-  "dormantAfterMs": 60000
+  "dormantAfterMs": 60000,
+  "river": {
+    "color": "ice",
+    "widthPx": 1.5,
+    "opacity": 0.9
+  },
+  "pin": {
+    "color": "glacier",
+    "armPx": 9,
+    "gapPx": 3,
+    "widthPx": 1.25,
+    "pingPx": 30,
+    "ping": "long"
+  }
 }

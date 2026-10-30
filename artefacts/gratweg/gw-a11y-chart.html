@@ -1,0 +1,98 @@
+<!-- Accessibility issues per product in the external audit, before and after adoption, as paired
+     horizontal bars; the total change is the headline. -->
+<style>
+  .chart {
+    position: absolute;
+    inset: 0;
+    padding: 26px 34px 18px;
+    color: var(--color-sheet);
+  }
+  /* Contour grey is 4.4:1 on the raised ground: labels here use the sheet colour. */
+  .chart > p {
+    margin-top: 6px;
+    color: var(--color-sheet);
+  }
+  .title {
+    color: var(--color-sheet);
+  }
+  .total {
+    position: absolute;
+    top: 22px;
+    right: 34px;
+    text-align: right;
+  }
+  .total b {
+    display: block;
+    color: var(--color-glacier);
+    font-family: var(--label);
+    font-size: 40px;
+    font-stretch: var(--label-wdth);
+    font-weight: 700;
+    line-height: 1;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: 370px;
+    margin-top: 16px;
+    overflow: visible;
+  }
+  .lbl {
+    fill: var(--color-sheet);
+    font-family: var(--diagram);
+    font-size: 13px;
+  }
+  .n {
+    fill: var(--color-sheet);
+    font-family: var(--label);
+    font-size: 11.5px;
+    font-stretch: var(--label-wdth);
+  }
+  .key {
+    display: flex;
+    gap: 22px;
+    margin-top: 6px;
+  }
+  .key span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .key i {
+    width: 22px;
+    height: 10px;
+    border-radius: 2px;
+  }
+</style>
+<div class="chart">
+  <h1 class="title">Accessibility issues per product</h1>
+  <p class="label">External WCAG 2.1 AA audit, before and after adoption · measured</p>
+  <p class="total label"><b id="tot"></b>issues in total</p>
+  <svg id="c"></svg>
+  <div class="key label">
+    <span><i style="background: #8A8C80"></i>before</span>
+    <span><i style="background: #C8F5B0"></i>after</span>
+  </div>
+</div>
+<script>
+  const D = window.DATA;
+  const A = D.audit;
+  document.getElementById("tot").textContent = `${A.changePct}%`.replace("-", "−");
+  const products = ["Building permits", "Tax portal", "Parking permits", "School enrolment", "Dog registry", "Waste calendar", "Business register", "Address change", "Fishing licences"];
+  const svg = document.getElementById("c");
+  const W = svg.clientWidth, H = 370, L = 150, R = 40;
+  const max = Math.max(...A.before);
+  const row = H / products.length;
+  const x = (v) => L + (v / max) * (W - L - R);
+  let s = "";
+  products.forEach((p, i) => {
+    const y = i * row;
+    s += `<text class="lbl" x="${L - 12}" y="${y + row / 2 + 4}" text-anchor="end">${p}</text>`;
+    s += `<rect x="${L}" y="${y + 6}" width="${x(A.before[i]) - L}" height="${row / 2 - 7}" rx="2" fill="#8A8C80"/>`;
+    s += `<rect x="${L}" y="${y + row / 2 + 1}" width="${x(A.after[i]) - L}" height="${row / 2 - 7}" rx="2" fill="#C8F5B0"/>`;
+    s += `<text class="n" x="${x(A.before[i]) + 6}" y="${y + row / 2 - 4}">${A.before[i]}</text>`;
+    s += `<text class="n" x="${x(A.after[i]) + 6}" y="${y + row - 9}">${A.after[i]}</text>`;
+  });
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.innerHTML = s;
+</script>

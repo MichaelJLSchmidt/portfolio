@@ -99,10 +99,10 @@ describe("password comparison", () => {
 describe("next", () => {
   it("keeps same-host relative paths", () => {
     assert.equal(safeNext("/", host), "/");
-    assert.equal(safeNext("/work/kibon/", host), "/work/kibon/");
+    assert.equal(safeNext("/work/test-project/", host), "/work/test-project/");
     assert.equal(safeNext("/about/?hm=2048", host), "/about/?hm=2048");
     assert.equal(safeNext("/a/../about/", host), "/about/");
-    assert.equal(safeNext("/work/kibon/index.htm?x=1", host), "/work/kibon/?x=1");
+    assert.equal(safeNext("/work/test-project/index.htm?x=1", host), "/work/test-project/?x=1");
     assert.equal(safeNext("/index.html", host), "/");
   });
 
@@ -159,7 +159,7 @@ const page: PageModel = {
   contact: [{ label: "Email", href: null }],
   placeholder: (label) => `[${label.toUpperCase()}]`,
   hud: { coordinates: "N", altitude: "ALT", clock: "Bern" },
-  access: { heading: "Basecamp access", label: "Password", submit: "Enter", error: "Wrong password.", closed: "Closed.", username: "basecamp" },
+  access: { heading: "Trail under construction", label: "Password", submit: "Enter", pending: "CHECKING…", error: "That’s not the password.", closed: "Closed.", username: "basecamp" },
   credit: { label: "Credit", href: null },
   css: "",
   script: "",
@@ -190,7 +190,7 @@ const cookieFrom = (response: Response) => response.headers.get("Set-Cookie")!.s
 describe("gate handler", () => {
   it("shows the gate page for any path without a valid cookie", async () => {
     const { calls, request } = harness();
-    for (const path of ["/", "/work/kibon/", "/_next/static/chunks/app.js", "/terrain/heightmap-1536.webp", "/index.txt?_rsc=1", "/_basecamp/x.css"]) {
+    for (const path of ["/", "/work/test-project/", "/_next/static/chunks/app.js", "/terrain/heightmap-1536.webp", "/index.txt?_rsc=1", "/_basecamp/x.css"]) {
       const res = await request(path);
       assert.equal(res.status, 401, path);
       assert.match(res.headers.get("WWW-Authenticate")!, /^Cookie realm="Basecamp"/);
@@ -202,8 +202,8 @@ describe("gate handler", () => {
       assert.match(html, /autocomplete="current-password"/);
     }
     assert.equal(calls.next, 0);
-    const res = await request("/work/kibon/?a=1");
-    assert.match(await res.text(), /name="next" value="\/work\/kibon\/\?a=1"/);
+    const res = await request("/work/test-project/?a=1");
+    assert.match(await res.text(), /name="next" value="\/work\/test-project\/\?a=1"/);
   });
 
   it("lets the gate's own assets through and answers robots.txt itself", async () => {
@@ -217,9 +217,9 @@ describe("gate handler", () => {
 
   it("unlocks with the right password: cookie, then 303 to next", async () => {
     const { calls, unlock, request } = harness();
-    const res = await unlock({ password: PASSWORD, next: "/work/kibon/" }, { Origin: `https://${PRIMARY_DOMAIN}` });
+    const res = await unlock({ password: PASSWORD, next: "/work/test-project/" }, { Origin: `https://${PRIMARY_DOMAIN}` });
     assert.equal(res.status, 303);
-    assert.equal(res.headers.get("Location"), "/work/kibon/");
+    assert.equal(res.headers.get("Location"), "/work/test-project/");
     const setCookie = res.headers.get("Set-Cookie")!;
     assert.match(setCookie, new RegExp(`^${gate.cookie.replace("-", "\\-")}=\\d+\\.[A-Za-z0-9_-]{43}; `));
     for (const attribute of ["Path=/", `Max-Age=${gate.maxAgeSeconds}`, "Secure", "HttpOnly", "SameSite=Lax"]) {
@@ -228,7 +228,7 @@ describe("gate handler", () => {
     assert.doesNotMatch(setCookie, /Domain=/i);
     assert.deepEqual(calls.waits, []);
 
-    const inside = await request("/work/kibon/", { headers: { Cookie: cookieFrom(res) } });
+    const inside = await request("/work/test-project/", { headers: { Cookie: cookieFrom(res) } });
     assert.equal(await inside.text(), "protected");
     assert.equal(inside.headers.get("X-Robots-Tag"), "noindex, nofollow");
     assert.equal(inside.headers.get("Cache-Control"), "private, max-age=31536000, immutable");
@@ -248,7 +248,11 @@ describe("gate handler", () => {
     assert.equal(res.headers.get("Set-Cookie"), null);
     assert.equal(res.headers.get("Cache-Control"), "no-store");
     const html = await res.text();
-    assert.match(html, /role="alert">Wrong password\.</);
+    assert.match(html, /role="alert">That’s not the password\.</);
+    // The submit button carries its pending label for the inline script ("CHECKING…").
+    assert.match(html, /<button type="submit" data-pending="CHECKING…">Enter<\/button>/);
+    // The field's underline, drawn on focus.
+    assert.match(html, /<span class="input"><input id="password"[^>]*><span class="line" aria-hidden="true"><\/span><\/span>/);
     assert.match(html, /aria-invalid="true" aria-describedby="access-error"/);
     assert.match(html, /name="next" value="\/about\/"/);
   });
@@ -303,5 +307,17 @@ describe("gate handler", () => {
     assert.equal(calls.next, 0);
     assert.ok(calls.logs.length <= 1);
     assert.ok(calls.logs.every((line) => line.includes(gate.passwordEnv)));
+  });
+});
+
+// The page's own copy (src/content/about.ts): the under-construction page and the gate.
+describe("the night-summit page's copy", () => {
+  it("reads as the trail under construction", async () => {
+    await import("../../scripts/lib/ts-hooks.mjs");
+    const { holding } = await import("../content/about.ts");
+    assert.equal(holding.access.heading, "Trail under construction");
+    assert.equal(holding.status, "The route is being marked. If you were given the password, step in.");
+    assert.equal(holding.access.error, "That’s not the password. Check the message you received, or write to me.");
+    assert.equal(holding.access.pending, "CHECKING…");
   });
 });

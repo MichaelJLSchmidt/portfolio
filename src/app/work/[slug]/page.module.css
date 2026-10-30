@@ -5,22 +5,18 @@
   padding-bottom: 64px;
 }
 
-.crumbs a {
+.crumb {
+  --l-rest-color: var(--color-glacier);
   display: inline-flex;
   align-items: center;
-  gap: 0.6em;
   min-height: 44px;
-  color: var(--color-glacier);
-  text-decoration: none;
 }
 
-.crumbs a:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
+/* A definite track, not an auto one: the title's size depends on its column (cqi), and an auto
+   track re-measures that column, and with it the whole page, on every layout. */
 .header {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
 }
 
@@ -42,25 +38,36 @@
   box-shadow: 0 24px 60px rgb(0 0 0 / 0.45);
 }
 
+/* One display size for every case-study title: the template's widest word (--title-em, measured)
+   fills 96% of this column, up to 8.5rem; a title with a wider word scales itself down
+   (--word-em). Shorter titles never grow. */
 .titleBlock {
+  container-type: inline-size;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
   align-content: end;
 }
 
 .coords {
-  color: var(--color-contour);
+  color: var(--color-sheet);
 }
 
 .title {
-  font-size: clamp(3rem, 12vw, 8.5rem);
-  overflow-wrap: anywhere;
+  font-size: min(calc(0.96 * 100cqi / max(var(--title-em, 5), var(--word-em, 5))), 8.5rem);
 }
 
 .type {
+  margin: 0;
+  font-family: var(--font-text-condensed);
   font-size: 1.125rem;
   font-weight: 600;
   font-stretch: var(--type-condensed-wdth);
+}
+
+.type[data-role] {
+  --kt-rest-wdth: var(--type-condensed-wdth);
+  --kt-rest-wght: 600;
 }
 
 /* "7 min read · 60-second skim below" */
@@ -68,9 +75,8 @@
   color: var(--color-sheet);
 }
 
-.meta a {
-  color: var(--color-glacier);
-  text-underline-offset: 4px;
+.skim {
+  --l-rest-color: var(--color-glacier);
 }
 
 /* The product hero, directly after the Summit summary. */
@@ -85,8 +91,9 @@
   gap: 12px;
 }
 
-.jump h2 {
-  color: var(--color-contour);
+.jumpHeading {
+  --kt-color: var(--color-sheet);
+  color: var(--color-sheet);
 }
 
 .jump ul {
@@ -98,64 +105,9 @@
   list-style: none;
 }
 
+/* The jump chips: SignatureLink's chip variant (breath, brightening border, sheet when pressed). */
 .chip {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 16px;
-  border: 1px solid var(--color-contour);
-  border-radius: 999px;
-  background: rgb(27 28 24 / 0.75);
-  color: var(--color-sheet);
-  text-decoration: none;
-}
-
-.chip:hover {
-  border-color: var(--color-glacier);
-  color: var(--color-glacier);
-}
-
-.inspect {
-  display: grid;
-}
-
-/* Cards use inline-size containment, so they need a definite width: centre with margins. */
-.inspect > * {
-  margin-inline: auto;
-}
-
-.next {
-  display: grid;
-  justify-items: start;
-  padding-top: 32px;
-  border-top: 1px solid var(--color-contour-dim);
-}
-
-.nextLink {
-  display: inline-grid;
-  gap: 8px;
-  min-height: 44px;
-  color: var(--color-glacier);
-}
-
-.nextName {
-  --l-rest-color: var(--color-sheet);
-  font-size: clamp(2.5rem, 9vw, 7rem);
-}
-
-.backToAll {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6em;
-  min-height: 44px;
-  margin-top: 16px;
-  color: var(--color-glacier);
-  text-decoration: none;
-}
-
-.backToAll:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  font-size: 0.9375rem;
 }
 
 /* Below 1200 px: "Jump to" chips at the top, the waypoints in one column. From 1200 px the
@@ -175,7 +127,7 @@
   min-width: 0;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .header {
     grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
     align-items: end;
@@ -183,7 +135,7 @@
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1280px) {
   .body {
     grid-template-columns: 13rem minmax(0, 1fr);
     align-items: start;

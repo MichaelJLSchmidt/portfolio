@@ -7,7 +7,7 @@
 //            (its default simulated throttling), median of the runs: LCP, TBT and CLS.
 //
 //   npm run report:motion                              / with 3 runs
-//   npm run report:motion -- /about/ /work/kibon/      other pages
+//   npm run report:motion -- /about/ /work/seilschaft/ other pages
 //   npm run report:motion -- --runs 5 --lighthouse     more runs, plus Lighthouse
 //   npm run report:motion -- --dir ../other-out        another export (e.g. an earlier build)
 //

@@ -10,6 +10,28 @@
 //   npm run test:e2e -- decode        heightmap decode check and its fallbacks
 //   npm run test:e2e -- casestudy     the case-study template on the example page (needs a build
 //                                     that includes examples: SITE_MODE=basecamp or a preview)
+//   npm run test:e2e -- terrain       the terrain conductor, Bern, the readout, tiers and context
+//                                     loss (scripts/e2e-terrain.mjs; needs NEXT_PUBLIC_PREVIEW=1)
+//   npm run test:e2e -- deck          deck order, card link names and the Next expedition loop
+//                                     (scripts/e2e/deck.mjs; needs the examples)
+//   npm run test:e2e -- basecamp      the HUD label ↔ Basecamp H1 morph in full, calm and still
+//                                     (scripts/e2e/basecamp.mjs)
+//   npm run test:e2e -- ia            page structure, HUD order, example content (scripts/e2e/layout.mjs)
+//   npm run test:e2e -- phone         every route at 360 and 390 px: no overflow, HUD and footer
+//                                     (scripts/e2e/layout.mjs)
+//   npm run test:e2e -- fontswap      the web fonts held back on a throttled phone: CLS ≤ 0.05,
+//                                     display titles keep their boxes (scripts/e2e/typography.mjs)
+//   npm run test:e2e -- hud           the HUD's slots, condensing and readout (scripts/e2e/chrome.mjs)
+//   npm run test:e2e -- toast         Copy address and its toast in full and still (scripts/e2e/chrome.mjs)
+//   npm run test:e2e -- cards         the deck's grid, phone list, arrival, hover, focus, press, marks,
+//                                     stats and the visited stamp (scripts/e2e/cards.mjs)
+//   npm run test:e2e -- views         Cards · Index in full, calm and still (scripts/e2e/cards.mjs)
+//   npm run test:e2e -- arrival       route arrivals: timing, focus on the H1, the trailhead morph,
+//                                     traversals, Basecamp, still (scripts/e2e/choreography.mjs)
+//   npm run test:e2e -- reading       the HUD waypoint readout, the trail, the altimeter bar, the
+//                                     career climb per mode, no endless loops (choreography.mjs)
+//   npm run test:e2e -- access        forced colours, headings read once, the haptics map
+//                                     (scripts/e2e/choreography.mjs)
 //
 // Serves ./out like a static host (base path read from the build) and drives Chromium with
 // Playwright, which is not a dependency: `npm i -D playwright && npx playwright install chromium`,
@@ -21,6 +43,13 @@ import { createRequire } from "node:module";
 import { createServer } from "node:net";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { basecamp } from "./e2e/basecamp.mjs";
+import { deck } from "./e2e/deck.mjs";
+import { ia, phone, routes as builtRoutes } from "./e2e/layout.mjs";
+import { fontswap } from "./e2e/typography.mjs";
+import { hud, toast } from "./e2e/chrome.mjs";
+import { cards, views } from "./e2e/cards.mjs";
+import { access, arrival, reading } from "./e2e/choreography.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const only = process.argv[2];
@@ -112,12 +141,13 @@ async function open({ calm = false, reduced = false, classic = false, init } = {
   );
   await context.addInitScript(() => {
     // The return choreography's traces: html[data-vt], the named exit parts, the card rebuild.
-    window.__return = { vt: 0, exits: 0, reassemble: 0 };
+    window.__return = { vt: 0, exits: 0, reassemble: 0, traverse: 0 };
     document.addEventListener("DOMContentLoaded", () => {
       new MutationObserver((records) => {
         for (const r of records) {
           const el = r.target;
           if (r.attributeName === "data-vt" && el.getAttribute("data-vt") === "return") window.__return.vt++;
+          if (r.attributeName === "data-vt" && el.getAttribute("data-vt") === "traverse") window.__return.traverse++;
           if (r.attributeName === "data-reassemble" && el.hasAttribute("data-reassemble")) window.__return.reassemble++;
           if (r.attributeName === "style" && el.style?.viewTransitionName?.startsWith("vt-exit")) window.__return.exits++;
         }
@@ -140,10 +170,11 @@ async function settle(page, { path, terrain }) {
         const backdrop = document.querySelector("[data-field]");
         const h1 = [...document.querySelectorAll("main h1")].find((h) => h.getClientRects().length);
         const vt = document.getAnimations().some((a) => a.effect?.pseudoElement?.startsWith("::view-transition"));
-        // Entrances (reveals, settles) still running are not "left hidden": wait for them.
+        // Entrances (reveals, settles) still running are not "left hidden": wait for them. A
+        // scroll-driven animation (the career climb) runs as long as the page does: not one.
         const entering = document
           .getAnimations()
-          .some((a) => a.playState === "running" && a.effect?.getTiming().iterations !== Infinity);
+          .some((a) => a.playState === "running" && a.timeline === document.timeline && a.effect?.getTiming().iterations !== Infinity);
         return (
           !vt &&
           !entering &&
@@ -166,7 +197,10 @@ async function settle(page, { path, terrain }) {
       main,
       h1,
       ...(h1?.querySelectorAll('[class*="glyph"]') ?? []),
-      ...(main?.querySelectorAll("[data-reveal], [style*='view-transition-name']") ?? []),
+      // Reveals still waiting below the fold are not hidden: they play when scrolled to.
+      ...[...(main?.querySelectorAll("[data-reveal], [style*='view-transition-name']") ?? [])].filter(
+        (el) => !(el.getAttribute("data-reveal-state") === "wait" && el.getBoundingClientRect().top >= window.innerHeight),
+      ),
       // The deck cards after a return: every part rebuilt, the name readable.
       ...(main?.querySelectorAll("article[data-slug] [class*='nameBar'], article[data-slug] [class*='typeLine'], article[data-slug] [class*='rules'], article[data-slug] [class*='stats'], article[data-slug] [class*='collector']") ?? []),
     ]
@@ -193,9 +227,19 @@ async function settle(page, { path, terrain }) {
   });
 }
 
+// The card the round trips open: a flagged example (there is no real case study yet), so these
+// scenarios need a build that includes examples (SITE_MODE=basecamp or a preview).
+const FLOW = { slug: "test-project", path: "/work/test-project/", title: "Test Project", terrain: "lab-099" };
+const hasFlow = () => {
+  if (existsSync(join(root, `out${FLOW.path}index.html`))) return true;
+  console.log(`  skipped: no ${FLOW.path} in this build (build with SITE_MODE=basecamp)`);
+  return false;
+};
+
 // --- transitions -------------------------------------------------------------------------------
 async function transitions() {
-  const card = { slug: "kibon", path: "/work/kibon/", title: "kiBon 2.0", terrain: "dvb-001" };
+  if (!hasFlow()) return;
+  const card = FLOW;
   const modes = [
     { name: "full motion, transition runs", abort: null },
     { name: "full motion, previous return (?vt=classic)", abort: null, classic: true },
@@ -225,14 +269,16 @@ async function transitions() {
     await page.locator(`article[data-slug="${card.slug}"] a`).first().click();
     expectPage(await settle(page, { path: card.path, terrain: fieldOn ? card.terrain : null }), "open card", card);
 
-    // The way back: card reassembly in full motion, the previous morph with ?vt=classic.
+    // The way back: card reassembly in full motion by the back link, the previous morph with
+    // ?vt=classic; browser back cross-fades (a traversal) without the reassembly.
     const choreography = fieldOn && !mode.abort;
-    const expectReturn = (r, label, before) => {
+    const expectReturn = (r, label, before, { traversal = false } = {}) => {
       check(`${label}: focus on the card`, r.focus === card.slug, `focus=${r.focus}`);
       check(`${label}: card rebuilt and done`, r.rebuilding === 0 && r.vtAttr === null, `rebuilding=${r.rebuilding} data-vt=${r.vtAttr}`);
       if (!choreography) return;
       const ran = r.ret.vt > before.vt && r.ret.exits > before.exits && r.ret.reassemble > before.reassemble;
-      if (mode.classic) check(`${label}: previous return, no reassembly`, r.ret.vt === before.vt && r.ret.reassemble === before.reassemble, JSON.stringify(r.ret));
+      if (traversal) check(`${label}: a traversal cross-fade, no reassembly`, r.ret.traverse > before.traverse && r.ret.reassemble === before.reassemble, JSON.stringify({ before, after: r.ret }));
+      else if (mode.classic) check(`${label}: previous return, no reassembly`, r.ret.vt === before.vt && r.ret.reassemble === before.reassemble, JSON.stringify(r.ret));
       else check(`${label}: exit, travel and reassembly ran`, ran, JSON.stringify({ before, after: r.ret }));
     };
     const returnTrace = () => page.evaluate(() => ({ ...window.__return }));
@@ -242,7 +288,7 @@ async function transitions() {
     await page.goBack();
     const back = await settle(page, { path: "/", terrain: fieldOn ? "region" : null });
     expectPage(back, "back", { path: "/", terrain: "region" });
-    expectReturn(back, "back", before);
+    expectReturn(back, "back", before, { traversal: true });
 
     await arm();
     await page.goForward();
@@ -342,10 +388,12 @@ async function decode() {
       check("reference texels read back once", s.readPixels.calls === want16, `${s.readPixels.calls} readPixels`);
       check("read-back never blocks the main thread", s.readPixels.ms < 5, `${s.readPixels.ms.toFixed(2)} ms in readPixels`);
       // A card's terrain goes through the same path.
-      await page.locator('article[data-slug="kibon"] a').first().click();
-      const r = await settle(page, { path: "/work/kibon/", terrain: "dvb-001" });
-      check("card terrain shown after navigation", r.terrain === "dvb-001", `data-terrain=${r.terrain}`);
-      check(`card heightmap via ${want}`, files.includes(`morph/dvb-001${want}`), files.join(", "));
+      if (hasFlow()) {
+        await page.locator(`article[data-slug="${FLOW.slug}"] a`).first().click();
+        const r = await settle(page, { path: FLOW.path, terrain: FLOW.terrain });
+        check("card terrain shown after navigation", r.terrain === FLOW.terrain, `data-terrain=${r.terrain}`);
+        check(`card heightmap via ${want}`, files.includes(`morph/${FLOW.terrain}${want}`), files.join(", "));
+      }
     }
     check(mode.expect === "image" ? "no warning" : "one console warning naming the browser", mode.expect === "image" ? warnings.length === 0 : warnings.length === 1 && /\] (Chrome|Edge|Firefox|Safari|Opera) \d/.test(warnings[0]), warnings.join(" | "));
 
@@ -397,7 +445,7 @@ async function casestudy() {
     }, trail);
     check("trail is a visible, sticky nav labelled “On this page”", info.visible && info.position === "sticky", `position=${info.position}`);
     check("trail lists the six waypoints, not the H1", info.links.length === 6 && !info.h1Linked, info.links.join(" "));
-    check("“Jump to” chips hidden from 1200 px", !info.jumpVisible);
+    check("“On this page” chips hidden from 1200 px", !info.jumpVisible);
     check("waypoint headings have a scroll margin", parseFloat(info.margin) >= 80, info.margin);
     check("the example page is noindex", /noindex/.test(info.robots ?? ""), info.robots);
     await page.evaluate(() => document.getElementById("discovery").scrollIntoView({ block: "start" }));
@@ -413,16 +461,18 @@ async function casestudy() {
     check("Tab moves along the trail", focused === "#decisions", `focus on ${focused}`);
     await page.keyboard.press("Enter");
     const followed = await waitFor(page, (t) => location.hash === "#decisions" && document.querySelector(`${t} a[aria-current="true"]`)?.getAttribute("href") === "#decisions", trail);
-    // Smooth scrolling (Lenis, fine pointers) is still gliding: wait until the page stops moving.
-    await page.waitForFunction(
-      () =>
-        new Promise((done) => {
-          const y = window.scrollY;
-          setTimeout(() => done(window.scrollY === y), 250);
-        }),
-      null,
-      { timeout: 8000, polling: 300 },
-    ).catch(() => {});
+    // Smooth scrolling (Lenis, fine pointers) is still gliding: wait until it has landed below the
+    // HUD (a stalled frame under load can look like a page at rest), or at most 8 s.
+    await page
+      .waitForFunction(
+        () => {
+          const top = document.getElementById("decisions").getBoundingClientRect().top;
+          return top >= 40 && top <= 160;
+        },
+        null,
+        { timeout: 8000, polling: 200 },
+      )
+      .catch(() => {});
     const top = await page.evaluate(() => Math.round(document.getElementById("decisions").getBoundingClientRect().top));
     check("Enter jumps to the waypoint and the trail follows", followed, `hash=${await page.evaluate(() => location.hash)}`);
     check("the waypoint lands below the HUD", top >= 40 && top <= 160, `top=${top}px`);
@@ -443,7 +493,7 @@ async function casestudy() {
       width: document.documentElement.scrollWidth,
       markers: [...document.querySelectorAll("button[data-hotspot]")].map((b) => b.getBoundingClientRect()).map((r) => Math.min(r.width, r.height)),
     }), trail);
-    check("trail hidden, “Jump to” chips shown", !info.trail && info.jump);
+    check("trail hidden, “On this page” chips shown", !info.trail && info.jump);
     check("each waypoint ends with “Next waypoint” (5) and “Back to top” (6)", info.next === 5 && info.top === 6, `${info.next} next, ${info.top} back`);
     check("no sideways scrolling", info.width <= 390, `${info.width}px`);
     check("hotspot markers at least 24×24 px", info.markers.length === 5 && info.markers.every((m) => m >= 24), info.markers.join(", "));
@@ -453,6 +503,8 @@ async function casestudy() {
     await fig.locator("button[data-lightbox-open]").waitFor({ state: "visible", timeout: 8000 }).catch(() => {});
     await fig.locator("button[data-lightbox-open]").tap();
     await page.waitForSelector("dialog[open]", { timeout: 5000 }).catch(() => {});
+    // The figure morphs into the overlay first (a view transition): interact once it has landed.
+    await page.waitForFunction(() => !document.getAnimations().some((a) => a.effect?.pseudoElement?.startsWith("::view-transition")), null, { timeout: 5000 }).catch(() => {});
     const box = await page.locator("dialog[open] [data-lightbox-stage]").boundingBox();
     const transform = () => page.evaluate(() => document.querySelector("dialog[open] img")?.style.transform ?? "");
     if (box) {
@@ -492,6 +544,8 @@ async function casestudy() {
     await button.focus();
     await page.keyboard.press("Enter");
     const opened = await waitFor(page, () => document.querySelector("dialog[data-lightbox][open]"));
+    // The figure morphs into the overlay first (a view transition): interact once it has landed.
+    await page.waitForFunction(() => !document.getAnimations().some((a) => a.effect?.pseudoElement?.startsWith("::view-transition")), null, { timeout: 5000 }).catch(() => {});
     const inside = await page.evaluate(() => {
       const d = document.querySelector("dialog[data-lightbox][open]");
       const img = d?.querySelector("img");
@@ -652,7 +706,8 @@ const motionProbe = () => {
 };
 
 async function modes() {
-  const card = { slug: "kibon", path: "/work/kibon/", terrain: "dvb-001" };
+  if (!hasFlow()) return;
+  const card = FLOW;
   for (const mode of ["full", "calm", "still"]) {
     console.log(`\nmotion mode: ${mode}`);
     const { context, page, errors } = await open({ calm: mode === "calm", reduced: mode === "still", init: motionProbe });
@@ -660,13 +715,18 @@ async function modes() {
     if (mode !== "still") await page.waitForSelector('[data-field="on"]', { timeout: 20000 }).catch(() => {});
     const html = await page.evaluate(() => ({ motion: document.documentElement.dataset.motion, tier: document.documentElement.dataset.tier }));
     check(`html[data-motion="${mode}"]`, html.motion === mode, JSON.stringify(html));
-    // The switch: named, its state matches, and in still it says why it cannot turn motion back on.
+    // The switch: its visible label is its name (Label in Name), its state matches, its description
+    // says what it does, and in still also why it cannot turn motion back on.
+    const named = await page.getByRole("switch", { name: "Calm map", exact: true }).count();
     const sw = await page.evaluate(() => {
       const input = document.querySelector('header input[role="switch"]');
       const desc = input?.getAttribute("aria-describedby");
-      return { name: input?.getAttribute("aria-label"), checked: input?.checked, described: desc ? document.getElementById(desc)?.textContent ?? "" : "" };
+      // The visible label settles as decoration around a visually hidden copy: that copy is its text.
+      const label = input?.closest("label");
+      return { label: (label?.querySelector(".visually-hidden") ?? label)?.textContent.trim(), checked: input?.checked, described: desc ? document.getElementById(desc)?.textContent ?? "" : "" };
     });
-    check("switch named “Reduce motion on this site”, state shown", sw.name === "Reduce motion on this site" && sw.checked === (mode !== "full"), JSON.stringify(sw));
+    check("switch named and labelled “Calm map”, state shown", named === 1 && /^calm map$/i.test(sw.label ?? "") && sw.checked === (mode !== "full"), JSON.stringify(sw));
+    check("switch described “Reduces motion on this site”", sw.described.startsWith("Reduces motion on this site"), sw.described);
     if (mode === "still") check("still: the switch explains why it is on", /reduced motion/i.test(sw.described), sw.described);
 
     // Hover and focus the deck heading area, open a card, try the next link, come back.
@@ -720,13 +780,24 @@ async function modes() {
   }
 }
 
+/**
+ * Loads a page. Lab pages signal readiness themselves (html[data-lab-ready], src/components/lab/
+ * ready.ts): "networkidle" is unreliable with the lab's three frames.
+ */
+async function load(page, url) {
+  if (new URL(url).pathname.includes("/lab/")) {
+    await page.goto(url, { waitUntil: "load" });
+    await page.waitForSelector("html[data-lab-ready]", { state: "attached", timeout: 30000 });
+  } else {
+    await page.goto(url, { waitUntil: "networkidle" });
+  }
+}
+
 // --- hydration ------------------------------------------------------------------------------------
 // Direct loads of every route: no hydration or console errors, and the motion attributes on <html>
 // survive hydration (a failed hydration re-creates the document and drops them).
 async function hydration() {
-  const routes = ["/", "/about/", "/work/kibon/", "/work/test-project/", "/lab/", "/lab/specimen/", "/no-such-page/"].filter(
-    (r) => r === "/no-such-page/" || existsSync(join(root, "out", r, "index.html")),
-  );
+  const routes = [...builtRoutes(root), "/lab/", "/lab/specimen/"].filter((r) => r === "/no-such-page/" || existsSync(join(root, "out", r, "index.html")));
   for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
     console.log(`\nhydration: direct loads at ${viewport.width}×${viewport.height}`);
     for (const route of routes) {
@@ -738,7 +809,7 @@ async function hydration() {
         // The 404 page's own document request is expected to fail.
         if (m.type() === "error" && !(route === "/no-such-page/" && /404/.test(m.text()))) problems.push(m.text().slice(0, 160));
       });
-      await page.goto(`${base}${route}`, { waitUntil: "networkidle" });
+      await load(page, `${base}${route}`);
       await page.waitForTimeout(600);
       const attrs = await page.evaluate(() => ["data-motion", "data-tier", "data-calm", "data-intro"].map((a) => `${a}=${document.documentElement.getAttribute(a)}`));
       check(`${route}: no hydration or console errors`, problems.length === 0, problems.join(" | "));
@@ -770,7 +841,7 @@ async function primitives() {
     const page = await context.newPage();
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
-    await page.goto(`${base}/lab/specimen/?motion=${mode}`, { waitUntil: "networkidle" });
+    await load(page, `${base}/lab/specimen/?motion=${mode}`);
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(1200);
     const sections = await page.$$eval("[data-primitive]", (els) => els.map((e) => e.dataset.primitive));
@@ -812,7 +883,7 @@ async function primitives() {
   for (const where of ["lab", "case study"]) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const page = await context.newPage();
-    await page.goto(where === "lab" ? `${base}/lab/specimen/?motion=full` : `${base}/work/kibon/`, { waitUntil: "networkidle" });
+    await load(page, where === "lab" ? `${base}/lab/specimen/?motion=full` : `${base}${FLOW.path}`);
     const link = where === "lab" ? page.locator('a[data-variant="display"][data-lab-state="rest"]').first() : page.locator('a[data-variant="display"]').first();
     await link.scrollIntoViewIfNeeded();
     const state = () =>
@@ -841,7 +912,7 @@ async function primitives() {
   {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     const page = await context.newPage();
-    await page.goto(`${base}/lab/specimen/?motion=full`, { waitUntil: "networkidle" });
+    await load(page, `${base}/lab/specimen/?motion=full`);
     const link = page.locator('a[data-variant="standalone"][data-lab-state="rest"]').first();
     await link.scrollIntoViewIfNeeded();
     const before = await link.evaluate((a) => getComputedStyle(a).getPropertyValue("--on").trim());
@@ -854,6 +925,9 @@ async function primitives() {
 }
 
 const scenarios = { transitions, modes, hydration, primitives, decode, casestudy };
+// The terrain conductor and the Bern terrain (scripts/e2e-terrain.mjs).
+Object.assign(scenarios, (await import("./e2e-terrain.mjs")).terrainScenarios({ browser, base, root, check, settle }));
+Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, basecamp, ia, phone, fontswap, hud, toast, cards, views, arrival, reading, access }).map(([name, run]) => [name, () => run({ browser, base, basePath, root, check, open, settle })])));
 try {
   for (const [name, run] of Object.entries(scenarios)) if (!only || only === name) await run();
 } finally {

@@ -3,6 +3,7 @@
   display: grid;
   gap: clamp(32px, 4.5vw, 72px);
   padding-block: clamp(20px, 3vw, 40px) clamp(64px, 10vw, 160px);
+  scroll-margin-top: 72px;
 }
 
 .header {
@@ -10,6 +11,16 @@
   gap: 16px;
   justify-items: center;
   text-align: center;
+}
+
+.eyebrow {
+  --kt-color: var(--color-glacier);
+  color: var(--color-glacier);
+}
+
+.headRule {
+  width: min(100%, 12rem);
+  transform-origin: center;
 }
 
 .heading {
@@ -21,14 +32,33 @@
   max-width: 40ch;
 }
 
-/* Cards sit centred on the page, a little offset from each other like a dealt hand. Without
-   captions each slot is just its card, so the offset is a fraction of a card's height. */
+/* "Cards" · "Index": two pressed-or-not buttons; the pressed one fills with the sheet colour. */
+.views {
+  display: inline-flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.viewButton {
+  min-width: 7.5rem;
+  border-color: var(--color-contour);
+  color: var(--color-sheet);
+}
+
+.viewButton[aria-pressed="true"] {
+  border-color: var(--color-sheet);
+  background: var(--color-sheet);
+  color: var(--color-ground);
+}
+
+/* Cards: a flat spread grid in deck order, every card at rest at 0°, in the 63:88 card ratio
+   (SummitCard). One column of full-width cards on phones, two from the small breakpoint, three
+   from the medium one. */
 .cards {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: flex-start;
-  gap: clamp(36px, 5vw, 104px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  gap: clamp(28px, 4vw, 56px);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -37,41 +67,84 @@
 .slot {
   display: grid;
   justify-items: center;
-  width: min(100%, 420px);
+  width: 100%;
 }
 
-@media (min-width: 900px) {
-  .slot:nth-child(even) {
-    margin-top: clamp(48px, 6.5vw, 112px);
+@media (min-width: 640px) {
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-/* Deal-in (full motion only): cards slide up from the deck, slightly turned, one after another.
-   Both states depend on the mode, so switching to calm or still mid-deal lands every card at
-   once. Phase 4 moves the deal onto the card tokens. */
-:root[data-motion="full"] .cards[data-deal="pending"] .slot {
-  opacity: 0;
-  transform: translate3d(0, 22vh, 0) rotate(calc(-7deg + var(--deal-i) * 14deg)) scale(0.9);
+@media (min-width: 1024px) {
+  .cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
-:root[data-motion="full"] .cards[data-deal="dealt"] .slot {
-  transition:
-    opacity var(--dur-long) var(--ease-trail),
-    transform var(--dur-scenic) var(--ease-drop);
-  transition-delay: calc(var(--deal-i) * 160ms);
+/* Phones: the cards snap into place as they scroll (y, proximity, so a reader in between is
+   never pulled). No haptic: snapping is scrolling. */
+@media (width < 640px) {
+  :root:has(.cards[data-snap]) {
+    scroll-snap-type: y proximity;
+  }
+
+  .slot {
+    scroll-snap-align: center;
+  }
 }
 
-.tilt {
-  min-height: 44px;
-  padding: 0 18px;
-  border: 1px solid var(--color-glacier);
-  border-radius: 999px;
-  background: rgb(27 28 24 / 0.8);
-  color: var(--color-glacier);
-  cursor: pointer;
+/* Index: one row per card, the name in the display cut and its index line beside it. */
+.index {
+  display: grid;
+  width: min(100%, 64rem);
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
 }
 
-.tilt[aria-pressed="true"] {
+.row + .row {
+  border-top: 1px solid var(--color-contour-dim);
+}
+
+.rowLink {
+  position: relative;
+  display: grid;
+  align-items: baseline;
+  gap: 4px 24px;
+  padding: 18px 4px;
+}
+
+/* From the small breakpoint the names make a column, so the lines start together. */
+@media (min-width: 640px) {
+  .rowLink {
+    grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+  }
+}
+
+/* The rule that draws under the hovered or focused row. */
+.rowLink::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 1px;
   background: var(--color-glacier);
-  color: var(--color-ground);
+  transform: scaleX(var(--on));
+  transform-origin: left center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .rowLink::after {
+    transition: transform var(--dur-underline) var(--ease-settle);
+  }
+}
+
+.rowName {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+}
+
+.rowLine {
+  color: var(--color-sheet);
+  font-size: 1.0625rem;
+  line-height: 1.4;
 }

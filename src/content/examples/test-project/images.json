@@ -68,7 +68,7 @@
         "bytes": 169870
       }
     ],
-    "hash": "87d33e1ca3390cef",
+    "hash": "b61948c31e05b565",
     "text": "Affinity map: what we heard 14 interviews · 60 observations · 6 themes Changed the brief H1–H6 homeowners I1–I5 installers C1–C3 caseworkers 1 Installer fills in the form 12 notes The installer filled it in H1 I sent it to my installer H3 Owner didn’t know the model I1 We fill these in at night I2 Floor area? Ask the installer H2 Installer’s e-mail on the form C1 The owner only signed H5 We know the specs, not the owner I3 Copied from the quote I4 My installer called for me H6 Same data for every canton I5 Who is the applicant? C2 2 Missing documents 16 notes Quote missing C1 Certificate number unknown H4 Proof of ownership? H2 Old quote attached C3 Photo unreadable C2 Which certificate? H1 Sent the documents twice H6 Land register extract C1 Attachment too big H3 Quote not signed C3 Certificate expired C2 Didn’t know it was needed H5 Scanned upside down C1 A page is missing C3 Owner or tenant? H4 Re-sent by post H2 3 Caseworkers re-key every case 10 notes Type it all again C1 Copy from the PDF by hand C2 No structure in e-mails C3 The batch is fine, the data isn’t C1 Searching the inbox C2 Same fields, other order C3 Typos when re-keying C1 Half a day per case C2 Notes in a spreadsheet C3 Can’t link documents C1 No status after sending 9 notes Did it arrive? H1 No reply for weeks H3 Called to ask H6 No receipt H2 My customer asks me I5 Is it complete? I2 Waiting, no news H4 When is the decision? H1 Lost track I4 Legal language 7 notes Legal terms H2 French version is older H6 What is a “Gesuchsteller”? H5 Translated badly I3 Long sentences H1 Footnotes everywhere H4 Two versions of one form C2 Login hurdles 6 notes Another account? H3 Forgot my password H5 Can’t log in for the owner I1 Paper is easier H6 Is there an app? H4 Needs a phone number H2 TEST PROJECT · FICTIONAL EXAMPLE · FIG. 3"
   },
   "tp-after": {
@@ -140,7 +140,7 @@
         "bytes": 72504
       }
     ],
-    "hash": "926469159d6e95ca",
+    "hash": "bbf16df00e4613ce",
     "text": "foerderung.hochmatt.example/antrag/anlage Kanton Hochmatt Energieamt · Förderprogramm Heizungsersatz DE FR Anspruch Angaben Anlage Dokumente Bestätigen Angaben zur Anlage Die Angaben stehen in der Offerte Ihres Installateurs. Welche Heizung wird eingebaut? Wärmepumpe Luft/Wasser Wärmepumpe Erdsonde Fernwärme Anschluss Wie gross ist die beheizte Fläche? Steht in der Offerte unter «Energiebezugsfläche». 145 m² Warum fragen wir das? Die Fläche bestimmt, wie hoch Ihr Förderbeitrag ist. Fehlt sie, müssen wir nachfragen. Zurück Weiter Beispiel: hier steht es So sieht eine Offerte aus. Die Fläche ist markiert. Energiebezugsfläche: 145 m² TEST PROJECT · FICTIONAL EXAMPLE · FIG. 9 · AFTER"
   },
   "tp-annotated-upload": {
@@ -239,7 +239,7 @@
         "y": 0.2557
       }
     ],
-    "hash": "0d79071cd33aa7c3",
+    "hash": "c0f9f55ec41a636f",
     "text": "foerderung.hochmatt.example/antrag/dokumente Kanton Hochmatt Energieamt · Förderprogramm Heizungsersatz DE FR Anspruch Angaben Anlage Dokumente Bestätigen Dokumente hochladen Diese drei Dokumente brauchen wir. Mehr nicht. Offerte des Installateurs Die unterschriebene Offerte mit Preis und Heizungstyp. PDF Offerte_Waermepumpe.pdf Beispiel ansehen Nachweis, dass Ihnen das Haus gehört + Datei auswählen oder hierher ziehen Ein Foto oder PDF, bis 10 MB Nummer des Gebäudeenergieausweises GEAK- Die Nummer ist unvollständig. Sie steht oben rechts auf dem Ausweis. Warum fragen wir das? Zurück Weiter zur Bestätigung Für die Eigentümerin oder den Eigentümer Speichern Sie den Entwurf. Die Eigentümerin oder der Eigentümer prüft ihn mit AGOV und bestätigt. Entwurf speichern und teilen Link wird per E-Mail gesendet Zwischengespeichert TEST PROJECT · FICTIONAL EXAMPLE · FIG. 10"
   },
   "tp-archetypes": {
@@ -311,7 +311,7 @@
         "bytes": 102806
       }
     ],
-    "hash": "71249604ecc9eabc",
+    "hash": "ca4d251e449d6eae",
     "text": "Delegating Owner Homeowner GOAL Get the subsidy without becoming a heating expert. KEY FRUSTRATION Asked for technical data only the installer has. KNOWS Owner details, the property, the budget DOESN’T KNOW Heat-pump model, heated floor area, certificate number “I just forward everything to my installer.” H3 Busy Installer Heating installer GOAL Close the job and get the customer’s subsidy approved fast. KEY FRUSTRATION Re-typing the same data into every canton’s PDF. KNOWS Model, output, floor area, the quote DOESN’T KNOW Ownership details, the owner’s login “I fill these in at night, in the van.” I2 Careful Caseworker Energy Office GOAL Decide on complete, legally sound files. KEY FRUSTRATION Chasing missing documents by phone. KNOWS The ordinance, the case system DOESN’T KNOW Whether a file is complete before opening it “Half my day is calling people back.” C1 TEST PROJECT · FICTIONAL EXAMPLE · FIG. 4"
   },
   "tp-before": {
@@ -383,7 +383,7 @@
         "bytes": 69430
       }
     ],
-    "hash": "5ad44e5a49d50b6e",
+    "hash": "2a509b925f2cd655",
     "text": "foerderung.hochmatt.example/formular-heizungsersatz.pdf formular-heizungsersatz.pdf Seite 3 / 9 Zoom: ganze Seite Gesuch um einen Förderbeitrag · Heizungsersatz Kanton Hochmatt · Energieamt Angaben zur Anlage 3.01 Art der neuen Anlage WP Luft/Wasser WP Sole/Wasser WP Wasser/Wasser Fernwärme Holz 3.02 Hersteller / Fabrikat 3.03 Typenbezeichnung gem. Offerte 3.04 Heizleistung kW (A2/W35 bzw. B0/W35) 3.05 Jahresarbeitszahl (JAZ) gem. Berechnung¹ 3.06 Energiebezugsfläche EBF in m² nach SIA² 3.07 GEAK-Nr. / Ausweis-Nr. (sofern vorhanden) 3.08 Baujahr Gebäude / Jahr Sanierung 3.09 Bisheriger Energieträger Heizöl Erdgas Elektro andere 3.10 Verbrauch der letzten Heizperioden (L, m³, kWh)³ 3.11 Installationsfirma (Name, Adresse) 3.12 UID der Firma 3.13 Datum der Offerte / Offert-Nr. 3.14 Offertbetrag inkl. MWST (CHF) ¹ Nachweis gemäss Anhang B der Verordnung; bei fehlender Berechnung ist das Gesuch unvollständig. ² Massgebend ist die Fläche nach Norm; Flächen unbeheizter Räume sind nicht anzurechnen. ³ Belege sind beizulegen. Unvollständige Gesuche werden zurückgewiesen. Die Angaben sind von der Gesuchstellerin bzw. vom Gesuchsteller persönlich zu bestätigen. Ort, Datum Unterschrift Gesuchsteller/in Stempel Installationsfirma TEST PROJECT · FICTIONAL EXAMPLE · FIG. 9 · BEFORE"
   },
   "tp-blueprint-current": {
@@ -455,7 +455,7 @@
         "bytes": 87808
       }
     ],
-    "hash": "9b4905b25a4fa2fe",
+    "hash": "997fd2fce07c754c",
     "text": "Current service blueprint Heating subsidy today, from first question to decision 7 hand-offs 4 moments without feedback to the applicant APPLICANT INSTALLER FRONTSTAGE PDF, E-MAIL BACKSTAGE CASEWORKER SYSTEMS Learns about the subsidy Asks for a quote Prepares the quote Fills in the technical pages Signs the PDF E-mails PDF and attachments Shared inbox one for all caseworkers Checks completeness by hand E-mail or call: documents missing Sends documents again Re-keys the case Nightly batch import Case system from 2011 Decides Decision letter Waits median 41 days 1 2 3 4 5 6 7 1 no receipt 2 no status 3 no confirmation 4 no update while waiting TEST PROJECT · FICTIONAL EXAMPLE · FIG. 5"
   },
   "tp-decision-matrix": {
@@ -515,7 +515,7 @@
         "bytes": 43360
       }
     ],
-    "hash": "24ed5cf2ed8d72c3",
+    "hash": "fbf43c9c7ee17d77",
     "text": "Decision matrix: who applies? More filled dots are better; for effort, more dots mean less effort OPTION LEGAL FIT DATA QUALITY EFFORT FOR OWNER BUILD EFFORT A Homeowner-only digital form B Installer applies alone C CHOSEN Delegated: installer prepares, owner confirms Ratings from decision workshop, n = 31. filled = better TEST PROJECT · FICTIONAL EXAMPLE · FIG. 6"
   },
   "tp-design-system": {
@@ -587,7 +587,7 @@
         "bytes": 107988
       }
     ],
-    "hash": "6b41211edca8aa48",
+    "hash": "0ba5ae249d9ca491",
     "text": "Hochmatt design system Angular Material, themed with cantonal tokens · 23 components · reused by 3 services Source Sans 3 · WCAG 2.1 AA COLOUR, WITH CONTRAST hm-blue #1D4F91 8.1:1 on white hm-blue-dark #153B6D 11.2:1 on white hm-ink #1A1F24 16.6:1 on white hm-ink-2 #4A5560 7.6:1 on white hm-error #B42318 6.6:1 on white hm-success #1E7A3C 5.4:1 on white hm-blue-tint #E6EDF6 14.1:1 ink on it hm-field-border #7D8893 3.6:1 field border TYPE SCALE Titel hm-h1 · 26px Abschnitt hm-h2 · 19px Fliesstext hm-text · 15px Hinweis hm-small · 13px SPACING 4 8 12 16 24 32 hm-stepper · --hm-blue Anspruch Angaben Anlage Dokumente hm-form-field · --hm-error E-Mail der Eigentümerin eigentuemerin@ Bitte vollständige Adresse eingeben. hm-file-upload · --hm-line + Datei auswählen Foto oder PDF PDF Offerte.pdf hm-radio-card · --hm-blue-tint Wärmepumpe Luft/Wasser Fernwärme Anschluss hm-alert · info, success, error Eingang bestätigt per E-Mail. Entwurf gespeichert. Ein Dokument fehlt. hm-button · primary, secondary, link Weiter Zurück Später TEST PROJECT · FICTIONAL EXAMPLE · FIG. 11"
   },
   "tp-flow": {
@@ -659,7 +659,7 @@
         "bytes": 81994
       }
     ],
-    "hash": "51629a32a001731d",
+    "hash": "349ba538a08ea5f1",
     "text": "New flow: check first, then hand over From the first visit to a complete case on the caseworker’s desk New decision point Yes / No: branch INSTALLER OR VISITOR, NO LOGIN OWNER, WITH AGOV ENERGY OFFICE Visitor installer or homeowner Pre-check 5 questions, anonymous Eligible? Installer prepares the draft data and documents Share link sent to the owner Owner logs in with AGOV Confirms? Submitted status page says when review starts Nightly batch import Caseworker complete, structured case Not eligible why, and where to get advice 2 reminder e-mails if the owner does not confirm Paper confirmation fallback Yes No Yes No 1 BEFORE LOGIN 2 DELEGATED HAND-OFF Status page: “Received — review starts within 2 working days.” TEST PROJECT · FICTIONAL EXAMPLE · FIG. 7"
   },
   "tp-hero": {
@@ -731,7 +731,7 @@
         "bytes": 80554
       }
     ],
-    "hash": "f21805cadbcbae02",
+    "hash": "6f200c0f9fb58ffa",
     "text": "FICTIONAL EXAMPLE foerderung.hochmatt.example foerderung.hochmatt.example/antrag/anspruch Kanton Hochmatt Energieamt · Förderprogramm Heizungsersatz DE FR Anspruch Angaben Anlage Dokumente Bestätigen Schritt 1 von 5 · ohne Login Haben Sie Anspruch auf einen Förderbeitrag? Beantworten Sie 5 kurze Fragen. Das dauert etwa 2 Minuten. Welche Heizung ersetzen Sie? Ölheizung Gasheizung Elektroheizung Gehört Ihnen die Liegenschaft? Ja, ich bin Eigentümer/in Nein, ich bin Installateur/in Förderbeitrag bis CHF 10'000 für Wärmepumpen und Fernwärme. Warum fragen wir das? Weiter TEST PROJECT · FICTIONAL EXAMPLE · HERO"
   },
   "tp-landscape": {
@@ -803,7 +803,7 @@
         "bytes": 114548
       }
     ],
-    "hash": "2dbd195148171f07",
+    "hash": "e78fda99eefdcf81",
     "text": "Service landscape, today 7 actors · 4 channels · 2 systems · 6 constraints Actor or channel Planned System PIN Constraint APPLICANTS CHANNELS ENERGY OFFICE & PARTNERS SYSTEMS Homeowner applies and declares Installer quotes and fills in PDF form 9 pages, DE or FR Shared e-mail inbox attachments, replies Phone questions, call-backs AGOV login planned for the new service Caseworkers 9, Energy Office Product owner Energy Office Legal service reads the ordinance IT provider hosting, AGOV Case system from 2011 Nightly batch import once a day Case-system vendor fixed contract quote, data signs fills in e-mailed re-keys every case LAW DE/FR ACCESSIBILITY AGOV LEGACY PROCUREMENT maintains Status known only after the nightly import TEST PROJECT · FICTIONAL EXAMPLE · FIG. 1"
   },
   "tp-outcomes": {
@@ -863,7 +863,7 @@
         "bytes": 50010
       }
     ],
-    "hash": "7778e80396f72256",
+    "hash": "9222550acb1fc9fb",
     "text": "Outcomes after three months System logs, n = 640 applications · calls estimated from a 2-week log FICTIONAL DATA Complete on first submission higher is better · measured 38% 82% Before After Median days to decision lower is better · measured 41 d 19 d Before After Caseworker phone calls estimated · before = 100 100 ≈ −35% Before After measured estimated TEST PROJECT · FICTIONAL EXAMPLE · FIG. 13"
   },
   "tp-sketch-to-wire": {
@@ -935,7 +935,7 @@
         "bytes": 54478
       }
     ],
-    "hash": "1537253a8d0ffd48",
+    "hash": "fd265e62db66ff93",
     "text": "WEEK 1 SKETCH show an example! weiter WEEK 3 WIREFRAME WEEK 6 CODED PROTOTYPE Kanton Hochmatt DE FR Dokumente hochladen PDF Offerte des Installateurs Beispiel ansehen + Nachweis Eigentum Foto oder PDF + Gebäudeenergieausweis Nummer oder Foto Weiter TEST PROJECT · FICTIONAL EXAMPLE · FIG. 8"
   },
   "tp-test-rounds": {
@@ -995,7 +995,7 @@
         "bytes": 75968
       }
     ],
-    "hash": "5887c96188f282dc",
+    "hash": "26031e9b191edfea",
     "text": "Task success: “submit a complete application” n = 8 per round · moderated · German and French · read as directional ROUND 1 Paper and clickable 5/8 completed Owner data asked for too early Document names unclear Errors far from their fields ROUND 2 Coded prototype 7/8 completed Share link hard to find Accepted formats unclear French labels too long on phones ROUND 3 Release candidate 8/8 completed Reminder e-mail tone too formal Focus jumps after an upload No print view of the summary completed the task did not complete Small samples: a trend, not a rate TEST PROJECT · FICTIONAL EXAMPLE · FIG. 12"
   },
   "tp-workshop-board": {
@@ -1067,7 +1067,7 @@
         "bytes": 150414
       }
     ],
-    "hash": "de9c94abd36ed166",
+    "hash": "5ac4260e6047e467",
     "text": "Decision workshop: who applies? Workshop 3 of 5 · dot vote, one dot each Energy Office Legal service IT & UX OPTIONS A Homeowner-only digital form B Installer applies alone C Delegated: installer prepares, owner reviews and confirms with AGOV MUST BE TRUE (LEGAL) The owner’s own declaration stays intact The owner confirms with an AGOV login Installer data is marked “prepared by” The decision log is readable by legal German and French texts say the same RISKS The owner never confirms: the draft stalls Two people need two logins A wrong owner e-mail sends the link astray Owners without AGOV need a paper route MITIGATIONS Share link plus two reminder e-mails Paper confirmation form as a fallback DECISION RULE Choose the option that meets the ordinance and puts each item with the person who knows it Legal may veto; otherwise the dots decide Decision: C – delegated Signed off by legal in the room NEXT Prototype the hand-off with installers Add the decision to the log, in plain language 1-2-4-All, 31 participants TEST PROJECT · FICTIONAL EXAMPLE · FIG. 2"
   }
 }

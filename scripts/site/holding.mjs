@@ -78,7 +78,8 @@ function css({ fonts, poster }) {
     `main{flex:1;display:flex;flex-direction:column;justify-content:center;width:100%;max-width:76rem;margin:0 auto;padding:clamp(28px,7vh,88px) max(var(--gutter),env(safe-area-inset-right)) clamp(28px,7vh,88px) max(var(--gutter),env(safe-area-inset-left))}`,
     `.name{margin:0 0 .28em;font:800 clamp(3.25rem,14.5vw,10.5rem)/var(--type-display-lh) "Archivo Display",system-ui,sans-serif;text-transform:uppercase;letter-spacing:-.01em;overflow-wrap:anywhere}`,
     `.role{margin:0;font-size:clamp(1.0625rem,2.2vw,1.375rem);line-height:1.4;text-wrap:balance}`,
-    `.status{margin:.4em 0 0;color:var(--color-contour);max-width:34rem;text-wrap:balance}`,
+    // The status line says how to get in, so it reads in sheet.
+    `.status{margin:.4em 0 0;max-width:34rem;text-wrap:balance}`,
     `.contact{display:flex;flex-wrap:wrap;gap:8px 28px;margin:28px 0 0;padding:0;list-style:none}`,
     `.contact a,.contact .pending{display:inline-block;padding:10px 0;${label};color:var(--color-glacier);text-decoration:underline;text-underline-offset:.35em;text-decoration-thickness:1px}`,
     `.contact .pending{color:var(--color-contour);text-decoration:none}`,
@@ -87,22 +88,33 @@ function css({ fonts, poster }) {
     `.access h2{margin:0 0 14px;color:var(--color-contour)}`,
     `.access label{display:block;margin-bottom:6px;font-size:.9375rem}`,
     `.field{display:flex;flex-wrap:wrap;gap:10px}`,
-    `.field input{flex:1 1 12rem;min-width:0;min-height:48px;margin:0;padding:0 14px;border:1px solid var(--color-contour);border-radius:2px;background:rgb(27 28 24/.88);color:var(--color-sheet);font:inherit}`,
-    `.field input[aria-invalid=true]{border-color:var(--color-alpenglow)}`,
+    // The password field; its underline (.line) draws on focus over --dur-underline (180 ms).
+    // Static font instances here: nothing changes width.
+    `.input{position:relative;display:flex;flex:1 1 12rem;min-width:0}`,
+    `.field input{flex:1;min-width:0;min-height:48px;margin:0;padding:0 14px;border:1px solid var(--color-contour);border-radius:2px;background:rgb(27 28 24/.88);color:var(--color-sheet);font:inherit}`,
+    `.line{position:absolute;inset:auto 0 0;height:2px;background:var(--color-glacier);transform:scaleX(0);transform-origin:left center;transition:transform var(--dur-underline) var(--ease-settle);pointer-events:none}`,
+    `.input:focus-within .line{transform:none}`,
+    // An error is the signal colour and the message, never a shake.
+    `.field input[aria-invalid=true]{border-color:var(--color-signal)}`,
+    `.field input[aria-invalid=true]+.line{background:var(--color-signal)}`,
     `.field button{flex:0 0 auto;min-height:48px;margin:0;padding:0 18px;border:0;border-radius:2px;background:var(--color-glacier);color:var(--color-ground);${label};font-size:.8125rem;letter-spacing:.08em;cursor:pointer}`,
     `.field button:hover{background:var(--color-sheet)}`,
+    `.field button[aria-disabled=true]{cursor:progress}`,
     `:focus-visible{outline:2px solid var(--color-glacier);outline-offset:3px}`,
     `.field input:focus-visible{outline-offset:2px}`,
-    `.error{margin:12px 0 0;color:var(--color-alpenglow)}`,
+    `.error{margin:12px 0 0;color:var(--color-signal)}`,
+    // Reduced motion: the underline appears at once, the headlamp stays off (above).
+    `@media (prefers-reduced-motion:reduce){.line,.lamp{transition:none}}`,
     `.closed{margin:0;color:var(--color-contour)}`,
     `footer{padding:14px max(var(--gutter),env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(var(--gutter),env(safe-area-inset-left));color:var(--color-contour)}`,
     `footer a{color:inherit;text-underline-offset:.35em}footer a:hover{color:var(--color-sheet)}`,
   ].join("");
 }
 
-// Live Bern time (minute precision, like the site's HUD clock) and the headlamp glow. The
-// clock always runs (a changing time is content, not motion); the headlamp stays off with
-// reduced motion. Without JavaScript the page is complete, just without either.
+// Live Bern time (minute precision, like the site's HUD clock), the headlamp glow, and the
+// submit button's "CHECKING…" while the password is checked. The clock always runs (a changing
+// time is content, not motion); the headlamp stays off with reduced motion. Without JavaScript
+// the page is complete, just without these.
 const script = `(()=>{
 const reduce=matchMedia("(prefers-reduced-motion: reduce)"),clock=document.querySelector("[data-clock]"),lamp=document.querySelector(".lamp");
 const format=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Zurich",hour:"2-digit",minute:"2-digit",hourCycle:"h23"});
@@ -116,6 +128,10 @@ addEventListener("pointerup",(e)=>{if(e.pointerType!=="mouse")off()});
 addEventListener("pointercancel",off);
 addEventListener("pointerout",(e)=>{if(!e.relatedTarget)off()});
 reduce.addEventListener("change",apply);
+const submit=document.querySelector("[data-pending]");
+const idle=submit&&submit.textContent;
+if(submit)submit.form.addEventListener("submit",(e)=>{if(submit.getAttribute("aria-disabled")==="true"){e.preventDefault();return}submit.textContent=submit.dataset.pending;submit.setAttribute("aria-disabled","true")});
+addEventListener("pageshow",(e)=>{if(e.persisted&&submit){submit.textContent=idle;submit.removeAttribute("aria-disabled")}});
 clock.parentElement.hidden=false;
 tick();
 })();`.replace(/\n/g, "");

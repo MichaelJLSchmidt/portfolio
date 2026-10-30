@@ -35,6 +35,24 @@ export type Keyword = { term: string; reminder: string };
 /** Leave `value` out (or the whole stat) until there is a real number: empty stats don't render. */
 export type Stat = { label: string; value?: string };
 
+/**
+ * The card's stats. Every one is optional (leave it out until there is a real number). The stat
+ * row shows at most three, TEAM LED, TIME and IMPACT (before → after), and disappears without
+ * any; the scope joins the coordinates line instead.
+ */
+export type CardStats = {
+  /** e.g. "3 + 7" (direct + wider team) or "2 → 6" (grown). */
+  teamLed?: string;
+  time?: string;
+  /** e.g. "9 products": the coordinates line, after the place. */
+  scope?: string;
+  /** The headline outcome; `note` says what the numbers count ("on system"), under the value. */
+  impact?: { before: string; after: string; note?: string };
+};
+
+/** One line for an index of expeditions: "<name> — <kind> · <summary> · <time>". */
+export type IndexLine = { kind: string; summary: string; time: string };
+
 export type SetSymbol = "peak" | "grid" | "lab";
 
 export type SummitCardData = {
@@ -43,7 +61,7 @@ export type SummitCardData = {
   rarity: Rarity;
   /** Why the card has its rarity, read with the rarity mark (e.g. "led the team and the UX strategy"). */
   rarityNote?: string;
-  /** Summit cost badge, 1–5 for projects; the leader card shows its birth altitude. */
+  /** Summit cost badge, 1–5. */
   cost: string;
   costLabel: string;
   coordinates: string;
@@ -52,8 +70,8 @@ export type SummitCardData = {
   collector: { number: string; language: string };
   keywords: Keyword[];
   flavor: string;
-  /** Up to three; the row adapts to the stats that have a value and disappears without any. */
-  stats?: Stat[];
+  stats: CardStats;
+  indexLine: IndexLine;
   artwork: Artwork;
   artworkAlt: string;
   /** Two-sentence summary shown under the card in the deck. */
@@ -69,8 +87,18 @@ export type SummitCardData = {
 
 export const cardLabels = {
   openLog: "Open expedition log",
+  /** The card link's accessible name. */
+  open: (name: string, type: string, rarity: string) => `Open expedition: ${name}, ${type}, rarity ${rarity}`,
   costPrefix: "Summit cost",
+  /** The cost pips, read as the project's scope (the pips are drawn, not read). */
+  scope: (n: number, of: number) => `Scope ${n} of ${of}`,
   stats: "Card stats",
+  stat: { teamLed: "Team led", time: "Time", impact: "Impact" },
+  /** Under the impact's after-value: where it started. */
+  from: (before: string) => `from ${before}`,
+  /** A card whose case study was visited: the stamp, and what screen readers hear. */
+  visitedStamp: "SUMMITED",
+  visited: "Visited",
   collector: "Collector line",
   rarity: (r: string) => `Rarity ${r}`,
   setSymbol: (set: string) => `Set ${set}`,
@@ -79,14 +107,14 @@ export const cardLabels = {
 
 export const caseStudyLabels = {
   summaryHeading: "Summit summary",
-  problem: "Problem",
+  mandate: "Mandate",
   role: "My role",
-  team: "Team",
-  duration: "Duration",
-  reach: "Reach",
+  teamLed: "Team I led",
+  putInPlace: "What I put in place",
   keyDecision: "Key decision",
   outcome: "Outcome",
-  jumpTo: "Jump to",
+  didNotDo: "What I did not do",
+  jumpTo: "On this page",
   onThisPage: "On this page",
   nextWaypoint: "Next waypoint",
   backToTop: "Back to top",
@@ -126,91 +154,13 @@ export const caseStudyLabels = {
   evidenceLegend: "Evidence",
   credits: "Credits",
   next: "Next expedition",
-  back: "Back to the deck",
-  backToAll: "Back to all expeditions",
+  back: "All expeditions",
+  backToAll: "All expeditions",
   example: "Fictional example",
 };
 
-const projectCards: SummitCardData[] = [
-  {
-    slug: "profile",
-    name: "Michael JL Schmidt",
-    rarity: "M",
-    cost: "566",
-    costLabel: "Birth altitude 566 m",
-    coordinates: "N 46°41′ · E 7°52′ · Interlaken",
-    type: "Leader — UX Team Lead · DV Bern AG",
-    set: { code: "IKN", name: "Interlaken", symbol: "peak" },
-    collector: { number: "000", language: "EN" },
-    keywords: [
-      { term: "Facilitation", reminder: "Hyper Island-trained workshop lead" },
-      { term: "Design Systems", reminder: "driving a central Angular Material system" },
-      { term: "Front-end", reminder: "designs in Figma, ships in code" },
-    ],
-    flavor: "Born at 566 m. Still climbing.",
-    stats: [
-      { label: "Team", value: "4 FTE" },
-      { label: "At DV Bern", value: "8+ yrs" },
-      { label: "Workshops led", value: "[#]" },
-    ],
-    artwork: {
-      kind: "crop",
-      terrainId: "ikn-000",
-      trail: [
-        { lon: 7.8632, lat: 46.6863 },
-        { lon: 7.8689, lat: 46.6658 },
-        { lon: 7.902, lat: 46.6316 },
-        { lon: 7.9089, lat: 46.5935 },
-        { lon: 7.9216, lat: 46.605 },
-        { lon: 7.9614, lat: 46.5853 },
-        { lon: 7.974, lat: 46.5743 },
-        { lon: 7.985, lat: 46.5475 },
-        { lon: 7.9625, lat: 46.5372 },
-      ],
-      waypoints: [
-        { lon: 7.8632, lat: 46.6863, label: "Interlaken", elevation: "566 m" },
-        { lon: 7.9089, lat: 46.5935 },
-        { lon: 7.9614, lat: 46.5853 },
-        { lon: 7.9625, lat: 46.5372, label: "Jungfrau", elevation: "4158 m" },
-      ],
-      labels: [
-        { lon: 7.76, lat: 46.697, text: "Thunersee", elevation: "558" },
-        { lon: 7.94, lat: 46.708, text: "Brienzersee", elevation: "564" },
-      ],
-    },
-    artworkAlt:
-      "Contour map from Interlaken between Lake Thun and Lake Brienz up to the Jungfrau, with a dotted trail and four waypoints.",
-    summary:
-      "UX Team Lead at DV Bern AG for more than eight years. Runs the workshops, drives the central Angular Material design system and designs straight into code. [SUMMARY]",
-    href: "/about/",
-  },
-  {
-    slug: "kibon",
-    name: "kiBon 2.0",
-    rarity: "U",
-    cost: "[#]",
-    costLabel: "Summit cost [#] of 5",
-    coordinates: "N 46°57′ · E 7°27′ · Bern · [YEARS]",
-    type: "Platform — Public sector · Kanton Bern",
-    set: { code: "DVB", name: "DV Bern", symbol: "grid" },
-    collector: { number: "001", language: "EN" },
-    keywords: [
-      { term: "UX Design", reminder: "the UX designer behind kiBon" },
-      { term: "User Story Mapping", reminder: "anchor method for planning 2.0" },
-      { term: "Facilitation", reminder: "neutral moderator of the client validation workshop" },
-    ],
-    flavor: "Childcare subsidies in one platform, for parents, providers and the administration.",
-    stats: [
-      { label: "Team", value: "[#]" },
-      { label: "Months", value: "[#]" },
-      { label: "Reach", value: "[#]" },
-    ],
-    artwork: { kind: "seeded", terrainId: "dvb-001" },
-    artworkAlt: "Contour map of a fictional massif generated for this project, with a dotted trail to the summit.",
-    summary:
-      "kiBon brings childcare subsidies for the Canton of Bern into one platform for parents, providers and the administration. Version 2.0 was planned with User Story Mapping. [SUMMARY]",
-  },
-];
+/** Real project cards. None is written yet: a live build's deck is empty and says so (Deck). */
+const projectCards: SummitCardData[] = [];
 
 /** The deck: project cards, then the flagged examples where the build includes them (last). */
 export const cards: SummitCardData[] = [...projectCards, ...exampleCards];
@@ -219,9 +169,31 @@ export const cardBySlug = (slug: string) => cards.find((c) => c.slug === slug);
 
 export const cardHref = (card: SummitCardData) => card.href ?? `/work/${card.slug}/`;
 
+/** The coordinates line: the place, then the scope. */
+export const coordinatesLine = (card: SummitCardData) => [card.coordinates, card.stats.scope].filter(Boolean).join(" · ");
+
+/**
+ * The card's stats as rows, at most three: team led, time and impact. The impact shows its
+ * after-value; `note` carries "from <before>" (and what the numbers count) under it.
+ */
+export const cardStats = (card: SummitCardData): (Stat & { note?: string })[] => {
+  const { teamLed, time, impact } = card.stats;
+  return [
+    { label: cardLabels.stat.teamLed, value: teamLed },
+    { label: cardLabels.stat.time, value: time },
+    { label: cardLabels.stat.impact, value: impact?.after, note: impact && [cardLabels.from(impact.before), impact.note].filter(Boolean).join(" · ") },
+  ];
+};
+
+/** The cost pips' scale: a card's cost is its scope, 1 to 5. */
+export const COST_SCALE = 5;
+
 const withSlash = (path: string) => (path.endsWith("/") ? path : `${path}/`);
 
-/** The terrain the contour field should morph to on a given route (a card's own terrain). */
+/**
+ * The terrain the contour field should morph to on a given route (a card's own terrain). Other
+ * routes, Basecamp (/about/) included, return null: the region.
+ */
 export const terrainIdForPath = (pathname: string | null): string | null => {
   if (!pathname || pathname === "/") return null;
   const path = withSlash(pathname);

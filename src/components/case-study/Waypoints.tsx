@@ -1,5 +1,10 @@
-import { useId } from "react";
+import { useId, type CSSProperties } from "react";
+import { ContourRule } from "@/components/motion/ContourRule";
+import { RollValue } from "@/components/motion/RollValue";
+import { SettleText } from "@/components/motion/SettleText";
+import { SignatureLink } from "@/components/motion/SignatureLink";
 import { caseStudyLabels as L } from "@/content/cards";
+import { duration } from "@/styles/tokens";
 import { decisionNumbers, figureNumbers, type Block, type CaseStudy, type Decision, type Evidence, type ListItem, type Waypoint } from "@/lib/case-study";
 import { EvidenceBadge, EvidenceLegend } from "./Evidence";
 import { Figure } from "./Figure";
@@ -42,9 +47,9 @@ function TextBlock({ block }: { block: Block }) {
       return (
         <>
           {block.intro && <p className={`${styles.listIntro} body-copy`}>{block.intro}</p>}
-          <List className={`${styles.list} body-copy`} data-ordered={block.ordered || undefined}>
+          <List className={`${styles.list} body-copy`} data-ordered={block.ordered || undefined} data-reveal="list">
             {block.items.map((item, i) => (
-              <li key={i}>
+              <li key={i} style={{ "--i": i } as CSSProperties}>
                 <Item item={item} />
               </li>
             ))}
@@ -59,23 +64,23 @@ function TextBlock({ block }: { block: Block }) {
   }
 }
 
-/** At most one per page: a <blockquote> with its attribution. */
+/** At most one per page: a <blockquote> with its attribution. Its rule draws, then it fades in. */
 export function PullQuote({ text, attribution }: { text: string; attribution: string }) {
   return (
-    <figure className={styles.quote}>
+    <figure className={styles.quote} data-reveal="quote">
       <blockquote>
-        <p className="body-copy">{text}</p>
+        <p className="body-copy italic">{text}</p>
       </blockquote>
       <figcaption className="hud-label">— {attribution}</figcaption>
     </figure>
   );
 }
 
-/** The page's one key insight: an aside on the sheet colour with a visible label. */
+/** The page's one key insight: an aside on the sheet colour with a visible label; it unfolds like a map sheet. */
 export function KeyInsight({ text }: { text: string }) {
   const id = useId();
   return (
-    <aside className={`${styles.insight} surface-copy`} aria-labelledby={id}>
+    <aside className={`${styles.insight} surface-copy`} aria-labelledby={id} data-reveal="sheet" data-fold="left">
       <p id={id} className={styles.insightLabel}>
         {L.keyInsight}
       </p>
@@ -84,14 +89,15 @@ export function KeyInsight({ text }: { text: string }) {
   );
 }
 
-/** A decision: an h3 "Decision n — question", the options as a real table, then chose / cost / mitigation. */
+/**
+ * A decision: an h3 "Decision n — question", the options as a real table (a contour marker draws
+ * beside the chosen option as it scrolls into view), then chose / cost / mitigation.
+ */
 export function DecisionBlock({ decision: d, number }: { decision: Decision; number: number }) {
   const id = useId();
   return (
     <div className={`${styles.decision} legend`} id={d.id}>
-      <h3 className={styles.decisionTitle}>
-        {L.decision(number)} — {d.title}
-      </h3>
+      <SettleText as="h3" text={`${L.decision(number)} — ${d.title}`} mode="block" wrap role="text" trigger="inview" className={styles.decisionTitle} />
       {d.text?.map((t, i) => (
         <p key={i} className="body-copy">
           {t}
@@ -115,6 +121,12 @@ export function DecisionBlock({ decision: d, number }: { decision: Decision; num
               {d.options.rows.map((r) => (
                 <tr key={r.option} data-chosen={r.chosen || undefined}>
                   <th scope="row">
+                    {/* The chosen option: a contour marker draws down beside it. */}
+                    {r.chosen && (
+                      <svg className={styles.chosenMark} viewBox="0 0 6 100" preserveAspectRatio="none" aria-hidden="true" data-reveal="mark">
+                        <path pathLength={1} d="M3 0C1 20 5 38 3 50S1 80 3 100" />
+                      </svg>
+                    )}
                     {r.option}
                     {r.chosen && <span className={`${styles.chosen} hud-label`}>{L.chosen}</span>}
                   </th>
@@ -148,13 +160,13 @@ export function DecisionBlock({ decision: d, number }: { decision: Decision; num
 type Metrics = Extract<Block, { kind: "metrics" }>;
 type Outcomes = Extract<Block, { kind: "outcomes" }>;
 
-/** Metric tiles: the value, what it measures, and how it was obtained. */
+/** Metric tiles: the value (its number rolls once from a nearby one), what it measures, and how it was obtained. */
 export function MetricTiles({ block }: { block: Metrics }) {
   return (
     <ul className={styles.metrics} aria-label={block.label}>
       {block.items.map((m) => (
         <li key={m.label} className={`${styles.metric} surface-copy`}>
-          <span className={styles.metricValue}>{m.value}</span>
+          <RollValue value={m.value} only="last" className={styles.metricValue} />
           <span className={styles.metricLabel}>{m.label}</span>
           {m.detail && <span className={styles.metricDetail}>{m.detail}</span>}
           <EvidenceBadge kind={m.evidence} />
@@ -201,16 +213,26 @@ export function OutcomeTable({ block, kinds }: { block: Outcomes; kinds: Evidenc
   );
 }
 
+/**
+ * "Label — finding": the line leads. A contour rule draws, the label settles in mono, then the
+ * finding settles as one block a moment later; headings take turns and snap while the reader
+ * scrolls fast (SettleText channel "heading").
+ */
 function Heading({ waypoint: w, index }: { waypoint: Waypoint; index: number }) {
+  const finding = w.finding ? `${w.finding[0].toUpperCase()}${w.finding.slice(1)}` : null;
   return (
-    <h2 id={`${w.id}-heading`} className={styles.heading}>
-      <span className={`${styles.headingLabel} hud-label`}>
-        <span aria-hidden="true">{String(index + 1).padStart(2, "0")} · </span>
-        {w.label}
-        {w.finding && " —"}
-      </span>
-      {w.finding && <span className={styles.headingFinding}> {w.finding}</span>}
-    </h2>
+    <>
+      <ContourRule className={styles.headingRule} />
+      <h2 id={`${w.id}-heading`} className={styles.heading}>
+        <span className={`${styles.headingLabel} hud-label`}>
+          <span aria-hidden="true">{String(index + 1).padStart(2, "0")} · </span>
+          <SettleText as="span" text={finding ? `${w.label} —` : w.label} mode="chars" role="mono" trigger="inview" className={styles.headingLabelText} />
+        </span>{" "}
+        {finding && (
+          <SettleText as="span" text={finding} mode="block" wrap role="text" trigger="inview" delay={duration.short} channel="heading" className={styles.headingFinding} />
+        )}
+      </h2>
+    </>
   );
 }
 
@@ -263,21 +285,29 @@ export function Waypoints({ study, evidence }: { study: CaseStudy; evidence: Evi
                   return null;
               }
             })}
-            {!next && study.credits && (
+            {!next && (
               <div className={`${styles.panel} legend`}>
+                <p className="body-copy">
+                  <strong>{L.didNotDo}: </strong>
+                  {study.didNotDo}
+                </p>
                 <p className={`${styles.credits} body-copy`}>{study.credits}</p>
               </div>
             )}
-            <p className={`${styles.foot} hud-label`}>
+            <p className={styles.foot}>
               {next && (
-                <a href={`#${next.id}`}>
-                  {L.nextWaypoint}
-                  <span className="visually-hidden">: {next.nav}</span> <span aria-hidden="true">↓</span>
-                </a>
+                <SignatureLink
+                  href={`#${next.id}`}
+                  variant="standalone"
+                  role="mono"
+                  label={L.nextWaypoint}
+                  arrow="↓"
+                  aria-label={`${L.nextWaypoint}: ${next.nav}`}
+                  className={`${styles.footLink} hud-label map-halo`}
+                  data-quiet-zone
+                />
               )}
-              <a href="#main">
-                {L.backToTop} <span aria-hidden="true">↑</span>
-              </a>
+              <SignatureLink href="#main" variant="standalone" role="mono" label={L.backToTop} arrow="↑" className={`${styles.footLink} hud-label map-halo`} data-quiet-zone />
             </p>
           </section>
         );

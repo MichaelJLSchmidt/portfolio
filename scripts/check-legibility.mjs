@@ -1,8 +1,10 @@
-// Body text against what is actually behind it, measured on rendered screenshots in Chromium:
-// every running-text element (.body-copy, and .knockout blocks such as the footer and tables) on
+// Text against what is actually behind it, measured on rendered screenshots in Chromium:
+// every running-text element (.body-copy, and .knockout blocks such as the footer and tables) and
+// every label straight over the field on
 // the home page, a case study, the case-study example (when the build includes it) and Basecamp,
 // at a desktop and a phone size, over the moving contour field at its worst (the headlamp lit
-// right on the text) and over the static poster (reduced motion, no WebGL). Text on opaque
+// right on the text), over the field caught mid-morph during a route change (preview builds) and
+// over the static poster (reduced motion, no WebGL). Text on opaque
 // surfaces (.surface-copy: the sheet colour of the banner, key insight and map-sheet captions, the
 // night frames of tiles and charts) is measured the same way, for either polarity.
 //
@@ -71,9 +73,12 @@ for (let i = 0; i < 50; i++) {
   await new Promise((r) => setTimeout(r, 100));
 }
 
-// Running text and other knocked-out text blocks (the footer). Builds from before the shared
-// class names: the same elements by their modules.
-const BODY = ".body-copy, .knockout, .surface-copy";
+// Running text and other knocked-out text blocks (the footer), plus every label straight over the
+// field (eyebrows, meta and type lines, the scroll cue: .hud-label and .map-halo text outside a
+// surface; the HUD has its own backdrop). Builds from before the shared class names: the same
+// elements by their modules.
+const LABELS = ":is(.hud-label, .map-halo):not(header[data-chrome] *):not(:is(.surface-copy, .legend, .map-sheet, article, [data-ink='sheet'], .knockout, .body-copy, dialog) *)";
+const BODY = `.body-copy, .knockout, .surface-copy, ${LABELS}`;
 const LEGACY = [
   "p[class*='_lede']",
   "p[class*='_intro']",
@@ -138,9 +143,9 @@ function measure(bg1, text, bg2, textL, dark = false) {
 
 const pages = [
   { path: "/", name: "home" },
-  { path: "/work/kibon/", name: "case study" },
-  // The example uses every case-study building block; live builds don't include it.
+  // The examples use every case-study building block; live builds don't include them.
   ...(existsSync(join(out, "work/test-project/index.html")) ? [{ path: "/work/test-project/", name: "case-study example" }] : []),
+  ...["seilschaft", "gratweg"].filter((s) => existsSync(join(out, `work/${s}/index.html`))).map((s) => ({ path: `/work/${s}/`, name: `case study ${s}` })),
   { path: "/about/", name: "Basecamp" },
 ];
 const viewports = [
@@ -150,6 +155,9 @@ const viewports = [
 const modes = [
   { name: "field, headlamp on the text", reduced: false },
   { name: "poster", reduced: true },
+  // A route change caught halfway: the field frozen mid-morph towards another terrain, its quiet
+  // zones held as the conductor holds them (preview builds: the field's debug hook).
+  { name: "mid-morph (route change), headlamp on the text", reduced: false, morph: true },
 ];
 
 // Narrow a run while iterating: LEGIBILITY_ONLY="Basecamp,desktop,field" (any of the words).
@@ -179,6 +187,10 @@ for (const mode of pick(modes)) {
     for (const p of pick(pages)) {
       await page.goto(`${base}${p.path}${mode.reduced ? "" : "?field=force"}`, { waitUntil: "networkidle" });
       if (!mode.reduced) await page.waitForSelector('[data-field="on"]', { timeout: 20000 });
+      if (mode.morph && !(await page.evaluate((path) => window.__terrain?.freeze(path === "/about/" ? null : "bern", 0.5) ?? false, p.path))) {
+        console.log(`skip  ${mode.name} · ${vp.name} · ${p.name}: no field debug hook (build with NEXT_PUBLIC_PREVIEW=1)`);
+        continue;
+      }
       await page.waitForTimeout(1500);
       // Content wider than a phone widens its layout viewport: the page pans sideways, and the
       // screenshots (taken by the visual viewport) no longer line up with the element boxes.
@@ -220,12 +232,24 @@ for (const mode of pick(modes)) {
           // The worst text colour among the element and its text-bearing descendants: the darkest
           // for light text, the lightest for dark text (all of it darker than mid-grey).
           const lin = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+          // Any computed colour (rgb(), oklab() from color-mix, …) as sRGB bytes and alpha.
+          const ctx = Object.assign(document.createElement("canvas"), { width: 1, height: 1 }).getContext("2d", { willReadFrequently: true });
+          const rgba = (color) => {
+            ctx.clearRect(0, 0, 1, 1);
+            ctx.fillStyle = color;
+            ctx.fillRect(0, 0, 1, 1);
+            return ctx.getImageData(0, 0, 1, 1).data;
+          };
           let min = 1;
           let max = 0;
           for (const node of [el, ...el.querySelectorAll("*")]) {
             if (![...node.childNodes].some((c) => c.nodeType === 3 && c.textContent.trim())) continue;
             if (!node.getClientRects().length) continue;
-            const [r2, g, b] = getComputedStyle(node).color.match(/[\d.]+/g).map(Number);
+            const cs = getComputedStyle(node);
+            // Text that is not drawn (a hidden layer such as a link's glint) is not read.
+            if (cs.visibility !== "visible") continue;
+            const [r2, g, b, a] = rgba(cs.color);
+            if (a === 0) continue;
             const l = 0.2126 * lin(r2 / 255) + 0.7152 * lin(g / 255) + 0.0722 * lin(b / 255);
             min = Math.min(min, l);
             max = Math.max(max, l);
@@ -265,6 +289,21 @@ for (const mode of pick(modes)) {
             clip.height -= cover - clip.y;
             clip.y = cover;
           }
+          // ...and under a fixed bar along the bottom (the case study's altimeter bar below the
+          // large breakpoint): shoot above it.
+          const floor = await page.evaluate(() =>
+            Math.floor(
+              Math.min(
+                window.innerHeight,
+                ...[...document.querySelectorAll("body *")]
+                  .filter((el) => getComputedStyle(el).position === "fixed" && getComputedStyle(el).visibility !== "hidden" && el.getClientRects().length)
+                  .map((el) => el.getBoundingClientRect())
+                  .filter((r) => r.bottom >= window.innerHeight - 1 && r.top > (window.innerHeight * 2) / 3)
+                  .map((r) => r.top),
+              ),
+            ),
+          );
+          if (clip.y + clip.height > floor) clip.height = floor - clip.y;
           if (clip.width < 4 || clip.height < 4) break;
           // The headlamp, right on the text: the pointer, or a finger held down on a phone.
           const cx = clip.x + clip.width / 2;

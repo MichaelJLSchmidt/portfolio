@@ -1,68 +1,60 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
+import { SettleText } from "@/components/motion/SettleText";
+import { currentMode } from "@/lib/motion-mode";
+import { duration } from "@/styles/tokens";
+import { meterReading, startReadingSpy, useReading } from "./reading";
 import styles from "./WaypointTrail.module.css";
 
 /**
- * "On this page" from 1200 px: the waypoints as a vertical contour trail beside the content. The
- * trail fills up to the waypoint being read (scroll-spy; aria-current="true" on its link); the
- * fill is decoration only. Without JavaScript it is a plain list of links.
+ * "On this page" from the large breakpoint: the waypoints as a vertical contour trail beside the
+ * content. It runs the page's reading spy (reading.ts), also when it is hidden (the altimeter bar
+ * and the HUD readout use it). The trail fills with glacier as the reader scrolls (scroll-linked,
+ * --reading); the current waypoint's pin pings once as it becomes current (full motion) and its
+ * label breathes +8 while it stays current; aria-current="true" marks its link. Without JavaScript
+ * it is a plain list of links.
  */
-export function WaypointTrail({ label, items }: { label: string; items: { id: string; nav: string }[] }) {
-  const [active, setActive] = useState(-1);
+export function WaypointTrail({ slug, label, items }: { slug: string; label: string; items: { id: string; nav: string }[] }) {
+  const { slug: readingSlug, index } = useReading();
+  const active = readingSlug === slug ? index : -1;
+  const listRef = useRef<HTMLOListElement>(null);
+  const last = useRef(-1);
 
+  useEffect(() => startReadingSpy(slug, items.map((i) => i.id)), [slug, items]);
+  useEffect(() => (listRef.current ? meterReading(listRef.current) : undefined), []);
+
+  // One ping as a waypoint becomes current (not for the one current on arrival).
   useEffect(() => {
-    const sections = items.map((i) => document.getElementById(i.id)).filter((s): s is HTMLElement => !!s);
-    let loop: typeof import("@/lib/frameloop") | null = null;
-    let queued = false;
-    let disposed = false;
-    const update = () => {
-      queued = false;
-      // The current waypoint is the last one whose top has passed a line 30% down the screen;
-      // at the very bottom of the page, the last one.
-      const line = window.innerHeight * 0.3;
-      let index = -1;
-      sections.forEach((s, i) => {
-        if (s.getClientRects().length && s.getBoundingClientRect().top <= line) index = i;
-      });
-      const bottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
-      if (bottom && index >= 0) index = sections.length - 1;
-      setActive(index);
-    };
-    // Measured in the read phase of Motion's frame loop (the page's single animation loop),
-    // at most once per frame.
-    const schedule = () => {
-      if (queued || !loop) return;
-      queued = true;
-      loop.frame.read(update);
-    };
-    import("@/lib/frameloop").then((m) => {
-      if (disposed) return;
-      loop = m;
-      update();
-      window.addEventListener("scroll", schedule, { passive: true });
-      window.addEventListener("resize", schedule);
-      window.addEventListener("hashchange", schedule);
-    });
+    const previous = last.current;
+    last.current = active;
+    if (active < 0 || previous === active || currentMode() !== "full") return;
+    if (previous < 0 && window.scrollY < 1) return;
+    const item = listRef.current?.children[active];
+    item?.setAttribute("data-ping", "");
+    const t = window.setTimeout(() => item?.removeAttribute("data-ping"), duration.long);
     return () => {
-      disposed = true;
-      if (loop) loop.cancelFrame(update);
-      window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
-      window.removeEventListener("hashchange", schedule);
+      window.clearTimeout(t);
+      item?.removeAttribute("data-ping");
     };
-  }, [items]);
+  }, [active]);
 
   return (
     <nav className={styles.trail} aria-label={label}>
-      <p className={`${styles.title} hud-label`} aria-hidden="true">
+      <p className={`${styles.title} hud-label map-halo`} aria-hidden="true" data-quiet-zone>
         {label}
       </p>
-      <ol className={styles.list}>
+      <ol ref={listRef} className={styles.list} style={{ "--n": items.length } as CSSProperties}>
         {items.map((item, i) => (
-          <li key={item.id} className={styles.item} data-state={i < active ? "passed" : i === active ? "current" : "ahead"}>
+          <li
+            key={item.id}
+            className={styles.item}
+            data-state={i < active ? "passed" : i === active ? "current" : "ahead"}
+            style={{ "--i": i } as CSSProperties}
+          >
+            <span className={styles.ping} aria-hidden="true" />
             <a href={`#${item.id}`} className={styles.link} aria-current={i === active ? "true" : undefined}>
-              {item.nav}
+              <SettleText text={item.nav} mode="block" wrap role="text" trigger="manual" breath className={styles.label} />
             </a>
           </li>
         ))}

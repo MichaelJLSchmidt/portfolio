@@ -49,6 +49,8 @@ uniform float uHeadlampGain;  // lit lines reach this many times their strength
 uniform float uSweepGain;     // the same for the intro sweep's leading edge
 
 uniform float uSweep;  // 0..1 draw-on from lake level upward
+uniform float uReveal;      // 0..1 route draw-on: the destination's lines from the valleys upward
+uniform float uRevealFloor; // strength of lines above the draw-on front (1 = no draw-on)
 uniform float uTime;   // seconds
 uniform float uDrift;  // cycles per second
 
@@ -60,6 +62,15 @@ uniform float uZoom;       // > 1 zooms in around the screen centre (camera push
 uniform vec4 uQuiet[MAX_QUIET];     // quiet zones behind text: left, bottom, right, top (device px)
 uniform vec2 uQuietKind[MAX_QUIET]; // per zone: feather (device px), line strength inside (0..1)
 uniform int uQuietCount;
+uniform float uQuietHold;   // 0..1: during a route change every zone takes the strongest knockout
+uniform vec2 uHoldKind;     // that knockout: feather (device px), strength
+uniform vec4 uQuietColumn;  // and the content column, old and new page together (device px)
+
+uniform vec2 uPinPos;       // the zero-point pin, device px (origin bottom-left)
+uniform float uPinStrength; // 0..1
+uniform float uPinPing;     // 0..1, the one ping's ring
+uniform vec4 uPinShape;     // arm length, centre gap, line width, ping radius (device px)
+uniform vec3 uPinColor;
 
 float decodeHeight(sampler2D tex, vec2 uv, vec2 enc) {
   vec2 rg = texture(tex, uv).rg;
@@ -105,26 +116,54 @@ void main() {
   float revealed = 1.0 - smoothstep(sweepLevel - 60.0, sweepLevel, h);
   float front = exp(-abs(h - sweepLevel) / 45.0) * step(uSweep, 0.999) * revealed;
 
+  // Route draw-on: the destination's lines appear from the valleys upward; above the front they
+  // keep the floor's strength, so the map never blanks, and the front itself is a little brighter.
+  float span = max(range.y - range.x, 1.0);
+  float band = max(span * 0.05, 8.0);
+  float revealLevel = mix(range.x - band, range.y + band, uReveal);
+  float below = 1.0 - smoothstep(revealLevel - band, revealLevel, h);
+  float drawn = mix(uRevealFloor, 1.0, below);
+  float revealFront = exp(-abs(h - revealLevel) / band) * below * (1.0 - uRevealFloor) * step(uReveal, 0.999);
+
   // Quiet zones: lines fade to the zone's strength inside its rectangle, feathered outwards,
   // like contours interrupted under a map's labels. Headings keep ~25% of a line, body text
-  // ~9%; where zones overlap, the stronger knockout wins.
+  // ~9%; where zones overlap, the stronger knockout wins. Through a route change every zone,
+  // and the column both pages' text shares, holds the strongest knockout.
   float keep = 1.0;
   for (int i = 0; i < MAX_QUIET; i++) {
     if (i >= uQuietCount) break;
     vec4 r = uQuiet[i];
+    vec2 kind = mix(uQuietKind[i], uHoldKind, uQuietHold);
     vec2 outside = max(max(r.xy - gl_FragCoord.xy, gl_FragCoord.xy - r.zw), 0.0);
-    float q = 1.0 - smoothstep(0.0, uQuietKind[i].x, length(outside));
-    keep = min(keep, mix(1.0, uQuietKind[i].y, q));
+    float q = 1.0 - smoothstep(0.0, kind.x, length(outside));
+    keep = min(keep, mix(1.0, kind.y, q));
+  }
+  if (uQuietHold > 0.0) {
+    vec2 outside = max(max(uQuietColumn.xy - gl_FragCoord.xy, gl_FragCoord.xy - uQuietColumn.zw), 0.0);
+    float q = 1.0 - smoothstep(0.0, uHoldKind.x, length(outside));
+    keep = min(keep, mix(1.0, uHoldKind.y, q * uQuietHold));
   }
 
   // Lit lines keep their colour and only gain strength: the map stays monochrome.
-  float gain = max(mix(1.0, uHeadlampGain, lit), mix(1.0, uSweepGain, front));
+  float gain = max(max(mix(1.0, uHeadlampGain, lit), mix(1.0, uSweepGain, front)), mix(1.0, uSweepGain, revealFront * 0.6));
   float aReg = min(reg * uLineOpacity * gain, 1.0) * keep;
   float aInd = min(ind * uIndexOpacity * gain, 1.0) * keep;
 
   vec3 col = uGround;
-  col = mix(col, uLineColor, aReg * revealed);
-  col = mix(col, uIndexColor, aInd * revealed);
+  col = mix(col, uLineColor, aReg * revealed * drawn);
+  col = mix(col, uIndexColor, aInd * revealed * drawn);
+
+  // The zero-point pin: a crosshair with a gap at its centre, and one expanding ring.
+  if (uPinStrength > 0.0 || (uPinPing > 0.0 && uPinPing < 1.0)) {
+    vec2 d = abs(gl_FragCoord.xy - uPinPos);
+    float w = uPinShape.z;
+    float armX = lineMask(d.y, w) * step(uPinShape.y, d.x) * (1.0 - smoothstep(uPinShape.x - 0.5, uPinShape.x + 0.5, d.x));
+    float armY = lineMask(d.x, w) * step(uPinShape.y, d.y) * (1.0 - smoothstep(uPinShape.x - 0.5, uPinShape.x + 0.5, d.y));
+    float ring = 0.0;
+    if (uPinPing > 0.0 && uPinPing < 1.0) ring = lineMask(abs(length(d) - uPinPing * uPinShape.w), w) * (1.0 - uPinPing);
+    float pin = max(max(armX, armY) * uPinStrength, ring) * keep;
+    col = mix(col, uPinColor, pin * 0.9);
+  }
 
   fragColor = vec4(col, 1.0);
 }
@@ -159,6 +198,8 @@ export type ContourUniforms = {
     | "uHeadlampGain"
     | "uSweepGain"
     | "uSweep"
+    | "uReveal"
+    | "uRevealFloor"
     | "uTime"
     | "uDrift"
     | "uResolution"
@@ -166,7 +207,15 @@ export type ContourUniforms = {
     | "uZoom"
     | "uQuiet"
     | "uQuietKind"
-    | "uQuietCount"]: THREE.IUniform;
+    | "uQuietCount"
+    | "uQuietHold"
+    | "uHoldKind"
+    | "uQuietColumn"
+    | "uPinPos"
+    | "uPinStrength"
+    | "uPinPing"
+    | "uPinShape"
+    | "uPinColor"]: THREE.IUniform;
 };
 
 export function createContourMaterial(): THREE.ShaderMaterial & { uniforms: ContourUniforms } {
@@ -195,6 +244,8 @@ export function createContourMaterial(): THREE.ShaderMaterial & { uniforms: Cont
     uHeadlampGain: { value: 1.5 },
     uSweepGain: { value: 2 },
     uSweep: { value: 1 },
+    uReveal: { value: 1 },
+    uRevealFloor: { value: 1 },
     uTime: { value: 0 },
     uDrift: { value: 0.02 },
     uResolution: { value: new THREE.Vector2(1, 1) },
@@ -203,6 +254,14 @@ export function createContourMaterial(): THREE.ShaderMaterial & { uniforms: Cont
     uQuiet: { value: Array.from({ length: MAX_QUIET_ZONES }, () => new THREE.Vector4()) },
     uQuietKind: { value: Array.from({ length: MAX_QUIET_ZONES }, () => new THREE.Vector2(48, 0.25)) },
     uQuietCount: { value: 0 },
+    uQuietHold: { value: 0 },
+    uHoldKind: { value: new THREE.Vector2(64, 0.09) },
+    uQuietColumn: { value: new THREE.Vector4(0, 0, 0, 0) },
+    uPinPos: { value: new THREE.Vector2(-1e4, -1e4) },
+    uPinStrength: { value: 0 },
+    uPinPing: { value: 0 },
+    uPinShape: { value: new THREE.Vector4(9, 3, 1.25, 30) },
+    uPinColor: { value: new THREE.Vector3(1, 1, 1) },
   };
   return new THREE.ShaderMaterial({
     glslVersion: THREE.GLSL3,

@@ -12,6 +12,7 @@ import { MapSheet } from "@/components/motion/MapSheet";
 import { MotionButton } from "@/components/motion/MotionButton";
 import { SettleText, type SettleHandle } from "@/components/motion/SettleText";
 import { SignatureLink } from "@/components/motion/SignatureLink";
+import { useLabReady } from "./ready";
 import styles from "./Lab.module.css";
 
 const t = lab.specimen;
@@ -31,6 +32,7 @@ export function Specimen() {
   const mono = useRef<SettleHandle>(null);
   const glintDark = useRef<HTMLParagraphElement>(null);
   const glintSheet = useRef<HTMLParagraphElement>(null);
+  useLabReady();
 
   // Side by side: a column's scroll position is mirrored in the other columns (lab page).
   useEffect(() => {

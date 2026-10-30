@@ -1,4 +1,6 @@
 import { caseStudyLabels as L } from "@/content/cards";
+import { haptic } from "@/lib/haptics";
+import { activeViewTransition, stillNavigation } from "@/lib/view-transition";
 
 /**
  * Lightbox for a wide figure, on a native <dialog> (Figure.tsx renders the markup):
@@ -8,8 +10,40 @@ import { caseStudyLabels as L } from "@/content/cards";
  * - zoom 100–400% with +/−/reset (their names include the level), click to step in (at the
  *   maximum, click resets), the wheel around the pointer, pinch on touch; drag or one finger
  *   pans when zoomed;
+ * - opening, the figure's image morphs into the overlay's on the share spring (a view transition,
+ *   html[data-vt="lightbox"]), and back on close; still mode opens and closes at once;
+ * - its buttons (Enlarge, zoom, Close) tick the press haptic;
  * - no zoom animation with reduced motion (Figure.module.css).
  */
+const MORPH = "lightbox-figure";
+
+/** Runs `update` in a view transition in which `from` (before) and `to` (after) are one element. */
+function morph(from: HTMLElement | null, to: HTMLElement | null, update: () => void) {
+  if (!from || !to || stillNavigation() || typeof document.startViewTransition !== "function") return update();
+  const root = document.documentElement;
+  const name = (el: HTMLElement | null, on: boolean) => {
+    el?.style.setProperty("view-transition-name", on ? MORPH : "");
+    el?.style.setProperty("view-transition-class", on ? "morph morph-art" : "");
+  };
+  root.setAttribute("data-vt", "lightbox");
+  name(from, true);
+  try {
+    const t = document.startViewTransition(() => {
+      name(from, false);
+      name(to, true);
+      update();
+    });
+    const done = () => {
+      name(to, false);
+      if (root.getAttribute("data-vt") === "lightbox") root.removeAttribute("data-vt");
+    };
+    t.finished.then(done, done);
+  } catch {
+    name(from, false);
+    root.removeAttribute("data-vt");
+    update();
+  }
+}
 const MIN = 1;
 const MAX = 4;
 const STEPS = [1, 1.5, 2, 3, 4];
@@ -81,21 +115,32 @@ export function attach(figure: HTMLElement): () => void {
     return [e.clientX - r.left - r.width / 2, e.clientY - r.top - r.height / 2] as const;
   };
 
+  // The figure's own image, on the page: one end of the morph.
+  const shown = figure.querySelector<HTMLImageElement>("[data-reveal] img, picture img");
   const onOpen = () => {
-    if (!img.getAttribute("src")) {
-      if (source?.dataset.srcset) source.srcset = source.dataset.srcset;
-      img.src = img.dataset.src!;
-    }
+    const first = !img.getAttribute("src");
+    // The image already on screen first (so the morph lands on a picture), the largest after.
+    if (first) img.src = shown?.currentSrc || img.dataset.src!;
     scale = 1;
     x = y = 0;
     render(false);
-    dialog.showModal();
-    close?.focus();
+    morph(shown, img, () => {
+      dialog.showModal();
+      close?.focus();
+    });
+    if (first)
+      requestAnimationFrame(() => {
+        if (source?.dataset.srcset) source.srcset = source.dataset.srcset;
+        img.src = img.dataset.src!;
+      });
   };
   const onClose = () => open.focus();
+  // Closing (button, backdrop, Esc) morphs the image back into the figure.
+  const shut = () => morph(img, shown, () => dialog.close());
   const onClick = (e: MouseEvent) => {
-    // A click on the backdrop (the dialog itself, outside its content) closes it.
-    if (e.target === dialog) dialog.close();
+    // A click on the backdrop (the dialog itself, outside its content) closes it. Not while the
+    // morph runs: the browser hit-tests past the travelling image then, onto the backdrop.
+    if (e.target === dialog && !activeViewTransition()) shut();
   };
 
   // Pointers: drag to pan, two fingers to pinch, a click without movement to zoom in.
@@ -154,11 +199,20 @@ export function attach(figure: HTMLElement): () => void {
   const onIn = () => step(1);
   const onOut = () => step(-1);
   const onReset = () => zoomTo(1);
-  const onCloseButton = () => dialog.close();
+  const onCloseButton = () => shut();
+  const onCancel = (e: Event) => {
+    e.preventDefault();
+    shut();
+  };
   const onResize = () => render(false);
 
+  // Buttons tick the press haptic (Android; haptics.ts decides).
+  const press = () => haptic("press");
+  const buttons = [open, zoomIn, zoomOut, zoomReset, close].filter((b): b is HTMLButtonElement => !!b);
+  buttons.forEach((b) => b.addEventListener("click", press));
   open.addEventListener("click", onOpen);
   dialog.addEventListener("close", onClose);
+  dialog.addEventListener("cancel", onCancel);
   dialog.addEventListener("click", onClick);
   dialog.addEventListener("keydown", onKey);
   stage.addEventListener("pointerdown", onDown);
@@ -173,8 +227,10 @@ export function attach(figure: HTMLElement): () => void {
   window.addEventListener("resize", onResize);
 
   return () => {
+    buttons.forEach((b) => b.removeEventListener("click", press));
     open.removeEventListener("click", onOpen);
     dialog.removeEventListener("close", onClose);
+    dialog.removeEventListener("cancel", onCancel);
     dialog.removeEventListener("click", onClick);
     dialog.removeEventListener("keydown", onKey);
     stage.removeEventListener("pointerdown", onDown);

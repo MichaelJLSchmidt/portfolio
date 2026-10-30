@@ -1,0 +1,115 @@
+<!-- The foundation decision on one sheet: three options rated on four criteria in filled dots,
+     the chosen one outlined in moss-ink, and the brand compromises written beside it. -->
+<style>
+  .sheet {
+    position: absolute;
+    inset: 0;
+    padding: 24px 30px 18px;
+  }
+  .top p {
+    margin-top: 4px;
+  }
+  .opts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 18px;
+  }
+  .opt {
+    display: grid;
+    gap: 10px;
+    align-content: start;
+    padding: 14px 16px 16px;
+    border: 1.5px solid var(--color-ground);
+    border-radius: 10px;
+    background: #fff;
+  }
+  .opt.chosen {
+    border: 3px solid var(--color-moss-ink);
+    box-shadow: 0 0 0 5px rgb(47 107 58 / 0.14);
+  }
+  .opt h2 {
+    font-size: 18px;
+    line-height: 1.2;
+  }
+  .opt .tag {
+    justify-self: start;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--color-moss-ink);
+    color: var(--color-sheet);
+    font-family: var(--label);
+    font-size: 11px;
+    font-stretch: var(--label-wdth);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  dl {
+    display: grid;
+    gap: 7px;
+  }
+  dl div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgb(90 92 82 / 0.3);
+    font-size: 13.5px;
+  }
+  .dots {
+    display: flex;
+    gap: 5px;
+  }
+  .dots i {
+    width: 13px;
+    height: 13px;
+    border: 1.5px solid var(--color-ground);
+    border-radius: 50%;
+  }
+  .dots i.on {
+    background: var(--color-ground);
+  }
+  .chosen .dots i.on {
+    background: var(--color-moss-ink);
+    border-color: var(--color-moss-ink);
+  }
+  .opt p {
+    color: var(--color-sheet-ink);
+    font-size: 13px;
+    line-height: 1.35;
+  }
+  .note {
+    margin-top: 16px;
+    padding: 12px 16px;
+    border-left: 4px solid var(--color-moss-ink);
+    background: rgb(255 255 255 / 0.6);
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  .note b {
+    color: var(--color-moss-ink);
+  }
+</style>
+<div class="sheet">
+  <div class="top">
+    <h1 class="title">What do we build on?</h1>
+    <p class="label muted">Rated by the core team and the coalition · filled dots are better (for cost: cheaper)</p>
+  </div>
+  <div class="opts">
+    <section class="opt" data-opt="custom"><h2>Custom component library</h2><dl></dl><p>Full control, and we maintain every line of it.</p></section>
+    <section class="opt" data-opt="kit"><h2>Commercial kit</h2><dl></dl><p>Fast start, but a licence and a second visual language.</p></section>
+    <section class="opt chosen" data-opt="material"><span class="tag">Chosen</span><h2>Angular Material + our own tokens</h2><dl></dl><p>Teams already use it; accessibility comes built in.</p></section>
+  </div>
+  <p class="note"><b>The compromises, signed once by brand:</b> Material’s focus ring stays, dense tables keep their spacing, and the elevation shadows are toned down rather than removed.</p>
+</div>
+<script>
+  const O = window.DATA.options;
+  const criteria = [["time", "Time to first benefit"], ["a11y", "Accessibility"], ["cost", "Cost to run"], ["brand", "Brand fit"]];
+  for (const box of document.querySelectorAll("[data-opt]")) {
+    const r = O[box.dataset.opt];
+    box.querySelector("dl").innerHTML = criteria
+      .map(([k, label]) => `<div><dt>${label}</dt><dd class="dots">${Array.from({ length: O.scale }, (_, i) => `<i class="${i < r[k] ? "on" : ""}"></i>`).join("")}</dd></div>`)
+      .join("");
+  }
+</script>

@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, ViewTransition, lazy, useSyncExternalStore, type ReactNode } from "react";
-import { useMotionMode } from "@/lib/motion-mode";
+import { useModeIf } from "@/lib/motion-mode";
 
 /**
  * Picks the morph mechanism for MorphTarget. Browsers with the View Transitions API get
@@ -29,7 +29,8 @@ export function MorphSwitch({
 }) {
   // Server snapshot assumes support, so capable browsers hydrate without a re-render.
   const native = useSyncExternalStore(noop, supportsViewTransitions, () => true);
-  const { mode } = useMotionMode();
+  // Only the fallback needs the mode.
+  const mode = useModeIf(!native);
   if (native) {
     return (
       <ViewTransition name={name} share={share} default="none">

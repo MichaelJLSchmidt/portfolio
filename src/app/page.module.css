@@ -2,11 +2,12 @@
   padding-top: 96px;
 }
 
-/* The name is the entry point, not the whole board. It sits on at most two lines (HeroName)
-   and is sized by its longest line, --name-chars capitals at up to ~0.5 em each in the display cut,
-   so any name length fits: ~92% of the measure on phones, 62% on desktop, and never more than
-   a quarter of the screen height. The hero stops --peek short of the first screen's bottom,
-   where the deck heading comes in. */
+/* The name is the entry point, not the whole board. It sits on at most two lines (HeroName),
+   in one display size: the site name's longest line (--name-em, measured at the display axes)
+   fills ~92% of the measure on phones, 80% from the small breakpoint, 62% on desktop, and never
+   more than a quarter of the screen height. A longer name scales itself down (--fit-em); a
+   shorter one keeps the size. The hero stops --peek short of the first screen's bottom, where
+   the deck heading comes in. */
 .hero {
   --peek: clamp(88px, 12svh, 140px);
   --name-fill: 0.92;
@@ -18,24 +19,26 @@
   min-height: calc(100svh - 96px - var(--peek));
 }
 
-.heroMeta {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 8px 24px;
-}
-
 .eyebrow {
+  --kt-color: var(--color-glacier);
   color: var(--color-glacier);
 }
 
-.origin {
-  color: var(--color-contour);
+/* The statement: the page's first sentence, visible from first paint (it may be the LCP). */
+.statement {
+  max-width: 30ch;
+  font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.75rem);
+  font-weight: 560;
+  line-height: 1.35;
+}
+
+.heroActions {
+  margin-top: 4px;
 }
 
 .name {
   margin-inline: -0.02em;
-  font-size: min(calc(var(--name-fill) * 100cqi / (var(--name-chars, 10) * 0.5)), 26svh);
+  font-size: min(calc(var(--name-fill) * 100cqi / max(var(--name-em, 5), var(--fit-em, 5))), 26svh);
 }
 
 .aside {
@@ -50,7 +53,7 @@
   gap: 14px;
   justify-self: start;
   min-height: 44px;
-  color: var(--color-contour);
+  color: var(--color-sheet);
   text-decoration: none;
 }
 
@@ -73,23 +76,24 @@
   position: absolute;
   inset: 0;
   background: var(--color-contour);
+  transform-origin: top;
 }
 
-/* An auto-playing loop: full motion only, so never without JavaScript or in calm and still. */
-:root[data-motion="full"] .cueLine::after {
-  animation: cue 2.4s var(--ease-summit) infinite;
+/* The line draws down once from first paint, then rests (no loop: WCAG 2.2.2); still mode shows
+   it drawn. */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .cueLine::after {
+    animation: cue var(--dur-draw) var(--ease-settle) var(--dur-settle) backwards;
+  }
 }
 
 @keyframes cue {
   from {
-    transform: translateY(-100%);
-  }
-  to {
-    transform: translateY(100%);
+    transform: scaleY(0);
   }
 }
 
-@media (min-width: 700px) {
+@media (min-width: 640px) {
   .hero {
     --name-fill: 0.8;
   }
@@ -97,14 +101,14 @@
 
 /* Desktop: a 12-column grid. Meta row on top; the name in the left eight columns; the lede
    and the cue in a clear right-hand column, sitting on the name's last baseline. */
-@media (min-width: 1000px) {
+@media (min-width: 1024px) {
   .hero {
     --name-fill: 0.62;
     grid-template-columns: repeat(12, minmax(0, 1fr));
     column-gap: clamp(16px, 2vw, 32px);
   }
 
-  .heroMeta {
+  .eyebrow {
     grid-column: 1 / -1;
   }
 

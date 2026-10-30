@@ -1,3 +1,26 @@
+/* --p (0..1): how far the climb has got. Registered so a scroll timeline or a timer can animate
+   it; at rest (still, no JavaScript) the whole line is drawn. --cy: the climber's height. */
+@property --p {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
+@property --cy {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+@keyframes ascent-p {
+  from {
+    --p: 0;
+  }
+  to {
+    --p: 1;
+  }
+}
+
 .ascent {
   --p: 1;
   display: grid;
@@ -12,6 +35,10 @@
 
 .heading {
   font-size: clamp(2.5rem, 9vw, 7rem);
+}
+
+.headRule {
+  width: min(100%, 12rem);
 }
 
 .stage {
@@ -97,7 +124,7 @@
 .gridLabel {
   position: absolute;
   left: 0;
-  color: var(--color-contour);
+  color: var(--color-sheet);
   translate: 0 -130%;
 }
 
@@ -117,8 +144,9 @@
   translate: -4px 70%;
 }
 
+/* Straight over the field: sheet, like every label there (7:1; contour is never used over it). */
 .stopElevation {
-  color: var(--color-contour);
+  color: var(--color-sheet);
 }
 
 /* Milestone pins: lit once the climber has passed them (--p ≥ --at), pure CSS. */
@@ -134,7 +162,7 @@
   border-radius: 50%;
   background: color-mix(in srgb, var(--color-glacier) calc(var(--r) * 100%), var(--color-ground));
   color: color-mix(in srgb, var(--color-ground) calc(var(--r) * 100%), var(--color-contour));
-  font-family: var(--font-martian), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 700;
 }
@@ -146,7 +174,7 @@
 
 .ascent[data-live] .climber {
   position: absolute;
-  left: var(--cx, 100%);
+  left: var(--cx, calc(var(--x0) + var(--p) * var(--xspan)));
   top: var(--cy, 0%);
   display: block;
   width: 14px;
@@ -166,6 +194,85 @@
   display: block;
   margin: 0;
   color: var(--color-glacier);
+}
+
+/* One ping as the climber reaches a camp (full motion). */
+.pin::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border: 1.5px solid var(--color-glacier);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes camp-ping {
+  from {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+}
+
+:root[data-motion="full"] .pin[data-ping]::after {
+  animation: camp-ping var(--dur-long) var(--ease-settle);
+}
+
+/* Full, where the browser has scroll-driven animations: a view timeline on the plaques draws the
+   climb (--p) and moves the climber along the line (its keyframes, AscentProfile.tsx). The range
+   puts each camp's plaque mid-screen as the climber reaches its pin (the plaques' heights below;
+   phones pin no chart above them). */
+@supports (animation-timeline: view()) {
+  .ascent[data-live="timeline"] {
+    --climb-range: cover 11% cover 67%;
+    timeline-scope: --climb;
+    animation: ascent-p linear both;
+    animation-timeline: --climb;
+    animation-range: var(--climb-range);
+  }
+
+  .ascent[data-live="timeline"] .steps {
+    view-timeline: --climb block;
+  }
+
+  /* The climber's keyframes are generated from the profile (its animation-name is inline). */
+  .ascent[data-live="timeline"] .climber {
+    animation-duration: auto;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: --climb;
+    animation-range: var(--climb-range);
+  }
+
+  @media (width < 640px) {
+    .ascent[data-live="timeline"] {
+      --climb-range: cover 16% cover 72%;
+    }
+  }
+}
+
+/* Calm: the climb waits at the start, then draws once on a timer, at an even pace (the
+   climber's keyframes take the same pace between each pair of points). */
+.ascent[data-live="wait"] {
+  animation: ascent-p var(--dur-cinematic) linear both paused;
+}
+
+.ascent[data-live="timer"] {
+  animation: ascent-p var(--dur-cinematic) linear both;
+}
+
+.ascent:is([data-live="wait"], [data-live="timer"]) .climber {
+  animation-duration: var(--dur-cinematic);
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+
+.ascent[data-live="wait"] .climber {
+  animation-play-state: paused;
 }
 
 /* Milestones: real content, in order. Each one sits in its own stretch of scroll. */
@@ -191,16 +298,25 @@
   border: 1px solid var(--color-contour-dim);
   border-radius: 12px;
   background: color-mix(in srgb, var(--color-ground-raised) 92%, transparent);
-  /* Not reached yet: offset, dim border and an open badge. Text keeps full contrast. */
-  transform: translateY(18px);
-  transition:
-    transform var(--dur-long) var(--ease-trail),
-    border-color var(--dur-medium) var(--ease-trail);
+  transition: border-color var(--dur-still) var(--ease-trail);
+}
+
+/* Not reached yet (the climb is live): offset, dim border and an open badge. Text keeps full
+   contrast. */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .ascent[data-live] .step:not([data-reached]) .plaque {
+    transform: translateY(18px);
+  }
+
+  :root:not([data-motion="still"]) .plaque {
+    transition:
+      transform var(--dur-long) var(--ease-trail),
+      border-color var(--dur-medium) var(--ease-trail);
+  }
 }
 
 .step[data-reached] .plaque {
   border-color: var(--color-contour);
-  transform: none;
 }
 
 .year {
@@ -234,30 +350,77 @@
   font-size: clamp(1.75rem, 3.2vw, 2.75rem);
 }
 
-.org {
-  color: var(--color-contour);
+/* A camp's rarity: shape + letter + colour, as on the cards. */
+.rarity {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  color: var(--color-sheet);
+  font-weight: 700;
 }
 
-@media (min-width: 900px) {
+.rarity svg {
+  width: 12px;
+  height: 12px;
+  fill: var(--rarity);
+}
+
+.rarityNote {
+  color: var(--color-sheet);
+}
+
+@media (min-width: 1024px) {
   .step:nth-child(even) {
     justify-content: flex-end;
   }
 }
 
-/* Phones: the pinned panel (HUD clearance + readout + chart) takes at most ~38% of the
-   visible height, so the plaques keep most of the screen. */
-@media (max-width: 700px) {
+/* Phones: the chart stands upright in a narrow pinned column beside the plaques, the climb
+   running down the screen (the profile turned a quarter, summits to the right). Its labels and
+   readout would turn with it, so they are left out; the plaques say the same. */
+@media (width < 640px) {
+  .stage {
+    --chart-len: calc(100svh - 128px);
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 16px;
+  }
+
   .sticky {
-    padding-block: 106px 22px;
+    top: 96px;
+    align-self: start;
+    height: var(--chart-len);
+    padding: 0;
+    background: none;
+  }
+
+  .sticky::after {
+    content: none;
   }
 
   .chart {
-    height: clamp(92px, calc(38svh - 128px), 240px);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--chart-len);
+    height: 56px;
+    transform: translateX(56px) rotate(90deg);
+    transform-origin: 0 0;
   }
 
-  /* Clear of the summit label on narrow charts. */
+  .gridLabel,
+  .stop,
   .ascent[data-live] .readout {
-    bottom: calc(100% + 16px);
+    display: none;
+  }
+
+  .pin {
+    rotate: -90deg;
+  }
+
+  .steps {
+    padding-top: 0;
   }
 
   .step {

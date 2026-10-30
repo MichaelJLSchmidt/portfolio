@@ -1,0 +1,142 @@
+<!-- The same address form in three products, before (three looks: different blues, label
+     positions, buttons and errors) and after adoption (one look from the system). Small flat browser
+     frames; the fictional product UI in German, as citizens see it. -->
+<style>
+  .sheet {
+    position: absolute;
+    inset: 0;
+    padding: 20px 26px 16px;
+  }
+  .rowlabel {
+    margin: 12px 0 8px;
+    color: var(--color-ground);
+  }
+  .rowlabel b {
+    color: var(--color-moss-ink);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .browser-url {
+    font-size: 11px;
+  }
+  .form {
+    padding: 12px 14px 14px;
+    font-family: var(--hm-font);
+    color: var(--hm-ink);
+  }
+  .form h3 {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .f {
+    display: grid;
+    gap: 3px;
+    margin-top: 8px;
+    font-size: 12.5px;
+  }
+  .in {
+    height: 28px;
+    border: 1.5px solid var(--hm-field-border);
+    background: #fff;
+  }
+  .btns {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+  .btn {
+    padding: 5px 14px;
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+  .err {
+    color: var(--hm-error);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  /* Before: three products, three looks. */
+  .a .in {
+    border-radius: 0;
+  }
+  .a .btn {
+    border-radius: 0;
+    background: #0e4a8a;
+    text-transform: uppercase;
+  }
+  .b .f {
+    grid-template-columns: 90px 1fr;
+    align-items: center;
+  }
+  .b .in {
+    border-radius: 12px;
+    border-color: #9aa3ab;
+  }
+  .b .btn {
+    border-radius: 999px;
+    background: #3366aa;
+  }
+  .b .err {
+    grid-column: 1 / -1;
+    color: #d12e2e;
+  }
+  .c h3 {
+    color: #164c7e;
+  }
+  .c .in {
+    border-width: 0 0 2px;
+    border-color: #164c7e;
+    background: transparent;
+  }
+  .c .btn {
+    border-radius: 4px;
+    background: #225d94;
+  }
+  .c .btns {
+    justify-content: flex-start;
+  }
+  /* After: one look, from the system. */
+  .sys .in {
+    border-radius: var(--hm-radius);
+  }
+  .sys .in.error {
+    border-color: var(--hm-error);
+    box-shadow: inset 4px 0 0 var(--hm-error);
+  }
+  .sys .btn {
+    border-radius: var(--hm-radius);
+    background: var(--hm-blue);
+  }
+  .sys h3 {
+    color: var(--hm-ink);
+  }
+</style>
+<div class="sheet">
+  <h1 class="title">The same form in three products</h1>
+  <p class="label muted">Address step, with one field left empty · before and after the design system</p>
+  <p class="rowlabel label-caps">Before · three looks</p>
+  <div class="row" data-row="before"></div>
+  <p class="rowlabel label-caps"><b>After · one system</b></p>
+  <div class="row" data-row="after"></div>
+</div>
+<script>
+  const products = [
+    ["parkieren.hochmatt.example", "Parkkarte beantragen", "a"],
+    ["steuern.hochmatt.example", "Adresse für die Steuererklärung", "b"],
+    ["umzug.hochmatt.example", "Umzug melden", "c"],
+  ];
+  const form = (url, title, cls, after) => `<div class="browser">
+      <div class="browser-bar"><span class="browser-dots"><i></i><i></i><i></i></span><span class="browser-url">${url}</span></div>
+      <div class="browser-view hm"><div class="form ${after ? "sys" : cls}">
+        <h3>${title}</h3>
+        <div class="f"><span>Strasse und Nummer</span><span class="in"></span></div>
+        <div class="f"><span>PLZ und Ort</span><span class="in ${after ? "error" : ""}"></span>${after ? `<span class="err">Bitte geben Sie PLZ und Ort an.</span>` : cls === "a" ? `<span class="err">FEHLER: Pflichtfeld</span>` : cls === "b" ? `<span class="err">Ungültige Eingabe!</span>` : `<span class="err">Ort fehlt</span>`}</div>
+        <div class="btns"><span class="btn">Weiter</span></div>
+      </div></div>
+    </div>`;
+  document.querySelector('[data-row="before"]').innerHTML = products.map(([u, t, c]) => form(u, t, c, false)).join("");
+  document.querySelector('[data-row="after"]').innerHTML = products.map(([u, t, c]) => form(u, t, c, true)).join("");
+</script>

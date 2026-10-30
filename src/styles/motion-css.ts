@@ -17,7 +17,16 @@ export function springCss(name: SpringToken): string {
   return generator.toString();
 }
 
+/**
+ * `--spring-<name>`, and its parts `--spring-<name>-dur` and `--spring-<name>-ease` for places
+ * that set duration and timing function apart (view-transition pseudo-elements, whose animation
+ * names the browser owns).
+ */
 export function springsToCss(): string {
-  const vars = (Object.keys(spring) as SpringToken[]).map((k) => `--spring-${k}:${springCss(k)}`);
+  const vars = (Object.keys(spring) as SpringToken[]).flatMap((k) => {
+    const css = springCss(k);
+    const cut = css.indexOf(" ");
+    return [`--spring-${k}:${css}`, `--spring-${k}-dur:${css.slice(0, cut)}`, `--spring-${k}-ease:${css.slice(cut + 1)}`];
+  });
   return `:root{${vars.join(";")}}`;
 }

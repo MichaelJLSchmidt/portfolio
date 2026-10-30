@@ -1,0 +1,96 @@
+<!-- Pareto chart of the UI inventory: patterns sorted by instances (bars), the cumulative share
+     (line), and the cut where the first version stopped. The distribution is generated from the
+     data file's totals, so bars, line and labels always agree with it. -->
+<style>
+  .chart {
+    position: absolute;
+    inset: 0;
+    padding: 26px 34px 18px;
+    color: var(--color-sheet);
+  }
+  /* Contour grey is 4.4:1 on the raised ground: labels here use the sheet colour. */
+  .chart > p {
+    margin-top: 6px;
+    color: var(--color-sheet);
+  }
+  .title {
+    color: var(--color-sheet);
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: 380px;
+    margin-top: 18px;
+    overflow: visible;
+  }
+  .grid {
+    stroke: var(--color-contour-dim);
+    stroke-width: 1;
+  }
+  .lbl {
+    fill: var(--color-sheet);
+    font-family: var(--label);
+    font-size: 11.5px;
+    font-stretch: var(--label-wdth);
+  }
+  .val {
+    fill: var(--color-sheet);
+    font-family: var(--label);
+    font-size: 19px;
+    font-stretch: var(--label-wdth);
+    font-weight: 700;
+  }
+  .ann {
+    fill: var(--color-sheet);
+    font-family: var(--diagram);
+    font-size: 13px;
+    font-weight: 600;
+  }
+</style>
+<div class="chart">
+  <h1 class="title">UI inventory: a few patterns do most of the work</h1>
+  <p class="label" id="sub"></p>
+  <svg id="c"></svg>
+</div>
+<script>
+  const I = window.DATA.inventory;
+  const fmt = (n) => n.toLocaleString("en");
+  document.getElementById("sub").textContent = `${fmt(I.instances)} instances across ${window.DATA.landscape.products} products · ${I.patterns} patterns, sorted by use · measured`;
+  // Instances per pattern: the core takes exactly coverPct of all instances, the rest the remainder,
+  // each falling off smoothly; rounding remainders go to the most used patterns.
+  const share = (count, total, k) => {
+    const w = Array.from({ length: count }, (_, i) => 1 / Math.pow(i + 1, k));
+    const sum = w.reduce((a, b) => a + b, 0);
+    const out = w.map((x) => Math.floor((x / sum) * total));
+    for (let i = 0, left = total - out.reduce((a, b) => a + b, 0); left > 0; i++, left--) out[i % count]++;
+    return out;
+  };
+  const coreTotal = Math.round((I.instances * I.coverPct) / 100);
+  const counts = [...share(I.core, coreTotal, 0.55), ...share(I.patterns - I.core, I.instances - coreTotal, 0.4)];
+  const svg = document.getElementById("c");
+  const W = svg.clientWidth, H = 380, L = 44, R = 50, T = 14, B = 34;
+  const max = counts[0];
+  const bw = (W - L - R) / counts.length;
+  const yb = (v) => T + (1 - v / max) * (H - T - B);
+  const yp = (p) => T + (1 - p / 100) * (H - T - B);
+  let s = "";
+  for (const p of [0, 50, 80, 100]) s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${yp(p)}" y2="${yp(p)}"/><text class="lbl" x="${W - R + 8}" y="${yp(p) + 4}">${p}%</text>`;
+  let cum = 0;
+  let line = "";
+  counts.forEach((c, i) => {
+    s += `<rect x="${L + i * bw + 1}" y="${yb(c)}" width="${Math.max(bw - 2, 1)}" height="${yb(0) - yb(c)}" fill="${i < I.core ? "#C8F5B0" : "#8A8C80"}" opacity="${i < I.core ? 0.85 : 0.6}"/>`;
+    cum += c;
+    line += `${i ? "L" : "M"}${L + (i + 1) * bw} ${yp((cum / I.instances) * 100)}`;
+  });
+  s += `<path d="${line}" fill="none" stroke="#DDE3E3" stroke-width="2.5"/>`;
+  const cut = L + I.core * bw;
+  s += `<line x1="${cut}" x2="${cut}" y1="${T - 6}" y2="${H - B}" stroke="#C8F5B0" stroke-width="2" stroke-dasharray="5 4"/>`;
+  s += `<circle cx="${cut}" cy="${yp(I.coverPct)}" r="6" fill="#C8F5B0"/>`;
+  s += `<text class="val" x="${cut + 12}" y="${yp(I.coverPct) + 26}">${I.coverPct}% of screens</text>`;
+  s += `<text class="ann" x="${cut - 10}" y="${T + 14}" text-anchor="end">First version: ${I.core} patterns</text>`;
+  s += `<text class="ann" x="${cut + 12}" y="${T + 14}">The other ${I.patterns - I.core}</text>`;
+  s += `<text class="lbl" x="${L}" y="${H - 12}">Most used</text><text class="lbl" x="${W - R}" y="${H - 12}" text-anchor="end">Least used</text>`;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.innerHTML = s;
+  if (cum !== I.instances) throw new Error(`${cum} instances charted, ${I.instances} expected`);
+</script>

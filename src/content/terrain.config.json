@@ -65,32 +65,6 @@
   ],
   "cards": [
     {
-      "id": "ikn-000",
-      "kind": "crop",
-      "center": {
-        "lon": 7.9,
-        "lat": 46.625
-      },
-      "widthKm": 36,
-      "aspect": 1.5,
-      "contourIntervalM": 200,
-      "indexEvery": 5,
-      "morphWidth": 512
-    },
-    {
-      "id": "dvb-001",
-      "kind": "seeded",
-      "seed": 1,
-      "lines": 20,
-      "indexEvery": 4,
-      "aspect": 1.5,
-      "elevationRangeM": [
-        520,
-        2380
-      ],
-      "morphWidth": 512
-    },
-    {
       "id": "lab-099",
       "kind": "seeded",
       "example": true,
@@ -103,7 +77,96 @@
         2510
       ],
       "morphWidth": 512
+    },
+    {
+      "id": "lab-097",
+      "kind": "seeded",
+      "example": true,
+      "seed": 97,
+      "lines": 20,
+      "indexEvery": 4,
+      "aspect": 1.5,
+      "elevationRangeM": [
+        560,
+        2280
+      ],
+      "morphWidth": 512
+    },
+    {
+      "id": "lab-098",
+      "kind": "seeded",
+      "example": true,
+      "seed": 98,
+      "lines": 20,
+      "indexEvery": 4,
+      "aspect": 1.5,
+      "elevationRangeM": [
+        720,
+        3140
+      ],
+      "morphWidth": 512
     }
   ],
-  "heightmapBlurSigma": 1
+  "heightmapBlurSigma": 1,
+  "profile": {
+    "id": "interlaken-jungfrau",
+    "trail": [
+      {
+        "lon": 7.8632,
+        "lat": 46.6863
+      },
+      {
+        "lon": 7.8689,
+        "lat": 46.6658
+      },
+      {
+        "lon": 7.902,
+        "lat": 46.6316
+      },
+      {
+        "lon": 7.9089,
+        "lat": 46.5935
+      },
+      {
+        "lon": 7.9216,
+        "lat": 46.605
+      },
+      {
+        "lon": 7.9614,
+        "lat": 46.5853
+      },
+      {
+        "lon": 7.974,
+        "lat": 46.5743
+      },
+      {
+        "lon": 7.985,
+        "lat": 46.5475
+      },
+      {
+        "lon": 7.9625,
+        "lat": 46.5372
+      }
+    ],
+    "waypoints": [
+      {
+        "lon": 7.8632,
+        "lat": 46.6863,
+        "label": "Interlaken"
+      },
+      {
+        "lon": 7.9089,
+        "lat": 46.5935
+      },
+      {
+        "lon": 7.9614,
+        "lat": 46.5853
+      },
+      {
+        "lon": 7.9625,
+        "lat": 46.5372,
+        "label": "Jungfrau"
+      }
+    ]
+  }
 }

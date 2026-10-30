@@ -1,256 +1,287 @@
 .main {
+  --main-top: 96px;
+  --main-gap: clamp(48px, 7vw, 112px);
   display: grid;
-  gap: clamp(56px, 8vw, 128px);
-  padding-top: 96px;
-  padding-bottom: 64px;
-}
-
-.crumbs a {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6em;
-  min-height: 44px;
-  color: var(--color-glacier);
-  text-decoration: none;
-}
-
-.crumbs a:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  gap: var(--main-gap);
+  padding-top: var(--main-top);
 }
 
 /* ------------------------------------------------------------- header */
 
+/* The H1 is the HUD label's morph target: big, alone, with the lead beside it on desktop. */
+/* The field's zero-point pin sits at the centre of the screen, the Aare's start above it: both
+   stay in view and clear of text, so the header reaches 56 px past the screen's middle before the
+   legend begins (its text at the top on phones, beside the H1's baseline on desktop). */
 .header {
   display: grid;
-  gap: 28px;
-  margin-top: calc(-1 * clamp(32px, 5vw, 96px));
+  gap: 20px;
+  align-content: start;
+  align-items: end;
+  min-height: calc(50svh + 56px - var(--main-top) - var(--main-gap));
+  padding-top: clamp(24px, 6vw, 96px);
 }
 
-.artSlot,
-.art {
-  width: 100%;
-  aspect-ratio: 3 / 2;
-  border-radius: 12px;
-}
-
-.art {
-  height: auto;
-  box-shadow: 0 24px 60px rgb(0 0 0 / 0.45);
-}
-
-.intro {
-  display: grid;
-  gap: 16px;
-  align-content: end;
-}
-
-.eyebrow {
-  color: var(--color-glacier);
+/* Basecamp's one display size: its widest word (--title-em, measured at the display axes) fills
+   96% of the name's column, up to 12rem, so it never runs into the lead beside it. */
+.nameCell {
+  container-type: inline-size;
 }
 
 .name {
-  font-size: clamp(3rem, 11vw, 9rem);
+  font-size: min(calc(0.96 * 100cqi / var(--title-em, 5)), 12rem);
 }
 
-.role {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 16px;
-  font-size: 1.125rem;
-  font-stretch: var(--type-condensed-wdth);
-  font-weight: 600;
+.lead {
+  max-width: 36ch;
+  font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.75rem);
+  font-weight: 560;
+  line-height: 1.35;
 }
 
-.place {
-  color: var(--color-contour);
-  font-weight: 400;
+.lead[data-role] {
+  --kt-rest-wdth: 100%;
+  --kt-rest-wght: 560;
 }
 
-.statement {
-  max-width: 44ch;
-}
-
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .header {
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-    align-items: end;
-    gap: clamp(32px, 4vw, 72px);
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    align-content: end;
+    column-gap: clamp(32px, 4vw, 72px);
+  }
+
+  .lead {
+    align-self: end;
+    padding-bottom: 1.2em;
   }
 }
 
-/* ------------------------------------------------------------ sections */
+/* ------------------------------------------------------------- legend and bio */
 
-.section {
+.who {
   display: grid;
-  gap: clamp(24px, 4vw, 48px);
+  gap: clamp(28px, 4vw, 56px);
+  align-items: start;
 }
 
-.sectionHead {
+.legend {
   display: grid;
-  gap: 12px;
-  max-width: 46rem;
+  gap: 14px;
 }
 
-.sectionHeading {
-  font-size: clamp(2.5rem, 9vw, 7rem);
-}
-
-/* Rope team: principles as trail markers (a stylised mountain-trail blaze). */
-.markers {
-  display: grid;
-  gap: 20px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-/* Each marker is a map-legend panel (globals.css). */
-.marker {
-  display: grid;
-  gap: 10px;
-  align-content: start;
-}
-
-.blaze {
-  display: block;
-  width: 42px;
-  height: 18px;
-  border-radius: 2px;
-  background: linear-gradient(
-    to bottom,
-    var(--color-sheet) 0 33%,
-    var(--color-alpenglow) 33% 67%,
-    var(--color-sheet) 67%
-  );
-}
-
-.markerTitle {
-  font-size: clamp(1.75rem, 3vw, 2.5rem);
-}
-
-.metric {
-  color: var(--color-glacier);
-}
-
-@media (min-width: 900px) {
-  .markers {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: clamp(24px, 3vw, 56px);
-  }
-}
-
-/* Craft: plaques in the card's language (neatline, keyword, reminder text, mono stats). */
-.plaques {
-  display: grid;
-  gap: 20px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.plaque {
-  position: relative;
-  display: grid;
-  gap: 12px;
-  align-content: start;
-  padding: 28px;
-  border: 1px solid var(--color-contour-dim);
-  border-radius: 16px;
-  background:
-    radial-gradient(130% 70% at 50% 0%, var(--color-ground-raised), transparent 75%),
-    var(--color-ground);
-}
-
-.plaque::before {
-  content: "";
-  position: absolute;
-  inset: 7px;
-  border: 1px solid var(--color-summit-gold);
-  border-radius: 10px;
-  pointer-events: none;
-}
-
-.plaqueTerm {
-  font-size: clamp(2rem, 3.4vw, 2.75rem);
-  font-stretch: var(--axis-display-compact-wdth);
-}
-
-.reminder {
-  color: var(--color-contour);
-}
-
-.plaqueStats {
-  display: grid;
-  grid-template-columns: repeat(var(--cells, 2), minmax(0, 1fr));
-  margin: 8px 0 0;
-  border-top: 1px solid var(--color-contour-dim);
-}
-
-.plaqueStats > div {
-  display: flex;
-  flex-direction: column-reverse;
-  gap: 2px;
-  padding-top: 12px;
-}
-
-.plaqueStats dt {
-  color: var(--color-contour);
-  font-family: var(--font-martian), ui-monospace, monospace;
-  font-size: var(--type-hud-size);
-  font-stretch: var(--axis-mono-rest-wdth);
-  letter-spacing: var(--type-hud-tracking);
-  text-transform: uppercase;
-}
-
-.plaqueStats dd {
-  margin: 0;
-  font-family: var(--font-martian), ui-monospace, monospace;
-  font-size: 1.375rem;
-  font-stretch: var(--axis-mono-rest-wdth);
+.legendHeading {
+  --kt-color: var(--color-moss-ink);
+  color: var(--color-moss-ink);
   font-weight: 700;
 }
 
-@media (min-width: 900px) {
-  .plaques {
+.legendHeading[data-role] {
+  --kt-rest-wght: 700;
+  --kt-from-wght: 700;
+}
+
+.legendRows {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+
+.legendRows > div {
+  display: grid;
+  gap: 2px 16px;
+  padding-block: 10px;
+  border-top: 1px solid rgb(90 92 82 / 0.45);
+}
+
+/* Label beside value where there is room; above it on phones. */
+@media (min-width: 640px) {
+  .legendRows > div {
+    grid-template-columns: minmax(6.5rem, 9rem) minmax(0, 1fr);
+  }
+}
+
+.legendRows dt {
+  color: var(--color-sheet-ink);
+  font-family: var(--font-mono);
+  font-size: var(--type-hud-size);
+  font-stretch: var(--axis-mono-rest-wdth);
+  letter-spacing: var(--type-hud-tracking);
+  line-height: 1.9;
+  text-transform: uppercase;
+}
+
+.legendLabel[data-role] {
+  --kt-color: var(--color-sheet-ink);
+}
+
+.legendRows dd {
+  margin: 0;
+  color: var(--color-ground);
+  overflow-wrap: anywhere;
+}
+
+.bio {
+  display: grid;
+  gap: 18px;
+}
+
+.bioHeading {
+  --kt-color: var(--color-glacier);
+  color: var(--color-glacier);
+}
+
+@media (min-width: 1024px) {
+  .who {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
+}
+
+/* ------------------------------------------------------------- sections */
+
+.section {
+  display: grid;
+  gap: clamp(20px, 3vw, 40px);
+  align-content: start;
+}
+
+.sectionHeading {
+  font-size: clamp(2.5rem, 8vw, 6.5rem);
+}
+
+/* Rope rules: six short agreements, two or three to a row. */
+.ropeRules {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .ropeRules {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .ropeRules {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
-/* Off the trail. */
-.offTrailBody {
-  display: grid;
-  gap: 20px;
-  max-width: 46rem;
+.ropeLead[data-role] {
+  --kt-rest-wdth: 100%;
+  --kt-rest-wght: 700;
 }
 
-.flavor {
-  color: var(--color-glacier);
-  font-size: clamp(1.5rem, 3vw, 2.25rem);
-  line-height: 1.25;
+/* First 90 days: three stages, left to right on desktop, joined by a short contour trail that
+   draws once as they come into view (data-reveal="mark"): across their tops on desktop, down
+   their left edge on phones. */
+.daysWrap {
+  position: relative;
+  padding-left: 28px;
 }
 
-@media (min-width: 900px) {
-  .offTrail {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-    align-items: start;
+.daysTrail,
+.daysTrailDown {
+  position: absolute;
+  overflow: visible;
+  fill: none;
+  stroke: var(--color-glacier);
+  stroke-linecap: round;
+  stroke-width: 1.5;
+}
+
+.daysTrail {
+  display: none;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 28px;
+}
+
+.daysTrailDown {
+  top: 12px;
+  bottom: 12px;
+  left: 2px;
+  width: 16px;
+  height: calc(100% - 24px);
+}
+
+@media (min-width: 1024px) {
+  .daysWrap {
+    padding: 36px 0 0;
+  }
+
+  .daysTrail {
+    display: block;
+  }
+
+  .daysTrailDown {
+    display: none;
   }
 }
 
-/* Contact. */
-.contact {
+/* First 90 days: three stages, left to right on desktop. */
+.days {
   display: grid;
-  gap: 20px;
-  justify-items: center;
-  padding-block: clamp(32px, 6vw, 96px);
-  text-align: center;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.contactHeading {
-  font-size: clamp(2.75rem, 10vw, 8.5rem);
+.day {
+  display: grid;
+  gap: 8px;
+  align-content: start;
 }
 
-.contact > ul {
-  justify-content: center;
+.dayRange {
+  color: var(--color-glacier);
+}
+
+.dayTitle {
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: 700;
+  font-stretch: var(--type-condensed-wdth);
+}
+
+/* A small settle from the breath above its condensed rest axes (SettleText role "text"). */
+.dayTitle[data-role] {
+  --kt-rest-wdth: var(--type-condensed-wdth);
+  --kt-rest-wght: 700;
+}
+
+@media (min-width: 1024px) {
+  .days {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Craft and off the map, side by side on desktop. */
+.pair {
+  display: grid;
+  gap: clamp(48px, 7vw, 112px);
+}
+
+.offMapHead {
+  display: grid;
+  gap: 10px;
+}
+
+.headRule {
+  width: min(100%, 12rem);
+}
+
+@media (min-width: 1024px) {
+  .pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: clamp(32px, 4vw, 72px);
+  }
+
+  /* No eyebrow here: the heading lines up with the one beside it. */
+  .offMapHead {
+    padding-top: calc(var(--type-hud-size) * 1.4 + 10px);
+  }
 }

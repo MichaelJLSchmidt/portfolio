@@ -1,0 +1,53 @@
+{
+  "$comment": "Input for scripts/terrain/bern.mjs (npm run terrain:bern): the Basecamp terrain, an 8 × 8 km window centred on the zero point of the Swiss coordinate system. Outputs land in public/terrain/bern/.",
+  "id": "bern",
+  "label": "Bern",
+  "zeroPoint": {
+    "e": 2600000,
+    "n": 1200000,
+    "label": "Zero point of LV95: the old observatory in Bern (swisstopo)"
+  },
+  "bboxLv95": [2596000, 1196000, 2604000, 1204000],
+  "source": {
+    "stacApi": "https://data.geo.admin.ch/api/stac/v1",
+    "collection": "ch.swisstopo.swissaltiregio",
+    "item": "swissaltiregio"
+  },
+  "heightmaps": [
+    { "name": "heightmap-1536", "width": 1536, "use": "desktop" },
+    { "name": "heightmap-800", "width": 800, "use": "mobile" }
+  ],
+  "quantisationM": 0.1,
+  "blurSigmaM": 12,
+  "intervalsM": [10, 20, 50],
+  "indexEvery": 5,
+  "poster": {
+    "intervalsM": [10, 20],
+    "gridWidth": 800,
+    "blurSigmaM": 14,
+    "simplifyTolerance": 0.45
+  },
+  "river": {
+    "name": "Aare",
+    "api": "https://api3.geo.admin.ch/rest/services/api/MapServer/identify",
+    "layer": "ch.swisstopo.swisstlm3d-gewaessernetz",
+    "nameIncludes": "Aare",
+    "simplifyM": 5
+  },
+  "cityFacts": {
+    "$comment": "Stadt Bern statistics (data from swisstopo), used as labels and sanity checks of the DEM.",
+    "lowestM": 481,
+    "lowestLabel": "the Aare leaving the city",
+    "highestM": 674,
+    "highestLabel": "Könizberg",
+    "stationM": 541,
+    "station": { "e": 2600070, "n": 1199780 },
+    "toleranceM": 6
+  },
+  "placeholder": {
+    "$comment": "Only when the elevation download fails: seeded low-relief noise, flagged as a placeholder everywhere.",
+    "seed": 2600,
+    "elevationRangeM": [480, 950],
+    "resolutionM": 10
+  }
+}

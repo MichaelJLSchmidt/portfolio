@@ -11,7 +11,7 @@ html {
   text-size-adjust: 100%;
   background: var(--color-ground);
   color: var(--color-sheet);
-  font-family: var(--font-archivo), system-ui, sans-serif;
+  font-family: var(--font-text);
   font-size: 100%;
   font-stretch: 100%;
 }
@@ -55,13 +55,127 @@ button {
   color: inherit;
 }
 
+/* Focus rings, never removed: mint on dark, moss-ink on the light sheet. A ring arrives 6 px out
+   and eases in to 3 px while it fades in (--dur-tap); still mode keeps the fade only. Forced
+   colours draw it in the system's highlight. */
 :focus-visible {
   outline: 2px solid var(--color-glacier);
-  outline-offset: 4px;
+  outline-offset: 3px;
+}
+
+:is(.map-sheet, [data-ink="sheet"], [data-surface="sheet"], .surface-copy) :focus-visible {
+  outline-color: var(--color-moss-ink);
+}
+
+@keyframes focus-ring {
+  from {
+    outline-color: transparent;
+    outline-offset: 6px;
+  }
+}
+
+@keyframes focus-fade {
+  from {
+    outline-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) :focus-visible {
+    animation: focus-ring var(--dur-tap) var(--ease-settle);
+  }
+}
+
+:root[data-motion="still"] :focus-visible {
+  animation: focus-fade var(--dur-tap) linear;
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline-color: Highlight;
+  }
+
+  /* Forced colours: no glint (the field and the cards' foil leave too, in their own styles). */
+  [data-glint] {
+    display: none;
+  }
+}
+
+/* The H1 focused after a route change (RouteArrival) is announced, not operated: no ring. */
+[data-route-focus]:focus {
+  outline: none;
+  animation: none;
+}
+
+/* Fallbacks while the web fonts load. next/font's own are local(Arial), which many phones and
+   Linux don't have; these take the first of several common faces and give them the web font's
+   metrics (overrides are divided by size-adjust), so the swap moves as little as possible:
+   - text: Archivo at wdth 100 (Liberation Sans and Arimo share Arial's widths: next/font's values);
+   - mono: Martian Mono at its rest width (0.65 em a character over a 0.6 em monospace; ascent
+     1 em, descent 0.2 em);
+   - display: Archivo's vertical metrics (ascent 0.878 em, descent 0.21 em) on a face narrowed
+     towards the condensed cut; with every display letter in a box of its measured width
+     (SettleText widths="display") the swap moves nothing;
+   - breath: Archivo at the label's breath axes (wdth 112, wght 650), about 19% wider than at wdth
+     100, for the boxes links and buttons reserve at that state (their ghosts): a fallback can't
+     widen, so without it those boxes grow when the web font arrives and rows rewrap;
+   - condensed: Archivo at wdth 88, wght 600 (the case-study type line, in the first viewport),
+     about 5% narrower than at wdth 100, so its line breaks are the web font's. */
+@font-face {
+  font-family: "Archivo Text Fallback";
+  src: local("Arial"), local("Liberation Sans"), local("Arimo"), local("Helvetica Neue"), local("Helvetica"), local("Roboto"), local("Noto Sans");
+  size-adjust: 98.7%;
+  ascent-override: 88.96%;
+  descent-override: 21.28%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Archivo Breath Fallback";
+  src: local("Arial"), local("Liberation Sans"), local("Arimo"), local("Helvetica Neue"), local("Helvetica"), local("Roboto"), local("Noto Sans");
+  size-adjust: 117.5%;
+  ascent-override: 74.73%;
+  descent-override: 17.88%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Archivo Condensed Fallback";
+  src: local("Arial"), local("Liberation Sans"), local("Arimo"), local("Helvetica Neue"), local("Helvetica"), local("Roboto"), local("Noto Sans");
+  size-adjust: 94%;
+  ascent-override: 93.41%;
+  descent-override: 22.34%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Martian Mono Local Fallback";
+  src: local("Menlo"), local("Liberation Mono"), local("DejaVu Sans Mono"), local("Roboto Mono"), local("Consolas"), local("Courier New");
+  size-adjust: 108.3%;
+  ascent-override: 92.34%;
+  descent-override: 18.47%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Archivo Display Fallback";
+  src: local("Arial"), local("Helvetica Neue"), local("Helvetica"), local("Roboto"), local("Liberation Sans"), local("Noto Sans"), local("DejaVu Sans"), local("Segoe UI");
+  size-adjust: 70%;
+  ascent-override: 125.43%;
+  descent-override: 30%;
+  line-gap-override: 0%;
+}
+
+:root {
+  --font-text: "Archivo", "Archivo Text Fallback", var(--font-archivo), system-ui, sans-serif;
+  --font-text-breath: "Archivo", "Archivo Breath Fallback", var(--font-archivo), system-ui, sans-serif;
+  --font-text-condensed: "Archivo", "Archivo Condensed Fallback", var(--font-archivo), system-ui, sans-serif;
+  --font-mono: "Martian Mono", "Martian Mono Local Fallback", var(--font-martian), ui-monospace, monospace;
+  --font-display: "Archivo", "Archivo Display Fallback", var(--font-archivo), system-ui, sans-serif;
 }
 
 .display {
-  font-family: var(--font-archivo), system-ui, sans-serif;
+  font-family: var(--font-display);
   font-weight: var(--axis-display-rest-wght);
   font-stretch: var(--axis-display-rest-wdth);
   line-height: var(--type-display-lh);
@@ -70,7 +184,7 @@ button {
 }
 
 .hud-label {
-  font-family: var(--font-martian), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: var(--type-hud-size);
   letter-spacing: var(--type-hud-tracking);
   font-stretch: var(--axis-mono-rest-wdth);
@@ -90,19 +204,48 @@ button {
   border: 0;
 }
 
+/* The skip link waits in place, invisible, and appears where it is: a 120 ms fade while its label
+   settles from the label's reveal width (still mode: the fade only). */
 .skip-link {
-  position: absolute;
-  left: 1rem;
-  top: 1rem;
+  position: fixed;
+  left: var(--gutter);
+  top: 12px;
   z-index: var(--layer-skip-link);
   padding: 0.5rem 0.875rem;
+  border-radius: 4px;
   background: var(--color-sheet);
   color: var(--color-ground);
-  transform: translateY(-200%);
+  font-stretch: var(--axis-label-rest-wdth);
+  font-weight: var(--axis-label-rest-wght);
+  text-decoration: none;
+  opacity: 0;
+  pointer-events: none;
 }
 
-.skip-link:focus-visible {
-  transform: none;
+.skip-link:focus {
+  opacity: 1;
+  pointer-events: auto;
+  outline-color: var(--color-moss-ink);
+}
+
+@keyframes skip-settle {
+  from {
+    opacity: 0;
+    font-stretch: var(--axis-label-reveal-wdth);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .skip-link:focus {
+    animation:
+      skip-settle var(--dur-tap) var(--ease-settle),
+      focus-ring var(--dur-tap) var(--ease-settle);
+  }
+}
+
+:root[data-motion="still"] .skip-link:focus {
+  animation: focus-fade var(--dur-tap) linear;
+  transition: opacity var(--dur-tap) linear;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -113,11 +256,17 @@ button {
   }
 }
 
+/* Italic: the local text fallback until italic text comes near the screen (html[data-italic],
+   src/lib/italic-face.ts), so the italic face is fetched only where italic is read. */
 em,
 i,
 .italic {
-  font-family: var(--font-archivo-italic), var(--font-archivo), system-ui, sans-serif;
+  font-family: "Archivo Text Fallback", system-ui, sans-serif;
   font-style: italic;
+}
+
+:root[data-italic] :is(em, i, .italic) {
+  font-family: var(--font-archivo-italic), var(--font-archivo), system-ui, sans-serif;
 }
 
 :root {
@@ -149,6 +298,16 @@ i,
 .map-halo {
   text-shadow:
     0 0 2px var(--color-ground),
+    0 0 6px var(--color-ground),
+    0 0 14px var(--color-ground);
+}
+
+/* Over the poster (no field, so no quiet zones) a denser halo keeps labels at 7:1 where its
+   lines run close together. */
+:root:not(:has([data-field="on"])) .map-halo {
+  text-shadow:
+    0 0 1px var(--color-ground),
+    0 0 3px var(--color-ground),
     0 0 6px var(--color-ground),
     0 0 14px var(--color-ground);
 }
@@ -221,34 +380,36 @@ i,
 }
 
 /* ------------------------------------------------------------------------------------
-   View transitions (React <ViewTransition> on route changes)
+   View transitions (React <ViewTransition> on route changes; kinds in src/lib/view-transition.ts)
 
-   Durations follow Material 3's scale (medium 250–400 ms, long 450–600 ms, extra-long
-   700–1000 ms) and the rule that duration grows with travel distance and size change:
-   - exit:   the old page dissolves in --dur-medium (360 ms), a plus-lighter crossfade;
-   - travel: the card artwork and title fly to the header in --dur-scenic (900 ms) with a
-             strong decelerate, the longest move on screen;
-   - enter:  the new page arrives with the root crossfade (its first-viewport text is never
-             hidden, reveal.ts), and the title settles once the morph has landed (SettleText);
-   - field:  the background terrain morphs over --dur-cinematic (1.4 s) with a camera push.
+   A link navigation (the route's arrival, RouteArrival and `arrival` in the tokens):
+   - 0 ms:   the press state and the haptic (the link or card itself);
+   - leave:  the old page's own content fades out over --dur-leave (160 ms) while the new page
+             fades in over the same, a plus-lighter crossfade, so the shared map and HUD keep
+             constant brightness and the new text never waits;
+   - travel: the shared artwork and title (card → header and H1, mini card → next header, HUD
+             label → Basecamp H1) travel on the share spring (420 ms, --spring-share-*);
+   - then:   the new page's parts follow from the commit (data-arrive-at, SettleText `arrive`) and
+             the H1 settles once the morph has landed, its glint after it;
+   - field:  the background terrain morphs over --dur-terrain (700 ms) from the same commit.
+   Browser back and forward (html[data-vt="traverse"]): a --dur-crossfade (180 ms) cross-fade plus
+   the shared elements where both pages have them; no arrival choreography, no glint.
    ------------------------------------------------------------------------------------ */
 ::view-transition {
   pointer-events: none;
 }
 
-/* Root: a true crossfade (matched linear curves, plus-lighter), so the shared map and
-   HUD keep constant brightness. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   mix-blend-mode: plus-lighter;
 }
 
 ::view-transition-old(root) {
-  animation: vt-exit var(--dur-medium) linear both;
+  animation: vt-exit var(--dur-leave) linear both;
 }
 
 ::view-transition-new(root) {
-  animation: vt-enter var(--dur-medium) linear both;
+  animation: vt-enter var(--dur-leave) linear both;
 }
 
 @keyframes vt-exit {
@@ -263,19 +424,19 @@ i,
   }
 }
 
-/* Shared elements travel on one curve. */
+/* Shared elements travel on the share spring. */
 ::view-transition-group(.morph) {
-  animation-duration: var(--dur-scenic);
-  animation-timing-function: var(--ease-drop);
+  animation-duration: var(--spring-share-dur);
+  animation-timing-function: var(--spring-share-ease);
 }
 
-/* Artwork: same terrain at a similar aspect, so a long, even crossfade is seamless. */
+/* Artwork: same terrain at a similar aspect, so an even crossfade in flight is seamless. */
 ::view-transition-old(.morph-art),
 ::view-transition-new(.morph-art) {
   height: 100%;
   object-fit: cover;
-  animation-duration: var(--dur-scenic);
-  animation-timing-function: var(--ease-drop);
+  animation-duration: var(--spring-share-dur);
+  animation-timing-function: var(--ease-settle);
 }
 
 /* Title: the box travels, the text does not scale. Both snapshots keep their own size,
@@ -289,11 +450,11 @@ i,
 }
 
 ::view-transition-old(.morph-title) {
-  animation: vt-title-old var(--dur-scenic) linear both;
+  animation: vt-title-old var(--spring-share-dur) linear both;
 }
 
 ::view-transition-new(.morph-title) {
-  animation: vt-title-new var(--dur-scenic) linear both;
+  animation: vt-title-new var(--spring-share-dur) linear both;
 }
 
 @keyframes vt-title-old {
@@ -316,11 +477,47 @@ i,
 
 /* Named parts without a partner (the other cards) leave and arrive with the page. */
 ::view-transition-old(.morph):only-child {
-  animation: vt-exit var(--dur-medium) var(--ease-scree) both;
+  animation: vt-exit var(--dur-leave) var(--ease-scree) both;
 }
 
 ::view-transition-new(.morph):only-child {
   animation: vt-enter var(--dur-long) var(--ease-trail) both;
+}
+
+/* Browser back and forward: a short cross-fade; the shared elements keep the share spring. */
+:root[data-vt="traverse"]::view-transition-old(root),
+:root[data-vt="traverse"]::view-transition-new(root),
+:root[data-vt="traverse"]::view-transition-old(.morph):only-child,
+:root[data-vt="traverse"]::view-transition-new(.morph):only-child {
+  animation-duration: var(--dur-crossfade);
+  animation-timing-function: linear;
+}
+
+/* The deck's Cards ⇄ Index switch (html[data-vt="view"], Deck.tsx): each card's name morphs into
+   its row's name, and the page cross-fades, over --dur-medium (360 ms). Calm (data-vt="view-calm")
+   only cross-fades: the shared names are switched off for that transition. */
+:root[data-vt="view"]::view-transition-group(.morph),
+:root[data-vt="view"]::view-transition-old(root),
+:root[data-vt="view"]::view-transition-new(root) {
+  animation-duration: var(--dur-medium);
+  animation-timing-function: var(--ease-settle);
+}
+
+:root[data-vt="view"]::view-transition-old(.morph-title) {
+  animation: vt-title-old var(--dur-medium) linear both;
+}
+
+:root[data-vt="view"]::view-transition-new(.morph-title) {
+  animation: vt-title-new var(--dur-medium) linear both;
+}
+
+:root[data-vt="view-calm"] [style*="view-transition-name"] {
+  view-transition-name: none !important;
+}
+
+:root[data-vt="view-calm"]::view-transition-old(root),
+:root[data-vt="view-calm"]::view-transition-new(root) {
+  animation-duration: var(--dur-medium);
 }
 
 /* Back into the deck: "card reassembly" (html[data-vt="return"], return-transition.ts).

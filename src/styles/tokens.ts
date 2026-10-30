@@ -73,6 +73,8 @@ export const axes = {
     reveal: { wdth: 112.5, wght: 500 },
     hover: { wdth: 100, wght: 500 },
     press: { wdth: 80, wght: 500 },
+    /** The HUD once the page has scrolled: Martian Mono's narrowest width. */
+    condensed: { wdth: 75, wght: 500 },
   },
 } as const;
 
@@ -113,6 +115,24 @@ export const duration = {
   glint: 900,
   /** A line or neatline drawing on. */
   draw: 900,
+  /** A small mark tracing itself: the logo's rings after a route change, a card's rarity shape. */
+  trace: 400,
+  /** Content that is not shared leaves the screen as a route starts. */
+  leave: 160,
+  /** Back and forward: the pages cross-fade (shared elements still morph). */
+  crossfade: 180,
+  /** A bottom sheet opening (the altimeter's jump list). */
+  sheet: 300,
+  /** A small sheet unfolding: the fiction banner, a hotspot's note. */
+  unfold: 240,
+  /** A route's arrival: everything on the new page has landed (see `arrival`). */
+  arrival: 740,
+  /** A card's artwork contours shift by one interval on hover. */
+  shift: 600,
+  /** Hovering a link to another terrain leans the field towards it (and back on leave). */
+  prewarm: 400,
+  /** How long a toast stays before it leaves (not motion: a reading time). */
+  toast: 4000,
 } as const;
 
 export type DurationToken = keyof typeof duration;
@@ -159,6 +179,21 @@ export const stagger = {
   card: { step: 70, cap: 420 },
 } as const;
 
+/**
+ * A route's arrival (a link navigation in full and calm; RouteArrival), in ms after the route
+ * commits, the moment the field's conductor starts: the old page's own content leaves over
+ * `duration.leave`, the shared artwork and title travel on `spring.share`, then the new page's
+ * parts follow, all landed by `duration.arrival`. Text never waits: it is readable throughout.
+ */
+export const arrival = {
+  /** A case study's type and meta lines settle. */
+  lines: 260,
+  /** A case study's summary sheet unfolds (to the arrival's end). */
+  summary: 380,
+  /** Basecamp: the lead settles and the legend unfolds, the H1 having landed. */
+  landed: 420,
+} as const;
+
 /** Distances in px (tilt in degrees). */
 export const distance = {
   /** Blocks rise this far as they reveal. */
@@ -171,12 +206,20 @@ export const distance = {
   lift: -6,
   /** Largest card tilt. */
   tiltMax: 5,
+  /** Largest tilt of a mini card (the trailhead band). */
+  tiltMini: 3,
+  /** The card's tilt perspective. */
+  perspective: 900,
+  /** The HUD condenses once the page has scrolled this far. */
+  hudCondense: 120,
 } as const;
 
 /** Scale factors. */
 export const scale = {
   /** A pressed button. */
   press: 0.97,
+  /** A pressed card (touch, and as it opens). */
+  cardPress: 0.98,
 } as const;
 
 /** The single mint pass: one band across the text, on dark surfaces only. */
@@ -237,6 +280,30 @@ export const haptics = {
 
 export type HapticEvent = keyof typeof haptics.patterns;
 
+/**
+ * Layout breakpoints (CSS px, min-width): at most three. Media queries can't read custom
+ * properties, so stylesheets write them literally, `(min-width: 960px)` or `(width < 960px)`;
+ * npm test checks that every width query in a stylesheet uses one of these.
+ */
+export const breakpoint = {
+  /** Past phones: the HUD shows the readout and the haptics switch; two-up grids. */
+  sm: 640,
+  /** The HUD's whole navigation; two-column hero, case-study and Basecamp headers; four-up grids. */
+  md: 1024,
+  /** The HUD's Bern time and the readout's coordinates; the trail beside a case study's waypoints. */
+  lg: 1280,
+} as const;
+
+export type Breakpoint = keyof typeof breakpoint;
+
+/**
+ * Device profile (not a layout breakpoint): a fine pointer and a long edge of at least
+ * `desktopMinEdgePx` is the desktop tier (html[data-tier], the field's tier A).
+ */
+export const device = {
+  desktopMinEdgePx: 900,
+} as const;
+
 /** Stacking layers of the page (local stacking inside a component stays local). */
 export const layer = {
   backdrop: 0,
@@ -244,14 +311,6 @@ export const layer = {
   hud: 30,
   overlay: 40,
   skipLink: 100,
-} as const;
-
-/**
- * Values that phase 4 (cards and deck) replaces with the tokens above: the current card tilt,
- * kept as it is until then so this phase changes nothing visible on the cards.
- */
-export const legacy = {
-  tilt: { spring: { stiffness: 150, damping: 18, mass: 0.6 }, maxDeg: 14 },
 } as const;
 
 export const cubicBezier = (e: EasingToken) => `cubic-bezier(${easing[e].join(",")})`;
@@ -300,7 +359,7 @@ export function tokensToCss({ motion = true }: { motion?: boolean } = {}): strin
     if ("cap" in s) vars.push(`--stagger-${k}-cap:${s.cap}ms`);
     if ("max" in s) vars.push(`--stagger-${k}-max:${s.max}`);
   }
-  for (const [k, v] of Object.entries(distance)) vars.push(`--dist-${kebab(k)}:${v}${k === "tiltMax" ? "deg" : "px"}`);
+  for (const [k, v] of Object.entries(distance)) vars.push(`--dist-${kebab(k)}:${v}${/^tilt/.test(k) ? "deg" : "px"}`);
   vars.push(
     `--glint-band:${glint.band}%`,
     `--glint-angle:${glint.angle}deg`,
@@ -309,6 +368,7 @@ export function tokensToCss({ motion = true }: { motion?: boolean } = {}): strin
     `--headlamp-fade:${headlamp.fadeMs}ms`,
     `--headlamp-shine:${headlamp.shineMax * 100}%`,
     `--scale-press:${scale.press}`,
+    `--scale-card-press:${scale.cardPress}`,
   );
   for (const [k, v] of Object.entries(layer)) vars.push(`--layer-${kebab(k)}:${v}`);
   return `:root{${vars.join(";")}}`;

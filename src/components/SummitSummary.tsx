@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
+import { SettleText } from "@/components/motion/SettleText";
 import { hasValue } from "@/lib/content";
 import styles from "./SummitSummary.module.css";
 
@@ -16,7 +17,12 @@ export type SummaryRow = {
 
 const SHORT_STAT = 16;
 
-/** "Summit summary" panel in the sheet colour: the facts a reader scans first. */
+/**
+ * "Summit summary" panel in the sheet colour: the facts a reader scans first. A map sheet: it
+ * unfolds from its top fold over --dur-medium (in the first viewport: as the page arrives by a
+ * link, `arriveAt` after the commit; otherwise as it scrolls into view), its rows fading in one
+ * after another; the values never move.
+ */
 export function SummitSummary({
   id,
   heading,
@@ -25,6 +31,7 @@ export function SummitSummary({
   className,
   style,
   exitOnReturn = false,
+  arriveAt,
 }: {
   id: string;
   heading: string;
@@ -35,6 +42,8 @@ export function SummitSummary({
   style?: CSSProperties;
   /** Leaves first when going back to the deck (return-transition.ts). */
   exitOnReturn?: boolean;
+  /** Milliseconds after a route commits at which the sheet unfolds when it is on screen (`arrival`). */
+  arriveAt?: number;
 }) {
   return (
     <section
@@ -43,15 +52,21 @@ export function SummitSummary({
       aria-labelledby={id}
       data-vt-exit={exitOnReturn ? "" : undefined}
       data-ink="sheet"
+      data-reveal="sheet"
+      data-fold="top"
+      data-arrive-at={arriveAt}
     >
-      <h2 id={id} className={`${styles.heading} hud-label`}>
-        {heading}
-      </h2>
-      <dl className={`${styles.grid} surface-copy`}>
+      <SettleText as="h2" id={id} text={heading} mode="chars" role="mono" trigger="inview" className={`${styles.heading} hud-label`} />
+      <dl className={`${styles.grid} surface-copy`} data-sheet-rows="">
         {rows
           .filter((row) => row.content || hasValue(row.value))
-          .map((row) => (
-            <div key={row.label} className={row.wide ? styles.wide : undefined} data-long={row.stat && (row.value?.length ?? 0) > SHORT_STAT ? "" : undefined}>
+          .map((row, i) => (
+            <div
+              key={row.label}
+              className={row.wide ? styles.wide : undefined}
+              data-long={row.stat && (row.value?.length ?? 0) > SHORT_STAT ? "" : undefined}
+              style={{ "--i": i } as CSSProperties}
+            >
               <dt>{row.label}</dt>
               <dd className={row.stat ? ((row.value?.length ?? 0) <= SHORT_STAT ? styles.stat : styles.statText) : undefined}>
                 {row.content ?? row.value}

@@ -4,8 +4,14 @@ import { duration, levels, stagger } from "@/styles/tokens";
 
 /**
  * Reveals: blocks marked `data-reveal` ("" rises --dist-rise and fades, "card" rises
- * --dist-rise-card, "rule" draws, "sheet" unfolds from its fold edge) appear as they scroll into
- * view, once per session. Anything in the first viewport is shown from first paint and never
+ * --dist-rise-card; in calm both only fade; "rule" draws, "sheet" unfolds from its fold edge,
+ * "line" traces a drawn line such as the footer's elevation profile over the draw token, "list"
+ * draws a list's ring bullets with the item stagger, "quote" draws a pull quote's rule and then
+ * fades the quote in, "caption" fades in after its figure, "mark" draws a small mark's paths,
+ * "fade" fades in only (running text may take it), after its block's --fade-after;
+ * "figure" unfolds a figure behind a scan line, its corner ticks after; a figure below the fold
+ * shows a contour placeholder until its images have decoded) appear as they scroll into view, once
+ * per session. Anything in the first viewport is shown from first paint and never
  * hidden, so it can be the LCP element; only blocks below the fold wait (data-reveal-state).
  * Budgets (the reveal level): at most two groups animate at once, each within 600 ms (item stagger
  * for the first six); a group that would exceed that, or arrives while the page scrolls fast,
@@ -14,6 +20,12 @@ import { duration, levels, stagger } from "@/styles/tokens";
  * Running text, tables and numbers never move (readability outranks motion): a rising block ("" or
  * "card") that is or holds body copy, a surface-copy panel or a table is shown at once. A sheet
  * only unfolds and fades, so its text never moves.
+ *
+ * A route's arrival (RouteArrival, a link navigation in full and calm) is the exception to "the
+ * first viewport is simply there": a block marked `data-arrive-at="<ms>"` that is on screen when the
+ * route commits plays from that many milliseconds after the commit and lands by the arrival's end
+ * (duration.arrival), every time the page is reached by a link (`playArrival`). Below the fold it
+ * reveals as usual.
  */
 type State = "wait" | "play" | "done";
 
@@ -35,13 +47,10 @@ function keyOf(el: Element): string {
   return settleKey(window.location.pathname, `reveal:${el.id || index}`);
 }
 
-function prepare(el: Element) {
-  if (el.hasAttribute("data-reveal-state")) return;
-  const rects = el.getClientRects();
+function prepare(el: Element, r: DOMRect | null) {
   // A page Next keeps alive while hidden: prepared once it shows again.
-  if (!rects.length) return;
+  if (!r) return;
   const key = keyOf(el);
-  const r = el.getBoundingClientRect();
   const shown = r.top < window.innerHeight && r.bottom > 0;
   if (currentMode() === "still" || isSettled(key) || shown || r.bottom <= 0 || movesText(el)) {
     if (shown) markSettled(key);
@@ -51,6 +60,21 @@ function prepare(el: Element) {
   keys.set(el, key);
   set(el, "wait");
   io?.observe(el);
+  if (el.getAttribute("data-reveal") === "figure") placeholdUntilDecoded(el);
+}
+
+/** A figure below the fold shows a contour placeholder until its images decode, then they fade in. */
+function placeholdUntilDecoded(el: Element) {
+  const images = [...el.querySelectorAll("img")].filter((img) => !img.complete);
+  if (!images.length) return;
+  el.setAttribute("data-decoding", "");
+  const decoded = images.map((img) =>
+    new Promise<void>((resolve) => {
+      img.addEventListener("load", () => resolve(), { once: true });
+      img.addEventListener("error", () => resolve(), { once: true });
+    }).then(() => img.decode().catch(() => {})),
+  );
+  Promise.all(decoded).then(() => el.removeAttribute("data-decoding"));
 }
 
 function play(group: Element[]) {
@@ -67,7 +91,26 @@ function play(group: Element[]) {
     (el as HTMLElement).style.setProperty("--reveal-delay", `${Math.min(i, stagger.item.max - 1) * step}ms`);
     set(el, "play");
   });
-  const total = Math.min(levels.reveal.maxMs, duration.reveal + (Math.min(group.length, stagger.item.max) - 1) * step);
+  // A traced line takes the draw token (it holds no text); a quote or caption fades after its
+  // rule or figure; everything else keeps the budget.
+  const own = Math.max(
+    ...group.map((el) => {
+      const kind = el.getAttribute("data-reveal");
+      if (kind === "line") return duration.draw;
+      if (kind === "mark") return duration.trace;
+      if (kind === "fade") return duration.reveal + duration.tap;
+      if (kind === "figure") return duration.settle + duration.short;
+      // A sheet whose marks draw after it opens (the evidence legend's swatches).
+      if (kind === "sheet" && el.hasAttribute("data-draws")) return duration.reveal / 2 + duration.trace + duration.short;
+      if (kind === "caption") return duration.settle + 2 * duration.short;
+      if (kind === "quote") return duration.reveal + duration.short;
+      if (kind === "list") return duration.reveal + (Math.min(el.children.length, stagger.item.max) - 1) * stagger.item.step;
+      const rows = el.querySelector("[data-sheet-rows]")?.children.length ?? 0;
+      if (kind === "sheet" && rows) return Math.max(duration.reveal + duration.short, duration.reveal / 2 + (Math.min(rows, stagger.item.max) - 1) * stagger.item.step + duration.micro);
+      return 0;
+    }),
+  );
+  const total = Math.max(own, Math.min(levels.reveal.maxMs, duration.reveal + (Math.min(group.length, stagger.item.max) - 1) * step));
   window.setTimeout(() => {
     running--;
     group.forEach((el) => {
@@ -76,6 +119,9 @@ function play(group: Element[]) {
     });
   }, total + 50);
 }
+
+/** True while the page scrolls faster than the reveal level's snap speed (reveals and settles snap). */
+export const scrollingFast = () => speed > levels.reveal.snapPxPerMs;
 
 /** Starts the controller (idempotent); returns a function that rescans, e.g. after a route change. */
 export function startReveals(): () => void {
@@ -114,6 +160,41 @@ export function startReveals(): () => void {
   return scan;
 }
 
+/**
+ * The route's arrival: plays the on-screen blocks marked `data-arrive-at` of the page that has just
+ * committed (before the view transition captures it), timed from now.
+ */
+export function playArrival(main: Element) {
+  if (currentMode() === "still") return;
+  scan();
+  main.querySelectorAll<HTMLElement>("[data-reveal][data-arrive-at]").forEach((el) => {
+    const r = el.getBoundingClientRect();
+    if (!el.getClientRects().length || r.top >= window.innerHeight || r.bottom <= 0) return;
+    io?.unobserve(el);
+    markSettled(keys.get(el) ?? keyOf(el));
+    const at = Number(el.dataset.arriveAt) || 0;
+    // Its own duration (data-arrive-dur), or up to the arrival's end.
+    const own = Number(el.dataset.arriveDur) || Math.max(duration.instant, duration.arrival - at);
+    el.style.setProperty("--reveal-delay", `${at}ms`);
+    el.style.setProperty("--reveal-dur", `${own}ms`);
+    // Restart: the page may be one Next kept alive and shows again.
+    set(el, "done");
+    void el.offsetWidth;
+    set(el, "play");
+    // The content (or rows) fade in after the sheet; then the reveal is done.
+    const rows = Math.min(el.querySelector("[data-sheet-rows]")?.children.length ?? 0, stagger.item.max);
+    const end = Math.max(own + duration.short, rows ? own / 2 + (rows - 1) * stagger.item.step + duration.micro : 0);
+    window.setTimeout(() => {
+      set(el, "done");
+      el.style.removeProperty("--reveal-delay");
+      el.style.removeProperty("--reveal-dur");
+    }, at + end + 50);
+  });
+}
+
 function scan() {
-  document.querySelectorAll("[data-reveal]:not([data-reveal-state])").forEach(prepare);
+  // Every box is read before any state is written: one layout for the whole scan, not one per block.
+  const found = [...document.querySelectorAll("[data-reveal]:not([data-reveal-state])")];
+  const rects = found.map((el) => (el.getClientRects().length ? el.getBoundingClientRect() : null));
+  found.forEach((el, i) => prepare(el, rects[i]));
 }

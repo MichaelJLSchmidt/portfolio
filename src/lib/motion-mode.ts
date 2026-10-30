@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { device } from "@/styles/tokens";
 import { settledScript } from "./settled";
 
 /**
@@ -32,8 +33,8 @@ const MODES: readonly MotionMode[] = ["full", "calm", "still"];
 const previewable = process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_PREVIEW === "1";
 
 // The tier rule matches the contour field's device profiles (field-settings.ts): a fine pointer
-// and a long edge of at least 900 px is "desktop"; constrained devices are "low".
-const tierScript = `var n=navigator,t="mobile";try{if((n.connection&&n.connection.saveData)||(n.deviceMemory||8)<4||(n.hardwareConcurrency||8)<4)t="low";else if(!matchMedia("(pointer: coarse)").matches&&Math.max(innerWidth,innerHeight)>=900)t="desktop"}catch(e){}`;
+// and a long edge of at least device.desktopMinEdgePx (900 px) is "desktop"; constrained devices are "low".
+const tierScript = `var n=navigator,t="mobile";try{if((n.connection&&n.connection.saveData)||(n.deviceMemory||8)<4||(n.hardwareConcurrency||8)<4)t="low";else if(!matchMedia("(pointer: coarse)").matches&&Math.max(innerWidth,innerHeight)>=${device.desktopMinEdgePx})t="desktop"}catch(e){}`;
 const forcedScript = previewable
   ? `try{f=new URLSearchParams(location.search).get("motion");if(!/^(full|calm|still)$/.test(f||""))f=null}catch(e){}`
   : "";
@@ -69,7 +70,14 @@ function apply(calm = readCalm()) {
   window.dispatchEvent(new Event(CHANGE_EVENT));
 }
 
-/** The Calm map switch. Has no effect on the mode while the OS asks for reduced motion. */
+// A Calm map choice made but not applied yet (setCalmMap): the mode follows a frame later.
+let pendingCalm: boolean | null = null;
+
+/**
+ * The Calm map switch. Has no effect on the mode while the OS asks for reduced motion. The switch's
+ * own look (html[data-calm]) changes at once; the mode, which restyles the whole page and
+ * re-renders whatever follows it, a frame later, so the switch answers before that work runs.
+ */
 export function setCalmMap(on: boolean) {
   try {
     if (on) localStorage.setItem(CALM_STORAGE_KEY, "1");
@@ -77,7 +85,17 @@ export function setCalmMap(on: boolean) {
   } catch {
     // Storage can be blocked (private mode, policies); the switch still works for this page view.
   }
-  apply(on);
+  root().setAttribute("data-calm", on ? "1" : "0");
+  const queued = pendingCalm !== null;
+  pendingCalm = on;
+  if (queued) return;
+  requestAnimationFrame(() =>
+    window.setTimeout(() => {
+      const calm = pendingCalm ?? on;
+      pendingCalm = null;
+      apply(calm);
+    }, 0),
+  );
 }
 
 /** Haptics: "on" or "off" once the visitor chose; unset means the mode's default (on in full only). */
@@ -120,6 +138,7 @@ export function cancelPendingIntro() {
 /** The resolved mode, read from <html> (the pre-paint script's result). Outside React too. */
 export function currentMode(): MotionMode {
   if (typeof document === "undefined") return "still";
+  if (pendingCalm !== null) return resolve(pendingCalm);
   const m = root().getAttribute("data-motion") as MotionMode | null;
   return m && MODES.includes(m) ? m : "still";
 }
@@ -156,6 +175,18 @@ const getHapticsSupported = () => hapticsSupported();
  * The motion mode for rendering. The server snapshot is "still", so server HTML and hydration
  * never start motion; the resolved mode follows right after hydration.
  */
+const stillMode = (): MotionMode => "still";
+const noSubscribe = () => () => {};
+
+/**
+ * Just the motion mode, and only while `enabled`: otherwise "still", with no subscription, so a
+ * component that needs the mode for one optional feature (a heading's shine) does not re-render
+ * when the Calm map switch flips. Components with many instances use this, not useMotionMode().
+ */
+export function useModeIf(enabled: boolean): MotionMode {
+  return useSyncExternalStore(enabled ? subscribe : noSubscribe, enabled ? currentMode : stillMode, stillMode);
+}
+
 export function useMotionMode() {
   const mode = useSyncExternalStore(subscribe, currentMode, () => "still" as MotionMode);
   const tier = useSyncExternalStore(subscribe, currentTier, () => "mobile" as DeviceTier);

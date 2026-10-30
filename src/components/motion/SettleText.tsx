@@ -11,25 +11,27 @@ import {
   type ReactNode,
   type Ref,
 } from "react";
+import { glyphEm, textEm, type MeasuredCut } from "@/lib/display-width";
 import { headlampFalloff, watchHeadlamp } from "@/lib/headlamp";
 import { useFinePointer } from "@/lib/idle";
-import { currentMode, useMotionMode } from "@/lib/motion-mode";
+import { currentMode, useModeIf } from "@/lib/motion-mode";
 import { isSettled, markSettled, settleKey } from "@/lib/settled";
-import { activeViewTransition } from "@/lib/view-transition";
+import { activeViewTransition, transitionKind } from "@/lib/view-transition";
 import { duration, headlamp, stagger, staggerStep, type AxisRole } from "@/styles/tokens";
 import { Glint } from "./Glint";
-import { playGlint } from "./glint";
+import { playGlint, takeArrivalGlint } from "./glint";
+import { scrollingFast } from "./reveal";
 import styles from "./SettleText.module.css";
 
-type Tag = "h1" | "h2" | "h3" | "p" | "span";
+type Tag = "h1" | "h2" | "h3" | "p" | "span" | "dt";
 
 /** chars: per-letter cascade (display titles); words: per word; block: one run (labels, buttons, nav). */
 export type SettleMode = "chars" | "words" | "block";
 /** paint: from first paint (CSS, before hydration); inview: when scrolled into view; manual: `play()`. */
 export type SettleTrigger = "paint" | "inview" | "manual";
 export type SettleHandle = {
-  /** Plays the settle again (and the glint after it, if the text has one). */
-  play(): void;
+  /** Plays the settle again (and the glint after it, if the text has one), after `delayMs`. */
+  play(delayMs?: number): void;
   glint(): Promise<void>;
 };
 
@@ -40,8 +42,12 @@ export type SettleTextProps = {
   id?: string;
   className?: string;
   mode?: SettleMode;
-  /** Axes from the tokens: display (default for chars and words) or label / mono (default for block). */
-  role?: AxisRole;
+  /**
+   * Axes from the tokens: display (default for chars and words) or label / mono (default for
+   * block); or "text": the className sets the rest axes (--kt-rest-wdth, --kt-rest-wght, e.g. the
+   * condensed type of H3s) and the text settles from the breath above them (+8 wdth): a small settle.
+   */
+  role?: AxisRole | "text";
   trigger?: SettleTrigger;
   /** A single mint glint after the first arrival this session (full motion, dark surfaces). */
   glint?: boolean;
@@ -51,9 +57,54 @@ export type SettleTextProps = {
   quiet?: boolean;
   /**
    * For text that morphs in with a page transition: while the transition runs it holds just wide
-   * (the breath axes) and settles once the transition has landed. Direct loads settle as usual.
+   * (the breath axes) and settles once the transition has landed. Direct loads settle as usual;
+   * browser back and forward show it at rest.
    */
   settleOnArrival?: boolean;
+  /**
+   * Part of a route's arrival (a link navigation, full and calm; RouteArrival): the settle plays
+   * this many milliseconds after the route commits (`arrival` in the tokens), every time the page
+   * is reached by a link. Direct loads settle from first paint as usual.
+   */
+  arrive?: number;
+  /**
+   * "page" (default): plays once per page per session. "site": once per session wherever it
+   * appears, for chrome that every page shares (the HUD).
+   */
+  scope?: "page" | "site";
+  /**
+   * Block mode: the box the run is reserved at. "widest" (default): the widest of the rest, reveal
+   * and breath axes. "rest": the rest axes (or --kt-box-wdth), for tight rows such as the HUD; the
+   * run lies over the box and spills past it for the moment of the settle, moving nothing.
+   */
+  reserve?: "widest" | "rest";
+  /**
+   * "display": every letter's (or word's) box takes its measured width at the display rest axes
+   * (src/lib/display-width.ts) instead of the font's, so the web font arriving after the fallback
+   * moves nothing (display titles in the first viewport). "condensed": the same at the condensed
+   * cut, wght 600, and each word space too (a gap of the measured space at the end of its word),
+   * so wrapping text keeps the web font's line breaks (the case-study type line). Only for text at
+   * those axes.
+   */
+  widths?: MeasuredCut;
+  /**
+   * Block mode for text that may wrap (headings): every letter keeps its own box at rest width,
+   * as in chars mode, so the line breaks are those of the rest state, but the whole block settles
+   * at once (no cascade).
+   */
+  wrap?: boolean;
+  /** Milliseconds before the settle starts: the line leads (a contour rule draws first). */
+  delay?: number;
+  /**
+   * The letters breathe to the breath axes (+8) when an ancestor sets `--on: 1` (a hovered or
+   * focused card), left to right, and settle back (full and calm).
+   */
+  breath?: boolean;
+  /**
+   * "heading": at most one heading settle at a time; one that would start while another runs, or
+   * while the page scrolls fast, shows at rest instead (waypoint and section headings).
+   */
+  channel?: "heading";
   style?: CSSProperties;
   ref?: Ref<SettleHandle>;
 };
@@ -81,18 +132,29 @@ export function SettleText({
   shine = false,
   quiet = false,
   settleOnArrival = false,
+  arrive,
+  scope = "page",
+  reserve = "widest",
+  widths,
+  wrap = false,
+  delay = 0,
+  breath = false,
+  channel,
   style,
   ref,
 }: SettleTextProps) {
   const elRef = useRef<HTMLElement>(null);
   const pathname = usePathname();
-  const key = settleKey(pathname ?? "", id ?? text);
-  const { mode: motion } = useMotionMode();
+  const key = settleKey(scope === "site" ? "" : (pathname ?? ""), id ?? text);
+  // The mode only matters to the shine (a switch to calm re-renders no other settle text).
+  const motion = useModeIf(shine);
   const finePointer = useFinePointer();
 
   const lines = text.split("\n");
-  const units = mode === "chars" ? text.replace(/[\s\n]/g, "").length : mode === "words" ? text.split(/\s+/).length : 1;
-  const step = staggerStep(mode === "words" ? stagger.word : stagger.char, units);
+  // A wrapping block lays out like chars mode and settles all at once.
+  const split = mode === "block" && wrap ? "chars" : mode;
+  const units = split === "chars" ? text.replace(/[\s\n]/g, "").length : split === "words" ? text.split(/\s+/).length : 1;
+  const step = mode === "block" ? 0 : staggerStep(mode === "words" ? stagger.word : stagger.char, units);
 
   // The settle's state is the element's own animation state, kept on data-play (React renders
   // only the initial value, so it never overwrites it). A settle that has run to the end is
@@ -105,7 +167,16 @@ export function SettleText({
     stopRef.current();
     stopRef.current = () => {};
     el.setAttribute("data-play", state);
-    if (state === "true") stopRef.current = whenSettled(el, landed);
+    if (state !== "true") return;
+    const release = channel === "heading" ? holdHeading(el) : () => {};
+    const stop = whenSettled(el, () => {
+      release();
+      landed();
+    });
+    stopRef.current = () => {
+      release();
+      stop();
+    };
   };
 
   // A settle has landed: remembered, then the glint (full motion, once per session).
@@ -114,13 +185,17 @@ export function SettleText({
     if (!el) return;
     if (el.getAttribute("data-play") === "true") el.setAttribute("data-play", "done");
     markSettled(key);
-    if (!glint || currentMode() !== "full" || isSettled(`${key}g`)) return;
+    if (!glint || currentMode() !== "full") return;
+    // Once per session, and again whenever a commit led here (a card opened, a link followed).
+    const committed = takeArrivalGlint(window.location.pathname);
+    if (!committed && isSettled(`${key}g`)) return;
     markSettled(`${key}g`);
-    playGlint(el);
+    playGlint(el, { auto: !committed });
   };
 
   useImperativeHandle(ref, () => ({
-    play() {
+    play(delayMs) {
+      if (delayMs !== undefined) elRef.current?.style.setProperty("--kt-delay", `${delayMs}ms`);
       setPlay("rest");
       requestAnimationFrame(() => setPlay("true"));
     },
@@ -136,8 +211,29 @@ export function SettleText({
     if (!el) return;
     if (trigger === "paint" && isSettled(key) && el.getAttribute("data-play") === "true") el.setAttribute("data-play", "done");
     const transition = activeViewTransition();
-    if (!settleOnArrival || !transition || currentMode() === "still") return;
+    const kind = transitionKind();
+    if (!transition || currentMode() === "still" || kind === "traverse" || kind === "view") return;
     let live = true;
+    // Part of the arrival: the settle from the reveal axes, `arrive` ms after the commit.
+    if (arrive !== undefined && !settleOnArrival) {
+      el.style.setProperty("--kt-delay", `${arrive}ms`);
+      el.setAttribute("data-arrive", "play");
+      el.setAttribute("data-play", "rest");
+      void el.offsetWidth;
+      el.setAttribute("data-play", "true");
+      const stop = whenSettled(el, () => {
+        if (!live) return;
+        el.setAttribute("data-arrive", "done");
+        el.setAttribute("data-play", "done");
+        landed();
+      });
+      return () => {
+        live = false;
+        stop();
+        el.setAttribute("data-arrive", "done");
+      };
+    }
+    if (!settleOnArrival) return;
     el.setAttribute("data-arrive", "hold");
     const settle = () => {
       if (!live) return;
@@ -156,7 +252,7 @@ export function SettleText({
     };
     // landed reads props that are fixed for the element's life.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settleOnArrival, key]);
+  }, [settleOnArrival, arrive, key]);
 
   // Triggers. Text already in view when an in-view settle would start stays at rest: it has been
   // visible from first paint.
@@ -170,14 +266,29 @@ export function SettleText({
       return () => stopRef.current();
     }
     if (isSettled(key) || state === "done" || currentMode() === "still") return;
-    const r = el.getBoundingClientRect();
-    if (r.top < window.innerHeight && r.bottom > 0) return markSettled(key);
-    setPlay("wait");
+    // The observer's first report places the text without forcing a layout per mounting text.
+    let first = true;
     const io = new IntersectionObserver(
       (entries) => {
+        if (first) {
+          first = false;
+          const r = entries[entries.length - 1].boundingClientRect;
+          if (r.top < window.innerHeight && r.bottom > 0) {
+            io.disconnect();
+            markSettled(key);
+            return;
+          }
+          setPlay("wait");
+        }
         // Play when it scrolls into view, or right away if the reader already jumped past it.
         if (!entries.some((e) => e.isIntersecting || e.boundingClientRect.bottom < 0)) return;
         io.disconnect();
+        // Headings take turns, and snap while the reader scrolls fast.
+        if (channel === "heading" && (headingBusy() || scrollingFast())) {
+          el.setAttribute("data-play", "rest");
+          markSettled(key);
+          return;
+        }
         setPlay("true");
       },
       { rootMargin: "0px 0px -12% 0px" },
@@ -258,8 +369,11 @@ export function SettleText({
   }, [shine, mode, motion, finePointer, text]);
 
   let index = 0;
+  // The condensed cut fixes the word space as well: a gap of its measured width ends each word
+  // (words are atomic, so lines still break between them), instead of the font's own space.
+  const gap = widths === "condensed" && split === "chars";
   const unit = (content: string, i: number): ReactNode => (
-    <span key={i} className={styles.unit}>
+    <span key={i} className={styles.unit} style={widths ? ({ "--u": (content.length === 1 ? glyphEm(content, widths) : textEm(content, widths)) ?? undefined } as CSSProperties) : undefined}>
       <span className={styles.ghost}>{content}</span>
       <span className={styles.glyph} data-st="glyph" style={{ "--kt-i": i } as CSSProperties}>
         {content}
@@ -274,13 +388,17 @@ export function SettleText({
       className={className ? `${styles.settle} ${className}` : styles.settle}
       data-mode={mode}
       data-role={role}
+      data-reserve={mode === "block" && reserve === "rest" ? "rest" : undefined}
+      data-widths={widths}
+      data-wrap={mode === "block" && wrap ? "" : undefined}
+      data-breath={breath ? "" : undefined}
       data-play={trigger === "paint" ? "true" : "rest"}
       data-settle-key={key}
       data-quiet-zone={quiet ? "" : undefined}
-      style={{ ...style, "--kt-step": `${step}ms` } as CSSProperties}
+      style={{ ...style, "--kt-step": `${step}ms`, ...(delay ? { "--kt-delay": `${delay}ms` } : {}) } as CSSProperties}
     >
       <span className="visually-hidden">{text.replace(/\n/g, " ")}</span>
-      {mode === "block" ? (
+      {split === "block" ? (
         <span className={styles.block} aria-hidden="true">
           <span className={styles.ghost}>{text}</span>
           <span className={styles.run} data-st="run">
@@ -294,8 +412,15 @@ export function SettleText({
               {l > 0 && <br />}
               {line.split(" ").map((word, w, words) => (
                 <Fragment key={w}>
-                  {mode === "words" ? unit(word, index++) : <span className={styles.word}>{[...word].map((ch) => unit(ch, index++))}</span>}
-                  {w < words.length - 1 ? " " : null}
+                  {split === "words" ? (
+                    unit(word, index++)
+                  ) : (
+                    <span className={styles.word}>
+                      {[...word].map((ch) => unit(ch, index++))}
+                      {gap && w < words.length - 1 && <span className={styles.gap} style={{ "--u": glyphEm(" ", "condensed") } as CSSProperties} />}
+                    </span>
+                  )}
+                  {w < words.length - 1 && !gap ? " " : null}
                 </Fragment>
               ))}
             </Fragment>
@@ -305,6 +430,16 @@ export function SettleText({
       {glint && <Glint text={text} className={styles.glint} />}
     </Tag>
   );
+}
+
+// The heading channel: the element whose settle is running, if any.
+let headingOwner: Element | null = null;
+const headingBusy = () => !!headingOwner && headingOwner.isConnected;
+function holdHeading(el: Element): () => void {
+  headingOwner = el;
+  return () => {
+    if (headingOwner === el) headingOwner = null;
+  };
 }
 
 /** Calls `done` once the settle animations running in `el` have finished (now, if none run). */
