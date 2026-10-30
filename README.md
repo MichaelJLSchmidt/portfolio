@@ -486,8 +486,9 @@ Attribution: "Terrain data © swisstopo" appears in the footer of every page (an
   example (when built) and About, at 1440×900 and 390×844, over the field, over the field caught mid-morph
   (preview builds) and over the poster. It requires at least 7:1 against the brightest background pixel under or
   next to a glyph, and lines under the glyphs at most 15% of a lit line. Text on opaque surfaces
-  (`.surface-copy`: captions, the summary, the key insight) is measured too; dark text on paper needs 4.5:1 (no
-  lines run behind it). It also fails when a page is wider than the phone (it would pan sideways).
+  (`.surface-copy`: captions, the summary, the key insight) is measured too; dark text on paper and light text on
+  an opaque raised panel (the logbook, results tables, figure surfaces) need 4.5:1 (no lines run behind them). It
+  also fails when a page is wider than the phone (it would pan sideways).
 
 ### Preview-only switches
 
