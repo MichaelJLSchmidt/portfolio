@@ -55,7 +55,8 @@ export function Deck({ copy: t, cards, entries = {} }: { copy: typeof home.work;
               d={`M0 100${cards
                 .map((c, i) => {
                   const x = 50 + i * 100;
-                  const y = 20 + ((top - (entries[c.slug]?.metres ?? low)) / Math.max(1, top - low)) * 30;
+                  // The highest apex stays a line below its spot height (Deck.module.css: .cards' top padding).
+                  const y = 25 + ((top - (entries[c.slug]?.metres ?? low)) / Math.max(1, top - low)) * 30;
                   return `L${x - 34} ${y + 26}L${x} ${y}L${x + 34} ${y + 26}`;
                 })
                 .join("")}L300 100`}

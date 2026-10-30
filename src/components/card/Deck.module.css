@@ -130,7 +130,9 @@
     .slot {
       width: 100%;
       justify-items: center;
-      transform: translateY(calc(var(--drop, 0) * 72px));
+      /* The ridgeline's own drop (30 of its 100 units over its 260 px), so every spot height
+         stands the same distance above its apex. */
+      transform: translateY(calc(var(--drop, 0) * 260px * 0.3));
     }
 
     .spot {
