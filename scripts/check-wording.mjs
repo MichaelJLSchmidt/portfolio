@@ -1,6 +1,7 @@
 // Plain wording in the built site: greps every HTML page in ./out (visible text, page titles,
 // meta descriptions, alt text and accessible names; links for .pdf) for words the site no
-// longer uses and for phrases that would read as job-seeking.
+// longer uses and for phrases that would read as job-seeking, and for words split into
+// per-letter spans.
 //
 //   npm run check:wording              exit 1 on any hit
 //   node scripts/check-wording.mjs --dir other-out
@@ -53,6 +54,10 @@ export function wordingHits(dir) {
     }
     const pdf = html.match(/\shref="[^"]*\.pdf(?:[?#][^"]*)?"/i);
     if (pdf) hits.push({ file: relative(root, file), word: ".pdf", why: "no CV or PDF download", context: pdf[0] });
+    // Titles and words stay whole (a screen reader reads them as words, and they animate as one
+    // element): three or more single-character spans in a row are letters split apart.
+    const letters = html.replace(/<script\b[\s\S]*?<\/script>/gi, " ").match(/(?:<span\b[^>]*>[^<\s]<\/span>\s*){3,}/i);
+    if (letters) hits.push({ file: relative(root, file), word: "per-letter spans", why: "no word split into letter spans", context: letters[0].slice(0, 80) });
   }
   return hits;
 }
@@ -70,5 +75,5 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1
     for (const h of hits) console.error(`  ${h.file}: "${h.word}" (${h.why}) … ${h.context} …`);
     process.exit(1);
   }
-  console.log(`Wording: no old names, CV or job-seeking phrases in ${relative(root, dir) || "."}.`);
+  console.log(`Wording: no old names, CV or job-seeking phrases, no per-letter spans in ${relative(root, dir) || "."}.`);
 }
