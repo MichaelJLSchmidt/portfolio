@@ -6,9 +6,10 @@ import { duration, levels, stagger } from "@/styles/tokens";
  * Reveals: blocks marked `data-reveal` ("" rises --dist-rise and fades, "card" rises
  * --dist-rise-card; in calm both only fade; "rule" draws, "sheet" unfolds from its fold edge,
  * "line" traces a drawn line such as the footer's elevation profile over the draw token, "list"
- * draws a list's ring bullets with the item stagger, "quote" draws a pull quote's rule and then
- * fades the quote in, "caption" fades in after its figure, "mark" draws a small mark's paths,
- * "fade" fades in only (running text may take it), after its block's --fade-after;
+ * draws a list's ring bullets with the item stagger, "caption" fades in after its figure, "mark" draws a small mark's paths,
+ * "fade" fades in only (running text may take it), after its block's --fade-after; "turn" is a
+ * binder page turning in (BinderPage, full motion only); "trace" a drawing whose route traces in
+ * over the draw token (CareerProfile: its own stylesheet says how);
  * "figure" unfolds a figure behind a scan line, its corner ticks after; a figure below the fold
  * shows a contour placeholder until its images have decoded) appear as they scroll into view, once
  * per session. Anything in the first viewport is shown from first paint and never
@@ -91,19 +92,21 @@ function play(group: Element[]) {
     (el as HTMLElement).style.setProperty("--reveal-delay", `${Math.min(i, stagger.item.max - 1) * step}ms`);
     set(el, "play");
   });
-  // A traced line takes the draw token (it holds no text); a quote or caption fades after its
+  // A traced line takes the draw token (it holds no text); a caption fades after its
   // rule or figure; everything else keeps the budget.
   const own = Math.max(
     ...group.map((el) => {
       const kind = el.getAttribute("data-reveal");
-      if (kind === "line") return duration.draw;
+      // A drawing whose route traces in (the career profile; its stylesheet animates the route).
+      if (kind === "line" || kind === "trace") return duration.draw;
       if (kind === "mark") return duration.trace;
+      // A binder page turning in (full only; its stylesheet animates it).
+      if (kind === "turn") return duration.long;
       if (kind === "fade") return duration.reveal + duration.tap;
       if (kind === "figure") return duration.settle + duration.short;
       // A sheet whose marks draw after it opens (the evidence legend's swatches).
       if (kind === "sheet" && el.hasAttribute("data-draws")) return duration.reveal / 2 + duration.trace + duration.short;
       if (kind === "caption") return duration.settle + 2 * duration.short;
-      if (kind === "quote") return duration.reveal + duration.short;
       if (kind === "list") return duration.reveal + (Math.min(el.children.length, stagger.item.max) - 1) * stagger.item.step;
       const rows = el.querySelector("[data-sheet-rows]")?.children.length ?? 0;
       if (kind === "sheet" && rows) return Math.max(duration.reveal + duration.short, duration.reveal / 2 + (Math.min(rows, stagger.item.max) - 1) * stagger.item.step + duration.micro);

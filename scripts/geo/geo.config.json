@@ -1,0 +1,51 @@
+{
+  "$comment": "Input for scripts/geo/build.mjs (npm run geo): the places the case-study stages and the About climb use. Each place is looked up in swissNAMES3D by name and kind (its Z is the official spot height), or, for an unnamed point on a ridge, read from swisstopo's height service on the crest near `near`. `research` is the value the brief started from, to check, never shown. `secondary` values come from outside swisstopo and stay flagged.",
+  "swissnames3d": {
+    "stacApi": "https://data.geo.admin.ch/api/stac/v1",
+    "collection": "ch.swisstopo.swissnames3d",
+    "item": "swissnames3d_2025",
+    "asset": "swissnames3d_2025_2056.csv.zip"
+  },
+  "api": {
+    "height": "https://api3.geo.admin.ch/rest/services/height",
+    "profile": "https://api3.geo.admin.ch/rest/services/profile.json",
+    "identify": "https://api3.geo.admin.ch/rest/services/api/MapServer/identify",
+    "trails": "ch.swisstopo.swisstlm3d-wanderwege"
+  },
+  "places": [
+    { "id": "interlaken-ost", "name": "Interlaken Ost", "kind": "Haltestelle Bahn", "label": "Interlaken Ost", "station": true, "research": 567 },
+    { "id": "grindelwald", "name": "Grindelwald", "kind": "Haltestelle Bahn", "label": "Grindelwald", "station": true, "research": 1034 },
+    { "id": "lauterbrunnen", "name": "Lauterbrunnen", "kind": "Haltestelle Bahn", "label": "Lauterbrunnen", "station": true, "research": 796 },
+    { "id": "kleine-scheidegg", "name": "Kleine Scheidegg", "kind": "Haltestelle Bahn", "label": "Kleine Scheidegg", "station": true, "research": 2061 },
+    { "id": "eigergletscher", "name": "Eigergletscher", "kind": "Haltestelle Bahn", "label": "Eigergletscher", "station": true, "research": 2320 },
+    { "id": "eismeer", "name": "Eismeer", "kind": "Haltestelle Bahn", "label": "Eismeer", "station": true, "underground": true, "research": [3160, 3118] },
+    { "id": "jungfraujoch", "name": "Jungfraujoch", "kind": "Haltestelle Bahn", "label": "Jungfraujoch", "station": true, "underground": true, "research": 3454 },
+    { "id": "mittellegi-hut", "name": "Mittellegihütte", "kind": "Gebaeude", "label": "Mittellegi hut", "research": 3355 },
+    { "id": "mittellegi-ridge", "label": "Upper Mittellegi ridge", "crest": { "from": "mittellegi-hut", "to": "eiger", "at": 0.55 } },
+    { "id": "eiger", "name": "Eiger", "kind": "Alpiner Gipfel", "label": "Eiger", "research": [3967, 3970] },
+    { "id": "moenchsjoch-hut", "name": "Mönchsjochhütte", "kind": "Gebaeude", "label": "Mönchsjoch hut", "research": [3657, 3650] },
+    { "id": "moench-se-ridge", "label": "Mönch southeast ridge", "crest": { "from": "moenchsjoch-hut", "to": "moench", "at": 0.6 } },
+    { "id": "moench", "name": "Mönch", "kind": "Alpiner Gipfel", "label": "Mönch", "research": 4107 },
+    { "id": "rottalsattel", "name": "Rottalsattel", "kind": "Pass", "label": "Rottalsattel", "research": 3885 },
+    { "id": "jungfrau", "name": "Jungfrau", "kind": "Alpiner Gipfel", "label": "Jungfrau", "research": 4158 },
+    { "id": "ittigen", "name": "Ittigen bei Bern", "kind": "Haltestelle Bahn", "label": "Ittigen", "station": true, "research": 526 },
+    { "id": "bolligen", "name": "Bolligen", "kind": "Haltestelle Bahn", "label": "Bolligen", "station": true },
+    { "id": "ferenberg", "name": "Ferenberg", "kind": "Ort", "label": "Ferenberg" },
+    { "id": "bantiger", "name": "Bantiger", "kind": "Haupthuegel", "label": "Bantiger", "research": 947 },
+    { "id": "bantiger-tower", "name": "Bantiger", "kind": "Turm", "label": "Bantiger tower (foot)", "research": 933 }
+  ],
+  "secondary": [
+    {
+      "id": "bantiger-tower-tip",
+      "label": "Bantiger tower (tip)",
+      "altitudeM": 1129,
+      "source": "German Wikipedia, “Sendeturm Bantiger” (a 196 m tower on a foot at about 933 m); not a swisstopo value"
+    }
+  ],
+  "aboutClimb": {
+    "id": "ittigen-bantiger",
+    "via": ["ittigen", "bolligen", "ferenberg", "bantiger"],
+    "bboxLv95": [2602400, 1200600, 2607600, 1203900],
+    "profilePoints": 160
+  }
+}

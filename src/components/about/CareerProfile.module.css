@@ -1,0 +1,384 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+/*
+ * The career profile (CareerProfile.tsx). From the sm breakpoint the trail runs across: the
+ * drawing (aspect 1000 : 400, the trail in its left 78%), the roles in columns under their spot
+ * heights, the mast and the outlook to the right of the summit. On phones it runs down the left
+ * margin (--gutter): the roles beside their spot heights, then the mast reaching out to the right
+ * from the summit, with the outlook under it. The walked line is the route's red.
+ */
+@layer components {
+  .career {
+    display: grid;
+    gap: clamp(20px, 3vw, 40px);
+  }
+
+  .intro {
+    max-width: 62ch;
+  }
+
+  .figure {
+    --gutter: 64px;
+    --trail-h: 30rem;
+    --pad: 1.75rem;
+    position: relative;
+    display: grid;
+    gap: 16px;
+    margin: 0;
+  }
+
+  .chart {
+    position: relative;
+    view-timeline: --career-climb block;
+  }
+
+  .across,
+  .down {
+    position: absolute;
+    overflow: visible;
+  }
+
+  .across path,
+  .down path {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .across .contour {
+    stroke: var(--color-contour-dim);
+    stroke-opacity: 0.5;
+    stroke-width: 1px;
+  }
+
+  .across .ground {
+    fill: color-mix(in srgb, var(--color-contour-dim) 30%, transparent);
+    stroke: none;
+  }
+
+  .across .leader {
+    stroke: var(--color-contour);
+    stroke-dasharray: 2 4;
+    stroke-width: 1px;
+  }
+
+  .across .base,
+  .down .base {
+    stroke: var(--color-contour);
+    stroke-width: 1.5px;
+  }
+
+  .across .walked,
+  .down .walked {
+    stroke: var(--color-signal);
+    stroke-width: 2.5px;
+  }
+
+  .marks {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  /* A camp's spot height: a dot on the line; the summit's a triangle. */
+  .spot {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--color-paper-dusk);
+    box-shadow: 0 0 0 2px var(--color-ground);
+    translate: -50% -50%;
+  }
+
+  .spot[data-summit] {
+    width: 14px;
+    height: 12px;
+    border-radius: 0;
+    background: var(--color-glacier);
+    box-shadow: none;
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    translate: -50% -70%;
+  }
+
+  .place,
+  .scale {
+    position: absolute;
+    color: var(--color-paper-dusk);
+    white-space: nowrap;
+  }
+
+  .camps {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .camp {
+    display: grid;
+    gap: 2px;
+    align-content: start;
+  }
+
+  .year {
+    color: var(--color-glacier);
+  }
+
+  .role {
+    color: var(--color-paper-dusk);
+    font-family: var(--font-text-condensed);
+    font-size: 1.0625rem;
+    font-stretch: var(--type-condensed-wdth);
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .height {
+    color: var(--color-paper-dusk);
+  }
+
+  .mastLabel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 12px;
+    margin: 0;
+    color: var(--color-paper-dusk);
+  }
+
+  .tip {
+    color: var(--color-glacier);
+  }
+
+  .outlook {
+    max-width: 24ch;
+    margin: 0;
+    color: var(--color-paper-dusk);
+    font-size: var(--type-body-size);
+    line-height: 1.45;
+  }
+
+  .caption {
+    color: var(--color-paper-dusk);
+  }
+
+  /* ------------------------------------------------------------- phones: down the margin */
+
+  @media (width < 640px) {
+    .figure {
+      grid-template-areas: "trail";
+    }
+
+    .chart,
+    .camps {
+      grid-area: trail;
+    }
+
+    .figure > .caption {
+      grid-area: auto;
+    }
+
+    /* The drawing's height is a spacer; the mast follows in the flow, level with the summit. */
+    .chart {
+      display: grid;
+      padding-top: var(--trail-h);
+    }
+
+    .across,
+    .place,
+    .scale {
+      display: none;
+    }
+
+    .down {
+      top: var(--pad);
+      left: 0;
+      width: var(--gutter);
+      height: calc(var(--trail-h) - 2 * var(--pad));
+    }
+
+    .spot {
+      top: calc(var(--pad) + var(--at) * (var(--trail-h) - 2 * var(--pad)));
+      left: calc(var(--ex) * var(--gutter) / 100);
+    }
+
+    .camps {
+      position: relative;
+      align-self: start;
+      height: var(--trail-h);
+    }
+
+    .camp {
+      position: absolute;
+      top: calc(var(--pad) + var(--at) * (var(--trail-h) - 2 * var(--pad)));
+      right: 0;
+      left: calc(var(--gutter) + 12px);
+      translate: 0 -50%;
+    }
+
+    /* The summit's role sits above its spot height: the mast runs out under it. */
+    .camp[data-summit] {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0 10px;
+      align-items: baseline;
+      translate: 0 calc(-100% - 8px);
+    }
+
+    .mast {
+      display: grid;
+      gap: 8px;
+      margin: calc(-1 * var(--pad)) 0 0 calc(var(--summit-ex) * var(--gutter) / 100);
+      padding-top: 10px;
+      border-top: 2px dashed var(--color-contour);
+    }
+
+    .mastLabel {
+      padding-left: calc(var(--gutter) * (1 - var(--summit-ex) / 100) + 12px);
+    }
+
+    .outlook {
+      padding-left: calc(var(--gutter) * (1 - var(--summit-ex) / 100) + 12px);
+    }
+  }
+
+  /* ------------------------------------------------------------- across */
+
+  @media (min-width: 640px) {
+    .chart {
+      aspect-ratio: 1000 / 400;
+    }
+
+    .across {
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .down {
+      display: none;
+    }
+
+    .spot {
+      top: calc(var(--y) * 1%);
+      left: calc(var(--x) * 1%);
+    }
+
+    /* Places sit just under the line, from their point; the summit's ends beside its triangle. */
+    .place {
+      top: calc(var(--y) * 1%);
+      left: calc(var(--x) * 1%);
+      translate: 8px 8px;
+    }
+
+    .place[data-edge="end"] {
+      translate: calc(-100% - 14px) -50%;
+    }
+
+    .scale {
+      top: calc(var(--y) * 1%);
+      left: 0;
+      translate: 0 calc(-100% - 2px);
+    }
+
+    /* One column per role, each starting under its spot height (the leader runs on down). */
+    .camps {
+      display: grid;
+      grid-template-columns: var(--columns);
+      padding-left: calc(var(--first-x) * 1%);
+    }
+
+    .camp {
+      padding: 4px 12px 0 10px;
+      border-left: 1px dashed var(--color-contour);
+    }
+
+    .mast {
+      position: absolute;
+      top: calc(var(--tip-y) * 1%);
+      left: calc(var(--summit-x) * 1%);
+      display: grid;
+      gap: 10px;
+      align-content: start;
+      width: calc(100% - var(--summit-x) * 1%);
+      height: calc((var(--summit-y) - var(--tip-y)) * 1%);
+      padding-left: 16px;
+      border-left: 2px dashed var(--color-contour);
+      translate: -1px 0;
+    }
+
+    .mastLabel {
+      flex-direction: column;
+    }
+  }
+
+  /* ------------------------------------------------------------- motion */
+
+  /* The walked line is revealed from its start: left to right across, top to bottom down the
+     margin. Full motion, where scroll timelines exist: with the scroll, as the drawing crosses the
+     screen. Elsewhere, and in calm: once as it comes into view (the drawing's data-reveal="trace",
+     over the draw token). Still: drawn. The full rules outrank the reveal's. */
+  @keyframes career-across {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0);
+    }
+  }
+
+  @keyframes career-down {
+    from {
+      clip-path: inset(0 0 100% 0);
+    }
+    to {
+      clip-path: inset(0);
+    }
+  }
+
+  :root:not([data-motion="still"]) .figure .across[data-reveal-state="wait"] .walk {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  :root:not([data-motion="still"]) .figure .across[data-reveal-state="play"] .walk {
+    animation: career-across var(--dur-draw) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
+  }
+
+  :root:not([data-motion="still"]) .figure .down[data-reveal-state="wait"] .walk {
+    clip-path: inset(0 0 100% 0);
+  }
+
+  :root:not([data-motion="still"]) .figure .down[data-reveal-state="play"] .walk {
+    animation: career-down var(--dur-draw) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
+  }
+
+  @supports (animation-timeline: view()) {
+    :root[data-motion="full"] .figure .chart .across[data-reveal] .walk {
+      animation: career-across linear both;
+      animation-timeline: --career-climb;
+      animation-range: entry 30% cover 55%;
+    }
+
+    :root[data-motion="full"] .figure .chart .down[data-reveal] .walk {
+      animation: career-down linear both;
+      animation-timeline: --career-climb;
+      animation-range: entry 15% cover 60%;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .across .walked,
+    .down .walked {
+      stroke: CanvasText;
+    }
+
+    .spot,
+    .spot[data-summit] {
+      background: CanvasText;
+    }
+
+    .mast {
+      border-color: CanvasText;
+    }
+  }
+}

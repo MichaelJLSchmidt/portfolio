@@ -105,12 +105,12 @@ ol {
 }
 
 .artefact[data-surface="sheet"] {
-  background: var(--color-sheet);
+  background: var(--color-paper-dusk);
 }
 
 .artefact[data-surface="night"] {
   background: var(--color-ground-raised);
-  color: var(--color-sheet);
+  color: var(--color-paper-dusk);
 }
 
 .artefact-body {
@@ -128,7 +128,7 @@ ol {
   height: 24px;
   padding: 0 14px;
   background: var(--color-ground);
-  color: var(--color-sheet);
+  color: var(--color-paper-dusk);
   font-family: var(--label);
   font-size: 11px;
   font-weight: 500;
@@ -151,7 +151,7 @@ ol {
   content: "";
   position: absolute;
   inset: 0;
-  background: url("/terrain/cards/lab-099.svg") center / cover no-repeat;
+  background: url("/terrain/cards/jungfrau.svg") center / cover no-repeat;
   opacity: 0.12;
   pointer-events: none;
 }
@@ -191,7 +191,7 @@ ol {
 }
 
 .muted {
-  color: var(--color-sheet-ink);
+  color: var(--color-paper-ink-2);
 }
 
 .moss {
@@ -209,10 +209,10 @@ ol {
   place-items: center;
   width: 26px;
   height: 26px;
-  border: 2px solid var(--color-sheet);
+  border: 2px solid var(--color-paper-dusk);
   border-radius: 50%;
   background: var(--color-ground);
-  color: var(--color-sheet);
+  color: var(--color-paper-dusk);
   font-family: var(--label);
   font-size: 12px;
   font-weight: 600;
@@ -228,7 +228,7 @@ ol {
   place-items: center;
   width: 26px;
   height: 26px;
-  color: var(--color-sheet);
+  color: var(--color-paper-dusk);
   font-family: var(--label);
   font-size: 12px;
   font-weight: 700;
@@ -241,7 +241,7 @@ ol {
   grid-area: 1 / 1;
   width: 19px;
   height: 19px;
-  border: 2px solid var(--color-sheet);
+  border: 2px solid var(--color-paper-dusk);
   background: var(--color-alpenglow-ink);
   transform: rotate(45deg);
 }
@@ -802,7 +802,7 @@ ol {
 }
 
 .d-wire.soft {
-  color: var(--color-sheet-ink);
+  color: var(--color-paper-ink-2);
 }
 
 .d-wire.moss {
@@ -832,7 +832,7 @@ ol {
 }
 
 .d-box small {
-  color: var(--color-sheet-ink);
+  color: var(--color-paper-ink-2);
   font-size: 12.5px;
   font-weight: 400;
 }
@@ -842,18 +842,18 @@ ol {
 }
 
 .d-box.soft {
-  border-color: var(--color-sheet-ink);
+  border-color: var(--color-paper-ink-2);
   background: rgb(255 255 255 / 0.6);
 }
 
 .d-box.dark {
   border-color: var(--color-ground);
   background: var(--color-ground);
-  color: var(--color-sheet);
+  color: var(--color-paper-dusk);
 }
 
 .d-box.dark small {
-  color: var(--color-sheet);
+  color: var(--color-paper-dusk);
 }
 
 .d-box.moss {
@@ -871,8 +871,8 @@ ol {
   position: absolute;
   padding: 1px 6px;
   border-radius: 4px;
-  background: var(--color-sheet);
-  color: var(--color-sheet-ink);
+  background: var(--color-paper-dusk);
+  color: var(--color-paper-ink-2);
   font-family: var(--label);
   font-size: 12px;
   font-weight: 500;

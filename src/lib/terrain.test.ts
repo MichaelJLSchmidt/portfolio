@@ -1,24 +1,25 @@
-// `npm test`: the contour field's route → terrain map, its readout and the route conductor's timing
+// `npm test`: the contour field's route → terrain map and the route conductor's timing
 // (src/components/terrain). The modules import "@/…" paths, so the TypeScript hooks come first.
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 await import("../../scripts/lib/ts-hooks.mjs");
-const { BERN, routeTerrain } = await import("../components/terrain/route-terrain.ts");
-const { cards, cardHref, terrainIdForPath } = await import("../content/cards.ts");
-const { formatReadout, readoutFor, readoutParts } = await import("../components/terrain/readout.ts");
+const { BERN, routeTerrain, setCardTerrains } = await import("../components/terrain/route-terrain.ts");
+const { cards, cardHref, cardTerrains, terrainIdForPath } = await import("../content/cards.ts");
+// What the root layout writes on <html data-card-terrains>.
+setCardTerrains(cardTerrains());
 const { REST, Timeline, morphStep, planRoute, prewarmStep } = await import("../components/terrain/conductor.ts");
 const { contourInterval, intervalSet, LOWLAND_INTERVALS, CONTOUR_INTERVALS } = await import("../components/terrain/field-settings.ts");
 const bern = (await import("../../public/terrain/bern/summary.json", { with: { type: "json" } })).default;
 const bernPosters = (await import("../../public/terrain/bern/posters.json", { with: { type: "json" } })).default;
 
 describe("routeTerrain", () => {
-  it("maps Basecamp to Bern, with or without the trailing slash", () => {
+  it("maps About to Bern, with or without the trailing slash", () => {
     assert.equal(routeTerrain("/about/"), BERN);
     assert.equal(routeTerrain("/about"), BERN);
   });
 
-  it("delegates every other path to the cards module unchanged", () => {
+  it("agrees with the cards module on every other path (through the layout's map)", () => {
     for (const path of ["/", "/no-such-page/", "/lab/", "/lab/terrain/", null, ...cards.map(cardHref).filter((h) => !h.startsWith("/about"))]) {
       assert.equal(routeTerrain(path), terrainIdForPath(path), String(path));
     }
@@ -30,36 +31,6 @@ describe("routeTerrain", () => {
   });
 });
 
-describe("readout", () => {
-  it("reads Bern at the zero point with the DEM's altitude", () => {
-    const alt = bern.zeroPoint.altitudeM;
-    assert.ok(Number.isInteger(alt) && alt > 500 && alt < 600, `altitude ${alt}`);
-    assert.equal(formatReadout(readoutFor(BERN)), `BERN · E 2’600’000 · N 1’200’000 · ALT ${alt} M`);
-  });
-
-  it("reads the home region as its summit", () => {
-    assert.equal(formatReadout(readoutFor(null)), "JUNGFRAU · ALT 4’158 M");
-  });
-
-  it("reads a card as far as its data goes", () => {
-    for (const card of cards) {
-      const r = readoutFor(card.artwork.terrainId);
-      const text = formatReadout(r);
-      assert.ok(text.startsWith(card.name.toUpperCase()), text);
-      if (r.altitudeM !== null) assert.ok(Number.isInteger(r.altitudeM) && text.endsWith(" M"), text);
-    }
-  });
-
-  it("leaves out what is unknown (a placeholder terrain has no altitude)", () => {
-    const parts = readoutParts({ id: BERN, label: "Bern", e: 2600000, n: 1200000, altitudeM: null });
-    assert.deepEqual(
-      parts.map((p) => p.key),
-      ["label", "e", "n"],
-    );
-    assert.equal(formatReadout({ id: BERN, label: "Bern", e: 2600000, n: 1200000, altitudeM: null }), "BERN · E 2’600’000 · N 1’200’000");
-  });
-});
-
 describe("contour intervals per terrain", () => {
   it("picks the set by relief: lowland for Bern, alpine for the region", () => {
     assert.deepEqual(intervalSet(860 - 480), LOWLAND_INTERVALS);
@@ -67,11 +38,11 @@ describe("contour intervals per terrain", () => {
     assert.deepEqual(bern.intervalsM, [...LOWLAND_INTERVALS]);
   });
 
-  it("keeps the spacing rule: Bern reaches 10 m on a laptop and a phone", () => {
+  it("keeps the spacing rule: Bern's 12 km window draws 20 m on a laptop and a phone", () => {
     const desktop = bernPosters.heightmaps.find((h) => h.use === "desktop")!;
     const mobile = bernPosters.heightmaps.find((h) => h.use === "mobile")!;
-    assert.equal(contourInterval(desktop, { width: 1440, height: 900 }, 1.06, { minSpacingPx: 3.25, steepPercentile: 95 }, bern.intervalsM), 10);
-    assert.equal(contourInterval(mobile, { width: 390, height: 844 }, 1.06, { minSpacingPx: 3, steepPercentile: 95 }, bern.intervalsM), 10);
+    assert.equal(contourInterval(desktop, { width: 1440, height: 900 }, 1.06, { minSpacingPx: 3.25, steepPercentile: 95 }, bern.intervalsM), 20);
+    assert.equal(contourInterval(mobile, { width: 390, height: 844 }, 1.06, { minSpacingPx: 3, steepPercentile: 95 }, bern.intervalsM), 20);
   });
 });
 
@@ -85,9 +56,9 @@ describe("route conductor", () => {
   });
 
   it("draws on over the draw token in full motion, never in calm", () => {
-    const full = planRoute("lab-097", "full", REST, { changes: true, revealFloor: 0.3 });
+    const full = planRoute("eiger", "full", REST, { changes: true, revealFloor: 0.3 });
     assert.deepEqual(ends(full, "reveal"), [[0, 900]]);
-    assert.equal(planRoute("lab-097", "calm", REST, { changes: true, revealFloor: 0.3 }).length, 0);
+    assert.equal(planRoute("eiger", "calm", REST, { changes: true, revealFloor: 0.3 }).length, 0);
   });
 
   it("recentres on Bern: the Aare draws over 200–900 ms, the pin pings at 300 ms", () => {

@@ -1,10 +1,10 @@
+@layer reset, tokens, base, layout, components, utilities;
+
 /*
- * The glint: one mint pass across text (dark surfaces), or a 1 px moss-ink rule drawing under it
- * (the light sheet). An aria-hidden copy of the text lies over the original with transparent
- * letters, and its background (a band --glint-band wide at --glint-angle) is clipped to those
- * letters; the band moves by animating a registered gradient position, --glint-x. The copy sits
- * on top, so it works whatever colour the letters below set for themselves (shine, rest colour),
- * and nothing but that one layer repaints. Full motion only.
+ * The foil sweep: one summit-gold pass across a Mythic card's name. An aria-hidden copy of the
+ * text lies over the original with transparent letters, and its background (a band --glint-band
+ * wide at --glint-angle) is clipped to those letters; the band moves by animating a registered
+ * gradient position, --glint-x. Nothing but that one layer repaints. Full motion only.
  */
 @property --glint-x {
   syntax: "<percentage>";
@@ -12,66 +12,37 @@
   initial-value: -20%;
 }
 
-.glint {
-  position: absolute;
-  inset: 0;
-  color: transparent;
-  text-shadow: none;
-  background-image: linear-gradient(
-    var(--glint-angle),
-    transparent calc(var(--glint-x) - var(--glint-band) / 2),
-    var(--glint-color) var(--glint-x),
-    transparent calc(var(--glint-x) + var(--glint-band) / 2)
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  pointer-events: none;
-  user-select: none;
-  visibility: hidden;
-}
-
-/* A Mythic card's pass: summit gold instead of mint. */
-.glint[data-tone="gold"] {
-  --glint-color: color-mix(in srgb, var(--color-summit-gold) 60%, transparent);
-}
-
-.rule {
-  position: absolute;
-  inset: auto 0 -0.12em;
-  height: 1px;
-  background: var(--color-moss-ink);
-  transform: scaleX(0);
-  transform-origin: left center;
-  pointer-events: none;
-  visibility: hidden;
-}
-
-@keyframes glint-pass {
-  from {
-    --glint-x: calc(var(--glint-band) / -2);
+@layer components {
+  .glint {
+    position: absolute;
+    inset: 0;
+    color: transparent;
+    text-shadow: none;
+    background-image: linear-gradient(
+      var(--glint-angle),
+      transparent calc(var(--glint-x) - var(--glint-band) / 2),
+      var(--glint-color) var(--glint-x),
+      transparent calc(var(--glint-x) + var(--glint-band) / 2)
+    );
+    --glint-color: color-mix(in srgb, var(--color-summit-gold) 60%, transparent);
+    -webkit-background-clip: text;
+    background-clip: text;
+    pointer-events: none;
+    user-select: none;
+    visibility: hidden;
   }
-  to {
-    --glint-x: calc(100% + var(--glint-band) / 2);
-  }
-}
 
-@keyframes glint-rule {
-  60% {
-    opacity: 1;
-    transform: none;
+  @keyframes glint-pass {
+    from {
+      --glint-x: calc(var(--glint-band) / -2);
+    }
+    to {
+      --glint-x: calc(100% + var(--glint-band) / 2);
+    }
   }
-  to {
-    opacity: 0;
-    transform: none;
+
+  :root[data-motion="full"] .glint[data-glint="play"] {
+    visibility: visible;
+    animation: glint-pass var(--dur-glint) var(--ease-glint) both;
   }
-}
-
-:root[data-motion="full"] .glint[data-glint="play"] {
-  visibility: visible;
-  animation: glint-pass var(--dur-glint) var(--ease-glint) both;
-}
-
-:root[data-motion="full"] .rule[data-glint="play"] {
-  visibility: visible;
-  animation: glint-rule var(--dur-glint) var(--ease-glint) both;
 }

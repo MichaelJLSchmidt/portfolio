@@ -1,4 +1,4 @@
-import { caseStudyLabels as L } from "@/content/cards";
+import { caseStudyLabels as L } from "@/content/case-study-labels";
 import type { Evidence } from "@/lib/case-study";
 import styles from "./CaseStudy.module.css";
 

@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
-import profile from "@terrain/profile.json";
-import { AscentProfile } from "@/components/about/AscentProfile";
+import { BinderPage, type PocketView } from "@/components/about/BinderPage";
+import { CareerProfile } from "@/components/about/CareerProfile";
+import { FieldKit } from "@/components/about/FieldKit";
 import { ContactBand } from "@/components/home/ContactBand";
 import { SectionHead } from "@/components/home/SectionHead";
 import { MapSheet } from "@/components/motion/MapSheet";
-import { RuledHeading } from "@/components/motion/RuledHeading";
-import { SettleText } from "@/components/motion/SettleText";
+import { WeightTitle } from "@/components/type/WeightTitle";
+import { PortraitCard } from "@/components/about/PortraitCard";
 import { MorphTarget } from "@/components/transition/MorphTarget";
-import { about } from "@/content/about";
-import { BASECAMP_MORPH } from "@/lib/morph";
-import { widestEm } from "@/lib/display-width";
-import { arrival, stagger } from "@/styles/tokens";
+import { about, pocketName } from "@/content/about";
+import { ABOUT_MORPH } from "@/lib/morph";
+import { titleEm } from "@/lib/title-axes";
+import { arrival } from "@/styles/tokens";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -20,52 +21,56 @@ export const metadata: Metadata = {
 };
 
 /**
- * Basecamp: the About page. Reached from the HUD's Basecamp link, whose label morphs into the H1
- * (BasecampLink) and settles once it has landed; going back, the H1 shrinks into the bar again.
- * Who and where (legend, bio), how I lead (rope rules, first 90 days), the climb so far, then
- * the craft, the person and the way in.
+ * About. Reached from the HUD's About link, whose label morphs into the H1 (AboutLink) and
+ * settles once it has landed; going back, the H1 shrinks into the bar again. The title holds the
+ * portrait card between its layers: the letters run behind the head, one stem of the last letter
+ * in front of the shoulders (a clipped copy of the title, hidden from screen readers). Then who I
+ * am, how I work with people, how I start with a new team, the skills beyond design, the career
+ * so far, the cards, the craft and the way in.
  */
 export default function About() {
-  // Named ends of the trail on the profile, with their official heights.
-  const stops = profile.stops.flatMap((s) => (s.label ? [{ label: s.label, elevation: about.ascent.stops[s.label], at: s.km / profile.lengthKm }] : []));
+  const heading = about.header.heading;
+  const titleStyle = { "--title-em": titleEm(heading) } as CSSProperties;
+  const binder = about.cards.binder;
+  const pockets: PocketView[] = binder.pockets.map((p) =>
+    p.kind === "empty" ? p : { ...p, name: pocketName(p), label: p.kind === "deck" ? binder.deckBox : pocketName(p) },
+  );
 
   return (
     <main id="main" className={`${styles.main} container`}>
-      <header className={styles.header} data-quiet-zone>
-        <div className={styles.nameCell}>
-          <MorphTarget name={BASECAMP_MORPH} variant="title">
-            <SettleText
-              as="h1"
-              text={about.header.heading}
-              className={`${styles.name} display`}
-              style={{ "--title-em": widestEm(about.header.heading) } as CSSProperties}
-              widths="display"
-              shine
-              glint
-              settleOnArrival
-            />
-          </MorphTarget>
+      <header className={styles.header}>
+        <div className={styles.titleCell} data-quiet-zone>
+          <div className={styles.titleBox} style={titleStyle}>
+            <MorphTarget name={ABOUT_MORPH} variant="title">
+              <WeightTitle as="h1" text={heading} className={styles.name} />
+            </MorphTarget>
+            <PortraitCard className={styles.portrait} portrait={about.portrait} facts={about.who.facts} />
+            <span className={styles.stemLayer} aria-hidden="true">
+              <WeightTitle as="span" arrive="none" text={heading} className={`${styles.name} ${styles.stem}`} />
+            </span>
+          </div>
         </div>
-        {/* Arriving from the HUD link: the H1 lands, then the lead settles and the legend unfolds. */}
-        <SettleText as="p" text={about.header.lead} mode="block" wrap role="text" arrive={arrival.landed} className={`${styles.lead} knockout`} />
+        <p className={`${styles.lead} knockout`}>{about.header.lead}</p>
       </header>
 
-      <section className={styles.who} aria-labelledby="legend-heading">
+      <section className={styles.who} aria-labelledby="who-heading">
         <MapSheet as="div" className={styles.legend} fold="left" arriveAt={arrival.landed}>
-          <SettleText as="h2" id="legend-heading" text={about.legend.heading} mode="chars" role="mono" trigger="inview" className={`${styles.legendHeading} hud-label`} />
-          {/* The rows fade in one after another, their labels (role, base…) settling in mono; the values never move. */}
+          <p className={`${styles.legendHeading} hud-label`}>{about.who.facts.label}</p>
+          {/* The rows fade in one after another; the values never move. */}
           <dl className={`${styles.legendRows} surface-copy`} data-sheet-rows="">
-            {about.legend.rows.map((r, i) => (
+            {about.who.facts.rows.map((r, i) => (
               <div key={r.label} style={{ "--i": i } as CSSProperties}>
-                <SettleText as="dt" text={r.label} mode="block" role="mono" trigger="inview" arrive={arrival.landed + Math.min(i, stagger.item.max - 1) * stagger.item.step} className={styles.legendLabel} />
+                <dt className={styles.legendLabel}>{r.label}</dt>
                 <dd>{r.value}</dd>
               </div>
             ))}
           </dl>
         </MapSheet>
         <div className={styles.bio}>
-          <SettleText as="h2" text={about.bio.heading} mode="chars" role="mono" trigger="inview" className={`${styles.bioHeading} hud-label map-halo knockout`} />
-          {about.bio.paragraphs.map((p) => (
+          <h2 id="who-heading" className={`${styles.bioHeading} hud-label map-halo knockout`}>
+            {about.who.heading}
+          </h2>
+          {about.who.paragraphs.map((p) => (
             <p key={p} className="body-copy">
               {p}
             </p>
@@ -73,16 +78,13 @@ export default function About() {
         </div>
       </section>
 
-      <section className={styles.section} aria-labelledby="rope-rules-heading">
-        <SectionHead id="rope-rules-heading" eyebrow={about.ropeRules.eyebrow} heading={about.ropeRules.heading} />
-        {/* The rules' leads settle as a group, one after another (the item stagger). */}
+      <section className={styles.section} aria-labelledby="people-heading">
+        <SectionHead id="people-heading" heading={about.workingRules.heading} />
         <ul className={styles.ropeRules}>
-          {about.ropeRules.rules.map((r, i) => (
+          {about.workingRules.rules.map((r) => (
             <li key={r.lead} className="legend">
               <p className="body-copy">
-                <strong>
-                  <SettleText text={r.lead} mode="block" wrap role="text" trigger="inview" delay={Math.min(i, stagger.item.max - 1) * stagger.item.step} className={styles.ropeLead} />
-                </strong>{" "}
+                <strong className={styles.ropeLead}>{r.lead}</strong>{" "}
                 {r.text}
               </p>
             </li>
@@ -90,8 +92,8 @@ export default function About() {
         </ul>
       </section>
 
-      <section className={styles.section} aria-labelledby="first-days-heading">
-        <SectionHead id="first-days-heading" eyebrow={about.firstDays.eyebrow} heading={about.firstDays.heading} />
+      <section className={styles.section} aria-labelledby="start-heading">
+        <SectionHead id="start-heading" heading={about.start.heading} />
         {/* A short contour trail draws between the three steps (across on desktop, down on phones). */}
         <div className={styles.daysWrap}>
           <svg className={styles.daysTrail} viewBox="0 0 300 28" preserveAspectRatio="none" aria-hidden="true" data-reveal="mark">
@@ -101,10 +103,9 @@ export default function About() {
             <path pathLength={1} d="M8 6C2 56 14 106 8 150S2 244 8 294" />
           </svg>
           <ol className={styles.days}>
-            {about.firstDays.steps.map((s) => (
+            {about.start.steps.map((s) => (
               <li key={s.title} className={`${styles.day} legend`}>
-                <p className={`${styles.dayRange} hud-label`}>{s.days}</p>
-                <SettleText as="h3" text={s.title} mode="block" wrap role="text" trigger="inview" className={styles.dayTitle} />
+                <h3 className={styles.dayTitle}>{s.title}</h3>
                 <p className="body-copy">{s.text}</p>
               </li>
             ))}
@@ -112,22 +113,42 @@ export default function About() {
         </div>
       </section>
 
-      <AscentProfile labels={about.ascent} camps={about.ascent.camps} stops={stops} />
+      <section className={styles.section} aria-labelledby="skills-heading">
+        <SectionHead id="skills-heading" heading={about.skills.heading} />
+        <FieldKit copy={about.skills} />
+      </section>
 
-      <div className={styles.pair}>
-        <section className={styles.section} aria-labelledby="craft-heading">
-          <SectionHead id="craft-heading" eyebrow={about.craft.eyebrow} heading={about.craft.heading} />
-          <p className="body-copy">{about.craft.body}</p>
-        </section>
-        <section className={styles.section} aria-labelledby="off-map-heading">
-          <div className={styles.offMapHead} data-quiet-zone>
-            <RuledHeading id="off-map-heading" text={about.offMap.heading} className={`${styles.sectionHeading} display`} ruleClassName={styles.headRule} />
+      <CareerProfile copy={about.career} />
+
+      <section className={styles.cards} aria-labelledby="cards-heading">
+        <div className={styles.cardsText}>
+          <SectionHead id="cards-heading" heading={about.cards.heading} />
+          <p className="body-copy">{about.cards.body}</p>
+          <div className={styles.binderList} data-quiet-zone>
+            <p className={`${styles.binderListLabel} hud-label map-halo`}>{binder.listLabel}</p>
+            <dl>
+              {pockets.flatMap((p) =>
+                p.kind === "empty"
+                  ? []
+                  : [
+                      <div key={p.name}>
+                        <dt className="hud-label map-halo">{p.name}</dt>
+                        <dd>{p.line}</dd>
+                      </div>,
+                    ],
+              )}
+            </dl>
           </div>
-          <p className="body-copy">{about.offMap.body}</p>
-        </section>
-      </div>
+        </div>
+        <BinderPage className={styles.binder} label={binder.label} empty={binder.empty} pockets={pockets} />
+      </section>
 
-      <ContactBand line={about.contactLine} />
+      <section className={styles.section} aria-labelledby="craft-heading">
+        <SectionHead id="craft-heading" heading={about.craft.heading} />
+        <p className={`${styles.craft} body-copy`}>{about.craft.body}</p>
+      </section>
+
+      <ContactBand />
     </main>
   );
 }

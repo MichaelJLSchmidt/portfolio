@@ -1,0 +1,81 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+/*
+ * WeightTitle: one eased progress value, --title-t (0 → 1), drives both of Archivo's axes. The
+ * weight runs linearly from --title-from-wght to --title-rest-wght; the width follows the four
+ * knots the build solved for this title (--title-k0…3, inline) and ends at --title-rest-wdth, so
+ * the line keeps its length the whole way. --wght and --wdth are registered so they compute to
+ * numbers and inherit into the flood's duplicate, which follows the same frames. Layout and paint
+ * are contained: a frame of the animation restyles the title and nothing else.
+ */
+@property --title-t {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
+@property --wght {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 800;
+}
+
+@property --wdth {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 75;
+}
+
+@layer components {
+  .title {
+    --title-k0: var(--title-rest-wdth);
+    --title-k1: var(--title-rest-wdth);
+    --title-k2: var(--title-rest-wdth);
+    --title-k3: var(--title-rest-wdth);
+    --wght: calc(var(--title-from-wght) + (var(--title-rest-wght) - var(--title-from-wght)) * var(--title-t));
+    --wdth: calc(
+      var(--title-k0) + (var(--title-k1) - var(--title-k0)) * clamp(0, var(--title-t) * 4, 1) + (var(--title-k2) - var(--title-k1)) *
+        clamp(0, var(--title-t) * 4 - 1, 1) + (var(--title-k3) - var(--title-k2)) * clamp(0, var(--title-t) * 4 - 2, 1) +
+        (var(--title-rest-wdth) - var(--title-k3)) * clamp(0, var(--title-t) * 4 - 3, 1)
+    );
+    position: relative;
+    font-family: var(--font-display);
+    font-weight: var(--title-rest-wght);
+    font-stretch: calc(var(--title-rest-wdth) * 1%);
+    font-variation-settings: "wght" var(--wght), "wdth" var(--wdth);
+    line-height: var(--type-display-lh);
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    /* Paint is clipped to the padding box: room for the capitals above and below a tight line. */
+    contain: layout paint;
+    padding-block: 0.14em;
+    margin-block: -0.14em;
+  }
+
+  /* The flood's copies lie exactly over the text (same box, same padding), in glacier. */
+  .flood {
+    position: absolute;
+    inset: 0;
+    padding-block: inherit;
+    color: var(--color-glacier);
+  }
+
+  @keyframes title-arrive {
+    from {
+      --title-t: 0;
+    }
+  }
+
+  /* Full motion only (also never without JavaScript: data-motion comes from the pre-paint
+     script). The hero arrives from the first frame; the others as they come into view. Once only:
+     a title that has arrived (data-title-done) or that a page morph brought in (data-title-morphed:
+     the morph is its arrival) stays at rest, also when its page is shown again (titles.ts). */
+  :root[data-motion="full"] .title[data-title="load"]:not([data-title-done], [data-title-morphed]),
+  :root[data-motion="full"] .title[data-title="view"][data-title-in]:not([data-title-done], [data-title-morphed]) {
+    animation: title-arrive var(--dur-title) var(--ease-trail) both;
+  }
+
+  :root[data-motion="full"] .title[data-title="view"]:not([data-title-in], [data-title-done], [data-title-morphed]) {
+    --title-t: 0;
+  }
+}

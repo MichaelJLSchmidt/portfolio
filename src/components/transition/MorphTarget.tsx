@@ -2,7 +2,7 @@ import { cloneElement, isValidElement, type CSSProperties, type ReactElement, ty
 import { MorphSwitch } from "./MorphSwitch";
 
 /**
- * Names an element that morphs between the deck and a case study, or between the HUD and Basecamp.
+ * Names an element that morphs between the deck and a case study, or between the HUD and About.
  *
  * The name and class are also set inline: Next keeps visited pages alive in hidden
  * <Activity> boundaries, and React does not pair names inside a page that is re-shown on

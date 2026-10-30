@@ -8,7 +8,6 @@ export const rawCard: SummitCardData = {
   name: "Seilschaft",
   rarity: "R",
   cost: "{{card.cost}}",
-  costLabel: "Summit cost {{card.cost}} of {{card.costScale}}",
   rarityNote: "built and led the practice",
   coordinates: "Hochmatt (fictional)",
   type: "People — Practice building · Lead (fictional)",
@@ -19,7 +18,7 @@ export const rawCard: SummitCardData = {
     { term: "Grow", reminder: "a {{ladder.levels|word}}-level career ladder, {{team.promotions}} internal promotions." },
     { term: "Protect", reminder: "one intake, {{intake.tiers|word}} tiers, no more {{desk.lateWeeks|word}}-week ambushes." },
   ],
-  flavor: "“We stopped taking tickets and started taking seats.” — team retro, {{years.retro}}",
+  flavor: "The team stopped taking tickets and took a seat in each product cluster.",
   stats: {
     teamLed: "{{team.start}} → {{team.end}}",
     time: "{{project.years}} YRS",
@@ -27,8 +26,8 @@ export const rawCard: SummitCardData = {
     impact: { before: "{{requests.before}}%", after: "{{requests.after}}%", note: "early" },
   },
   indexLine: { kind: "People", summary: "Built a UX practice from {{team.start}} to {{team.end}}", time: "{{project.years}} years" },
-  artwork: { kind: "seeded", terrainId: "lab-097" },
-  artworkAlt: "Contour map of a fictional massif generated for this example, with a dotted trail to the summit.",
+  artwork: { kind: "crop", terrainId: "eiger" },
+  artworkAlt: "Contour map of the Eiger from swisstopo data, with a dotted trail from Kleine Scheidegg by Eismeer and the Mittellegi hut along the ridge to the summit.",
   summary:
     "A fictional model case study: a {{team.start|word}}-person UX service desk became a {{team.end|word}}-person practice, and {{requests.after}}% of requests now reach UX before development starts.",
   example: true,

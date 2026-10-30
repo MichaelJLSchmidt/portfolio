@@ -1,0 +1,102 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+/*
+ * The red route (RouteLayer.tsx). The layer spans its <main> behind the content (main isolates
+ * itself as soon as it holds one, globals.css), so panels and cards cover the route where it
+ * passes them. Full: a dashed base, the walked line solid over it, the "you are here" marker.
+ * Calm: the walked line steps from waypoint to waypoint. Still: the route drawn solid, no marker.
+ * Above the last station the route is a blaze: paper-white either side of the red.
+ */
+@layer components {
+  .layer {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: visible;
+  }
+
+  .svg path {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .base {
+    stroke: var(--color-signal);
+    stroke-dasharray: 3 7;
+    stroke-opacity: 0.6;
+    stroke-width: 2px;
+  }
+
+  .walked {
+    stroke: var(--color-signal);
+    stroke-width: 2px;
+  }
+
+  /* White-red-white: a paper casing under the red where the route is climbed on foot. */
+  .blaze {
+    stroke: var(--color-paper-dusk);
+    stroke-linecap: butt;
+    stroke-width: 6px;
+  }
+
+  /* You are here: a red dot ringed in ground and paper, riding the walked line's end. */
+  .marker {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-signal);
+    box-shadow:
+      0 0 0 3px var(--color-ground),
+      0 0 0 4px var(--color-paper-dusk);
+    offset-anchor: center;
+    offset-distance: 0%;
+    offset-rotate: 0deg;
+  }
+
+  :root[data-motion="calm"] .walked {
+    transition: stroke-dashoffset var(--dur-medium) var(--ease-settle);
+  }
+
+  :root[data-motion="calm"] .marker {
+    transition: offset-distance var(--dur-medium) var(--ease-settle);
+  }
+
+  /* Still: the whole route, solid; nothing rides it. */
+  :root[data-motion="still"] .base,
+  :root[data-motion="still"] .marker {
+    display: none;
+  }
+
+  @media (forced-colors: active) {
+    .base,
+    .walked {
+      stroke: CanvasText;
+    }
+
+    .blaze {
+      stroke: Canvas;
+    }
+
+    .marker {
+      background: CanvasText;
+      forced-color-adjust: none;
+    }
+  }
+
+  @media print {
+    .layer {
+      display: none;
+    }
+  }
+}

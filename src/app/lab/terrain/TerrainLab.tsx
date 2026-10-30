@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 import { useLabReady } from "@/components/lab/ready";
-import { MotionButton } from "@/components/motion/MotionButton";
+import { FloodButton } from "@/components/interaction/FloodButton";
 import { fieldStore, useFieldStore } from "@/components/terrain/field-store";
 import { BERN } from "@/components/terrain/route-terrain";
-import { TerrainReadout } from "@/components/terrain/TerrainReadout";
 import { cards } from "@/content/cards";
 import { useMotionMode } from "@/lib/motion-mode";
 import { terrainLab as copy } from "@/content/lab";
@@ -51,7 +50,7 @@ export function TerrainLab() {
         <p className={styles.note}>{copy.morphs.note}</p>
         <div className={styles.row}>
           {terrains.map((t) => (
-            <MotionButton
+            <FloodButton
               key={t.id ?? "region"}
               label={t.label}
               aria-pressed={target === t.id}
@@ -80,7 +79,6 @@ export function TerrainLab() {
         <h2 id="lab-readout" className="hud-label">
           {copy.readout.heading}
         </h2>
-        <TerrainReadout className={`${styles.readout} hud-label`} />
         <dl className={styles.state}>
           <div>
             <dt>{copy.state.field}</dt>

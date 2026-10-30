@@ -10,28 +10,41 @@
 //   npm run test:e2e -- decode        heightmap decode check and its fallbacks
 //   npm run test:e2e -- casestudy     the case-study template on the example page (needs a build
 //                                     that includes examples: SITE_MODE=basecamp or a preview)
-//   npm run test:e2e -- terrain       the terrain conductor, Bern, the readout, tiers and context
+//   npm run test:e2e -- terrain       the terrain conductor, Bern, tiers and context
 //                                     loss (scripts/e2e-terrain.mjs; needs NEXT_PUBLIC_PREVIEW=1)
-//   npm run test:e2e -- deck          deck order, card link names and the Next expedition loop
+//   npm run test:e2e -- deck          deck order, card link names and the Next project loop
 //                                     (scripts/e2e/deck.mjs; needs the examples)
-//   npm run test:e2e -- basecamp      the HUD label ↔ Basecamp H1 morph in full, calm and still
-//                                     (scripts/e2e/basecamp.mjs)
+//   npm run test:e2e -- about         the HUD label ↔ About H1 morph in full, calm and still
+//                                     (scripts/e2e/about.mjs)
 //   npm run test:e2e -- ia            page structure, HUD order, example content (scripts/e2e/layout.mjs)
 //   npm run test:e2e -- phone         every route at 360 and 390 px: no overflow, HUD and footer
 //                                     (scripts/e2e/layout.mjs)
 //   npm run test:e2e -- fontswap      the web fonts held back on a throttled phone: CLS ≤ 0.05,
 //                                     display titles keep their boxes (scripts/e2e/typography.mjs)
-//   npm run test:e2e -- hud           the HUD's slots, condensing and readout (scripts/e2e/chrome.mjs)
+//   npm run test:e2e -- hud           the HUD's slots and condensing (scripts/e2e/chrome.mjs)
 //   npm run test:e2e -- toast         Copy address and its toast in full and still (scripts/e2e/chrome.mjs)
 //   npm run test:e2e -- cards         the deck's grid, phone list, arrival, hover, focus, press, marks,
 //                                     stats and the visited stamp (scripts/e2e/cards.mjs)
-//   npm run test:e2e -- views         Cards · Index in full, calm and still (scripts/e2e/cards.mjs)
 //   npm run test:e2e -- arrival       route arrivals: timing, focus on the H1, the trailhead morph,
 //                                     traversals, Basecamp, still (scripts/e2e/choreography.mjs)
-//   npm run test:e2e -- reading       the HUD waypoint readout, the trail, the altimeter bar, the
-//                                     career climb per mode, no endless loops (choreography.mjs)
+//   npm run test:e2e -- reading       the waypoint trail, the altimeter bar, the
+//                                     career profile per mode, no endless loops (choreography.mjs)
+//   npm run test:e2e -- route         the red route: one path through every waypoint, never across
+//                                     text, the phone margin, the blaze; full (scroll timeline,
+//                                     Lenis), the fallback, calm, still (scripts/e2e/route.mjs)
+//   npm run test:e2e -- axe           axe-core WCAG 2.2 A/AA on every route: full, calm, still, a
+//                                     phone, forced colours (scripts/e2e/axe.mjs)
 //   npm run test:e2e -- access        forced colours, headings read once, the haptics map
 //                                     (scripts/e2e/choreography.mjs)
+//   npm run test:e2e -- wording       no old names, CV or job-seeking phrases in the built HTML
+//                                     (scripts/check-wording.mjs)
+//   npm run test:e2e -- flood         the contour flood by mouse, keyboard and touch, in each mode
+//   npm run test:e2e -- trail         trail links: the red line, no width change, the blaze
+//   npm run test:e2e -- portrait      the About portrait card turning to its facts and back
+//   npm run test:e2e -- inp           the Next project tap on a throttled phone (INP ≤ 200 ms)
+//   npm run test:e2e -- pointer       no pointermove listener but the card tilt (scripts/e2e/interaction.mjs)
+//   npm run test:e2e -- smoke         a smoke subset in Chromium, WebKit and Firefox (each where
+//                                     Playwright has it installed; scripts/e2e/smoke.mjs)
 //
 // Serves ./out like a static host (base path read from the build) and drives Chromium with
 // Playwright, which is not a dependency: `npm i -D playwright && npx playwright install chromium`,
@@ -43,13 +56,18 @@ import { createRequire } from "node:module";
 import { createServer } from "node:net";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { basecamp } from "./e2e/basecamp.mjs";
+import { about } from "./e2e/about.mjs";
 import { deck } from "./e2e/deck.mjs";
 import { ia, phone, routes as builtRoutes } from "./e2e/layout.mjs";
 import { fontswap } from "./e2e/typography.mjs";
 import { hud, toast } from "./e2e/chrome.mjs";
-import { cards, views } from "./e2e/cards.mjs";
+import { cards } from "./e2e/cards.mjs";
 import { access, arrival, reading } from "./e2e/choreography.mjs";
+import { smoke } from "./e2e/smoke.mjs";
+import { flood, inp, pointer, portrait, trail } from "./e2e/interaction.mjs";
+import { route } from "./e2e/route.mjs";
+import { axe } from "./e2e/axe.mjs";
+import { wordingHits } from "./check-wording.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const only = process.argv[2];
@@ -98,7 +116,7 @@ async function open({ calm = false, reduced = false, classic = false, init } = {
   await context.addInitScript(
     ({ calm, classic }) => {
       try {
-        sessionStorage.setItem("summit:intro-played", "1");
+        
         if (calm) localStorage.setItem("summit:calm-map", "1");
         if (classic) sessionStorage.setItem("summit:vt", "classic");
       } catch {}
@@ -171,7 +189,7 @@ async function settle(page, { path, terrain }) {
         const h1 = [...document.querySelectorAll("main h1")].find((h) => h.getClientRects().length);
         const vt = document.getAnimations().some((a) => a.effect?.pseudoElement?.startsWith("::view-transition"));
         // Entrances (reveals, settles) still running are not "left hidden": wait for them. A
-        // scroll-driven animation (the career climb) runs as long as the page does: not one.
+        // scroll-driven animation (the career profile, the drawings) runs as long as the page does: not one.
         const entering = document
           .getAnimations()
           .some((a) => a.playState === "running" && a.timeline === document.timeline && a.effect?.getTiming().iterations !== Infinity);
@@ -229,7 +247,7 @@ async function settle(page, { path, terrain }) {
 
 // The card the round trips open: a flagged example (there is no real case study yet), so these
 // scenarios need a build that includes examples (SITE_MODE=basecamp or a preview).
-const FLOW = { slug: "test-project", path: "/work/test-project/", title: "Test Project", terrain: "lab-099" };
+const FLOW = { slug: "test-project", path: "/work/test-project/", title: "Test Project", terrain: "moench" };
 const hasFlow = () => {
   if (existsSync(join(root, `out${FLOW.path}index.html`))) return true;
   console.log(`  skipped: no ${FLOW.path} in this build (build with SITE_MODE=basecamp)`);
@@ -444,9 +462,9 @@ async function casestudy() {
       };
     }, trail);
     check("trail is a visible, sticky nav labelled “On this page”", info.visible && info.position === "sticky", `position=${info.position}`);
-    check("trail lists the six waypoints, not the H1", info.links.length === 6 && !info.h1Linked, info.links.join(" "));
+    check("trail lists the six stages and the results, not the H1", info.links.length === 7 && info.links.at(-1) === "#results" && !info.h1Linked, info.links.join(" "));
     check("“On this page” chips hidden from 1200 px", !info.jumpVisible);
-    check("waypoint headings have a scroll margin", parseFloat(info.margin) >= 80, info.margin);
+    check("stage headings have a scroll margin", parseFloat(info.margin) >= 80, info.margin);
     check("the example page is noindex", /noindex/.test(info.robots ?? ""), info.robots);
     await page.evaluate(() => document.getElementById("discovery").scrollIntoView({ block: "start" }));
     const spied = await waitFor(page, (t) => document.querySelector(`${t} a[aria-current="true"]`)?.getAttribute("href") === "#discovery", trail);
@@ -480,6 +498,76 @@ async function casestudy() {
     await context.close();
   }
 
+  console.log("\ncase-study template: the layouts (spread, legend sheet, stages, fork, logbook, results, descent)");
+  {
+    const { context, page, errors } = await open();
+    await page.goto(url, { waitUntil: "networkidle" });
+    const t = await page.evaluate(() => {
+      const text = (el) => el?.textContent.replace(/\s+/g, " ").trim() ?? "";
+      const sections = [...document.querySelectorAll("section[data-waypoint]")];
+      const forks = [...document.querySelectorAll('ol[aria-label="Options"]')].map((ol) => [...ol.children].map((li) => text(li.querySelector("p")).match(/(Not chosen|Chosen|Reversed)$/)?.[1] ?? "?"));
+      const note = document.querySelector('aside[aria-label^="Side note"]');
+      const para = note?.parentElement?.querySelector("p");
+      const results = document.querySelector("#results table");
+      const log = document.querySelector('[aria-labelledby="after-launch-heading"] table');
+      return {
+        problem: text(document.querySelector("main header h2")),
+        result: text(document.getElementById("result-heading")),
+        gain: text(document.querySelector("#result-heading ~ div")),
+        legend: [...document.querySelectorAll('[aria-labelledby="summary-heading"] dt')].map(text),
+        sheet: text(document.querySelector('[aria-labelledby="summary-heading"] p')),
+        stageLines: sections.slice(0, 6).map((s) => text(s.querySelector("h2 span"))),
+        notes: document.querySelectorAll('aside[aria-label^="Side note"]').length,
+        noteBeside: note && para ? note.getBoundingClientRect().left >= para.getBoundingClientRect().right : null,
+        forks,
+        reversed: text(document.getElementById("reversed-heading")?.closest("section")),
+        forkSvgHidden: [...document.querySelectorAll('ol[aria-label="Options"] svg')].every((svg) => svg.closest('[aria-hidden="true"]')),
+        log: log ? { caption: !!log.querySelector("caption"), rows: log.querySelectorAll("tbody tr").length } : null,
+        results: results ? { caption: !!results.querySelector("caption"), rows: results.querySelectorAll("tbody tr").length, won: text(results.querySelector("tbody td:nth-child(3)")) } : null,
+        lessons: [...document.querySelectorAll('[aria-labelledby="looking-back"] li')].map((li) => text(li.lastElementChild)),
+        team: document.querySelectorAll('[aria-labelledby="team"] li').length,
+        ridge: text(document.querySelector('nav[aria-label="Next project"] figure ol')),
+      };
+    });
+    check("spread: “The problem” and “The result” with the altitude gained", t.problem === "The problem" && t.result === "The result" && /^\+[\d’]+ m/i.test(t.gain), `${t.problem} | ${t.result} | ${t.gain.slice(0, 60)}`);
+    check("legend sheet: the brief, outcome, role, team, what I put in place, key decision", t.legend.join("|") === "The brief|Outcome|My role|Team I led|What I put in place|Key decision", t.legend.join(" | "));
+    check("legend sheet: “Sheet n/3” and a scale", /Sheet \d\/3/.test(t.sheet), t.sheet);
+    check("six stage lines with place and altitude, starting in Interlaken", t.stageLines.length === 6 && /^Stage 1 · Interlaken Ost · 567 m$/i.test(t.stageLines[0]) && t.stageLines.every((l, i) => new RegExp(`^Stage ${i + 1} · .+ · [\\d’]+ m$`, "i").test(l)), t.stageLines.join(" | "));
+    check("side notes sit in the margin beside their paragraph", t.notes >= 2 && t.noteBeside === true, `${t.notes} notes, beside=${t.noteBeside}`);
+    check("forks: an ordered list of options, each with its status in text, exactly one chosen", t.forks.length >= 2 && t.forks.every((f) => f.length >= 2 && f.filter((x) => x === "Chosen").length === 1 && !f.includes("?")), JSON.stringify(t.forks));
+    check("a decision we reversed: one reversed option, dated", /Reversed/.test(t.reversed) && /Turned back · /.test(t.reversed), t.reversed.slice(0, 80));
+    check("the fork drawings are hidden from screen readers", t.forkSvgHidden);
+    check("after launch: a table with a caption and dated rows", t.log?.caption && t.log.rows >= 3, JSON.stringify(t.log));
+    check("results: a table with a caption, each won at a stage", t.results?.caption && t.results.rows >= 3 && /^Stage \d · /.test(t.results.won), JSON.stringify(t.results));
+    check("looking back: every lesson says what I would do next time", t.lessons.length >= 2 && t.lessons.every((l) => l.startsWith("Next time I would")), t.lessons.length);
+    check("team: roles on a rope", t.team >= 3, String(t.team));
+    check("next project: the ridge of three peaks with “You are here”", /You are here/.test(t.ridge) && /Eiger/.test(t.ridge) && /Jungfrau/.test(t.ridge), t.ridge);
+    check("no page errors", errors.length === 0, errors.join("; "));
+    await context.close();
+  }
+  {
+    const context = await browser.newContext({ viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true });
+    const page = await context.newPage();
+    await page.goto(url, { waitUntil: "networkidle" });
+    const m = await page.evaluate(() => {
+      const note = document.querySelector('aside[aria-label^="Side note"]');
+      const para = note?.parentElement?.querySelector("p");
+      const facts = document.getElementById("result-heading")?.closest("section")?.querySelector("dl")?.getBoundingClientRect();
+      const pager = [...document.querySelectorAll('nav[aria-label="Next project"] p a')].map((a) => Math.round(a.getBoundingClientRect().height));
+      return {
+        noteAfter: note && para ? note.getBoundingClientRect().top >= para.getBoundingClientRect().bottom - 1 : null,
+        spread: facts ? +((facts.bottom + scrollY) / innerHeight).toFixed(2) : null,
+        pager,
+        width: document.documentElement.scrollWidth,
+      };
+    });
+    check("phone: side notes follow their paragraph", m.noteAfter === true);
+    check("phone: the spread ends (role line) within about 1.4 screens at 360×740", m.spread !== null && m.spread <= 1.4, String(m.spread));
+    check("phone: “Previous project” and “Next project” targets at least 48 px", m.pager.length === 2 && m.pager.every((h) => h >= 48), m.pager.join(", "));
+    check("phone 360: no sideways scrolling", m.width <= 360, `${m.width}px`);
+    await context.close();
+  }
+
   console.log("\ncase-study template: phone 390×844");
   {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
@@ -488,13 +576,13 @@ async function casestudy() {
     const info = await page.evaluate((trail) => ({
       trail: !!document.querySelector(trail)?.getClientRects().length,
       jump: !!document.querySelector("#jump-heading")?.getClientRects().length,
-      next: [...document.querySelectorAll("section[data-waypoint] a")].filter((a) => /^Next waypoint/.test(a.textContent) && a.getClientRects().length).length,
+      next: [...document.querySelectorAll("section[data-waypoint] a")].filter((a) => /^Next stage/.test(a.textContent) && a.getClientRects().length).length,
       top: [...document.querySelectorAll('section[data-waypoint] a[href="#main"]')].filter((a) => a.getClientRects().length).length,
       width: document.documentElement.scrollWidth,
       markers: [...document.querySelectorAll("button[data-hotspot]")].map((b) => b.getBoundingClientRect()).map((r) => Math.min(r.width, r.height)),
     }), trail);
     check("trail hidden, “On this page” chips shown", !info.trail && info.jump);
-    check("each waypoint ends with “Next waypoint” (5) and “Back to top” (6)", info.next === 5 && info.top === 6, `${info.next} next, ${info.top} back`);
+    check("each stage ends with “Next stage” (5) and “Back to top” (6)", info.next === 5 && info.top === 6, `${info.next} next, ${info.top} back`);
     check("no sideways scrolling", info.width <= 390, `${info.width}px`);
     check("hotspot markers at least 24×24 px", info.markers.length === 5 && info.markers.every((m) => m >= 24), info.markers.join(", "));
     // The lightbox on touch: two fingers pinch, one finger pans.
@@ -646,7 +734,7 @@ async function casestudy() {
         notes: [...document.querySelectorAll("figure[data-kind=hotspots] [data-note]")].filter(visible).length,
         describe: [...document.querySelectorAll("details > summary")].filter((s) => s.textContent === "Describe this diagram").length,
         trailLinks: document.querySelectorAll('nav[aria-label="On this page"] a').length,
-        banner: document.querySelector('[role="note"]')?.textContent ?? "",
+        banner: document.querySelector("main header p")?.textContent ?? "",
         missingAlt: [...document.querySelectorAll("main img")].filter((i) => !i.hasAttribute("alt")).length,
       };
     });
@@ -654,8 +742,8 @@ async function casestudy() {
     check("“Open full-size image” link instead of the lightbox", !!r.fallback && r.enlargeHidden, r.fallback);
     check("hotspot notes listed", r.notes === 5, `${r.notes} notes`);
     check("long descriptions behind “Describe this diagram”", r.describe >= 5, `${r.describe}`);
-    check("trail links present", r.trailLinks === 6);
-    check("fictional-example banner present", /FICTIONAL EXAMPLE|Fictional example/i.test(r.banner), r.banner.slice(0, 60));
+    check("trail links present", r.trailLinks === 7, String(r.trailLinks));
+    check("the example line above the H1", /^Example — fictional case study$/i.test(r.banner.trim()), r.banner.slice(0, 60));
     check("every image has an alt attribute", r.missingAlt === 0, `${r.missingAlt} without`);
     await context.close();
   }
@@ -665,7 +753,17 @@ async function casestudy() {
 // Records what moves: CSS animations and transitions by property (with their durations), inline
 // transforms written by script, glint passes, and the field's WebGL draws. Installed before load.
 const motionProbe = () => {
-  window.__motion = { anims: [], transitions: [], styleTransforms: 0, glints: 0, draws: 0 };
+  window.__motion = { anims: [], transitions: [], styleTransforms: 0, glints: 0, titleGlints: 0, draws: 0, log: [] };
+  // A timeline of what could move the field (for a failure's detail): scrolls, animations, transitions.
+  const note = (what) => window.__motion.log.push(`${Math.round(performance.now())} ${what}`);
+  addEventListener("scroll", () => note(`scroll ${Math.round(scrollY)}`), true);
+  document.addEventListener("animationstart", (e) => note(`anim ${e.animationName}`), true);
+  document.addEventListener("transitionrun", (e) => note(`trans ${e.propertyName} ${String(e.target.className?.baseVal ?? e.target.className).slice(0, 30)}`), true);
+  // Focus moves (a focus ring's transition, a pre-warm on focus) and pointer crossings, by target.
+  document.addEventListener("focusin", (e) => note(`focusin ${e.target.tagName} ${(e.target.getAttribute?.("href") ?? "").slice(0, 30)}`), true);
+  document.addEventListener("focusout", (e) => note(`focusout ${e.target.tagName}`), true);
+
+  document.addEventListener("pointerover", (e) => note(`pointerover ${e.target.tagName}.${String(e.target.className?.baseVal ?? e.target.className).slice(0, 24)}`), true);
   const positional = /^(transform|translate|scale|rotate|font-stretch|font-weight|font-variation-settings|left|top|right|bottom|width|height|clip-path|background-position)$/;
   document.addEventListener(
     "animationstart",
@@ -689,7 +787,10 @@ const motionProbe = () => {
   document.addEventListener("DOMContentLoaded", () => {
     new MutationObserver((records) => {
       for (const r of records) {
-        if (r.attributeName === "data-glint" && r.target.getAttribute("data-glint") === "play") window.__motion.glints++;
+        if (r.attributeName === "data-glint" && r.target.getAttribute("data-glint") === "play") {
+          window.__motion.glints++;
+          if (r.target.closest("[data-title], h1, h2")) window.__motion.titleGlints++;
+        }
         if (r.attributeName === "style" && /transform|translate/.test(r.target.getAttribute("style") ?? "") && !/view-transition/.test(r.target.getAttribute("style") ?? "")) window.__motion.styleTransforms++;
       }
     }).observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ["style", "data-glint"] });
@@ -699,6 +800,7 @@ const motionProbe = () => {
       const original = ctx.prototype[fn];
       ctx.prototype[fn] = function (...args) {
         window.__motion.draws++;
+        window.__motion.log.push(`${Math.round(performance.now())} draw`);
         return original.apply(this, args);
       };
     }
@@ -721,7 +823,6 @@ async function modes() {
     const sw = await page.evaluate(() => {
       const input = document.querySelector('header input[role="switch"]');
       const desc = input?.getAttribute("aria-describedby");
-      // The visible label settles as decoration around a visually hidden copy: that copy is its text.
       const label = input?.closest("label");
       return { label: (label?.querySelector(".visually-hidden") ?? label)?.textContent.trim(), checked: input?.checked, described: desc ? document.getElementById(desc)?.textContent ?? "" : "" };
     });
@@ -734,7 +835,7 @@ async function modes() {
     await page.mouse.move(700, 450, { steps: 8 });
     await page.locator(`article[data-slug="${card.slug}"] a`).first().click();
     await settle(page, { path: card.path, terrain: mode === "still" ? null : card.terrain });
-    const next = page.locator('nav[aria-label] a[data-variant="display"]').first();
+    const next = page.locator('a[aria-describedby="next-project-label"]').first();
     await next.scrollIntoViewIfNeeded();
     await next.hover();
     await page.waitForTimeout(400);
@@ -743,11 +844,43 @@ async function modes() {
     await page.keyboard.press("Shift+Tab");
     await page.keyboard.press("Tab");
     await page.waitForTimeout(400);
-    // Idle on the case study: no ambient field frames in calm.
-    await page.waitForTimeout(800);
-    const idleStart = await page.evaluate(() => window.__motion.draws);
+    // Idle on the case study: the field is still while a page is read (every mode). Wait for a
+    // smooth scroll the focus started (Lenis, full motion) to land first: scrolling moves the
+    // quiet zones, and the field redraws for that.
+    await page.waitForFunction(
+      () =>
+        new Promise((done) => {
+          const y = scrollY;
+          setTimeout(() => done(scrollY === y), 400);
+        }),
+      null,
+      { timeout: 8000, polling: 100 },
+    ).catch(() => {});
+    // Responses to that input (a pre-warm of the next terrain on focus, which waits for its
+    // heightmap) finish first: wait until the field has drawn nothing for 700 ms.
+    // One loop in the page (polls that overlap could start the idle window between two of those
+    // responses): it ends once 1.5 s pass without a draw, or after 8 s. The pre-warm's heightmap
+    // can land well after the focus has left on the software renderer, and its frame is a response.
+    await page.evaluate(() => document.activeElement?.blur());
+    await page.evaluate(
+      () =>
+        new Promise((done) => {
+          const start = performance.now();
+          let n = window.__motion.draws;
+          let quietSince = start;
+          const tick = () => {
+            const now = performance.now();
+            if (window.__motion.draws !== n) [n, quietSince] = [window.__motion.draws, now];
+            if (now - quietSince >= 1500 || now - start > 8000) return done();
+            setTimeout(tick, 50);
+          };
+          tick();
+        }),
+    );
+    const idleStart = await page.evaluate(() => [window.__motion.draws, performance.now()]);
     await page.waitForTimeout(2500);
-    const idleDraws = (await page.evaluate(() => window.__motion.draws)) - idleStart;
+    const idleDraws = (await page.evaluate(() => window.__motion.draws)) - idleStart[0];
+    const idleLog = await page.evaluate((t0) => `idle from ${Math.round(t0)}: ` + window.__motion.log.filter((l) => Number(l.split(" ")[0]) > t0 - 1500).filter((l) => !/ trans /.test(l)).slice(0, 24).join(" | "), idleStart[1]);
     // Card → case study morphs; case study → case study has no shared element yet (no View
     // Transition); back to the deck morphs again.
     await next.click();
@@ -765,16 +898,11 @@ async function modes() {
       check("still: no View Transition API call", m.native === 0, `native calls=${m.native}`);
     } else {
       check(`${mode}: View Transitions run`, m.native >= 2, `native calls=${m.native}`);
-      check(`${mode}: settles and breaths animate`, moved.length > 0, `${moved.length} positional animations`);
+      check(`${mode}: responses and morphs animate`, moved.length > 0, `${moved.length} positional animations`);
     }
-    if (mode === "calm") {
-      check("calm: no ambient field frames while idle", idleDraws === 0, `${idleDraws} draws in 2.5 s`);
-      check("calm: no glint", m.glints === 0, `${m.glints} glints`);
-    }
-    if (mode === "full") {
-      check("full: the field keeps its ambient frames", idleDraws > 0, `${idleDraws} draws in 2.5 s`);
-      check("full: a glint marked the first arrival or the commit", m.glints >= 1, `${m.glints} glints`);
-    }
+    check(`${mode}: no field frames while the page is read`, idleDraws === 0, `${idleDraws} draws in 2.5 s; ${idleLog}`);
+    // Titles never glint: the only glint left is a Mythic card's foil sweep.
+    check(`${mode}: no glint on titles`, m.titleGlints === 0 && (mode === "full" || m.glints === 0), `${m.titleGlints} on titles, ${m.glints} in all`);
     check("no page errors", errors.length === 0, errors.join("; "));
     await context.close();
   }
@@ -811,7 +939,7 @@ async function hydration() {
       });
       await load(page, `${base}${route}`);
       await page.waitForTimeout(600);
-      const attrs = await page.evaluate(() => ["data-motion", "data-tier", "data-calm", "data-intro"].map((a) => `${a}=${document.documentElement.getAttribute(a)}`));
+      const attrs = await page.evaluate(() => ["data-motion", "data-tier", "data-calm"].map((a) => `${a}=${document.documentElement.getAttribute(a)}`));
       check(`${route}: no hydration or console errors`, problems.length === 0, problems.join(" | "));
       check(`${route}: motion attributes kept`, !attrs.some((a) => a.endsWith("=null")), attrs.join(" "));
       await context.close();
@@ -821,9 +949,9 @@ async function hydration() {
 
 // --- primitives (motion lab) ----------------------------------------------------------------------
 // Each primitive is exercised on the lab's specimen sheet (hover, focus and press on everything
-// interactive, replay and glint buttons, the reveals scrolled into view) and its layout shift
+// interactive, the replay button, the reveals scrolled into view) and its layout shift
 // summed from every shift whose sources lie inside it, input or not (at most 0.005 each). Focus parity: keyboard
-// focus gives the signature link exactly the hover state.
+// focus gives the trail link exactly the hover state.
 async function primitives() {
   if (!existsSync(join(root, "out/lab/specimen/index.html"))) {
     console.log("\nprimitives: skipped (no motion lab in this build; build with SITE_MODE=basecamp)");
@@ -851,7 +979,7 @@ async function primitives() {
       await page.waitForTimeout(500);
       // Only what the primitive's own motion shifts: loading (the web fonts' swap) is not part of it.
       await page.evaluate(() => (window.__shifts.length = 0));
-      // Everything interactive in it: hover, focus, press; then the replay and glint buttons.
+      // Everything interactive in it: hover, focus, press; the replay button too.
       const targets = section.locator("a, button");
       const n = await targets.count();
       for (let i = 0; i < n; i++) {
@@ -879,18 +1007,18 @@ async function primitives() {
     await context.close();
   }
 
-  console.log("\nprimitives: signature link focus parity");
+  console.log("\nprimitives: trail link focus parity");
   for (const where of ["lab", "case study"]) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const page = await context.newPage();
     await load(page, where === "lab" ? `${base}/lab/specimen/?motion=full` : `${base}${FLOW.path}`);
-    const link = where === "lab" ? page.locator('a[data-variant="display"][data-lab-state="rest"]').first() : page.locator('a[data-variant="display"]').first();
+    const link = where === "lab" ? page.locator('a[data-trail="standalone"][data-lab-state="rest"]').first() : page.locator('a[aria-describedby="next-project-label"]').first();
     await link.scrollIntoViewIfNeeded();
     const state = () =>
       link.evaluate((a) => ({
-        letters: [...a.querySelectorAll("[style*='--kt-i']")].map((c) => `${getComputedStyle(c).fontStretch}/${getComputedStyle(c).fontWeight}`).join(" "),
-        arrow: [...a.querySelectorAll("span")].filter((s) => s.textContent === "→" && s.getClientRects().length).map((s) => getComputedStyle(s).transform).join(" "),
-        colour: getComputedStyle(a.querySelector("span[class*='label']") ?? a).color,
+        line: getComputedStyle(a.querySelector("span[class*='label']") ?? a).backgroundSize,
+        arrow: [...a.querySelectorAll("span[class*='arrow']")].map((s) => getComputedStyle(s).transform).join(" "),
+        width: Math.round(a.getBoundingClientRect().width * 10) / 10,
       }));
     const rest = await state();
     await link.hover();
@@ -905,6 +1033,7 @@ async function primitives() {
     const focused = await state();
     check(`${where}: hover changes the link`, JSON.stringify(rest) !== JSON.stringify(hovered), JSON.stringify(hovered).slice(0, 120));
     check(`${where}: keyboard focus gives exactly the hover motion`, JSON.stringify(hovered) === JSON.stringify(focused), `${JSON.stringify(hovered).slice(0, 90)} vs ${JSON.stringify(focused).slice(0, 90)}`);
+    check(`${where}: the link never changes width`, rest.width === hovered.width && rest.width === focused.width, `${rest.width} / ${hovered.width} / ${focused.width}`);
     await context.close();
   }
 
@@ -913,7 +1042,7 @@ async function primitives() {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     const page = await context.newPage();
     await load(page, `${base}/lab/specimen/?motion=full`);
-    const link = page.locator('a[data-variant="standalone"][data-lab-state="rest"]').first();
+    const link = page.locator('a[data-trail="standalone"][data-lab-state="rest"]').first();
     await link.scrollIntoViewIfNeeded();
     const before = await link.evaluate((a) => getComputedStyle(a).getPropertyValue("--on").trim());
     await link.tap();
@@ -924,10 +1053,20 @@ async function primitives() {
   }
 }
 
-const scenarios = { transitions, modes, hydration, primitives, decode, casestudy };
+/** Plain wording in every built page (scripts/check-wording.mjs). */
+async function wording() {
+  console.log("\nwording: the built HTML");
+  const hits = wordingHits(join(root, "out"));
+  for (const word of ["Höhenlinie", "Expedition", "Basecamp", "CV", ".pdf", "open to", "available for", "looking for"]) {
+    const found = hits.filter((h) => h.word.toLowerCase().startsWith(word.toLowerCase().replace(/^\./, ".")));
+    check(`no “${word}” in any page`, found.length === 0, found.slice(0, 3).map((h) => `${h.file}: ${h.context}`).join(" | "));
+  }
+}
+
+const scenarios = { transitions, modes, hydration, primitives, decode, casestudy, wording };
 // The terrain conductor and the Bern terrain (scripts/e2e-terrain.mjs).
 Object.assign(scenarios, (await import("./e2e-terrain.mjs")).terrainScenarios({ browser, base, root, check, settle }));
-Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, basecamp, ia, phone, fontswap, hud, toast, cards, views, arrival, reading, access }).map(([name, run]) => [name, () => run({ browser, base, basePath, root, check, open, settle })])));
+Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, about, ia, phone, fontswap, hud, toast, cards, arrival, reading, access, flood, trail, portrait, pointer, inp, smoke, route, axe }).map(([name, run]) => [name, () => run({ browser, playwright, base, basePath, root, check, open, settle })])));
 try {
   for (const [name, run] of Object.entries(scenarios)) if (!only || only === name) await run();
 } finally {

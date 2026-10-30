@@ -7,7 +7,7 @@ import { beginReturn, finishReassembly } from "@/components/transition/return-tr
  * - Every transition gets a kind (`transitionKind()`): "route" (a link), "traverse" (browser back
  *   or forward: a 180 ms cross-fade plus the shared elements, `html[data-vt="traverse"]`, and no
  *   arrival choreography), "return" (a link back into the deck, the card reassembly) or "view"
- *   (in the page: the deck's Cards ⇄ Index switch, the lightbox).
+ *   (in the page: the lightbox).
  *
  * - Still mode (the OS asks for reduced motion): no View Transition at all. The wrapper throws
  *   before the API is reached, and React commits the navigation directly (its fallback when a
@@ -104,8 +104,11 @@ if (typeof document !== "undefined" && typeof document.startViewTransition === "
       run?.finished();
     };
     transition.finished.then(clear, clear);
-    // An aborted transition draws nothing: drop the choreography's state right away.
-    if (run) transition.ready.catch(() => run.finished());
+    // An aborted transition draws nothing: drop the choreography's state right away. A transition
+    // skipped by the next one (a back during a morph) rejects `ready` and `updateCallbackDone`:
+    // that is expected, not an error to report.
+    transition.ready.catch(() => run?.finished());
+    transition.updateCallbackDone.catch(() => {});
     return transition;
   } as typeof start;
 }

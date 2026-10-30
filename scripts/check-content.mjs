@@ -166,6 +166,17 @@ if (examples.size && !scope) {
   const where = mode === "live" ? "not part of live builds" : "never part of a live build";
   console.log(`Content: skipped ${[...examples.values()].join(", ")} (fictional example, ${where}).`);
 }
+// Case studies: the template's schema (src/lib/case-study.ts). An incomplete one never builds.
+if (mode !== "construction") {
+  const { caseStudies } = await import(pathToFileURL(join(contentDir, "case-studies.ts")).href);
+  const { validateCaseStudy } = await import(pathToFileURL(join(root, "src/lib/case-study.ts")).href);
+  const problems = Object.entries(caseStudies).flatMap(([slug, study]) => validateCaseStudy(slug, study));
+  if (problems.length) {
+    console.error(`Case studies incomplete (${problems.length}):\n  ${problems.join("\n  ")}`);
+    process.exit(1);
+  }
+}
+
 const total = list.length + exampleList.length;
 if (!total) {
   console.log(`Content: no placeholders or example values left${scope ? ` on ${what}` : ""}.`);
@@ -173,7 +184,7 @@ if (!total) {
 }
 const counts = [list.length && `${list.length} placeholder(s)`, exampleList.length && `${exampleList.length} example value(s)`].filter(Boolean).join(" and ");
 if (build && (mode === "basecamp" || preview)) {
-  console.warn(`Content: ${counts} remain (shown in this ${mode === "basecamp" ? "Basecamp" : "preview"} build). npm run check:content lists them.`);
+  console.warn(`Content: ${counts} remain (shown in this ${mode === "basecamp" ? "gated preview" : "preview"} build). npm run check:content lists them.`);
   process.exit(0);
 }
 const short = (v, n = 34) => (v.length > n ? `${v.slice(0, n - 1)}…` : v);

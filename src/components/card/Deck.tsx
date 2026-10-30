@@ -1,152 +1,100 @@
 "use client";
 
-import { startTransition, useLayoutEffect, useState, useSyncExternalStore, type CSSProperties } from "react";
-import { cardHref, cards, type SummitCardData } from "@/content/cards";
+import { useLayoutEffect, type CSSProperties } from "react";
+import type { SummitCardData } from "@/content/cards";
+import { flood } from "@/content/flood";
 import type { home } from "@/content/home";
 import { rememberOrigin, takeOrigin } from "@/components/transition/return-focus";
-import { MorphTarget } from "@/components/transition/MorphTarget";
-import { MotionButton } from "@/components/motion/MotionButton";
 import { RuledHeading } from "@/components/motion/RuledHeading";
-import { SettleText } from "@/components/motion/SettleText";
-import { SignatureLink } from "@/components/motion/SignatureLink";
-import { prefetchTerrain } from "@/components/terrain/field-store";
-import { morphName } from "@/lib/morph";
-import { currentMode } from "@/lib/motion-mode";
-import { duration } from "@/styles/tokens";
 import { SummitCard } from "./SummitCard";
 import styles from "./Deck.module.css";
 
-type View = "cards" | "index";
-const noop = () => () => {};
-const VIEW_KEY = "summit:deck-view";
-
-function readView(): View {
-  try {
-    return sessionStorage.getItem(VIEW_KEY) === "index" ? "index" : "cards";
-  } catch {
-    return "cards";
-  }
-}
-
-function rememberView(view: View) {
-  try {
-    sessionStorage.setItem(VIEW_KEY, view);
-  } catch {
-    // Without storage the deck opens on the cards next time.
-  }
-}
-
-/** One row of the Index view: the name breathes and a rule draws on hover or focus; its terrain pre-warms. */
-function IndexRow({ card }: { card: SummitCardData }) {
-  const line = card.indexLine;
-  const warm = () => prefetchTerrain(card.artwork.terrainId);
-  return (
-    <li className={styles.row} data-index-slug={card.slug}>
-      <SignatureLink
-        href={cardHref(card)}
-        variant="standalone"
-        role="display"
-        label={card.name}
-        className={styles.rowLink}
-        labelClassName={`${styles.rowName} display`}
-        wrapLabel={(label) => (
-          <MorphTarget name={morphName("title", card.slug)} variant="title">
-            {label}
-          </MorphTarget>
-        )}
-        after={<span className={styles.rowLine}> — {[line.kind, line.summary, line.time].join(" · ")}</span>}
-        onPointerEnter={warm}
-        onFocus={warm}
-        onClick={() => rememberOrigin(card.slug)}
-      />
-    </li>
-  );
-}
+/** What the server page knows about each card's case study: its caption and its summit (the spot
+ * height's label, and its height in metres). */
+export type DeckEntry = { problem: string; result: string; role: string; spot: string; metres: number };
 
 /**
- * The home page's deck: every card from content, each one a link to its case study, in two views.
- *
- * - Cards: a flat spread grid in deck order (one column of full-width cards on phones, which
- *   snap into place as they scroll, y proximity; two from the small breakpoint, three from the
- *   medium one). Each card arrives once per session as it enters (SummitCard).
- * - Index: one row per card, its index line.
- *
- * "Cards" · "Index" switches between them with a View Transition: each card's name morphs into
- * its row's name over --dur-medium (360 ms); calm cross-fades; still switches at once. The choice
- * is remembered for the session. The section's copy arrives as a prop from the server page:
- * importing home.ts here would put the whole home copy into this client component's bundle.
+ * Selected work (id="work") as a ridge: the cards stand on a drawn ridgeline in deck order (the
+ * panorama seen from Interlaken), each raised by its real summit height, with a plain caption
+ * under it (problem, result, role). Phones: a vertical stack at 86% width, alternately offset,
+ * each card with its spot height beside it. No carousel. Each card arrives once per session as it
+ * enters (SummitCard). The cards, the copy and the captions arrive as props from the server page:
+ * importing the content here would put it into this client component's bundle.
  */
-export function Deck({ copy: t }: { copy: typeof home.expeditions }) {
-  // The session's view (the server renders the cards); a switch here overrides it.
-  const stored = useSyncExternalStore(noop, readView, () => "cards" as View);
-  const [chosen, setChosen] = useState<View | null>(null);
-  const view = chosen ?? stored;
-
-  // Coming back from a card's page: that card (or its row) is in view and focused. A layout
-  // effect, so it happens before a view transition captures the deck, which then rebuilds the
-  // card where the reader sees it (return-transition.ts).
+export function Deck({ copy: t, cards, entries = {} }: { copy: typeof home.work; cards: readonly SummitCardData[]; entries?: Record<string, DeckEntry> }) {
+  // Coming back from a card's page: that card is in view and focused. A layout effect, so it
+  // happens before a view transition captures the deck, which then rebuilds the card where the
+  // reader sees it (return-transition.ts).
   useLayoutEffect(() => {
     const slug = takeOrigin();
     if (!slug) return;
-    const escaped = CSS.escape(slug);
-    const target = document.querySelector<HTMLElement>(`article[data-slug="${escaped}"], [data-index-slug="${escaped}"]`);
+    const target = document.querySelector<HTMLElement>(`article[data-slug="${CSS.escape(slug)}"]`);
     if (!target) return;
     const r = target.getBoundingClientRect();
     if (r.top < 0 || r.bottom > window.innerHeight) target.scrollIntoView({ block: "center" });
     target.querySelector("a")?.focus({ preventScroll: true });
   }, []);
 
-  const switchTo = (next: View) => {
-    if (next === view) return;
-    rememberView(next);
-    const mode = currentMode();
-    if (mode === "still") return setChosen(next);
-    // The press paints first; the switch (a view transition, which holds rendering while it
-    // captures the page) starts a frame later.
-    requestAnimationFrame(() =>
-      window.setTimeout(() => {
-        // The view switch's own timing (globals.css): the names morph over 360 ms; calm cross-fades.
-        const root = document.documentElement;
-        const flag = mode === "calm" ? "view-calm" : "view";
-        root.setAttribute("data-vt", flag);
-        window.setTimeout(() => root.getAttribute("data-vt") === flag && root.removeAttribute("data-vt"), duration.medium + duration.short);
-        startTransition(() => setChosen(next));
-      }, 0),
-    );
-  };
-
   // No case study in this build (a live build until the first real one is written): the section
   // stays and says so.
   const empty = cards.length === 0;
+  // Heights: the highest summit stands highest; the others lower by their real difference.
+  const heights = cards.map((c) => entries[c.slug]?.metres ?? 0);
+  const top = Math.max(...heights, 1);
+  const low = Math.min(...heights.filter(Boolean), top);
   return (
-    <section id="expeditions" className={styles.deck} aria-labelledby="deck-heading">
+    <section id="work" className={styles.deck} aria-labelledby="work-heading">
       <div className={styles.header} data-quiet-zone>
-        <SettleText as="p" text={t.eyebrow} mode="chars" role="mono" trigger="inview" className={`${styles.eyebrow} hud-label map-halo`} />
-        <RuledHeading id="deck-heading" text={empty ? t.emptyHeading : t.heading} className={`${styles.heading} display`} ruleClassName={styles.headRule} />
+        <RuledHeading id="work-heading" text={t.heading} className={`${styles.heading} display`} ruleClassName={styles.headRule} flood={flood.sections.work} />
         <p className={`${styles.intro} body-copy`}>{empty ? t.empty : t.intro}</p>
-        {!empty && (
-          <div className={styles.views} role="group" aria-label={t.views.label}>
-            {(["cards", "index"] as const).map((v) => (
-              <MotionButton key={v} label={t.views[v]} aria-pressed={view === v} className={styles.viewButton} onClick={() => switchTo(v)} />
-            ))}
-          </div>
-        )}
       </div>
-      {!empty && view === "cards" && (
-        <ul className={styles.cards} data-snap="">
-          {cards.map((card) => (
-            <li key={card.slug} className={styles.slot}>
-              <SummitCard card={card} transitionNames onOpen={() => rememberOrigin(card.slug)} />
-            </li>
-          ))}
-        </ul>
-      )}
-      {!empty && view === "index" && (
-        <ol className={styles.index} aria-label={t.indexLabel} style={{ "--rows": cards.length } as CSSProperties}>
-          {cards.map((card) => (
-            <IndexRow key={card.slug} card={card} />
-          ))}
-        </ol>
+      {!empty && (
+        <div className={styles.ridge}>
+          <svg className={styles.ridgeLine} viewBox="0 0 300 100" preserveAspectRatio="none" aria-hidden="true" data-route="ridge" data-route-anchor="ridge">
+            <path
+              d={`M0 100${cards
+                .map((c, i) => {
+                  const x = 50 + i * 100;
+                  // The highest apex stays a line below its spot height (Deck.module.css: .cards' top padding).
+                  const y = 25 + ((top - (entries[c.slug]?.metres ?? low)) / Math.max(1, top - low)) * 30;
+                  return `L${x - 34} ${y + 26}L${x} ${y}L${x + 34} ${y + 26}`;
+                })
+                .join("")}L300 100`}
+            />
+          </svg>
+          <ul className={styles.cards} data-snap="">
+            {cards.map((card, i) => {
+              const e = entries[card.slug];
+              const drop = e ? (top - e.metres) / Math.max(1, top - low) : 0;
+              return (
+                <li key={card.slug} className={styles.slot} style={{ "--drop": drop.toFixed(3), "--side": i % 2 ? 1 : -1 } as CSSProperties}>
+                  {e && (
+                    <p className={`${styles.spot} hud-label map-halo`} data-quiet-zone>
+                      {e.spot}
+                    </p>
+                  )}
+                  <SummitCard card={card} transitionNames onOpen={() => rememberOrigin(card.slug)} />
+                  {e && (
+                    <dl className={styles.caption} data-quiet-zone>
+                      <div>
+                        <dt className="hud-label map-halo">{t.caption.problem}</dt>
+                        <dd>{e.problem}</dd>
+                      </div>
+                      <div>
+                        <dt className="hud-label map-halo">{t.caption.result}</dt>
+                        <dd>{e.result}</dd>
+                      </div>
+                      <div>
+                        <dt className="hud-label map-halo">{t.caption.role}</dt>
+                        <dd>{e.role}</dd>
+                      </div>
+                    </dl>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
     </section>
   );

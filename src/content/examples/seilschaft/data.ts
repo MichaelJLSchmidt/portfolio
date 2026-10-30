@@ -63,6 +63,23 @@ export const data = {
   engagement: { before: 12, after: 46 },
   reflection: { quarterMonths: 3, rotateAt: 8 },
   card: { cost: 3, costScale: 5 },
+  /** People outside the team who worked with it (the team list). */
+  partners: { hr: 1, sponsor: 1 },
+  /** The career ladder: first a wiki page written by the team alone, then rebuilt with HR. */
+  reversal: { wikiPublished: "March 2022", turnedBack: "October 2022", hrPublished: "May 2023", lostMonths: 7, hrMonths: 7 },
+  /** After the practice was set up: dated observations (intake log, support desk, research days). */
+  log: {
+    /** Months after the intake opened until every product team had used it. */
+    adoption: { date: "January 2022", months: 6 },
+    /** Polish tickets merged in one quarter, and the redesigns they belonged to. */
+    split: { date: "June 2022", merged: 9, redesigns: 3 },
+    splitFixed: { date: "September 2022", merged: 0 },
+    /** Support tickets about failed invoice payments, per month (payments cluster). */
+    payments: { date: "June 2023", before: 120, after: 45 },
+    /** Citizens from the pool who completed a building-permit application unaided. */
+    permitTest: { date: "November 2023", n: 8, before: 3, after: 7 },
+    review: { date: "March 2024" },
+  },
 };
 
 export type SeilschaftData = typeof data;
@@ -113,4 +130,7 @@ export const consistency: [string, boolean][] = [
   ["onboarding steps are thirty days apart", d.onboarding.second - d.onboarding.first === 30 && d.onboarding.third - d.onboarding.second === 30],
   ["the senior co-mentors before the first year is out", d.hiring.mentorMonth < 12],
   ["designer hires (a senior, then juniors) plus the researcher are all hires", 1 + d.hiring.juniors + d.team.researchers === d.team.hires],
+  ["the split Polish tickets belong to fewer redesigns, and the fix stopped the merging", d.log.split.redesigns < d.log.split.merged && d.log.splitFixed.merged < d.log.split.merged],
+  ["the permit test improved and fits its participants", d.log.permitTest.before < d.log.permitTest.after && d.log.permitTest.after <= d.log.permitTest.n],
+  ["payment support tickets fell", d.log.payments.after < d.log.payments.before],
 ];

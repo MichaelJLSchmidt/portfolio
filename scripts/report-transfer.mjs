@@ -69,7 +69,7 @@ try {
     const context = await browser.newContext(device);
     await context.addInitScript(() => {
       try {
-        sessionStorage.setItem("summit:intro-played", "1");
+        
       } catch {}
     });
     const page = await context.newPage();

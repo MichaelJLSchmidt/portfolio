@@ -1,400 +1,313 @@
-/* Home sections (and the contact band Basecamp shares). Colours, type and motion come from the
+@layer reset, tokens, base, layout, components, utilities;
+
+/* Home sections (and the contact section About shares). Colours, type and motion come from the
    tokens; running text keeps its knockout (.body-copy) or sits on a legend panel (.legend). */
 
-.section {
-  display: grid;
-  gap: clamp(24px, 3.5vw, 48px);
-  padding-block: clamp(48px, 8vw, 128px) 0;
-  scroll-margin-top: 72px;
-}
-
-/* ---------------------------------------------------------------- section head */
-
-.head {
-  display: grid;
-  gap: 10px;
-  justify-items: start;
-}
-
-.head[data-align="center"] {
-  justify-items: center;
-  text-align: center;
-}
-
-/* The rule that leads: drawn as the section comes into view, before the heading settles. */
-.headRule {
-  width: min(100%, 12rem);
-}
-
-.head[data-align="center"] .headRule {
-  transform-origin: center;
-}
-
-.eyebrow {
-  --kt-color: var(--color-glacier);
-  color: var(--color-glacier);
-}
-
-.heading {
-  font-size: clamp(2.5rem, 8vw, 6.5rem);
-}
-
-/* ---------------------------------------------------------------- action links (pills) */
-
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.action {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5em;
-  min-height: 44px;
-  padding: 0 18px;
-  border: 1px solid var(--color-glacier);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--color-ground) 80%, transparent);
-  font-weight: 600;
-  text-decoration: none;
-  transition: background var(--dur-still) var(--ease-settle);
-}
-
-/* The primary action is filled; on hover or focus it turns over to the ground, so its label
-   (which moves to glacier) always reads. */
-.action[data-primary] {
-  --l-rest-color: var(--color-ground);
-  background: var(--color-glacier);
-}
-
-.action[data-primary] [class*="arrow"] {
-  color: inherit;
-}
-
-.action[data-primary]:focus-visible {
-  background: var(--color-ground);
-}
-
-@media (hover: hover) {
-  .action[data-primary]:hover {
-    background: var(--color-ground);
+@layer components {
+  .section {
+    display: grid;
+    gap: clamp(24px, 3.5vw, 48px);
+    padding-block: var(--space-section) 0;
+    scroll-margin-top: 72px;
   }
-}
 
-/* Not a link yet: a dashed pill, its text still at 7:1 or more over the field. */
-.action[data-placeholder] {
-  border-style: dashed;
-  border-color: var(--color-contour);
-  color: var(--color-sheet);
-}
+  /* ---------------------------------------------------------------- section head */
 
-.tbd {
-  font-family: var(--font-mono);
-  font-size: 0.75em;
-}
-
-/* ---------------------------------------------------------------- summit log */
-
-.log {
-  display: grid;
-  gap: 16px;
-}
-
-.logGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
-  margin: 0;
-}
-
-.logGrid > div {
-  container-type: inline-size;
-  display: flex;
-  flex-direction: column-reverse;
-  justify-content: flex-end;
-  gap: 6px;
-  padding-top: 12px;
-  border-top: 1px solid rgb(90 92 82 / 0.45);
-}
-
-/* Sized by its own column, so "38% → 82%" stays on one line at any width. */
-.logGrid dd {
-  margin: 0;
-  color: var(--color-ground);
-  font-family: var(--font-mono);
-  font-size: clamp(1.125rem, 15cqi, 3rem);
-  font-stretch: var(--axis-mono-rest-wdth);
-  font-weight: 700;
-  line-height: 1.05;
-  white-space: nowrap;
-}
-
-.logGrid dt {
-  color: var(--color-ground);
-  line-height: 1.4;
-}
-
-.smallPrint {
-  color: var(--color-sheet-ink);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-}
-
-@media (min-width: 1024px) {
-  .logGrid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+  .head {
+    display: grid;
+    gap: 10px;
+    justify-items: start;
   }
-}
 
-/* ---------------------------------------------------------------- trail rules */
-
-.rules {
-  display: grid;
-  gap: 16px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: none;
-}
-
-.rule {
-  display: grid;
-  gap: 8px;
-  align-content: start;
-}
-
-.ruleNo {
-  color: var(--color-glacier);
-}
-
-.ruleTitle {
-  font-size: clamp(1.25rem, 2vw, 1.5rem);
-  font-weight: 700;
-  font-stretch: var(--type-condensed-wdth);
-  line-height: 1.2;
-}
-
-/* H3s settle a little from the breath above their condensed rest axes (SettleText role "text"). */
-.ruleTitle[data-role] {
-  --kt-rest-wdth: var(--type-condensed-wdth);
-  --kt-rest-wght: 700;
-}
-
-/* The evidence line fades in --dur-tap after its rule's title has begun to settle. */
-.evidence {
-  --fade-after: var(--dur-tap);
-  padding-top: 8px;
-  border-top: 1px dashed var(--color-contour-dim);
-  font-size: 1rem;
-}
-
-.evidence :global(.hud-label) {
-  color: var(--color-glacier);
-}
-
-@media (min-width: 1024px) {
-  .rules {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .head[data-align="center"] {
+    justify-items: center;
+    text-align: center;
   }
-}
 
-/* ---------------------------------------------------------------- field notes */
-
-.notes {
-  display: grid;
-  gap: 16px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.note figure {
-  display: grid;
-  gap: 12px;
-  margin: 0;
-}
-
-.note blockquote {
-  margin: 0;
-}
-
-/* Set roman: the quote marks and the attribution carry the voice, and home never loads the
-   italic face for them. */
-.noteQuote {
-  font-size: clamp(1.125rem, 1.6vw, 1.3rem);
-}
-
-.noteSource {
-  color: var(--color-sheet);
-}
-
-/* Preview builds: an invented quote says so. */
-.exampleTag {
-  justify-self: start;
-  padding: 2px 8px;
-  border: 1px solid var(--color-alpenglow);
-  border-radius: 999px;
-  color: var(--color-alpenglow);
-  font-size: 0.625rem;
-}
-
-@media (min-width: 1024px) {
-  .notes {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* The rule that leads: drawn as the section comes into view, before the heading settles. */
+  .headRule {
+    width: min(100%, 12rem);
   }
-}
 
-/* ---------------------------------------------------------------- workshops */
+  .head[data-align="center"] .headRule {
+    transform-origin: center;
+  }
 
-.workshops {
-  display: grid;
-  gap: 20px;
-  max-width: 62rem;
-}
+  .eyebrow {
+    color: var(--color-glacier);
+  }
 
-.formats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
+  .heading {
+    font-size: clamp(2.5rem, 8vw, 6.5rem);
+  }
 
-/* The chip variant's look (SignatureLink chip): a pill on a contour border. The formats are not
-   links or buttons, so the chips keep its look without its response. */
-.format {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 10px;
-  padding: 10px 16px;
-  border: 1px solid var(--color-contour);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--color-ground) 75%, transparent);
-}
+  /* ---------------------------------------------------------------- action links (pills) */
 
-.formatName {
-  font-weight: 600;
-}
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 28px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
 
-.format :global(.hud-label) {
-  color: var(--color-glacier);
-}
+  /* Trail links in body size; the email link first. */
+  .action {
+    color: var(--color-paper-dusk);
+    font-size: var(--type-body-size);
+    font-weight: 600;
+  }
 
-.proof strong {
-  color: var(--color-glacier);
-  font-family: var(--font-mono);
-  font-stretch: var(--axis-mono-rest-wdth);
-}
+  .action[data-primary] {
+    color: var(--color-glacier);
+  }
 
-/* ---------------------------------------------------------------- contact */
+  /* Not a link yet: the label with a visible placeholder, its text still at 7:1 or more. */
+  .action[data-placeholder] {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--color-paper-dusk);
+  }
 
-.contact {
-  justify-items: center;
-  padding-bottom: clamp(64px, 10vw, 160px);
-  text-align: center;
-}
+  .tbd {
+    font-family: var(--font-mono);
+    font-size: 0.75em;
+  }
 
-.contactLine {
-  max-width: 48ch;
-}
+  /* ---------------------------------------------------------------- switchback */
 
-.contactActions {
-  justify-content: center;
-}
+  /* How I lead: one column on phones (each illustration, at most 220 px, above its principle);
+     from the md breakpoint the turns alternate left and right, and the page's red route
+     (RouteLayer) zig-zags between their drawings through the gaps. */
+  .switchback {
+    position: relative;
+    display: grid;
+    gap: clamp(32px, 5vw, 64px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
 
-/* ---------------------------------------------------------------- copy address and its toast */
+  .turn {
+    position: relative;
+    display: grid;
+    gap: 16px;
+    align-items: center;
+  }
 
-.copy {
-  font-size: 1rem;
-}
+  .rule {
+    display: grid;
+    gap: 8px;
+    align-content: start;
+    max-width: 34rem;
+  }
 
-/* The toast: a status message at the bottom of the screen, on the raised ground with a glacier
-   hairline. It rises in (calm: fades) over --dur-reveal; still mode fades within --dur-still. */
-.toast {
-  position: fixed;
-  left: 50%;
-  bottom: max(24px, env(safe-area-inset-bottom));
-  z-index: var(--layer-overlay);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  max-width: calc(100vw - 2 * var(--gutter));
-  padding: 6px 6px 6px 18px;
-  border: 1px solid var(--color-glacier);
-  border-radius: 999px;
-  background: var(--color-ground-raised);
-  color: var(--color-sheet);
-  text-align: start;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  translate: -50% 0;
-}
+  .ruleNo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    color: var(--color-glacier);
+  }
 
-.toast[data-open] {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
+  .spot {
+    width: 9px;
+    height: 9px;
+    fill: var(--color-glacier);
+  }
 
-.toastText {
-  position: relative;
-  margin: 0;
-}
+  .ruleTitle {
+    font-size: clamp(1.25rem, 2vw, 1.5rem);
+    font-weight: 700;
+    font-stretch: var(--type-condensed-wdth);
+    line-height: 1.2;
+  }
 
-/* The message keeps its own case ("COPIED — see you at the trailhead."): scoped to the toast so
-   it outranks the global .hud-label in any stylesheet order. */
-.toast .toastText {
-  text-transform: none;
-}
+  .evidence {
+    margin: 0;
+    padding-top: 8px;
+    border-top: 1px dashed var(--color-contour-dim);
+    color: var(--color-paper-dusk);
+    letter-spacing: 0.06em;
+    line-height: 1.6;
+    text-transform: none;
+  }
 
-.toast[data-ok] .toastText {
-  color: var(--color-glacier);
-}
+  .evidenceLabel {
+    color: var(--color-glacier);
+    text-transform: uppercase;
+  }
 
-.toastClose {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 36px;
-  height: 36px;
-  border: 0;
-  border-radius: 50%;
-  background: none;
-  color: var(--color-sheet);
-  font-size: 1.25rem;
-  cursor: pointer;
-}
+  .illo {
+    width: min(100%, 220px);
+    height: auto;
+    overflow: visible;
+  }
 
-@keyframes toast-in {
-  from {
+  .illo path,
+  .illo circle {
+    fill: none;
+    stroke: var(--color-contour);
+    stroke-width: 1.5px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .illo .illoRoute {
+    stroke: var(--color-signal);
+    stroke-width: 2px;
+  }
+
+  .illo .illoBlaze {
+    fill: var(--color-signal);
+    stroke: none;
+  }
+
+  /* Full motion, where scroll timelines exist: each line draws as the drawing scrolls in (entry
+     10% to cover 40%). Elsewhere, and in calm and still, the drawing is simply there. */
+  @keyframes illo-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @supports (animation-timeline: view()) {
+    :root[data-motion="full"] .illo :is(path, circle):not(.illoBlaze) {
+      stroke-dasharray: 1;
+      animation: illo-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 40%;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .turn {
+      grid-template-columns: minmax(0, 220px) minmax(0, 34rem);
+      column-gap: clamp(32px, 4vw, 64px);
+      justify-content: start;
+    }
+
+    .turn[data-side="right"] {
+      grid-template-columns: minmax(0, 34rem) minmax(0, 220px);
+      justify-content: end;
+    }
+
+    .turn[data-side="right"] .illo {
+      order: 2;
+    }
+  }
+
+  /* ---------------------------------------------------------------- contact */
+
+  .contact {
+    justify-items: center;
+    padding-bottom: clamp(64px, 10vw, 160px);
+    text-align: center;
+  }
+
+  .contactLine {
+    max-width: 48ch;
+  }
+
+  .contactActions {
+    justify-content: center;
+  }
+
+  /* ---------------------------------------------------------------- copy address and its toast */
+
+  .copy {
+    font-size: 1rem;
+  }
+
+  /* The toast: a status message at the bottom of the screen, on the raised ground with a glacier
+     hairline. It rises in (calm: fades) over --dur-reveal; still mode fades within --dur-still. */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: max(24px, env(safe-area-inset-bottom));
+    z-index: var(--layer-overlay);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: calc(100vw - 2 * var(--gutter));
+    padding: 6px 6px 6px 18px;
+    border: 1px solid var(--color-glacier);
+    border-radius: 999px;
+    background: var(--color-ground-raised);
+    color: var(--color-paper-dusk);
+    text-align: start;
     opacity: 0;
-    transform: translateY(var(--dist-rise));
-  }
-}
-
-@keyframes toast-fade {
-  from {
-    opacity: 0;
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion="still"]) .toast[data-open] {
-    animation: toast-in var(--dur-reveal) var(--ease-settle);
+    visibility: hidden;
+    pointer-events: none;
+    translate: -50% 0;
   }
 
-  :root[data-motion="calm"] .toast[data-open] {
-    animation-name: toast-fade;
+  .toast[data-open] {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
   }
-}
 
-:root[data-motion="still"] .toast[data-open] {
-  animation: toast-fade var(--dur-still) linear;
+  .toastText {
+    position: relative;
+    margin: 0;
+  }
+
+  /* The message keeps its own case ("COPIED — see you at the trailhead."): scoped to the toast so
+     it outranks the global .hud-label in any stylesheet order. */
+  .toast .toastText {
+    text-transform: none;
+  }
+
+  .toast[data-ok] .toastText {
+    color: var(--color-glacier);
+  }
+
+  .toastClose {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--color-paper-dusk);
+    font-size: 1.25rem;
+    cursor: pointer;
+  }
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(var(--dist-rise));
+    }
+  }
+
+  @keyframes toast-fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :root:not([data-motion="still"]) .toast[data-open] {
+      animation: toast-in var(--dur-reveal) var(--ease-settle);
+    }
+
+    :root[data-motion="calm"] .toast[data-open] {
+      animation-name: toast-fade;
+    }
+  }
+
+  :root[data-motion="still"] .toast[data-open] {
+    animation: toast-fade var(--dur-still) linear;
+  }
 }

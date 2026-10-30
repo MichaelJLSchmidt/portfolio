@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { archivo, archivoItalic, martianMono } from "./fonts";
+import { cardTerrains } from "@/content/cards";
 import { site } from "@/content/site";
 import { color, tokensToCss } from "@/styles/tokens";
 import { motionModeScript } from "@/lib/motion-mode";
@@ -17,10 +18,15 @@ import "@/styles/motion.css";
 
 const isPreview = process.env.NEXT_PUBLIC_PREVIEW === "1";
 
+/** The cascade layers, lowest first; every stylesheet starts with the same statement. */
+const LAYER_ORDER = "@layer reset, tokens, base, layout, components, utilities;";
+
 export const metadata: Metadata = {
-  title: site.title,
+  title: { default: site.title, template: site.titleTemplate },
   description: site.description,
-  // Preview builds (Basecamp branch deploys, Deploy Previews) must never be indexed; production must.
+  applicationName: site.brand,
+  openGraph: { type: "website", siteName: `${site.brand} · ${site.name}`, title: site.title, description: site.description, locale: "en" },
+  // Preview builds (branch deploys, Deploy Previews) must never be indexed; production must.
   robots: isPreview ? { index: false, follow: false } : undefined,
 };
 
@@ -31,9 +37,15 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang={site.lang} className={`${archivo.variable} ${archivoItalic.variable} ${martianMono.variable}`} suppressHydrationWarning>
+    <html
+      lang={site.lang}
+      className={`${archivo.variable} ${archivoItalic.variable} ${martianMono.variable}`}
+      data-card-terrains={JSON.stringify(cardTerrains())}
+      suppressHydrationWarning
+    >
       <head>
-        <style dangerouslySetInnerHTML={{ __html: tokensToCss() + springsToCss() }} />
+        {/* The tokens' custom properties, in the tokens layer (globals.css explains the layers). */}
+        <style dangerouslySetInnerHTML={{ __html: `${LAYER_ORDER}@layer tokens{${tokensToCss()}${springsToCss()}}` }} />
         <script dangerouslySetInnerHTML={{ __html: motionModeScript }} />
       </head>
       <body>

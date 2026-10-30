@@ -1,0 +1,111 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+/*
+ * The descent (Descent.tsx): Looking back | Team on two legend panels side by side from the md
+ * breakpoint. The team is a rope: a line down the left of the list, a knot at each role.
+ */
+@layer components {
+  .descent {
+    display: grid;
+    gap: 24px;
+    align-items: start;
+  }
+
+  @media (min-width: 1024px) {
+    .descent {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    }
+  }
+
+  .column {
+    display: grid;
+    gap: 18px;
+  }
+
+  .heading {
+    color: var(--color-paper-dusk);
+    font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.6rem);
+    scroll-margin-top: 96px;
+  }
+
+  .lessons {
+    display: grid;
+    gap: 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: lesson;
+  }
+
+  .lessons > li {
+    display: grid;
+    gap: 4px;
+    padding-top: 14px;
+    border-top: 1px solid var(--color-contour-dim);
+  }
+
+  .lesson {
+    margin: 0;
+    font-weight: 650;
+  }
+
+  .nextTime {
+    margin: 0;
+  }
+
+  .rope {
+    position: relative;
+    display: grid;
+    gap: 18px;
+    margin: 0;
+    padding: 0 0 0 28px;
+    list-style: none;
+  }
+
+  /* The rope: one line through every knot. */
+  .rope::before {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: 0.6em;
+    bottom: 0.6em;
+    border-left: 2px solid var(--color-contour);
+  }
+
+  .rope > li {
+    position: relative;
+    display: grid;
+    gap: 2px;
+  }
+
+  .knot {
+    position: absolute;
+    left: -27px;
+    top: 0.35em;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--color-paper-dusk);
+    border-radius: 50%;
+    background: var(--color-ground-raised);
+  }
+
+  .role {
+    margin: 0;
+    font-weight: 650;
+  }
+
+  .count {
+    color: var(--color-glacier);
+  }
+
+  .line {
+    margin: 0;
+  }
+
+  @media (forced-colors: active) {
+    .rope::before,
+    .knot {
+      border-color: CanvasText;
+    }
+  }
+}

@@ -55,7 +55,7 @@ export const images: Record<string, ImageSpec> = {
 };
 
 export const figures: Record<string, FigureSpec> = {
-  "gw-hero": { kind: "image", image: "gw-hero", surface: "night", size: "wide" },
+  "gw-hero": { kind: "image", image: "gw-hero", surface: "night", size: "wide", source: "Swatch audit of the products (fictional)" },
   "gw-coalition": {
     kind: "image",
     image: "gw-coalition",
@@ -63,6 +63,7 @@ export const figures: Record<string, FigureSpec> = {
     size: "column",
     zoom: true,
     caption: "The co-signed proposal. The business case used the teams’ own hours, so nobody had to take my word for it.",
+    source: "Proposal to the steering board, {{years.start}} (fictional)",
     long: [
       "Problem: {{landscape.auditFailed}} of {{landscape.products}} products fail WCAG 2.1 AA; {{landscape.libraries}} UI libraries, {{landscape.blues}} primary blues.",
       "Business case: about {{businessCase.datePickerHours}} hours spent rebuilding one date picker across the teams.",
@@ -83,6 +84,7 @@ export const figures: Record<string, FigureSpec> = {
     surface: "night",
     size: "column",
     caption: "{{inventory.instances|en}} UI instances, {{inventory.patterns}} patterns. The first {{inventory.core}} cover {{inventory.coverPct}}% of screens, so that is where the first version stopped.",
+    source: "UI inventory, {{years.start}} (fictional)",
   },
   "gw-options": {
     kind: "image",
@@ -91,6 +93,7 @@ export const figures: Record<string, FigureSpec> = {
     size: "wide",
     zoom: true,
     caption: "The foundation decision on one sheet. Angular Material lost on brand fit and won on everything a citizen would notice.",
+    source: "Foundation review (fictional)",
     long: [
       "Custom component library: slow time to benefit, accessibility to build ourselves, highest cost, full brand fit.",
       "Commercial kit: fast start, accessibility varies, licence cost, a second visual language.",
@@ -104,6 +107,7 @@ export const figures: Record<string, FigureSpec> = {
     size: "wide",
     zoom: true,
     caption: "Governance: the core team owns, contributors propose. The fast lane came after an icon needed a full RFC.",
+    source: "Contribution guidelines (fictional)",
     long: [
       "A contributor writes a one-page RFC: the problem, the proposal, who it affects.",
       {
@@ -124,6 +128,7 @@ export const figures: Record<string, FigureSpec> = {
     size: "wide",
     zoom: true,
     caption: "The token pipeline. A colour changes in one place, and every product gets it with one package update.",
+    source: "Token pipeline documentation (fictional)",
     long: [
       "Figma variables: designers change a token.",
       "CI: reads the variables with a read-only key.",
@@ -139,6 +144,7 @@ export const figures: Record<string, FigureSpec> = {
     size: "wide",
     zoom: true,
     caption: "The adoption dashboard every team could see. Counting automatically ended the arguments about whose numbers were right.",
+    source: "Design-system analytics, package downloads (fictional)",
   },
   "gw-a11y-chart": {
     kind: "image",
@@ -146,6 +152,7 @@ export const figures: Record<string, FigureSpec> = {
     surface: "night",
     size: "column",
     caption: "Accessibility issues per product, before and after adoption. Every product dropped; most of the remaining issues are in content, not components.",
+    source: "External accessibility audits (fictional)",
   },
   "gw-before-after": {
     kind: "image",
@@ -154,5 +161,6 @@ export const figures: Record<string, FigureSpec> = {
     size: "wide",
     zoom: true,
     caption: "The same address form in three products, before and after. Citizens now meet one authority, not several.",
+    source: "Product screenshots, before and after (fictional)",
   },
 };

@@ -1,5 +1,5 @@
 import meta from "@terrain/terrain.json";
-import { exampleTerrains } from "@/content/examples";
+import { exampleTerrains } from "@/content/examples/terrains";
 
 /**
  * A card's generated terrain (npm run terrain): artwork SVG, trail and pins, and the field's

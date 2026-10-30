@@ -1,7 +1,4 @@
 import * as THREE from "three";
-import { headlamp } from "@/styles/tokens";
-
-const FALLOFF = headlamp.falloff.toFixed(3);
 
 /**
  * Full-screen contour shader. Heights come from RG-packed 16-bit WebPs; lines are drawn
@@ -42,20 +39,12 @@ uniform vec3 uGround;
 uniform vec3 uLineColor;
 uniform vec3 uIndexColor;
 
-uniform vec2 uHeadlampPos;    // device px, origin bottom-left
-uniform float uHeadlampRadius; // device px
-uniform float uHeadlampStrength; // 0..1, fades in and out
-uniform float uHeadlampGain;  // lit lines reach this many times their strength
-uniform float uSweepGain;     // the same for the intro sweep's leading edge
+uniform float uRevealGain;  // the draw-on front's lines reach this many times their strength
 
-uniform float uSweep;  // 0..1 draw-on from lake level upward
 uniform float uReveal;      // 0..1 route draw-on: the destination's lines from the valleys upward
 uniform float uRevealFloor; // strength of lines above the draw-on front (1 = no draw-on)
-uniform float uTime;   // seconds
-uniform float uDrift;  // cycles per second
 
 uniform vec2 uResolution;  // drawing buffer, device px
-uniform vec2 uPan;         // map offset in UV (pointer + scroll parallax, slow drift)
 uniform float uZoom;       // > 1 zooms in around the screen centre (camera push on morph)
 
 #define MAX_QUIET 24
@@ -83,7 +72,7 @@ float lineMask(float d, float w) {
 }
 
 void main() {
-  vec2 p = (gl_FragCoord.xy / uResolution - 0.5) / uZoom + 0.5 + uPan;
+  vec2 p = (gl_FragCoord.xy / uResolution - 0.5) / uZoom + 0.5;
   vec2 st = vec2(p.x, 1.0 - p.y);
   float hA = decodeHeight(uHeightA, st * uUvA.xy + uUvA.zw, uEncA);
   float hB = decodeHeight(uHeightB, st * uUvB.xy + uUvB.zw, uEncB);
@@ -91,7 +80,7 @@ void main() {
   float h = mix(hA, hB, m);
   vec2 range = mix(uRangeA, uRangeB, m);
 
-  float level = h / uInterval + uTime * uDrift;
+  float level = h / uInterval;
   float fw = max(fwidth(level), 1e-5);
 
   // Distance to the nearest regular and index line, in device pixels.
@@ -107,15 +96,6 @@ void main() {
   float reg = lineMask(dReg, uLineWidth) * crowdReg;
   float ind = lineMask(dIdx, uIndexWidth) * crowdIdx;
 
-  // Headlamp: a soft Gaussian falloff around the pointer, reaching zero at the radius.
-  float x = length(gl_FragCoord.xy - uHeadlampPos) / max(uHeadlampRadius, 1.0);
-  float lit = max(exp(-${FALLOFF} * x * x) - exp(-${FALLOFF}), 0.0) / (1.0 - exp(-${FALLOFF})) * uHeadlampStrength;
-
-  // Intro sweep: lines appear from the lowest ground upward, with a brighter leading edge.
-  float sweepLevel = mix(range.x - 30.0, range.y + 60.0, uSweep);
-  float revealed = 1.0 - smoothstep(sweepLevel - 60.0, sweepLevel, h);
-  float front = exp(-abs(h - sweepLevel) / 45.0) * step(uSweep, 0.999) * revealed;
-
   // Route draw-on: the destination's lines appear from the valleys upward; above the front they
   // keep the floor's strength, so the map never blanks, and the front itself is a little brighter.
   float span = max(range.y - range.x, 1.0);
@@ -127,7 +107,7 @@ void main() {
 
   // Quiet zones: lines fade to the zone's strength inside its rectangle, feathered outwards,
   // like contours interrupted under a map's labels. Headings keep ~25% of a line, body text
-  // ~9%; where zones overlap, the stronger knockout wins. Through a route change every zone,
+  // ~7%; where zones overlap, the stronger knockout wins. Through a route change every zone,
   // and the column both pages' text shares, holds the strongest knockout.
   float keep = 1.0;
   for (int i = 0; i < MAX_QUIET; i++) {
@@ -144,14 +124,14 @@ void main() {
     keep = min(keep, mix(1.0, uHoldKind.y, q * uQuietHold));
   }
 
-  // Lit lines keep their colour and only gain strength: the map stays monochrome.
-  float gain = max(max(mix(1.0, uHeadlampGain, lit), mix(1.0, uSweepGain, front)), mix(1.0, uSweepGain, revealFront * 0.6));
+  // The draw-on front keeps its colour and only gains strength: the map stays monochrome.
+  float gain = mix(1.0, uRevealGain, revealFront * 0.6);
   float aReg = min(reg * uLineOpacity * gain, 1.0) * keep;
   float aInd = min(ind * uIndexOpacity * gain, 1.0) * keep;
 
   vec3 col = uGround;
-  col = mix(col, uLineColor, aReg * revealed * drawn);
-  col = mix(col, uIndexColor, aInd * revealed * drawn);
+  col = mix(col, uLineColor, aReg * drawn);
+  col = mix(col, uIndexColor, aInd * drawn);
 
   // The zero-point pin: a crosshair with a gap at its centre, and one expanding ring.
   if (uPinStrength > 0.0 || (uPinPing > 0.0 && uPinPing < 1.0)) {
@@ -192,18 +172,10 @@ export type ContourUniforms = {
     | "uGround"
     | "uLineColor"
     | "uIndexColor"
-    | "uHeadlampPos"
-    | "uHeadlampRadius"
-    | "uHeadlampStrength"
-    | "uHeadlampGain"
-    | "uSweepGain"
-    | "uSweep"
+    | "uRevealGain"
     | "uReveal"
     | "uRevealFloor"
-    | "uTime"
-    | "uDrift"
     | "uResolution"
-    | "uPan"
     | "uZoom"
     | "uQuiet"
     | "uQuietKind"
@@ -238,18 +210,10 @@ export function createContourMaterial(): THREE.ShaderMaterial & { uniforms: Cont
     uGround: { value: new THREE.Vector3() },
     uLineColor: { value: new THREE.Vector3() },
     uIndexColor: { value: new THREE.Vector3() },
-    uHeadlampPos: { value: new THREE.Vector2(-1e4, -1e4) },
-    uHeadlampRadius: { value: headlamp.radiusPx },
-    uHeadlampStrength: { value: 0 },
-    uHeadlampGain: { value: 1.5 },
-    uSweepGain: { value: 2 },
-    uSweep: { value: 1 },
+    uRevealGain: { value: 2 },
     uReveal: { value: 1 },
     uRevealFloor: { value: 1 },
-    uTime: { value: 0 },
-    uDrift: { value: 0.02 },
     uResolution: { value: new THREE.Vector2(1, 1) },
-    uPan: { value: new THREE.Vector2() },
     uZoom: { value: 1 },
     uQuiet: { value: Array.from({ length: MAX_QUIET_ZONES }, () => new THREE.Vector4()) },
     uQuietKind: { value: Array.from({ length: MAX_QUIET_ZONES }, () => new THREE.Vector2(48, 0.25)) },

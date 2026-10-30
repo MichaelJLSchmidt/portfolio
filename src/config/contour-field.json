@@ -5,18 +5,12 @@
   "indexLineWidthPx": 1.5,
   "lineColor": "contour",
   "indexColor": "contour",
-  "headlampGain": 1.5,
-  "sweepGain": 2,
-  "parallax": 0.011,
-  "scrollParallax": 0.05,
-  "driftCyclesPerSecond": 0.05,
-  "quietStrength": 0.25,
+  "quietStrength": 0.22,
   "quietFeatherPx": 48,
-  "bodyQuietStrength": 0.09,
+  "bodyQuietStrength": 0.07,
   "bodyQuietFeatherPx": 64,
   "zoomBase": 1.06,
   "morphZoom": 0.14,
-  "intro": "cinematic",
   "morph": "terrain",
   "reveal": "draw",
   "revealFloor": 0.3,
@@ -31,9 +25,7 @@
     "heightmapMinDevicePx": 1400,
     "minSpacingPx": 3.25,
     "lineOpacity": 0.3,
-    "indexOpacity": 0.5,
-    "idleFps": 10,
-    "ambientFps": 30
+    "indexOpacity": 0.5
   },
   "mobile": {
     "dprMax": 1,
@@ -41,12 +33,9 @@
     "heightmap": "mobile",
     "minSpacingPx": 3,
     "lineOpacity": 0.3,
-    "indexOpacity": 0.5,
-    "idleFps": 5,
-    "ambientFps": 24
+    "indexOpacity": 0.5
   },
   "frameBudgetMs": 22,
-  "dormantAfterMs": 60000,
   "river": {
     "color": "ice",
     "widthPx": 1.5,
@@ -59,5 +48,6 @@
     "widthPx": 1.25,
     "pingPx": 30,
     "ping": "long"
-  }
+  },
+  "revealGain": 2
 }

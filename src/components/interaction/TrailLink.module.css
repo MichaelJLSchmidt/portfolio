@@ -1,0 +1,124 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+/*
+ * TrailLink: a dotted underline at 40% at rest; on hover (fine pointers) and keyboard focus a
+ * signal-red line draws left to right under the label (a background sized from 0 to 100%, so a
+ * phrase that wraps draws line by line) and the arrow steps 3 px forward in two steps. Focus gets
+ * exactly the hover state (one --on switch). A committed link carries data-blazed: a small
+ * white-red-white blaze after it, taking no room. Calm: 120 ms; still: at once.
+ */
+@layer components {
+  .link {
+    --on: 0;
+    --trail-dur: var(--dur-trail);
+    position: relative;
+    color: inherit;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .link[data-trail="standalone"] {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    min-height: 44px;
+  }
+
+  @media (hover: hover) {
+    .link:hover {
+      --on: 1;
+    }
+  }
+
+  .link:focus-visible {
+    --on: 1;
+  }
+
+  .label {
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.28em;
+    background-image: linear-gradient(var(--color-signal), var(--color-signal));
+    background-repeat: no-repeat;
+    background-position: 0 calc(100% - 0.02em);
+    background-size: calc(var(--on) * 100%) 2px;
+    padding-bottom: 0.12em;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  .arrow {
+    display: inline-block;
+    transform: translateX(calc(var(--on) * var(--dist-trail-step)));
+  }
+
+  .link[data-arrow-at="start"] .arrow {
+    transform: translateX(calc(var(--on) * var(--dist-trail-step) * -1));
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :root:not([data-motion="still"]) .label {
+      transition: background-size var(--trail-dur) var(--ease-settle);
+    }
+
+    :root:not([data-motion="still"]) .arrow {
+      transition: transform var(--trail-dur) steps(2, end);
+    }
+
+    :root[data-motion="calm"] .link {
+      --trail-dur: var(--dur-trail-calm);
+    }
+  }
+
+  /* The blaze: a painted trail marker, white over red over white, taking no room. */
+  .blaze {
+    display: none;
+  }
+
+  .link[data-blazed] .blaze {
+    display: inline-block;
+    position: relative;
+    width: 0;
+    height: 0.9em;
+    vertical-align: -0.1em;
+  }
+
+  .link[data-blazed] .blaze::before {
+    content: "";
+    position: absolute;
+    left: 0.3em;
+    top: 0;
+    width: 0.32em;
+    height: 0.9em;
+    border-radius: 1px;
+    background: linear-gradient(var(--color-paper-dusk) 0 33%, var(--color-signal) 33% 67%, var(--color-paper-dusk) 67%);
+  }
+
+  .link[data-trail="inline"][data-blazed] .blaze::before {
+    left: 0.15em;
+    width: 0.24em;
+    height: 0.7em;
+    top: 0.1em;
+  }
+
+  @media (forced-colors: active) {
+    .label {
+      background-image: none;
+      text-decoration-style: solid;
+      text-decoration-color: LinkText;
+    }
+
+    .link[data-blazed] .blaze::before {
+      background: LinkText;
+    }
+  }
+}
+
+/* The motion lab shows each state side by side (data-lab-state, review pages only). */
+@layer components {
+  .link:is([data-lab-state="on"], [data-lab-state="press"]) {
+    --on: 1;
+  }
+}

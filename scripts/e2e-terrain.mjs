@@ -5,8 +5,10 @@
 //
 // Covered: morphs to a card terrain and to Bern (data-terrain, and the conductor's timing from the
 // hook: each tween starts at the route commit and runs its token's duration, ±50 ms); back and
-// forward; the interval reaching 10 m on Bern and the Aare on screen after its draw; the readout;
-// pre-warm; calm (no draw-on), still (posters, no WebGL context); context loss (poster, restore,
+// forward; the interval reaching 20 m on Bern (its 12 km window at laptop scale) and the Aare on screen after its draw; the field
+// holding still while a page is read (no idle frames, none for a moving pointer);
+// pre-warm; calm (no draw-on), still (posters, no WebGL context); About's pin and Aare clear of its
+// title and portrait at 1440×900, 1280×800 and 390×844; context loss (poster, restore,
 // then tier C); tier B (no idle frames under touch emulation); the field pausing behind a dialog;
 // no console errors. SwiftShader's frame times say nothing about real devices: the timing checks
 // bracket each tween's end between two frames and report the gap.
@@ -16,8 +18,6 @@ import { join } from "node:path";
 const TOLERANCE_MS = 50;
 
 export function terrainScenarios({ browser, base, root, check, settle }) {
-  const bern = JSON.parse(readFileSync(join(root, "public/terrain/bern/summary.json"), "utf8"));
-  const bernReadout = `BERN · E 2’600’000 · N 1’200’000 · ALT ${bern.zeroPoint.altitudeM} M`;
 
   /** A page with the intro played; console errors and page errors are collected. */
   async function open({ viewport = { width: 960, height: 600 }, calm = false, reduced = false, mobile = false, init } = {}) {
@@ -28,7 +28,7 @@ export function terrainScenarios({ browser, base, root, check, settle }) {
     });
     await context.addInitScript((calm) => {
       try {
-        sessionStorage.setItem("summit:intro-played", "1");
+        
         sessionStorage.setItem("summit:deck-dealt", "1");
         if (calm) localStorage.setItem("summit:calm-map", "1");
       } catch {}
@@ -120,23 +120,23 @@ export function terrainScenarios({ browser, base, root, check, settle }) {
     const cardLink = page.locator('article[data-slug="seilschaft"] a').first();
     await cardLink.scrollIntoViewIfNeeded();
     await clearEvents(page);
-    await prewarm(page, cardLink, "lab-097");
+    await prewarm(page, cardLink, "eiger");
     await page.waitForTimeout(600);
     const warm = await state(page);
-    check("pre-warm: hover leans towards the card's terrain (uMorph 0.12)", Math.abs(warm.values.morph - 0.12) < 0.01 && warm.slots[1] === "lab-097", JSON.stringify(warm.slots) + ` morph=${warm.values.morph.toFixed(3)}`);
+    check("pre-warm: hover leans towards the card's terrain (uMorph 0.12)", Math.abs(warm.values.morph - 0.12) < 0.01 && warm.slots[1] === "eiger", JSON.stringify(warm.slots) + ` morph=${warm.values.morph.toFixed(3)}`);
     await page.mouse.move(2, 2);
     await page.waitForTimeout(700);
     const cold = await state(page);
     check("pre-warm: leaving eases back to 0", cold.values.morph === 0, `morph=${cold.values.morph}`);
 
     // Card: morph 700 ms, draw-on 900 ms, from the route commit.
-    await prewarm(page, cardLink, "lab-097");
+    await prewarm(page, cardLink, "eiger");
     await clearEvents(page);
     await cardLink.click();
-    await settle(page, { path: "/work/seilschaft/", terrain: "lab-097" });
-    await landed(page, "lab-097").catch(() => {});
+    await settle(page, { path: "/work/seilschaft/", terrain: "eiger" });
+    await landed(page, "eiger").catch(() => {});
     let evs = await events(page);
-    check("card: data-terrain=lab-097", (await page.getAttribute("[data-field]", "data-terrain")) === "lab-097");
+    check("card: data-terrain=eiger", (await page.getAttribute("[data-field]", "data-terrain")) === "eiger");
     checkTiming("card", timing(evs, "morph"), "morph", { delay: 0, duration: 700 });
     checkTiming("card", timing(evs, "reveal"), "reveal", { delay: 0, duration: 900 });
     check("card: quiet zones held, then released", evs.some((e) => e.type === "end" && e.channel === "hold" && e.to === 0), evs.filter((e) => e.channel === "hold").map((e) => `${e.type}→${e.to}`).join(" "));
@@ -163,11 +163,20 @@ export function terrainScenarios({ browser, base, root, check, settle }) {
     checkTiming("Bern", timing(evs, "ping"), "ping", { delay: 300, duration: 560 });
     check("Bern: no zoom push (zoom at its base)", Math.abs(sb.zoom - 1.06) < 1e-6, `zoom=${sb.zoom}`);
     check("Bern: no isoline draw-on (the Aare is its draw)", !evs.some((e) => e.channel === "reveal"), "");
-    check("Bern: the interval reached 10 m", Math.abs(sb.interval - 10) < 1e-6, `${sb.interval.toFixed(2)} m`);
+    check("Bern: the interval reached 20 m", Math.abs(sb.interval - 20) < 1e-6, `${sb.interval.toFixed(2)} m`);
     check("Bern: the Aare drawn and on screen", sb.riverVisible && sb.values.riverDraw === 1 && sb.values.riverOpacity === 1, JSON.stringify(sb.values));
     const ice = await iceShare(page);
     check("Bern: ice-coloured river pixels in the frame", ice > 0.0005, `${(ice * 100).toFixed(3)}% of the screen`);
-    check("Bern: the pin at the zero point (screen centre)", Math.abs(sb.pin[0] / sb.dpr - 480) < 30 && Math.abs((600 - sb.pin[1] / sb.dpr) - 300) < 30, JSON.stringify(sb.pin.map(Math.round)));
+    // Bern is framed on the zero point like object-position (u, v of the window), zoomed about the
+    // screen's centre: that is where the pin must be.
+    const { zeroPoint: z, heightmaps: [hm] } = JSON.parse(readFileSync(join(root, "public/terrain/bern/bern.json"), "utf8"));
+    const [vw, vh] = [960, 600];
+    const [ta, va] = [hm.width / hm.height, vw / vh];
+    const [sx, sy] = va > ta ? [1, ta / va] : [va / ta, 1];
+    const at = (p, s) => (((p - p * (1 - s)) / s - 0.5) * sb.zoom + 0.5);
+    const want = [at(z.u, sx) * vw, at(z.v, sy) * vh];
+    const got = [sb.pin[0] / sb.dpr, vh - sb.pin[1] / sb.dpr];
+    check("Bern: the pin at the zero point (where the framing puts it)", Math.abs(got[0] - want[0]) < 30 && Math.abs(got[1] - want[1]) < 30, `${got.map(Math.round)} vs ${want.map(Math.round)}`);
 
     // Leaving reverses it; back and forward get the same treatment.
     await clearEvents(page);
@@ -188,46 +197,25 @@ export function terrainScenarios({ browser, base, root, check, settle }) {
     await context.close();
   }
 
-  async function readout() {
-    if (!existsSync(join(root, "out/lab/terrain/index.html"))) {
-      console.log("\nterrain: readout skipped (no lab in this build; build with SITE_MODE=basecamp)");
-      return;
-    }
-    console.log("\nterrain: the readout (lab page)");
-    const html = readFileSync(join(root, "out/lab/terrain/index.html"), "utf8");
-    check("server-rendered readout of the home region", html.includes("JUNGFRAU · ALT 4’158 M"), "");
-    check("lab page is noindex", /<meta name="robots" content="noindex, nofollow"/.test(html), "");
-    for (const mode of ["full", "still"]) {
-      const { context, page, errors } = await open({ reduced: mode === "still" });
-      await page.goto(`${base}/lab/terrain/?field=force`, { waitUntil: "load" });
-      await page.waitForSelector("html[data-lab-ready]", { state: "attached", timeout: 30000 });
-      const text = () => page.locator("main [data-terrain-readout] .visually-hidden").textContent();
-      check(`${mode}: home readout`, (await text()) === "JUNGFRAU · ALT 4’158 M", await text());
-      await page.locator('button[data-morph="bern"]').click();
-      await page.waitForTimeout(900);
-      check(`${mode}: Bern readout`, (await text()) === bernReadout, await text());
-      // What is shown: the static parts, and each rolling group's own value (AnimateNumber keeps a
-      // visually hidden copy of it as its first child; its digit columns hold every digit).
-      const shown = await page.evaluate(() => {
-        const root = document.querySelector("main [data-terrain-readout] [data-run]").cloneNode(true);
-        const rolls = root.querySelectorAll("[data-part] > span > *");
-        const alt = root.querySelectorAll('[data-part="alt"] > span > *').length;
-        for (const n of rolls) n.replaceWith(n.firstElementChild?.textContent ?? n.textContent);
-        return { text: root.textContent.replace(/\s+/g, " ").trim(), rolls: rolls.length, alt };
-      });
-      check(`${mode}: the shown digits match the text`, shown.text === bernReadout, shown.text);
-      if (mode === "still") check("still: numbers snap (no rolling digits)", shown.rolls === 0, `${shown.rolls} rolling groups`);
-      // The altitude changed, so it rolls (AnimateNumber); the coordinates appear with Bern, at their value.
-      else check("full: a changed number rolls (the altitude, AnimateNumber)", shown.alt === 1, `${shown.alt} rolling altitude groups, ${shown.rolls} in all`);
-      const card = await page.locator('button[data-morph]:not([data-morph="bern"]):not([data-morph="region"])').first();
-      if (await card.count()) {
-        await card.click();
-        await page.waitForTimeout(900);
-        check(`${mode}: a card's readout`, /ALT \d/.test(await text()), await text());
-      }
-      check(`${mode}: no console errors`, errors.length === 0, errors.join(" | "));
-      await context.close();
-    }
+  /** The field holds still while a page is read: no frames when idle, none for a moving pointer. */
+  async function stillness() {
+    console.log("\nterrain: the field holds still while reading");
+    const { context, page, errors } = await open();
+    await page.goto(`${base}/?field=force`, { waitUntil: "networkidle" });
+    await fieldOn(page);
+    await landed(page, "region");
+    await page.waitForTimeout(800);
+    const frames = () => page.evaluate(() => window.__terrain.frames);
+    let before = await frames();
+    await page.waitForTimeout(1500);
+    check("idle: no frames while the page is read", (await frames()) === before, `${(await frames()) - before} frames in 1.5 s`);
+    before = await frames();
+    await page.mouse.move(200, 200);
+    await page.mouse.move(900, 500, { steps: 20 });
+    await page.waitForTimeout(400);
+    check("a moving pointer draws no frames (nothing follows the cursor)", (await frames()) === before, `${(await frames()) - before} frames`);
+    check("no console errors", errors.length === 0, errors.join(" | "));
+    await context.close();
   }
 
   async function modes() {
@@ -239,8 +227,8 @@ export function terrainScenarios({ browser, base, root, check, settle }) {
       await landed(page, "region");
       await clearEvents(page);
       await page.locator('article[data-slug="seilschaft"] a').first().click();
-      await settle(page, { path: "/work/seilschaft/", terrain: "lab-097" });
-      await landed(page, "lab-097").catch(() => {});
+      await settle(page, { path: "/work/seilschaft/", terrain: "eiger" });
+      await landed(page, "eiger").catch(() => {});
       let evs = await events(page);
       check("calm: the card's terrain morphs", evs.some((e) => e.type === "end" && e.channel === "morph" && e.duration === 700), "");
       check("calm: no draw-on", !evs.some((e) => e.channel === "reveal" || e.channel === "floor"), evs.map((e) => e.channel).filter(Boolean).join(","));
@@ -251,7 +239,7 @@ export function terrainScenarios({ browser, base, root, check, settle }) {
       await landed(page, "bern").catch(() => {});
       evs = await events(page);
       const s = await state(page);
-      check("calm: Bern's interval reached 10 m", Math.abs(s.interval - 10) < 1e-6, `${s.interval.toFixed(2)} m`);
+      check("calm: Bern's interval reached 20 m", Math.abs(s.interval - 20) < 1e-6, `${s.interval.toFixed(2)} m`);
       check("calm: the river and the pin appear without drawing or pinging", s.riverVisible && !evs.some((e) => e.channel === "ping") && evs.some((e) => e.channel === "riverDraw" && e.duration === 0), "");
       check("calm: no console errors", errors.length === 0, errors.join(" | "));
       await context.close();
@@ -360,12 +348,72 @@ export function terrainScenarios({ browser, base, root, check, settle }) {
     }
   }
 
+  /**
+   * About's first viewport keeps Bern's zero-point pin and the Aare clear of the title and the
+   * portrait card: no river pixel within 8 px of either box, the pin at least 24 px outside both,
+   * at the three sizes the layout is drawn for (Bern is framed from its west edge on portrait
+   * screens, so the river runs down the right edge of a phone).
+   */
+  async function clearings() {
+    console.log("\nterrain: About keeps the pin and the Aare clear");
+    const sizes = [
+      { width: 1440, height: 900 },
+      { width: 1280, height: 800 },
+      { width: 390, height: 844, mobile: true },
+    ];
+    for (const { mobile, ...viewport } of sizes) {
+      const label = `${viewport.width}×${viewport.height}`;
+      const { context, page, errors } = await open({ viewport, mobile });
+      await page.goto(`${base}/about/?field=force`, { waitUntil: "networkidle" });
+      await fieldOn(page);
+      await page
+        .waitForFunction(() => window.__terrain?.state()?.riverVisible && window.__terrain.state().values.riverDraw === 1, null, { timeout: 20000, polling: 50 })
+        .catch(() => {});
+      const boxes = await page.evaluate(() => {
+        const h1 = document.querySelector("main h1");
+        const range = document.createRange();
+        range.selectNodeContents(h1.firstChild);
+        const box = (r) => [r.left, r.top, r.right, r.bottom];
+        const s = window.__terrain.state();
+        return { title: box(range.getBoundingClientRect()), card: box(document.querySelector("#portrait-card").getBoundingClientRect()), pin: [s.pin[0] / s.dpr, innerHeight - s.pin[1] / s.dpr], dpr: devicePixelRatio };
+      });
+      await page.evaluate(() => {
+        for (const el of document.querySelectorAll(".page, header[data-chrome]")) el.style.visibility = "hidden";
+      });
+      await page.waitForTimeout(600);
+      const { default: sharp } = await import("sharp");
+      const { data, info } = await sharp(await page.screenshot()).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+      // The Aare in ice, also where thin lines are drawn faint (phones render at 0.75).
+      const ice = (x, y) => {
+        const i = (y * info.width + x) * 3;
+        return data[i + 2] - data[i] > 18 && data[i + 2] > 60;
+      };
+      const k = info.width / viewport.width;
+      let total = 0;
+      for (let y = 0; y < info.height; y++) for (let x = 0; x < info.width; x++) if (ice(x, y)) total++;
+      const inBox = ([l, t, r, b]) => {
+        let n = 0;
+        const [x0, y0, x1, y1] = [l - 8, t - 8, r + 8, b + 8].map((v) => Math.round(v * k));
+        for (let y = Math.max(0, y0); y < Math.min(info.height, y1); y++) for (let x = Math.max(0, x0); x < Math.min(info.width, x1); x++) if (ice(x, y)) n++;
+        return n;
+      };
+      const pinIn = ([l, t, r, b]) => boxes.pin[0] > l - 24 && boxes.pin[0] < r + 24 && boxes.pin[1] > t - 24 && boxes.pin[1] < b + 24;
+      const onScreen = boxes.pin[0] >= 0 && boxes.pin[0] <= viewport.width && boxes.pin[1] >= 0 && boxes.pin[1] <= viewport.height;
+      check(`${label}: the Aare and the pin are on screen`, total > 0 && onScreen, `${total} river px, pin ${boxes.pin.map(Math.round)}`);
+      check(`${label}: no river under the title or the portrait`, inBox(boxes.title) === 0 && inBox(boxes.card) === 0, `title ${inBox(boxes.title)} px, card ${inBox(boxes.card)} px`);
+      check(`${label}: the pin clear of the title and the portrait`, !pinIn(boxes.title) && !pinIn(boxes.card), JSON.stringify(boxes));
+      check(`${label}: no console errors`, errors.length === 0, errors.join(" | "));
+      await context.close();
+    }
+  }
+
   return {
     terrain: async () => {
       await conductor();
-      await readout();
+      await stillness();
       await modes();
       await robustness();
+      await clearings();
     },
   };
 }
