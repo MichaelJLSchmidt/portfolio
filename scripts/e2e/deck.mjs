@@ -4,7 +4,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-const ORDER = ["seilschaft", "gratweg", "test-project"];
+const ORDER = ["seilschaft", "test-project", "gratweg"];
 
 export async function deck({ base, basePath, root, check, open, settle }) {
   console.log("\ndeck: order, link names and the Next project loop");
@@ -15,7 +15,7 @@ export async function deck({ base, basePath, root, check, open, settle }) {
   const { context, page, errors } = await open();
   await page.goto(`${base}/`, { waitUntil: "networkidle" });
   const slugs = await page.$$eval("#work article[data-slug]", (els) => els.map((e) => e.dataset.slug));
-  check("deck order: Seilschaft, Gratweg, Test Project", JSON.stringify(slugs) === JSON.stringify(ORDER), slugs.join(", "));
+  check("deck order: Seilschaft (Eiger), Test Project (Mönch), Gratweg (Jungfrau), the panorama from Interlaken", JSON.stringify(slugs) === JSON.stringify(ORDER), slugs.join(", "));
   const names = await page.$$eval("#work article[data-slug] a", (as) => as.map((a) => a.getAttribute("aria-label")));
   check(
     "card links named “Open case study: <name>, <type>, rarity <letter>”",

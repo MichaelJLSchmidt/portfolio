@@ -241,20 +241,6 @@
    "weightEffect": -0.0928,
    "compensated": true
   },
-  "886b949e": {
-   "em": 4.153,
-   "wordEm": 4.153,
-   "knots": [
-    82.23,
-    81.07,
-    79.82,
-    78
-   ],
-   "drift": 0.0021,
-   "straightDrift": 0.0144,
-   "weightEffect": -0.0819,
-   "compensated": true
-  },
   "c65816bc": {
    "em": 6.06,
    "wordEm": 3.83,
@@ -267,6 +253,20 @@
    "drift": 0.0032,
    "straightDrift": 0.0183,
    "weightEffect": -0.0769,
+   "compensated": true
+  },
+  "886b949e": {
+   "em": 4.153,
+   "wordEm": 4.153,
+   "knots": [
+    82.23,
+    81.07,
+    79.82,
+    78
+   ],
+   "drift": 0.0021,
+   "straightDrift": 0.0144,
+   "weightEffect": -0.0819,
    "compensated": true
   }
  }

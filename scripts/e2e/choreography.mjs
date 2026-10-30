@@ -6,7 +6,7 @@
 //             still mode: no view transition, focus still on the H1.
 //   reading   the case study while it is read: the trail's scroll-linked fill and current waypoint, the altimeter bar on a phone (shown from
 //             the first waypoint, its sheet: focus inside, Esc, focus back, a jump focuses the
-//             waypoint's heading); the career climb in full, calm and still; no endless loop on
+//             waypoint's heading); the career profile in full, calm and still; no endless loop on
 //             the home page but the field's.
 import { existsSync } from "node:fs";
 import { join } from "node:path";
@@ -252,24 +252,35 @@ export async function reading({ browser, base, root, check }) {
     await context.close();
   }
 
-  // The career climb: full follows the scroll, calm draws on a timer, still shows it whole.
+  // The career profile: full draws the walked line with the scroll, calm draws it once as it comes
+  // into view, still shows it drawn. The roles are text and never move.
   for (const mode of ["full", "calm", "still"]) {
     const { context, page } = await newPage(browser, { calm: mode === "calm", reduced: mode === "still" });
     await page.goto(`${base}/about/`, { waitUntil: "load" });
     await page.waitForTimeout(1000);
     const state = () =>
       page.evaluate(() => {
-        const s = document.querySelector("section[aria-labelledby=ascent-heading]");
-        return { live: s.dataset.live ?? null, p: Number(getComputedStyle(s).getPropertyValue("--p")), reached: s.querySelectorAll("li[data-reached]").length };
+        const svg = [...document.querySelectorAll("section[aria-labelledby=career-heading] svg[data-reveal]")].find((g) => g.getBoundingClientRect().width > 0);
+        const walk = svg.querySelector("g");
+        const scroll = walk.getAnimations().find((a) => a.timeline && !(a.timeline instanceof DocumentTimeline));
+        return {
+          reveal: svg.dataset.revealState ?? null,
+          clip: getComputedStyle(walk).clipPath,
+          progress: scroll ? scroll.effect.getComputedTiming().progress : null,
+          scrollDriven: !!scroll,
+          camps: document.querySelectorAll("section[aria-labelledby=career-heading] ol > li").length,
+        };
       });
     const early = await state();
-    await page.locator("#ascent-heading").scrollIntoViewIfNeeded();
-    await page.evaluate(() => window.scrollBy(0, window.innerHeight * 1.6));
-    await page.waitForTimeout(mode === "calm" ? 2200 : 700);
+    await page.locator("#career-heading").scrollIntoViewIfNeeded();
+    await page.evaluate(() => window.scrollBy(0, window.innerHeight * 0.35));
+    await page.waitForTimeout(mode === "calm" ? 1600 : 700);
     const later = await state();
-    if (mode === "full") check("climb (full): follows the scroll", ["timeline", "scroll"].includes(later.live) && early.p < 0.05 && later.p > 0.1 && later.p < 1, JSON.stringify({ early, later }));
-    if (mode === "calm") check("climb (calm): waits, then draws once on a timer", early.live === "wait" && early.p === 0 && later.live === "timer" && later.p === 1, JSON.stringify({ early, later }));
-    if (mode === "still") check("climb (still): shown complete", later.live === null && later.p === 1 && later.reached >= 4, JSON.stringify(later));
+    if (mode === "full")
+      check("career (full): the line draws with the scroll", later.scrollDriven && (early.progress ?? 0) < 0.05 && later.progress > 0.05 && later.progress <= 1, JSON.stringify({ early, later }));
+    if (mode === "calm")
+      check("career (calm): waits, then draws once", early.reveal === "wait" && !later.scrollDriven && later.reveal === "done" && /none|inset\(0(px)?\)/.test(later.clip), JSON.stringify({ early, later }));
+    if (mode === "still") check("career (still): drawn, nothing moves", !later.scrollDriven && later.clip === "none" && later.camps === 4, JSON.stringify(later));
     await context.close();
   }
 

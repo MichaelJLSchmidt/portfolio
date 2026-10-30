@@ -7,7 +7,8 @@
 // hook: each tween starts at the route commit and runs its token's duration, ±50 ms); back and
 // forward; the interval reaching 20 m on Bern (its 12 km window at laptop scale) and the Aare on screen after its draw; the field
 // holding still while a page is read (no idle frames, none for a moving pointer);
-// pre-warm; calm (no draw-on), still (posters, no WebGL context); context loss (poster, restore,
+// pre-warm; calm (no draw-on), still (posters, no WebGL context); About's pin and Aare clear of its
+// title and portrait at 1440×900, 1280×800 and 390×844; context loss (poster, restore,
 // then tier C); tier B (no idle frames under touch emulation); the field pausing behind a dialog;
 // no console errors. SwiftShader's frame times say nothing about real devices: the timing checks
 // bracket each tween's end between two frames and report the gap.
@@ -347,12 +348,72 @@ export function terrainScenarios({ browser, base, root, check, settle }) {
     }
   }
 
+  /**
+   * About's first viewport keeps Bern's zero-point pin and the Aare clear of the title and the
+   * portrait card: no river pixel within 8 px of either box, the pin at least 24 px outside both,
+   * at the three sizes the layout is drawn for (Bern is framed from its west edge on portrait
+   * screens, so the river runs down the right edge of a phone).
+   */
+  async function clearings() {
+    console.log("\nterrain: About keeps the pin and the Aare clear");
+    const sizes = [
+      { width: 1440, height: 900 },
+      { width: 1280, height: 800 },
+      { width: 390, height: 844, mobile: true },
+    ];
+    for (const { mobile, ...viewport } of sizes) {
+      const label = `${viewport.width}×${viewport.height}`;
+      const { context, page, errors } = await open({ viewport, mobile });
+      await page.goto(`${base}/about/?field=force`, { waitUntil: "networkidle" });
+      await fieldOn(page);
+      await page
+        .waitForFunction(() => window.__terrain?.state()?.riverVisible && window.__terrain.state().values.riverDraw === 1, null, { timeout: 20000, polling: 50 })
+        .catch(() => {});
+      const boxes = await page.evaluate(() => {
+        const h1 = document.querySelector("main h1");
+        const range = document.createRange();
+        range.selectNodeContents(h1.firstChild);
+        const box = (r) => [r.left, r.top, r.right, r.bottom];
+        const s = window.__terrain.state();
+        return { title: box(range.getBoundingClientRect()), card: box(document.querySelector("#portrait-card").getBoundingClientRect()), pin: [s.pin[0] / s.dpr, innerHeight - s.pin[1] / s.dpr], dpr: devicePixelRatio };
+      });
+      await page.evaluate(() => {
+        for (const el of document.querySelectorAll(".page, header[data-chrome]")) el.style.visibility = "hidden";
+      });
+      await page.waitForTimeout(600);
+      const { default: sharp } = await import("sharp");
+      const { data, info } = await sharp(await page.screenshot()).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+      // The Aare in ice, also where thin lines are drawn faint (phones render at 0.75).
+      const ice = (x, y) => {
+        const i = (y * info.width + x) * 3;
+        return data[i + 2] - data[i] > 18 && data[i + 2] > 60;
+      };
+      const k = info.width / viewport.width;
+      let total = 0;
+      for (let y = 0; y < info.height; y++) for (let x = 0; x < info.width; x++) if (ice(x, y)) total++;
+      const inBox = ([l, t, r, b]) => {
+        let n = 0;
+        const [x0, y0, x1, y1] = [l - 8, t - 8, r + 8, b + 8].map((v) => Math.round(v * k));
+        for (let y = Math.max(0, y0); y < Math.min(info.height, y1); y++) for (let x = Math.max(0, x0); x < Math.min(info.width, x1); x++) if (ice(x, y)) n++;
+        return n;
+      };
+      const pinIn = ([l, t, r, b]) => boxes.pin[0] > l - 24 && boxes.pin[0] < r + 24 && boxes.pin[1] > t - 24 && boxes.pin[1] < b + 24;
+      const onScreen = boxes.pin[0] >= 0 && boxes.pin[0] <= viewport.width && boxes.pin[1] >= 0 && boxes.pin[1] <= viewport.height;
+      check(`${label}: the Aare and the pin are on screen`, total > 0 && onScreen, `${total} river px, pin ${boxes.pin.map(Math.round)}`);
+      check(`${label}: no river under the title or the portrait`, inBox(boxes.title) === 0 && inBox(boxes.card) === 0, `title ${inBox(boxes.title)} px, card ${inBox(boxes.card)} px`);
+      check(`${label}: the pin clear of the title and the portrait`, !pinIn(boxes.title) && !pinIn(boxes.card), JSON.stringify(boxes));
+      check(`${label}: no console errors`, errors.length === 0, errors.join(" | "));
+      await context.close();
+    }
+  }
+
   return {
     terrain: async () => {
       await conductor();
       await stillness();
       await modes();
       await robustness();
+      await clearings();
     },
   };
 }

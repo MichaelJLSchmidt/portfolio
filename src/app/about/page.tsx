@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
-import profile from "@terrain/profile.json";
-import { AscentProfile } from "@/components/about/AscentProfile";
+import { BinderPage, type PocketView } from "@/components/about/BinderPage";
+import { CareerProfile } from "@/components/about/CareerProfile";
+import { FieldKit } from "@/components/about/FieldKit";
 import { ContactBand } from "@/components/home/ContactBand";
 import { SectionHead } from "@/components/home/SectionHead";
 import { MapSheet } from "@/components/motion/MapSheet";
 import { WeightTitle } from "@/components/type/WeightTitle";
 import { PortraitCard } from "@/components/about/PortraitCard";
 import { MorphTarget } from "@/components/transition/MorphTarget";
-import { about } from "@/content/about";
+import { about, pocketName } from "@/content/about";
 import { ABOUT_MORPH } from "@/lib/morph";
 import { titleEm } from "@/lib/title-axes";
 import { arrival } from "@/styles/tokens";
@@ -21,24 +22,35 @@ export const metadata: Metadata = {
 
 /**
  * About. Reached from the HUD's About link, whose label morphs into the H1 (AboutLink) and
- * settles once it has landed; going back, the H1 shrinks into the bar again. Who I am, how I work
- * with people, how I start with a new team, the skills beyond design, the career so far, the
- * cards, the craft and the way in.
+ * settles once it has landed; going back, the H1 shrinks into the bar again. The title holds the
+ * portrait card between its layers: the letters run behind the head, one stem of the last letter
+ * in front of the shoulders (a clipped copy of the title, hidden from screen readers). Then who I
+ * am, how I work with people, how I start with a new team, the skills beyond design, the career
+ * so far, the cards, the craft and the way in.
  */
 export default function About() {
-  // Named ends of the trail on the profile, with their official heights.
-  const stops = profile.stops.flatMap((s) => (s.label ? [{ label: s.label, elevation: about.career.stops[s.label], at: s.km / profile.lengthKm }] : []));
+  const heading = about.header.heading;
+  const titleStyle = { "--title-em": titleEm(heading) } as CSSProperties;
+  const binder = about.cards.binder;
+  const pockets: PocketView[] = binder.pockets.map((p) =>
+    p.kind === "empty" ? p : { ...p, name: pocketName(p), label: p.kind === "deck" ? binder.deckBox : pocketName(p) },
+  );
 
   return (
     <main id="main" className={`${styles.main} container`}>
       <header className={styles.header}>
-        <div className={styles.nameCell} data-quiet-zone>
-          <MorphTarget name={ABOUT_MORPH} variant="title">
-            <WeightTitle as="h1" text={about.header.heading} className={styles.name} style={{ "--title-em": titleEm(about.header.heading) } as CSSProperties} />
-          </MorphTarget>
+        <div className={styles.titleCell} data-quiet-zone>
+          <div className={styles.titleBox} style={titleStyle}>
+            <MorphTarget name={ABOUT_MORPH} variant="title">
+              <WeightTitle as="h1" text={heading} className={styles.name} />
+            </MorphTarget>
+            <PortraitCard className={styles.portrait} portrait={about.portrait} facts={about.who.facts} />
+            <span className={styles.stemLayer} aria-hidden="true">
+              <WeightTitle as="span" arrive="none" text={heading} className={`${styles.name} ${styles.stem}`} />
+            </span>
+          </div>
         </div>
         <p className={`${styles.lead} knockout`}>{about.header.lead}</p>
-        <PortraitCard className={styles.portrait} portrait={about.portrait} facts={about.who.facts} />
       </header>
 
       <section className={styles.who} aria-labelledby="who-heading">
@@ -103,31 +115,38 @@ export default function About() {
 
       <section className={styles.section} aria-labelledby="skills-heading">
         <SectionHead id="skills-heading" heading={about.skills.heading} />
-        <ul className={styles.ropeRules}>
-          {about.skills.items.map((s) => (
-            <li key={s.name} className="legend">
-              <h3 className={styles.dayTitle}>{s.name}</h3>
-              <p className="body-copy">{s.text}</p>
-              <p className="hud-label">
-                {about.skills.proofLabel}: {s.proof}
-              </p>
-            </li>
-          ))}
-        </ul>
+        <FieldKit copy={about.skills} />
       </section>
 
-      <AscentProfile labels={about.career} camps={about.career.camps} stops={stops} />
+      <CareerProfile copy={about.career} />
 
-      <div className={styles.pair}>
-        <section className={styles.section} aria-labelledby="cards-heading">
+      <section className={styles.cards} aria-labelledby="cards-heading">
+        <div className={styles.cardsText}>
           <SectionHead id="cards-heading" heading={about.cards.heading} />
           <p className="body-copy">{about.cards.body}</p>
-        </section>
-        <section className={styles.section} aria-labelledby="craft-heading">
-          <SectionHead id="craft-heading" heading={about.craft.heading} />
-          <p className="body-copy">{about.craft.body}</p>
-        </section>
-      </div>
+          <div className={styles.binderList} data-quiet-zone>
+            <p className={`${styles.binderListLabel} hud-label`}>{binder.listLabel}</p>
+            <dl>
+              {pockets.flatMap((p) =>
+                p.kind === "empty"
+                  ? []
+                  : [
+                      <div key={p.name}>
+                        <dt className="hud-label">{p.name}</dt>
+                        <dd>{p.line}</dd>
+                      </div>,
+                    ],
+              )}
+            </dl>
+          </div>
+        </div>
+        <BinderPage className={styles.binder} label={binder.label} empty={binder.empty} pockets={pockets} />
+      </section>
+
+      <section className={styles.section} aria-labelledby="craft-heading">
+        <SectionHead id="craft-heading" heading={about.craft.heading} />
+        <p className={`${styles.craft} body-copy`}>{about.craft.body}</p>
+      </section>
 
       <ContactBand />
     </main>

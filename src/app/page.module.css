@@ -2,40 +2,24 @@
 
 @layer components {
   .main {
-    padding-top: 96px;
+    padding-top: 0;
   }
 
-  /* The name is the entry point, not the whole board. It sits on at most two lines (HeroName),
-     in one display size: the site name's longest line (--name-em, measured at the display axes)
-     fills ~92% of the measure on phones, 80% from the small breakpoint, 62% on desktop, and never
-     more than a quarter of the screen height. A longer name scales itself down (--fit-em); a
-     shorter one keeps the size. The hero stops --peek short of the first screen's bottom, where
-     the deck heading comes in. */
+  /* The sheet title: the first screen is a map sheet's title block. The name sits bottom left in
+     one display size (its longest line, --name-em, fills ~92% of the measure on phones, 80% from
+     the small breakpoint, 72% on desktop, never more than a quarter of the screen height; a longer
+     name scales itself down with --fit-em), the tags in one row beneath. */
   .hero {
-    --peek: clamp(88px, 12svh, 140px);
     --name-fill: 0.92;
+    position: relative;
     container-type: inline-size;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     align-content: end;
-    row-gap: clamp(20px, 3svh, 32px);
-    min-height: calc(100svh - 96px - var(--peek));
-  }
-
-  .eyebrow {
-    color: var(--color-glacier);
-  }
-
-  /* The statement: the page's first sentence, visible from first paint (it may be the LCP). */
-  .statement {
-    max-width: 30ch;
-    font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.75rem);
-    font-weight: 560;
-    line-height: 1.35;
-  }
-
-  .heroActions {
-    margin-top: 4px;
+    row-gap: clamp(16px, 2.5svh, 28px);
+    min-height: 100svh;
+    /* The foot clears the lower corner ticks (two mono lines and their 20 px inset). */
+    padding-block: 96px calc(clamp(28px, 6svh, 64px) + 44px);
   }
 
   .name {
@@ -43,85 +27,213 @@
     font-size: min(calc(var(--name-fill) * 100cqi / max(var(--name-em, 5), var(--fit-em, 5))), 26svh);
   }
 
-  .aside {
-    display: grid;
-    justify-items: start;
-    gap: clamp(20px, 3svh, 32px);
+  .under {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 32px;
   }
 
-  .cue {
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 0;
+    margin: 0;
+    padding: 0;
+    color: var(--color-glacier);
+    list-style: none;
+  }
+
+  .tags li + li::before {
+    content: "·";
+    margin-inline: 0.8em;
+    color: var(--color-contour);
+  }
+
+  /* The scale bar: --scale-km of the field's width or height, whichever the field covers. */
+  .scale {
     display: inline-flex;
     align-items: center;
-    gap: 14px;
-    justify-self: start;
-    min-height: 44px;
-    color: var(--color-paper-dusk);
-    text-decoration: none;
+    gap: 10px;
+    margin: 0;
+    color: var(--color-contour);
   }
 
-  @media (hover: hover) {
-    .cue:hover {
-      color: var(--color-glacier);
-    }
+  .scaleBar {
+    width: calc(var(--scale-km) * max(100vw / var(--sheet-km-x), 100svh / var(--sheet-km-y)));
+    max-width: 40vw;
+    height: 5px;
+    border: 1px solid var(--color-contour);
+    background: linear-gradient(90deg, var(--color-contour) 0 25%, transparent 25% 50%, var(--color-contour) 50% 75%, transparent 75%);
   }
 
-  .cueLine {
-    position: relative;
-    width: 1px;
-    height: 36px;
-    overflow: hidden;
-    background: var(--color-contour-dim);
+  /* Corner ticks with the sheet's LV95 coordinates (on phones the top-left and bottom-right only). */
+  .sheet {
+    position: absolute;
+    inset: 72px calc(var(--gutter) * -0.5) 12px;
+    pointer-events: none;
   }
 
-  .cueLine::after {
+  .tick {
+    position: absolute;
+    display: grid;
+    gap: 2px;
+    color: var(--color-contour);
+    font-size: 0.625rem;
+  }
+
+  .tick::before {
     content: "";
     position: absolute;
-    inset: 0;
-    background: var(--color-contour);
-    transform-origin: top;
+    width: 14px;
+    height: 14px;
+    border-color: var(--color-contour);
+    border-style: solid;
+    border-width: 0;
   }
 
-  /* The line draws down once from first paint, then rests (no loop: WCAG 2.2.2); still mode shows
-     it drawn. */
-  @media (prefers-reduced-motion: no-preference) {
-    :root:not([data-motion="still"]) .cueLine::after {
-      animation: cue var(--dur-draw) var(--ease-settle) var(--dur-settle) backwards;
-    }
+  .tick[data-corner="nw"] {
+    top: 0;
+    left: 0;
+    padding: 20px 0 0 20px;
   }
 
-  @keyframes cue {
+  .tick[data-corner="nw"]::before {
+    top: 0;
+    left: 0;
+    border-top-width: 1px;
+    border-left-width: 1px;
+  }
+
+  .tick[data-corner="ne"] {
+    top: 0;
+    right: 0;
+    padding: 20px 20px 0 0;
+    text-align: end;
+  }
+
+  .tick[data-corner="ne"]::before {
+    top: 0;
+    right: 0;
+    border-top-width: 1px;
+    border-right-width: 1px;
+  }
+
+  .tick[data-corner="sw"] {
+    bottom: 0;
+    left: 0;
+    padding: 0 0 20px 20px;
+  }
+
+  .tick[data-corner="sw"]::before {
+    bottom: 0;
+    left: 0;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+  }
+
+  .tick[data-corner="se"] {
+    right: 0;
+    bottom: 0;
+    padding: 0 20px 20px 0;
+    text-align: end;
+  }
+
+  .tick[data-corner="se"]::before {
+    right: 0;
+    bottom: 0;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+  }
+
+  .tick[data-corner="ne"],
+  .tick[data-corner="sw"] {
+    display: none;
+  }
+
+  /* The intro: at most three lines, there from the first frame (it may be the LCP). In full motion
+     only its weight eases in (300 → 400) with a 6 px settle. */
+  .intro {
+    display: grid;
+    gap: 24px;
+    align-items: start;
+    padding-top: var(--space-section);
+  }
+
+  .introText {
+    display: grid;
+    gap: 16px;
+    justify-items: start;
+  }
+
+  /* Three lines on desktop: about 70 characters a line beside the facts. */
+  .statement {
+    max-width: 70ch;
+    margin: 0;
+    font-size: clamp(1.375rem, 1.1rem + 0.8vw, 1.625rem);
+    font-weight: var(--type-body-wght);
+    line-height: 1.35;
+  }
+
+  @keyframes intro-settle {
     from {
-      transform: scaleY(0);
+      font-weight: 300;
+      transform: translateY(var(--dist-intro-settle));
     }
+  }
+
+  :root[data-motion="full"] .statement {
+    animation: intro-settle var(--dur-intro) var(--ease-settle) both;
+  }
+
+  .facts {
+    display: grid;
+    gap: 0;
+    margin: 0;
+  }
+
+  .facts > div {
+    display: grid;
+    grid-template-columns: 5rem minmax(0, 1fr);
+    gap: 12px;
+    padding-block: 8px;
+    border-top: 1px solid var(--color-contour-dim);
+  }
+
+  .facts > div:first-child {
+    border-top: 0;
+  }
+
+  .facts dt {
+    color: var(--color-contour);
+  }
+
+  .facts dd {
+    margin: 0;
+    color: var(--color-paper-dusk);
   }
 
   @media (min-width: 640px) {
     .hero {
       --name-fill: 0.8;
     }
+
+    .tick[data-corner="ne"],
+    .tick[data-corner="sw"] {
+      display: grid;
+    }
   }
 
-  /* Desktop: a 12-column grid. Meta row on top; the name in the left eight columns; the lede
-     and the cue in a clear right-hand column, sitting on the name's last baseline. */
+  /* Desktop: the facts as a small legend in the margin beside the intro. */
   @media (min-width: 1024px) {
     .hero {
-      --name-fill: 0.62;
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-      column-gap: clamp(16px, 2vw, 32px);
+      --name-fill: 0.72;
     }
 
-    .eyebrow {
-      grid-column: 1 / -1;
-    }
-
-    .name {
-      grid-column: 1 / span 8;
-      align-self: last baseline;
-    }
-
-    .aside {
-      grid-column: 9 / -1;
-      align-self: last baseline;
+    .intro {
+      grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+      column-gap: clamp(32px, 5vw, 96px);
     }
   }
 }

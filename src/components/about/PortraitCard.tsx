@@ -29,8 +29,8 @@ export type PortraitCardProps = {
 const RINGS = [1, 0.78, 0.56, 0.34];
 const HEAD = (k: number) => `M${50 - 22 * k} 48a${22 * k} ${27 * k} 0 1 0 ${44 * k} 0a${22 * k} ${27 * k} 0 1 0 ${-44 * k} 0Z`;
 const SHOULDERS = (k: number) => `M${50 - 42 * k} 140C${50 - 40 * k} ${140 - 34 * k} ${50 - 22 * k} ${140 - 48 * k} 50 ${140 - 48 * k}S${50 + 40 * k} ${140 - 34 * k} ${50 + 42 * k} 140`;
-/** The card is at most 300 px wide (70% of a phone's width below that). */
-const SIZES = "(min-width: 640px) 300px, 70vw";
+/** The card's width: about 240 px in the desktop title, at most 340 px on tablets, 70% of a phone. */
+const SIZES = "(min-width: 1024px) 240px, (min-width: 640px) 340px, 70vw";
 
 /**
  * The portrait card: the cut-out portrait on a thin Summit Card frame (its rarity shape and

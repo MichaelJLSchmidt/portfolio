@@ -7,7 +7,9 @@ import { duration, levels, stagger } from "@/styles/tokens";
  * --dist-rise-card; in calm both only fade; "rule" draws, "sheet" unfolds from its fold edge,
  * "line" traces a drawn line such as the footer's elevation profile over the draw token, "list"
  * draws a list's ring bullets with the item stagger, "caption" fades in after its figure, "mark" draws a small mark's paths,
- * "fade" fades in only (running text may take it), after its block's --fade-after;
+ * "fade" fades in only (running text may take it), after its block's --fade-after; "turn" is a
+ * binder page turning in (BinderPage, full motion only); "trace" a drawing whose route traces in
+ * over the draw token (CareerProfile: its own stylesheet says how);
  * "figure" unfolds a figure behind a scan line, its corner ticks after; a figure below the fold
  * shows a contour placeholder until its images have decoded) appear as they scroll into view, once
  * per session. Anything in the first viewport is shown from first paint and never
@@ -95,8 +97,11 @@ function play(group: Element[]) {
   const own = Math.max(
     ...group.map((el) => {
       const kind = el.getAttribute("data-reveal");
-      if (kind === "line") return duration.draw;
+      // A drawing whose route traces in (the career profile; its stylesheet animates the route).
+      if (kind === "line" || kind === "trace") return duration.draw;
       if (kind === "mark") return duration.trace;
+      // A binder page turning in (full only; its stylesheet animates it).
+      if (kind === "turn") return duration.long;
       if (kind === "fade") return duration.reveal + duration.tap;
       if (kind === "figure") return duration.settle + duration.short;
       // A sheet whose marks draw after it opens (the evidence legend's swatches).

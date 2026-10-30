@@ -19,7 +19,7 @@ import { fieldStore } from "./field-store";
 import { loadHeightmap, type HeightmapMeta } from "./heightmap-loader";
 import { watchQuietZones, type QuietKind, type QuietRect } from "./quiet-zones";
 import { createRiverMaterial, riverGeometry } from "./river-material";
-import { BERN, routeTerrain } from "./route-terrain";
+import { BERN, BERN_PORTRAIT_U, routeTerrain } from "./route-terrain";
 
 /**
  * The persistent contour field. Mounted once from the root layout (lazy chunk with
@@ -57,6 +57,8 @@ type TerrainSource = {
   max: number;
   posX: number;
   posY: number;
+  /** posX on portrait screens, where it differs (Bern). */
+  posXPortrait?: number;
   /** Gradient percentiles (metres per texel), for the screen-adaptive contour interval. */
   gradientM: Record<string, number>;
   /** The terrain's interval set (alpine or lowland, by relief). */
@@ -110,7 +112,8 @@ const cardSource = (id: string): TerrainSource | null => {
   };
 };
 
-// Bern is framed on the zero point, so it sits at the centre of every screen.
+// Bern is framed on the zero point (object-position: its u and v), from the west edge on portrait
+// screens (BERN_PORTRAIT_U).
 const bernSource = (profile: DeviceProfile): TerrainSource => {
   const hm = pickMap(bern.heightmaps, profile);
   return {
@@ -124,6 +127,7 @@ const bernSource = (profile: DeviceProfile): TerrainSource => {
     max: bern.elevation.max,
     posX: bern.zeroPoint.u,
     posY: bern.zeroPoint.v,
+    posXPortrait: BERN_PORTRAIT_U,
     gradientM: hm.gradientM,
     intervals: bern.intervalsM,
     push: false,
@@ -374,7 +378,8 @@ function Field({ profile, paused, calm, onReady, onContextLost }: FieldProps) {
     (which === "A" ? u.uHeightA : u.uHeightB).value = slot.tex;
     (which === "A" ? u.uEncA : u.uEncB).value.set(s.offset, s.scale);
     (which === "A" ? u.uRangeA : u.uRangeB).value.set(s.min, s.max);
-    coverTransform((which === "A" ? u.uUvA : u.uUvB).value, view.width, view.height, s.width, s.height, s.posX, s.posY);
+    const posX = view.width <= view.height ? (s.posXPortrait ?? s.posX) : s.posX;
+    coverTransform((which === "A" ? u.uUvA : u.uUvB).value, view.width, view.height, s.width, s.height, posX, s.posY);
   }
   function setB(slot: Slot | null) {
     const a = anim.current;

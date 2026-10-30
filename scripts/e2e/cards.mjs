@@ -1,15 +1,15 @@
 // The deck and its cards (phase 4): `npm run test:e2e -- cards`. Needs a build with
 // the flagged examples (SITE_MODE=basecamp or a preview).
 //
-//   cards  the spread grid (0°, 63:88, three columns on desktop) and the phone list (one column,
-//          scroll-snap y proximity); arrival once per session (rise and fade, no rotation); hover
+//   cards  the ridge (0°, 63:88, three columns on desktop raised by their summits' heights) and
+//          the phone stack (one column at 86%, alternating offsets, scroll-snap y proximity); arrival once per session (rise and fade, no rotation); hover
 //          (lift −6 px, tilt ≤ 5°, foil ≤ 0.18 on R and M only), keyboard focus (lift, never tilt),
 //          calm (no tilt, no foil); press 0.98; scope pips ("Scope n of 5"); one stat size, the
 //          impact's after-value with "from <before>"; the visited stamp; no gyroscope control.
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
-const ORDER = ["seilschaft", "gratweg", "test-project"];
+const ORDER = ["seilschaft", "test-project", "gratweg"];
 
 export async function cards({ browser, base, root, check }) {
   console.log("\ncards: the deck and its cards");
@@ -55,7 +55,9 @@ export async function cards({ browser, base, root, check }) {
         gyro: [...document.querySelectorAll("button")].some((b) => /tilt/i.test(b.textContent)),
       };
     });
-    check("desktop: three cards side by side, in one row", new Set(r.tops).size === 1 && r.lefts[0] < r.lefts[1] && r.lefts[1] < r.lefts[2], JSON.stringify(r.tops));
+    // The ridge: side by side, each raised by its summit's real height (Eiger 3967, Mönch 4110,
+    // Jungfrau 4158 m), so the tops fall from left to right in the panorama's order.
+    check("desktop: three cards side by side on the ridge, higher summits higher", r.lefts[0] < r.lefts[1] && r.lefts[1] < r.lefts[2] && r.tops[0] > r.tops[1] && r.tops[1] > r.tops[2], JSON.stringify(r.tops));
     check("cards rest at 0° (no rotation)", r.transforms.every((t) => t === "none" || /^matrix\(1, 0, 0, 1,/.test(t)), r.transforms.join(" | "));
     check("cards keep the 63:88 ratio", r.ratio.every((x) => Math.abs(x - 63 / 88) < 0.01), r.ratio.join(", "));
     check("no gyroscope control", !r.gyro);
@@ -162,7 +164,7 @@ export async function cards({ browser, base, root, check }) {
     await context.close();
   }
 
-  // Phones: one column of full-width cards that snap (y proximity).
+  // Phones: one column of cards at 86% of the width, alternating offsets, that snap (y proximity).
   {
     const { context, page } = await newPage({ viewport: { width: 390, height: 844 }, mobile: true });
     await page.goto(`${base}/`, { waitUntil: "load" });
@@ -177,7 +179,11 @@ export async function cards({ browser, base, root, check }) {
         list: Math.round(list.getBoundingClientRect().width),
       };
     });
-    check("phone: one column of full-width cards", new Set(r.lefts).size === 1 && r.widths.every((w) => w >= r.list - 1), JSON.stringify(r));
+    check(
+      "phone: one column of cards at 86% of the width, offsets alternating",
+      r.widths.every((w) => Math.abs(w / r.list - 0.86) < 0.02) && r.lefts[0] === r.lefts[2] && r.lefts[1] !== r.lefts[0],
+      JSON.stringify(r),
+    );
     // "y proximity" serialises as "y" (proximity is the default).
     check("phone: the cards snap (y proximity, centred)", /^y( proximity)?$/.test(r.snap) && r.align.includes("center"), `${r.snap} / ${r.align}`);
     await context.close();

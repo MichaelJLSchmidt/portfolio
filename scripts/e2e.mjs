@@ -28,7 +28,7 @@
 //   npm run test:e2e -- arrival       route arrivals: timing, focus on the H1, the trailhead morph,
 //                                     traversals, Basecamp, still (scripts/e2e/choreography.mjs)
 //   npm run test:e2e -- reading       the HUD waypoint readout, the trail, the altimeter bar, the
-//                                     career climb per mode, no endless loops (choreography.mjs)
+//                                     career profile per mode, no endless loops (choreography.mjs)
 //   npm run test:e2e -- access        forced colours, headings read once, the haptics map
 //                                     (scripts/e2e/choreography.mjs)
 //   npm run test:e2e -- wording       no old names, CV or job-seeking phrases in the built HTML
@@ -182,7 +182,7 @@ async function settle(page, { path, terrain }) {
         const h1 = [...document.querySelectorAll("main h1")].find((h) => h.getClientRects().length);
         const vt = document.getAnimations().some((a) => a.effect?.pseudoElement?.startsWith("::view-transition"));
         // Entrances (reveals, settles) still running are not "left hidden": wait for them. A
-        // scroll-driven animation (the career climb) runs as long as the page does: not one.
+        // scroll-driven animation (the career profile, the drawings) runs as long as the page does: not one.
         const entering = document
           .getAnimations()
           .some((a) => a.playState === "running" && a.timeline === document.timeline && a.effect?.getTiming().iterations !== Infinity);

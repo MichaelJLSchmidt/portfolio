@@ -37,6 +37,18 @@
     transition: opacity var(--dur-medium) var(--ease-trail);
   }
 
+  /* Bern's poster is framed like the field: on its zero point, from the west edge on portrait
+     screens (BERN_PORTRAIT_U). */
+  .layer[data-layer="bern"] .poster {
+    object-position: var(--focus-u) var(--focus-v);
+  }
+
+  @media (orientation: portrait) {
+    .layer[data-layer="bern"] .poster {
+      object-position: var(--focus-u-portrait) var(--focus-v);
+    }
+  }
+
   .canvas {
     opacity: 0;
     transition: opacity var(--dur-medium) var(--ease-trail);

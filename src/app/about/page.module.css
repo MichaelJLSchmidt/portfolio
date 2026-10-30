@@ -11,27 +11,109 @@
 
   /* ------------------------------------------------------------- header */
 
-  /* The H1 is the HUD label's morph target: big, alone, with the lead beside it on desktop. */
-  /* The field's zero-point pin sits at the centre of the screen, the Aare's start above it: both
-     stay in view and clear of text, so the header reaches 56 px past the screen's middle before the
-     legend begins (its text at the top on phones, beside the H1's baseline on desktop). */
+  /* The first viewport belongs to the map: Bern's zero-point pin and the Aare stay clear of the
+     title and the portrait (the field frames Bern so they can). Phones: the Aare runs down the
+     right edge (BERN_PORTRAIT_U), so the title sits at the foot of the screen, full width, the
+     card overlapping the lower half of its letters. Landscape: the Aare and the pin keep to the
+     left half, so the title and the lead take the right half, the title's foot at 78% of the
+     screen. */
   .header {
     display: grid;
-    gap: 20px;
+    gap: 24px;
     align-content: start;
-    align-items: end;
-    min-height: calc(50svh + 56px - var(--main-top) - var(--main-gap));
-    padding-top: clamp(24px, 6vw, 96px);
   }
 
-  /* About's one display size: its widest word (--title-em, measured at the display axes) fills
-     96% of the name's column, up to 12rem, so it never runs into the lead beside it. */
-  .nameCell {
+  /* --title-f: the word fills 96% of its column (--title-em, measured at the display axes). */
+  .titleCell {
     container-type: inline-size;
   }
 
+  .titleBox {
+    --title-f: min(calc(0.96 * 100cqi / var(--title-em, 5)), 28rem);
+    --title-foot: 93svh;
+    --card-w: min(70%, 340px);
+    position: relative;
+    display: grid;
+    margin-top: max(0px, calc(var(--title-foot) - var(--main-top) - 0.86 * var(--title-f)));
+  }
+
   .name {
-    font-size: min(calc(0.96 * 100cqi / var(--title-em, 5)), 12rem);
+    display: block;
+    font-size: var(--title-f);
+  }
+
+  .portrait {
+    position: relative;
+    justify-self: end;
+    width: var(--card-w);
+    margin-top: calc(-0.36 * var(--title-f));
+  }
+
+  .stemLayer {
+    display: none;
+  }
+
+  /* Desktop: the portrait stands in the last letter. The letters run behind its head; the last
+     letter's stem passes in front of its right shoulder (the clipped copy of the title). The stem
+     is centred --stem-x from the title's end and --stem-w wide (the T of Archivo at the display
+     axes); the card is 1.3 times the type size tall, its foot --card-drop below the line, its
+     centre 0.22 of its width left of the stem, and the shoulders start 0.38 of its height above
+     its foot. Landscape screens from 768 px take this layout: Bern's framing follows the
+     orientation, not the width. */
+  @media (orientation: landscape) and (min-width: 768px) {
+    .header {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .titleCell,
+    .lead {
+      grid-column: 2;
+    }
+
+    .titleBox {
+      --title-foot: 78svh;
+      --card-h: calc(1.3 * var(--title-f));
+      --card-w: calc(var(--card-h) * 63 / 88);
+      --card-drop: calc(0.05 * var(--title-f));
+      --stem-x: calc(0.26 * var(--title-f));
+      --stem-w: calc(0.2 * var(--title-f));
+      width: fit-content;
+      max-width: 100%;
+    }
+
+    .portrait {
+      position: absolute;
+      top: calc(100% + var(--card-drop) - var(--card-h));
+      left: calc(100% - var(--stem-x) - 0.72 * var(--card-w));
+      margin: 0;
+    }
+
+    .stemLayer {
+      position: absolute;
+      inset: 0;
+      display: block;
+      pointer-events: none;
+      transition: opacity var(--dur-short) linear;
+    }
+
+    /* The copy's box reaches 0.14 em past the line at both ends (WeightTitle's padding). */
+    .stem {
+      clip-path: inset(
+        calc(100% - 0.14 * var(--title-f) + var(--card-drop) - 0.38 * var(--card-h))
+          calc(var(--stem-x) - var(--stem-w) / 2) 0 calc(100% - var(--stem-x) - var(--stem-w) / 2)
+      );
+    }
+
+    /* Not over the facts, and not while the title arrives on its weight (full motion). */
+    .titleBox:has([data-facing="facts"]) .stemLayer,
+    :root[data-motion="full"] .titleBox:has(h1[data-title="view"]:not([data-title-done], [data-title-morphed])) .stemLayer {
+      opacity: 0;
+    }
+
+    /* Under the card's "Show facts". */
+    .lead {
+      margin-top: 72px;
+    }
   }
 
   .lead {
@@ -39,23 +121,6 @@
     font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.75rem);
     font-weight: 560;
     line-height: 1.35;
-  }
-
-  .portrait {
-    width: min(70%, 300px);
-  }
-
-  @media (min-width: 1024px) {
-    .header {
-      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-      align-content: end;
-      column-gap: clamp(32px, 4vw, 72px);
-    }
-
-    .lead {
-      align-self: end;
-      padding-bottom: 1.2em;
-    }
   }
 
   /* ------------------------------------------------------------- legend and bio */
@@ -139,10 +204,6 @@
     align-content: start;
   }
 
-  .sectionHeading {
-    font-size: clamp(2.5rem, 8vw, 6.5rem);
-  }
-
   /* Rope rules: six short agreements, two or three to a row. */
   .ropeRules {
     display: grid;
@@ -169,7 +230,7 @@
     font-weight: 700;
   }
 
-  /* First 90 days: three stages, left to right on desktop, joined by a short contour trail that
+  /* How I start: three steps, left to right on desktop, joined by a short contour trail that
      draws once as they come into view (data-reveal="mark"): across their tops on desktop, down
      their left edge on phones. */
   .daysWrap {
@@ -217,7 +278,6 @@
     }
   }
 
-  /* First 90 days: three stages, left to right on desktop. */
   .days {
     display: grid;
     gap: 16px;
@@ -232,10 +292,6 @@
     align-content: start;
   }
 
-  .dayRange {
-    color: var(--color-glacier);
-  }
-
   .dayTitle {
     font-size: clamp(1.5rem, 2.4vw, 2rem);
     font-weight: 700;
@@ -248,30 +304,66 @@
     }
   }
 
-  /* Craft and off the map, side by side on desktop. */
-  .pair {
+  /* Away from work: cards. The text and the list of the binder's cards beside the binder page
+     on desktop; on phones the text first. */
+  .cards {
     display: grid;
-    gap: clamp(48px, 7vw, 112px);
+    gap: clamp(28px, 4vw, 56px);
+    align-items: start;
   }
 
-  .offMapHead {
+  .cardsText {
+    display: grid;
+    gap: clamp(20px, 3vw, 32px);
+    align-content: start;
+  }
+
+  .binderList {
     display: grid;
     gap: 10px;
   }
 
-  .headRule {
-    width: min(100%, 12rem);
+  .binderListLabel {
+    color: var(--color-glacier);
+  }
+
+  .binderList dl {
+    display: grid;
+    margin: 0;
+  }
+
+  .binderList dl > div {
+    display: grid;
+    gap: 2px;
+    padding-block: 10px;
+    border-top: 1px solid var(--color-contour-dim);
+  }
+
+  .binderList dt {
+    color: var(--color-contour);
+  }
+
+  .binderList dd {
+    margin: 0;
+    color: var(--color-paper-dusk);
+  }
+
+  .binder {
+    width: min(100%, 560px);
   }
 
   @media (min-width: 1024px) {
-    .pair {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .cards {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
       column-gap: clamp(32px, 4vw, 72px);
     }
 
-    /* No eyebrow here: the heading lines up with the one beside it. */
-    .offMapHead {
-      padding-top: calc(var(--type-mono-size) * 1.4 + 10px);
+    .binder {
+      justify-self: end;
     }
+  }
+
+  .craft {
+    max-width: 62ch;
   }
 }

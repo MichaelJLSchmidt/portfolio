@@ -4,6 +4,8 @@
  * The portrait card (PortraitCard.tsx): 63 : 88 like a Summit Card, a thin frame in its rarity
  * colour. The inner box turns over in full motion (rotateY over --dur-flip, the back face turned
  * away); calm stacks both faces and cross-fades them over --dur-flip-calm; still swaps at once.
+ * The front has no fill (the About title runs behind the cut-out); the stand-in silhouette and the
+ * frame's foot are filled with the ground.
  * Hover (fine pointers) and keyboard focus on its button lift it --dist-lift. The facts face is
  * raised ground with paper-dusk text.
  */
@@ -53,9 +55,11 @@
     backface-visibility: hidden;
   }
 
+  /* The front is open: the cut-out stands in the frame and the About title runs behind it. */
   .front {
     align-items: end;
     justify-items: center;
+    background: none;
   }
 
   .photo,
@@ -68,7 +72,7 @@
   }
 
   .placeholder path {
-    fill: none;
+    fill: var(--color-ground);
     stroke: var(--color-contour);
     stroke-width: 1px;
     vector-effect: non-scaling-stroke;
@@ -115,6 +119,9 @@
     align-items: center;
     gap: 0.5em;
     margin: 0;
+    padding: 2px 6px;
+    border-radius: 2px;
+    background: var(--color-ground);
     color: var(--color-paper-dusk);
   }
 

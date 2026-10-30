@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { useEffect, useLayoutEffect, useRef, useState, type ComponentType } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ComponentType, type CSSProperties } from "react";
 import meta from "@terrain/terrain.json";
 import bern from "@terrain/bern/posters.json";
 import { asset } from "@/lib/asset";
@@ -10,7 +10,7 @@ import { whenIdle } from "@/lib/idle";
 import { useMotionMode } from "@/lib/motion-mode";
 import { fieldConfig, posterMedia, type DeviceProfile } from "./field-settings";
 import { fieldStore, useFieldStore } from "./field-store";
-import { BERN, routeTerrain } from "./route-terrain";
+import { BERN, BERN_PORTRAIT_U, routeTerrain } from "./route-terrain";
 import styles from "./TerrainBackdrop.module.css";
 
 type FieldComponent = ComponentType<{
@@ -139,7 +139,7 @@ export function TerrainBackdrop() {
                 width={bernCoarse.width}
                 height={bernCoarse.height}
                 decoding="async"
-                style={{ objectPosition: `${bern.focus.u * 100}% ${bern.focus.v * 100}%` }}
+                style={{ "--focus-u": `${bern.focus.u * 100}%`, "--focus-u-portrait": `${BERN_PORTRAIT_U * 100}%`, "--focus-v": `${bern.focus.v * 100}%` } as CSSProperties}
               />
             </picture>
           )}

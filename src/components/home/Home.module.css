@@ -46,51 +46,29 @@
   .actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    align-items: center;
+    gap: 10px 28px;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
+  /* Trail links in body size; the email link first. */
   .action {
+    color: var(--color-paper-dusk);
+    font-size: var(--type-body-size);
+    font-weight: 600;
+  }
+
+  .action[data-primary] {
+    color: var(--color-glacier);
+  }
+
+  /* Not a link yet: the label with a visible placeholder, its text still at 7:1 or more. */
+  .action[data-placeholder] {
     display: inline-flex;
     align-items: center;
-    gap: 0.5em;
     min-height: 44px;
-    padding: 0 18px;
-    border: 1px solid var(--color-glacier);
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--color-ground) 80%, transparent);
-    font-weight: 600;
-    text-decoration: none;
-    transition: background var(--dur-still) var(--ease-settle);
-  }
-
-  /* The primary action is filled; on hover or focus it turns over to the ground, so its label
-     (which moves to glacier) always reads. */
-  .action[data-primary] {
-    color: var(--color-ground);
-    background: var(--color-glacier);
-  }
-
-  .action[data-primary] [class*="arrow"] {
-    color: inherit;
-  }
-
-  .action[data-primary]:focus-visible {
-    background: var(--color-ground);
-  }
-
-  @media (hover: hover) {
-    .action[data-primary]:hover {
-      background: var(--color-ground);
-    }
-  }
-
-  /* Not a link yet: a dashed pill, its text still at 7:1 or more over the field. */
-  .action[data-placeholder] {
-    border-style: dashed;
-    border-color: var(--color-contour);
     color: var(--color-paper-dusk);
   }
 
@@ -99,25 +77,45 @@
     font-size: 0.75em;
   }
 
-  /* ---------------------------------------------------------------- trail rules */
+  /* ---------------------------------------------------------------- switchback */
 
-  .rules {
+  /* How I lead: one column on phones (each illustration, at most 220 px, above its principle);
+     from the md breakpoint the turns alternate left and right and a route zig-zags between them. */
+  .switchback {
+    position: relative;
     display: grid;
-    gap: 16px;
+    gap: clamp(32px, 5vw, 64px);
     margin: 0;
     padding: 0;
     list-style: none;
-    counter-reset: none;
+  }
+
+  .turn {
+    position: relative;
+    display: grid;
+    gap: 16px;
+    align-items: center;
   }
 
   .rule {
     display: grid;
     gap: 8px;
     align-content: start;
+    max-width: 34rem;
   }
 
   .ruleNo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
     color: var(--color-glacier);
+  }
+
+  .spot {
+    width: 9px;
+    height: 9px;
+    fill: var(--color-glacier);
   }
 
   .ruleTitle {
@@ -127,23 +125,129 @@
     line-height: 1.2;
   }
 
-  /* The evidence line fades in --dur-tap after its rule's title has begun to settle. */
   .evidence {
-    --fade-after: var(--dur-tap);
+    margin: 0;
     padding-top: 8px;
     border-top: 1px dashed var(--color-contour-dim);
-    font-size: 1rem;
+    color: var(--color-paper-dusk);
+    letter-spacing: 0.06em;
+    line-height: 1.6;
+    text-transform: none;
   }
 
-  .evidence :global(.hud-label) {
+  .evidenceLabel {
     color: var(--color-glacier);
+    text-transform: uppercase;
+  }
+
+  .illo {
+    width: min(100%, 220px);
+    height: auto;
+    overflow: visible;
+  }
+
+  .illo path,
+  .illo circle {
+    fill: none;
+    stroke: var(--color-contour);
+    stroke-width: 1.5px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .illo .illoRoute {
+    stroke: var(--color-signal);
+    stroke-width: 2px;
+  }
+
+  .illo .illoBlaze {
+    fill: var(--color-signal);
+    stroke: none;
+  }
+
+  /* Full motion, where scroll timelines exist: each line draws as the drawing scrolls in (entry
+     10% to cover 40%). Elsewhere, and in calm and still, the drawing is simply there. */
+  @keyframes illo-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @supports (animation-timeline: view()) {
+    :root[data-motion="full"] .illo :is(path, circle):not(.illoBlaze) {
+      stroke-dasharray: 1;
+      animation: illo-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 40%;
+    }
   }
 
   @media (min-width: 1024px) {
-    .rules {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .turn {
+      grid-template-columns: minmax(0, 220px) minmax(0, 34rem);
+      column-gap: clamp(32px, 4vw, 64px);
+      justify-content: start;
+    }
+
+    .turn[data-side="right"] {
+      grid-template-columns: minmax(0, 34rem) minmax(0, 220px);
+      justify-content: end;
+    }
+
+    .turn[data-side="right"] .illo {
+      order: 2;
+    }
+
+    /* The route between the turns: from under one turn's drawing down into the gap, across it
+       (never through a principle), and down into the next drawing. The drawings are 220 × 147
+       and centred on their turn. */
+    .switchback {
+      --gap: clamp(32px, 5vw, 64px);
+    }
+
+    .turn:not(:last-child)::after,
+    .turn:not(:first-child)::before {
+      content: "";
+      position: absolute;
+      border: 0 solid var(--color-signal);
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .turn:not(:last-child)::after {
+      top: calc(50% + 78px);
+      right: 110px;
+      left: 110px;
+      height: calc(50% - 78px + var(--gap) / 2);
+      border-bottom-width: 2px;
+      border-left-width: 2px;
+      border-bottom-left-radius: 24px;
+    }
+
+    .turn[data-side="right"]:not(:last-child)::after {
+      border-left-width: 0;
+      border-right-width: 2px;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 24px;
+    }
+
+    .turn:not(:first-child)::before {
+      top: calc(var(--gap) / -2);
+      left: 109px;
+      height: calc(50% - 78px + var(--gap) / 2);
+      border-left-width: 2px;
+    }
+
+    .turn[data-side="right"]:not(:first-child)::before {
+      right: 109px;
+      left: auto;
     }
   }
+
 
   /* ---------------------------------------------------------------- field notes */
 

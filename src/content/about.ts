@@ -12,21 +12,27 @@ export type { Action } from "./contact";
  * to confirm as [PLACEHOLDERS]: check:content lists both, and a live build stops on them.
  */
 
-/** A camp on the career profile: a role, with its card rarity (C, U, R, M as on the cards). */
+/** A camp on the career profile: a role, where it stands on the Ittigen → Bantiger trail. */
 export type Camp = {
   year: string;
   title: string;
-  rarity: Rarity;
-  /** Position along the profile, 0 (start) to 1 (summit). */
+  /** Position along the trail, 0 (Ittigen) to 1 (the Bantiger). */
   at: number;
 };
 
 const camps: Camp[] = [
-  { year: ex("2018"), title: "Front-end developer", rarity: "C", at: 0.1 },
-  { year: ex("2019"), title: "UX designer", rarity: "C", at: 0.38 },
-  { year: ex("2020"), title: "Senior UX designer", rarity: "U", at: 0.66 },
-  { year: "today", title: "UX Team Lead", rarity: "R", at: 1 },
+  { year: ex("2018"), title: "Front-end developer", at: 0 },
+  { year: ex("2019"), title: "UX designer", at: 0.36 },
+  { year: ex("2020"), title: "Senior UX designer", at: 0.7 },
+  { year: "today", title: "UX Team Lead", at: 1 },
 ];
+
+/** A pocket of the card binder: an original card (no game's logo, art or frame), or an empty one. */
+export type Pocket =
+  | { kind: "deck"; game: string; line: string }
+  | { kind: "trainer"; line: string }
+  | { kind: "workshop"; line: string }
+  | { kind: "empty" };
 
 export const about = {
   meta: {
@@ -156,16 +162,19 @@ export const about = {
   },
   career: {
     heading: "Career so far",
-    intro: "From front-end code to leading a team, drawn on a real trail: the line is the terrain along it, from swisstopo elevation data.",
-    /** The camps' letters, read as on the cards. */
-    rarityNote: "Letters as on the cards: C common · U uncommon · R rare · M mythic",
-    /** Read before a camp's letter: "Rarity R, rare". */
-    rarityLabel: "Rarity",
-    readout: { altitude: "Alt", distance: "Km" },
-    /** Official heights of the named ends of the trail (the profile's labels). */
-    stops: { Interlaken: "566 m", Jungfrau: "4158 m" } as Record<string, string>,
+    intro: "From front-end code to leading a team, drawn on a real trail near Bern: from Ittigen up to the Bantiger, the line is the terrain along it, from swisstopo elevation data.",
+    /** The camps' list (its accessible name): the roles, each with its height on the trail. */
+    caption: "Roles along the way",
     camps,
+    /** The summit camp: "UX Team Lead · today". */
+    summit: (title: string, year: string) => `${title} · ${year}`,
+    /** On the transmitter mast above the summit: the outlook, and a tiny label on the mast. */
     outlook: "947 m. Not the top. There’s still room to grow.",
+    mast: "Luft nach oben",
+    /** The mast's tip (a secondary source, so "about"). */
+    tip: (height: string) => `≈ ${height} m`,
+    /** Under the drawing: the trail's places with their heights, its length and the data's source. */
+    trail: (places: string, km: string) => `${places} · ${km} km · elevation: swisstopo`,
   },
   craft: {
     heading: "Tools and craft",
@@ -174,10 +183,40 @@ export const about = {
   cards: {
     heading: "Away from work: cards",
     body: "I play trading card games: Magic: The Gathering, the One Piece Card Game and Yu-Gi-Oh!. A good card game is a rule system that has to be clear at a glance, which is not far from designing a public service. That’s why the projects on this site are cards.",
+    /** The binder page: nine pockets of original cards; a tap turns one over to its line. */
+    binder: {
+      label: "Card binder",
+      /** The pockets' lines, also listed as text under the binder. */
+      listLabel: "In the binder",
+      deckBox: "Deck box",
+      /** A deck box's name: "Deck box · Magic: The Gathering". */
+      cardName: (kind: string, game: string) => `${kind} · ${game}`,
+      trainer: "Trainer card",
+      workshop: "Workshop card",
+      empty: "Still collecting",
+      pockets: [
+        { kind: "deck", game: "Magic: The Gathering", line: ex("Commander, mostly: a hundred cards, one of each.") },
+        { kind: "trainer", line: "The person behind the decks, in the same frame as the projects." },
+        { kind: "deck", game: "One Piece Card Game", line: ex("Fast games on weeknights.") },
+        { kind: "workshop", line: ex("About 40 workshops since 2019: each ends with a decision.") },
+        { kind: "empty" },
+        { kind: "deck", game: "Yu-Gi-Oh!", line: ex("The game I learned rules lawyering from.") },
+        { kind: "empty" },
+        { kind: "empty" },
+        { kind: "empty" },
+      ] as Pocket[],
+    },
   },
   /** The under-construction page's inert stand-in for a link without a URL yet. */
   placeholderAction: (label: string) => `[${label.toUpperCase()}]`,
 };
+
+/** A binder pocket's card name ("Deck box · Magic: The Gathering"), for its button and the list. */
+export function pocketName(p: Pocket): string {
+  const b = about.cards.binder;
+  if (p.kind === "deck") return b.cardName(b.deckBox, p.game);
+  return p.kind === "trainer" ? b.trainer : p.kind === "workshop" ? b.workshop : b.empty;
+}
 
 /**
  * The under-construction page production serves until launch, and the password gate, which

@@ -1,0 +1,230 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+/*
+ * The binder page (BinderPage.tsx): a raised sheet punched for the rings on its left edge, three
+ * by three sleeve pockets, each card 63 : 88. The cards are original: a mono kind label, a line
+ * drawing, the game's name as text. Turning a card follows the portrait card (PortraitCard.module.css).
+ */
+@layer components {
+  .page {
+    position: relative;
+    padding: clamp(14px, 2vw, 22px) clamp(14px, 2vw, 22px) clamp(14px, 2vw, 22px) clamp(32px, 4vw, 44px);
+    border: 1px solid var(--color-contour-dim);
+    border-radius: 6px;
+    background: var(--color-ground-raised);
+    transform-origin: 0 50%;
+  }
+
+  /* The ring holes: three punched circles down the left margin. */
+  .page::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: clamp(10px, 1.4vw, 16px);
+    width: 10px;
+    background: radial-gradient(circle at 50% 50%, var(--color-ground) 0 4px, var(--color-contour-dim) 4px 5px, transparent 5.5px) 0 0 / 10px 33.333% repeat-y;
+  }
+
+  .pockets {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(8px, 1.2vw, 14px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* A sleeve pocket: a faint edge and a sheen line across its top. */
+  .pocket {
+    position: relative;
+    display: grid;
+    aspect-ratio: 63 / 88;
+    padding: 4%;
+    border: 1px solid color-mix(in srgb, var(--color-contour) 40%, transparent);
+    border-radius: 4px;
+  }
+
+  .pocket::after {
+    content: "";
+    position: absolute;
+    inset: 6% 8% auto;
+    height: 1px;
+    background: color-mix(in srgb, var(--color-paper-dusk) 18%, transparent);
+    pointer-events: none;
+  }
+
+  .pocket[data-empty] {
+    place-items: center;
+    border-style: dashed;
+  }
+
+  .emptyLabel {
+    padding: 8%;
+    color: var(--color-contour);
+    text-align: center;
+  }
+
+  .card {
+    --on: 0;
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+    perspective: 900px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (hover: hover) {
+    .card:hover {
+      --on: 1;
+    }
+  }
+
+  .card:focus-visible {
+    --on: 1;
+    outline: 2px solid var(--color-glacier);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  .inner {
+    position: relative;
+    display: block;
+    height: 100%;
+    transform: translateY(calc(var(--on) * var(--dist-lift) / 2));
+  }
+
+  .face {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    overflow: hidden;
+    border: 1px solid var(--color-contour-dim);
+    border-radius: 4.5% / 3.2%;
+    background: var(--color-ground);
+    color: var(--color-paper-dusk);
+    backface-visibility: hidden;
+  }
+
+  .card[data-kind="trainer"] .face {
+    border-color: var(--color-summit-gold);
+  }
+
+  .front {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    justify-items: center;
+    gap: 4px;
+    padding: 9% 8% 10%;
+  }
+
+  .kind {
+    justify-self: start;
+    color: var(--color-glacier);
+    font-size: clamp(0.5625rem, 0.45rem + 0.3vw, 0.6875rem);
+    line-height: 1.2;
+  }
+
+  .drawing {
+    width: 72%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .drawing path {
+    fill: none;
+    stroke: var(--color-contour);
+    stroke-width: 1.5px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .game {
+    color: var(--color-paper-dusk);
+    font-family: var(--font-text-condensed);
+    font-size: clamp(0.6875rem, 0.55rem + 0.4vw, 0.875rem);
+    font-stretch: var(--type-condensed-wdth);
+    font-weight: 700;
+    line-height: 1.15;
+    text-align: center;
+  }
+
+  .rarity {
+    width: 12px;
+    height: 12px;
+    fill: var(--color-summit-gold);
+  }
+
+  .back {
+    align-content: center;
+    padding: 10%;
+    background: var(--color-ground-raised);
+  }
+
+  .line {
+    font-size: clamp(0.75rem, 0.6rem + 0.4vw, 0.9375rem);
+    line-height: 1.35;
+  }
+
+  /* Full: a card turns over; the page turns in once as it scrolls into view. */
+  :root[data-motion="full"] .inner {
+    transform-style: preserve-3d;
+    transition: transform var(--dur-flip) var(--ease-summit);
+  }
+
+  :root[data-motion="full"] .back {
+    transform: rotateY(180deg);
+  }
+
+  :root[data-motion="full"] .card[data-turned] .inner {
+    transform: translateY(calc(var(--on) * var(--dist-lift) / 2)) rotateY(180deg);
+  }
+
+  @keyframes page-turn {
+    from {
+      opacity: 0;
+      transform: perspective(1800px) rotateY(-62deg);
+    }
+  }
+
+  :root[data-motion="full"] .page[data-reveal-state="wait"] {
+    opacity: 0;
+  }
+
+  :root[data-motion="full"] .page[data-reveal-state="play"] {
+    animation: page-turn var(--dur-long) var(--ease-settle) backwards;
+  }
+
+  /* Calm and still (and without JavaScript): the faces lie on each other; calm cross-fades. */
+  :root:not([data-motion="full"]) .card:not([data-turned]) .back,
+  :root:not([data-motion="full"]) .card[data-turned] .front {
+    opacity: 0;
+  }
+
+  :root[data-motion="calm"] .face {
+    transition: opacity var(--dur-flip-calm) linear;
+  }
+
+  :root[data-motion="calm"] .inner {
+    transition: transform var(--dur-short) var(--ease-settle);
+  }
+
+  :root[data-motion="still"] .inner {
+    transform: none;
+  }
+
+  @media (forced-colors: active) {
+    .face,
+    .pocket {
+      border-color: CanvasText;
+    }
+  }
+}

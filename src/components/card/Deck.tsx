@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, type CSSProperties } from "react";
 import { cards } from "@/content/cards";
 import { flood } from "@/content/flood";
 import type { home } from "@/content/home";
@@ -9,14 +9,19 @@ import { RuledHeading } from "@/components/motion/RuledHeading";
 import { SummitCard } from "./SummitCard";
 import styles from "./Deck.module.css";
 
+/** What the server page knows about each card's case study: its caption and its summit (the spot
+ * height's label, and its height in metres). */
+export type DeckEntry = { problem: string; result: string; role: string; spot: string; metres: number };
+
 /**
- * Selected work (id="work"): every card from content, each one a link to its case study, in deck
- * order (one column of full-width cards on phones, which snap into place as they scroll, y
- * proximity; two from the small breakpoint, three from the medium one). Each card arrives once
- * per session as it enters (SummitCard). The section's copy arrives as a prop from the server
- * page: importing home.ts here would put the whole home copy into this client component's bundle.
+ * Selected work (id="work") as a ridge: the cards stand on a drawn ridgeline in deck order (the
+ * panorama seen from Interlaken), each raised by its real summit height, with a plain caption
+ * under it (problem, result, role). Phones: a vertical stack at 86% width, alternately offset,
+ * each card with its spot height beside it. No carousel. Each card arrives once per session as it
+ * enters (SummitCard). The copy and the captions arrive as props from the server page: importing
+ * the content here would put it into this client component's bundle.
  */
-export function Deck({ copy: t }: { copy: typeof home.work }) {
+export function Deck({ copy: t, entries = {} }: { copy: typeof home.work; entries?: Record<string, DeckEntry> }) {
   // Coming back from a card's page: that card is in view and focused. A layout effect, so it
   // happens before a view transition captures the deck, which then rebuilds the card where the
   // reader sees it (return-transition.ts).
@@ -33,6 +38,10 @@ export function Deck({ copy: t }: { copy: typeof home.work }) {
   // No case study in this build (a live build until the first real one is written): the section
   // stays and says so.
   const empty = cards.length === 0;
+  // Heights: the highest summit stands highest; the others lower by their real difference.
+  const heights = cards.map((c) => entries[c.slug]?.metres ?? 0);
+  const top = Math.max(...heights, 1);
+  const low = Math.min(...heights.filter(Boolean), top);
   return (
     <section id="work" className={styles.deck} aria-labelledby="work-heading">
       <div className={styles.header} data-quiet-zone>
@@ -40,13 +49,47 @@ export function Deck({ copy: t }: { copy: typeof home.work }) {
         <p className={`${styles.intro} body-copy`}>{empty ? t.empty : t.intro}</p>
       </div>
       {!empty && (
-        <ul className={styles.cards} data-snap="">
-          {cards.map((card) => (
-            <li key={card.slug} className={styles.slot}>
-              <SummitCard card={card} transitionNames onOpen={() => rememberOrigin(card.slug)} />
-            </li>
-          ))}
-        </ul>
+        <div className={styles.ridge}>
+          <svg className={styles.ridgeLine} viewBox="0 0 300 100" preserveAspectRatio="none" aria-hidden="true">
+            <path
+              d={`M0 100${cards
+                .map((c, i) => {
+                  const x = 50 + i * 100;
+                  const y = 20 + ((top - (entries[c.slug]?.metres ?? low)) / Math.max(1, top - low)) * 30;
+                  return `L${x - 34} ${y + 26}L${x} ${y}L${x + 34} ${y + 26}`;
+                })
+                .join("")}L300 100`}
+            />
+          </svg>
+          <ul className={styles.cards} data-snap="">
+            {cards.map((card, i) => {
+              const e = entries[card.slug];
+              const drop = e ? (top - e.metres) / Math.max(1, top - low) : 0;
+              return (
+                <li key={card.slug} className={styles.slot} style={{ "--drop": drop.toFixed(3), "--side": i % 2 ? 1 : -1 } as CSSProperties}>
+                  {e && <p className={`${styles.spot} hud-label`}>{e.spot}</p>}
+                  <SummitCard card={card} transitionNames onOpen={() => rememberOrigin(card.slug)} />
+                  {e && (
+                    <dl className={styles.caption}>
+                      <div>
+                        <dt className="hud-label">{t.caption.problem}</dt>
+                        <dd>{e.problem}</dd>
+                      </div>
+                      <div>
+                        <dt className="hud-label">{t.caption.result}</dt>
+                        <dd>{e.result}</dd>
+                      </div>
+                      <div>
+                        <dt className="hud-label">{t.caption.role}</dt>
+                        <dd>{e.role}</dd>
+                      </div>
+                    </dl>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
     </section>
   );

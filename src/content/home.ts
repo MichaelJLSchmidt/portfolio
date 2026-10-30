@@ -15,6 +15,9 @@ export const home = {
   hero: {
     /** One row of tags under the name. */
     tags: ["UX Team Lead", "Senior UX Designer", "Bern, Switzerland"],
+    /** The map sheet's scale bar under the name: its length in kilometres on the field. */
+    scaleKm: 5,
+    scale: (km: number) => `${km} km`,
   },
   intro: {
     /** At most three lines, visible from the first frame (it may be the LCP element). */
@@ -22,29 +25,35 @@ export const home = {
       "I lead a small UX team at a cantonal IT services provider in Bern. We design public services that people understand on the first try, and my job is to give the team the time, the methods and the backing to do that.",
     ),
     more: "More about me",
+    /** A small legend beside the intro: these rows of About's facts. */
+    facts: { label: "At a glance", rows: ["Role", "Team", "Based"] },
   },
   lead: {
     heading: "How I lead",
-    evidenceLabel: "Evidence",
+    evidenceLabel: "Evidence:",
     /** Four principles; each title passes the plain-label test, the illustration carries the metaphor. */
     principles: [
       {
         title: "Clear the path, then step aside",
+        illustration: "path",
         text: "I set direction and remove blockers; designers own their decisions.",
         evidence: ex("Removed two approval steps so designers could test every week."),
       },
       {
         title: "Bring people in early",
+        illustration: "rope",
         text: "Legal, developers and operations join at workshop one, not workshop three.",
         evidence: ex("Developers join from the first workshop, not at the handover."),
       },
       {
         title: "Measure before we change",
+        illustration: "profile",
         text: "No change without a baseline, no baseline without a method.",
         evidence: ex("Every project starts with a baseline task-success test."),
       },
       {
         title: "Leave the system better",
+        illustration: "blaze",
         text: "Patterns, docs and career paths should outlast any one project.",
         evidence: ex("Each project adds a pattern to our design system."),
       },
@@ -58,6 +67,8 @@ export const home = {
     /** Under each card: what it was, what changed, what I did. */
     caption: { problem: "Problem", result: "Result", role: "Role" },
   },
+  /** The spot height beside each card of Selected work: its summit and real height. */
+  workSummit: (name: string, altitude: string) => `${name} · ${altitude}`,
   earlier: {
     heading: "Earlier work",
     caption: "Earlier projects, newest first",

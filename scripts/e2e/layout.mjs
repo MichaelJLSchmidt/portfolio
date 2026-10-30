@@ -13,7 +13,7 @@ import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const HOME_SECTIONS = ["hero-name", "lead-heading", "work-heading", "contact-heading"];
-const ABOUT_SECTIONS = ["who-heading", "people-heading", "start-heading", "skills-heading", "ascent-heading", "cards-heading", "craft-heading", "contact-heading"];
+const ABOUT_SECTIONS = ["who-heading", "people-heading", "start-heading", "skills-heading", "career-heading", "cards-heading", "craft-heading", "contact-heading"];
 
 /** An element's accessible-ish name: its aria-label, its label's text, or its text. */
 const NAME = (el) => (el.getAttribute("aria-label") ?? el.querySelector(".visually-hidden")?.textContent ?? el.textContent).trim().replace(/\s+/g, " ");
