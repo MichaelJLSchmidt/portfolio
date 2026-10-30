@@ -254,9 +254,7 @@ function Field({ profile, paused, calm, onReady, onContextLost }: FieldProps) {
       u.uGround.value.set(...hexToRgb(color.ground));
       u.uLineColor.value.set(...hexToRgb(colorOf(cfg.lineColor)));
       u.uIndexColor.value.set(...hexToRgb(colorOf(cfg.indexColor)));
-      u.uHeadlampGain.value = cfg.headlampGain;
-      u.uSweepGain.value = cfg.sweepGain;
-      u.uDrift.value = cfg.driftCyclesPerSecond;
+      u.uRevealGain.value = cfg.revealGain;
       u.uPinColor.value.set(...hexToRgb(colorOf(cfg.pin.color)));
       riverMaterial.uniforms.uColor.value.set(...hexToRgb(colorOf(cfg.river.color)));
       writeQuietKinds();
@@ -899,7 +897,6 @@ function Field({ profile, paused, calm, onReady, onContextLost }: FieldProps) {
     const zA = zoomOf(a.A);
     const zB = a.B ? zoomOf(a.B) : zA;
     u.uZoom.value = zA + (zB - zA) * v.morph;
-    // The map holds still while the page is read: no drift, line flow, headlamp or parallax.
 
     // Bern: the Aare and the zero-point pin follow the slot Bern is in.
     const bernUv = a.A.src.id === BERN ? (u.uUvA.value as THREE.Vector4) : a.B?.src.id === BERN ? (u.uUvB.value as THREE.Vector4) : null;
@@ -912,11 +909,10 @@ function Field({ profile, paused, calm, onReady, onContextLost }: FieldProps) {
       r.uOpacity.value = v.riverOpacity * fieldStore.get().config.river.opacity;
       // Terrain coordinates → device px, the inverse of the shader's mapping.
       const res = u.uResolution.value as THREE.Vector2;
-      const pan = u.uPan.value as THREE.Vector2;
       const zoom = u.uZoom.value as number;
       const px = (bern.zeroPoint.u - bernUv.z) / bernUv.x;
       const py = 1 - (bern.zeroPoint.v - bernUv.w) / bernUv.y;
-      pinScratch.set(((px - pan.x - 0.5) * zoom + 0.5) * res.x, ((py - pan.y - 0.5) * zoom + 0.5) * res.y);
+      pinScratch.set(((px - 0.5) * zoom + 0.5) * res.x, ((py - 0.5) * zoom + 0.5) * res.y);
       u.uPinPos.value.copy(pinScratch);
       u.uPinStrength.value = v.pin;
       u.uPinPing.value = v.ping;

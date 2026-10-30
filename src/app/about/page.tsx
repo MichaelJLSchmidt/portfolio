@@ -5,12 +5,13 @@ import { AscentProfile } from "@/components/about/AscentProfile";
 import { ContactBand } from "@/components/home/ContactBand";
 import { SectionHead } from "@/components/home/SectionHead";
 import { MapSheet } from "@/components/motion/MapSheet";
-import { SettleText } from "@/components/motion/SettleText";
+import { WeightTitle } from "@/components/type/WeightTitle";
+import { PortraitCard } from "@/components/about/PortraitCard";
 import { MorphTarget } from "@/components/transition/MorphTarget";
 import { about } from "@/content/about";
 import { ABOUT_MORPH } from "@/lib/morph";
-import { widestEm } from "@/lib/display-width";
-import { arrival, stagger } from "@/styles/tokens";
+import { titleEm } from "@/lib/title-axes";
+import { arrival } from "@/styles/tokens";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -30,22 +31,14 @@ export default function About() {
 
   return (
     <main id="main" className={`${styles.main} container`}>
-      <header className={styles.header} data-quiet-zone>
-        <div className={styles.nameCell}>
+      <header className={styles.header}>
+        <div className={styles.nameCell} data-quiet-zone>
           <MorphTarget name={ABOUT_MORPH} variant="title">
-            <SettleText
-              as="h1"
-              text={about.header.heading}
-              className={`${styles.name} display`}
-              style={{ "--title-em": widestEm(about.header.heading) } as CSSProperties}
-              widths="display"
-              glint
-              settleOnArrival
-            />
+            <WeightTitle as="h1" text={about.header.heading} className={styles.name} style={{ "--title-em": titleEm(about.header.heading) } as CSSProperties} />
           </MorphTarget>
         </div>
-        {/* Arriving from the HUD link: the H1 lands, then the lead settles and the facts unfold. */}
-        <SettleText as="p" text={about.header.lead} mode="block" wrap role="text" arrive={arrival.landed} className={`${styles.lead} knockout`} />
+        <p className={`${styles.lead} knockout`}>{about.header.lead}</p>
+        <PortraitCard className={styles.portrait} portrait={about.portrait} facts={about.who.facts} />
       </header>
 
       <section className={styles.who} aria-labelledby="who-heading">
@@ -55,7 +48,7 @@ export default function About() {
           <dl className={`${styles.legendRows} surface-copy`} data-sheet-rows="">
             {about.who.facts.rows.map((r, i) => (
               <div key={r.label} style={{ "--i": i } as CSSProperties}>
-                <SettleText as="dt" text={r.label} mode="block" role="mono" trigger="inview" arrive={arrival.landed + Math.min(i, stagger.item.max - 1) * stagger.item.step} className={styles.legendLabel} />
+                <dt className={styles.legendLabel}>{r.label}</dt>
                 <dd>{r.value}</dd>
               </div>
             ))}
@@ -75,14 +68,11 @@ export default function About() {
 
       <section className={styles.section} aria-labelledby="people-heading">
         <SectionHead id="people-heading" heading={about.workingRules.heading} />
-        {/* The rules' leads settle as a group, one after another (the item stagger). */}
         <ul className={styles.ropeRules}>
-          {about.workingRules.rules.map((r, i) => (
+          {about.workingRules.rules.map((r) => (
             <li key={r.lead} className="legend">
               <p className="body-copy">
-                <strong>
-                  <SettleText text={r.lead} mode="block" wrap role="text" trigger="inview" delay={Math.min(i, stagger.item.max - 1) * stagger.item.step} className={styles.ropeLead} />
-                </strong>{" "}
+                <strong className={styles.ropeLead}>{r.lead}</strong>{" "}
                 {r.text}
               </p>
             </li>
@@ -103,7 +93,7 @@ export default function About() {
           <ol className={styles.days}>
             {about.start.steps.map((s) => (
               <li key={s.title} className={`${styles.day} legend`}>
-                <SettleText as="h3" text={s.title} mode="block" wrap role="text" trigger="inview" className={styles.dayTitle} />
+                <h3 className={styles.dayTitle}>{s.title}</h3>
                 <p className="body-copy">{s.text}</p>
               </li>
             ))}

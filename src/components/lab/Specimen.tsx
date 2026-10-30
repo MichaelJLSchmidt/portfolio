@@ -1,17 +1,15 @@
 "use client";
 
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { lab } from "@/content/lab";
 import { haptic } from "@/lib/haptics";
 import { useMotionMode } from "@/lib/motion-mode";
 import { haptics, type HapticEvent } from "@/styles/tokens";
+import { FloodButton } from "@/components/interaction/FloodButton";
+import { TrailLink } from "@/components/interaction/TrailLink";
 import { ContourRule } from "@/components/motion/ContourRule";
-import { Glint } from "@/components/motion/Glint";
-import { playGlint } from "@/components/motion/glint";
 import { MapSheet } from "@/components/motion/MapSheet";
-import { MotionButton } from "@/components/motion/MotionButton";
-import { SettleText, type SettleHandle } from "@/components/motion/SettleText";
-import { SignatureLink } from "@/components/motion/SignatureLink";
+import { WeightTitle } from "@/components/type/WeightTitle";
 import { useLabReady } from "./ready";
 import styles from "./Lab.module.css";
 
@@ -26,12 +24,8 @@ const states = ["rest", "on", "press"] as const;
  */
 export function Specimen() {
   const { mode, tier, haptics: hapticsOn, hapticsAvailable } = useMotionMode();
-  const chars = useRef<SettleHandle>(null);
-  const words = useRef<SettleHandle>(null);
-  const label = useRef<SettleHandle>(null);
-  const mono = useRef<SettleHandle>(null);
-  const glintDark = useRef<HTMLParagraphElement>(null);
-  const glintSheet = useRef<HTMLParagraphElement>(null);
+  // Replay: a new key remounts the titles, so their arrival runs again.
+  const [round, setRound] = useState(0);
   useLabReady();
 
   // Side by side: a column's scroll position is mirrored in the other columns (lab page).
@@ -72,49 +66,17 @@ export function Specimen() {
         </div>
       </dl>
 
-      <section className={styles.section} data-primitive="settle">
-        <h2 className="hud-label">{S.settle.title}</h2>
-        <p className={styles.note}>{S.settle.note}</p>
-        <div className={styles.row}>
-          <SettleText ref={chars} as="p" id="lab-chars" text={S.settle.chars} className={`${styles.big} display`} trigger="paint" />
-          <MotionButton label={t.replay} onClick={() => chars.current?.play()} />
+      <section className={styles.section} data-primitive="title">
+        <h2 className="hud-label">{S.title.title}</h2>
+        <p className={styles.note}>{S.title.note}</p>
+        <div className={styles.row} key={round}>
+          <WeightTitle as="p" id="lab-title" text={S.title.big} arrive="load" className={styles.big} />
+          <WeightTitle as="p" id="lab-title-mid" text={S.title.mid} arrive="load" className={styles.mid} />
         </div>
         <div className={styles.row}>
-          <SettleText ref={words} as="p" id="lab-words" mode="words" text={S.settle.words} className={`${styles.mid} display`} trigger="manual" />
-          <MotionButton label={t.replay} onClick={() => words.current?.play()} />
-        </div>
-        <div className={styles.row}>
-          <SettleText ref={label} as="p" id="lab-label" mode="block" text={S.settle.label} trigger="manual" />
-          <SettleText ref={mono} as="p" id="lab-mono" mode="block" role="mono" text={S.settle.mono} className="hud-label" trigger="manual" />
-          <MotionButton
-            label={t.replay}
-            onClick={() => {
-              label.current?.play();
-              mono.current?.play();
-            }}
-          />
+          <FloodButton label={t.replay} onClick={() => setRound((r) => r + 1)} />
         </div>
       </section>
-
-      <section className={styles.section} data-primitive="glint">
-        <h2 className="hud-label">{S.glint.title}</h2>
-        <p className={styles.note}>{S.glint.note}</p>
-        <div className={styles.row}>
-          <p ref={glintDark} className={`${styles.mid} ${styles.glintHost} display`}>
-            {S.glint.dark}
-            <Glint text={S.glint.dark} />
-          </p>
-          <MotionButton label={t.playGlint} onClick={() => playGlint(glintDark.current)} />
-        </div>
-        <div className={`${styles.row} ${styles.sheetRow}`}>
-          <p ref={glintSheet} className={`${styles.glintHost} ${styles.sheetText}`}>
-            {S.glint.sheet}
-            <Glint text={S.glint.sheet} surface="sheet" />
-          </p>
-          <MotionButton label={t.playGlint} onClick={() => playGlint(glintSheet.current)} />
-        </div>
-      </section>
-
 
       <section className={styles.section} data-primitive="link">
         <h2 className="hud-label">{S.link.title}</h2>
@@ -140,7 +102,10 @@ export function Specimen() {
                   <td key={s}>
                     <p className="body-copy">
                       {S.link.inlineBefore}
-                      <SignatureLink href="#lab-links" variant="inline" label={S.link.inline} data-lab-state={s} />.
+                      <TrailLink href="#lab-links" variant="inline" data-lab-state={s}>
+                        {S.link.inline}
+                      </TrailLink>
+                      .
                     </p>
                   </td>
                 ))}
@@ -151,39 +116,35 @@ export function Specimen() {
                 </th>
                 {states.map((s) => (
                   <td key={s}>
-                    <SignatureLink href="#lab-links" variant="standalone" label={S.link.standalone} arrow={t.arrow} data-lab-state={s} />
+                    <TrailLink href="#lab-links" arrow={t.arrow} data-lab-state={s}>
+                      {S.link.standalone}
+                    </TrailLink>
                   </td>
                 ))}
               </tr>
               <tr>
                 <th scope="row" className="hud-label">
-                  {t.variants.nav}
+                  {t.variants.back}
                 </th>
                 {states.map((s) => (
                   <td key={s}>
-                    <SignatureLink href="#lab-links" variant="nav" label={S.link.nav} className="hud-label" data-lab-state={s} />
+                    <TrailLink href="#lab-links" arrow="←" arrowAt="start" className="hud-label" data-lab-state={s}>
+                      {S.link.back}
+                    </TrailLink>
                   </td>
                 ))}
               </tr>
             </tbody>
           </table>
         </div>
-        <p id="lab-links" className={styles.row}>
-          <SignatureLink href="#lab-links" variant="nav" label={S.link.navCurrent} className="hud-label" current />
-        </p>
-        <div className={styles.displayLinks}>
+        <div id="lab-links" className={styles.displayLinks}>
           {states.map((s) => (
-            <SignatureLink
-              key={s}
-              href="#lab-links"
-              variant="display"
-              className={styles.nextLink}
-              before={<span className="hud-label">{`${S.link.eyebrow} · ${t.states[s]}`}</span>}
-              label={S.link.display}
-              labelClassName={`${styles.nextName} display`}
-              arrow={t.arrow}
-              data-lab-state={s}
-            />
+            <div key={s} className={styles.nextLink}>
+              <span className="hud-label">{`${S.link.eyebrow} · ${t.states[s]}`}</span>
+              <TrailLink href="#lab-links" className={`${styles.nextName} display`} data-lab-state={s}>
+                {S.link.display}
+              </TrailLink>
+            </div>
           ))}
         </div>
       </section>
@@ -193,7 +154,7 @@ export function Specimen() {
         <p className={styles.note}>{S.button.note}</p>
         <div className={styles.row}>
           {states.map((s) => (
-            <MotionButton key={s} label={S.button.label} data-lab-state={s} className="hud-label" />
+            <FloodButton key={s} label={S.button.label} data-lab-state={s} />
           ))}
         </div>
       </section>
@@ -203,7 +164,7 @@ export function Specimen() {
         <p className={styles.note}>{S.haptics.note}</p>
         <div className={styles.row}>
           {(Object.keys(haptics.patterns) as HapticEvent[]).map((event) => (
-            <MotionButton key={event} label={event} className="hud-label" onClick={() => haptic(event)} />
+            <FloodButton key={event} label={event} pressHaptic={false} onClick={() => haptic(event)} />
           ))}
         </div>
       </section>
@@ -213,7 +174,7 @@ export function Specimen() {
       <section className={styles.section} data-primitive="reveal">
         <h2 className="hud-label">{S.reveal.title}</h2>
         <p className={styles.note}>{S.reveal.note}</p>
-        <SettleText as="p" id="lab-inview" text={S.settle.chars} className={`${styles.big} display`} trigger="inview" />
+        <WeightTitle as="p" id="lab-inview" text={S.title.big} className={styles.big} />
         <ContourRule />
         {[S.reveal.block, S.reveal.block, S.reveal.block].map((text, i) => (
           <p key={i} className={`${styles.block} hud-label`} data-reveal="" style={{ "--i": i } as CSSProperties}>

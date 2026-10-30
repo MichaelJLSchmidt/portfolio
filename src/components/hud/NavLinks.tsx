@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { SignatureLink } from "@/components/motion/SignatureLink";
+import { HudLink } from "./HudLink";
 
 const withSlash = (path: string) => (path.endsWith("/") ? path : `${path}/`);
 
@@ -9,5 +9,5 @@ const withSlash = (path: string) => (path.endsWith("/") ? path : `${path}/`);
 export function WorkLink({ label, className }: { label: string; className?: string }) {
   const pathname = usePathname();
   const inCaseStudy = withSlash(pathname ?? "").startsWith("/work/");
-  return <SignatureLink href="/#work" variant="nav" role="mono" settle label={label} current={inCaseStudy ? "location" : false} className={className} />;
+  return <HudLink href="/#work" label={label} current={inCaseStudy ? "location" : false} className={className} />;
 }

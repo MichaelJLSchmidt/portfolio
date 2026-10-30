@@ -1,6 +1,6 @@
 // The About morph: the HUD's About label grows into the About H1 and shrinks back. In full
 // and calm every navigation to and from /about/ runs a View Transition with the shared group
-// (none aborted: a duplicate name would abort the capture), the H1 settles once it has landed, and
+// (none aborted: a duplicate name would abort the capture), the H1 is at rest once it has landed, and
 // at rest at most one rendered element holds the name. In still no View Transition runs at all.
 // Which terrain /about/ shows is not asserted here. Run with: npm run test:e2e -- about
 import { existsSync } from "node:fs";
@@ -77,8 +77,11 @@ export async function about({ base, basePath, root, check, open, settle }) {
     const there = await step("HUD About → About", () => hud().click(), "/about/");
     check("the H1 reads About", there.h1 === "About", there.h1);
     if (morphs) {
-      const arrived = await page.evaluate(() => document.querySelector("main h1")?.getAttribute("data-arrive"));
-      check("the H1 settled after the morph landed", arrived === "done", `data-arrive=${arrived}`);
+      const axes = await page.evaluate(() => {
+        const h1 = [...document.querySelectorAll("main h1")].find((h) => h.getClientRects().length);
+        return h1 ? getComputedStyle(h1).fontVariationSettings : null;
+      });
+      check("the H1 is at rest after the morph landed (wght 800)", /"wght" 800\b/.test(axes ?? ""), axes);
     }
     const current = await hud().getAttribute("aria-current");
     check("the HUD link shows the current page", current === "page", current);

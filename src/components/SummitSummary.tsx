@@ -1,5 +1,4 @@
 import type { CSSProperties, ReactNode } from "react";
-import { SettleText } from "@/components/motion/SettleText";
 import { hasValue } from "@/lib/content";
 import styles from "./SummitSummary.module.css";
 
@@ -56,7 +55,9 @@ export function SummitSummary({
       data-fold="top"
       data-arrive-at={arriveAt}
     >
-      <SettleText as="h2" id={id} text={heading} mode="chars" role="mono" trigger="inview" className={`${styles.heading} hud-label`} />
+      <h2 id={id} className={`${styles.heading} hud-label`}>
+        {heading}
+      </h2>
       <dl className={`${styles.grid} surface-copy`} data-sheet-rows="">
         {rows
           .filter((row) => row.content || hasValue(row.value))

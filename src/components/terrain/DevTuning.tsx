@@ -36,14 +36,8 @@ export default function DevTuning() {
     }),
     lineColor: { value: fieldConfig.lineColor, options: LINE_COLORS },
     indexColor: { value: fieldConfig.indexColor, options: LINE_COLORS },
-    // The headlamp's radius, falloff and timing are shared with the type shine: `headlamp` in
-    // src/styles/tokens.ts. Only its gain on the lines is tuned here.
-    // Lit lines keep their colour and reach this many times their strength.
-    headlampGain: { value: fieldConfig.headlampGain, min: 1, max: 3, step: 0.05 },
-    sweepGain: { value: fieldConfig.sweepGain, min: 1, max: 3, step: 0.05 },
-    parallax: { value: fieldConfig.parallax, min: 0, max: 0.08, step: 0.002 },
-    scrollParallax: { value: fieldConfig.scrollParallax, min: 0, max: 0.2, step: 0.005 },
-    driftCyclesPerSecond: { value: fieldConfig.driftCyclesPerSecond, min: 0, max: 0.2, step: 0.005 },
+    // The draw-on front's lines keep their colour and reach this many times their strength.
+    revealGain: { value: fieldConfig.revealGain, min: 1, max: 3, step: 0.05 },
     // Quiet zones behind text: line strength inside, feather outside (CSS px).
     quietStrength: { value: fieldConfig.quietStrength, min: 0, max: 1, step: 0.05 },
     quietFeatherPx: { value: fieldConfig.quietFeatherPx, min: 0, max: 160, step: 4 },
@@ -51,10 +45,8 @@ export default function DevTuning() {
     bodyQuietFeatherPx: { value: fieldConfig.bodyQuietFeatherPx, min: 0, max: 160, step: 4 },
     zoomBase: { value: fieldConfig.zoomBase, min: 1, max: 1.3, step: 0.01 },
     morphZoom: { value: fieldConfig.morphZoom, min: 0, max: 0.5, step: 0.01 },
-    intro: { value: fieldConfig.intro, options: durationTokens },
     morph: { value: fieldConfig.morph, options: durationTokens },
     frameBudgetMs: { value: fieldConfig.frameBudgetMs, min: 12, max: 40, step: 1 },
-    dormantAfterMs: { value: fieldConfig.dormantAfterMs, min: 5000, max: 300000, step: 5000 },
   });
 
   useControls("Contour field", {

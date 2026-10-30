@@ -33,6 +33,10 @@
 //                                     (scripts/e2e/choreography.mjs)
 //   npm run test:e2e -- wording       no old names, CV or job-seeking phrases in the built HTML
 //                                     (scripts/check-wording.mjs)
+//   npm run test:e2e -- flood         the contour flood by mouse, keyboard and touch, in each mode
+//   npm run test:e2e -- trail         trail links: the red line, no width change, the blaze
+//   npm run test:e2e -- portrait      the About portrait card turning to its facts and back
+//   npm run test:e2e -- pointer       no pointermove listener but the card tilt (scripts/e2e/interaction.mjs)
 //   npm run test:e2e -- smoke         a smoke subset in Chromium, WebKit and Firefox (each where
 //                                     Playwright has it installed; scripts/e2e/smoke.mjs)
 //
@@ -54,6 +58,7 @@ import { hud, toast } from "./e2e/chrome.mjs";
 import { cards } from "./e2e/cards.mjs";
 import { access, arrival, reading } from "./e2e/choreography.mjs";
 import { smoke } from "./e2e/smoke.mjs";
+import { flood, pointer, portrait, trail } from "./e2e/interaction.mjs";
 import { wordingHits } from "./check-wording.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -670,7 +675,12 @@ async function casestudy() {
 // Records what moves: CSS animations and transitions by property (with their durations), inline
 // transforms written by script, glint passes, and the field's WebGL draws. Installed before load.
 const motionProbe = () => {
-  window.__motion = { anims: [], transitions: [], styleTransforms: 0, glints: 0, draws: 0 };
+  window.__motion = { anims: [], transitions: [], styleTransforms: 0, glints: 0, titleGlints: 0, draws: 0, log: [] };
+  // A timeline of what could move the field (for a failure's detail): scrolls, animations, transitions.
+  const note = (what) => window.__motion.log.push(`${Math.round(performance.now())} ${what}`);
+  addEventListener("scroll", () => note(`scroll ${Math.round(scrollY)}`), true);
+  document.addEventListener("animationstart", (e) => note(`anim ${e.animationName}`), true);
+  document.addEventListener("transitionrun", (e) => note(`trans ${e.propertyName} ${String(e.target.className?.baseVal ?? e.target.className).slice(0, 30)}`), true);
   const positional = /^(transform|translate|scale|rotate|font-stretch|font-weight|font-variation-settings|left|top|right|bottom|width|height|clip-path|background-position)$/;
   document.addEventListener(
     "animationstart",
@@ -694,7 +704,10 @@ const motionProbe = () => {
   document.addEventListener("DOMContentLoaded", () => {
     new MutationObserver((records) => {
       for (const r of records) {
-        if (r.attributeName === "data-glint" && r.target.getAttribute("data-glint") === "play") window.__motion.glints++;
+        if (r.attributeName === "data-glint" && r.target.getAttribute("data-glint") === "play") {
+          window.__motion.glints++;
+          if (r.target.closest("[data-title], h1, h2")) window.__motion.titleGlints++;
+        }
         if (r.attributeName === "style" && /transform|translate/.test(r.target.getAttribute("style") ?? "") && !/view-transition/.test(r.target.getAttribute("style") ?? "")) window.__motion.styleTransforms++;
       }
     }).observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ["style", "data-glint"] });
@@ -704,6 +717,7 @@ const motionProbe = () => {
       const original = ctx.prototype[fn];
       ctx.prototype[fn] = function (...args) {
         window.__motion.draws++;
+        window.__motion.log.push(`${Math.round(performance.now())} draw`);
         return original.apply(this, args);
       };
     }
@@ -726,7 +740,6 @@ async function modes() {
     const sw = await page.evaluate(() => {
       const input = document.querySelector('header input[role="switch"]');
       const desc = input?.getAttribute("aria-describedby");
-      // The visible label settles as decoration around a visually hidden copy: that copy is its text.
       const label = input?.closest("label");
       return { label: (label?.querySelector(".visually-hidden") ?? label)?.textContent.trim(), checked: input?.checked, described: desc ? document.getElementById(desc)?.textContent ?? "" : "" };
     });
@@ -739,7 +752,7 @@ async function modes() {
     await page.mouse.move(700, 450, { steps: 8 });
     await page.locator(`article[data-slug="${card.slug}"] a`).first().click();
     await settle(page, { path: card.path, terrain: mode === "still" ? null : card.terrain });
-    const next = page.locator('nav[aria-label] a[data-variant="display"]').first();
+    const next = page.locator('a[aria-describedby="next-project-label"]').first();
     await next.scrollIntoViewIfNeeded();
     await next.hover();
     await page.waitForTimeout(400);
@@ -748,11 +761,34 @@ async function modes() {
     await page.keyboard.press("Shift+Tab");
     await page.keyboard.press("Tab");
     await page.waitForTimeout(400);
-    // Idle on the case study: no ambient field frames in calm.
-    await page.waitForTimeout(800);
-    const idleStart = await page.evaluate(() => window.__motion.draws);
+    // Idle on the case study: the field is still while a page is read (every mode). Wait for a
+    // smooth scroll the focus started (Lenis, full motion) to land first: scrolling moves the
+    // quiet zones, and the field redraws for that.
+    await page.waitForFunction(
+      () =>
+        new Promise((done) => {
+          const y = scrollY;
+          setTimeout(() => done(scrollY === y), 400);
+        }),
+      null,
+      { timeout: 8000, polling: 100 },
+    ).catch(() => {});
+    // Responses to that input (a pre-warm of the next terrain on focus, which waits for its
+    // heightmap) finish first: wait until the field has drawn nothing for 700 ms.
+    await page.evaluate(() => document.activeElement?.blur());
+    await page.waitForFunction(
+      () =>
+        new Promise((done) => {
+          const n = window.__motion.draws;
+          setTimeout(() => done(window.__motion.draws === n), 700);
+        }),
+      null,
+      { timeout: 10000, polling: 100 },
+    ).catch(() => {});
+    const idleStart = await page.evaluate(() => [window.__motion.draws, performance.now()]);
     await page.waitForTimeout(2500);
-    const idleDraws = (await page.evaluate(() => window.__motion.draws)) - idleStart;
+    const idleDraws = (await page.evaluate(() => window.__motion.draws)) - idleStart[0];
+    const idleLog = await page.evaluate((t0) => window.__motion.log.filter((l) => Number(l.split(" ")[0]) > t0 - 500 && !l.endsWith(" draw")).slice(0, 12).join(" | "), idleStart[1]);
     // Card → case study morphs; case study → case study has no shared element yet (no View
     // Transition); back to the deck morphs again.
     await next.click();
@@ -770,16 +806,11 @@ async function modes() {
       check("still: no View Transition API call", m.native === 0, `native calls=${m.native}`);
     } else {
       check(`${mode}: View Transitions run`, m.native >= 2, `native calls=${m.native}`);
-      check(`${mode}: settles and breaths animate`, moved.length > 0, `${moved.length} positional animations`);
+      check(`${mode}: responses and morphs animate`, moved.length > 0, `${moved.length} positional animations`);
     }
-    if (mode === "calm") {
-      check("calm: no ambient field frames while idle", idleDraws === 0, `${idleDraws} draws in 2.5 s`);
-      check("calm: no glint", m.glints === 0, `${m.glints} glints`);
-    }
-    if (mode === "full") {
-      check("full: the field keeps its ambient frames", idleDraws > 0, `${idleDraws} draws in 2.5 s`);
-      check("full: a glint marked the first arrival or the commit", m.glints >= 1, `${m.glints} glints`);
-    }
+    check(`${mode}: no field frames while the page is read`, idleDraws === 0, `${idleDraws} draws in 2.5 s; ${idleLog}`);
+    // Titles never glint: the only glint left is a Mythic card's foil sweep.
+    check(`${mode}: no glint on titles`, m.titleGlints === 0 && (mode === "full" || m.glints === 0), `${m.titleGlints} on titles, ${m.glints} in all`);
     check("no page errors", errors.length === 0, errors.join("; "));
     await context.close();
   }
@@ -826,9 +857,9 @@ async function hydration() {
 
 // --- primitives (motion lab) ----------------------------------------------------------------------
 // Each primitive is exercised on the lab's specimen sheet (hover, focus and press on everything
-// interactive, replay and glint buttons, the reveals scrolled into view) and its layout shift
+// interactive, the replay button, the reveals scrolled into view) and its layout shift
 // summed from every shift whose sources lie inside it, input or not (at most 0.005 each). Focus parity: keyboard
-// focus gives the signature link exactly the hover state.
+// focus gives the trail link exactly the hover state.
 async function primitives() {
   if (!existsSync(join(root, "out/lab/specimen/index.html"))) {
     console.log("\nprimitives: skipped (no motion lab in this build; build with SITE_MODE=basecamp)");
@@ -856,7 +887,7 @@ async function primitives() {
       await page.waitForTimeout(500);
       // Only what the primitive's own motion shifts: loading (the web fonts' swap) is not part of it.
       await page.evaluate(() => (window.__shifts.length = 0));
-      // Everything interactive in it: hover, focus, press; then the replay and glint buttons.
+      // Everything interactive in it: hover, focus, press; the replay button too.
       const targets = section.locator("a, button");
       const n = await targets.count();
       for (let i = 0; i < n; i++) {
@@ -884,18 +915,18 @@ async function primitives() {
     await context.close();
   }
 
-  console.log("\nprimitives: signature link focus parity");
+  console.log("\nprimitives: trail link focus parity");
   for (const where of ["lab", "case study"]) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const page = await context.newPage();
     await load(page, where === "lab" ? `${base}/lab/specimen/?motion=full` : `${base}${FLOW.path}`);
-    const link = where === "lab" ? page.locator('a[data-variant="display"][data-lab-state="rest"]').first() : page.locator('a[data-variant="display"]').first();
+    const link = where === "lab" ? page.locator('a[data-trail="standalone"][data-lab-state="rest"]').first() : page.locator('a[aria-describedby="next-project-label"]').first();
     await link.scrollIntoViewIfNeeded();
     const state = () =>
       link.evaluate((a) => ({
-        letters: [...a.querySelectorAll("[style*='--kt-i']")].map((c) => `${getComputedStyle(c).fontStretch}/${getComputedStyle(c).fontWeight}`).join(" "),
-        arrow: [...a.querySelectorAll("span")].filter((s) => s.textContent === "→" && s.getClientRects().length).map((s) => getComputedStyle(s).transform).join(" "),
-        colour: getComputedStyle(a.querySelector("span[class*='label']") ?? a).color,
+        line: getComputedStyle(a.querySelector("span[class*='label']") ?? a).backgroundSize,
+        arrow: [...a.querySelectorAll("span[class*='arrow']")].map((s) => getComputedStyle(s).transform).join(" "),
+        width: Math.round(a.getBoundingClientRect().width * 10) / 10,
       }));
     const rest = await state();
     await link.hover();
@@ -910,6 +941,7 @@ async function primitives() {
     const focused = await state();
     check(`${where}: hover changes the link`, JSON.stringify(rest) !== JSON.stringify(hovered), JSON.stringify(hovered).slice(0, 120));
     check(`${where}: keyboard focus gives exactly the hover motion`, JSON.stringify(hovered) === JSON.stringify(focused), `${JSON.stringify(hovered).slice(0, 90)} vs ${JSON.stringify(focused).slice(0, 90)}`);
+    check(`${where}: the link never changes width`, rest.width === hovered.width && rest.width === focused.width, `${rest.width} / ${hovered.width} / ${focused.width}`);
     await context.close();
   }
 
@@ -918,7 +950,7 @@ async function primitives() {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     const page = await context.newPage();
     await load(page, `${base}/lab/specimen/?motion=full`);
-    const link = page.locator('a[data-variant="standalone"][data-lab-state="rest"]').first();
+    const link = page.locator('a[data-trail="standalone"][data-lab-state="rest"]').first();
     await link.scrollIntoViewIfNeeded();
     const before = await link.evaluate((a) => getComputedStyle(a).getPropertyValue("--on").trim());
     await link.tap();
@@ -942,7 +974,7 @@ async function wording() {
 const scenarios = { transitions, modes, hydration, primitives, decode, casestudy, wording };
 // The terrain conductor and the Bern terrain (scripts/e2e-terrain.mjs).
 Object.assign(scenarios, (await import("./e2e-terrain.mjs")).terrainScenarios({ browser, base, root, check, settle }));
-Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, about, ia, phone, fontswap, hud, toast, cards, arrival, reading, access, smoke }).map(([name, run]) => [name, () => run({ browser, playwright, base, basePath, root, check, open, settle })])));
+Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, about, ia, phone, fontswap, hud, toast, cards, arrival, reading, access, flood, trail, portrait, pointer, smoke }).map(([name, run]) => [name, () => run({ browser, playwright, base, basePath, root, check, open, settle })])));
 try {
   for (const [name, run] of Object.entries(scenarios)) if (!only || only === name) await run();
 } finally {

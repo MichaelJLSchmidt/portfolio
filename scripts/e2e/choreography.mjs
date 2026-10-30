@@ -1,8 +1,8 @@
 // Page choreography (phase 5), against a build with the examples (SITE_MODE=basecamp):
 //   arrival   deck → case study: focus on the H1, the arrival's parts timed from the commit
-//             (type and meta lines at 260 ms, the summary from 380 ms), the H1's commit glint;
+//             (the summary from 380 ms), no glint on the H1 (titles arrive on their weight);
 //             the trailhead band's mini card morphing into the next case study; browser back as a
-//             180 ms traversal; About from the HUD (H1 focused, lead and facts from 420 ms);
+//             180 ms traversal; About from the HUD (H1 focused, the facts from 420 ms);
 //             still mode: no view transition, focus still on the H1.
 //   reading   the case study while it is read: the trail's scroll-linked fill and current waypoint, the altimeter bar on a phone (shown from
 //             the first waypoint, its sheet: focus inside, Esc, focus back, a jump focuses the
@@ -112,24 +112,24 @@ export async function arrival({ browser, basePath, base, root, check }) {
     const t = await page.evaluate(() => ({ vt: window.__vt.at(-1), arrival: window.__arrival, glints: window.__glints }));
     check("deck → case study: the artwork and the name travel", t.vt?.groups.includes("art-seilschaft") && t.vt?.groups.includes("title-seilschaft"), JSON.stringify(t.vt?.groups));
     check("the old page leaves over 160 ms", t.vt?.root === 160, String(t.vt?.root));
-    check("type and meta lines settle from 260 ms", t.arrival?.settle.includes(260), JSON.stringify(t.arrival));
     check("the summary unfolds from 380 ms", t.arrival?.unfold.includes(380), JSON.stringify(t.arrival));
-    check("the H1 glints once it has arrived", t.glints.includes("H1"), JSON.stringify(t.glints));
+    check("the H1 is a weight title and never glints", (await page.locator("h1[data-title]").count()) === 1 && !t.glints.includes("H1"), JSON.stringify(t.glints));
     const f = await focusInfo(page);
     check("focus on the new page's H1", f.tag === "h1" && f.tabindex === "-1", JSON.stringify(f));
 
     // Case study → next: the trailhead band's mini card morphs into the next header.
-    await page.locator('nav[aria-label="Next project"]').scrollIntoViewIfNeeded();
+    const nextLink = page.locator('a[aria-describedby="next-project-label"]');
+    await nextLink.scrollIntoViewIfNeeded();
     await page.waitForTimeout(1500);
-    const next = await page.locator('nav[aria-label="Next project"] > div > a').getAttribute("href");
+    const next = await nextLink.getAttribute("href");
     const slug = next.split("/").filter(Boolean).at(-1);
     await page.evaluate(() => (window.__glints = []));
-    await page.locator('nav[aria-label="Next project"] > div > a').click();
+    await nextLink.click();
     await landed(page, basePath, `/work/${slug}/`);
     await page.waitForTimeout(1500);
     const n = await page.evaluate(() => ({ vt: window.__vt.at(-1), glints: window.__glints, n: window.__vt.length }));
     check("case study → next: the mini card's artwork and name morph into the header", n.vt?.groups.includes(`art-${slug}`) && n.vt?.groups.includes(`title-${slug}`), JSON.stringify(n.vt));
-    check("the commit glint plays on the destination H1", n.glints.includes("H1"), JSON.stringify(n.glints));
+    check("no glint on the destination H1", !n.glints.includes("H1"), JSON.stringify(n.glints));
     check("focus on the next page's H1", (await focusInfo(page)).tag === "h1");
     const named = await page.evaluate(() => [...document.querySelectorAll("[data-commit-morph]")].filter((el) => el.style.viewTransitionName).length);
     check("the mini card is unnamed again afterwards", named === 0, String(named));
@@ -165,7 +165,7 @@ export async function arrival({ browser, basePath, base, root, check }) {
     await landed(page, basePath, "/about/");
     const r = await page.evaluate(() => ({ vt: window.__vt.at(-1), arrival: window.__arrival }));
     check("About: the HUD label morphs into the H1", r.vt?.groups.includes("about-title"), JSON.stringify(r.vt?.groups));
-    check("About: lead and facts from 420 ms", r.arrival?.includes(420), JSON.stringify(r.arrival));
+    check("About: the facts from 420 ms", r.arrival?.includes(420), JSON.stringify(r.arrival));
     const f = await focusInfo(page);
     check("About: focus on the H1 (not lost with the HUD link)", f.tag === "h1", JSON.stringify(f));
     check("no page errors", errors.length === 0, errors.join("; "));

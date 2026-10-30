@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { playArrival } from "@/components/motion/reveal";
+import { restMorphedTitles } from "@/components/type/titles";
 import { fieldStore } from "@/components/terrain/field-store";
 import { transitionKind } from "@/lib/view-transition";
 import { duration } from "@/styles/tokens";
@@ -12,7 +13,8 @@ import { duration } from "@/styles/tokens";
  *
  * - Its own arrival choreography, on a link navigation in full and calm (`main[data-arrival]`):
  *   the parts marked `data-arrive-at` play from that many milliseconds after the commit (reveal.ts),
- *   text settles with SettleText's `arrive`. Browser back and forward (a traversal), still mode
+ *   titles arrive on their weight (WeightTitle), except one a morph brought in (the morph is its
+ *   arrival). Browser back and forward (a traversal), still mode
  *   and a browser that animated the gesture itself get none of it.
  * - Focus moves to the new page's H1 (tabindex -1), so screen readers announce it, unless the
  *   page placed focus itself (the deck focuses the card the reader came from), or to the target
@@ -41,6 +43,7 @@ function arrive(kind: ReturnType<typeof transitionKind>) {
   const main = visibleMain();
   if (!main) return;
   if (kind === "route" || kind === "return") {
+    restMorphedTitles(main);
     main.setAttribute("data-arrival", "route");
     playArrival(main);
     window.setTimeout(() => main.removeAttribute("data-arrival"), duration.arrival + duration.settle);

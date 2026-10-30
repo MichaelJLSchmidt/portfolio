@@ -36,7 +36,7 @@ export async function deck({ base, basePath, root, check, open, settle }) {
   await page.goto(`${base}/work/${ORDER[0]}/`, { waitUntil: "networkidle" });
   for (let step = 1; step <= ORDER.length; step++) {
     const want = ORDER[step % ORDER.length];
-    const link = page.locator('nav[aria-label="Next project"] a[data-variant="display"]');
+    const link = page.locator('a[aria-describedby="next-project-label"]');
     await link.scrollIntoViewIfNeeded();
     await link.click();
     const r = await settle(page, { path: `/work/${want}/` });

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { SettleText } from "@/components/motion/SettleText";
 import styles from "./Hud.module.css";
 
 /** The set symbol's rings, inner to outer (viewBox units); hover moves each one step outward. */
@@ -27,7 +26,7 @@ export function HudMark({ label, name }: { label: string; name: string }) {
           <circle key={r} cx="10" cy="10" r={r} pathLength={1} style={{ "--ring": i, "--ring-step": (r + 2.5) / r } as React.CSSProperties} />
         ))}
       </svg>
-      <SettleText text={label} mode="block" role="mono" id="hud-mark" scope="site" reserve="rest" className={styles.markText} />
+      <span className={styles.markText}>{label}</span>
     </Link>
   );
 }

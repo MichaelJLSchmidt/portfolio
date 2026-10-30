@@ -1,9 +1,7 @@
 /**
- * Once-per-session motion: an element that has played its settle (or glint) is remembered in
- * sessionStorage, so a reload, a page re-shown after back navigation or a second visit in the same
- * session renders it settled. The pre-paint script (`settledScript`, part of the motion-mode
- * script) turns the remembered keys into a style that stops their animations before first paint,
- * so even the server-rendered first-paint settle never replays.
+ * Once-per-session motion: an element that has played its reveal is remembered in sessionStorage,
+ * so a reload, a page re-shown after back navigation or a second visit in the same session renders
+ * it settled.
  */
 export const SETTLED_STORAGE_KEY = "summit:settled";
 
@@ -38,9 +36,3 @@ export function markSettled(key: string) {
     fallback = [...fallback, key];
   }
 }
-
-/**
- * Before first paint: stop the animations of every remembered element (keys are [a-z0-9]), unless
- * a route's arrival plays it again (data-arrive, SettleText).
- */
-export const settledScript = `try{var k=JSON.parse(sessionStorage.getItem("${SETTLED_STORAGE_KEY}")||"[]").filter(function(x){return/^s[a-z0-9]+$/.test(x)});if(k.length){var st=document.createElement("style");st.textContent=k.map(function(x){var s='[data-settle-key="'+x+'"]:not([data-arrive])';return s+","+s+" *"}).join(",")+"{animation:none!important}";document.head.appendChild(st)}}catch(e){}`;

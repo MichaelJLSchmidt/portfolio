@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
-// Motion primitives first: their CSS is shared by every route, and importing them after the
-// case-study blocks makes Turbopack merge those blocks' CSS into the chunk every route loads.
-import { SettleText } from "@/components/motion/SettleText";
-import { SignatureLink } from "@/components/motion/SignatureLink";
+// Primitives first: their CSS is shared by every route, and importing them after the case-study
+// blocks makes Turbopack merge those blocks' CSS into the chunk every route loads.
+import { WeightTitle } from "@/components/type/WeightTitle";
+import { flood } from "@/content/flood";
+import { TrailLink } from "@/components/interaction/TrailLink";
 import { CardArtwork } from "@/components/card/CardArtwork";
 import { EvidenceBadge } from "@/components/case-study/Evidence";
 import { AltimeterBar } from "@/components/case-study/AltimeterBar";
@@ -20,11 +21,14 @@ import { caseStudies } from "@/content/case-studies";
 import { caseStudyLabels as L, cardBySlug, cards, coordinatesLine } from "@/content/cards";
 import { readingMinutes, type CaseStudy as Study, type Evidence } from "@/lib/case-study";
 import { morphName } from "@/lib/morph";
-import { widestEm } from "@/lib/display-width";
+import { titleEm } from "@/lib/title-axes";
 import { arrival } from "@/styles/tokens";
 import styles from "./page.module.css";
 
 export const dynamicParams = false;
+
+/** The summary sheet unfolds this long after a link navigation commits (the route's arrival). */
+const ARRIVE_SUMMARY = arrival.summary;
 
 /**
  * A static export refuses a dynamic route that generates no page, and a live build has no case
@@ -34,11 +38,11 @@ export const dynamicParams = false;
 const NO_CASE_STUDY = "_none";
 
 /**
- * The case-study template's one display size: its widest current word (measured at the display
- * axes) fills the title column. Shorter titles keep that size; a longer word scales its own
- * title down (--word-em).
+ * The case-study template's one display size: its widest current word (measured at the rest cut)
+ * fills the title column. Shorter titles keep that size; a longer word scales its own title down
+ * (--word-em).
  */
-const TITLE_EM = Math.max(...cards.filter((c) => caseStudies[c.slug]).map((c) => widestEm(c.name)), 4);
+const TITLE_EM = Math.max(...cards.filter((c) => caseStudies[c.slug]).map((c) => titleEm(c.name, { words: true })), 4);
 
 export function generateStaticParams() {
   const slugs = Object.keys(caseStudies).filter((slug) => cardBySlug(slug));
@@ -94,7 +98,9 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
       <RememberCard slug={card.slug} />
       <nav className={styles.crumbs} aria-label={L.back} data-vt-exit>
         {/* No scroll to the top: the deck brings the card back into view itself (Deck). */}
-        <SignatureLink href="/" scroll={false} variant="standalone" role="mono" label={L.back} arrow="←" arrowAt="start" className={`${styles.crumb} hud-label map-halo`} data-quiet-zone />
+        <TrailLink href="/" scroll={false} arrow="←" arrowAt="start" className={`${styles.crumb} hud-label map-halo`} data-quiet-zone>
+          {L.back}
+        </TrailLink>
       </nav>
 
       {study.banner && <FictionBanner label={study.banner.label} text={study.banner.text} />}
@@ -108,27 +114,26 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
             {coordinatesLine(card)}
           </p>
           <MorphTarget name={morphName("title", card.slug)} variant="title">
-            <SettleText
+            <WeightTitle
               as="h1"
               text={card.name}
-              className={`${styles.title} display`}
-              style={{ "--title-em": TITLE_EM, "--word-em": widestEm(card.name) } as CSSProperties}
-              widths="display"
-              glint
-              settleOnArrival
+              flood={flood.caseStudyTitle}
+              className={styles.title}
+              style={{ "--title-em": TITLE_EM, "--word-em": titleEm(card.name, { words: true }) } as CSSProperties}
             />
           </MorphTarget>
-          {/* The type and meta lines settle as the page arrives (arrival.lines after the commit). */}
           <div data-vt-exit>
-            <SettleText as="p" text={study.typeLine ?? card.type} mode="block" wrap role="text" widths="condensed" arrive={arrival.lines} className={`${styles.type} map-halo`} />
+            <p className={`${styles.type} map-halo`}>{study.typeLine ?? card.type}</p>
           </div>
           <p className="body-copy" data-vt-exit>
             {study.lede}
           </p>
           <p className={`${styles.meta} hud-label map-halo`} data-vt-exit>
-            <SettleText text={L.readingTime(readingMinutes(study))} mode="block" role="mono" arrive={arrival.lines} />
+            <span>{L.readingTime(readingMinutes(study))}</span>
             {" · "}
-            <SignatureLink href="#summary-heading" variant="inline" label={L.skim} className={styles.skim} />
+            <TrailLink href="#summary-heading" variant="inline" className={styles.skim}>
+              {L.skim}
+            </TrailLink>
           </p>
         </div>
       </header>
@@ -137,7 +142,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
         id="summary-heading"
         heading={L.summaryHeading}
         exitOnReturn
-        arriveAt={arrival.summary}
+        arriveAt={ARRIVE_SUMMARY}
         note={summary.note}
         rows={[
           { label: L.mandate, value: summary.mandate, wide: true },
@@ -184,11 +189,15 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
 
       <div className={styles.body} data-vt-exit>
         <nav className={styles.jump} aria-labelledby="jump-heading">
-          <SettleText as="h2" id="jump-heading" text={L.jumpTo} mode="chars" role="mono" trigger="inview" quiet className={`${styles.jumpHeading} hud-label map-halo`} />
+          <h2 id="jump-heading" className={`${styles.jumpHeading} hud-label map-halo`} data-quiet-zone>
+            {L.jumpTo}
+          </h2>
           <ul>
             {study.waypoints.map((w) => (
               <li key={w.id}>
-                <SignatureLink href={`#${w.id}`} variant="chip" label={w.nav} className={styles.chip} />
+                <TrailLink href={`#${w.id}`} variant="inline" className={styles.chip}>
+                  {w.nav}
+                </TrailLink>
               </li>
             ))}
           </ul>

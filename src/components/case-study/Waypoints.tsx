@@ -1,10 +1,7 @@
 import { useId, type CSSProperties } from "react";
 import { ContourRule } from "@/components/motion/ContourRule";
-import { RollValue } from "@/components/motion/RollValue";
-import { SettleText } from "@/components/motion/SettleText";
-import { SignatureLink } from "@/components/motion/SignatureLink";
+import { TrailLink } from "@/components/interaction/TrailLink";
 import { caseStudyLabels as L } from "@/content/cards";
-import { duration } from "@/styles/tokens";
 import { decisionNumbers, figureNumbers, type Block, type CaseStudy, type Decision, type Evidence, type ListItem, type Waypoint } from "@/lib/case-study";
 import { EvidenceBadge, EvidenceLegend } from "./Evidence";
 import { Figure } from "./Figure";
@@ -83,7 +80,7 @@ export function DecisionBlock({ decision: d, number }: { decision: Decision; num
   const id = useId();
   return (
     <div className={`${styles.decision} legend`} id={d.id}>
-      <SettleText as="h3" text={`${L.decision(number)} — ${d.title}`} mode="block" wrap role="text" trigger="inview" className={styles.decisionTitle} />
+      <h3 className={styles.decisionTitle}>{`${L.decision(number)} — ${d.title}`}</h3>
       {d.text?.map((t, i) => (
         <p key={i} className="body-copy">
           {t}
@@ -146,13 +143,13 @@ export function DecisionBlock({ decision: d, number }: { decision: Decision; num
 type Metrics = Extract<Block, { kind: "metrics" }>;
 type Outcomes = Extract<Block, { kind: "outcomes" }>;
 
-/** Metric tiles: the value (its number rolls once from a nearby one), what it measures, and how it was obtained. */
+/** Metric tiles: the value (never moving), what it measures, and how it was obtained. */
 export function MetricTiles({ block }: { block: Metrics }) {
   return (
     <ul className={styles.metrics} aria-label={block.label}>
       {block.items.map((m) => (
         <li key={m.label} className={`${styles.metric} surface-copy`}>
-          <RollValue value={m.value} only="last" className={styles.metricValue} />
+          <span className={styles.metricValue}>{m.value}</span>
           <span className={styles.metricLabel}>{m.label}</span>
           {m.detail && <span className={styles.metricDetail}>{m.detail}</span>}
           <EvidenceBadge kind={m.evidence} />
@@ -199,11 +196,7 @@ export function OutcomeTable({ block, kinds }: { block: Outcomes; kinds: Evidenc
   );
 }
 
-/**
- * "Label — finding": the line leads. A contour rule draws, the label settles in mono, then the
- * finding settles as one block a moment later; headings take turns and snap while the reader
- * scrolls fast (SettleText channel "heading").
- */
+/** "Label — finding": the line leads. A contour rule draws, then the mono label and the finding. */
 function Heading({ waypoint: w, index }: { waypoint: Waypoint; index: number }) {
   const finding = w.finding ? `${w.finding[0].toUpperCase()}${w.finding.slice(1)}` : null;
   return (
@@ -212,11 +205,9 @@ function Heading({ waypoint: w, index }: { waypoint: Waypoint; index: number }) 
       <h2 id={`${w.id}-heading`} className={styles.heading}>
         <span className={`${styles.headingLabel} hud-label`}>
           <span aria-hidden="true">{String(index + 1).padStart(2, "0")} · </span>
-          <SettleText as="span" text={finding ? `${w.label} —` : w.label} mode="chars" role="mono" trigger="inview" className={styles.headingLabelText} />
+          <span className={styles.headingLabelText}>{finding ? `${w.label} —` : w.label}</span>
         </span>{" "}
-        {finding && (
-          <SettleText as="span" text={finding} mode="block" wrap role="text" trigger="inview" delay={duration.short} channel="heading" className={styles.headingFinding} />
-        )}
+        {finding && <span className={styles.headingFinding}>{finding}</span>}
       </h2>
     </>
   );
@@ -282,18 +273,13 @@ export function Waypoints({ study, evidence }: { study: CaseStudy; evidence: Evi
             )}
             <p className={styles.foot}>
               {next && (
-                <SignatureLink
-                  href={`#${next.id}`}
-                  variant="standalone"
-                  role="mono"
-                  label={L.nextWaypoint}
-                  arrow="↓"
-                  aria-label={`${L.nextWaypoint}: ${next.nav}`}
-                  className={`${styles.footLink} hud-label map-halo`}
-                  data-quiet-zone
-                />
+                <TrailLink href={`#${next.id}`} arrow="↓" aria-label={`${L.nextWaypoint}: ${next.nav}`} className={`${styles.footLink} hud-label map-halo`} data-quiet-zone>
+                  {L.nextWaypoint}
+                </TrailLink>
               )}
-              <SignatureLink href="#main" variant="standalone" role="mono" label={L.backToTop} arrow="↑" className={`${styles.footLink} hud-label map-halo`} data-quiet-zone />
+              <TrailLink href="#main" arrow="↑" className={`${styles.footLink} hud-label map-halo`} data-quiet-zone>
+                {L.backToTop}
+              </TrailLink>
             </p>
           </section>
         );

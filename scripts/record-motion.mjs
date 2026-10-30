@@ -85,9 +85,7 @@ try {
     await page.waitForSelector("html[data-lab-ready]", { state: "attached", timeout: 30000 });
     await pause(page, 2500);
     const full = page.frameLocator('iframe[data-lab-column="full"]');
-    await full.locator('[data-primitive="settle"] button').first().click();
-    await pause(page, 1200);
-    await full.locator('[data-primitive="glint"] button').first().click();
+    await full.locator('[data-primitive="title"] button').first().click();
     await pause(page, 1200);
     await full.locator('[data-primitive="link"]').scrollIntoViewIfNeeded();
     await pause(page, 600);
@@ -122,7 +120,7 @@ try {
       await pause(page, 1200);
       await page.locator('article[data-slug="test-project"] a').first().click();
       await pause(page, 3000);
-      const next = page.locator('a[data-variant="display"]').first();
+      const next = page.locator('a[aria-describedby="next-project-label"]').first();
       await next.scrollIntoViewIfNeeded();
       await pause(page, 800);
       await next.hover();
@@ -223,7 +221,7 @@ try {
     await pause(page, 2500);
     for (let i = 0; i < 3; i++) {
       await scrollThrough(page, 4, 600, 450);
-      const next = page.locator('nav[aria-label="Next expedition"] a[data-variant="display"]');
+      const next = page.locator('a[aria-describedby="next-project-label"]');
       await next.scrollIntoViewIfNeeded();
       await pause(page, 700);
       await next.hover();

@@ -2,11 +2,10 @@ import { duration } from "@/styles/tokens";
 import { currentMode } from "@/lib/motion-mode";
 
 /**
- * Plays the glint layer(s) in `scope` once (full motion only). Glints are the signature level:
- * one at a time, so a glint asked for while another plays is skipped. An `auto` glint (one nobody
- * asked for: a first arrival, a Mythic card arriving, a card crossing a phone's middle, the
- * contact band) is also skipped within a screen's height of the last one on the page, so there is
- * at most one signature per viewport. A commit's glint always plays. Resolves when it is over.
+ * Plays the glint layer(s) in `scope` once (full motion only): the Mythic card's foil sweep, the
+ * only glint left. One at a time, so a glint asked for while another plays is skipped. An `auto`
+ * glint (one nobody asked for: a Mythic card arriving) is also skipped within a screen's height of
+ * the last one on the page, so there is at most one per viewport. Resolves when it is over.
  */
 let playing: Element | null = null;
 let lastAuto: { path: string; y: number } | null = null;
@@ -35,24 +34,4 @@ export function playGlint(scope: Element | null, { auto = false }: { auto?: bool
     const timer = window.setTimeout(end, duration.glint + 100);
     layers[0].addEventListener("animationend", end, { once: true });
   });
-}
-
-/**
- * A committed navigation (a card opened, a link to another page): the view transition freezes the
- * departing page in its snapshot, so the commit's glint plays on the destination instead, on its
- * H1 once it has arrived (SettleText `glint`, full motion). The path is the destination's.
- */
-let arrival: { path: string; at: number } | null = null;
-
-export function glintOnArrival(path: string) {
-  arrival = { path: path.endsWith("/") ? path : `${path}/`, at: performance.now() };
-}
-
-/** True once for the page a commit has just led to (within a few seconds). */
-export function takeArrivalGlint(path: string): boolean {
-  const wanted = arrival;
-  if (!wanted || performance.now() - wanted.at > 5000) return false;
-  if (wanted.path !== (path.endsWith("/") ? path : `${path}/`)) return false;
-  arrival = null;
-  return true;
 }

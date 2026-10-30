@@ -158,7 +158,7 @@ const page: PageModel = {
   status: "Status",
   contact: [{ label: "Email", href: null }],
   placeholder: (label) => `[${label.toUpperCase()}]`,
-  brand: "MJLS",
+  brand: "Brand",
   access: { heading: "Under construction", label: "Password", submit: "Look around →", pending: "Checking…", error: "That’s not the password.", closed: "Closed.", username: "preview" },
   credit: { label: "Credit", href: null },
   css: "",

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, type CSSProperties } from "react";
-import { SettleText } from "@/components/motion/SettleText";
 import { currentMode } from "@/lib/motion-mode";
 import { duration } from "@/styles/tokens";
 import { meterReading, startReadingSpy, useReading } from "./reading";
@@ -10,9 +9,8 @@ import styles from "./WaypointTrail.module.css";
 /**
  * "On this page" from the large breakpoint: the waypoints as a vertical contour trail beside the
  * content. It runs the page's reading spy (reading.ts), also when it is hidden (the altimeter bar
- * and the HUD readout use it). The trail fills with glacier as the reader scrolls (scroll-linked,
- * --reading); the current waypoint's pin pings once as it becomes current (full motion) and its
- * label breathes +8 while it stays current; aria-current="true" marks its link. Without JavaScript
+ * uses it). The trail fills with glacier as the reader scrolls (scroll-linked,
+ * --reading); the current waypoint's pin pings once as it becomes current (full motion); aria-current="true" marks its link. Without JavaScript
  * it is a plain list of links.
  */
 export function WaypointTrail({ slug, label, items }: { slug: string; label: string; items: { id: string; nav: string }[] }) {
@@ -54,7 +52,7 @@ export function WaypointTrail({ slug, label, items }: { slug: string; label: str
           >
             <span className={styles.ping} aria-hidden="true" />
             <a href={`#${item.id}`} className={styles.link} aria-current={i === active ? "true" : undefined}>
-              <SettleText text={item.nav} mode="block" wrap role="text" trigger="manual" breath className={styles.label} />
+              <span className={styles.label}>{item.nav}</span>
             </a>
           </li>
         ))}

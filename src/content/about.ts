@@ -34,6 +34,23 @@ export const about = {
     description:
       "About a UX Team Lead in Bern: who I am, how I work with people, how I start with a new team, the skills beyond design, and the way from front-end developer to team lead.",
   },
+  /**
+   * The portrait card in the About title: the cut-out portrait on a thin card frame (rarity M,
+   * collector number 000); "Show facts" turns it over to the facts. Until the photo is supplied
+   * (scripts/portrait.mjs, docs/content.md) a contour silhouette stands in and `missing` is a
+   * placeholder, so a live build stops on it.
+   */
+  portrait: {
+    /** After `npm run portrait -- cutout.png`: the import of ./portrait.json (and remove `missing`). */
+    image: null as null | { width: number; height: number; sources: { format: string; width: number; src: string }[] },
+    missing: "[PORTRAIT PHOTO]",
+    alt: `Portrait of ${site.name}`,
+    placeholderLabel: "Portrait to come",
+    showFacts: "Show facts",
+    showPhoto: "Show photo",
+    rarity: "M" as Rarity,
+    collector: "000",
+  },
   header: {
     /** The H1: the HUD's About label, which morphs into it (the same word on both ends). */
     heading: site.nav.about,

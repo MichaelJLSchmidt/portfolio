@@ -47,7 +47,7 @@ export function copyAssets(dir, prefix) {
 }
 
 function css({ fonts, poster }) {
-  const label = `font:500 var(--type-hud-size)/1.4 "Martian Mono",ui-monospace,monospace;letter-spacing:var(--type-hud-tracking);text-transform:uppercase`;
+  const label = `font:500 var(--type-mono-size)/1.4 "Martian Mono",ui-monospace,monospace;letter-spacing:var(--type-mono-tracking);text-transform:uppercase`;
   return [
     tokensToCss(),
     `@font-face{font-family:"Archivo Display";src:url(${fonts.display}) format("woff2");font-weight:800;font-display:swap}`,
@@ -58,7 +58,7 @@ function css({ fonts, poster }) {
     `@media (min-width:48rem){:root{--gutter:40px}}`,
     `*,*::before,*::after{box-sizing:border-box}`,
     `html{-webkit-text-size-adjust:100%;text-size-adjust:100%;background:var(--color-ground)}`,
-    `body{margin:0;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;color:var(--color-sheet);font:400 var(--type-body-size)/var(--type-body-lh) "Archivo Text",system-ui,sans-serif}`,
+    `body{margin:0;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;color:var(--color-paper-dusk);font:400 var(--type-body-size)/var(--type-body-lh) "Archivo Text",system-ui,sans-serif}`,
     // Terrain: the poster dimmed so its regular lines show at 23% (it draws them at the
     // field's desktop strength) and a vignette that keeps the text legible. Nothing follows the
     // pointer.
@@ -80,22 +80,22 @@ function css({ fonts, poster }) {
     `.contact{display:flex;flex-wrap:wrap;gap:8px 28px;margin:28px 0 0;padding:0;list-style:none}`,
     `.contact a,.contact .pending{display:inline-block;padding:10px 0;${label};color:var(--color-glacier);text-decoration:underline;text-underline-offset:.35em;text-decoration-thickness:1px}`,
     `.contact .pending{color:var(--color-contour);text-decoration:none}`,
-    `.contact a:hover{color:var(--color-sheet)}`,
+    `.contact a:hover{color:var(--color-paper-dusk)}`,
     `.access{margin-top:clamp(36px,7vh,64px);max-width:30rem}`,
     `.access h2{margin:0 0 14px;color:var(--color-contour)}`,
     `.access label{display:block;margin-bottom:6px;font-size:.9375rem}`,
     `.field{display:flex;flex-wrap:wrap;gap:10px}`,
-    // The password field; its underline (.line) draws on focus over --dur-underline (180 ms).
+    // The password field; its underline (.line) draws on focus over --dur-trail (280 ms).
     // Static font instances here: nothing changes width.
     `.input{position:relative;display:flex;flex:1 1 12rem;min-width:0}`,
-    `.field input{flex:1;min-width:0;min-height:48px;margin:0;padding:0 14px;border:1px solid var(--color-contour);border-radius:2px;background:rgb(27 28 24/.88);color:var(--color-sheet);font:inherit}`,
-    `.line{position:absolute;inset:auto 0 0;height:2px;background:var(--color-glacier);transform:scaleX(0);transform-origin:left center;transition:transform var(--dur-underline) var(--ease-settle);pointer-events:none}`,
+    `.field input{flex:1;min-width:0;min-height:48px;margin:0;padding:0 14px;border:1px solid var(--color-contour);border-radius:2px;background:rgb(27 28 24/.88);color:var(--color-paper-dusk);font:inherit}`,
+    `.line{position:absolute;inset:auto 0 0;height:2px;background:var(--color-glacier);transform:scaleX(0);transform-origin:left center;transition:transform var(--dur-trail) var(--ease-settle);pointer-events:none}`,
     `.input:focus-within .line{transform:none}`,
     // An error is the signal colour and the message, never a shake.
     `.field input[aria-invalid=true]{border-color:var(--color-signal)}`,
     `.field input[aria-invalid=true]+.line{background:var(--color-signal)}`,
     `.field button{flex:0 0 auto;min-height:48px;margin:0;padding:0 18px;border:0;border-radius:2px;background:var(--color-glacier);color:var(--color-ground);${label};font-size:.8125rem;letter-spacing:.08em;cursor:pointer}`,
-    `.field button:hover{background:var(--color-sheet)}`,
+    `.field button:hover{background:var(--color-paper-dusk)}`,
     `.field button[aria-disabled=true]{cursor:progress}`,
     `:focus-visible{outline:2px solid var(--color-glacier);outline-offset:3px}`,
     `.field input:focus-visible{outline-offset:2px}`,
@@ -104,7 +104,7 @@ function css({ fonts, poster }) {
     `@media (prefers-reduced-motion:reduce){.line{transition:none}}`,
     `.closed{margin:0;color:var(--color-contour)}`,
     `footer{padding:14px max(var(--gutter),env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(var(--gutter),env(safe-area-inset-left));color:var(--color-contour)}`,
-    `footer a{color:inherit;text-underline-offset:.35em}footer a:hover{color:var(--color-sheet)}`,
+    `footer a{color:inherit;text-underline-offset:.35em}footer a:hover{color:var(--color-paper-dusk)}`,
   ].join("");
 }
 

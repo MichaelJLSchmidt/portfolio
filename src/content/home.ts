@@ -58,4 +58,18 @@ export const home = {
     /** Under each card: what it was, what changed, what I did. */
     caption: { problem: "Problem", result: "Result", role: "Role" },
   },
+  earlier: {
+    heading: "Earlier work",
+    caption: "Earlier projects, newest first",
+    columns: { year: "Year", type: "Type of project", sector: "Sector", role: "Role" },
+    /** Newest first, at most ten. Invented until the real list replaces it. */
+    entries: [
+      { year: ex("2024"), type: ex("Form patterns for a design system"), sector: ex("Cantonal administration"), role: ex("UX lead") },
+      { year: ex("2023"), type: ex("Online permit application"), sector: ex("Municipal services"), role: ex("Lead UX designer") },
+      { year: ex("2022"), type: ex("Intranet structure and search"), sector: ex("Public health"), role: ex("UX designer") },
+      { year: ex("2021"), type: ex("Accessibility review of e-services"), sector: ex("Education"), role: ex("Reviewer") },
+      { year: ex("2019"), type: ex("Front-end rebuild of a booking site"), sector: ex("Tourism"), role: ex("Front-end developer") },
+      { year: ex("2018"), type: ex("Workshop series on service design"), sector: ex("Internal IT"), role: ex("Facilitator") },
+    ],
+  },
 };

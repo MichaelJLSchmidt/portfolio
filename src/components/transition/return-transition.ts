@@ -1,4 +1,3 @@
-import { playGlint } from "@/components/motion/glint";
 import { BASE_PATH } from "@/lib/asset";
 import { clearTraversal } from "@/lib/view-transition";
 import { duration, stagger } from "@/styles/tokens";
@@ -13,8 +12,7 @@ import { duration, stagger } from "@/styles/tokens";
  *    under `html[data-vt="return"]`).
  * 3. Once the new page is in the DOM, the deck card is rebuilt around the landed artwork:
  *    `data-reassemble` plays the neatline and the staggered rise of its parts
- *    (SummitCard.module.css), a glint crosses its name once the neatline has closed (the Glint
- *    primitive, full motion), then the attribute is removed.
+ *    (SummitCard.module.css), then the attribute is removed.
  *
  * view-transition.ts calls `beginReturn` for every route transition but browser back and forward
  * (those cross-fade); it only acts when a detail page (`main[data-card]`) is left for the deck
@@ -26,7 +24,7 @@ export type ReturnRun = { afterUpdate(): void; finished(): void };
 
 const previewable = process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_PREVIEW === "1";
 const FLAG_KEY = "summit:vt";
-/** When the rebuilt card's neatline has closed (its glint plays then), and its last part has risen. */
+/** When the rebuilt card's neatline has closed, and its last part has risen. */
 const NEATLINE_CLOSED_MS = duration.settle + duration.medium;
 const REASSEMBLE_MS = duration.settle + 4 * stagger.item.step + duration.short + duration.instant;
 
@@ -105,7 +103,6 @@ export function beginReturn(): ReturnRun | null {
       finishReassembly();
       card.setAttribute("data-reassemble", "");
       reassembling = { card, timer: window.setTimeout(finishReassembly, Math.max(REASSEMBLE_MS, NEATLINE_CLOSED_MS)) };
-      window.setTimeout(() => playGlint(card.querySelector("[data-name-glint]")), NEATLINE_CLOSED_MS);
     },
     finished() {
       unname();

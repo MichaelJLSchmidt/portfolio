@@ -11,9 +11,7 @@ import { currentMode, useMotionMode } from "@/lib/motion-mode";
 import { isSettled, markSettled, settleKey } from "@/lib/settled";
 import { useVisited } from "@/lib/visited";
 import { Glint } from "@/components/motion/Glint";
-import { glintOnArrival, playGlint } from "@/components/motion/glint";
-import { RollNumber, preloadRoll } from "@/components/motion/RollNumber";
-import { SettleText, type SettleHandle } from "@/components/motion/SettleText";
+import { playGlint } from "@/components/motion/glint";
 import { prefetchTerrain } from "@/components/terrain/field-store";
 import { MorphTarget } from "@/components/transition/MorphTarget";
 import { cardTerrain } from "@/lib/card-terrain";
@@ -74,23 +72,6 @@ function dealPlace(): number {
   return deal.n++;
 }
 
-/** "2 → 6" → [2, " → ", 6]: numbers roll, the rest stays. */
-const parts = (value: string) => value.split(/(\d+)/).filter(Boolean).map((p) => (/^\d+$/.test(p) ? Number(p) : p));
-/** A value near enough to roll from (a little below it). */
-const nearby = (n: number) => Math.max(0, n - Math.max(1, Math.round(n * 0.15)));
-
-type Roll = "rest" | "from" | "to";
-
-/** A stat value whose numbers show a nearby value ("from"), then roll to the real one ("to"); at rest it reads as written. */
-function StatValue({ value, phase }: { value: string; phase: Roll }) {
-  if (phase === "rest") return <>{value}</>;
-  return (
-    <span className={styles.statRoll}>
-      {parts(value).map((p, i) => (typeof p === "number" ? <RollNumber key={i} value={phase === "from" ? nearby(p) : p} duration="settle" /> : <span key={i}>{p}</span>))}
-    </span>
-  );
-}
-
 /** Resolves once the current frame has painted (a frame, then a task). */
 const afterPaint = () => new Promise<void>((done) => requestAnimationFrame(() => window.setTimeout(done, 0)));
 
@@ -100,31 +81,20 @@ const afterPaint = () => new Promise<void>((done) => requestAnimationFrame(() =>
  * case study has been opened).
  *
  * Motion (docs/motion.md): it arrives once per session as it enters (full: rises 12 px and fades
- * with the card stagger; its name settles, the type line follows 120 ms later, the scope pips fill
- * and the rarity shape traces itself). Hover or focus lifts it −6 px on the card spring with a
- * deeper shadow and a brighter border, the name breathes +8, the keyword chips breathe in turn,
- * the artwork's contours shift by one interval and the foil shows (rarity R and M); the stats
- * roll once from a nearby value (touch: the first time in view). A fine pointer tilts it (≤ 5°).
- * Press scales it to 0.98; opening ticks the open haptic, and the case study's H1 glints once it
- * has arrived. Touch shows one glint as the card crosses the screen's middle. Calm keeps the
- * responses and settles, still only colour and opacity.
+ * with the card stagger; the scope pips fill and the rarity shape traces itself; a Mythic card's
+ * foil sweeps once across its name). Hover or focus lifts it −6 px on the card spring with a
+ * deeper shadow and a brighter border, the artwork's contours shift by one interval and the foil
+ * shows (rarity R and M). A fine pointer tilts it (≤ 5°). Press scales it to 0.98; opening ticks
+ * the open haptic. Text and numbers never move. Calm keeps the responses, still only colour and
+ * opacity.
  */
 export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNames = false, decorative = false, onOpen, navigate }: SummitCardProps) {
   const [active, setActive] = useState(false);
-  const [roll, setRoll] = useState<Roll>("rest");
-  // The stats roll once: the nearby values for a frame, then the real ones.
-  const startRoll = () => {
-    preloadRoll();
-    setRoll("from");
-    requestAnimationFrame(() => requestAnimationFrame(() => setRoll("to")));
-  };
   const { mode } = useMotionMode();
   const full = mode === "full";
   const rootRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
-  const nameRef = useRef<HTMLDivElement>(null);
   const goldRef = useRef<HTMLSpanElement>(null);
-  const settleName = useRef<SettleHandle>(null);
   const finePointer = useFinePointer();
   const idle = useIdle();
   const tilt = full && finePointer && idle;
@@ -168,11 +138,10 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNa
         const delay = Math.min(dealPlace() * stagger.card.step, stagger.card.cap);
         el.style.setProperty("--deal-delay", `${delay}ms`);
         el.setAttribute("data-arrive", "in");
-        settleName.current?.play(delay);
         // The last card in: the deck has dealt for this session.
         if (!document.querySelector('article[data-arrive="wait"]')) markDealt();
-        // A Mythic card marks its arrival with one gold glint, once its name has settled.
-        if (card.rarity === "M") window.setTimeout(() => playGlint(goldRef.current, { auto: true }), delay + duration.settleDisplay);
+        // A Mythic card's foil sweeps once as it arrives: one gold pass across its name.
+        if (card.rarity === "M") window.setTimeout(() => playGlint(goldRef.current, { auto: true }), delay + duration.title);
       },
       { rootMargin: "0px 0px -12% 0px" },
     );
@@ -180,51 +149,11 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNa
     return () => io.disconnect();
   }, [card.slug, card.rarity, size]);
 
-  // Touch: the stats roll the first time the card is in view, and one glint marks it as it
-  // crosses the middle of the screen (full motion); once per session each.
-  useEffect(() => {
-    const el = rootRef.current;
-    if (!el || finePointer) return;
-    const rollKey = settleKey("deck", `roll:${card.slug}`);
-    const glintKey = settleKey("deck", `glint:${card.slug}`);
-    const view = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((e) => e.isIntersecting) || isSettled(rollKey)) return;
-        markSettled(rollKey);
-        if (currentMode() !== "still") startRoll();
-        view.disconnect();
-      },
-      { threshold: 0.6 },
-    );
-    const middle = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((e) => e.isIntersecting) || isSettled(glintKey) || currentMode() !== "full") return;
-        markSettled(glintKey);
-        playGlint(nameRef.current, { auto: true });
-        middle.disconnect();
-      },
-      { rootMargin: "-50% 0px -50% 0px" },
-    );
-    view.observe(el);
-    middle.observe(el);
-    return () => {
-      view.disconnect();
-      middle.disconnect();
-    };
-  }, [card.slug, finePointer]);
-
   const foil = card.rarity === "R" || card.rarity === "M";
   const stats = withValues(cardStats(card)).slice(0, 3);
 
-  // Hover or focus: pre-warm the terrain; the first one this session rolls the stats.
-  const intent = () => {
-    prefetchTerrain(card.artwork.terrainId);
-    const key = settleKey("deck", `roll:${card.slug}`);
-    if (!isSettled(key)) {
-      markSettled(key);
-      if (currentMode() !== "still") startRoll();
-    }
-  };
+  // Hover or focus: pre-warm the terrain.
+  const intent = () => prefetchTerrain(card.artwork.terrainId);
 
   const morph = (part: "art" | "title", node: ReactNode) =>
     transitionNames === "commit" ? (
@@ -270,23 +199,13 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNa
             <header className={styles.nameBar}>
               {morph(
                 "title",
-                <div ref={nameRef} className={styles.nameBox}>
-                  <SettleText
-                    ref={settleName}
-                    as={Heading}
-                    id={nameId}
-                    text={card.name}
-                    mode="block"
-                    wrap
-                    role="text"
-                    trigger="manual"
-                    breath
-                    className={styles.name}
-                  />
-                  <Glint text={card.name} className={styles.nameGlint} data-name-glint="" />
+                <div className={styles.nameBox}>
+                  <Heading id={nameId} className={styles.name}>
+                    {card.name}
+                  </Heading>
                   {card.rarity === "M" && (
                     <span ref={goldRef} className={styles.goldGlint}>
-                      <Glint text={card.name} tone="gold" className={styles.nameGlint} />
+                      <Glint text={card.name} className={styles.nameGlint} />
                     </span>
                   )}
                 </div>,
@@ -313,14 +232,9 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNa
             </p>
             <div className={styles.rules}>
               <ul className={styles.keywords}>
-                {card.keywords.map((k, i) => (
+                {card.keywords.map((k) => (
                   <li key={k.term}>
-                    <strong className={styles.term} style={{ "--k": i } as CSSProperties}>
-                      <span className={styles.termGhost} aria-hidden="true">
-                        {k.term}
-                      </span>
-                      <span className={styles.termRun}>{k.term}</span>
-                    </strong>{" "}
+                    <strong className={styles.term}>{k.term}</strong>{" "}
                     <em className={styles.reminder}>— {k.reminder}</em>
                   </li>
                 ))}
@@ -334,10 +248,7 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNa
                   <div key={s.label} className={styles.stat}>
                     <dt>{s.label}</dt>
                     <dd>
-                      <span className="visually-hidden">{s.value}</span>
-                      <span aria-hidden="true">
-                        <StatValue value={s.value} phase={mode === "still" ? "rest" : roll} />
-                      </span>
+                      {s.value}
                       {s.note && <small className={styles.statNote}>{s.note}</small>}
                     </dd>
                   </div>
@@ -359,9 +270,7 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNa
               <rect pathLength={1} />
             </svg>
             <div className={styles.glare} aria-hidden="true" />
-            {visited && (
-              <SettleText text={cardLabels.visitedStamp} mode="block" role="mono" id={`visited:${card.slug}`} scope="site" className={`${styles.visited} hud-label`} />
-            )}
+            {visited && <span className={`${styles.visited} hud-label`}>{cardLabels.visitedStamp}</span>}
             <Link
               href={cardHref(card)}
               className={styles.cardLink}
@@ -373,8 +282,6 @@ export function SummitCard({ card, size = "deck", headingLevel = 3, transitionNa
                 onOpen?.();
                 if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
                 haptic("open");
-                // The glint marks the arrival: on the case study's H1 once it has landed.
-                glintOnArrival(e.currentTarget.pathname);
                 // A tilted card springs flat first (≤ 120 ms), so the morph never starts tilted.
                 const settled = settleRef.current?.();
                 const href = cardHref(card);

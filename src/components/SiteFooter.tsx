@@ -1,6 +1,8 @@
 import profile from "@terrain/profile.json";
-import { SignatureLink } from "@/components/motion/SignatureLink";
+import { TrailLink } from "@/components/interaction/TrailLink";
+import { emailAddress } from "@/content/contact";
 import { site } from "@/content/site";
+import { Wordmark } from "./footer/Wordmark";
 import { HapticsToggle } from "./hud/CalmToggle";
 import styles from "./SiteFooter.module.css";
 
@@ -14,8 +16,8 @@ const edge = points
 
 /**
  * The footer: an elevation-profile line along its top edge (it traces once as it scrolls into
- * view, over the draw token) and the credits. The haptics switch sits here below the small
- * breakpoint, where the HUD has no room for it.
+ * view, over the draw token), the outline wordmark, the email address again and the credits. The
+ * haptics switch sits here below the small breakpoint, where the HUD has no room for it.
  */
 export function SiteFooter() {
   return (
@@ -23,8 +25,18 @@ export function SiteFooter() {
       <svg className={styles.edge} viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true" data-reveal="line">
         <path d={edge} />
       </svg>
+      <Wordmark className={styles.wordmark} />
+      {emailAddress && (
+        <p className={styles.email}>
+          <TrailLink plain href={`mailto:${emailAddress}`} variant="inline">
+            {emailAddress}
+          </TrailLink>
+        </p>
+      )}
       <p className={`${styles.credits} hud-label`}>
-        <SignatureLink plain href={site.footer.creditHref} rel="noopener" variant="inline" label={site.footer.credit} />
+        <TrailLink plain href={site.footer.creditHref} rel="noopener" variant="inline">
+          {site.footer.credit}
+        </TrailLink>
         <span className={styles.sep} aria-hidden="true">
           ·
         </span>

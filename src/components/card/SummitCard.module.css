@@ -18,8 +18,8 @@
     max-width: 252px;
   }
 
-  /* Hovered (a mouse or pen) or keyboard-focused: one switch, --on, read by the lift, the name's
-     breath, the keyword chips, the contours and the foil. Touch never sets it. */
+  /* Hovered (a mouse or pen) or keyboard-focused: one switch, --on, read by the lift, the
+     contours and the foil. Touch never sets it. */
   .card[data-active="true"],
   .card:has(.cardLink:focus-visible) {
     --on: 1;
@@ -81,7 +81,7 @@
     box-shadow:
       0 calc(1.5cqi + var(--on) * 2cqi) calc(5cqi + var(--on) * 5cqi) rgb(0 0 0 / calc(0.5 + var(--on) * 0.15)),
       0 0 0 1px rgb(0 0 0 / 0.4);
-    color: var(--color-sheet);
+    color: var(--color-paper-dusk);
     transition:
       border-color var(--dur-still) var(--ease-settle),
       box-shadow var(--dur-medium) var(--ease-settle);
@@ -132,23 +132,15 @@
 
   .name {
     margin: 0;
+    color: var(--color-paper-dusk);
     font-size: max(18px, 7.4cqi);
-    font-weight: var(--axis-display-compact-wght);
-    font-stretch: var(--axis-display-compact-wdth);
+    font-weight: var(--type-compact-wght);
+    font-stretch: var(--type-compact-wdth);
     line-height: 0.86;
     text-transform: uppercase;
   }
 
-  /* The name settles as the card arrives and breathes +8 when the card is hovered or focused
-     (SettleText role "text", breath). */
-  .name[data-role] {
-    --kt-color: var(--color-sheet);
-    --kt-rest-wdth: var(--axis-display-compact-wdth);
-    --kt-rest-wght: var(--axis-display-compact-wght);
-    --kt-dur: var(--dur-settle-display);
-  }
-
-  /* A Mythic card's gold glint lies over the mint one (its own scope, so each plays alone). */
+  /* A Mythic card's foil sweep: one gold pass across its name as it arrives. */
   .goldGlint {
     position: absolute;
     inset: 0;
@@ -157,8 +149,8 @@
 
   .nameGlint {
     font-size: max(18px, 7.4cqi);
-    font-weight: var(--axis-display-compact-wght);
-    font-stretch: var(--axis-display-compact-wdth);
+    font-weight: var(--type-compact-wght);
+    font-stretch: var(--type-compact-wdth);
     line-height: 0.86;
     text-transform: uppercase;
   }
@@ -190,7 +182,7 @@
     color: var(--color-contour);
     font-family: var(--font-mono);
     font-size: max(9.5px, 2.5cqi);
-    font-stretch: var(--axis-mono-rest-wdth);
+    font-stretch: var(--type-mono-wdth);
     letter-spacing: 0.14em;
     line-height: 1.5;
     text-overflow: ellipsis;
@@ -278,7 +270,7 @@
   }
 
   .pinLabel {
-    fill: var(--color-sheet);
+    fill: var(--color-paper-dusk);
     font-weight: 600;
   }
 
@@ -321,7 +313,7 @@
     gap: 1.3cqi;
     padding: 1.9cqi 2.4cqi;
     border-radius: 1cqi;
-    background: var(--color-sheet);
+    background: var(--color-paper-dusk);
     color: var(--color-ground);
     font-size: max(11px, 3.05cqi);
     line-height: 1.32;
@@ -335,47 +327,25 @@
     list-style: none;
   }
 
-  /* Keyword chips: a pill whose term breathes +8, one chip after another, while the card is hovered
-     or focused; its box is reserved at the breath, so the reminder beside it never moves. */
+  /* Keyword chips: a pill around each term. */
   .term {
-    display: inline-grid;
+    display: inline-block;
     padding: 0 0.45em;
     border: 1px solid rgb(27 28 24 / 0.35);
     border-radius: 999px;
     font-weight: 750;
   }
 
-  .term > * {
-    grid-area: 1 / 1;
-  }
-
-  .termGhost {
-    visibility: hidden;
-    font-stretch: calc(var(--axis-label-rest-wdth) + var(--axis-display-hover-wdth) - var(--axis-display-rest-wdth));
-  }
-
-  .termRun {
-    justify-self: center;
-    font-stretch: var(--axis-label-rest-wdth);
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    :root:not([data-motion="still"]) .termRun {
-      font-stretch: calc(var(--axis-label-rest-wdth) + var(--on) * (var(--axis-display-hover-wdth) - var(--axis-display-rest-wdth)));
-      transition: font-stretch var(--dur-breath) var(--ease-settle);
-      transition-delay: calc(var(--on) * var(--k) * var(--stagger-item));
-    }
-  }
 
   .reminder,
   .flavor {
-    color: var(--color-sheet-ink);
+    color: var(--color-paper-ink-2);
   }
 
   .hairline {
     margin: 0;
     border: 0;
-    border-top: 1px solid var(--color-sheet-ink);
+    border-top: 1px solid var(--color-paper-ink-2);
     opacity: 0.5;
   }
 
@@ -401,7 +371,7 @@
     color: var(--color-contour);
     font-family: var(--font-mono);
     font-size: max(8.5px, 2.25cqi);
-    font-stretch: var(--axis-mono-rest-wdth);
+    font-stretch: var(--type-mono-wdth);
     letter-spacing: 0.14em;
     text-overflow: ellipsis;
     text-transform: uppercase;
@@ -410,10 +380,10 @@
 
   .stat dd {
     margin: 0;
-    color: var(--color-sheet);
+    color: var(--color-paper-dusk);
     font-family: var(--font-mono);
     font-size: max(20px, 5cqi);
-    font-stretch: var(--axis-mono-rest-wdth);
+    font-stretch: var(--type-mono-wdth);
     font-weight: 700;
     line-height: 1.1;
     white-space: nowrap;
@@ -448,7 +418,7 @@
     color: var(--color-contour);
     font-family: var(--font-mono);
     font-size: max(9px, 2.3cqi);
-    font-stretch: var(--axis-mono-rest-wdth);
+    font-stretch: var(--type-mono-wdth);
     letter-spacing: 0.12em;
     text-transform: uppercase;
   }
@@ -558,10 +528,6 @@
     pointer-events: none;
   }
 
-  .visited[data-role] {
-    --kt-color: var(--color-glacier);
-  }
-
   /* ------------------------------------------------------------- the link */
 
   /* One transparent anchor over the whole face: the card is a single link. Its focus ring is the
@@ -659,7 +625,7 @@
     }
 
     :root:not([data-motion="still"]) .card[data-arrive="in"] .pipMark[data-on] {
-      animation: pip-fill var(--dur-tap) var(--ease-settle) calc(var(--deal-delay, 0ms) + var(--dur-tap) + var(--p) * var(--stagger-word)) backwards;
+      animation: pip-fill var(--dur-tap) var(--ease-settle) calc(var(--deal-delay, 0ms) + var(--dur-tap) + var(--p) * var(--stagger-item)) backwards;
     }
 
     :root:not([data-motion="still"]) .card[data-arrive="in"] .pip path {

@@ -7,7 +7,7 @@
   .section {
     display: grid;
     gap: clamp(24px, 3.5vw, 48px);
-    padding-block: clamp(48px, 8vw, 128px) 0;
+    padding-block: var(--space-section) 0;
     scroll-margin-top: 72px;
   }
 
@@ -34,7 +34,6 @@
   }
 
   .eyebrow {
-    --kt-color: var(--color-glacier);
     color: var(--color-glacier);
   }
 
@@ -70,7 +69,7 @@
   /* The primary action is filled; on hover or focus it turns over to the ground, so its label
      (which moves to glacier) always reads. */
   .action[data-primary] {
-    --l-rest-color: var(--color-ground);
+    color: var(--color-ground);
     background: var(--color-glacier);
   }
 
@@ -92,66 +91,12 @@
   .action[data-placeholder] {
     border-style: dashed;
     border-color: var(--color-contour);
-    color: var(--color-sheet);
+    color: var(--color-paper-dusk);
   }
 
   .tbd {
     font-family: var(--font-mono);
     font-size: 0.75em;
-  }
-
-  /* ---------------------------------------------------------------- summit log */
-
-  .log {
-    display: grid;
-    gap: 16px;
-  }
-
-  .logGrid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 24px;
-    margin: 0;
-  }
-
-  .logGrid > div {
-    container-type: inline-size;
-    display: flex;
-    flex-direction: column-reverse;
-    justify-content: flex-end;
-    gap: 6px;
-    padding-top: 12px;
-    border-top: 1px solid rgb(90 92 82 / 0.45);
-  }
-
-  /* Sized by its own column, so "38% → 82%" stays on one line at any width. */
-  .logGrid dd {
-    margin: 0;
-    color: var(--color-ground);
-    font-family: var(--font-mono);
-    font-size: clamp(1.125rem, 15cqi, 3rem);
-    font-stretch: var(--axis-mono-rest-wdth);
-    font-weight: 700;
-    line-height: 1.05;
-    white-space: nowrap;
-  }
-
-  .logGrid dt {
-    color: var(--color-ground);
-    line-height: 1.4;
-  }
-
-  .smallPrint {
-    color: var(--color-sheet-ink);
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    letter-spacing: 0.06em;
-  }
-
-  @media (min-width: 1024px) {
-    .logGrid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
   }
 
   /* ---------------------------------------------------------------- trail rules */
@@ -180,12 +125,6 @@
     font-weight: 700;
     font-stretch: var(--type-condensed-wdth);
     line-height: 1.2;
-  }
-
-  /* H3s settle a little from the breath above their condensed rest axes (SettleText role "text"). */
-  .ruleTitle[data-role] {
-    --kt-rest-wdth: var(--type-condensed-wdth);
-    --kt-rest-wght: 700;
   }
 
   /* The evidence line fades in --dur-tap after its rule's title has begun to settle. */
@@ -226,73 +165,16 @@
     margin: 0;
   }
 
-  /* Set roman: the quote marks and the attribution carry the voice, and home never loads the
-     italic face for them. */
-  .noteQuote {
-    font-size: clamp(1.125rem, 1.6vw, 1.3rem);
-  }
-
-  .noteSource {
-    color: var(--color-sheet);
-  }
-
-  /* Preview builds: an invented quote says so. */
-  .exampleTag {
-    justify-self: start;
-    padding: 2px 8px;
-    border: 1px solid var(--color-alpenglow);
-    border-radius: 999px;
-    color: var(--color-alpenglow);
-    font-size: 0.625rem;
-  }
-
   @media (min-width: 1024px) {
     .notes {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
 
-  /* ---------------------------------------------------------------- workshops */
-
-  .workshops {
-    display: grid;
-    gap: 20px;
-    max-width: 62rem;
-  }
-
-  .formats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  /* The chip variant's look (SignatureLink chip): a pill on a contour border. The formats are not
-     links or buttons, so the chips keep its look without its response. */
-  .format {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 10px;
-    padding: 10px 16px;
-    border: 1px solid var(--color-contour);
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--color-ground) 75%, transparent);
-  }
-
-  .formatName {
-    font-weight: 600;
-  }
-
-  .format :global(.hud-label) {
-    color: var(--color-glacier);
-  }
-
   .proof strong {
     color: var(--color-glacier);
     font-family: var(--font-mono);
-    font-stretch: var(--axis-mono-rest-wdth);
+    font-stretch: var(--type-mono-wdth);
   }
 
   /* ---------------------------------------------------------------- contact */
@@ -332,7 +214,7 @@
     border: 1px solid var(--color-glacier);
     border-radius: 999px;
     background: var(--color-ground-raised);
-    color: var(--color-sheet);
+    color: var(--color-paper-dusk);
     text-align: start;
     opacity: 0;
     visibility: hidden;
@@ -370,7 +252,7 @@
     border: 0;
     border-radius: 50%;
     background: none;
-    color: var(--color-sheet);
+    color: var(--color-paper-dusk);
     font-size: 1.25rem;
     cursor: pointer;
   }

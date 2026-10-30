@@ -10,7 +10,7 @@
     gap: 8px 24px;
     margin-top: 48px;
     padding: 40px var(--gutter) max(24px, env(safe-area-inset-bottom));
-    color: var(--color-sheet);
+    color: var(--color-paper-dusk);
   }
 
   /* The top edge: the Interlaken → Jungfrau elevation profile as a contour-coloured line. It
@@ -29,6 +29,16 @@
     stroke: var(--color-contour);
     stroke-width: 1px;
     vector-effect: non-scaling-stroke;
+  }
+
+  .wordmark {
+    flex: none;
+  }
+
+  .email {
+    flex: 0 0 100%;
+    margin: 0 0 8px;
+    font-size: var(--type-body-size);
   }
 
   .credits {

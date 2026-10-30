@@ -12,8 +12,6 @@
 @layer components {
   .hud {
     --c: 0;
-    /* The width every mono label of the bar rests at. */
-    --hud-wdth: var(--axis-mono-rest-wdth);
     position: fixed;
     inset: 0 0 auto;
     z-index: var(--layer-hud);
@@ -98,26 +96,16 @@
     list-style: none;
   }
 
-  /* Condensed (full and calm): the row moves up into a 44 px bar, the labels narrow. */
+  /* Condensed (full and calm): the row moves up into a 44 px bar. */
   @media (prefers-reduced-motion: no-preference) {
     :root:not([data-motion="still"]) .hud[data-condensed] {
       --c: 1;
-      --hud-wdth: var(--axis-mono-condensed-wdth);
     }
 
     :root:not([data-motion="still"]) .bar {
       transform: translateY(calc(var(--c) * -6px));
       transition: transform var(--dur-settle) var(--ease-settle);
     }
-
-    /* Every label's visible run follows --hud-wdth; its box stays reserved. */
-    :root:not([data-motion="still"]) .hud :is([data-st="run"], [data-run]) {
-      transition: font-stretch var(--dur-settle) var(--ease-settle);
-    }
-  }
-
-  .hud :is([data-st="run"], [data-run]) {
-    font-stretch: var(--hud-wdth);
   }
 
   /* ---------------------------------------------------------------- the mark */
@@ -133,14 +121,8 @@
     white-space: nowrap;
   }
 
-  /* (.hud .bar …: these set axes over the primitives' own role defaults.) */
-  .hud .bar .markText {
-    --kt-color: var(--color-glacier);
-    --kt-rest-wdth: var(--hud-wdth);
-    --kt-box-wdth: var(--axis-mono-rest-wdth);
-    --kt-rest-wght: 700;
-    --kt-from-wght: 700;
-    --kt-breath-wght: 700;
+  .markText {
+    font-weight: 700;
   }
 
   /* The narrowest phones (under 360 px): the rings alone carry the mark (its name stays). */
@@ -170,8 +152,8 @@
 
   @media (prefers-reduced-motion: no-preference) {
     :root:not([data-motion="still"]) .rings circle {
-      transition: transform var(--dur-breath) var(--ease-settle);
-      transition-delay: calc(var(--ring) * var(--stagger-char));
+      transition: transform var(--dur-short) var(--ease-settle);
+      transition-delay: calc(var(--ring) * var(--stagger-item));
     }
 
     :root:not([data-motion="still"]) .mark:focus-visible .rings circle {
@@ -181,7 +163,7 @@
     :root:not([data-motion="still"]) .rings[data-redraw] circle {
       stroke-dasharray: 1;
       animation: ring-trace var(--dur-trace) var(--ease-settle) both;
-      animation-delay: calc(var(--ring) * var(--stagger-char));
+      animation-delay: calc(var(--ring) * var(--stagger-item));
     }
   }
 
@@ -209,8 +191,33 @@
     white-space: nowrap;
   }
 
-  .hud .bar .navLink {
-    --l-rest-wdth: var(--hud-wdth);
+  .navLink {
+    position: relative;
+    color: var(--color-paper-dusk);
+    text-decoration: none;
+    transition: color var(--dur-still) linear;
+  }
+
+  @media (hover: hover) {
+    .navLink:hover {
+      color: var(--color-glacier);
+    }
+  }
+
+  .navLink:focus-visible,
+  .navLink[aria-current] {
+    color: var(--color-glacier);
+  }
+
+  /* The current page or place: a short glacier rule under the label. */
+  .navLink[aria-current]::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 4px;
+    height: 1.5px;
+    background: currentColor;
   }
 
   /* ---------------------------------------------------------------- breakpoints */
@@ -234,17 +241,13 @@
     align-items: center;
     gap: 8px;
     min-height: 32px;
-    color: var(--color-sheet);
+    color: var(--color-paper-dusk);
     white-space: nowrap;
     cursor: pointer;
     transition: color var(--dur-micro) var(--ease-settle);
   }
 
-  .hud .bar .toggleText {
-    --kt-color: currentColor;
-    --kt-rest-wdth: var(--hud-wdth);
-    --kt-box-wdth: var(--axis-mono-rest-wdth);
-  }
+
 
   .switch {
     position: relative;

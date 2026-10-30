@@ -1,4 +1,5 @@
 import { actions, contact, emailAddress } from "@/content/contact";
+import { flood } from "@/content/flood";
 import { ActionLinks } from "./ActionLinks";
 import { CopyAddress } from "./CopyAddress";
 import { SectionHead } from "./SectionHead";
@@ -8,7 +9,7 @@ import styles from "./Home.module.css";
 export function ContactBand() {
   return (
     <section id="contact" className={`${styles.section} ${styles.contact}`} aria-labelledby="contact-heading">
-      <SectionHead id="contact-heading" heading={contact.heading} align="center">
+      <SectionHead id="contact-heading" heading={contact.heading} align="center" flood={flood.sections.contact}>
         <p className={`${styles.contactLine} body-copy`}>{contact.line}</p>
       </SectionHead>
       <ActionLinks

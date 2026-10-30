@@ -2,6 +2,7 @@
 
 import { useLayoutEffect } from "react";
 import { cards } from "@/content/cards";
+import { flood } from "@/content/flood";
 import type { home } from "@/content/home";
 import { rememberOrigin, takeOrigin } from "@/components/transition/return-focus";
 import { RuledHeading } from "@/components/motion/RuledHeading";
@@ -35,7 +36,7 @@ export function Deck({ copy: t }: { copy: typeof home.work }) {
   return (
     <section id="work" className={styles.deck} aria-labelledby="work-heading">
       <div className={styles.header} data-quiet-zone>
-        <RuledHeading id="work-heading" text={t.heading} className={`${styles.heading} display`} ruleClassName={styles.headRule} />
+        <RuledHeading id="work-heading" text={t.heading} className={`${styles.heading} display`} ruleClassName={styles.headRule} flood={flood.sections.work} />
         <p className={`${styles.intro} body-copy`}>{empty ? t.empty : t.intro}</p>
       </div>
       {!empty && (

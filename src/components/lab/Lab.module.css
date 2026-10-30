@@ -127,23 +127,6 @@
     font-size: clamp(1.75rem, 5vw, 2.75rem);
   }
 
-  .glintHost {
-    position: relative;
-    margin: 0;
-  }
-
-  .sheetRow {
-    padding: 16px 20px;
-    border-radius: 8px;
-    background: var(--color-sheet);
-  }
-
-  .sheetText {
-    color: var(--color-ground);
-    font-size: 1.25rem;
-    font-weight: 700;
-  }
-
   .states {
     border-collapse: collapse;
   }
@@ -173,7 +156,7 @@
   }
 
   .nextName {
-    --l-rest-color: var(--color-sheet);
+    color: var(--color-paper-dusk);
     font-size: clamp(2.25rem, 7vw, 3.5rem);
   }
 

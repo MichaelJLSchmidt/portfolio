@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { MorphSwitch } from "@/components/transition/MorphSwitch";
-import { SignatureLink } from "@/components/motion/SignatureLink";
+import { HudLink } from "./HudLink";
 import { ABOUT_MORPH } from "@/lib/morph";
 
 const ABOUT = "/about/";
@@ -22,7 +22,7 @@ const withSlash = (path: string) => (path.endsWith("/") ? path : `${path}/`);
 export function AboutLink({ label, className }: { label: string; className?: string }) {
   const pathname = usePathname();
   const here = withSlash(pathname ?? "") === ABOUT;
-  const link = <SignatureLink href={ABOUT} variant="nav" role="mono" settle label={label} current={here} className={className} />;
+  const link = <HudLink href={ABOUT} label={label} current={here} className={className} />;
   if (here) return link;
   return (
     <MorphSwitch name={ABOUT_MORPH} share="morph morph-title">

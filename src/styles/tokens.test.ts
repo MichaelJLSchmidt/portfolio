@@ -8,7 +8,6 @@ import { describe, it } from "node:test";
 import { spring as springEasing } from "motion";
 import { springCss, springsToCss } from "./motion-css.ts";
 import {
-  axes,
   breakpoint,
   color,
   cubicBezier,
@@ -16,18 +15,19 @@ import {
   duration,
   easing,
   glint,
-  headlamp,
   hexChannels,
   layer,
   scale,
+  space,
   spring,
   stagger,
   staggerStep,
+  titleAxes,
   tokensToCss,
   type,
 } from "./tokens.ts";
 
-const kebab = (s: string) => s.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`);
+const kebab = (s: string) => s.replace(/[A-Z]|\d+/g, (m) => `-${m.toLowerCase()}`);
 
 /** `:root{--a:1;--b:2}` → Map { "--a" => "1", "--b" => "2" } (values may contain ";" only inside parentheses). */
 function parse(css: string): Map<string, string> {
@@ -65,7 +65,9 @@ describe("tokens → CSS", () => {
     for (const [k, v] of Object.entries(duration)) assert.equal(css.get(`--dur-${kebab(k)}`), `${v}ms`, k);
     assert.equal(duration.tap, 120);
     assert.equal(duration.settle, 420);
-    assert.equal(duration.settleDisplay, 640);
+    assert.equal(duration.title, 600);
+    assert.equal(duration.trail, 280);
+    assert.equal(duration.trailCalm, 120);
     assert.equal(duration.route, 600);
     assert.equal(duration.terrain, 700);
     assert.equal(duration.glint, 900);
@@ -78,24 +80,37 @@ describe("tokens → CSS", () => {
     assert.deepEqual(easing.glint, [0.45, 0, 0.55, 1]);
   });
 
-  it("axes, wdth as a percentage and wght as a number", () => {
-    for (const [role, states] of Object.entries(axes)) {
-      for (const [state, v] of Object.entries(states)) {
-        assert.equal(css.get(`--axis-${role}-${state}-wdth`), `${v.wdth}%`, `${role} ${state}`);
-        assert.equal(css.get(`--axis-${role}-${state}-wght`), String(v.wght), `${role} ${state}`);
-      }
-    }
+  it("type roles: widths as percentages, weights as numbers", () => {
+    assert.equal(css.get("--type-display-wdth"), `${type.display.wdth}%`);
+    assert.equal(css.get("--type-display-wght"), String(type.display.wght));
+    assert.equal(css.get("--type-body-lh"), String(type.body.lineHeight));
+    assert.equal(css.get("--type-body-wght"), String(type.body.wght));
+    assert.equal(css.get("--type-button-wdth"), `${type.button.wdth}%`);
+    assert.equal(css.get("--type-button-wght"), String(type.button.wght));
+    assert.equal(css.get("--type-button-tracking"), `${type.button.tracking}em`);
+    assert.equal(css.get("--type-mono-wdth"), `${type.mono.wdth}%`);
+    assert.equal(css.get("--type-mono-wght"), String(type.mono.wght));
+    assert.equal(css.get("--type-compact-wdth"), `${type.compact.wdth}%`);
+    assert.equal(css.get("--type-condensed-wdth"), `${type.condensed.wdth}%`);
+    assert.equal(css.get("--space-section-mobile"), space.section.mobile);
+    assert.equal(css.get("--space-section-desktop"), space.section.desktop);
+    assert.equal(css.get("--space-overshoot"), `${space.overshoot}px`);
   });
 
-  it("display text rests at Archivo's narrowest width and settles from wider", () => {
-    assert.equal(axes.display.rest.wdth, 62);
-    assert.equal(axes.display.hover.wdth, axes.display.rest.wdth + 8);
-    assert.ok(axes.display.reveal.wdth > axes.display.rest.wdth);
-    assert.ok(axes.display.press.wdth >= 62, "width cannot go below 62");
-    for (const role of [axes.label, axes.mono]) assert.ok(role.reveal.wdth > role.rest.wdth);
+  it("titles rest at wdth 75, wght 800 and arrive from wght 200 (WeightTitle)", () => {
+    assert.equal(type.display.wdth, 75);
+    assert.equal(type.display.wght, 800);
+    assert.equal(titleAxes.from.wght, 200);
+    assert.equal(css.get("--title-from-wght"), "200");
+    assert.equal(css.get("--title-rest-wght"), "800");
+    // A unitless number: WeightTitle's knots interpolate it inside font-variation-settings.
+    assert.equal(css.get("--title-rest-wdth"), "75");
+    // Body text: 17–19 px, 1.55, 60–68 characters.
+    assert.deepEqual([type.body.sizeMin, type.body.sizeMax, type.body.lineHeight], [17, 19, 1.55]);
+    assert.ok(type.body.measureMin >= 60 && type.body.measureMax <= 68);
   });
 
-  it("staggers, distances, glint, headlamp, layers", () => {
+  it("staggers, distances, glint, layers", () => {
     for (const [k, s] of Object.entries(stagger)) {
       assert.equal(css.get(`--stagger-${k}`), `${s.step}ms`, k);
       if ("cap" in s) assert.equal(css.get(`--stagger-${k}-cap`), `${s.cap}ms`, k);
@@ -105,13 +120,9 @@ describe("tokens → CSS", () => {
     assert.equal(css.get("--glint-band"), `${glint.band}%`);
     assert.equal(css.get("--glint-angle"), `${glint.angle}deg`);
     assert.equal(css.get("--glint-color"), `rgb(${hexChannels(color.glacier).join(" ")} / ${glint.alpha})`);
-    assert.equal(css.get("--headlamp-radius"), `${headlamp.radiusPx}px`);
-    assert.equal(css.get("--headlamp-fade"), `${headlamp.fadeMs}ms`);
-    assert.equal(css.get("--headlamp-shine"), `${headlamp.shineMax * 100}%`);
     assert.equal(css.get("--scale-press"), String(scale.press));
     assert.equal(css.get("--scale-card-press"), String(scale.cardPress));
     for (const [k, v] of Object.entries(layer)) assert.equal(css.get(`--layer-${kebab(k)}`), String(v), k);
-    assert.equal(css.get("--type-condensed-wdth"), `${type.condensed.wdth}%`);
   });
 
   it("springs, as Motion's own spring sampled into linear()", () => {
@@ -127,16 +138,15 @@ describe("tokens → CSS", () => {
   });
 
   it("a cascade stays within its cap", () => {
-    assert.equal(staggerStep(stagger.char, 1), 0);
-    assert.equal(staggerStep(stagger.char, 10), 14);
-    assert.ok(Math.abs(staggerStep(stagger.char, 30) * 29 - stagger.char.cap) < 1e-9);
-    assert.ok(staggerStep(stagger.word, 20) * 19 <= stagger.word.cap);
+    assert.equal(staggerStep(stagger.card, 1), 0);
+    assert.equal(staggerStep(stagger.card, 3), stagger.card.step);
+    assert.ok(staggerStep(stagger.card, 20) * 19 <= stagger.card.cap + 1e-9);
   });
 
   it("the palette-only CSS leaves motion out", () => {
     const base = parse(tokensToCss({ motion: false }));
     assert.equal(base.get("--color-glacier"), color.glacier);
-    assert.ok(![...base.keys()].some((k) => /^--(dur|ease|axis|stagger|dist|glint|headlamp|layer|scale)-/.test(k)));
+    assert.ok(![...base.keys()].some((k) => /^--(dur|ease|stagger|dist|glint|layer|scale|space|flood)-/.test(k)));
   });
 });
 
@@ -149,14 +159,21 @@ describe("stylesheets read existing tokens", () => {
       return statSync(p).isDirectory() ? files(p) : p.endsWith(".css") ? [p] : [];
     });
   const root = new URL("..", import.meta.url).pathname;
-  it("var(--dur|ease|axis|stagger|dist|glint|headlamp|layer|spring|scale|color|type-…)", () => {
+  it("var(--dur|ease|stagger|dist|glint|layer|spring|scale|color|type|title|space-…)", () => {
     const missing: string[] = [];
+    // Derived from tokens in the global stylesheet (e.g. --space-section per breakpoint).
+    const globals = new Set([...readFileSync(join(root, "app/globals.css"), "utf8").matchAll(/(?:^|[;{\s])(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
     for (const file of files(root)) {
       const text = readFileSync(file, "utf8");
-      // A property a stylesheet registers itself (@property) is local state, not a token.
-      const local = new Set([...text.matchAll(/@property\s+(--[a-z0-9-]+)/g)].map((m) => m[1]));
-      for (const m of text.matchAll(/var\((--(?:dur|ease|axis|stagger|dist|glint|headlamp|layer|spring|color|type)-[a-z0-9-]+)/g)) {
-        if (!css.has(m[1]) && !local.has(m[1])) missing.push(`${file.slice(root.length)}: ${m[1]}`);
+      // A property a stylesheet registers (@property) or sets itself is local state, not a token;
+      // so is one read with a fallback (set inline by a component, e.g. a title's fitted size).
+      const local = new Set([
+        ...[...text.matchAll(/@property\s+(--[a-z0-9-]+)/g)].map((m) => m[1]),
+        ...[...text.matchAll(/(?:^|[;{\s])(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]),
+        ...[...text.matchAll(/var\((--[a-z0-9-]+),/g)].map((m) => m[1]),
+      ]);
+      for (const m of text.matchAll(/var\((--(?:dur|ease|stagger|dist|glint|layer|spring|color|type|title|space)-[a-z0-9-]+)/g)) {
+        if (!css.has(m[1]) && !local.has(m[1]) && !globals.has(m[1])) missing.push(`${file.slice(root.length)}: ${m[1]}`);
       }
     }
     assert.deepEqual(missing, []);

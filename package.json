@@ -15,6 +15,7 @@
     "terrain:bern": "node scripts/terrain/bern.mjs",
     "geo": "node scripts/geo/build.mjs",
     "images": "node scripts/images/build.mjs",
+    "portrait": "node scripts/portrait.mjs",
     "verify:terrain": "node scripts/terrain/verify.mjs",
     "report:size": "node scripts/report-sizes.mjs",
     "report:transfer": "node scripts/report-transfer.mjs",
@@ -29,7 +30,10 @@
     "test:e2e": "node scripts/e2e.mjs",
     "test:hosting": "node scripts/e2e-hosting.mjs",
     "test": "node --test src/hosting/*.test.ts src/styles/*.test.ts src/lib/*.test.ts",
-    "fonts:subset": "node scripts/site/fonts.mjs"
+    "fonts:subset": "node scripts/site/fonts.mjs",
+    "titles": "node scripts/measure-titles.mjs",
+    "wordmark": "node scripts/wordmark.mjs",
+    "flood": "node scripts/flood/sprites.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "9.8.2",

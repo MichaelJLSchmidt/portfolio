@@ -1,13 +1,12 @@
 import type { ReactNode } from "react";
-import { SignatureLink } from "@/components/motion/SignatureLink";
+import { TrailLink } from "@/components/interaction/TrailLink";
 import type { Action } from "@/content/contact";
 import styles from "./Home.module.css";
 
 export type ActionLink = { label: string; href: string | null; arrow?: string; arrowAt?: "start" | "end"; primary?: boolean; kind?: Action["kind"] };
 
 /**
- * A row of action links drawn as pills (signature links: the label breathes on hover and focus,
- * a commit glints). A link without a URL yet shows as a visible, inert placeholder.
+ * A row of trail links. A link without a URL yet shows as a visible, inert placeholder.
  */
 export function ActionLinks({
   links,
@@ -26,16 +25,17 @@ export function ActionLinks({
       {links.flatMap((l) => [
         <li key={l.label}>
           {l.href ? (
-            <SignatureLink
+            <TrailLink
               href={l.href}
-              variant="standalone"
-              label={l.label}
-              arrow={l.arrow}
+              plain={!l.href.startsWith("/")}
+              arrow={l.arrow ?? null}
               arrowAt={l.arrowAt}
               className={styles.action}
               data-primary={l.primary ? "" : undefined}
               {...(l.kind === "linkedin" ? { rel: "me noopener", target: "_blank" } : {})}
-            />
+            >
+              {l.label}
+            </TrailLink>
           ) : (
             <span className={styles.action} data-placeholder="">
               {l.label} <span className={styles.tbd}>[URL]</span>

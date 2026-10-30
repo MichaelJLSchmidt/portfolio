@@ -1,0 +1,170 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+/*
+ * The portrait card (PortraitCard.tsx): 63 : 88 like a Summit Card, a thin frame in its rarity
+ * colour. The inner box turns over in full motion (rotateY over --dur-flip, the back face turned
+ * away); calm stacks both faces and cross-fades them over --dur-flip-calm; still swaps at once.
+ * Hover (fine pointers) and keyboard focus on its button lift it --dist-lift. The facts face is
+ * raised ground with paper-dusk text.
+ */
+@layer components {
+  .wrap {
+    display: grid;
+    justify-items: start;
+    gap: 16px;
+  }
+
+  .card {
+    --on: 0;
+    position: relative;
+    width: 100%;
+    aspect-ratio: 63 / 88;
+    perspective: 1400px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (hover: hover) {
+    .card:hover {
+      --on: 1;
+    }
+  }
+
+  .wrap:has(.toggle:focus-visible) .card {
+    --on: 1;
+  }
+
+  .inner {
+    position: relative;
+    height: 100%;
+    transform: translateY(calc(var(--on) * var(--dist-lift)));
+  }
+
+  .face {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid var(--rarity);
+    border-radius: 3.5% / 2.5%;
+    background: var(--color-ground-raised);
+    color: var(--color-paper-dusk);
+    backface-visibility: hidden;
+  }
+
+  .front {
+    align-items: end;
+    justify-items: center;
+  }
+
+  .photo,
+  .placeholder {
+    grid-area: 1 / 1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 100%;
+  }
+
+  .placeholder path {
+    fill: none;
+    stroke: var(--color-contour);
+    stroke-width: 1px;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .back {
+    align-content: start;
+    gap: 12px;
+    padding: 8% 8% 18%;
+  }
+
+  .factsLabel {
+    margin: 0;
+    color: var(--color-glacier);
+  }
+
+  .facts {
+    display: grid;
+    margin: 0;
+  }
+
+  .facts > div {
+    display: grid;
+    gap: 2px;
+    padding-block: 8px;
+    border-top: 1px solid var(--color-contour-dim);
+  }
+
+  .facts dt {
+    color: var(--color-contour);
+  }
+
+  .facts dd {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.35;
+  }
+
+  /* The frame's foot: rarity shape and letter, collector number. */
+  .frame {
+    position: absolute;
+    inset: auto 6% 4%;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin: 0;
+    color: var(--color-paper-dusk);
+  }
+
+  .rarity {
+    width: 12px;
+    height: 12px;
+    fill: var(--rarity);
+  }
+
+  .collector {
+    margin-left: auto;
+    color: var(--color-contour);
+  }
+
+  /* Full: the card turns over. */
+  :root[data-motion="full"] .inner {
+    transform-style: preserve-3d;
+    transition: transform var(--dur-flip) var(--ease-summit);
+  }
+
+  :root[data-motion="full"] .back {
+    transform: rotateY(180deg);
+  }
+
+  :root[data-motion="full"] .card[data-facing="facts"] .inner {
+    transform: translateY(calc(var(--on) * var(--dist-lift))) rotateY(180deg);
+  }
+
+  /* Calm and still (and without JavaScript): the faces lie on each other; the one turned away is
+     transparent. Calm cross-fades, still swaps at once. */
+  :root:not([data-motion="full"]) .card[data-facing="photo"] .back,
+  :root:not([data-motion="full"]) .card[data-facing="facts"] .front {
+    opacity: 0;
+  }
+
+  :root[data-motion="calm"] .face {
+    transition: opacity var(--dur-flip-calm) linear;
+  }
+
+  :root[data-motion="calm"] .inner {
+    transition: transform var(--dur-short) var(--ease-settle);
+  }
+
+  :root[data-motion="still"] .inner {
+    transform: none;
+  }
+
+  @media (forced-colors: active) {
+    .face {
+      border-color: CanvasText;
+    }
+  }
+}

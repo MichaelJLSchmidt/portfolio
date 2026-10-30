@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import profile from "@terrain/profile.json";
 import type { Camp } from "@/content/about";
 import { rarityShapes } from "@/components/card/rarity-shapes";
-import { RollNumber } from "@/components/motion/RollNumber";
 import { RuledHeading } from "@/components/motion/RuledHeading";
 import { formatInteger } from "@/lib/format";
 import { currentMode, useMotionMode } from "@/lib/motion-mode";
@@ -284,7 +283,7 @@ export function AscentProfile({
             ))}
             <span className={styles.climber} style={{ animationName: "ascent-climber" }} data-climber="" />
             <p className={`${styles.readout} hud-label`}>
-              {labels.readout.altitude} <RollNumber value={Math.round(elevationAt(shown.at))} /> m · {labels.readout.distance} {(shown.at * profile.lengthKm).toFixed(1)}
+              {labels.readout.altitude} {formatInteger(Math.round(elevationAt(shown.at)))} m · {labels.readout.distance} {(shown.at * profile.lengthKm).toFixed(1)}
             </p>
           </div>
         </div>

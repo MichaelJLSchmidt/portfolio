@@ -12,7 +12,6 @@
 
   /* Glacier like every eyebrow: alpenglow would read below 7:1 over the field. */
   .eyebrow {
-    --kt-color: var(--color-glacier);
     color: var(--color-glacier);
   }
 

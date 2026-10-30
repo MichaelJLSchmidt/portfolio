@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useId, useRef } from "react";
-import { SettleText, type SettleHandle } from "@/components/motion/SettleText";
 import { caseStudyLabels } from "@/content/cards";
 import { haptic } from "@/lib/haptics";
 import { meterReading, useReading } from "./reading";
@@ -30,14 +29,9 @@ export function AltimeterBar({
   const active = readingSlug === slug ? index : -1;
   const barRef = useRef<HTMLElement>(null);
   const sheetRef = useRef<HTMLDialogElement>(null);
-  const nameRef = useRef<SettleHandle>(null);
   const id = useId();
 
   useEffect(() => (barRef.current ? meterReading(barRef.current) : undefined), []);
-  // The waypoint's name settles in on every change.
-  useEffect(() => {
-    if (active >= 0) nameRef.current?.play();
-  }, [active]);
 
   const open = () => {
     const sheet = sheetRef.current;
@@ -68,7 +62,7 @@ export function AltimeterBar({
           <span className={`${styles.altimeterCount} hud-label`}>
             {caseStudyLabels.section(active + 1, count || items.length)}
           </span>
-          <SettleText ref={nameRef} text={current?.nav ?? items[0]?.nav ?? ""} mode="block" role="label" trigger="manual" className={styles.altimeterName} />
+          <span className={styles.altimeterName}>{current?.nav ?? items[0]?.nav ?? ""}</span>
           <span className={styles.altimeterArrow} aria-hidden="true">
             ↑
           </span>

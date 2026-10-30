@@ -127,13 +127,13 @@
   .gridLabel {
     position: absolute;
     left: 0;
-    color: var(--color-sheet);
+    color: var(--color-paper-dusk);
     translate: 0 -130%;
   }
 
   .stop {
     position: absolute;
-    color: var(--color-sheet);
+    color: var(--color-paper-dusk);
     white-space: nowrap;
     translate: -4px -190%;
   }
@@ -149,7 +149,7 @@
 
   /* Straight over the field: sheet, like every label there (7:1; contour is never used over it). */
   .stopElevation {
-    color: var(--color-sheet);
+    color: var(--color-paper-dusk);
   }
 
   /* Milestone pins: lit once the climber has passed them (--p ≥ --at), pure CSS. */
@@ -359,7 +359,7 @@
     align-items: center;
     gap: 5px;
     margin-left: auto;
-    color: var(--color-sheet);
+    color: var(--color-paper-dusk);
     font-weight: 700;
   }
 
@@ -370,7 +370,7 @@
   }
 
   .rarityNote {
-    color: var(--color-sheet);
+    color: var(--color-paper-dusk);
   }
 
   @media (min-width: 1024px) {

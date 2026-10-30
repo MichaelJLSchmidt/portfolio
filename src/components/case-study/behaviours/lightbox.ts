@@ -151,8 +151,10 @@ export function attach(figure: HTMLElement): () => void {
     const [a, b] = [...pointers.values()];
     return Math.hypot(a.x - b.x, a.y - b.y);
   };
+  // Drag and pinch only: the stage listens for movement while a pointer is held down, never at rest.
   const onDown = (e: PointerEvent) => {
     stage.setPointerCapture(e.pointerId);
+    if (!pointers.size) stage.addEventListener("pointermove", onMove);
     // Follow the fingers directly: no easing while a gesture is under way.
     stage.dataset.gesture = "";
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -179,7 +181,10 @@ export function attach(figure: HTMLElement): () => void {
   const onUp = (e: PointerEvent) => {
     pointers.delete(e.pointerId);
     if (pointers.size < 2) pinch = null;
-    if (!pointers.size) delete stage.dataset.gesture;
+    if (!pointers.size) {
+      delete stage.dataset.gesture;
+      stage.removeEventListener("pointermove", onMove);
+    }
     if (!moved && e.pointerType === "mouse" && e.button === 0) {
       const [px, py] = local(e);
       if (scale >= MAX) zoomTo(1);
@@ -216,7 +221,6 @@ export function attach(figure: HTMLElement): () => void {
   dialog.addEventListener("click", onClick);
   dialog.addEventListener("keydown", onKey);
   stage.addEventListener("pointerdown", onDown);
-  stage.addEventListener("pointermove", onMove);
   stage.addEventListener("pointerup", onUp);
   stage.addEventListener("pointercancel", onUp);
   stage.addEventListener("wheel", onWheel, { passive: false });

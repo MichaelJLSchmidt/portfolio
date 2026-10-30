@@ -33,9 +33,9 @@ const LATIN =
   "‐–—‘’‚“”„•…′″‹›€←↑→↓";
 
 const instances = [
-  { file: "archivo-display.woff2", source: "archivo", axes: { wdth: type.display.wdthMin, wght: type.display.wght } },
+  { file: "archivo-display.woff2", source: "archivo", axes: { wdth: type.display.wdth, wght: type.display.wght } },
   { file: "archivo-text.woff2", source: "archivo", axes: { wdth: type.body.wdth, wght: type.body.wght } },
-  { file: "martian-mono.woff2", source: "martian", axes: { wdth: type.hudLabel.wdth, wght: type.hudLabel.wght } },
+  { file: "martian-mono.woff2", source: "martian", axes: { wdth: type.mono.wdth, wght: type.mono.wght } },
 ];
 
 async function cached(url) {

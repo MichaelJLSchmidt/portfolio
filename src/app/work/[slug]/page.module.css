@@ -9,7 +9,7 @@
   }
 
   .crumb {
-    --l-rest-color: var(--color-glacier);
+    color: var(--color-glacier);
     display: inline-flex;
     align-items: center;
     min-height: 44px;
@@ -53,7 +53,7 @@
   }
 
   .coords {
-    color: var(--color-sheet);
+    color: var(--color-paper-dusk);
   }
 
   .title {
@@ -68,18 +68,13 @@
     font-stretch: var(--type-condensed-wdth);
   }
 
-  .type[data-role] {
-    --kt-rest-wdth: var(--type-condensed-wdth);
-    --kt-rest-wght: 600;
-  }
-
   /* "7 min read · 60-second skim below" */
   .meta {
-    color: var(--color-sheet);
+    color: var(--color-paper-dusk);
   }
 
   .skim {
-    --l-rest-color: var(--color-glacier);
+    color: var(--color-glacier);
   }
 
   /* The product hero, directly after the Summit summary. */
@@ -95,8 +90,7 @@
   }
 
   .jumpHeading {
-    --kt-color: var(--color-sheet);
-    color: var(--color-sheet);
+    color: var(--color-paper-dusk);
   }
 
   .jump ul {

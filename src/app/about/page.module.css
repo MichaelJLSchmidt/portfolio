@@ -3,7 +3,7 @@
 @layer components {
   .main {
     --main-top: 96px;
-    --main-gap: clamp(48px, 7vw, 112px);
+    --main-gap: var(--space-section);
     display: grid;
     gap: var(--main-gap);
     padding-top: var(--main-top);
@@ -41,9 +41,8 @@
     line-height: 1.35;
   }
 
-  .lead[data-role] {
-    --kt-rest-wdth: 100%;
-    --kt-rest-wght: 560;
+  .portrait {
+    width: min(70%, 300px);
   }
 
   @media (min-width: 1024px) {
@@ -73,14 +72,8 @@
   }
 
   .legendHeading {
-    --kt-color: var(--color-moss-ink);
-    color: var(--color-moss-ink);
+    color: var(--color-glacier);
     font-weight: 700;
-  }
-
-  .legendHeading[data-role] {
-    --kt-rest-wght: 700;
-    --kt-from-wght: 700;
   }
 
   .legendRows {
@@ -93,7 +86,7 @@
     display: grid;
     gap: 2px 16px;
     padding-block: 10px;
-    border-top: 1px solid rgb(90 92 82 / 0.45);
+    border-top: 1px solid var(--color-contour-dim);
   }
 
   /* Label beside value where there is room; above it on phones. */
@@ -104,22 +97,22 @@
   }
 
   .legendRows dt {
-    color: var(--color-sheet-ink);
+    color: var(--color-contour);
     font-family: var(--font-mono);
-    font-size: var(--type-hud-size);
-    font-stretch: var(--axis-mono-rest-wdth);
-    letter-spacing: var(--type-hud-tracking);
+    font-size: var(--type-mono-size);
+    font-stretch: var(--type-mono-wdth);
+    letter-spacing: var(--type-mono-tracking);
     line-height: 1.9;
     text-transform: uppercase;
   }
 
-  .legendLabel[data-role] {
-    --kt-color: var(--color-sheet-ink);
+  .legendLabel {
+    color: var(--color-contour);
   }
 
   .legendRows dd {
     margin: 0;
-    color: var(--color-ground);
+    color: var(--color-paper-dusk);
     overflow-wrap: anywhere;
   }
 
@@ -129,7 +122,6 @@
   }
 
   .bioHeading {
-    --kt-color: var(--color-glacier);
     color: var(--color-glacier);
   }
 
@@ -172,9 +164,9 @@
     }
   }
 
-  .ropeLead[data-role] {
-    --kt-rest-wdth: 100%;
-    --kt-rest-wght: 700;
+  .ropeLead {
+    font-stretch: 100%;
+    font-weight: 700;
   }
 
   /* First 90 days: three stages, left to right on desktop, joined by a short contour trail that
@@ -250,12 +242,6 @@
     font-stretch: var(--type-condensed-wdth);
   }
 
-  /* A small settle from the breath above its condensed rest axes (SettleText role "text"). */
-  .dayTitle[data-role] {
-    --kt-rest-wdth: var(--type-condensed-wdth);
-    --kt-rest-wght: 700;
-  }
-
   @media (min-width: 1024px) {
     .days {
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -285,7 +271,7 @@
 
     /* No eyebrow here: the heading lines up with the one beside it. */
     .offMapHead {
-      padding-top: calc(var(--type-hud-size) * 1.4 + 10px);
+      padding-top: calc(var(--type-mono-size) * 1.4 + 10px);
     }
   }
 }

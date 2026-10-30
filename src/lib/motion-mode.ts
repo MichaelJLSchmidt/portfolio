@@ -2,7 +2,6 @@
 
 import { useSyncExternalStore } from "react";
 import { device } from "@/styles/tokens";
-import { settledScript } from "./settled";
 
 /**
  * Three motion modes, resolved before first paint and kept in sync (docs/motion.md):
@@ -38,8 +37,8 @@ const forcedScript = previewable
   ? `try{f=new URLSearchParams(location.search).get("motion");if(!/^(full|calm|still)$/.test(f||""))f=null}catch(e){}`
   : "";
 
-/** Inline in <head>: sets the mode and tier, and stops settled animations (settled.ts), before first paint. */
-export const motionModeScript = `(function(){var d=document.documentElement,c=false,r=false,f=null;try{c=localStorage.getItem("${CALM_STORAGE_KEY}")==="1"}catch(e){}try{r=matchMedia("${REDUCE_QUERY}").matches}catch(e){}${forcedScript}var m=r?"still":f||(c?"calm":"full");${tierScript}d.setAttribute("data-calm",c?"1":"0");d.setAttribute("data-motion",m);if(f)d.setAttribute("data-motion-forced",f);d.setAttribute("data-tier",t);try{if(typeof navigator.vibrate=="function"&&/Android/i.test(navigator.userAgent))d.setAttribute("data-haptics","")}catch(e){}${settledScript}})()`;
+/** Inline in <head>: sets the mode and tier before first paint. */
+export const motionModeScript = `(function(){var d=document.documentElement,c=false,r=false,f=null;try{c=localStorage.getItem("${CALM_STORAGE_KEY}")==="1"}catch(e){}try{r=matchMedia("${REDUCE_QUERY}").matches}catch(e){}${forcedScript}var m=r?"still":f||(c?"calm":"full");${tierScript}d.setAttribute("data-calm",c?"1":"0");d.setAttribute("data-motion",m);if(f)d.setAttribute("data-motion-forced",f);d.setAttribute("data-tier",t);try{if(typeof navigator.vibrate=="function"&&/Android/i.test(navigator.userAgent))d.setAttribute("data-haptics","")}catch(e){}})()`;
 
 const root = () => document.documentElement;
 

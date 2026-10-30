@@ -43,6 +43,10 @@ const run = (args, env = {}) => {
 rmSync(edgeEntry, { force: true });
 rmSync(out, { recursive: true, force: true });
 run([join(root, "scripts/check-content.mjs"), "--build", `--mode=${mode}`]);
+// Display titles: width compensation for the weight arrival, from the current copy (WeightTitle).
+run([join(root, "scripts/measure-titles.mjs")]);
+// The footer wordmark's outlines, from the brand (scripts/wordmark.mjs).
+run([join(root, "scripts/wordmark.mjs")]);
 const examples = mode !== "construction" && includesExamples(process.env);
 if (mode !== "construction") console.log(`Examples: ${examples ? "included" : "excluded"}`);
 if (examples) run([join(root, "scripts/check-figures.mjs")]);

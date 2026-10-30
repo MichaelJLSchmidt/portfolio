@@ -3,7 +3,7 @@ import { Deck } from "@/components/card/Deck";
 import { HeroName } from "@/components/HeroName";
 import { ContactBand } from "@/components/home/ContactBand";
 import { LeadPrinciples } from "@/components/home/LeadPrinciples";
-import { SignatureLink } from "@/components/motion/SignatureLink";
+import { TrailLink } from "@/components/interaction/TrailLink";
 import { home } from "@/content/home";
 import { site } from "@/content/site";
 import styles from "./page.module.css";
@@ -28,7 +28,9 @@ export default function Home() {
       </section>
       <section className={styles.intro} aria-label={home.intro.more}>
         <p className={`${styles.statement} knockout`}>{home.intro.text}</p>
-        <SignatureLink href="/about/" variant="standalone" label={home.intro.more} arrow="→" className={styles.more} />
+        <TrailLink href="/about/" className={styles.more}>
+          {home.intro.more}
+        </TrailLink>
       </section>
       <LeadPrinciples />
       <Deck copy={home.work} />
