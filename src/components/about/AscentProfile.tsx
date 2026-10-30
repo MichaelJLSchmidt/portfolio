@@ -256,14 +256,14 @@ export function AscentProfile({
             {gridLines
               .filter((m) => m % 1000 === 0)
               .map((m) => (
-                <span key={m} className={`${styles.gridLabel} hud-label`} style={{ top: pct(yOf(m), H) }}>
+                <span key={m} className={`${styles.gridLabel} hud-label map-halo`} style={{ top: pct(yOf(m), H) }}>
                   {formatInteger(m)} m
                 </span>
               ))}
             {stops.map((s) => (
               <span
                 key={s.label}
-                className={`${styles.stop} hud-label`}
+                className={`${styles.stop} hud-label map-halo`}
                 data-end={s.at > 0.5 ? "true" : undefined}
                 data-start={s.at <= 0.5 ? "true" : undefined}
                 style={{ left: pct(xOf(s.at * profile.lengthKm), W), top: pct(yOf(elevationAt(s.at)), H) }}
