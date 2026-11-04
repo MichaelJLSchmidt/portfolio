@@ -41,24 +41,24 @@ export function TrailheadSpread({
   return (
     <header className={styles.spread} data-route="trailhead">
       {example && (
-        <p className={`${styles.example} hud-label map-halo`} data-vt-exit data-quiet-zone>
+        <p className={`${styles.example} mono`} data-quiet-zone>
           {example}
         </p>
       )}
       <div className={styles.art}>{artwork}</div>
       <div className={styles.left} data-quiet-zone>
         {title}
-        <p className={`${styles.type} map-halo`} data-vt-exit>
+        <p className={`${styles.type}`}>
           {typeLine}
         </p>
-        <div className={styles.problem} data-vt-exit>
-          <h2 className={`${styles.label} hud-label`}>{labels.problem}</h2>
+        <div className={styles.problem}>
+          <h2 className={`${styles.label} mono`}>{labels.problem}</h2>
           <p className="body-copy">{problem}</p>
         </div>
         {meta}
       </div>
-      <section className={`${styles.right} legend`} aria-labelledby="result-heading" data-vt-exit>
-        <h2 id="result-heading" className={`${styles.label} hud-label`}>
+      <section className={`${styles.right} legend`} aria-labelledby="result-heading">
+        <h2 id="result-heading" className={`${styles.label} mono`}>
           {labels.result}
         </h2>
         <p className={styles.impact}>{impactLine}</p>
@@ -66,17 +66,17 @@ export function TrailheadSpread({
           <svg className={styles.climbLine} viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
             <path d="M0 38L18 33 34 30 50 22 66 17 82 9 100 2" />
           </svg>
-          <p className={`${styles.gain} hud-label`}>
+          <p className={`${styles.gain} mono`}>
             <span className={styles.gainValue}>{climb.gain}</span> {labels.gain}
           </p>
-          <p className={`${styles.from} hud-label`}>
+          <p className={`${styles.from} mono`}>
             {climb.from.label} · {climb.from.altitude}
           </p>
-          <p className={`${styles.to} hud-label`}>
+          <p className={`${styles.to} mono`}>
             {climb.to.label} · {climb.to.altitude}
           </p>
         </div>
-        <dl className={`${styles.facts} hud-label`}>
+        <dl className={`${styles.facts} mono`}>
           {facts.map((f) => (
             <div key={f.label}>
               <dt>{f.label}</dt>

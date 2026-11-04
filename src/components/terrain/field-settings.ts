@@ -41,7 +41,7 @@ export type DeviceProfile = {
 export const fieldConfig: FieldConfig = config;
 
 /** The field is a monochrome map: its lines take neutral colours only. */
-export const LINE_COLORS = ["contour", "contourDim", "paperDusk"] as const satisfies readonly ColorToken[];
+export const LINE_COLORS = ["fieldLine", "line", "text"] as const satisfies readonly ColorToken[];
 
 /** Contour intervals the field may use on alpine terrain (metres). The index line is every `indexEvery`-th. */
 export const CONTOUR_INTERVALS = [50, 100, 200, 250, 500] as const;

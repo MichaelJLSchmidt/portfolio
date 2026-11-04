@@ -367,9 +367,9 @@ const posters = [];
     }
     const svg =
       `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice">` +
-      stroke(regular, color.contour, 1, field.desktop.lineOpacity) +
-      stroke(index, color.contour, 1.5, field.desktop.indexOpacity) +
-      stroke(riverPath, color.ice, 1.5, 0.9) +
+      stroke(regular, color.fieldLine, 1, field.desktop.lineOpacity) +
+      stroke(index, color.fieldLine, 1.5, field.desktop.indexOpacity) +
+      stroke(riverPath, color.fieldLine, 1.5, 0.9) +
       stroke(pin, color.glacier, 1.25, 0.9) +
       `</svg>\n`;
     const file = `contours-${interval}.svg`;

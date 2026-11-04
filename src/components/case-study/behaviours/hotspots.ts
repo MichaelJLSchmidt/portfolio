@@ -53,7 +53,7 @@ export function attach(figure: HTMLElement): () => void {
     const marker = e.currentTarget as HTMLButtonElement;
     const n = marker.getAttribute("aria-pressed") === "true" ? null : marker.dataset.hotspot!;
     select(n);
-    if (n) haptic("detent");
+    if (n) haptic();
     const note = notes.find((el) => el.dataset.note === n);
     if (!note) return;
     const r = note.getBoundingClientRect();
@@ -72,10 +72,10 @@ export function attach(figure: HTMLElement): () => void {
       if (isSettled(key) || currentMode() !== "full") return;
       markSettled(key);
       markers.forEach((m, i) => {
-        m.style.setProperty("--ping-delay", `${i * duration.instant}ms`);
+        m.style.setProperty("--ping-delay", `${i * duration.press}ms`);
         m.setAttribute("data-ping", "");
       });
-      window.setTimeout(() => markers.forEach((m) => m.removeAttribute("data-ping")), markers.length * duration.instant + duration.long);
+      window.setTimeout(() => markers.forEach((m) => m.removeAttribute("data-ping")), markers.length * duration.press + duration.enter);
     },
     { threshold: 0.6 },
   );

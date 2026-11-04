@@ -3,9 +3,8 @@
 import { useEffect, useRef } from "react";
 import { lab } from "@/content/lab";
 import { asset } from "@/lib/asset";
-import { SETTLED_STORAGE_KEY } from "@/lib/settled";
 import type { MotionMode } from "@/lib/motion-mode";
-import { FloodButton } from "@/components/interaction/FloodButton";
+import { SurveyButton } from "@/components/ui/SurveyButton";
 import { LAB_READY, markLabReady } from "./ready";
 import styles from "./Lab.module.css";
 
@@ -34,25 +33,20 @@ export function LabFrames() {
     return () => window.removeEventListener("message", onMessage);
   }, []);
 
-  const replay = () => {
-    try {
-      sessionStorage.removeItem(SETTLED_STORAGE_KEY);
-    } catch {
-      // Without storage nothing was remembered.
-    }
-    frames.current.forEach((f) => f?.contentWindow?.location.reload());
-  };
+  const replay = () => frames.current.forEach((f) => f?.contentWindow?.location.reload());
 
   return (
     <>
       <div>
-        <FloodButton label={lab.replay} onClick={replay} />
+        <SurveyButton arrow={null} onClick={replay}>
+          {lab.replay}
+        </SurveyButton>
       </div>
       <div className={styles.columns}>
         {MODES.map((mode, i) => (
           <section key={mode} className={styles.column} aria-labelledby={`lab-${mode}`}>
             <header className={styles.columnHead}>
-              <h2 id={`lab-${mode}`} className="hud-label">
+              <h2 id={`lab-${mode}`} className="mono">
                 {lab.modes[mode].name}
               </h2>
               <p className={styles.columnNote}>{lab.modes[mode].note}</p>

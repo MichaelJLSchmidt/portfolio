@@ -52,7 +52,7 @@ export function ElevationProfile({
   return (
     <figure className={styles.profile} style={{ "--points": points.length } as CSSProperties}>
       <div className={styles.chart} aria-hidden="true">
-        <svg className={styles.svg} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" data-reveal="line">
+        <svg className={styles.svg} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
           <path className={styles.ground} d={`${line}L${W} ${H}L0 ${H}Z`} />
           <path className={styles.line} d={line} pathLength={1} />
         </svg>
@@ -69,7 +69,7 @@ export function ElevationProfile({
               data-end={i === 0 || i === points.length - 1 ? "" : undefined}
             >
               <span className={styles.dot} />
-              <span className={`${styles.nodeLabel} hud-label`}>
+              <span className={`${styles.nodeLabel} mono`}>
                 {i < points.length - 1 && <span>{labels.stage(i + 1)}</span>}
                 <span>{p.label}</span>
                 <span className={styles.altitude}>{p.altitude}</span>
@@ -79,19 +79,19 @@ export function ElevationProfile({
         </ol>
       </div>
       <table className={styles.table} role="table">
-        <caption className={`${styles.caption} hud-label`}>{caption}</caption>
+        <caption className={`${styles.caption} mono`}>{caption}</caption>
         <thead role="rowgroup">
           <tr role="row">
-            <th scope="col" role="columnheader" className="hud-label">
+            <th scope="col" role="columnheader" className="mono">
               {labels.metric}
             </th>
-            <th scope="col" role="columnheader" className="hud-label">
+            <th scope="col" role="columnheader" className="mono">
               {labels.before}
             </th>
-            <th scope="col" role="columnheader" className="hud-label">
+            <th scope="col" role="columnheader" className="mono">
               {labels.wonAt}
             </th>
-            <th scope="col" role="columnheader" className="hud-label">
+            <th scope="col" role="columnheader" className="mono">
               {labels.after}
             </th>
           </tr>
@@ -105,7 +105,7 @@ export function ElevationProfile({
               <td role="cell" className={styles.before}>
                 {r.before}
               </td>
-              <td role="cell" className={`${styles.won} hud-label`}>
+              <td role="cell" className={`${styles.won} mono`}>
                 <span className={styles.wonMark} aria-hidden="true" />
                 {`${labels.stage(r.stage)} · ${stages[r.stage - 1]?.label ?? ""}`}
               </td>

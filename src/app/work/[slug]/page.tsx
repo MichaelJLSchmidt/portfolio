@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
-import type { CSSProperties } from "react";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 // Primitives first: their CSS is shared by every route, and importing them after the case-study
 // blocks makes Turbopack merge those blocks' CSS into the chunk every route loads.
-import { WeightTitle } from "@/components/type/WeightTitle";
-import { flood } from "@/content/flood";
-import { TrailLink } from "@/components/interaction/TrailLink";
-import { CardArtwork } from "@/components/card/CardArtwork";
+import { Title } from "@/components/type/Title";
 import { EvidenceBadge, EvidenceLegend } from "@/components/case-study/Evidence";
 import { AltimeterBar } from "@/components/case-study/AltimeterBar";
 import { Descent } from "@/components/case-study/Descent";
@@ -14,26 +11,18 @@ import { ElevationProfile } from "@/components/case-study/ElevationProfile";
 import { Figure } from "@/components/case-study/Figure";
 import { LegendSheet } from "@/components/case-study/LegendSheet";
 import { DecisionFork, Stages } from "@/components/case-study/Stages";
-import { TrailheadBand } from "@/components/case-study/TrailheadBand";
+import { NextCase } from "@/components/case-study/NextCase";
 import { TrailheadSpread } from "@/components/case-study/TrailheadSpread";
-import { Route } from "@/components/route/Route";
 import { WaypointTrail } from "@/components/case-study/WaypointTrail";
 import { Logbook } from "@/components/logbook/Logbook";
-import { MorphTarget } from "@/components/transition/MorphTarget";
-import { RememberCard } from "@/components/transition/RememberCard";
 import { caseStudies } from "@/content/case-studies";
-import { caseStudyLabels as L, cardBySlug, cards, type SummitCardData } from "@/content/cards";
+import { caseStudyLabels as L, cardBySlug, cards } from "@/content/cards";
 import { altitudeLabel, ascentOf } from "@/content/geo";
 import { readingMinutes, type CaseStudy as Study, type Evidence } from "@/lib/case-study";
-import { morphName } from "@/lib/morph";
-import { titleEm } from "@/lib/title-axes";
-import { arrival } from "@/styles/tokens";
+import { asset } from "@/lib/asset";
 import styles from "./page.module.css";
 
 export const dynamicParams = false;
-
-/** The summary sheet unfolds this long after a link navigation commits (the route's arrival). */
-const ARRIVE_SUMMARY = arrival.summary;
 
 /**
  * A static export refuses a dynamic route that generates no page, and a live build has no case
@@ -41,13 +30,6 @@ const ARRIVE_SUMMARY = arrival.summary;
  * which scripts/site/build.mjs removes with the rest of out/work/.
  */
 const NO_CASE_STUDY = "_none";
-
-/**
- * The case-study template's one display size: its widest current word (measured at the rest cut)
- * fills the title column. Shorter titles keep that size; a longer word scales its own title down
- * (--word-em).
- */
-const TITLE_EM = Math.max(...cards.filter((c) => caseStudies[c.slug]).map((c) => titleEm(c.name, { words: true })), 4);
 
 export function generateStaticParams() {
   const slugs = Object.keys(caseStudies).filter((slug) => cardBySlug(slug));
@@ -79,7 +61,6 @@ function evidenceKinds(study: Study): Evidence[] {
   return (["measured", "estimated", "qualitative"] as const).filter((k) => used.has(k));
 }
 
-const terrainOf = (card: SummitCardData) => (card.artwork.kind === "crop" ? card.artwork.terrainId : null);
 
 /** Timeline spacing: a node's distance to the next follows the real altitude gain, at least 34 px. */
 const SPACE = { min: 34, total: 420 };
@@ -89,28 +70,13 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
   if (!found) notFound();
   const { card, study } = found;
   const { summary } = study;
-  const ascent = ascentOf(terrainOf(card));
+  const ascent = ascentOf(card.terrainId);
   if (!ascent) throw new Error(`Case study "${card.slug}": its card's terrain is not one of the ascents in geo.ts.`);
   const places = ascent.stages;
   // The case studies in deck order: the next and previous loop round; the ridge shows all three.
   const studies = cards.filter((c) => caseStudies[c.slug]);
   const at = studies.indexOf(card);
   const next = studies.length > 1 ? studies[(at + 1) % studies.length] : null;
-  const previous = studies.length > 1 ? studies[(at - 1 + studies.length) % studies.length] : null;
-  const ridge = studies.flatMap((c) => {
-    const a = ascentOf(terrainOf(c));
-    return a
-      ? [
-          {
-            slug: c.slug,
-            name: a.summit.label,
-            altitude: altitudeLabel(a.summit.altitudeM),
-            metres: a.summit.altitudeM,
-            current: c === card,
-          },
-        ]
-      : [];
-  });
   const hero = study.hero ? study.figures?.[study.hero] : undefined;
   const kinds = evidenceKinds(study);
   // The timeline: each stage as far from the next as the climb between them, the results at the summit.
@@ -132,41 +98,25 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
   ];
 
   return (
-    <main id="main" className={`${styles.main} container`} data-rarity={card.rarity} data-card={card.slug}>
-      {/* data-vt-exit: the page's own content, which leaves first on the way back (return-transition.ts). */}
-      <Route />
-      <RememberCard slug={card.slug} />
-      <nav className={styles.crumbs} aria-label={L.back} data-vt-exit>
+    <main id="main" className={`${styles.main} container`} data-card={card.slug}>
+      <nav className={styles.crumbs} aria-label={L.back}>
         {/* No scroll to the top: the deck brings the card back into view itself (Deck). */}
-        <TrailLink href="/" scroll={false} arrow="←" arrowAt="start" className={`${styles.crumb} hud-label map-halo`} data-quiet-zone>
-          {L.back}
-        </TrailLink>
+        <Link href="/#case-studies" className={`${styles.crumb} mono`}>
+          ← {L.back}
+        </Link>
       </nav>
 
       <TrailheadSpread
         example={study.example ? L.exampleLine : undefined}
         artwork={
-          <MorphTarget name={morphName("art", card.slug)} variant="art" className={styles.artSlot}>
-            <CardArtwork artwork={card.artwork} alt={card.artworkAlt} className={styles.art} stamp={card.example ? L.example : undefined} />
-          </MorphTarget>
+          <span className={styles.artSlot}>
+            <img className={styles.art} src={asset(`/plates/${card.terrainId}-level.svg`)} alt={card.artworkAlt} width={400} height={300} />
+          </span>
         }
         title={
-          <MorphTarget name={morphName("title", card.slug)} variant="title">
-            <WeightTitle
-              as="h1"
-              text={card.name}
-              flood={flood.caseStudyTitle}
-              className={styles.title}
-              style={
-                {
-                  "--title-em": TITLE_EM,
-                  "--word-em": titleEm(card.name, { words: true }),
-                } as CSSProperties
-              }
-            />
-          </MorphTarget>
+          <Title role="h1" text={card.name} className={styles.title} />
         }
-        typeLine={study.typeLine ?? card.type}
+        typeLine={study.typeLine ?? card.sector}
         problem={study.problem}
         impactLine={study.impactLine}
         climb={{
@@ -186,12 +136,12 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
           { label: L.facts.time, value: study.facts.time },
         ]}
         meta={
-          <p className={`${styles.meta} hud-label map-halo`} data-vt-exit>
+          <p className={`${styles.meta} mono`}>
             <span>{L.readingTime(readingMinutes(study))}</span>
             {" · "}
-            <TrailLink href="#summary-heading" variant="inline" className={styles.skim}>
+            <a href="#summary-heading" className={styles.skim}>
               {L.skim}
-            </TrailLink>
+            </a>
           </p>
         }
         labels={{
@@ -206,7 +156,6 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
         heading={L.summaryHeading}
         sheet={L.sheet(at + 1, studies.length)}
         scale={L.scale}
-        arriveAt={ARRIVE_SUMMARY}
         note={summary.note}
         rows={[
           { symbol: "brief", label: L.brief, value: summary.brief },
@@ -245,22 +194,22 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
       />
 
       {hero && (
-        <div className={styles.hero} data-vt-exit>
+        <div className={styles.hero}>
           <Figure spec={hero} images={study.images ?? {}} assets={study.assets ?? {}} />
         </div>
       )}
 
-      <div className={styles.body} data-vt-exit>
+      <div className={styles.body}>
         <nav className={styles.jump} aria-labelledby="jump-heading">
-          <h2 id="jump-heading" className={`${styles.jumpHeading} hud-label map-halo`} data-quiet-zone>
+          <h2 id="jump-heading" className={`${styles.jumpHeading} mono`} data-quiet-zone>
             {L.jumpTo}
           </h2>
           <ul>
             {trail.map((w) => (
               <li key={w.id}>
-                <TrailLink href={`#${w.id}`} variant="inline" className={styles.chip}>
+                <a href={`#${w.id}`} className={styles.chip}>
                   {w.nav}
-                </TrailLink>
+                </a>
               </li>
             ))}
           </ul>
@@ -272,14 +221,14 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
           <Stages study={study} places={places} lastStation={ascent.lastStation} />
 
           <section className={styles.section} aria-labelledby="reversed-heading">
-            <h2 id="reversed-heading" className={`${styles.sectionHeading} display`}>
+            <h2 id="reversed-heading" className={`${styles.sectionHeading} t-h2`}>
               {L.reversedHeading}
             </h2>
             <DecisionFork decision={study.reversedDecision} heading={study.reversedDecision.title} />
           </section>
 
           <section className={styles.section} aria-labelledby="after-launch-heading">
-            <h2 id="after-launch-heading" className={`${styles.sectionHeading} display`}>
+            <h2 id="after-launch-heading" className={`${styles.sectionHeading} t-h2`}>
               {L.afterLaunchHeading}
             </h2>
             <Logbook caption={study.afterLaunch.caption} columns={L.logColumns} rows={study.afterLaunch.entries.map((e) => [e.date, e.text])} />
@@ -287,10 +236,10 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
 
           <section id="results" className={styles.section} aria-labelledby="results-heading" data-waypoint data-route="results" data-route-blaze="">
             <h2 id="results-heading" className={styles.resultsHeading}>
-              <span className={`${styles.stageLine} hud-label map-halo`} data-quiet-zone>
+              <span className={`${styles.stageLine} mono`} data-quiet-zone>
                 {`${ascent.summit.label} · ${altitudeLabel(ascent.summit.altitudeM)}`}
               </span>
-              <span className={`${styles.sectionHeading} display`}>{L.resultsHeading}</span>
+              <span className={`${styles.sectionHeading} t-h2`}>{L.resultsHeading}</span>
             </h2>
             <ElevationProfile
               caption={study.results.caption}
@@ -319,7 +268,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
       </div>
 
       <Descent lookingBack={{ heading: L.lookingBack, lessons: study.lookingBack }} team={{ heading: L.team, roles: study.team }} />
-      <div className={`${styles.closing} legend`} data-vt-exit>
+      <div className={`${styles.closing} legend`}>
         <p className="body-copy">
           <strong>{L.didNotDo}: </strong>
           {study.didNotDo}
@@ -327,18 +276,12 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
         <p className={`${styles.credits} body-copy`}>{study.credits}</p>
       </div>
 
-      <TrailheadBand
+      <NextCase
         next={next}
-        previous={previous}
-        ridge={ridge}
-        labels={{
-          nav: L.next,
-          next: L.next,
-          previous: L.previous,
-          backToAll: L.backToAll,
-          youAreHere: L.youAreHere,
-          ridge: L.ridge,
-        }}
+        outcome={next ? caseStudies[next.slug]!.impactLine : ""}
+        index={next ? studies.indexOf(next) + 1 : 0}
+        total={studies.length}
+        labels={{ next: L.next, backToAll: L.backToAll }}
       />
       <AltimeterBar slug={card.slug} items={trail} labels={{ bar: L.onThisPage, sheet: L.jumpTo, close: L.close }} />
     </main>

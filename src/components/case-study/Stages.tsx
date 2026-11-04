@@ -3,7 +3,6 @@ import { caseStudyLabels as L } from "@/content/case-study-labels";
 import type { AscentPlace } from "@/content/geo";
 import { altitudeLabel } from "@/content/geo";
 import { decisionNumbers, figureNumbers, noteNumbers, type Block, type CaseStudy, type Decision, type ListItem } from "@/lib/case-study";
-import { TrailLink } from "@/components/interaction/TrailLink";
 import { ForkDiagram } from "./ForkDiagram";
 import { Figure } from "./Figure";
 import styles from "./Stages.module.css";
@@ -48,7 +47,7 @@ function Paragraph({ block, note }: { block: Extract<Block, { kind: "p" }>; note
         )}
       </p>
       {note && (
-        <aside className={`${styles.note} hud-label`} aria-label={L.sideNote(note)}>
+        <aside className={`${styles.note} mono`} aria-label={L.sideNote(note)}>
           <span className={styles.noteNumber} aria-hidden="true">
             {note}
           </span>
@@ -82,7 +81,7 @@ function KeyInsight({ text }: { text: string }) {
   const id = useId();
   return (
     <aside className={`${styles.insight} surface-copy`} aria-labelledby={id}>
-      <p id={id} className={`${styles.insightLabel} hud-label`}>
+      <p id={id} className={`${styles.insightLabel} mono`}>
         {L.keyInsight}
       </p>
       <p className={styles.insightText}>{text}</p>
@@ -126,7 +125,7 @@ export function Stages({ study, places, lastStation }: { study: CaseStudy; place
             {groups(stage.blocks).map((part, g) => {
               const heading = g === 0 && (
                 <h2 id={`${stage.id}-heading`} className={styles.heading}>
-                  <span className={`${styles.stageLine} hud-label`}>
+                  <span className={`${styles.stageLine} mono`}>
                     {place ? L.stageLine(index + 1, place.label, altitudeLabel(place.altitudeM)) : L.stage(index + 1)}
                   </span>
                   <span className={styles.finding}>{stage.finding}</span>
@@ -175,19 +174,13 @@ export function Stages({ study, places, lastStation }: { study: CaseStudy; place
             })}
             <p className={styles.foot}>
               {next && (
-                <TrailLink
-                  href={`#${next.id}`}
-                  arrow="↓"
-                  aria-label={`${L.nextWaypoint}: ${next.nav}`}
-                  className={`${styles.footLink} hud-label map-halo`}
-                  data-quiet-zone
-                >
-                  {L.nextWaypoint}
-                </TrailLink>
+                <a href={`#${next.id}`} aria-label={`${L.nextWaypoint}: ${next.nav}`} className={`${styles.footLink} mono`}>
+                  {L.nextWaypoint} ↓
+                </a>
               )}
-              <TrailLink href="#main" arrow="↑" className={`${styles.footLink} hud-label map-halo`} data-quiet-zone>
-                {L.backToTop}
-              </TrailLink>
+              <a href="#main" className={`${styles.footLink} mono`}>
+                {L.backToTop} ↑
+              </a>
             </p>
           </section>
         );

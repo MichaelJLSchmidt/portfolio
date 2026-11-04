@@ -86,11 +86,11 @@ export function ForkDiagram({
             <div className={styles.card}>
               <p className={styles.optionHead}>
                 <span className={styles.label}>{o.label}</span>
-                <span className={`${styles.status} hud-label`}>{statusText[o.status]}</span>
+                <span className={`${styles.status} mono`}>{statusText[o.status]}</span>
               </p>
               <dl className={styles.facts}>
                 <div>
-                  <dt className="hud-label">{labels.pros}</dt>
+                  <dt className="mono">{labels.pros}</dt>
                   <dd>
                     <ul>
                       {o.pros.map((p) => (
@@ -100,7 +100,7 @@ export function ForkDiagram({
                   </dd>
                 </div>
                 <div>
-                  <dt className="hud-label">{labels.cons}</dt>
+                  <dt className="mono">{labels.cons}</dt>
                   <dd>
                     <ul>
                       {o.cons.map((c) => (
@@ -110,13 +110,13 @@ export function ForkDiagram({
                   </dd>
                 </div>
                 <div>
-                  <dt className="hud-label">{labels.cost}</dt>
+                  <dt className="mono">{labels.cost}</dt>
                   <dd>{o.cost}</dd>
                 </div>
               </dl>
               {o.turnedBack && (
                 <p className={styles.turnedBack}>
-                  <span className={`${styles.turnedBackLabel} hud-label`}>{labels.turnedBack(o.turnedBack.date)}</span> {o.turnedBack.text}
+                  <span className={`${styles.turnedBackLabel} mono`}>{labels.turnedBack(o.turnedBack.date)}</span> {o.turnedBack.text}
                 </p>
               )}
             </div>

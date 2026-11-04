@@ -60,38 +60,38 @@ export function planRoute(
     if (mode === "full") {
       if (!drawn) {
         steps.push({ channel: "riverOpacity", to: 1, delay: 200, duration: 0, easing: "linear" });
-        steps.push({ channel: "riverDraw", from: 0, to: 1, delay: 200, duration: ms("draw") - 200, easing: "summit" });
-        steps.push({ channel: "ping", from: 0, to: 1, delay: 300, duration: ms("long"), easing: "trail" });
+        steps.push({ channel: "riverDraw", from: 0, to: 1, delay: 200, duration: ms("draw") - 200, easing: "inOut" });
+        steps.push({ channel: "ping", from: 0, to: 1, delay: 300, duration: ms("enter"), easing: "out" });
       } else {
-        steps.push({ channel: "riverOpacity", to: 1, delay: 0, duration: ms("still"), easing: "trail" });
+        steps.push({ channel: "riverOpacity", to: 1, delay: 0, duration: ms("still"), easing: "out" });
       }
-      steps.push({ channel: "pin", to: 1, delay: drawn ? 0 : 300, duration: ms("micro"), easing: "trail" });
+      steps.push({ channel: "pin", to: 1, delay: drawn ? 0 : 300, duration: ms("press"), easing: "out" });
     } else {
       steps.push({ channel: "riverDraw", to: 1, delay: 0, duration: 0, easing: "linear" });
-      steps.push({ channel: "riverOpacity", to: 1, delay: 200, duration: ms("still"), easing: "trail" });
-      steps.push({ channel: "pin", to: 1, delay: 300, duration: ms("still"), easing: "trail" });
+      steps.push({ channel: "riverOpacity", to: 1, delay: 200, duration: ms("still"), easing: "out" });
+      steps.push({ channel: "pin", to: 1, delay: 300, duration: ms("still"), easing: "out" });
     }
     return steps;
   }
   const leavingBern = values.riverOpacity > 0 || values.pin > 0;
   if (leavingBern) {
-    steps.push({ channel: "riverOpacity", to: 0, delay: 0, duration: ms("breathOut"), easing: "scree" });
-    steps.push({ channel: "pin", to: 0, delay: 0, duration: ms("breathOut"), easing: "scree" });
+    steps.push({ channel: "riverOpacity", to: 0, delay: 0, duration: ms("fast"), easing: "in" });
+    steps.push({ channel: "pin", to: 0, delay: 0, duration: ms("fast"), easing: "in" });
     steps.push({ channel: "ping", to: 0, delay: 0, duration: 0, easing: "linear" });
   } else if (mode === "full" && changes) {
     // Lines above the front drop to the floor at once (80 ms), then return as it passes them.
-    steps.push({ channel: "floor", to: revealFloor, delay: 0, duration: ms("instant"), easing: "trail" });
-    steps.push({ channel: "reveal", from: 0, to: 1, delay: 0, duration: ms("draw"), easing: "summit" });
+    steps.push({ channel: "floor", to: revealFloor, delay: 0, duration: ms("press"), easing: "out" });
+    steps.push({ channel: "reveal", from: 0, to: 1, delay: 0, duration: ms("draw"), easing: "inOut" });
     steps.push({ channel: "floor", from: 1, to: 1, delay: ms("draw"), duration: 0, easing: "linear" });
   }
   return steps;
 }
 
 /** The morph: terrain token, summit easing. */
-export const morphStep = (to: number): Step => ({ channel: "morph", to, delay: 0, duration: ms("terrain"), easing: "summit" });
+export const morphStep = (to: number): Step => ({ channel: "morph", to, delay: 0, duration: ms("terrain"), easing: "inOut" });
 
 /** Pre-warm (tier A, full): lean towards a hovered or focused destination, and back on leave. */
-export const prewarmStep = (to: number, durationMs: number): Step => ({ channel: "morph", to, delay: 0, duration: durationMs, easing: "trail" });
+export const prewarmStep = (to: number, durationMs: number): Step => ({ channel: "morph", to, delay: 0, duration: durationMs, easing: "out" });
 
 /** Cubic-bezier easing (x → y) solved with a few Newton steps; fine for UI tweens. */
 export function bezier(p: readonly number[]): (x: number) => number {

@@ -14,33 +14,22 @@
 //                                     loss (scripts/e2e-terrain.mjs; needs NEXT_PUBLIC_PREVIEW=1)
 //   npm run test:e2e -- deck          deck order, card link names and the Next project loop
 //                                     (scripts/e2e/deck.mjs; needs the examples)
-//   npm run test:e2e -- about         the HUD label ↔ About H1 morph in full, calm and still
-//                                     (scripts/e2e/about.mjs)
 //   npm run test:e2e -- ia            page structure, HUD order, example content (scripts/e2e/layout.mjs)
 //   npm run test:e2e -- phone         every route at 360 and 390 px: no overflow, HUD and footer
 //                                     (scripts/e2e/layout.mjs)
 //   npm run test:e2e -- fontswap      the web fonts held back on a throttled phone: CLS ≤ 0.05,
 //                                     display titles keep their boxes (scripts/e2e/typography.mjs)
-//   npm run test:e2e -- hud           the HUD's slots and condensing (scripts/e2e/chrome.mjs)
 //   npm run test:e2e -- toast         Copy address and its toast in full and still (scripts/e2e/chrome.mjs)
-//   npm run test:e2e -- cards         the deck's grid, phone list, arrival, hover, focus, press, marks,
-//                                     stats and the visited stamp (scripts/e2e/cards.mjs)
 //   npm run test:e2e -- arrival       route arrivals: timing, focus on the H1, the trailhead morph,
 //                                     traversals, Basecamp, still (scripts/e2e/choreography.mjs)
 //   npm run test:e2e -- reading       the waypoint trail, the altimeter bar, the
 //                                     career profile per mode, no endless loops (choreography.mjs)
-//   npm run test:e2e -- route         the red route: one path through every waypoint, never across
-//                                     text, the phone margin, the blaze; full (scroll timeline,
-//                                     Lenis), the fallback, calm, still (scripts/e2e/route.mjs)
 //   npm run test:e2e -- axe           axe-core WCAG 2.2 A/AA on every route: full, calm, still, a
 //                                     phone, forced colours (scripts/e2e/axe.mjs)
 //   npm run test:e2e -- access        forced colours, headings read once, the haptics map
 //                                     (scripts/e2e/choreography.mjs)
 //   npm run test:e2e -- wording       no old names, CV or job-seeking phrases in the built HTML
 //                                     (scripts/check-wording.mjs)
-//   npm run test:e2e -- flood         the contour flood by mouse, keyboard and touch, in each mode
-//   npm run test:e2e -- trail         trail links: the red line, no width change, the blaze
-//   npm run test:e2e -- portrait      the About portrait card turning to its facts and back
 //   npm run test:e2e -- inp           the Next project tap on a throttled phone (INP ≤ 200 ms)
 //   npm run test:e2e -- pointer       no pointermove listener but the card tilt (scripts/e2e/interaction.mjs)
 //   npm run test:e2e -- smoke         a smoke subset in Chromium, WebKit and Firefox (each where
@@ -56,16 +45,13 @@ import { createRequire } from "node:module";
 import { createServer } from "node:net";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { about } from "./e2e/about.mjs";
 import { deck } from "./e2e/deck.mjs";
 import { ia, phone, routes as builtRoutes } from "./e2e/layout.mjs";
 import { fontswap } from "./e2e/typography.mjs";
-import { hud, toast } from "./e2e/chrome.mjs";
-import { cards } from "./e2e/cards.mjs";
+import { toast } from "./e2e/chrome.mjs";
 import { access, arrival, reading } from "./e2e/choreography.mjs";
 import { smoke } from "./e2e/smoke.mjs";
-import { flood, inp, pointer, portrait, trail } from "./e2e/interaction.mjs";
-import { route } from "./e2e/route.mjs";
+import { inp, pointer } from "./e2e/interaction.mjs";
 import { axe } from "./e2e/axe.mjs";
 import { wordingHits } from "./check-wording.mjs";
 
@@ -1066,7 +1052,7 @@ async function wording() {
 const scenarios = { transitions, modes, hydration, primitives, decode, casestudy, wording };
 // The terrain conductor and the Bern terrain (scripts/e2e-terrain.mjs).
 Object.assign(scenarios, (await import("./e2e-terrain.mjs")).terrainScenarios({ browser, base, root, check, settle }));
-Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, about, ia, phone, fontswap, hud, toast, cards, arrival, reading, access, flood, trail, portrait, pointer, inp, smoke, route, axe }).map(([name, run]) => [name, () => run({ browser, playwright, base, basePath, root, check, open, settle })])));
+Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, ia, phone, fontswap, toast, arrival, reading, access, pointer, inp, smoke, axe }).map(([name, run]) => [name, () => run({ browser, playwright, base, basePath, root, check, open, settle })])));
 try {
   for (const [name, run] of Object.entries(scenarios)) if (!only || only === name) await run();
 } finally {

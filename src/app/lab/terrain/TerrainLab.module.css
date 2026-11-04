@@ -31,10 +31,10 @@
     align-content: start;
     gap: 12px;
     padding: 20px;
-    border: 1px solid var(--color-contour-dim);
+    border: 1px solid var(--color-line);
     border-radius: 8px;
     background: color-mix(in srgb, var(--color-ground-raised) 88%, transparent);
-    color: var(--color-paper-dusk);
+    color: var(--color-text);
   }
 
   .panel h2,
@@ -45,7 +45,7 @@
 
   .note {
     margin: 0;
-    color: var(--color-paper-dusk);
+    color: var(--color-text);
     font-size: 0.875rem;
     line-height: 1.45;
   }
@@ -58,7 +58,7 @@
   }
 
   .row a {
-    color: var(--color-paper-dusk);
+    color: var(--color-text);
   }
 
   .row a[aria-current="true"] {
@@ -73,7 +73,7 @@
   }
 
   .state dt {
-    color: var(--color-paper-dusk);
+    color: var(--color-text);
     font-size: 0.75rem;
   }
 

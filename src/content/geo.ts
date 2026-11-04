@@ -1,5 +1,6 @@
 import data from "./geo-data.json";
 import { formatInteger } from "@/lib/format";
+import { coordinatesLabel, lv95ToWgs84 } from "@/lib/geo";
 
 /**
  * Verified place data: the stages of the three ascents (case studies) and the About climb. Every
@@ -99,4 +100,13 @@ export function ascentOf(terrainId: string | null | undefined): { id: AscentId; 
     summit: { id: a.summit, ...places[a.summit] },
     lastStation: lastStation(a),
   };
+}
+
+/** A case study's summit (its card's terrain): name, altitude and coordinates, for the set line and the header plate. */
+export function summitOf(terrainId: string): { label: string; altitude: string; coordinates: string | null } | null {
+  const ascent = ascentOf(terrainId);
+  if (!ascent) return null;
+  const { summit } = ascent;
+  const coordinates = summit.e && summit.n ? coordinatesLabel(...lv95ToWgs84(summit.e, summit.n)) : null;
+  return { label: summit.label, altitude: altitudeLabel(summit.altitudeM), coordinates };
 }

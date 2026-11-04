@@ -5,51 +5,6 @@
 //   toast  "Copy address" copies the address, its label changes to "Copied", a role="status"
 //          toast reads "Email address copied.", stays 4 s, pauses on hover, closes; in still
 //          mode it only fades.
-export async function hud({ browser, base, check }) {
-  console.log("\nhud: two slots, condensing");
-  for (const width of [360, 640, 1024, 1280, 1920]) {
-    const context = await browser.newContext({ viewport: { width, height: 800 } });
-    const page = await context.newPage();
-    await page.goto(`${base}/about/`, { waitUntil: "load" });
-    await page.evaluate(() => document.fonts.ready);
-    const r = await page.evaluate(() => {
-      const bar = document.querySelector("header[data-chrome]").firstElementChild;
-      const items = [...bar.children].flatMap((slot) => [...slot.children]).filter((el) => el.getClientRects().length);
-      const boxes = items.map((el) => el.getBoundingClientRect());
-      const overlaps = boxes.some((a, i) => boxes.some((b, j) => j > i && a.left < b.right - 0.5 && b.left < a.right - 0.5));
-      return { overlaps, inside: boxes.every((b) => b.left >= 0 && b.right <= innerWidth + 0.5) };
-    });
-    check(`${width} px: the slots never overlap and stay on screen`, !r.overlaps && r.inside, JSON.stringify(r));
-    await context.close();
-  }
-  {
-    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-    await context.addInitScript(() => {
-      window.__shifts = [];
-      new PerformanceObserver((l) => {
-        for (const e of l.getEntries()) if (!e.hadRecentInput) window.__shifts.push(e.value);
-      }).observe({ type: "layout-shift", buffered: true });
-    });
-    const page = await context.newPage();
-    await page.goto(`${base}/`, { waitUntil: "load" });
-    await page.evaluate(() => document.fonts.ready);
-    await page.waitForTimeout(800);
-    const before = await page.evaluate(() => window.__shifts.length);
-    await page.mouse.wheel(0, 900);
-    await page.waitForTimeout(900);
-    const s = await page.evaluate((n) => {
-      const h = document.querySelector("header[data-chrome]");
-      const r = h.getBoundingClientRect();
-      return { condensed: h.hasAttribute("data-condensed"), top: r.top, visible: getComputedStyle(h).visibility, shifts: window.__shifts.slice(n).reduce((a, b) => a + b, 0) };
-    }, before);
-    check("after 120 px the bar condenses, still on screen", s.condensed && s.top === 0 && s.visible === "visible", JSON.stringify(s));
-    check("condensing moves nothing (no layout shift)", s.shifts < 0.0005, s.shifts.toFixed(5));
-    await page.mouse.wheel(0, -900);
-    await page.waitForTimeout(700);
-    check("back at the top it rests again", !(await page.evaluate(() => document.querySelector("header[data-chrome]").hasAttribute("data-condensed"))));
-    await context.close();
-  }
-}
 
 export async function toast({ browser, base, check }) {
   for (const mode of ["full", "still"]) {

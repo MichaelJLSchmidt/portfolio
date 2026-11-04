@@ -51,8 +51,8 @@ uniform float uZoom;       // > 1 zooms in around the screen centre (camera push
 uniform vec4 uQuiet[MAX_QUIET];     // quiet zones behind text: left, bottom, right, top (device px)
 uniform vec2 uQuietKind[MAX_QUIET]; // per zone: feather (device px), line strength inside (0..1)
 uniform int uQuietCount;
-uniform float uQuietHold;   // 0..1: during a route change every zone takes the strongest knockout
-uniform vec2 uHoldKind;     // that knockout: feather (device px), strength
+uniform float uQuietHold;   // 0..1: during a route change every zone takes the strongest
+uniform vec2 uHoldKind;     // that: feather (device px), strength
 uniform vec4 uQuietColumn;  // and the content column, old and new page together (device px)
 
 uniform vec2 uPinPos;       // the zero-point pin, device px (origin bottom-left)
@@ -107,8 +107,8 @@ void main() {
 
   // Quiet zones: lines fade to the zone's strength inside its rectangle, feathered outwards,
   // like contours interrupted under a map's labels. Headings keep ~25% of a line, body text
-  // ~7%; where zones overlap, the stronger knockout wins. Through a route change every zone,
-  // and the column both pages' text shares, holds the strongest knockout.
+  // ~7%; where zones overlap, the stronger wins. Through a route change every zone,
+  // and the column both pages' text shares, holds the strongest.
   float keep = 1.0;
   for (int i = 0; i < MAX_QUIET; i++) {
     if (i >= uQuietCount) break;

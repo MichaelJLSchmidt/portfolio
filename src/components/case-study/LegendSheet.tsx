@@ -41,7 +41,6 @@ export function LegendSheet({
   scale,
   rows,
   note,
-  arriveAt,
 }: {
   id: string;
   heading: string;
@@ -51,16 +50,15 @@ export function LegendSheet({
   scale: string;
   rows: readonly LegendRow[];
   note?: string;
-  arriveAt?: number;
 }) {
   return (
-    <section className={styles.sheet} aria-labelledby={id} data-vt-exit="" data-ink="sheet" data-reveal="sheet" data-fold="top" data-arrive-at={arriveAt}>
+    <section className={styles.sheet} aria-labelledby={id} data-surface="sheet">
       <span className={styles.ticks} aria-hidden="true" />
       <div className={styles.head}>
-        <h2 id={id} className={`${styles.heading} hud-label`}>
+        <h2 id={id} className={`${styles.heading} mono`}>
           {heading}
         </h2>
-        <p className={`${styles.margin} hud-label`}>
+        <p className={`${styles.margin} mono`}>
           <span>{sheet}</span>
           <span className={styles.scale} aria-hidden="true">
             <span className={styles.scaleBar} />
@@ -77,13 +75,13 @@ export function LegendSheet({
                 <svg className={styles.symbol} viewBox="0 0 18 18" aria-hidden="true">
                   <path d={legendSymbols[r.symbol]} />
                 </svg>
-                <span className="hud-label">{r.label}</span>
+                <span className="mono">{r.label}</span>
               </dt>
               <dd>{r.content ?? r.value}</dd>
             </div>
           ))}
       </dl>
-      {note && <p className={`${styles.note} hud-label`}>{note}</p>}
+      {note && <p className={`${styles.note} mono`}>{note}</p>}
     </section>
   );
 }

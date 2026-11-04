@@ -1,4 +1,3 @@
-import type { Rarity } from "@/styles/tokens";
 import { actions } from "./contact";
 import { ex } from "./example-values";
 import { site } from "./site";
@@ -6,9 +5,8 @@ import { site } from "./site";
 export type { Action } from "./contact";
 
 /**
- * About (/about/): who I am and how I work, for a hiring manager who reads one page. It is reached
- * from the HUD's About link, whose label morphs into the page's H1. Components render only what
- * is here. Invented values are written as ex("…") (src/content/example-values.ts) and facts still
+ * About (/about/): who I am and how I work, for a hiring manager who reads one page. Components
+ * render only what is here. Invented values are written as ex("…") (src/content/example-values.ts) and facts still
  * to confirm as [PLACEHOLDERS]: check:content lists both, and a live build stops on them.
  */
 
@@ -27,13 +25,6 @@ const camps: Camp[] = [
   { year: "today", title: "UX Team Lead", at: 1 },
 ];
 
-/** A pocket of the card binder: an original card (no game's logo, art or frame), or an empty one. */
-export type Pocket =
-  | { kind: "deck"; game: string; line: string }
-  | { kind: "trainer"; line: string }
-  | { kind: "workshop"; line: string }
-  | { kind: "empty" };
-
 export const about = {
   meta: {
     title: site.nav.about,
@@ -41,10 +32,9 @@ export const about = {
       "About a UX Team Lead in Bern: who I am, how I work with people, how I start with a new team, the skills beyond design, and the way from front-end developer to team lead.",
   },
   /**
-   * The portrait card in the About title: the cut-out portrait on a thin card frame (rarity M,
-   * collector number 000); "Show facts" turns it over to the facts. Until the photo is supplied
-   * (scripts/portrait.mjs, docs/content.md) a contour silhouette stands in and `missing` is a
-   * placeholder, so a live build stops on it.
+   * The portrait slot beside the intro. Until the photo is supplied (scripts/portrait.mjs,
+   * docs/content.md) a contour silhouette stands in and `missing` is a placeholder, so a live
+   * build stops on it.
    */
   portrait: {
     /** After `npm run portrait -- cutout.png`: the import of ./portrait.json (and remove `missing`). */
@@ -52,13 +42,9 @@ export const about = {
     missing: "[PORTRAIT PHOTO]",
     alt: `Portrait of ${site.name}`,
     placeholderLabel: "Portrait to come",
-    showFacts: "Show facts",
-    showPhoto: "Show photo",
-    rarity: "M" as Rarity,
-    collector: "000",
   },
   header: {
-    /** The H1: the HUD's About label, which morphs into it (the same word on both ends). */
+    /** The H1: the header's About label, the same word. */
     heading: site.nav.about,
     lead: ex("UX Team Lead in Bern. I build teams that design public services people understand on the first try."),
   },
@@ -82,6 +68,34 @@ export const about = {
       ex(
         "For eight years I’ve worked on digital services for public administration: childcare subsidies, permits, internal tools nobody wanted to talk about. My team designs, researches and prototypes in code, and we run the workshops that get legal, operations and development to one decision.",
       ),
+    ],
+  },
+  /** How I lead: four principles with their evidence (the leadership band, on the sheet). */
+  lead: {
+    heading: "How I lead",
+    evidenceLabel: "Evidence:",
+    /** Four principles; each title passes the plain-label test. */
+    principles: [
+      {
+        title: "Clear the path, then step aside",
+        text: "I set direction and remove blockers; designers own their decisions.",
+        evidence: ex("Removed two approval steps so designers could test every week."),
+      },
+      {
+        title: "Bring people in early",
+        text: "Legal, developers and operations join at workshop one, not workshop three.",
+        evidence: ex("Developers join from the first workshop, not at the handover."),
+      },
+      {
+        title: "Measure before we change",
+        text: "No change without a baseline, no baseline without a method.",
+        evidence: ex("Every project starts with a baseline task-success test."),
+      },
+      {
+        title: "Leave the system better",
+        text: "Patterns, docs and career paths should outlast any one project.",
+        evidence: ex("Each project adds a pattern to our design system."),
+      },
     ],
   },
   workingRules: {
@@ -126,55 +140,44 @@ export const about = {
         name: "Workshop facilitation",
         text: "Workshops that end with decisions, not sticky notes.",
         proof: ex("About 40 since 2019"),
-        icon: "workshop",
       },
       {
         name: "Coaching designers",
         text: "1:1s and critique that build judgement, not dependence.",
         proof: ex("Two designers grown into senior roles"),
-        icon: "coaching",
       },
       {
         name: "Aligning stakeholders",
         text: "In public administration a yes needs many signatures; I map them early.",
         proof: ex("One decision log per project, signed off by legal"),
-        icon: "stakeholders",
       },
       {
         name: "Writing plainly",
         text: "Interfaces, decisions and documentation in words people understand.",
         proof: ex("Content guidelines used by four product teams"),
-        icon: "writing",
       },
       {
         name: "Bridging design and code",
         text: "Years as a front-end developer mean I know what a design costs to build.",
         proof: ex("Five years of front-end development before UX"),
-        icon: "code",
       },
       {
         name: "Moderating conflict",
         text: "I make disagreements explicit and time-boxed.",
         proof: ex("Decision workshops with legal, IT and operations"),
-        icon: "conflict",
       },
     ],
   },
   career: {
     heading: "Career so far",
-    intro: "From front-end code to leading a team, drawn on a real trail near Bern: from Ittigen up to the Bantiger, the line is the terrain along it, from swisstopo elevation data.",
+    intro: "From front-end code to leading a team, drawn on a real trail near Bern: from Ittigen up to the Bantiger, the line is the terrain along it.",
     /** The camps' list (its accessible name): the roles, each with its height on the trail. */
     caption: "Roles along the way",
     camps,
     /** The summit camp: "UX Team Lead · today". */
     summit: (title: string, year: string) => `${title} · ${year}`,
-    /** On the transmitter mast above the summit: the outlook, and a tiny label on the mast. */
-    outlook: "947 m. Not the top. There’s still room to grow.",
-    mast: "Luft nach oben",
-    /** The mast's tip (a secondary source, so "about"). */
-    tip: (height: string) => `≈ ${height} m`,
-    /** Under the drawing: the trail's places with their heights, its length and the data's source. */
-    trail: (places: string, km: string) => `${places} · ${km} km · elevation: swisstopo`,
+    /** Under the drawing: the trail's places, its length and the data's source. */
+    trail: (places: string, km: string) => `${places} · ${km} km · terrain: swisstopo`,
   },
   craft: {
     heading: "Tools and craft",
@@ -183,40 +186,17 @@ export const about = {
   cards: {
     heading: "Away from work: cards",
     body: "I play trading card games: Magic: The Gathering, the One Piece Card Game and Yu-Gi-Oh!. A good card game is a rule system that has to be clear at a glance, which is not far from designing a public service. That’s why the projects on this site are cards.",
-    /** The binder page: nine pockets of original cards; a tap turns one over to its line. */
-    binder: {
-      label: "Card binder",
-      /** The pockets' lines, also listed as text under the binder. */
-      listLabel: "In the binder",
-      deckBox: "Deck box",
-      /** A deck box's name: "Deck box · Magic: The Gathering". */
-      cardName: (kind: string, game: string) => `${kind} · ${game}`,
-      trainer: "Trainer card",
-      workshop: "Workshop card",
-      empty: "Still collecting",
-      pockets: [
-        { kind: "deck", game: "Magic: The Gathering", line: ex("Commander, mostly: a hundred cards, one of each.") },
-        { kind: "trainer", line: "The person behind the decks, in the same frame as the projects." },
-        { kind: "deck", game: "One Piece Card Game", line: ex("Fast games on weeknights.") },
-        { kind: "workshop", line: ex("About 40 workshops since 2019: each ends with a decision.") },
-        { kind: "empty" },
-        { kind: "deck", game: "Yu-Gi-Oh!", line: ex("The game I learned rules lawyering from.") },
-        { kind: "empty" },
-        { kind: "empty" },
-        { kind: "empty" },
-      ] as Pocket[],
-    },
+    /** What is in the binder, as a list. */
+    listLabel: "In the binder",
+    items: [
+      { name: "Magic: The Gathering", line: ex("Commander, mostly: a hundred cards, one of each.") },
+      { name: "One Piece Card Game", line: ex("Fast games on weeknights.") },
+      { name: "Yu-Gi-Oh!", line: ex("The game I learned rules lawyering from.") },
+    ],
   },
   /** The under-construction page's inert stand-in for a link without a URL yet. */
   placeholderAction: (label: string) => `[${label.toUpperCase()}]`,
 };
-
-/** A binder pocket's card name ("Deck box · Magic: The Gathering"), for its button and the list. */
-export function pocketName(p: Pocket): string {
-  const b = about.cards.binder;
-  if (p.kind === "deck") return b.cardName(b.deckBox, p.game);
-  return p.kind === "trainer" ? b.trainer : p.kind === "workshop" ? b.workshop : b.empty;
-}
 
 /**
  * The under-construction page production serves until launch, and the password gate, which

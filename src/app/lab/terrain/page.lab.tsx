@@ -18,7 +18,7 @@ export default function TerrainLabPage() {
   return (
     <main id="main" className={`${styles.main} container`}>
       <header className={styles.header} data-quiet-zone>
-        <h1 className={`${styles.title} display`}>{terrainLab.heading}</h1>
+        <h1 className={`${styles.title} t-h1`}>{terrainLab.heading}</h1>
         <p className="body-copy">{terrainLab.intro}</p>
       </header>
       <TerrainLab />

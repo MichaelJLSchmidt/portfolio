@@ -44,7 +44,7 @@ if (!meta.hasAlpha) {
 }
 
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
-const [lo, hi] = [hex(color.ground), hex(color.paperDusk)];
+const [lo, hi] = [hex(color.ground), hex(color.text)];
 
 /** The photo with the duotone mixed in and, optionally, the contour overlay: raw RGBA at width w. */
 async function master(w) {

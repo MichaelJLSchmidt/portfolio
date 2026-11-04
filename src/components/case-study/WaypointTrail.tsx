@@ -39,7 +39,7 @@ export function WaypointTrail({ slug, label, items }: { slug: string; label: str
     if (previous < 0 && window.scrollY < 1) return;
     const item = listRef.current?.children[active];
     item?.setAttribute("data-ping", "");
-    const t = window.setTimeout(() => item?.removeAttribute("data-ping"), duration.long);
+    const t = window.setTimeout(() => item?.removeAttribute("data-ping"), duration.enter);
     return () => {
       window.clearTimeout(t);
       item?.removeAttribute("data-ping");
@@ -48,7 +48,7 @@ export function WaypointTrail({ slug, label, items }: { slug: string; label: str
 
   return (
     <nav className={styles.trail} aria-label={label}>
-      <p className={`${styles.title} hud-label map-halo`} aria-hidden="true" data-quiet-zone>
+      <p className={`${styles.title} mono`} aria-hidden="true" data-quiet-zone>
         {label}
       </p>
       <ol ref={listRef} className={styles.list} style={{ "--n": items.length } as CSSProperties} data-quiet-zone>
@@ -62,7 +62,7 @@ export function WaypointTrail({ slug, label, items }: { slug: string; label: str
             <span className={styles.ping} aria-hidden="true" />
             <a href={`#${item.id}`} className={styles.link} aria-current={i === active ? "true" : undefined}>
               <span className={styles.label}>{item.nav}</span>
-              {item.detail && <span className={`${styles.detail} hud-label map-halo`}>{item.detail}</span>}
+              {item.detail && <span className={`${styles.detail} mono`}>{item.detail}</span>}
             </a>
           </li>
         ))}

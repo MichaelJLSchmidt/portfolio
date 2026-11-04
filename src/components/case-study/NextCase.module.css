@@ -1,0 +1,20 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+@layer components {
+  .next {
+    display: grid;
+    gap: 48px;
+    justify-items: start;
+    margin-top: var(--space-section);
+  }
+
+  .lead {
+    display: grid;
+    gap: 16px;
+    width: min(100%, 320px);
+  }
+
+  .label {
+    color: var(--color-text-2);
+  }
+}

@@ -33,7 +33,7 @@ export function EvidenceBadge({ kind }: { kind: Evidence }) {
  */
 export function EvidenceLegend({ kinds, notes }: { kinds: Evidence[]; notes?: Partial<Record<Evidence, string>> }) {
   return (
-    <dl className={`${styles.evidenceLegend} body-copy`} aria-label={L.evidenceLegend} data-reveal="sheet" data-fold="left" data-draws="">
+    <dl className={`${styles.evidenceLegend} body-copy`} aria-label={L.evidenceLegend} data-draws="">
       {kinds.map((kind) => (
         <div key={kind}>
           <dt>

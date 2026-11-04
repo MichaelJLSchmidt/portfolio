@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 import { useLabReady } from "@/components/lab/ready";
-import { FloodButton } from "@/components/interaction/FloodButton";
+import { SurveyButton } from "@/components/ui/SurveyButton";
 import { fieldStore, useFieldStore } from "@/components/terrain/field-store";
 import { BERN } from "@/components/terrain/route-terrain";
 import { cards } from "@/content/cards";
@@ -37,46 +37,42 @@ export function TerrainLab() {
   useLabReady();
   const terrains = [
     { id: null, label: copy.morphs.region },
-    ...cards.map((c) => ({ id: c.artwork.terrainId, label: copy.morphs.card(c.name) })),
+    ...cards.map((c) => ({ id: c.terrainId, label: copy.morphs.card(c.name) })),
     { id: BERN, label: copy.morphs.bern },
   ];
 
   return (
     <div className={styles.grid}>
       <section className={styles.panel} aria-labelledby="lab-morphs" data-quiet-zone>
-        <h2 id="lab-morphs" className="hud-label">
+        <h2 id="lab-morphs" className="mono">
           {copy.morphs.heading}
         </h2>
         <p className={styles.note}>{copy.morphs.note}</p>
         <div className={styles.row}>
           {terrains.map((t) => (
-            <FloodButton
-              key={t.id ?? "region"}
-              label={t.label}
-              aria-pressed={target === t.id}
-              data-morph={t.id ?? "region"}
-              onClick={() => morphTo(t.id)}
-            />
+            <SurveyButton key={t.id ?? "region"} arrow={null} aria-pressed={target === t.id} data-morph={t.id ?? "region"} onClick={() => morphTo(t.id)}>
+              {t.label}
+            </SurveyButton>
           ))}
         </div>
-        <h3 className="hud-label">{copy.routes.heading}</h3>
+        <h3 className="mono">{copy.routes.heading}</h3>
         <div className={styles.row}>
-          <Link href="/" className="hud-label">
+          <Link href="/" className="mono">
             {copy.routes.home}
           </Link>
           {cards.map((c) => (
-            <Link key={c.slug} href={c.href ?? `/work/${c.slug}/`} className="hud-label">
+            <Link key={c.slug} href={c.href ?? `/work/${c.slug}/`} className="mono">
               {c.name}
             </Link>
           ))}
-          <Link href="/about/" className="hud-label">
+          <Link href="/about/" className="mono">
             {copy.routes.about}
           </Link>
         </div>
       </section>
 
       <section className={styles.panel} aria-labelledby="lab-readout" data-quiet-zone>
-        <h2 id="lab-readout" className="hud-label">
+        <h2 id="lab-readout" className="mono">
           {copy.readout.heading}
         </h2>
         <dl className={styles.state}>
@@ -100,13 +96,13 @@ export function TerrainLab() {
       </section>
 
       <section className={styles.panel} aria-labelledby="lab-modes" data-quiet-zone>
-        <h2 id="lab-modes" className="hud-label">
+        <h2 id="lab-modes" className="mono">
           {copy.modes.heading}
         </h2>
         <p className={styles.note}>{copy.modes.note}</p>
         <div className={styles.row}>
           {(Object.keys(copy.modes.options) as (keyof typeof copy.modes.options)[]).map((m) => (
-            <a key={m} href={withParam(search, "motion", m)} className="hud-label" aria-current={mode === m ? "true" : undefined}>
+            <a key={m} href={withParam(search, "motion", m)} className="mono" aria-current={mode === m ? "true" : undefined}>
               {copy.modes.options[m]}
             </a>
           ))}
@@ -114,7 +110,7 @@ export function TerrainLab() {
       </section>
 
       <section className={styles.panel} aria-labelledby="lab-tiers" data-quiet-zone>
-        <h2 id="lab-tiers" className="hud-label">
+        <h2 id="lab-tiers" className="mono">
           {copy.tiers.heading}
         </h2>
         <p className={styles.note}>{copy.tiers.note}</p>
@@ -123,7 +119,7 @@ export function TerrainLab() {
             <a
               key={t}
               href={withParam(search, "tier", t === "auto" ? null : t)}
-              className="hud-label"
+              className="mono"
               aria-current={(t === "auto" ? !new URLSearchParams(search).get("tier") : tier === t) ? "true" : undefined}
             >
               {copy.tiers.options[t]}

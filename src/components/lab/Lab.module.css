@@ -42,7 +42,7 @@
   }
 
   .columnNote {
-    color: var(--color-contour);
+    color: var(--color-text-2);
     font-size: 0.875rem;
     line-height: 1.4;
   }
@@ -50,7 +50,7 @@
   .frame {
     width: 100%;
     height: min(78svh, 900px);
-    border: 1px solid var(--color-contour-dim);
+    border: 1px solid var(--color-line);
     border-radius: 8px;
     background: var(--color-ground);
   }
@@ -87,7 +87,7 @@
   }
 
   .readout dt {
-    color: var(--color-contour);
+    color: var(--color-text-2);
   }
 
   .readout dd {
@@ -98,7 +98,7 @@
     display: grid;
     gap: 16px;
     padding-top: 24px;
-    border-top: 1px solid var(--color-contour-dim);
+    border-top: 1px solid var(--color-line);
   }
 
   .section > h2 {
@@ -107,7 +107,7 @@
 
   .note {
     max-width: 52ch;
-    color: var(--color-contour);
+    color: var(--color-text-2);
     font-size: 0.9375rem;
     line-height: 1.5;
   }
@@ -139,7 +139,7 @@
   }
 
   .states th {
-    color: var(--color-contour);
+    color: var(--color-text-2);
     font-weight: 400;
   }
 
@@ -156,7 +156,7 @@
   }
 
   .nextName {
-    color: var(--color-paper-dusk);
+    color: var(--color-text);
     font-size: clamp(2.25rem, 7vw, 3.5rem);
   }
 
@@ -164,7 +164,7 @@
     display: grid;
     align-items: end;
     min-height: 110svh;
-    color: var(--color-contour);
+    color: var(--color-text-2);
   }
 
   .block {
@@ -173,7 +173,7 @@
 
   .cardBlock {
     padding: 20px;
-    border: 1px solid var(--color-contour-dim);
+    border: 1px solid var(--color-line);
     border-radius: 12px;
     background: var(--color-ground-raised);
   }

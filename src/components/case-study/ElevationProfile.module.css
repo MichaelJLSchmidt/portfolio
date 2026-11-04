@@ -14,10 +14,10 @@
     gap: 24px;
     margin: 0;
     padding: clamp(16px, 2.4vw, 28px);
-    border: 1px solid var(--color-contour-dim);
+    border: 1px solid var(--color-line);
     border-radius: 8px;
     background: var(--color-ground-raised);
-    color: var(--color-paper-dusk);
+    color: var(--color-text);
   }
 
   /* Phones: the profile runs down the left margin, a node per stage, the summit last. */
@@ -34,12 +34,12 @@
   }
 
   .ground {
-    fill: color-mix(in srgb, var(--color-contour) 8%, transparent);
+    fill: color-mix(in srgb, var(--color-text-2) 8%, transparent);
   }
 
   .line {
     fill: none;
-    stroke: var(--color-signal);
+    stroke: var(--color-text-2);
     stroke-width: 2px;
     vector-effect: non-scaling-stroke;
     stroke-dasharray: 1;
@@ -56,7 +56,7 @@
     display: grid;
     gap: 14px;
     padding-left: 22px;
-    border-left: 2px solid var(--color-signal);
+    border-left: 2px solid var(--color-text-2);
     margin-left: 4px;
   }
 
@@ -70,7 +70,7 @@
     top: 0.35em;
     width: 8px;
     height: 8px;
-    border: 1.5px solid var(--color-paper-dusk);
+    border: 1.5px solid var(--color-text);
     border-radius: 50%;
     background: var(--color-ground-raised);
   }
@@ -84,7 +84,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0 0.6em;
-    color: var(--color-paper-dusk);
+    color: var(--color-text);
     line-height: 1.5;
   }
 
@@ -105,14 +105,14 @@
 
   .table thead th {
     padding: 0 12px 8px 0;
-    color: var(--color-contour);
+    color: var(--color-text-2);
     font-weight: var(--type-mono-wght);
     text-align: start;
   }
 
   .table tbody > tr > * {
     padding: 10px 12px 10px 0;
-    border-top: 1px solid var(--color-contour-dim);
+    border-top: 1px solid var(--color-line);
     text-align: start;
     vertical-align: baseline;
   }
@@ -133,7 +133,7 @@
   }
 
   .won {
-    color: var(--color-contour);
+    color: var(--color-text-2);
   }
 
   .wonMark {
@@ -142,12 +142,12 @@
     height: 7px;
     margin-right: 6px;
     border-radius: 50%;
-    background: var(--color-signal);
+    background: var(--color-text-2);
   }
 
   /* Desktop: the rows stand under the profile's columns. */
   /* Phones and tablets: each result is a block of its own (metric, before and after, won at). */
-  @media (width < 1024px) {
+  @media (width < 1280px) {
     .table thead {
       position: absolute;
       width: 1px;
@@ -162,7 +162,7 @@
       align-items: baseline;
       gap: 4px 12px;
       padding-block: 12px;
-      border-top: 1px solid var(--color-contour-dim);
+      border-top: 1px solid var(--color-line);
     }
 
     .table tbody > tr > * {
@@ -176,7 +176,7 @@
 
     .before::after {
       content: " →";
-      color: var(--color-contour);
+      color: var(--color-text-2);
     }
 
     .won {
@@ -184,7 +184,7 @@
     }
   }
 
-  @media (min-width: 1024px) {
+  @media (min-width: 1280px) {
     .chart {
       margin-bottom: 56px;
     }
@@ -251,7 +251,7 @@
         minmax(max-content, 0.6fr);
       row-gap: 6px;
       padding-block: 12px;
-      border-top: 1px solid var(--color-contour-dim);
+      border-top: 1px solid var(--color-line);
     }
 
     .table tbody > tr > * {

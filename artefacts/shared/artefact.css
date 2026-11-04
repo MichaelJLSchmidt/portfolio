@@ -6,8 +6,8 @@
 
    Rules for every artefact:
    - flat browser frames (28 px bar, three neutral dots, the fictional URL); at most one phone frame;
-   - on light sheets: markers are ground circles with light numerals, highlights moss-ink, "no
-     feedback" gaps alpenglow-ink; at most one faint contour set (.contours) behind diagrams,
+   - on light sheets: markers are ground circles with light numerals, highlights in ink, "no
+     feedback" gaps in ink-2; at most one faint contour set (.contours) behind diagrams,
      never behind UI text;
    - labels in Martian Mono 500 at 13–14 px, diagram text in Archivo 400/600;
    - Swiss formats in the product UI (CHF 10'000, dd.mm.yyyy, DE/FR); no real coats of arms or
@@ -46,8 +46,8 @@
   --hm-line-soft: #dde3e8;
   --hm-canvas: #f3f5f7;
   --hm-surface: #ffffff;
-  --hm-error: #b42318;
-  --hm-error-tint: #fdeceb;
+  --hm-error: #7A4B00;
+  --hm-error-tint: #FBF3E0;
   --hm-success: #1e7a3c;
   --hm-success-tint: #e7f4eb;
   --hm-focus: #f2b705;
@@ -105,12 +105,12 @@ ol {
 }
 
 .artefact[data-surface="sheet"] {
-  background: var(--color-paper-dusk);
+  background: var(--color-sheet);
 }
 
 .artefact[data-surface="night"] {
   background: var(--color-ground-raised);
-  color: var(--color-paper-dusk);
+  color: var(--color-sheet);
 }
 
 .artefact-body {
@@ -128,7 +128,7 @@ ol {
   height: 24px;
   padding: 0 14px;
   background: var(--color-ground);
-  color: var(--color-paper-dusk);
+  color: var(--color-sheet);
   font-family: var(--label);
   font-size: 11px;
   font-weight: 500;
@@ -138,12 +138,12 @@ ol {
 }
 
 .strip-note {
-  color: var(--color-alpenglow);
+  color: var(--color-ink-2);
   font-weight: 700;
 }
 
 .strip-dot {
-  color: var(--color-contour);
+  color: var(--color-field-line);
 }
 
 /* One faint contour set (contour grey at ~12%) behind diagrams; never behind UI text. */
@@ -191,15 +191,15 @@ ol {
 }
 
 .muted {
-  color: var(--color-paper-ink-2);
+  color: var(--color-ink-2);
 }
 
 .moss {
-  color: var(--color-moss-ink);
+  color: var(--color-ink);
 }
 
 .glow {
-  color: var(--color-alpenglow-ink);
+  color: var(--color-ink);
 }
 
 /* Numbered marker: a ground circle with a light numeral. */
@@ -209,10 +209,10 @@ ol {
   place-items: center;
   width: 26px;
   height: 26px;
-  border: 2px solid var(--color-paper-dusk);
+  border: 2px solid var(--color-sheet);
   border-radius: 50%;
   background: var(--color-ground);
-  color: var(--color-paper-dusk);
+  color: var(--color-sheet);
   font-family: var(--label);
   font-size: 12px;
   font-weight: 600;
@@ -221,14 +221,14 @@ ol {
   font-stretch: var(--label-wdth);
 }
 
-/* "No feedback" gap: an alpenglow-ink diamond. */
+/* "No feedback" gap: an ink diamond. */
 .gap {
   display: inline-grid;
   flex: none;
   place-items: center;
   width: 26px;
   height: 26px;
-  color: var(--color-paper-dusk);
+  color: var(--color-sheet);
   font-family: var(--label);
   font-size: 12px;
   font-weight: 700;
@@ -241,8 +241,8 @@ ol {
   grid-area: 1 / 1;
   width: 19px;
   height: 19px;
-  border: 2px solid var(--color-paper-dusk);
-  background: var(--color-alpenglow-ink);
+  border: 2px solid var(--color-sheet);
+  background: var(--color-ink);
   transform: rotate(45deg);
 }
 
@@ -257,9 +257,9 @@ ol {
   align-items: center;
   gap: 8px;
   padding: 5px 11px;
-  border: 1.5px solid var(--color-alpenglow);
+  border: 1.5px solid var(--color-ink-2);
   border-radius: 999px;
-  color: var(--color-alpenglow);
+  color: var(--color-ink-2);
   font-family: var(--label);
   font-size: 12px;
   font-weight: 700;
@@ -749,11 +749,11 @@ ol {
 }
 
 .note.gold {
-  background: var(--color-summit-gold);
+  background: var(--color-text);
 }
 
 .note.ice {
-  background: var(--color-ice);
+  background: var(--color-line-on-sheet);
 }
 
 .note.glacier {
@@ -802,16 +802,16 @@ ol {
 }
 
 .d-wire.soft {
-  color: var(--color-paper-ink-2);
+  color: var(--color-ink-2);
 }
 
 .d-wire.moss {
-  color: var(--color-moss-ink);
+  color: var(--color-ink);
   stroke-width: 2.5;
 }
 
 .d-wire.glow {
-  color: var(--color-alpenglow-ink);
+  color: var(--color-ink);
 }
 
 .d-box {
@@ -832,7 +832,7 @@ ol {
 }
 
 .d-box small {
-  color: var(--color-paper-ink-2);
+  color: var(--color-ink-2);
   font-size: 12.5px;
   font-weight: 400;
 }
@@ -842,22 +842,22 @@ ol {
 }
 
 .d-box.soft {
-  border-color: var(--color-paper-ink-2);
+  border-color: var(--color-ink-2);
   background: rgb(255 255 255 / 0.6);
 }
 
 .d-box.dark {
   border-color: var(--color-ground);
   background: var(--color-ground);
-  color: var(--color-paper-dusk);
+  color: var(--color-sheet);
 }
 
 .d-box.dark small {
-  color: var(--color-paper-dusk);
+  color: var(--color-sheet);
 }
 
 .d-box.moss {
-  border: 2.5px solid var(--color-moss-ink);
+  border: 2.5px solid var(--color-ink);
 }
 
 /* A box that only reserves space (its content draws its own shape, e.g. a decision diamond). */
@@ -871,8 +871,8 @@ ol {
   position: absolute;
   padding: 1px 6px;
   border-radius: 4px;
-  background: var(--color-paper-dusk);
-  color: var(--color-paper-ink-2);
+  background: var(--color-sheet);
+  color: var(--color-ink-2);
   font-family: var(--label);
   font-size: 12px;
   font-weight: 500;

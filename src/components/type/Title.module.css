@@ -1,0 +1,48 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+@layer components {
+  .title {
+    overflow-wrap: anywhere;
+  }
+
+  /* One word: the final-weight copy reserves the cell, the live word sits on it. */
+  .word {
+    display: inline-grid;
+    justify-items: start;
+    max-width: 100%;
+  }
+
+  .rest,
+  .live {
+    grid-area: 1 / 1;
+    min-width: 0;
+  }
+
+  .rest {
+    visibility: hidden;
+    user-select: none;
+  }
+
+  @keyframes title-weight {
+    from {
+      font-weight: var(--title-from-wght);
+    }
+  }
+
+  /* Full: 900 ms per word, 60 ms apart (four steps at most). */
+  :root[data-motion="full"] .title[data-arrive="arrive"] .live {
+    animation: title-weight var(--dur-title) var(--ease-out) both;
+    animation-delay: calc(var(--i) * var(--stagger-step));
+  }
+
+  /* Calm: 600 ms, all words together. */
+  :root[data-motion="calm"] .title[data-arrive="arrive"] .live {
+    animation: title-weight calc(var(--dur-title) * 2 / 3) var(--ease-out) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .title .live {
+      animation: none !important;
+    }
+  }
+}

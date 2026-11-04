@@ -1,5 +1,5 @@
 <!-- Fig. 7: the new flow. An anonymous eligibility pre-check before any login, and a delegated
-     hand-off from installer to owner; the two new decision points are outlined in moss-ink. -->
+     hand-off from installer to owner; the two new decision points are outlined in ink. -->
 <style>
   .head {
     position: absolute;
@@ -26,7 +26,7 @@
   .sw {
     width: 24px;
     height: 16px;
-    border: 3px solid var(--color-moss-ink);
+    border: 3px solid var(--color-ink);
     border-radius: 4px;
     background: #fff;
   }
@@ -75,8 +75,8 @@
     gap: 6px;
     padding: 2px 8px 2px 3px;
     border-radius: 999px;
-    background: var(--color-moss-ink);
-    color: var(--color-paper-dusk);
+    background: var(--color-ink);
+    color: var(--color-sheet);
     font-family: var(--label);
     font-size: 11.5px;
     font-stretch: var(--label-wdth);
@@ -92,7 +92,7 @@
     font-size: 11px;
   }
   .status {
-    color: var(--color-paper-ink-2);
+    color: var(--color-ink-2);
     font-size: 13px;
   }
 </style>
@@ -134,7 +134,7 @@
   for (const [id, label, moss] of [["eligible", "Eligible?", true], ["confirm", "Confirms?", false]]) {
     const el = d.el(id);
     el.classList.add("bare");
-    el.innerHTML = `<div class="diamond"><svg viewBox="0 0 112 84"><path d="M56 2 110 42 56 82 2 42Z" fill="#fff" stroke="${moss ? "#2F6B3A" : "#1B1C18"}" stroke-width="${moss ? 3 : 1.5}"/></svg><b style="max-width:72px;font-size:14px">${label}</b></div>`;
+    el.innerHTML = `<div class="diamond"><svg viewBox="0 0 112 84"><path d="M56 2 110 42 56 82 2 42Z" fill="#fff" stroke="${moss ? "#1B1C18" : "#1B1C18"}" stroke-width="${moss ? 3 : 1.5}"/></svg><b style="max-width:72px;font-size:14px">${label}</b></div>`;
   }
 
   // Branches below the main path.

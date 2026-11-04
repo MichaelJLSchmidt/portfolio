@@ -17,7 +17,7 @@ export default function MotionLab() {
   return (
     <main id="main" className={`${styles.main} container`}>
       <header className={styles.header}>
-        <h1 className={`${styles.title} display`}>{lab.heading}</h1>
+        <h1 className={`${styles.title} t-h1`}>{lab.heading}</h1>
         <p className="body-copy">{lab.intro}</p>
       </header>
       <LabFrames />

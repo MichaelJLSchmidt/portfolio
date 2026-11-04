@@ -5,15 +5,15 @@
     position: absolute;
     inset: 0;
     padding: 26px 34px 18px;
-    color: var(--color-paper-dusk);
+    color: var(--color-sheet);
   }
   /* Contour grey is 4.4:1 on the raised ground: labels here use the sheet colour. */
   .chart > p {
     margin-top: 6px;
-    color: var(--color-paper-dusk);
+    color: var(--color-sheet);
   }
   .title {
-    color: var(--color-paper-dusk);
+    color: var(--color-sheet);
   }
   .rounds {
     display: grid;
@@ -26,17 +26,17 @@
     align-content: start;
     gap: 16px;
     padding: 20px 20px 18px;
-    border: 1px solid var(--color-contour-dim);
+    border: 1px solid var(--color-line);
     border-radius: 10px;
     background: var(--color-ground);
   }
   .round h2 {
     display: grid;
     gap: 2px;
-    color: var(--color-contour);
+    color: var(--color-field-line);
   }
   .round h2 .stage {
-    color: var(--color-paper-dusk);
+    color: var(--color-sheet);
     font-size: 16px;
     font-weight: 650;
   }
@@ -49,7 +49,7 @@
     color: var(--color-glacier);
   }
   .score small {
-    color: var(--color-paper-dusk);
+    color: var(--color-sheet);
     font-size: 15px;
     font-weight: 500;
   }
@@ -60,7 +60,7 @@
   .dots i {
     width: 24px;
     height: 24px;
-    border: 2px solid var(--color-contour);
+    border: 2px solid var(--color-field-line);
     border-radius: 50%;
   }
   .dots i.ok {
@@ -72,7 +72,7 @@
     gap: 6px;
     margin-top: 4px;
     padding-top: 12px;
-    border-top: 1px solid var(--color-contour-dim);
+    border-top: 1px solid var(--color-line);
     counter-reset: i;
   }
   li {
@@ -87,7 +87,7 @@
     position: absolute;
     left: 0;
     top: 1px;
-    color: var(--color-contour);
+    color: var(--color-field-line);
     font-family: var(--label);
     font-size: 12px;
     font-stretch: var(--label-wdth);
@@ -99,7 +99,7 @@
     bottom: 20px;
     display: flex;
     justify-content: space-between;
-    color: var(--color-paper-dusk);
+    color: var(--color-sheet);
   }
   .key span {
     display: inline-flex;
@@ -109,7 +109,7 @@
   .key i {
     width: 14px;
     height: 14px;
-    border: 2px solid var(--color-contour);
+    border: 2px solid var(--color-field-line);
     border-radius: 50%;
   }
   .key i.ok {

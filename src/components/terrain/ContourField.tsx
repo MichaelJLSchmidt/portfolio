@@ -137,7 +137,7 @@ const bernSource = (profile: DeviceProfile): TerrainSource => {
 const sourceFor = (id: string | null, profile: DeviceProfile) =>
   id === BERN ? bernSource(profile) : id ? cardSource(id) : regionSource(profile);
 
-const easeTrail = bezier(easing.trail);
+const easeTrail = bezier(easing.out);
 const smooth = (x: number) => x * x * (3 - 2 * x);
 
 type Tween = { from: number; to: number; start: number; dur: number; ease: (x: number) => number };
@@ -207,7 +207,7 @@ function Field({ profile, paused, calm, onReady, onContextLost }: FieldProps) {
         ? kinds[i].set(cfg.bodyQuietFeatherPx * d, cfg.bodyQuietStrength)
         : kinds[i].set(cfg.quietFeatherPx * d, cfg.quietStrength),
     );
-    // Through a route change every zone takes the strongest knockout and the wider feather.
+    // Through a route change every zone takes the strongest and the wider feather.
     material.uniforms.uHoldKind.value.set(
       Math.max(cfg.bodyQuietFeatherPx, cfg.quietFeatherPx) * d,
       Math.min(cfg.bodyQuietStrength, cfg.quietStrength),
@@ -356,7 +356,7 @@ function Field({ profile, paused, calm, onReady, onContextLost }: FieldProps) {
     for (const slot of [a.A, a.B]) if (slot) slot.interval = contourInterval(slot.src, view, zoomOf(slot), spacing, slot.src.intervals);
     const now = performance.now();
     const target = lnBlend(timeline.values.morph);
-    a.glide = animate && Math.abs(before - target) > 1e-6 ? { from: before - target, to: 0, start: now, dur: msOf("long"), ease: easeTrail } : null;
+    a.glide = animate && Math.abs(before - target) > 1e-6 ? { from: before - target, to: 0, start: now, dur: msOf("enter"), ease: easeTrail } : null;
     const intervalM = (a.B ?? a.A).interval;
     if (fieldStore.get().intervalM !== intervalM) fieldStore.set({ intervalM });
     wake();
@@ -884,7 +884,7 @@ function Field({ profile, paused, calm, onReady, onContextLost }: FieldProps) {
     }
     // The quiet-zone hold lets go once the View Transition and the field's own motion are over.
     if (v.hold > 0 && a.holdVtDone && !a.routing && !timeline.busy("reveal") && !timeline.busy("hold")) {
-      timeline.play([{ channel: "hold", to: 0, delay: 0, duration: duration.medium, easing: "trail" }], now);
+      timeline.play([{ channel: "hold", to: 0, delay: 0, duration: duration.base, easing: "out" }], now);
     }
 
     u.uMorph.value = v.morph;

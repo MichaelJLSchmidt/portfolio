@@ -36,24 +36,20 @@
 
   .art {
     height: auto;
-    border-color: var(--color-contour-dim);
-    box-shadow: 0 24px 60px rgb(0 0 0 / 0.45);
+    border-color: var(--color-line);
   }
 
 
 
-  .title {
-    font-size: min(calc(0.96 * 100cqi / max(var(--title-em, 5), var(--word-em, 5))), 8.5rem);
-  }
 
 
   /* "7 min read · 60-second skim below" */
   .meta {
-    color: var(--color-paper-dusk);
+    color: var(--color-text);
   }
 
   .skim {
-    color: var(--color-glacier);
+    color: var(--color-text);
   }
 
   /* The product hero, directly after the Summit summary. */
@@ -69,7 +65,7 @@
   }
 
   .jumpHeading {
-    color: var(--color-paper-dusk);
+    color: var(--color-text);
   }
 
   .jump ul {
@@ -112,7 +108,7 @@
   }
 
   .sectionHeading {
-    color: var(--color-paper-dusk);
+    color: var(--color-text);
     font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.6rem);
   }
 

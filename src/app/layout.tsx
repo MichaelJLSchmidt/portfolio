@@ -2,15 +2,12 @@ import type { Metadata, Viewport } from "next";
 import { archivo, archivoItalic, martianMono } from "./fonts";
 import { cardTerrains } from "@/content/cards";
 import { site } from "@/content/site";
-import { color, tokensToCss } from "@/styles/tokens";
+import { color, gridToCss, tokensToCss } from "@/styles/tokens";
 import { motionModeScript } from "@/lib/motion-mode";
-import { springsToCss } from "@/styles/motion-css";
 import { TerrainBackdrop } from "@/components/terrain/TerrainBackdrop";
-import { Hud } from "@/components/hud/Hud";
+import { Header } from "@/components/header/Header";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SmoothScroll } from "@/components/SmoothScroll";
-import { RouteFade } from "@/components/transition/RouteFade";
-import { HistoryTransitions } from "@/components/transition/HistoryTransitions";
 import { RouteArrival } from "@/components/transition/RouteArrival";
 import { Reveals } from "@/components/motion/Reveals";
 import "./globals.css";
@@ -33,6 +30,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: color.ground,
   colorScheme: "dark",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -45,20 +43,18 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     >
       <head>
         {/* The tokens' custom properties, in the tokens layer (globals.css explains the layers). */}
-        <style dangerouslySetInnerHTML={{ __html: `${LAYER_ORDER}@layer tokens{${tokensToCss()}${springsToCss()}}` }} />
+        <style dangerouslySetInnerHTML={{ __html: `${LAYER_ORDER}@layer tokens{${tokensToCss()}${gridToCss()}}` }} />
         <script dangerouslySetInnerHTML={{ __html: motionModeScript }} />
       </head>
       <body>
-        <a className="skip-link" href="#main">
+        <a className="skip-link plain" href="#main">
           {site.skipLink}
         </a>
         <TerrainBackdrop />
         <SmoothScroll />
-        <HistoryTransitions />
-        <RouteFade />
         <RouteArrival />
         <Reveals />
-        <Hud />
+        <Header />
         <div className="page">
           {children}
           <SiteFooter />

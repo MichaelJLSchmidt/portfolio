@@ -34,7 +34,7 @@
 
   .poster {
     object-fit: cover;
-    transition: opacity var(--dur-medium) var(--ease-trail);
+    transition: opacity var(--dur-base) var(--ease-out);
   }
 
   /* Bern's poster is framed like the field: on its zero point, from the west edge on portrait
@@ -51,7 +51,7 @@
 
   .canvas {
     opacity: 0;
-    transition: opacity var(--dur-medium) var(--ease-trail);
+    transition: opacity var(--dur-base) var(--ease-out);
   }
 
   .backdrop[data-field="on"] .canvas {
@@ -62,7 +62,7 @@
   .backdrop[data-field="on"] .poster {
     animation: none;
     opacity: 0;
-    transition-delay: var(--dur-medium);
+    transition-delay: var(--dur-base);
   }
 
   /* The WebGL context is lost: the poster is back at once. */
@@ -88,10 +88,10 @@
      text instead (quiet zones), so the vignette fades out with the poster. */
   .vignette {
     background: linear-gradient(to top, rgb(27 28 24 / 0.75), rgb(27 28 24 / 0) 55%);
-    transition: opacity var(--dur-medium) var(--ease-trail);
+    transition: opacity var(--dur-base) var(--ease-out);
   }
 
-  @media (min-width: 1024px) {
+  @media (min-width: 1280px) {
     .vignette {
       background: linear-gradient(to right, rgb(27 28 24 / 0.7), rgb(27 28 24 / 0.15) 60%, rgb(27 28 24 / 0));
     }

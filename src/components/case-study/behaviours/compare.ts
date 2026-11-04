@@ -37,7 +37,7 @@ export function attach(figure: HTMLElement): () => void {
     root.dataset.view = "slider";
     stopHint();
     const pos = Number(range.value);
-    if ((pos === 0 || pos === 50 || pos === 100) && pos !== detent) haptic("detent");
+    if ((pos === 0 || pos === 50 || pos === 100) && pos !== detent) haptic();
     detent = pos === 0 || pos === 50 || pos === 100 ? pos : null;
     sync();
   };
@@ -53,7 +53,7 @@ export function attach(figure: HTMLElement): () => void {
   };
   const hint = () => {
     const start = performance.now();
-    const total = duration.long;
+    const total = duration.enter;
     const step = (now: number) => {
       const t = Math.min(1, (now - start) / total);
       // Out to 56% and back to 50% in one smooth swing.

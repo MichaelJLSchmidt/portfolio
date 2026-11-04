@@ -42,7 +42,7 @@ export function AltimeterBar({
     sheet.querySelector<HTMLElement>("a[aria-current]")?.focus();
   };
   const jump = (target: string) => {
-    haptic("detent");
+    haptic();
     sheetRef.current?.close();
     // The link scrolls to the waypoint; its heading takes focus once there.
     window.setTimeout(() => {
@@ -61,7 +61,7 @@ export function AltimeterBar({
       <nav ref={barRef} className={styles.altimeter} aria-label={labels.bar} data-shown={current ? "" : undefined}>
         <span className={styles.altimeterLine} aria-hidden="true" />
         <button type="button" className={styles.altimeterButton} aria-haspopup="dialog" aria-controls={`${id}sheet`} onClick={open} tabIndex={current ? undefined : -1}>
-          <span className={`${styles.altimeterCount} hud-label`}>
+          <span className={`${styles.altimeterCount} mono`}>
             {(current ?? items[0])?.place ? caseStudyLabels.stageOf(Math.max(1, active + 1), stages, (current ?? items[0]).place!) : (current?.nav ?? "")}
           </span>
           {(current ?? items[0])?.place && <span className={styles.altimeterName}>{(current ?? items[0]).nav}</span>}
@@ -72,12 +72,12 @@ export function AltimeterBar({
       </nav>
       <dialog ref={sheetRef} id={`${id}sheet`} className={styles.jumpSheet} aria-labelledby={`${id}title`} data-lenis-prevent>
         <div className={styles.jumpSheetBar}>
-          <h2 id={`${id}title`} className="hud-label">
+          <h2 id={`${id}title`} className="mono">
             {labels.sheet}
           </h2>
           <button
             type="button"
-            className={`${styles.jumpSheetClose} hud-label`}
+            className={`${styles.jumpSheetClose} mono`}
             onClick={() => {
               haptic("press");
               sheetRef.current?.close();
@@ -90,7 +90,7 @@ export function AltimeterBar({
           {items.map((item, i) => (
             <li key={item.id}>
               <a href={`#${item.id}`} aria-current={i === active ? "true" : undefined} onClick={() => jump(item.id)}>
-                <span className="hud-label" aria-hidden="true">
+                <span className="mono" aria-hidden="true">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 {item.nav}

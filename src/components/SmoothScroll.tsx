@@ -4,8 +4,8 @@ import { useEffect } from "react";
 import { useMotionMode } from "@/lib/motion-mode";
 
 /**
- * Lenis smooth scrolling on fine-pointer desktop devices in full motion only (never on touch, in
- * calm or still). Lenis has no loop of its own (autoRaf off): Motion's frame loop drives it, the
+ * Lenis smooth scrolling (lerp 0.1) for desktop wheel input in Full only (never on touch, in
+ * Calm or Off). Lenis has no loop of its own (autoRaf off): Motion's frame loop drives it, the
  * same loop that runs the springs and the contour field, and only while Lenis is animating a
  * scroll. Every scroll Lenis animates starts in scrollTo (wheel, its anchor links, programmatic
  * calls), so that call wakes the loop; once the animation has settled the loop stops asking
@@ -20,7 +20,7 @@ export function SmoothScroll() {
     let stop: (() => void) | null = null;
     Promise.all([import("lenis"), import("@/lib/frameloop")]).then(([{ default: Lenis }, { frame, cancelFrame }]) => {
       if (destroyed) return;
-      const lenis = new Lenis({ autoRaf: false, anchors: true, lerp: 0.14, stopInertiaOnNavigate: true });
+      const lenis = new Lenis({ autoRaf: false, anchors: true, lerp: 0.1, stopInertiaOnNavigate: true });
       let running = false;
       const tick = ({ timestamp }: { timestamp: number }) => {
         lenis.raf(timestamp);

@@ -1,0 +1,81 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+@layer components {
+  .control {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 4px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+
+  .legend {
+    float: left;
+    margin-right: 8px;
+    padding: 0;
+  }
+
+  .option {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: 6px;
+    cursor: pointer;
+    color: var(--color-text-2);
+  }
+
+  .option + .option::before {
+    content: "·";
+    position: absolute;
+    left: -5px;
+    color: var(--color-text-3);
+    pointer-events: none;
+  }
+
+  /* The native radio stays for keyboard and screen readers, drawn as the label itself. */
+  .input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: inherit;
+  }
+
+  .name {
+    padding-bottom: 2px;
+    border-bottom: var(--stroke-hairline) solid transparent;
+    transition: color var(--dur-fast) linear;
+  }
+
+  /* The selection: text colour and a 1 px underline in text colour (no mint). */
+  .input:checked + .name {
+    color: var(--color-text);
+    border-bottom-color: var(--color-text);
+  }
+
+  @media (hover: hover) {
+    .option:hover .name {
+      color: var(--color-text);
+    }
+  }
+
+  .input:focus-visible + .name {
+    outline: var(--stroke-focus) solid var(--color-glacier);
+    outline-offset: 3px;
+  }
+
+  .input:disabled + .name {
+    color: var(--color-text-3);
+    cursor: not-allowed;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .name {
+      transition: none;
+    }
+  }
+}

@@ -18,9 +18,9 @@ export function Descent({
   team: { heading: string; roles: readonly TeamRole[] };
 }) {
   return (
-    <div className={styles.descent} data-vt-exit>
+    <div className={styles.descent}>
       <section className={`${styles.column} legend`} aria-labelledby="looking-back">
-        <h2 id="looking-back" className={`${styles.heading} display`}>
+        <h2 id="looking-back" className={`${styles.heading} t-h2`}>
           {lookingBack.heading}
         </h2>
         <ol className={styles.lessons}>
@@ -33,7 +33,7 @@ export function Descent({
         </ol>
       </section>
       <section className={`${styles.column} legend`} aria-labelledby="team">
-        <h2 id="team" className={`${styles.heading} display`}>
+        <h2 id="team" className={`${styles.heading} t-h2`}>
           {team.heading}
         </h2>
         <ul className={styles.rope}>
@@ -41,7 +41,7 @@ export function Descent({
             <li key={r.role} style={{ "--i": i } as CSSProperties}>
               <span className={styles.knot} aria-hidden="true" />
               <p className={styles.role}>
-                <span className={`${styles.count} hud-label`}>{r.count}</span> {r.role}
+                <span className={`${styles.count} mono`}>{r.count}</span> {r.role}
               </p>
               <p className={`${styles.line} body-copy`}>{r.line}</p>
             </li>

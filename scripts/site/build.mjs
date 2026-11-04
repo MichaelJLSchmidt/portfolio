@@ -43,10 +43,6 @@ const run = (args, env = {}) => {
 rmSync(edgeEntry, { force: true });
 rmSync(out, { recursive: true, force: true });
 run([join(root, "scripts/check-content.mjs"), "--build", `--mode=${mode}`]);
-// Display titles: width compensation for the weight arrival, from the current copy (WeightTitle).
-run([join(root, "scripts/measure-titles.mjs")]);
-// The footer wordmark's outlines, from the brand (scripts/wordmark.mjs).
-run([join(root, "scripts/wordmark.mjs")]);
 const examples = mode !== "construction" && includesExamples(process.env);
 if (mode !== "construction") console.log(`Examples: ${examples ? "included" : "excluded"}`);
 if (examples) run([join(root, "scripts/check-figures.mjs")]);
@@ -160,13 +156,18 @@ async function caseStudyCount(examples) {
   return Object.values(caseStudies).filter((study) => examples || !study.example).length;
 }
 
+/** An example's own terrain files: its plates, its morph heightmap and its card artwork. */
+function exampleTerrainFiles(id) {
+  return [`/plates/${id}.svg`, `/plates/${id}-level.svg`, `/terrain/cards/${id}.svg`, `/terrain/morph/${id}.webp`, `/terrain/morph/${id}.bin`];
+}
+
 /** Removes the examples' files from out/, then fails if anything of theirs is left there. */
 async function stripExamples() {
   await import("../lib/ts-hooks.mjs");
   const { exampleCards, exampleMedia } = await import("../../src/content/examples/index.ts");
   for (const card of exampleCards) {
-    const id = card.artwork.terrainId;
-    for (const path of [exampleMedia[card.slug], `/work/${card.slug}/`, `/terrain/cards/${id}.svg`, `/terrain/morph/${id}.webp`, `/terrain/morph/${id}.bin`]) {
+    const id = card.terrainId;
+    for (const path of [exampleMedia[card.slug], `/work/${card.slug}/`, ...exampleTerrainFiles(id)]) {
       if (path) rmSync(join(out, path), { recursive: true, force: true });
     }
   }
@@ -179,8 +180,8 @@ async function stripExamples() {
   // An example's terrain is a real mountain (the Eiger, the Mönch, the Jungfrau), whose name other
   // data may carry (the footer's Interlaken → Jungfrau trail): what may not remain is the
   // example's own terrain files and the reference to them.
-  const terrainNeedles = (id) => (id ? [`/terrain/cards/${id}.svg`, `/terrain/morph/${id}.`, `"terrainId":"${id}"`] : []);
-  const needles = exampleCards.flatMap((c) => [c.name, `/work/${c.slug}`, ...terrainNeedles(c.artwork.terrainId), exampleMedia[c.slug]].filter(Boolean));
+  const terrainNeedles = (id) => (id ? [...exampleTerrainFiles(id), `"terrainId":"${id}"`] : []);
+  const needles = exampleCards.flatMap((c) => [c.name, `/work/${c.slug}`, ...terrainNeedles(c.terrainId), exampleMedia[c.slug]].filter(Boolean));
   const files = (dir) => readdirSync(dir).flatMap((name) => (statSync(join(dir, name)).isDirectory() ? files(join(dir, name)) : [join(dir, name)]));
   const leaks = files(out)
     .filter((f) => /\.(html|txt|js|json|css|xml|svg|map)$/.test(f))

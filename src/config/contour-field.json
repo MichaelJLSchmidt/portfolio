@@ -3,8 +3,8 @@
   "indexEvery": 5,
   "lineWidthPx": 1,
   "indexLineWidthPx": 1.5,
-  "lineColor": "contour",
-  "indexColor": "contour",
+  "lineColor": "fieldLine",
+  "indexColor": "fieldLine",
   "quietStrength": 0.22,
   "quietFeatherPx": 48,
   "bodyQuietStrength": 0.07,
@@ -37,7 +37,7 @@
   },
   "frameBudgetMs": 22,
   "river": {
-    "color": "ice",
+    "color": "text2",
     "widthPx": 1.5,
     "opacity": 0.9
   },

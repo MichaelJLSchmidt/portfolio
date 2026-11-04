@@ -49,11 +49,11 @@ function write(rel, data) {
 function svg({ w, h, regular, index, lakes, lakeOpacity, lineOpacity = 0.55, indexOpacity = 0.9 }) {
   const line = (d, width, opacity) =>
     d
-      ? `<path d="${d}" fill="none" stroke="${color.contour}" stroke-opacity="${opacity}" stroke-width="${width}" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`
+      ? `<path d="${d}" fill="none" stroke="${color.fieldLine}" stroke-opacity="${opacity}" stroke-width="${width}" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`
       : "";
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice">` +
-    (lakes ? `<path d="${lakes}" fill="${color.ice}" fill-opacity="${lakeOpacity}"/>` : "") +
+    (lakes ? `<path d="${lakes}" fill="${color.fieldLine}" fill-opacity="${lakeOpacity}"/>` : "") +
     line(regular, 1, lineOpacity) +
     line(index, 1.5, indexOpacity) +
     `</svg>\n`

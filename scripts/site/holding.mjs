@@ -58,7 +58,7 @@ function css({ fonts, poster }) {
     `@media (min-width:48rem){:root{--gutter:40px}}`,
     `*,*::before,*::after{box-sizing:border-box}`,
     `html{-webkit-text-size-adjust:100%;text-size-adjust:100%;background:var(--color-ground)}`,
-    `body{margin:0;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;color:var(--color-paper-dusk);font:400 var(--type-body-size)/var(--type-body-lh) "Archivo Text",system-ui,sans-serif}`,
+    `body{margin:0;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;color:var(--color-text);font:400 var(--type-body-size)/var(--type-body-lh) "Archivo Text",system-ui,sans-serif}`,
     // Terrain: the poster dimmed so its regular lines show at 23% (it draws them at the
     // field's desktop strength) and a vignette that keeps the text legible. Nothing follows the
     // pointer.
@@ -70,7 +70,7 @@ function css({ fonts, poster }) {
     `.hud,main,footer{text-shadow:0 0 2px var(--color-ground),0 0 6px var(--color-ground),0 0 14px var(--color-ground)}`,
     `input,button{text-shadow:none}`,
     `.label{${label}}`,
-    `.hud{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 20px;margin:0;padding:max(14px,env(safe-area-inset-top)) max(var(--gutter),env(safe-area-inset-right)) 14px max(var(--gutter),env(safe-area-inset-left));color:var(--color-contour)}`,
+    `.hud{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 20px;margin:0;padding:max(14px,env(safe-area-inset-top)) max(var(--gutter),env(safe-area-inset-right)) 14px max(var(--gutter),env(safe-area-inset-left));color:var(--color-text-2)}`,
     `.hud p{margin:0}.hud .brand{color:var(--color-glacier);font-weight:700}`,
     `main{flex:1;display:flex;flex-direction:column;justify-content:center;width:100%;max-width:76rem;margin:0 auto;padding:clamp(28px,7vh,88px) max(var(--gutter),env(safe-area-inset-right)) clamp(28px,7vh,88px) max(var(--gutter),env(safe-area-inset-left))}`,
     `.name{margin:0 0 .28em;font:800 clamp(3.25rem,14.5vw,10.5rem)/var(--type-display-lh) "Archivo Display",system-ui,sans-serif;text-transform:uppercase;letter-spacing:-.01em;overflow-wrap:anywhere}`,
@@ -79,32 +79,32 @@ function css({ fonts, poster }) {
     `.status{margin:.4em 0 0;max-width:34rem;text-wrap:balance}`,
     `.contact{display:flex;flex-wrap:wrap;gap:8px 28px;margin:28px 0 0;padding:0;list-style:none}`,
     `.contact a,.contact .pending{display:inline-block;padding:10px 0;${label};color:var(--color-glacier);text-decoration:underline;text-underline-offset:.35em;text-decoration-thickness:1px}`,
-    `.contact .pending{color:var(--color-contour);text-decoration:none}`,
-    `.contact a:hover{color:var(--color-paper-dusk)}`,
+    `.contact .pending{color:var(--color-text-2);text-decoration:none}`,
+    `.contact a:hover{color:var(--color-text)}`,
     `.access{margin-top:clamp(36px,7vh,64px);max-width:30rem}`,
-    `.access h2{margin:0 0 14px;color:var(--color-contour)}`,
+    `.access h2{margin:0 0 14px;color:var(--color-text-2)}`,
     `.access label{display:block;margin-bottom:6px;font-size:.9375rem}`,
     `.field{display:flex;flex-wrap:wrap;gap:10px}`,
-    // The password field; its underline (.line) draws on focus over --dur-trail (280 ms).
+    // The password field; its underline (.line) draws on focus over --dur-base (280 ms).
     // Static font instances here: nothing changes width.
     `.input{position:relative;display:flex;flex:1 1 12rem;min-width:0}`,
-    `.field input{flex:1;min-width:0;min-height:48px;margin:0;padding:0 14px;border:1px solid var(--color-contour);border-radius:2px;background:rgb(27 28 24/.88);color:var(--color-paper-dusk);font:inherit}`,
-    `.line{position:absolute;inset:auto 0 0;height:2px;background:var(--color-glacier);transform:scaleX(0);transform-origin:left center;transition:transform var(--dur-trail) var(--ease-settle);pointer-events:none}`,
+    `.field input{flex:1;min-width:0;min-height:48px;margin:0;padding:0 14px;border:1px solid var(--color-text-2);border-radius:2px;background:rgb(27 28 24/.88);color:var(--color-text);font:inherit}`,
+    `.line{position:absolute;inset:auto 0 0;height:2px;background:var(--color-glacier);transform:scaleX(0);transform-origin:left center;transition:transform var(--dur-base) var(--ease-out);pointer-events:none}`,
     `.input:focus-within .line{transform:none}`,
     // An error is alpenglow and the message, never a shake (red is the route's alone).
-    `.field input[aria-invalid=true]{border-color:var(--color-alpenglow)}`,
-    `.field input[aria-invalid=true]+.line{background:var(--color-alpenglow)}`,
+    `.field input[aria-invalid=true]{border-color:var(--color-text)}`,
+    `.field input[aria-invalid=true]+.line{background:var(--color-text)}`,
     `.field button{flex:0 0 auto;min-height:48px;margin:0;padding:0 18px;border:0;border-radius:2px;background:var(--color-glacier);color:var(--color-ground);${label};font-size:.8125rem;letter-spacing:.08em;cursor:pointer}`,
-    `.field button:hover{background:var(--color-paper-dusk)}`,
+    `.field button:hover{background:var(--color-text)}`,
     `.field button[aria-disabled=true]{cursor:progress}`,
     `:focus-visible{outline:2px solid var(--color-glacier);outline-offset:3px}`,
     `.field input:focus-visible{outline-offset:2px}`,
-    `.error{margin:12px 0 0;color:var(--color-alpenglow)}`,
+    `.error{margin:12px 0 0;color:var(--color-text)}`,
     // Reduced motion: the underline appears at once.
     `@media (prefers-reduced-motion:reduce){.line{transition:none}}`,
-    `.closed{margin:0;color:var(--color-contour)}`,
-    `footer{padding:14px max(var(--gutter),env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(var(--gutter),env(safe-area-inset-left));color:var(--color-contour)}`,
-    `footer a{color:inherit;text-underline-offset:.35em}footer a:hover{color:var(--color-paper-dusk)}`,
+    `.closed{margin:0;color:var(--color-text-2)}`,
+    `footer{padding:14px max(var(--gutter),env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(var(--gutter),env(safe-area-inset-left));color:var(--color-text-2)}`,
+    `footer a{color:inherit;text-underline-offset:.35em}footer a:hover{color:var(--color-text)}`,
   ].join("");
 }
 
