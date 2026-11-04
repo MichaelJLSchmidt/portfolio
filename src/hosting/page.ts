@@ -20,6 +20,8 @@ export type PageModel = {
   placeholder: (label: string) => string;
   /** The short brand: the page's mark (the name source's `brand`). */
   brand: string;
+  /** The mark's outline colour (text-3). */
+  outline: string;
   access: {
     heading: string;
     label: string;
@@ -122,7 +124,12 @@ export function renderPage(page: PageModel, form: FormState): string {
   const body = [
     `<div class="terrain" aria-hidden="true"><div class="poster"></div><canvas data-field-canvas></canvas></div>`,
     `<main>`,
-    `<h1 class="mark" data-quiet-zone><span aria-hidden="true">${escapeHtml(page.brand)}</span><span class="visually-hidden">${escapeHtml(page.name)}</span></h1>`,
+    // The relief fill's stack (the script adds its canvas and construction layer) and filters.
+    `<h1 class="mark" data-relief-root data-quiet-zone>`,
+    `<span class="relief-stack" data-relief-stack aria-hidden="true"><span class="relief-fill" data-relief-fill>${escapeHtml(page.brand)}</span><span class="relief-text" data-relief-text>${escapeHtml(page.brand)}</span></span>`,
+    `<span class="visually-hidden">${escapeHtml(page.name)}</span>`,
+    `</h1>`,
+    `<svg class="defs" width="0" height="0" aria-hidden="true" focusable="false"><filter id="relief-outline" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB"><feMorphology in="SourceAlpha" operator="dilate" radius="1" result="grown"/><feComposite in="grown" in2="SourceAlpha" operator="out" result="ring"/><feFlood flood-color="${escapeHtml(page.outline)}"/><feComposite in2="ring" operator="in"/></filter></svg>`,
     `<p class="role label" data-quiet-zone>${escapeHtml(page.role)}</p>`,
     `<p class="status" data-quiet-zone>${escapeHtml(page.status)}</p>`,
     accessForm(page, form),

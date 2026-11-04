@@ -13,8 +13,10 @@ import "../lib/ts-hooks.mjs";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const { about, holding } = await import("../../src/content/about.ts");
 const { site } = await import("../../src/content/site.ts");
-const { tokensToCss } = await import("../../src/styles/tokens.ts");
+const { color, tokensToCss } = await import("../../src/styles/tokens.ts");
 const { fieldMotion, fieldOptions, terrainSource } = await import("../../src/field/index.ts");
+const { reliefOn } = await import("../../src/content/relief.ts");
+const { reliefOptions } = await import("../../src/components/relief/options.ts");
 const field = JSON.parse(readFileSync(join(root, "public/terrain/field/field.json"), "utf8"));
 
 const sha256 = (data) => createHash("sha256").update(data).digest();
@@ -79,9 +81,19 @@ function css({ fonts, poster }) {
     `input,button{text-shadow:none}`,
     `.label{${label}}`,
     `main{flex:1;display:grid;align-content:center;justify-items:center;gap:20px;width:100%;max-width:60rem;margin:0 auto;padding:clamp(40px,10vh,120px) max(var(--gutter),env(safe-area-inset-right)) clamp(28px,6vh,72px) max(var(--gutter),env(safe-area-inset-left));text-align:center}`,
-    // The mark: the brand in outline (the relief fill arrives in phase 7). Sized by the screen,
-    // never by its length; it wraps if it must.
-    `.mark{margin:0;font:800 clamp(4.5rem,20vw,13rem)/.9 "Archivo Display",system-ui,sans-serif;letter-spacing:-.035em;color:transparent;-webkit-text-stroke:1px var(--color-text);overflow-wrap:anywhere}`,
+    // The mark: the brand with the relief fill (src/components/relief), sized by the screen, never
+    // by its length; it wraps if it must. At rest a 1 px outline (an SVG morphology filter) under
+    // the construction layer; the script adds the canvas and the layer.
+    `.mark{margin:0 0 24px;font:800 clamp(4.5rem,20vw,13rem)/.9 "Archivo Display",system-ui,sans-serif;letter-spacing:-.035em;overflow-wrap:anywhere;color:var(--color-text-3)}`,
+    `.defs{position:absolute;width:0;height:0}`,
+    `.relief-stack{position:relative;display:inline-grid;max-width:100%}.relief-stack>*{grid-area:1/1}`,
+    `.relief-text{color:var(--color-text-3);filter:url(#relief-outline)}.relief-fill{color:var(--color-sheet);opacity:0}`,
+    `[data-relief-canvas],[data-relief-construction]{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}`,
+    `[data-relief=still] .relief-fill{opacity:1}`,
+    `@property --relief-r{syntax:"<length>";inherits:true;initial-value:0px}`,
+    `[data-relief=mask] .relief-fill{opacity:1;-webkit-mask-image:radial-gradient(circle at var(--relief-x,50%) var(--relief-y,50%),#000 var(--relief-r),transparent calc(var(--relief-r) + 1px));mask-image:radial-gradient(circle at var(--relief-x,50%) var(--relief-y,50%),#000 var(--relief-r),transparent calc(var(--relief-r) + 1px));transition:--relief-r var(--dur-level) var(--ease-out)}`,
+    `[data-relief=mask][data-relief-on] .relief-fill{--relief-r:.6em;transition-duration:var(--dur-title)}`,
+    `[data-relief=mask][data-relief-swept] .relief-fill{--relief-r:200vw;transition-duration:var(--dur-press)}`,
     `.role{margin:0;color:var(--color-text-2)}`,
     `.status{margin:0;max-width:34rem;text-wrap:balance}`,
     `.contact{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 24px;margin:0;padding:0;list-style:none}`,
@@ -149,6 +161,29 @@ field.show(${JSON.stringify(source)}).then(zones,()=>d.setAttribute("data-field"
 })();`;
 }
 
+/**
+ * The relief fill on the mark (src/components/relief/relief-core.ts, inlined like the field):
+ * Full with the pointer's lens (fine pointers) or one survey pass (touch); under reduced motion
+ * the filled mark, still. Only when the mark is opted in (src/content/relief.ts).
+ */
+function reliefScript() {
+  if (!reliefOn("gate-mark")) return "";
+  const core = ts
+    .transpileModule(readFileSync(join(root, "src/components/relief/relief-core.ts"), "utf8"), {
+      compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, removeComments: true },
+    })
+    .outputText.replace(/^export\s+(?=(?:async\s+)?function|const|let|class)/gm, "")
+    .replace(/^export\s*\{\s*\};?\s*$/gm, "");
+  const options = reliefOptions("full", true, site.footer.coordinates);
+  return `(()=>{${core}
+const mark=document.querySelector("[data-relief-root]");
+if(!mark)return;
+let still=false;try{still=matchMedia("(prefers-reduced-motion: reduce)").matches}catch(e){}
+const fine=matchMedia("(hover: hover) and (pointer: fine)").matches;
+attachRelief(mark,Object.assign(${JSON.stringify(options)},{mode:still?"still":"full",fine}));
+})();`;
+}
+
 // The submit button's "Checking…" while the password is checked. Without JavaScript the page is
 // complete, just without it.
 const submitScript = `(()=>{
@@ -172,10 +207,11 @@ export function pageModel(assets, { canonical }) {
     contact: holding.contact.map(({ label, href }) => ({ label, href })),
     placeholder: about.placeholderAction,
     brand: holding.brand,
+    outline: color.text3,
     access: holding.access,
     credit: { label: site.footer.credit, href: site.footer.creditHref },
     css: css(assets),
-    script: `${fieldScript(assets)}\n${submitScript}`,
+    script: [fieldScript(assets), reliefScript(), submitScript].filter(Boolean).join("\n"),
     preload: [assets.fonts.display],
   };
 }

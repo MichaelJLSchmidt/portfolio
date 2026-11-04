@@ -45,23 +45,16 @@
     color: var(--color-text-2);
   }
 
-  /* The wordmark (the relief fill draws over it, phase 7): the brand at rest as an outline. */
+  /* The wordmark (ReliefFill): the brand, sized by the screen, never by its length. Room below
+     for the construction layer's coordinates. */
   .wordmark {
-    display: block;
     justify-self: start;
-    max-width: 100%;
-    color: var(--color-text-3);
-  }
-
-  .word {
-    display: block;
+    margin-bottom: 24px;
     font-size: clamp(5rem, 22vw, 20rem);
     font-weight: 800;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.035em;
     line-height: 0.9;
     overflow-wrap: anywhere;
-    color: transparent;
-    -webkit-text-stroke: 1px var(--color-text-3);
   }
 
   .meta {

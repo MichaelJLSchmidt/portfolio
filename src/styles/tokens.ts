@@ -140,6 +140,26 @@ export const route = {
 } as const;
 
 /**
+ * The relief fill (src/components/relief): the footer wordmark's and the gate mark's one signature
+ * effect. Durations in ms; lerps are per frame at 60 fps.
+ */
+export const relief = {
+  /** A resting pointer fills the glyph under it in about this long. */
+  fillMs: 1200,
+  /** The field decays to half in this long once nothing feeds it. */
+  halfLifeMs: 450,
+  /** Keyboard focus: every glyph fills from its centre in this long. */
+  focusMs: duration.level,
+  /** A press fills the whole word in this long. */
+  pressMs: duration.press,
+  /** Touch: the survey pass sweeps left to right in this long. */
+  sweepMs: 900,
+  /** The lens follows the pointer softly; a faster second stamp softens its edge. */
+  lerp: 0.09,
+  lerpFast: 0.15,
+} as const;
+
+/**
  * Cubic-bezier control points (Motion arrays; CSS via `cubicBezier`). Ease-out to appear, ease-in
  * to leave, ease-in-out for travel. No bounce anywhere.
  */

@@ -184,7 +184,13 @@ async function browserPass(base) {
   const browser = await playwright.chromium.launch();
   try {
     const page = await browser.newPage();
+    // The gate's inline script (the field and the relief mark) must run under its hash-pinned CSP.
+    const violations = [];
+    page.on("console", (m) => /Content Security Policy|Refused to/i.test(m.text()) && violations.push(m.text().slice(0, 140)));
     await page.goto(`${base}/about/`);
+    await page.waitForFunction(() => document.querySelector("[data-relief-root]")?.hasAttribute("data-relief"), null, { timeout: 10000 }).catch(() => {});
+    const relief = await page.evaluate(() => document.querySelector("[data-relief-root]")?.getAttribute("data-relief") ?? null);
+    check("browser: the gate's inline script runs under its CSP (the relief mark attached)", !!relief && violations.length === 0, `${relief} ${violations.join(" | ")}`);
     await page.fill("#password", "not-it");
     await page.click("button[type=submit]");
     await page.waitForSelector("#access-error");

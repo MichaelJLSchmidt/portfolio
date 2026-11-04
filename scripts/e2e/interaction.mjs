@@ -28,8 +28,9 @@ export async function pointer({ browser, base, check }) {
   for (const route of ROUTES) {
     if (!(await exists(page, `${base}${route}`))) continue;
     await page.waitForTimeout(1500);
-    // Inside a title, running text and the footer wordmark (cards tilt on purpose: not here).
-    for (const selector of ["main h1", "main .body-copy", "footer a[data-flood]"]) {
+    // Inside a title and running text (the wordmark's relief answers the pointer on purpose:
+    // scripts/e2e/wordmark.mjs).
+    for (const selector of ["main h1", "main .body-copy"]) {
       const target = page.locator(selector).first();
       if (!(await target.count())) continue;
       await target.scrollIntoViewIfNeeded();
@@ -37,7 +38,7 @@ export async function pointer({ browser, base, check }) {
       const box = await target.boundingBox();
       if (!box) continue;
       const y = box.y + box.height / 2;
-      // Entering may answer (a flood, a pre-warm); let that finish, then move inside it.
+      // Entering may answer; let that finish, then move inside it.
       await page.mouse.move(box.x + 4, y);
       await page.waitForTimeout(1600);
       await page.evaluate(() => {

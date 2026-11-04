@@ -1,13 +1,14 @@
 import { actions, contact, emailAddress } from "@/content/contact";
 import { site } from "@/content/site";
 import { BernTime } from "./footer/BernTime";
+import { ReliefFill } from "./relief/ReliefFill";
 import { CopyAddress } from "./footer/CopyAddress";
 import { MotionControl } from "./footer/MotionControl";
 import styles from "./SiteFooter.module.css";
 
 /**
  * The footer, in order: "Get in touch" with the email (and LinkedIn, Copy address); the brand
- * wordmark, a link that writes an email; a meta row: Bern time · Motion · © year · the terrain
+ * wordmark with the relief fill, a link that writes an email; a meta row: Bern time · Motion · © year · the terrain
  * credit. It carries the page's contact anchor (#contact) and safe-area padding.
  */
 export function SiteFooter() {
@@ -37,11 +38,14 @@ export function SiteFooter() {
         </section>
 
         {emailAddress && (
-          <a className={`${styles.wordmark} plain`} href={`mailto:${emailAddress}`} aria-label={site.footer.wordmark(emailAddress)}>
-            <span className={styles.word} aria-hidden="true">
-              {site.brand}
-            </span>
-          </a>
+          <ReliefFill
+            id="footer-wordmark"
+            text={site.brand}
+            href={`mailto:${emailAddress}`}
+            label={site.footer.wordmark(emailAddress)}
+            coordinates={site.footer.coordinates}
+            className={styles.wordmark}
+          />
         )}
 
         <div className={`${styles.meta} mono`}>
