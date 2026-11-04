@@ -13,7 +13,7 @@ import { card as testProject } from "./test-project/card";
  *
  * This module is small on purpose (the deck imports it); the long-form copy is in ./case-studies.
  */
-// Deck order, and the Next project loop: the panorama seen from Interlaken, left to right: the
+// Card order, and the Next case study loop: the panorama seen from Interlaken, left to right: the
 // Eiger (Seilschaft), the Mönch (Test Project), the Jungfrau (Gratweg).
 export const exampleCards: CardData[] = [seilschaft, testProject, gratweg];
 

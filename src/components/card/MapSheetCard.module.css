@@ -60,6 +60,11 @@
     letter-spacing: 0.02em;
   }
 
+  /* A part of the type line ("2 → 6") never breaks inside. */
+  .part {
+    white-space: nowrap;
+  }
+
   .outcome {
     display: -webkit-box;
     -webkit-box-orient: vertical;

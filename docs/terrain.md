@@ -57,6 +57,12 @@ its terrain.
   with `src/field/core.ts` in Chromium, landscape 1600 × 1000 and portrait 900 × 1600, as AVIF
   ≤ 60 KB. The poster is the first paint, the Off tier and the fallback without WebGL2; the field
   fades in over it on the identical frame.
+- `npm run plates` writes the cards' art (`scripts/plates/build.mjs`): each summit's master cropped to
+  4:3 around the summit and contoured at the card's interval in the field's language (1 px lines,
+  1.5 px index lines every fifth, stone grey) with one mint index line, as an SVG ≤ 25 KB in
+  `public/plates/`. A second plate, `<id>-level.svg`, steps the index emphasis and the mint line
+  up one contour: the card's hover crossfades to it, and the case study's header shows it. The
+  terrain scripts run it at their end.
 - `npm run verify:terrain` decodes every master and field map and compares it with the heights
   the pipeline wrote. In the browser, the first upload of each map is read back once per session
   (16 reference texels); a browser that alters the decode gets the raw heights instead.

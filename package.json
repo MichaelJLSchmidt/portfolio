@@ -15,6 +15,7 @@
     "terrain:bern": "node scripts/terrain/bern.mjs",
     "terrain:field": "node scripts/terrain/field.mjs",
     "posters": "node scripts/terrain/posters.mjs",
+    "plates": "node scripts/plates/build.mjs",
     "geo": "node scripts/geo/build.mjs",
     "images": "node scripts/images/build.mjs",
     "portrait": "node scripts/portrait.mjs",

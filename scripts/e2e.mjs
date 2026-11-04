@@ -12,7 +12,7 @@
 //   npm run test:e2e -- terrain       the living survey: frames at rest, under the pointer, hidden,
 //                                     Off, touch; a page change's crossfade; context loss
 //                                     (scripts/e2e-terrain.mjs; needs NEXT_PUBLIC_PREVIEW=1)
-//   npm run test:e2e -- deck          deck order, card link names and the Next project loop
+//   npm run test:e2e -- deck          card order, card link names and the Next case study loop
 //                                     (scripts/e2e/deck.mjs; needs the examples)
 //   npm run test:e2e -- ia            page structure, header order, the Motion control, the 404, titles
 //                                     inside their column (scripts/e2e/layout.mjs)
@@ -32,7 +32,7 @@
 //                                     (scripts/e2e/choreography.mjs)
 //   npm run test:e2e -- wording       no old names, CV or job-seeking phrases in the built HTML
 //                                     (scripts/check-wording.mjs)
-//   npm run test:e2e -- inp           the Next project tap on a throttled phone (INP ≤ 200 ms)
+//   npm run test:e2e -- inp           the Next case study tap on a throttled phone (INP ≤ 150 ms)
 //   npm run test:e2e -- pointer       no pointermove listener but the card tilt (scripts/e2e/interaction.mjs)
 //   npm run test:e2e -- smoke         a smoke subset in Chromium, WebKit and Firefox (each where
 //                                     Playwright has it installed; scripts/e2e/smoke.mjs)

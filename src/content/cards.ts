@@ -36,7 +36,7 @@ export type CardData = {
 
 // The labels and the per-card helpers live apart from the cards' data, so client components that
 // need only them don't bundle every card.
-export { cardLabels, cardHref, typeLine } from "./card-labels";
+export { cardLabels, cardHref, typeLine, typeParts } from "./card-labels";
 export { caseStudyLabels } from "./case-study-labels";
 
 /** Real project cards. None is written yet: a live build's "Case studies" is empty and says so. */

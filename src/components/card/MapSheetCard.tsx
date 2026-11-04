@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { cardHref, cardLabels, typeLine, type CardData } from "@/content/cards";
+import { Fragment } from "react";
+import { cardHref, cardLabels, typeLine, typeParts, type CardData } from "@/content/cards";
 import { summitOf } from "@/content/geo";
 import { asset } from "@/lib/asset";
+import { PlatePreload } from "./PlatePreload";
 import styles from "./MapSheetCard.module.css";
 
 /**
@@ -13,7 +15,8 @@ import styles from "./MapSheetCard.module.css";
  *
  * Hover (fine pointer, Full): the card lifts 6 px, its frame goes to text-3 and the art steps up
  * one contour level (the second plate crossfades in over --dur-level). Focus: the same with the
- * 2 px mint outline. Press: 0.985. Touch, Calm and Off: only the frame changes.
+ * 2 px mint outline. Press: 0.985. Touch, Calm and Off: only the frame changes. The level plate
+ * loads lazily and is decoded on the first hover or focus (PlatePreload).
  */
 export function MapSheetCard({
   card,
@@ -47,10 +50,27 @@ export function MapSheetCard({
         <Heading className={`${styles.title} t-h3`}>{card.name}</Heading>
         <span className={styles.art} data-card-art={card.slug}>
           <img className={styles.plate} src={asset(`/plates/${card.terrainId}.svg`)} alt="" width={400} height={300} loading="lazy" decoding="async" />
-          <img className={`${styles.plate} ${styles.level}`} src={asset(`/plates/${card.terrainId}-level.svg`)} alt="" width={400} height={300} loading="lazy" decoding="async" />
+          <img
+            className={`${styles.plate} ${styles.level}`}
+            src={asset(`/plates/${card.terrainId}-level.svg`)}
+            alt=""
+            width={400}
+            height={300}
+            loading="lazy"
+            decoding="async"
+            data-plate="level"
+          />
         </span>
-        <span className={`${styles.type} mono`}>{line}</span>
+        <span className={`${styles.type} mono`}>
+          {typeParts(card).map((part, i) => (
+            <Fragment key={i}>
+              {i > 0 && " · "}
+              <span className={styles.part}>{part}</span>
+            </Fragment>
+          ))}
+        </span>
         <span className={styles.outcome}>{outcome}</span>
+        <PlatePreload />
         <span className={`${styles.set} mono`}>
           <span>{summit ? `${summit.label} · ${summit.altitude}` : ""}</span>
           <span>{cardLabels.collector(index, total)}</span>

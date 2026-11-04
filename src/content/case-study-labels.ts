@@ -82,12 +82,8 @@ export const caseStudyLabels = {
   },
   evidenceLegend: "Evidence",
   credits: "Credits",
-  next: "Next project",
-  previous: "Previous project",
-  youAreHere: "You are here",
-  /** The ridge of the three projects in the Next project band. */
-  ridge: "The three projects",
-  back: "All projects",
-  backToAll: "All projects",
+  next: "Next case study",
+  back: "Case studies",
+  backToAll: "Back to case studies",
   example: "Fictional example",
 };

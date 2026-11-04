@@ -2,13 +2,6 @@
   "cards": {
     "eiger": {
       "kind": "crop",
-      "svg": "/terrain/cards/eiger.svg",
-      "viewBox": [
-        0,
-        0,
-        360,
-        240
-      ],
       "contourIntervalM": 150,
       "indexEvery": 5,
       "bboxLv95": [
@@ -17,59 +10,6 @@
         2645500,
         1160700
       ],
-      "trail": [
-        [
-          0.0863,
-          0.3188
-        ],
-        [
-          0.718,
-          0.673
-        ],
-        [
-          0.8755,
-          0.3518
-        ],
-        [
-          0.7525,
-          0.435
-        ],
-        [
-          0.656,
-          0.5155
-        ]
-      ],
-      "pins": [
-        {
-          "x": 0.0863,
-          "y": 0.3188,
-          "elevationM": 2061
-        },
-        {
-          "x": 0.718,
-          "y": 0.673,
-          "elevationM": 3160
-        },
-        {
-          "x": 0.8755,
-          "y": 0.3518,
-          "elevationM": 3354
-        },
-        {
-          "x": 0.7525,
-          "y": 0.435,
-          "elevationM": 3674
-        },
-        {
-          "x": 0.656,
-          "y": 0.5155,
-          "elevationM": 3967
-        }
-      ],
-      "svgBytes": {
-        "bytes": 9935,
-        "gzipBytes": 4008
-      },
       "morph": {
         "file": "/terrain/morph/eiger.webp",
         "width": 448,
@@ -198,13 +138,6 @@
     },
     "moench": {
       "kind": "crop",
-      "svg": "/terrain/cards/moench.svg",
-      "viewBox": [
-        0,
-        0,
-        360,
-        240
-      ],
       "contourIntervalM": 150,
       "indexEvery": 5,
       "bboxLv95": [
@@ -213,59 +146,6 @@
         2645050,
         1158633
       ],
-      "trail": [
-        [
-          0.2829,
-          0.0892
-        ],
-        [
-          0.3922,
-          0.9171
-        ],
-        [
-          0.7156,
-          0.6929
-        ],
-        [
-          0.6467,
-          0.62
-        ],
-        [
-          0.5976,
-          0.5791
-        ]
-      ],
-      "pins": [
-        {
-          "x": 0.2829,
-          "y": 0.0892,
-          "elevationM": 2322
-        },
-        {
-          "x": 0.3922,
-          "y": 0.9171,
-          "elevationM": 3454
-        },
-        {
-          "x": 0.7156,
-          "y": 0.6929,
-          "elevationM": 3656
-        },
-        {
-          "x": 0.6467,
-          "y": 0.62,
-          "elevationM": 3983
-        },
-        {
-          "x": 0.5976,
-          "y": 0.5791,
-          "elevationM": 4110
-        }
-      ],
-      "svgBytes": {
-        "bytes": 9118,
-        "gzipBytes": 3772
-      },
       "morph": {
         "file": "/terrain/morph/moench.webp",
         "width": 448,
@@ -394,13 +274,6 @@
     },
     "jungfrau": {
       "kind": "crop",
-      "svg": "/terrain/cards/jungfrau.svg",
-      "viewBox": [
-        0,
-        0,
-        360,
-        240
-      ],
       "contourIntervalM": 150,
       "indexEvery": 5,
       "bboxLv95": [
@@ -409,50 +282,6 @@
         2644300,
         1156567
       ],
-      "trail": [
-        [
-          0.4814,
-          0.3887
-        ],
-        [
-          0.8372,
-          0.1422
-        ],
-        [
-          0.2236,
-          0.8623
-        ],
-        [
-          0.1784,
-          0.7469
-        ]
-      ],
-      "pins": [
-        {
-          "x": 0.4814,
-          "y": 0.3887,
-          "elevationM": 3454
-        },
-        {
-          "x": 0.8372,
-          "y": 0.1422,
-          "elevationM": 3656
-        },
-        {
-          "x": 0.2236,
-          "y": 0.8623,
-          "elevationM": 3877
-        },
-        {
-          "x": 0.1784,
-          "y": 0.7469,
-          "elevationM": 4158
-        }
-      ],
-      "svgBytes": {
-        "bytes": 8187,
-        "gzipBytes": 3395
-      },
       "morph": {
         "file": "/terrain/morph/jungfrau.webp",
         "width": 448,

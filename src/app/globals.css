@@ -262,6 +262,13 @@
     --link-gap: 1.5px;
   }
 
+  /* A link that is not a text link (a card, the brand, the header's items): no underline lines.
+     In this layer, so a component's own padding and background still win. */
+  a.plain {
+    padding-bottom: 0;
+    background-image: none;
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     :root:not([data-motion="still"]) a {
       transition:
@@ -455,12 +462,6 @@
     clip: rect(0 0 0 0);
     white-space: nowrap;
     border: 0;
-  }
-
-  /* A link that is not a text link: no underline lines. */
-  .plain {
-    padding-bottom: 0;
-    background: none;
   }
 
   /* The H1 focused after a route change (RouteArrival) is announced, not operated: no ring. */

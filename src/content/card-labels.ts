@@ -17,5 +17,8 @@ export const cardLabels = {
 
 export const cardHref = (card: CardData) => card.href ?? `/work/${card.slug}/`;
 
+/** The type line's parts: sector, role, team size (each kept on one line). */
+export const typeParts = (card: CardData) => [card.sector, card.role, card.teamSize].filter((p): p is string => Boolean(p));
+
 /** The type line: sector · role · team size. */
-export const typeLine = (card: CardData) => [card.sector, card.role, card.teamSize].filter(Boolean).join(" · ");
+export const typeLine = (card: CardData) => typeParts(card).join(" · ");

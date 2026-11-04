@@ -12,7 +12,7 @@ export function EarlierProjects({ copy: t, className }: { copy: typeof home.earl
       <h2 id="earlier-heading" className="t-h2" data-quiet-zone>
         {t.heading}
       </h2>
-      <ol className={styles.list} aria-label={t.caption}>
+      <ol className={styles.list} aria-label={t.caption} data-quiet-zone>
         {t.entries.map((e) => {
           const content = (
             <>
