@@ -328,6 +328,8 @@ export type Field = {
   frames(): number;
   /** What the loop does now (tests): the active pace (bump, crossfade), a page change, paused. */
   state(): { active: boolean; routing: boolean; paused: boolean; bump: number };
+  /** Tests (preview builds): pins a page change's crossfade at this progress (0..1); null lets it go on. */
+  hold(progress: number | null): void;
   destroy(): void;
 };
 
@@ -385,8 +387,9 @@ export function createField(canvas: HTMLCanvasElement, initial: FieldOptions, ho
   let frames = 0;
   let first = true;
   const t0 = performance.now();
-  // The route: dim 0..1 (1 = dimmed), crossfade 0..1.
+  // The route: dim 0..1 (1 = dimmed), crossfade 0..1; `held` pins the crossfade (tests).
   const route = { start: -1, mix: 0, dim: 0 };
+  let held: number | null = null;
   // The pointer bump.
   const ptr = { x: 0, y: 0, tx: 0, ty: 0, inside: false, seen: false, speed: 0, amp: 0, vel: 0, target: 0, lastX: 0, lastY: 0, lastT: 0 };
 
@@ -489,8 +492,8 @@ export function createField(canvas: HTMLCanvasElement, initial: FieldOptions, ho
     if (!ptr.inside && ptr.amp < 1e-3 && Math.abs(ptr.vel) < 1e-3) ptr.amp = ptr.vel = 0;
     // The route: dim, then crossfade and undim.
     if (route.start >= 0) {
-      const t = now - route.start;
       const { dimMs, fadeMs, dimTo } = opts.route;
+      const t = held !== null && B ? dimMs + held * fadeMs : now - route.start;
       if (t < dimMs) {
         route.dim = easeInOut(t / dimMs) * (1 - dimTo);
       } else if (!B) {
@@ -592,6 +595,10 @@ export function createField(canvas: HTMLCanvasElement, initial: FieldOptions, ho
     },
     setMotion(next) {
       motion = next;
+      wake();
+    },
+    hold(progress) {
+      held = progress === null ? null : Math.min(0.999, Math.max(0, progress));
       wake();
     },
     setPaused(next) {

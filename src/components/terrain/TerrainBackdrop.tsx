@@ -88,6 +88,12 @@ export function TerrainBackdrop() {
             (window as Window & { __terrain?: unknown }).__terrain = {
               route: mounted.route,
               retune: mounted.retune,
+              // A page change pinned half-way (check:legibility's mid-morph pass).
+              freeze: (id: string | null, progress: number) => {
+                mounted.route(id);
+                mounted.field.hold(progress);
+                return true;
+              },
               frames: () => mounted.field.frames(),
               state: () => mounted.field.state(),
               tier,

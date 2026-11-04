@@ -1,3 +1,5 @@
+import { site } from "./site";
+
 /** Copy for the motion lab (/lab/), a preview-only review page. Components never hardcode copy. */
 export const lab = {
   meta: {
@@ -23,7 +25,8 @@ export const lab = {
       title: {
         title: "Title",
         note: "Each word arrives from wght 200 to its role's weight over 900 ms, 60 ms apart (four steps at most); a hidden copy at the final weight holds the width. Calm: 600 ms together. Off: the final weight.",
-        big: "Michael JL Schmidt",
+        /** The display name, from the name source. */
+        big: site.name,
         mid: "Seilschaft",
       },
       link: {

@@ -35,7 +35,7 @@ const ALPINE = [50, 100, 200, 250, 500];
 const LOWLAND = [10, 20, 50];
 
 /**
- * The largest width (in 16 px steps) whose lossless WebP stays within the budget. A light blur
+ * The largest width (in 16 px steps) whose lossless WebP and raw fallback both stay within the budget. A light blur
  * (like the gate's poster: σ ≈ 1 texel) and a coarser height step than the masters' (a fraction of
  * the finest contour interval, so no line moves visibly) keep the fine terrain within it.
  */
@@ -47,7 +47,9 @@ async function fit(id, data, w, h, encoding, sigma = 0) {
     const rgb = packHeightRgb(d, dw, dh, encoding);
     const webp = await encodeLosslessWebp(rgb, dw, dh);
     if (webp.length > BUDGET) continue;
+    // The raw fallback is what a browser that alters the decode loads instead: within budget too.
     const raw = encodeRawHeights(rgb, dw, dh);
+    if (raw.length > BUDGET) continue;
     writeFileSync(join(outDir, `${id}.webp`), webp);
     writeFileSync(join(outDir, `${id}.bin`), raw);
     console.log(`  ${id.padEnd(9)} ${dw}×${dh}  WebP ${(webp.length / 1024).toFixed(1)} KB  raw ${(raw.length / 1024).toFixed(1)} KB`);

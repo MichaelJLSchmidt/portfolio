@@ -34,6 +34,8 @@
 //                                     (scripts/check-wording.mjs)
 //   npm run test:e2e -- inp           the Next case study tap on a throttled phone (INP ≤ 150 ms)
 //   npm run test:e2e -- pointer       no pointermove listener but the card tilt (scripts/e2e/interaction.mjs)
+//   npm run test:e2e -- calm          Off moves nothing; a resting pointer moves only the field; at
+//                                     most two regions animate at once; Calm at 0.7 (e2e/calm.mjs)
 //   npm run test:e2e -- wordmark      the relief fill: rest, hover, leave, focus, touch, Calm, Off
 //                                     (scripts/e2e/wordmark.mjs)
 //   npm run test:e2e -- smoke         a smoke subset in Chromium, WebKit and Firefox (each where
@@ -58,6 +60,7 @@ import { smoke } from "./e2e/smoke.mjs";
 import { inp, pointer } from "./e2e/interaction.mjs";
 import { axe } from "./e2e/axe.mjs";
 import { wordmark } from "./e2e/wordmark.mjs";
+import { calm } from "./e2e/calm.mjs";
 import { wordingHits } from "./check-wording.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -827,7 +830,7 @@ async function wording() {
 const scenarios = { transitions, hydration, primitives, casestudy, wording };
 // The contour field (scripts/e2e-terrain.mjs).
 Object.assign(scenarios, (await import("./e2e-terrain.mjs")).terrainScenarios({ browser, base, root, check, settle }));
-Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, ia, phone, fontswap, toast, arrival, reading, access, pointer, inp, smoke, axe, wordmark }).map(([name, run]) => [name, () => run({ browser, playwright, base, basePath, root, check, open, settle })])));
+Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, ia, phone, fontswap, toast, arrival, reading, access, pointer, inp, smoke, axe, wordmark, calm }).map(([name, run]) => [name, () => run({ browser, playwright, base, basePath, root, check, open, settle })])));
 try {
   for (const [name, run] of Object.entries(scenarios)) if (!only || only === name) await run();
 } finally {

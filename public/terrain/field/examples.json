@@ -1,5 +1,5 @@
 {
-  "$comment": "Written by npm run terrain:field (scripts/terrain/field.mjs).",
+  "$comment": "Written by npm run terrain:field (scripts/terrain/field.mjs); posters by npm run posters.",
   "budgetBytes": 153600,
   "terrains": {
     "eiger": {
