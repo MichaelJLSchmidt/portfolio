@@ -14,12 +14,14 @@
 //                                     (scripts/e2e-terrain.mjs; needs NEXT_PUBLIC_PREVIEW=1)
 //   npm run test:e2e -- deck          deck order, card link names and the Next project loop
 //                                     (scripts/e2e/deck.mjs; needs the examples)
-//   npm run test:e2e -- ia            page structure, HUD order, example content (scripts/e2e/layout.mjs)
-//   npm run test:e2e -- phone         every route at 360 and 390 px: no overflow, HUD and footer
-//                                     (scripts/e2e/layout.mjs)
+//   npm run test:e2e -- ia            page structure, header order, the Motion control, the 404, titles
+//                                     inside their column (scripts/e2e/layout.mjs)
+//   npm run test:e2e -- phone         every route at 320, 360 and 390 px: no overflow, the header and
+//                                     footer inside the screen (scripts/e2e/layout.mjs)
 //   npm run test:e2e -- fontswap      the web fonts held back on a throttled phone: CLS ≤ 0.05,
-//                                     display titles keep their boxes (scripts/e2e/typography.mjs)
-//   npm run test:e2e -- toast         Copy address and its toast in full and still (scripts/e2e/chrome.mjs)
+//                                     titles keep their boxes (scripts/e2e/typography.mjs)
+//   npm run test:e2e -- toast         the footer's Copy address and its toast in full and still
+//                                     (scripts/e2e/chrome.mjs)
 //   npm run test:e2e -- arrival       route arrivals: timing, focus on the H1, the trailhead morph,
 //                                     traversals, Basecamp, still (scripts/e2e/choreography.mjs)
 //   npm run test:e2e -- reading       the waypoint trail, the altimeter bar, the
@@ -102,8 +104,7 @@ async function open({ calm = false, reduced = false, classic = false, init } = {
   await context.addInitScript(
     ({ calm, classic }) => {
       try {
-        
-        if (calm) localStorage.setItem("summit:calm-map", "1");
+        if (calm) localStorage.setItem("summit:motion", "calm");
         if (classic) sessionStorage.setItem("summit:vt", "classic");
       } catch {}
       // Counts calls that reach the browser's API and, when armed, aborts the next one:
@@ -832,7 +833,7 @@ async function hydration() {
       });
       await load(page, `${base}${route}`);
       await page.waitForTimeout(600);
-      const attrs = await page.evaluate(() => ["data-motion", "data-tier", "data-calm"].map((a) => `${a}=${document.documentElement.getAttribute(a)}`));
+      const attrs = await page.evaluate(() => ["data-motion", "data-tier"].map((a) => `${a}=${document.documentElement.getAttribute(a)}`));
       check(`${route}: no hydration or console errors`, problems.length === 0, problems.join(" | "));
       check(`${route}: motion attributes kept`, !attrs.some((a) => a.endsWith("=null")), attrs.join(" "));
       await context.close();

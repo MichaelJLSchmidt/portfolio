@@ -2,8 +2,8 @@
 //
 //   fontswap  On a phone with the CPU slowed 4× and the web fonts held back 2.5 s (so the
 //             fallback paints first), the swap moves nothing: the page's layout shift (CLS) stays
-//             ≤ 0.05 and each display title's own shift ≤ 0.005 (WeightTitle: one element whose
-//             fallback face is metric-matched).
+//             ≤ 0.05 and each title's own shift ≤ 0.005 (Title: each word's box is reserved by a
+//             copy at its final weight, and the fallback face is metric-matched).
 export async function fontswap({ browser, base, check }) {
   const routes = ["/", "/about/", "/work/seilschaft/"];
   console.log("\nfontswap: web fonts held back 2.5 s on a throttled phone");
@@ -45,7 +45,7 @@ export async function fontswap({ browser, base, check }) {
     const after = await page.evaluate(() => document.querySelector("h1").getBoundingClientRect().height);
     check(`${route}: the H1 keeps its height through the swap`, Math.abs(after - before) < 1, `${Math.round(before)} → ${Math.round(after)} px`);
     const r = await page.evaluate(() => {
-      const titles = [...document.querySelectorAll("[data-title]")];
+      const titles = [...document.querySelectorAll("[data-arrive]")];
       const own = titles.map((t) => ({
         title: t.textContent.trim().slice(0, 24),
         value: window.__shifts.filter((s) => s.sources.some((n) => t.contains(n) || n.contains?.(t))).reduce((a, s) => a + s.value, 0),
@@ -54,7 +54,7 @@ export async function fontswap({ browser, base, check }) {
     });
     check(`${route}: CLS ≤ 0.05 with the font swap`, r.cls <= 0.05, `CLS ${r.cls.toFixed(4)} (fonts ${r.fonts})`);
     const worst = r.own.reduce((a, b) => (b.value > a.value ? b : a), { title: "—", value: 0 });
-    check(`${route}: each display title's own shift ≤ 0.005`, worst.value <= 0.005, `${worst.title}: ${worst.value.toFixed(4)}`);
+    check(`${route}: each title's own shift ≤ 0.005`, worst.value <= 0.005, `${worst.title}: ${worst.value.toFixed(4)}`);
     await context.close();
   }
 }

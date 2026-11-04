@@ -10,7 +10,7 @@ import { currentMode } from "@/lib/motion-mode";
  */
 let io: IntersectionObserver | null = null;
 
-const set = (el: Element, state: "wait" | "in") => el.setAttribute("data-reveal-state", state);
+const set = (el: Element, state: "wait" | "in" | "shown") => el.setAttribute("data-reveal-state", state);
 
 export function startReveals(root: ParentNode = document): () => void {
   if (typeof window === "undefined") return () => {};
@@ -29,8 +29,9 @@ export function startReveals(root: ParentNode = document): () => void {
   for (const el of root.querySelectorAll("[data-reveal]")) {
     if (el.getAttribute("data-reveal-state")) continue;
     const r = el.getBoundingClientRect();
+    // In the first viewport (or Off): there from the first paint, no animation.
     if (still || !r.height || r.top < window.innerHeight) {
-      set(el, "in");
+      set(el, "shown");
       continue;
     }
     const group = el.closest("[data-reveal-group]");

@@ -177,12 +177,6 @@ for (const mode of pick(modes)) {
       hasTouch: vp.mobile,
       reducedMotion: mode.reduced ? "reduce" : "no-preference",
     });
-    await context.addInitScript(() => {
-      try {
-        
-        sessionStorage.setItem("summit:deck-dealt", "1");
-      } catch {}
-    });
     const page = await context.newPage();
     const cdp = vp.mobile ? await context.newCDPSession(page) : null;
     for (const p of pick(pages)) {

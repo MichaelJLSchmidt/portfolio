@@ -10,6 +10,7 @@
   .fork {
     display: grid;
     gap: 16px;
+    overflow-x: clip;
   }
 
   .heading {

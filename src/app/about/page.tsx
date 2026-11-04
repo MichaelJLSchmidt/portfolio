@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { asset } from "@/lib/asset";
 import { CareerProfile } from "@/components/about/CareerProfile";
 import { Title } from "@/components/type/Title";
 import { about } from "@/content/about";
@@ -27,7 +28,7 @@ export default function About() {
         <figure className={styles.portrait}>
           {portrait.image ? (
             <img
-              src={portrait.image.sources[0]?.src}
+              src={asset(portrait.image.sources[0]?.src ?? "")}
               alt={portrait.alt}
               width={portrait.image.width}
               height={portrait.image.height}

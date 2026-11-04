@@ -38,7 +38,7 @@
   .columnHead {
     display: grid;
     gap: 4px;
-    color: var(--color-glacier);
+    color: var(--color-text-2);
   }
 
   .columnNote {
@@ -78,7 +78,7 @@
     flex-wrap: wrap;
     gap: 8px 24px;
     margin: 0;
-    color: var(--color-glacier);
+    color: var(--color-text-2);
   }
 
   .readout div {
@@ -102,7 +102,7 @@
   }
 
   .section > h2 {
-    color: var(--color-glacier);
+    color: var(--color-text-2);
   }
 
   .note {
@@ -152,7 +152,7 @@
     display: inline-grid;
     gap: 8px;
     justify-self: start;
-    color: var(--color-glacier);
+    color: var(--color-text-2);
   }
 
   .nextName {

@@ -22,9 +22,7 @@ async function newPage(browser, { viewport = { width: 1440, height: 900 }, mobil
   await context.addInitScript(
     ({ calm }) => {
       try {
-        
-        sessionStorage.setItem("summit:deck-dealt", "1");
-        if (calm) localStorage.setItem("summit:calm-map", "1");
+        if (calm) localStorage.setItem("summit:motion", "calm");
       } catch {}
       // View transitions: how many started, the pairs they drew, the root's timing.
       window.__vt = [];
@@ -354,7 +352,6 @@ export async function access({ browser, base, root, check }) {
     await context.addInitScript(() => {
       try {
         
-        sessionStorage.setItem("summit:deck-dealt", "1");
       } catch {}
       window.__buzz = [];
       Object.defineProperty(navigator, "vibrate", { configurable: true, value: (p) => (window.__buzz.push(Array.isArray(p) ? p.join(",") : String(p)), true) });

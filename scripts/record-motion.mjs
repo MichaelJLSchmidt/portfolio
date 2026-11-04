@@ -115,7 +115,7 @@ try {
       await context.addInitScript((calm) => {
         try {
           
-          if (calm) localStorage.setItem("summit:calm-map", "1");
+          if (calm) localStorage.setItem("summit:motion", "calm");
         } catch {}
       }, mode === "calm");
       await page.goto(`${base}/?field=force`, { waitUntil: "networkidle" });
@@ -163,7 +163,7 @@ try {
         await context.addInitScript((calm) => {
           try {
             
-            if (calm) localStorage.setItem("summit:calm-map", "1");
+            if (calm) localStorage.setItem("summit:motion", "calm");
           } catch {}
         }, mode === "calm");
         await page.goto(`${base}/?field=force`, { waitUntil: "networkidle" });
@@ -230,7 +230,7 @@ try {
     const calmly = async (context) =>
       context.addInitScript((calm) => {
         try {
-          if (calm) localStorage.setItem("summit:calm-map", "1");
+          if (calm) localStorage.setItem("summit:motion", "calm");
         } catch {}
       }, mode === "calm");
     await record(`about-${mode}`, options, async (page, context) => {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { MapSheetCard } from "@/components/card/MapSheetCard";
 import { EarlierProjects } from "@/components/home/EarlierProjects";
 import { Title } from "@/components/type/Title";
@@ -25,9 +26,9 @@ export default function Home() {
         <Title id="hero-name" role="display" text={site.hero.name} className={styles.name} />
         <p className={`${styles.intro} body-copy`}>
           {home.intro.text}{" "}
-          <a href="/about/" className={styles.more}>
+          <Link href="/about/" className={styles.more}>
             {home.intro.more}
-          </a>
+          </Link>
         </p>
       </section>
 
