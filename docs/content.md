@@ -89,7 +89,7 @@ Where they exist is `includesExamples` in `src/hosting/config.ts`:
 
 A live build swaps `@/content/examples` and its case studies for `none.ts` (`next.config.ts`),
 removes their files from `out/` and fails if anything of theirs is left. Their card terrains are
-in `public/terrain/examples.json`, not `terrain.json`. With no real project yet, a live build's
+in `terrain/examples.json` and `public/terrain/field/examples.json`, not `terrain.json`. With no real project yet, a live build's
 deck is empty and says so, and `/work/` generates no case study.
 
 ## Case studies
@@ -114,11 +114,39 @@ same parts, in this order:
 - **Looking back:** each lesson with "Next time I would …". **Team:** each role with its count and
   a line on what they did; no names. **What I did not do** and the credits.
 
-`validateCaseStudy` rejects a case study with any part missing or malformed; the unit tests and
-`check:content` run it, so an incomplete case study never builds. The page's ascent comes from its
-card: the card's artwork must be a crop terrain that is one of the ascents in `geo.ts` (`eiger`,
-`moench`, `jungfrau`), or the page refuses to build. A new mountain needs an ascent in `geo.ts`,
-its places in `scripts/geo/geo.config.json` and a crop card in `terrain.config.json`.
+The six stages carry the ids `context`, `leadership`, `discovery`, `decisions`, `delivery` and
+`outcome`, in that order. `validateCaseStudy` rejects a case study with any part missing or
+malformed; the unit tests and `check:content` run it, so an incomplete case study never builds.
+
+### The page: the Calm Survey template
+
+`surveyLayout()` (`src/lib/survey-layout.ts`, unit-tested) lays the content out; nothing is
+invented and every part lands in exactly one place. In page order, alternating the dark ground
+and the light sheet:
+
+1. **Header plate**: the card's level plate full bleed, with the meta line, the H1 and the summit
+   · altitude · coordinates (`geo.ts`).
+2. **Summary** (sheet): the problem, my role, team · duration · reach (`facts` and the card's
+   `reach`), the key decision, the outcome with its evidence.
+3. **01 · Context**: the context stage and the brief, beside the contents trail.
+4. **Metric band**: the card's `impact.after` and the impact line.
+5. **02 · Findings**: the discovery stage, an offset pair of its first two plain images (from
+   discovery and delivery), then the delivery stage.
+6. **Decisions**: the decisions stage's finding, each decision a step beside a sticky figure (the
+   figure that follows it in the stage, or its options set as type).
+7. **Options** (sheet): every decision's options in full, then the decision we reversed.
+8. **Map frame**: the `hero` figure, full bleed in a map-sheet frame.
+9. **03 · Leading the team**: the leadership stage's finding as the page's one pull statement (the
+   owner's own words), its blocks, the team I led, what I put in place, the team by role.
+10. **Outcome** (sheet): the results as tiles (after, from before, evidence, the stage it was won
+    at), the outcome stage, any before/after figure, the after-launch log.
+11. **Reflection**: looking back, what I did not do, the credits.
+12. **Next case study**: the next card, then "Back to case studies".
+
+The header's summit comes from the card's terrain: one of the summits in `geo.ts` (`eiger`,
+`moench`, `jungfrau`). A new mountain needs its summit there, the place in
+`scripts/geo/geo.config.json` and a crop card in `terrain.config.json` (then `npm run terrain`,
+which also writes its plates).
 
 ### Numbers come from a data file
 

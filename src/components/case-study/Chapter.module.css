@@ -1,0 +1,66 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+@layer components {
+  .chapter {
+    row-gap: 28px;
+    align-items: start;
+  }
+
+  .chapter > * {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .chapter > [data-block="figure"],
+  .chapter > [data-block="wide"] {
+    margin-block: 20px;
+  }
+
+  @media (min-width: 768px) {
+    .chapter > [data-block="text"],
+    .chapter > [data-block="figure"] {
+      grid-column: 1 / span 7;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .chapter > [data-block="text"],
+    .chapter > [data-block="figure"] {
+      grid-column: 4 / span 7;
+    }
+
+    .chapter > [data-block="wide"] {
+      grid-column: 4 / -1;
+    }
+  }
+
+  .head {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .line {
+    margin: 0;
+    color: var(--color-text-2);
+  }
+
+  .head h2 {
+    margin: 0;
+    max-width: 24ch;
+  }
+
+  /* Chapter 03: the heading is the page's one pull statement, in the owner's own words. */
+  .pull {
+    max-width: 22ch !important;
+  }
+
+  .sub {
+    margin-top: 24px;
+  }
+
+  .sub h3 {
+    margin: 0;
+    max-width: 32ch;
+  }
+}

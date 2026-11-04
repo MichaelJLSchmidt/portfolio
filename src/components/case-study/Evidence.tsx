@@ -1,6 +1,6 @@
 import { caseStudyLabels as L } from "@/content/case-study-labels";
 import type { Evidence } from "@/lib/case-study";
-import styles from "./CaseStudy.module.css";
+import styles from "./Evidence.module.css";
 
 /** Shape plus text, never colour alone: filled circle, half-filled circle, open diamond. */
 const shapes: Record<Evidence, React.ReactNode> = {
@@ -33,7 +33,7 @@ export function EvidenceBadge({ kind }: { kind: Evidence }) {
  */
 export function EvidenceLegend({ kinds, notes }: { kinds: Evidence[]; notes?: Partial<Record<Evidence, string>> }) {
   return (
-    <dl className={`${styles.evidenceLegend} body-copy`} aria-label={L.evidenceLegend} data-draws="">
+    <dl className={`${styles.evidenceLegend} body-copy`} aria-label={L.evidenceLegend}>
       {kinds.map((kind) => (
         <div key={kind}>
           <dt>

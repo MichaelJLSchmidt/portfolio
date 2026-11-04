@@ -4,10 +4,8 @@
 //             the trailhead band's mini card morphing into the next case study; browser back as a
 //             180 ms traversal; About from the HUD (H1 focused, the facts from 420 ms);
 //             still mode: no view transition, focus still on the H1.
-//   reading   the case study while it is read: the trail's scroll-linked fill and current waypoint, the altimeter bar on a phone (shown from
-//             the first waypoint, its sheet: focus inside, Esc, focus back, a jump focuses the
-//             waypoint's heading); the career profile in full, calm and still; no endless loop on
-//             the home page but the field's.
+//   reading   the career line drawn once in Full and Calm, drawn in Off; no endless loop on any
+//             page but the field's.
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
@@ -196,96 +194,47 @@ export async function arrival({ browser, basePath, base, root, check }) {
 }
 
 export async function reading({ browser, base, root, check }) {
-  console.log("\nreading: the case study as it is read, the career climb, loops");
+  console.log("\nreading: the career line, loops");
   if (!hasExamples(root)) return console.log("  skipped: build with SITE_MODE=basecamp");
 
-  // Desktop: the trail.
-  {
-    const { context, page, errors } = await newPage(browser);
-    await page.goto(`${base}/work/gratweg/`, { waitUntil: "load" });
-    await page.waitForTimeout(1500);
-    const at = async (i) => {
-      await page.evaluate((i) => document.querySelectorAll("section[data-waypoint]")[i].scrollIntoView({ block: "start" }), i);
-      await page.waitForTimeout(700);
-      return page.evaluate(() => ({
-        current: document.querySelector('nav a[aria-current="true"]')?.getAttribute("href"),
-        reading: Number(getComputedStyle(document.querySelector("nav ol[style]")).getPropertyValue("--reading")),
-      }));
-    };
-    const one = await at(0);
-    const three = await at(2);
-    check("the trail marks the current waypoint", one.current?.startsWith("#") && three.current !== one.current, `${one.current} → ${three.current}`);
-    check("the trail fills with the scroll", three.reading > one.reading && three.reading > 0, `${one.reading} → ${three.reading}`);
-    check("no page errors", errors.length === 0, errors.join("; "));
-    await context.close();
-  }
-
-  // Phone: the altimeter bar and its jump sheet.
-  {
-    const { context, page, errors } = await newPage(browser, { viewport: { width: 390, height: 844 }, mobile: true });
-    await page.goto(`${base}/work/gratweg/`, { waitUntil: "load" });
-    await page.waitForTimeout(1500);
-    const shown = () => page.evaluate(() => !!document.querySelector("nav[data-shown]")?.getClientRects().length);
-    check("altimeter bar: hidden above the first waypoint", !(await shown()));
-    await page.evaluate(() => document.querySelectorAll("section[data-waypoint]")[1].scrollIntoView({ block: "start" }));
-    await page.waitForTimeout(800);
-    const label = await page.evaluate(() => document.querySelector("nav[data-shown] button")?.textContent?.trim());
-    check("altimeter bar: shown, with the current waypoint", (await shown()) && !!label, label);
-    await page.locator("nav[data-shown] button").tap();
-    await page.waitForTimeout(500);
-    const open = await page.evaluate(() => ({ open: !!document.querySelector("dialog[open]"), inside: !!document.activeElement?.closest("dialog[open]") }));
-    check("the jump sheet opens with focus inside", open.open && open.inside, JSON.stringify(open));
-    await page.keyboard.press("Escape");
-    await page.waitForTimeout(300);
-    const closed = await page.evaluate(() => ({ open: !!document.querySelector("dialog[open]"), back: !!document.activeElement?.closest("nav[data-shown]") }));
-    check("Esc closes it and focus returns to the bar", !closed.open && closed.back, JSON.stringify(closed));
-    await page.locator("nav[data-shown] button").tap();
-    await page.waitForTimeout(400);
-    const target = await page.locator("dialog[open] a").nth(3).getAttribute("href");
-    await page.locator("dialog[open] a").nth(3).tap();
-    await page.waitForTimeout(900);
-    const jumped = await page.evaluate(() => ({ focus: document.activeElement?.id, hash: location.hash }));
-    check("a jump lands on the waypoint and focuses its heading", jumped.focus === `${target.slice(1)}-heading`, JSON.stringify(jumped));
-    check("no page errors", errors.length === 0, errors.join("; "));
-    await context.close();
-  }
-
-  // The career profile: full draws the walked line with the scroll, calm draws it once as it comes
-  // into view, still shows it drawn. The roles are text and never move.
+  // The career profile: one line, drawn once over --dur-draw as it comes into view (Full and
+  // Calm), drawn at once in Off. Never scroll-scrubbed; the roles are text and never move.
   for (const mode of ["full", "calm", "still"]) {
     const { context, page } = await newPage(browser, { calm: mode === "calm", reduced: mode === "still" });
     await page.goto(`${base}/about/`, { waitUntil: "load" });
     await page.waitForTimeout(1000);
     const state = () =>
       page.evaluate(() => {
-        const svg = [...document.querySelectorAll("section[aria-labelledby=career-heading] svg[data-reveal]")].find((g) => g.getBoundingClientRect().width > 0);
-        const walk = svg.querySelector("g");
-        const scroll = walk.getAnimations().find((a) => a.timeline && !(a.timeline instanceof DocumentTimeline));
+        const figure = document.querySelector("section[aria-labelledby=career-heading] figure");
+        const svg = [...figure.querySelectorAll("svg")].find((g) => g.getBoundingClientRect().width > 0);
+        const anims = svg.getAnimations();
         return {
-          reveal: svg.dataset.revealState ?? null,
-          clip: getComputedStyle(walk).clipPath,
-          progress: scroll ? scroll.effect.getComputedTiming().progress : null,
-          scrollDriven: !!scroll,
-          camps: document.querySelectorAll("section[aria-labelledby=career-heading] ol > li").length,
+          reveal: figure.dataset.revealState ?? null,
+          clip: getComputedStyle(svg).clipPath,
+          scrollDriven: anims.some((a) => a.timeline && !(a.timeline instanceof DocumentTimeline)),
+          running: anims.filter((a) => a.playState === "running").length,
+          camps: figure.querySelectorAll("ol > li").length,
         };
       });
     const early = await state();
     await page.locator("#career-heading").scrollIntoViewIfNeeded();
     await page.evaluate(() => window.scrollBy(0, window.innerHeight * 0.35));
-    await page.waitForTimeout(mode === "calm" ? 1600 : 700);
+    await page.waitForTimeout(1800);
     const later = await state();
-    if (mode === "full")
-      check("career (full): the line draws with the scroll", later.scrollDriven && (early.progress ?? 0) < 0.05 && later.progress > 0.05 && later.progress <= 1, JSON.stringify({ early, later }));
-    if (mode === "calm")
-      check("career (calm): waits, then draws once", early.reveal === "wait" && !later.scrollDriven && later.reveal === "done" && /none|inset\(0(px)?\)/.test(later.clip), JSON.stringify({ early, later }));
-    if (mode === "still") check("career (still): drawn, nothing moves", !later.scrollDriven && later.clip === "none" && later.camps === 4, JSON.stringify(later));
+    if (mode === "still") check("career (Off): drawn, nothing moves", !later.scrollDriven && /none/.test(later.clip) && later.running === 0 && later.camps === 4, JSON.stringify(later));
+    else
+      check(
+        `career (${mode === "full" ? "Full" : "Calm"}): waits, then draws once, not with the scroll`,
+        early.reveal === "wait" && later.reveal === "in" && !later.scrollDriven && later.running === 0 && /none|inset\(0(px)?\)/.test(later.clip),
+        JSON.stringify({ early, later }),
+      );
     await context.close();
   }
 
-  // WCAG 2.2.2: nothing loops on the home page but the field (full, desktop).
-  {
+  // WCAG 2.2.2: nothing loops on any page but the field (Full, desktop).
+  for (const path of ["/", "/about/", "/work/test-project/"]) {
     const { context, page } = await newPage(browser);
-    await page.goto(`${base}/?field=force`, { waitUntil: "load" });
+    await page.goto(`${base}${path}?field=force`, { waitUntil: "load" });
     await page.waitForTimeout(3000);
     const loops = await page.evaluate(() =>
       document
@@ -293,7 +242,7 @@ export async function reading({ browser, base, root, check }) {
         .filter((a) => a.effect?.getTiming().iterations === Infinity)
         .map((a) => `${a.animationName ?? "?"} on ${a.effect?.target?.className?.toString?.().slice(0, 40)}`),
     );
-    check("home: no endless CSS loop (the scroll cue draws once)", loops.every((l) => /poster|field|backdrop/i.test(l)), JSON.stringify(loops));
+    check(`${path}: no endless CSS loop`, loops.length === 0, JSON.stringify(loops));
     await context.close();
   }
 }
@@ -303,7 +252,7 @@ export async function access({ browser, base, root, check }) {
   console.log("\naccess: forced colours, accessible names, haptics");
   if (!hasExamples(root)) return console.log("  skipped: build with SITE_MODE=basecamp");
 
-  // Forced colours: no field, foil, glare or glint; the focus ring stays.
+  // Forced colours: no field; the focus ring stays.
   {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, forcedColors: "active" });
     const page = await context.newPage();
@@ -311,9 +260,9 @@ export async function access({ browser, base, root, check }) {
     await page.waitForTimeout(1000);
     const r = await page.evaluate(() => {
       const shown = (sel) => [...document.querySelectorAll(sel)].filter((el) => getComputedStyle(el).display !== "none").length;
-      return { backdrop: shown("[data-field]"), glints: shown("[data-glint]"), foil: shown("article [class*=foil], article [class*=glare]") };
+      return { backdrop: shown("[data-field]") };
     });
-    check("forced colours: no field, glint, foil or glare", r.backdrop === 0 && r.glints === 0 && r.foil === 0, JSON.stringify(r));
+    check("forced colours: no field", r.backdrop === 0, JSON.stringify(r));
     await page.keyboard.press("Tab");
     await page.keyboard.press("Tab");
     const ring = await page.evaluate(() => {
@@ -344,15 +293,13 @@ export async function access({ browser, base, root, check }) {
     await context.close();
   }
 
-  // The haptics map: what each action asks navigator.vibrate for (Android only in real life).
+  // Haptics: 8 ms on primary presses where navigator.vibrate exists (Android here), never in Off,
+  // never on scroll or reveals.
   {
-    // Haptics exist on Android only (motion-mode.ts): an Android phone's user agent.
     const userAgent = "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36";
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, userAgent });
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await context.addInitScript(() => {
-      try {
-        
-      } catch {}
       window.__buzz = [];
       Object.defineProperty(navigator, "vibrate", { configurable: true, value: (p) => (window.__buzz.push(Array.isArray(p) ? p.join(",") : String(p)), true) });
     });
@@ -363,31 +310,20 @@ export async function access({ browser, base, root, check }) {
     await page.mouse.wheel(0, 600);
     await page.waitForTimeout(600);
     check("haptics: nothing on scroll or reveals", (await buzz()).length === 0);
-    const copy = page.locator("#contact button", { hasText: "Copy address" });
+    const copy = page.locator("#contact").getByRole("button", { name: "Copy address" });
     await copy.scrollIntoViewIfNeeded();
     await page.waitForTimeout(400);
     await buzz();
-    // Calm map on (calm has no haptics by default), then off again: that press ticks.
-    await page.locator("label:has(input[role=switch])").first().tap();
+    await copy.tap();
+    await page.waitForTimeout(600);
+    check("haptics: Copy address (a primary press) ticks 8 ms", (await buzz()).includes("8"));
+    // Off: the Motion control's last option; then nothing buzzes.
+    await page.locator("#contact fieldset label").filter({ hasText: "Off" }).tap();
     await page.waitForTimeout(400);
     await buzz();
-    await page.locator("label:has(input[role=switch])").first().tap();
-    await page.waitForTimeout(300);
-    check("haptics: a switch ticks 6 ms", (await buzz()).includes("6"));
-    await page.waitForTimeout(300);
-    const card = page.locator("article[data-slug] a").first();
-    await card.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(400);
-    await buzz();
-    await card.tap();
-    await page.waitForTimeout(1500);
-    check("haptics: opening a card ticks 8 ms", (await buzz()).includes("8"));
-    await page.locator('nav[aria-label="Next project"]').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(800);
-    await buzz();
-    await page.locator('a[aria-describedby="next-project-label"]').tap();
-    await page.waitForTimeout(1500);
-    check("haptics: Next project commits with 10 ms", (await buzz()).includes("10"));
+    await page.locator("#contact").getByRole("button", { name: /Copy address|Copied/ }).tap();
+    await page.waitForTimeout(600);
+    check("haptics: none in Off", (await buzz()).length === 0);
     await context.close();
   }
 }

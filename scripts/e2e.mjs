@@ -7,7 +7,7 @@
 //   npm run test:e2e -- hydration     direct loads of every route: no hydration or console errors
 //   npm run test:e2e -- primitives    the motion lab: layout shift per primitive, focus parity
 //                                     (needs a build with the lab: SITE_MODE=basecamp or a preview)
-//   npm run test:e2e -- casestudy     the case-study template on the example page (needs a build
+//   npm run test:e2e -- casestudy     the Calm Survey case-study template on the example page (needs a build
 //                                     that includes examples: SITE_MODE=basecamp or a preview)
 //   npm run test:e2e -- terrain       the living survey: frames at rest, under the pointer, hidden,
 //                                     Off, touch; a page change's crossfade; context loss
@@ -24,11 +24,10 @@
 //                                     (scripts/e2e/chrome.mjs)
 //   npm run test:e2e -- arrival       route arrivals: timing, focus on the H1, the trailhead morph,
 //                                     traversals, Basecamp, still (scripts/e2e/choreography.mjs)
-//   npm run test:e2e -- reading       the waypoint trail, the altimeter bar, the
-//                                     career profile per mode, no endless loops (choreography.mjs)
+//   npm run test:e2e -- reading       the career line per mode, no endless loops (choreography.mjs)
 //   npm run test:e2e -- axe           axe-core WCAG 2.2 A/AA on every route: full, calm, still, a
 //                                     phone, forced colours (scripts/e2e/axe.mjs)
-//   npm run test:e2e -- access        forced colours, headings read once, the haptics map
+//   npm run test:e2e -- access        forced colours, headings read once, haptics (8 ms, never in Off)
 //                                     (scripts/e2e/choreography.mjs)
 //   npm run test:e2e -- wording       no old names, CV or job-seeking phrases in the built HTML
 //                                     (scripts/check-wording.mjs)
@@ -324,9 +323,11 @@ async function transitions() {
 }
 
 // --- case-study template ------------------------------------------------------------------------
-// On the flagged example, which uses every building block: the "On this page" trail (scroll-spy,
-// aria-current, keyboard), the lightbox (focus in and out, Esc, zoom buttons), the before/after
-// comparison (keyboard, view buttons), hotspots, and the fallbacks without JavaScript.
+// On the flagged example, which uses every building block: the twelve parts in order (plate,
+// sheet bands, chapters, breakers), the contents trail (current part, stepping aside over bands,
+// keyboard; the phone's disclosure), the pinned decision's swap, the lightbox (focus in and out,
+// Esc, zoom buttons, pinch), the before/after comparison (keyboard, view buttons), hotspots, and
+// the fallbacks without JavaScript.
 const EXAMPLE = "/work/test-project/";
 
 async function casestudy() {
@@ -338,104 +339,95 @@ async function casestudy() {
   const trail = 'nav[aria-label="On this page"]';
   const waitFor = (page, fn, arg) => page.waitForFunction(fn, arg, { timeout: 8000, polling: 50 }).then(() => true, () => false);
 
-  console.log("\ncase-study template: trail, desktop 1440×900");
+  console.log("\ncase-study template: the parts in order, desktop 1440×900");
   {
     const { context, page, errors } = await open();
     await page.goto(url, { waitUntil: "networkidle" });
-    const info = await page.evaluate((trail) => {
-      const nav = document.querySelector(trail);
-      const links = [...(nav?.querySelectorAll("a") ?? [])];
-      return {
-        visible: !!nav && nav.getClientRects().length > 0,
-        position: nav ? getComputedStyle(nav).position : null,
-        links: links.map((a) => a.getAttribute("href")),
-        h1Linked: links.some((a) => document.querySelector(a.getAttribute("href"))?.querySelector("h1")),
-        jumpVisible: !!document.querySelector("#jump-heading")?.getClientRects().length,
-        margin: getComputedStyle(document.querySelector("section[data-waypoint] h2")).scrollMarginTop,
-        robots: document.querySelector('meta[name="robots"]')?.content,
-      };
-    }, trail);
-    check("trail is a visible, sticky nav labelled “On this page”", info.visible && info.position === "sticky", `position=${info.position}`);
-    check("trail lists the six stages and the results, not the H1", info.links.length === 7 && info.links.at(-1) === "#results" && !info.h1Linked, info.links.join(" "));
-    check("“On this page” chips hidden from 1200 px", !info.jumpVisible);
-    check("stage headings have a scroll margin", parseFloat(info.margin) >= 80, info.margin);
-    check("the example page is noindex", /noindex/.test(info.robots ?? ""), info.robots);
-    await page.evaluate(() => document.getElementById("discovery").scrollIntoView({ block: "start" }));
-    const spied = await waitFor(page, (t) => document.querySelector(`${t} a[aria-current="true"]`)?.getAttribute("href") === "#discovery", trail);
-    const current = await page.locator(`${trail} a[aria-current="true"]`).count();
-    check("scroll-spy marks the waypoint being read (aria-current=true)", spied && current === 1, `${current} current`);
-    // Keyboard: Tab onto a trail link, Enter follows it.
-    await page.focus(`${trail} a[href="#context"]`);
-    await page.keyboard.press("Tab");
-    await page.keyboard.press("Tab");
-    await page.keyboard.press("Tab");
-    const focused = await page.evaluate(() => document.activeElement?.getAttribute("href"));
-    check("Tab moves along the trail", focused === "#decisions", `focus on ${focused}`);
-    await page.keyboard.press("Enter");
-    const followed = await waitFor(page, (t) => location.hash === "#decisions" && document.querySelector(`${t} a[aria-current="true"]`)?.getAttribute("href") === "#decisions", trail);
-    // Smooth scrolling (Lenis, fine pointers) is still gliding: wait until it has landed below the
-    // HUD (a stalled frame under load can look like a page at rest), or at most 8 s.
-    await page
-      .waitForFunction(
-        () => {
-          const top = document.getElementById("decisions").getBoundingClientRect().top;
-          return top >= 40 && top <= 160;
-        },
-        null,
-        { timeout: 8000, polling: 200 },
-      )
-      .catch(() => {});
-    const top = await page.evaluate(() => Math.round(document.getElementById("decisions").getBoundingClientRect().top));
-    check("Enter jumps to the waypoint and the trail follows", followed, `hash=${await page.evaluate(() => location.hash)}`);
-    check("the waypoint lands below the HUD", top >= 40 && top <= 160, `top=${top}px`);
-    check("no page errors", errors.length === 0, errors.join("; "));
-    await context.close();
-  }
-
-  console.log("\ncase-study template: the layouts (spread, legend sheet, stages, fork, logbook, results, descent)");
-  {
-    const { context, page, errors } = await open();
-    await page.goto(url, { waitUntil: "networkidle" });
-    const t = await page.evaluate(() => {
+    const t = await page.evaluate((trail) => {
       const text = (el) => el?.textContent.replace(/\s+/g, " ").trim() ?? "";
-      const sections = [...document.querySelectorAll("section[data-waypoint]")];
-      const forks = [...document.querySelectorAll('ol[aria-label="Options"]')].map((ol) => [...ol.children].map((li) => text(li.querySelector("p")).match(/(Not chosen|Chosen|Reversed)$/)?.[1] ?? "?"));
+      const order = ["main > header", "#summary", "#context", "[data-breaker] .t-metric", "#findings", "#decisions", "#options-heading", "#leading", "#outcome", "#reflection", 'nav[aria-label="Next case study"]'];
+      const els = order.map((s) => document.querySelector(s));
+      const nav = document.querySelector(trail);
+      const decisions = [...document.querySelectorAll("#decisions article h3")].map(text);
+      const options = [...document.querySelectorAll('[aria-labelledby="options-heading"] table')].map((tbl) => [...tbl.querySelectorAll("tbody tr")].map((tr) => text(tr.querySelector("th span span"))));
       const note = document.querySelector('aside[aria-label^="Side note"]');
       const para = note?.parentElement?.querySelector("p");
-      const results = document.querySelector("#results table");
-      const log = document.querySelector('[aria-labelledby="after-launch-heading"] table');
       return {
-        problem: text(document.querySelector("main header h2")),
-        result: text(document.getElementById("result-heading")),
-        gain: text(document.querySelector("#result-heading ~ div")),
-        legend: [...document.querySelectorAll('[aria-labelledby="summary-heading"] dt')].map(text),
-        sheet: text(document.querySelector('[aria-labelledby="summary-heading"] p')),
-        stageLines: sections.slice(0, 6).map((s) => text(s.querySelector("h2 span"))),
-        notes: document.querySelectorAll('aside[aria-label^="Side note"]').length,
+        missing: order.filter((_, i) => !els[i]),
+        ordered: els.every((el, i) => el && (i === 0 || els[i - 1].compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING)),
+        plate: !!document.querySelector("main > header [data-card-art] img[src$='-level.svg']"),
+        legend: text(document.querySelector("main > header .mono:last-of-type")),
+        summary: [...document.querySelectorAll("#summary dt")].map(text),
+        sheets: [...document.querySelectorAll('main [data-band][data-surface="sheet"]')].map((el) => el.id || el.getAttribute("aria-labelledby")),
+        chapters: ["#context", "#findings", "#leading"].map((s) => text(document.querySelector(`${s} p.mono`))),
+        pull: !!document.querySelector("#leading h2.t-pull"),
+        pair: document.querySelectorAll("[data-breaker] figure").length,
+        decisions,
+        options,
+        reversed: text(document.querySelector('[aria-labelledby="options-heading"]')).includes("Turned back · "),
+        tiles: document.querySelectorAll("#outcome li").length,
+        log: !!document.querySelector("#outcome table caption"),
+        lessons: [...document.querySelectorAll("#reflection li p.body-copy")].map(text),
+        trail: nav ? { position: getComputedStyle(nav).position, links: [...nav.querySelectorAll("a")].map((a) => a.getAttribute("href")) } : null,
         noteBeside: note && para ? note.getBoundingClientRect().left >= para.getBoundingClientRect().right : null,
-        forks,
-        reversed: text(document.getElementById("reversed-heading")?.closest("section")),
-        forkSvgHidden: [...document.querySelectorAll('ol[aria-label="Options"] svg')].every((svg) => svg.closest('[aria-hidden="true"]')),
-        log: log ? { caption: !!log.querySelector("caption"), rows: log.querySelectorAll("tbody tr").length } : null,
-        results: results ? { caption: !!results.querySelector("caption"), rows: results.querySelectorAll("tbody tr").length, won: text(results.querySelector("tbody td:nth-child(3)")) } : null,
-        lessons: [...document.querySelectorAll('[aria-labelledby="looking-back"] li')].map((li) => text(li.lastElementChild)),
-        team: document.querySelectorAll('[aria-labelledby="team"] li').length,
-        ridge: text(document.querySelector('nav[aria-label="Next project"] figure ol')),
+        robots: document.querySelector('meta[name="robots"]')?.content,
+        quotes: document.querySelectorAll("main blockquote").length,
       };
-    });
-    check("spread: “The problem” and “The result” with the altitude gained", t.problem === "The problem" && t.result === "The result" && /^\+[\d’]+ m/i.test(t.gain), `${t.problem} | ${t.result} | ${t.gain.slice(0, 60)}`);
-    check("legend sheet: the brief, outcome, role, team, what I put in place, key decision", t.legend.join("|") === "The brief|Outcome|My role|Team I led|What I put in place|Key decision", t.legend.join(" | "));
-    check("legend sheet: “Sheet n/3” and a scale", /Sheet \d\/3/.test(t.sheet), t.sheet);
-    check("six stage lines with place and altitude, starting in Interlaken", t.stageLines.length === 6 && /^Stage 1 · Interlaken Ost · 567 m$/i.test(t.stageLines[0]) && t.stageLines.every((l, i) => new RegExp(`^Stage ${i + 1} · .+ · [\\d’]+ m$`, "i").test(l)), t.stageLines.join(" | "));
-    check("side notes sit in the margin beside their paragraph", t.notes >= 2 && t.noteBeside === true, `${t.notes} notes, beside=${t.noteBeside}`);
-    check("forks: an ordered list of options, each with its status in text, exactly one chosen", t.forks.length >= 2 && t.forks.every((f) => f.length >= 2 && f.filter((x) => x === "Chosen").length === 1 && !f.includes("?")), JSON.stringify(t.forks));
-    check("a decision we reversed: one reversed option, dated", /Reversed/.test(t.reversed) && /Turned back · /.test(t.reversed), t.reversed.slice(0, 80));
-    check("the fork drawings are hidden from screen readers", t.forkSvgHidden);
-    check("after launch: a table with a caption and dated rows", t.log?.caption && t.log.rows >= 3, JSON.stringify(t.log));
-    check("results: a table with a caption, each won at a stage", t.results?.caption && t.results.rows >= 3 && /^Stage \d · /.test(t.results.won), JSON.stringify(t.results));
-    check("looking back: every lesson says what I would do next time", t.lessons.length >= 2 && t.lessons.every((l) => l.startsWith("Next time I would")), t.lessons.length);
-    check("team: roles on a rope", t.team >= 3, String(t.team));
-    check("next project: the ridge of three peaks with “You are here”", /You are here/.test(t.ridge) && /Eiger/.test(t.ridge) && /Jungfrau/.test(t.ridge), t.ridge);
+    }, trail);
+    check(
+      "the twelve parts in order: plate, summary, context, metric, findings, decisions, options, leading, outcome, reflection, next",
+      t.missing.length === 0 && t.ordered,
+      JSON.stringify(t.missing),
+    );
+    check("header plate: the level plate, summit · altitude · coordinates", t.plate && /· [\d’]+ m · [\d.]+ N [\d.]+ E$/i.test(t.legend), t.legend);
+    check("summary: problem, my role, team · duration · reach, key decision, outcome", t.summary.join("|") === "Problem|My role|Team · Duration · Reach|Key decision|Outcome", t.summary.join(" | "));
+    check("sheet bands: summary, options, outcome", t.sheets.length === 3, JSON.stringify(t.sheets));
+    check("chapters 01, 02, 03 with their mono lines", t.chapters.join("|") === "01 · Context|02 · Findings|03 · Leading the team", t.chapters.join(" | "));
+    check("chapter 03 opens with the one pull statement", t.pull);
+    check("decisions: numbered steps, each a question", t.decisions.length >= 2 && t.decisions.every((d, i) => d.startsWith(`Decision ${i + 1} — `)), t.decisions.join(" | "));
+    check("options: every option with its status in words, one chosen per decision", t.options.length >= 3 && t.options.every((o) => o.length >= 2), JSON.stringify(t.options));
+    check("the decision we reversed, dated", t.reversed);
+    check("outcome: metric tiles and the after-launch log", t.tiles >= 3 && t.log, `${t.tiles} tiles`);
+    check("reflection: every lesson says what I would do next time", t.lessons.length >= 2 && t.lessons.every((l) => l.startsWith("Next time I would")), String(t.lessons.length));
+    check("contents trail: sticky, the seven parts", t.trail?.position === "sticky" && t.trail.links.join(" ") === "#summary #context #findings #decisions #leading #outcome #reflection", JSON.stringify(t.trail));
+    check("side notes sit in the margin beside their paragraph", t.noteBeside === true);
+    check("the example page is noindex, no quotes", /noindex/.test(t.robots ?? "") && t.quotes === 0, t.robots);
+
+    // The trail marks the part being read, and steps aside over bands and breakers.
+    await page.evaluate(() => document.getElementById("findings").scrollIntoView({ block: "start" }));
+    const spied = await waitFor(page, (s) => document.querySelector(`${s} a[aria-current="location"]`)?.getAttribute("href") === "#findings", trail);
+    check("the trail marks the part being read (aria-current=location)", spied);
+    await page.evaluate(() => document.getElementById("options-heading").scrollIntoView({ block: "start" }));
+    const over = await waitFor(page, (s) => document.querySelector(s)?.hasAttribute("data-over"), trail);
+    check("the trail steps aside over a sheet band", over);
+    // Keyboard: a trail link follows to its part, below the header.
+    await page.evaluate(() => window.scrollTo(0, document.getElementById("context").offsetTop));
+    await waitFor(page, (s) => !document.querySelector(s)?.hasAttribute("data-over"), trail);
+    await page.focus(`${trail} a[href="#decisions"]`);
+    await page.keyboard.press("Enter");
+    await page.waitForFunction(() => location.hash === "#decisions", null, { timeout: 5000 }).catch(() => {});
+    await page.waitForFunction(() => Math.abs(document.getElementById("decisions").getBoundingClientRect().top - 80) < 80, null, { timeout: 8000, polling: 200 }).catch(() => {});
+    const top = await page.evaluate(() => Math.round(document.getElementById("decisions").getBoundingClientRect().top));
+    check("Enter on a trail link lands its part below the header", top >= 40 && top <= 160, `top=${top}px`);
+
+    // The pinned decision: the figure on the right follows the step being read.
+    const steps = await page.locator("#decisions [data-step]").count();
+    const seen = [];
+    let follows = true;
+    for (let i = 0; i < steps; i++) {
+      // Twice: smooth scrolling (Lenis) may still be gliding to the last target the first time.
+      for (const pause of [600, 0]) {
+        await page.evaluate((i) => {
+          const s = document.querySelector(`#decisions [data-step="${i}"]`);
+          window.scrollTo(0, s.getBoundingClientRect().top + scrollY - innerHeight * 0.3);
+        }, i);
+        await page.waitForTimeout(pause);
+      }
+      const ok = await waitFor(page, (i) => document.querySelector(`#decisions [data-step-figure="${i}"]`)?.hasAttribute("data-active"), i);
+      if (!ok) seen.push(await page.evaluate(() => ({ y: Math.round(scrollY), tops: [...document.querySelectorAll("#decisions [data-step]")].map((s) => Math.round(s.getBoundingClientRect().top)), active: [...document.querySelectorAll("#decisions [data-step-figure]")].map((f) => f.hasAttribute("data-active")) })));
+      follows = ok && follows;
+    }
+    check("pinned decision: the sticky figure swaps to each step", steps >= 2 && follows, `${steps} steps ${JSON.stringify(seen)}`);
     check("no page errors", errors.length === 0, errors.join("; "));
     await context.close();
   }
@@ -446,18 +438,19 @@ async function casestudy() {
     const m = await page.evaluate(() => {
       const note = document.querySelector('aside[aria-label^="Side note"]');
       const para = note?.parentElement?.querySelector("p");
-      const facts = document.getElementById("result-heading")?.closest("section")?.querySelector("dl")?.getBoundingClientRect();
-      const pager = [...document.querySelectorAll('nav[aria-label="Next project"] p a')].map((a) => Math.round(a.getBoundingClientRect().height));
+      const dts = [...document.querySelectorAll("#summary dt")].map((dt) => [dt.textContent.trim(), dt.getBoundingClientRect().top]).sort((a, b) => a[1] - b[1]).map((x) => x[0]);
+      const back = document.querySelector('nav[aria-label="Next case study"] a.cta, nav[aria-label="Next case study"] a[class*="back"]');
       return {
         noteAfter: note && para ? note.getBoundingClientRect().top >= para.getBoundingClientRect().bottom - 1 : null,
-        spread: facts ? +((facts.bottom + scrollY) / innerHeight).toFixed(2) : null,
-        pager,
+        first: dts.slice(0, 2),
+        tables: [...document.querySelectorAll('[aria-labelledby="options-heading"] table')].every((t) => t.scrollWidth <= t.clientWidth + 1),
+        back: back ? Math.round(back.getBoundingClientRect().height) : 0,
         width: document.documentElement.scrollWidth,
       };
     });
     check("phone: side notes follow their paragraph", m.noteAfter === true);
-    check("phone: the spread ends (role line) within about 1.4 screens at 360×740", m.spread !== null && m.spread <= 1.4, String(m.spread));
-    check("phone: “Previous project” and “Next project” targets at least 48 px", m.pager.length === 2 && m.pager.every((h) => h >= 48), m.pager.join(", "));
+    check("phone: My role and Team come first in the summary", m.first.join("|") === "My role|Team · Duration · Reach", m.first.join(" | "));
+    check("phone: the options stack, no table scrolls sideways", m.tables);
     check("phone 360: no sideways scrolling", m.width <= 360, `${m.width}px`);
     await context.close();
   }
@@ -467,16 +460,25 @@ async function casestudy() {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
     const page = await context.newPage();
     await page.goto(url, { waitUntil: "networkidle" });
-    const info = await page.evaluate((trail) => ({
-      trail: !!document.querySelector(trail)?.getClientRects().length,
-      jump: !!document.querySelector("#jump-heading")?.getClientRects().length,
-      next: [...document.querySelectorAll("section[data-waypoint] a")].filter((a) => /^Next stage/.test(a.textContent) && a.getClientRects().length).length,
-      top: [...document.querySelectorAll('section[data-waypoint] a[href="#main"]')].filter((a) => a.getClientRects().length).length,
-      width: document.documentElement.scrollWidth,
-      markers: [...document.querySelectorAll("button[data-hotspot]")].map((b) => b.getBoundingClientRect()).map((r) => Math.min(r.width, r.height)),
-    }), trail);
-    check("trail hidden, “On this page” chips shown", !info.trail && info.jump);
-    check("each stage ends with “Next stage” (5) and “Back to top” (6)", info.next === 5 && info.top === 6, `${info.next} next, ${info.top} back`);
+    const info = await page.evaluate((trail) => {
+      const nav = document.querySelector(trail);
+      const toggle = nav?.querySelector("button[aria-expanded]");
+      return {
+        bar: toggle ? Math.round(toggle.getBoundingClientRect().height) : 0,
+        position: nav ? getComputedStyle(nav).position : null,
+        listHidden: nav ? !nav.querySelector("ol").getClientRects().length : false,
+        width: document.documentElement.scrollWidth,
+        markers: [...document.querySelectorAll("button[data-hotspot]")].map((b) => b.getBoundingClientRect()).map((r) => Math.min(r.width, r.height)),
+      };
+    }, trail);
+    check("contents: a sticky 40 px disclosure, closed", info.bar === 40 && info.position === "sticky" && info.listHidden, JSON.stringify(info));
+    await page.evaluate(() => window.scrollTo(0, document.getElementById("context").offsetTop));
+    await page.locator(`${trail} button[aria-expanded]`).tap();
+    const opened = await page.evaluate((trail) => document.querySelector(`${trail} button`).getAttribute("aria-expanded") === "true" && document.querySelector(`${trail} ol`).getClientRects().length > 0, trail);
+    await page.locator(`${trail} a[href="#outcome"]`).tap();
+    await page.waitForFunction(() => location.hash === "#outcome", null, { timeout: 5000 }).catch(() => {});
+    const closed = await page.evaluate((trail) => document.querySelector(`${trail} button`).getAttribute("aria-expanded") === "false", trail);
+    check("contents: opens, leads to a part and closes", opened && closed);
     check("no sideways scrolling", info.width <= 390, `${info.width}px`);
     check("hotspot markers at least 24×24 px", info.markers.length === 5 && info.markers.every((m) => m >= 24), info.markers.join(", "));
     // The lightbox on touch: two fingers pinch, one finger pans.
@@ -636,7 +638,7 @@ async function casestudy() {
     check("“Open full-size image” link instead of the lightbox", !!r.fallback && r.enlargeHidden, r.fallback);
     check("hotspot notes listed", r.notes === 5, `${r.notes} notes`);
     check("long descriptions behind “Describe this diagram”", r.describe >= 5, `${r.describe}`);
-    check("trail links present", r.trailLinks === 7, String(r.trailLinks));
+    check("contents links present", r.trailLinks === 7, String(r.trailLinks));
     check("the example line above the H1", /^Example — fictional case study$/i.test(r.banner.trim()), r.banner.slice(0, 60));
     check("every image has an alt attribute", r.missingAlt === 0, `${r.missingAlt} without`);
     await context.close();
@@ -901,17 +903,19 @@ async function primitives() {
     await context.close();
   }
 
-  console.log("\nprimitives: trail link focus parity");
+  // Links "contour tightening": hover draws the second line in; keyboard focus gives exactly the
+  // hover state; nothing changes width. The standalone call to action also steps its arrow.
+  console.log("\nprimitives: link focus parity");
   for (const where of ["lab", "case study"]) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const page = await context.newPage();
     await load(page, where === "lab" ? `${base}/lab/specimen/?motion=full` : `${base}${FLOW.path}`);
-    const link = where === "lab" ? page.locator('a[data-trail="standalone"][data-lab-state="rest"]').first() : page.locator('a[aria-describedby="next-project-label"]').first();
+    const link = where === "lab" ? page.locator('[data-primitive="link"] a.cta').first() : page.locator('nav[aria-label="Next case study"] a.cta').first();
     await link.scrollIntoViewIfNeeded();
     const state = () =>
       link.evaluate((a) => ({
-        line: getComputedStyle(a.querySelector("span[class*='label']") ?? a).backgroundSize,
-        arrow: [...a.querySelectorAll("span[class*='arrow']")].map((s) => getComputedStyle(s).transform).join(" "),
+        lines: getComputedStyle(a).backgroundSize,
+        arrow: [...a.querySelectorAll("[data-arrow]")].map((s) => getComputedStyle(s).transform).join(" "),
         width: Math.round(a.getBoundingClientRect().width * 10) / 10,
       }));
     const rest = await state();
@@ -925,24 +929,26 @@ async function primitives() {
     await page.keyboard.press("Tab");
     await page.waitForTimeout(700);
     const focused = await state();
-    check(`${where}: hover changes the link`, JSON.stringify(rest) !== JSON.stringify(hovered), JSON.stringify(hovered).slice(0, 120));
-    check(`${where}: keyboard focus gives exactly the hover motion`, JSON.stringify(hovered) === JSON.stringify(focused), `${JSON.stringify(hovered).slice(0, 90)} vs ${JSON.stringify(focused).slice(0, 90)}`);
+    check(`${where}: hover draws the second line and steps the arrow`, /100% 1px, 100% 1px/.test(hovered.lines) && rest.lines !== hovered.lines && rest.arrow !== hovered.arrow, JSON.stringify({ rest, hovered }));
+    check(`${where}: keyboard focus gives exactly the hover state`, JSON.stringify(hovered) === JSON.stringify(focused), `${JSON.stringify(hovered)} vs ${JSON.stringify(focused)}`);
     check(`${where}: the link never changes width`, rest.width === hovered.width && rest.width === focused.width, `${rest.width} / ${hovered.width} / ${focused.width}`);
     await context.close();
   }
 
-  // Touch: no sticky hover after a tap ((hover: hover) guards).
+  // Touch: the underline at full colour at rest, and no sticky hover after a tap.
   {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     const page = await context.newPage();
     await load(page, `${base}/lab/specimen/?motion=full`);
-    const link = page.locator('a[data-trail="standalone"][data-lab-state="rest"]').first();
+    const link = page.locator('[data-primitive="link"] a.cta').first();
     await link.scrollIntoViewIfNeeded();
-    const before = await link.evaluate((a) => getComputedStyle(a).getPropertyValue("--on").trim());
+    const before = await link.evaluate((a) => getComputedStyle(a).backgroundSize);
     await link.tap();
     await page.waitForTimeout(400);
-    const after = await link.evaluate((a) => (a.matches(":focus-visible") ? "focus" : getComputedStyle(a).getPropertyValue("--on").trim()));
-    check("touch: a tap leaves no sticky hover", before === "0" && after === "0", `before=${before} after=${after}`);
+    await page.touchscreen.tap(4, 400);
+    await page.waitForTimeout(400);
+    const after = await link.evaluate((a) => getComputedStyle(a).backgroundSize);
+    check("touch: no sticky hover after a tap", before === after && /100% 1px, 0% 1px/.test(after), `before=${before} after=${after}`);
     await context.close();
   }
 }

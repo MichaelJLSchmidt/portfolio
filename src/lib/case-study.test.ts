@@ -26,5 +26,7 @@ describe("case-study schema", () => {
   it("rejects a result without the stage it was won at", () => assert.ok(broken((s) => (s.results.rows[0].stage = 0)).some((e) => /stage/.test(e))));
   it("rejects a decision with two chosen options", () =>
     assert.ok(broken((s) => s.reversedDecision.options.forEach((o) => (o.status = "chosen"))).some((e) => /exactly one chosen/.test(e))));
+  it("rejects stages out of the template's order", () =>
+    assert.ok(broken((s) => s.stages.reverse()).some((e) => /the id "context"/.test(e))));
   it("rejects a problem of one sentence", () => assert.ok(broken((s) => (s.problem = "Too short.")).some((e) => /problem/.test(e))));
 });

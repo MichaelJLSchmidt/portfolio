@@ -152,17 +152,15 @@ export default function About() {
         </div>
       </section>
 
-      <section className={`${styles.cta} section`} aria-labelledby="about-contact-heading">
-        <h2 id="about-contact-heading" className="t-h2">
-          {contact.heading}
-        </h2>
+      {/* The way in: the footer's Get in touch, right below. */}
+      <p className={`${styles.cta} section`} data-quiet-zone>
         <a href="#contact" className="cta">
           {contact.cta}
           <span data-arrow="" aria-hidden="true">
             ↓
           </span>
         </a>
-      </section>
+      </p>
     </main>
   );
 }

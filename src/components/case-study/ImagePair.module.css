@@ -1,0 +1,74 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+@layer components {
+  .pair {
+    row-gap: 32px;
+    margin-block: clamp(48px, 6vw, 96px);
+  }
+
+  .first,
+  .second {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .second {
+    margin-left: 24px;
+  }
+
+  @media (min-width: 768px) {
+    .first {
+      grid-column: 1 / span 4;
+    }
+
+    .second {
+      grid-column: 5 / -1;
+      margin: 120px 0 0;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .first {
+      grid-column: 2 / 7;
+    }
+
+    .second {
+      grid-column: 7 / 12;
+    }
+  }
+
+  /* Desktop, Full: a parallax of at most 24 px, driven by the scroll (where supported). */
+  @supports (animation-timeline: view()) {
+    @media (min-width: 1280px) and (prefers-reduced-motion: no-preference) {
+      :root[data-motion="full"] .first,
+      :root[data-motion="full"] .second {
+        animation: pair-drift linear both;
+        animation-timeline: view();
+      }
+
+      :root[data-motion="full"] .second {
+        animation-name: pair-drift-far;
+      }
+
+      @keyframes pair-drift {
+        from {
+          transform: translateY(6px);
+        }
+
+        to {
+          transform: translateY(-6px);
+        }
+      }
+
+      @keyframes pair-drift-far {
+        from {
+          transform: translateY(12px);
+        }
+
+        to {
+          transform: translateY(-12px);
+        }
+      }
+    }
+  }
+}

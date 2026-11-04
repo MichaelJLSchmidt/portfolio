@@ -1,0 +1,159 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+@layer components {
+  .band {
+    padding-block: clamp(56px, 7vw, 112px);
+    background: var(--color-sheet);
+    color: var(--color-ink);
+  }
+
+  .inner {
+    display: grid;
+    gap: clamp(40px, 5vw, 72px);
+  }
+
+  .inner h2 {
+    margin: 0;
+  }
+
+  .decision {
+    display: grid;
+    gap: 20px;
+  }
+
+  .decision h3 {
+    margin: 0;
+    max-width: 40ch;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  .table thead th {
+    padding: 0 16px 10px 0;
+    border-bottom: var(--stroke-hairline) solid var(--color-ink-2);
+    color: var(--color-ink-2);
+    font-weight: 400;
+    text-align: left;
+    vertical-align: bottom;
+  }
+
+  .table tbody th,
+  .table td {
+    padding: 16px 16px 16px 0;
+    border-bottom: var(--stroke-hairline) solid var(--color-line-on-sheet);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .table tbody th {
+    width: 26%;
+    font-weight: 400;
+  }
+
+  .option {
+    display: grid;
+    gap: 6px;
+  }
+
+  .status {
+    color: var(--color-ink-2);
+  }
+
+  .label {
+    font-weight: 650;
+  }
+
+  /* The way taken: a heavier rule at its left, the status in words beside. */
+  .table tr[data-status="chosen"] th {
+    padding-left: 12px;
+    border-left: var(--stroke-focus) solid var(--color-ink);
+  }
+
+  .table tr[data-status="reversed"] th {
+    padding-left: 12px;
+    border-left: var(--stroke-focus) dashed var(--color-ink);
+  }
+
+  .turned {
+    color: var(--color-ink-2);
+  }
+
+  .table ul {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding-left: 1.1em;
+  }
+
+  .after {
+    max-width: var(--type-body-measure);
+    margin: 0;
+  }
+
+  /* Phones and tablets: each option a stacked block with its column names. */
+  @media (width < 1280px) {
+    .table thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+    }
+
+    .table,
+    .table tbody,
+    .table tr,
+    .table tbody th,
+    .table td {
+      display: block;
+      width: auto;
+    }
+
+    .table tr {
+      display: grid;
+      gap: 12px;
+      padding-block: 16px;
+      border-bottom: var(--stroke-hairline) solid var(--color-line-on-sheet);
+    }
+
+    .table tbody th,
+    .table td {
+      padding: 0;
+      border-bottom: 0;
+    }
+
+    .table tr[data-status="chosen"],
+    .table tr[data-status="reversed"] {
+      padding-left: 12px;
+    }
+
+    .table tr[data-status="chosen"] {
+      border-left: var(--stroke-focus) solid var(--color-ink);
+    }
+
+    .table tr[data-status="reversed"] {
+      border-left: var(--stroke-focus) dashed var(--color-ink);
+    }
+
+    .table tr[data-status] th {
+      padding-left: 0;
+      border-left: 0;
+    }
+
+    .table td::before {
+      content: attr(data-label);
+      display: block;
+      margin-bottom: 4px;
+      color: var(--color-ink-2);
+      font-family: var(--font-mono);
+      font-size: var(--type-mono-size);
+      letter-spacing: var(--type-mono-tracking);
+      text-transform: uppercase;
+    }
+  }
+}

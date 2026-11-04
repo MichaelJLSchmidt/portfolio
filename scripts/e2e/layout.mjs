@@ -23,7 +23,6 @@ const ABOUT_SECTIONS = [
   "skills-heading",
   "craft-heading",
   "cards-heading",
-  "about-contact-heading",
   "contact-heading",
 ];
 
@@ -101,7 +100,7 @@ export async function ia({ base, basePath, root, check, open }) {
     { ids: ABOUT_SECTIONS, inOrderSrc: inOrder.toString() },
   );
   check(
-    "About: sections in order (About, Who I am, Career, How I lead, people, a new team, skills, craft, cards, the way in, Get in touch)",
+    "About: sections in order (About, Who I am, Career, How I lead, people, a new team, skills, craft, cards, Get in touch)",
     about.missing.length === 0 && about.ordered,
     JSON.stringify(about.missing),
   );

@@ -174,32 +174,6 @@
     }
   }
 
-  /* One ping per pin, in turn (hotspots.ts): a ring leaves the pin and fades. */
-  .hotspot::after {
-    content: "";
-    position: absolute;
-    inset: -2px;
-    border: 2px solid var(--color-glacier);
-    border-radius: 50%;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  @keyframes hotspot-ping {
-    from {
-      opacity: 0.9;
-      transform: scale(1);
-    }
-    to {
-      opacity: 0;
-      transform: scale(2.2);
-    }
-  }
-
-  :root[data-motion="full"] .hotspot[data-ping]::after {
-    animation: hotspot-ping var(--dur-enter) var(--ease-out) var(--ping-delay, 0ms) backwards;
-  }
-
   /* The pressed pin's title in a mini sheet beside it: it unfolds from the pin's side, its letters
      settling; still mode shows it at once. */
   .media :global([data-hotspot-label]) {

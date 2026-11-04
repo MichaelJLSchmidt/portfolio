@@ -18,8 +18,9 @@
   }
 
   .portrait {
-    margin: 0;
+    width: 100%;
     max-width: 320px;
+    margin: 0;
   }
 
   .photo,
@@ -160,9 +161,8 @@
   }
 
   .cta {
-    display: grid;
-    gap: 16px;
-    justify-items: start;
+    margin: 0;
+    font-size: var(--type-h3-size);
   }
 
   @media (min-width: 768px) {

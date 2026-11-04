@@ -1,25 +1,27 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 // Primitives first: their CSS is shared by every route, and importing them after the case-study
 // blocks makes Turbopack merge those blocks' CSS into the chunk every route loads.
 import { Title } from "@/components/type/Title";
-import { EvidenceBadge, EvidenceLegend } from "@/components/case-study/Evidence";
-import { AltimeterBar } from "@/components/case-study/AltimeterBar";
-import { Descent } from "@/components/case-study/Descent";
-import { ElevationProfile } from "@/components/case-study/ElevationProfile";
-import { Figure } from "@/components/case-study/Figure";
-import { LegendSheet } from "@/components/case-study/LegendSheet";
-import { DecisionFork, Stages } from "@/components/case-study/Stages";
+import { Blocks } from "@/components/case-study/Blocks";
+import { Chapter, SubHeading } from "@/components/case-study/Chapter";
+import { ContentsTrail } from "@/components/case-study/ContentsTrail";
+import { HeaderPlate } from "@/components/case-study/HeaderPlate";
+import { ImagePair } from "@/components/case-study/ImagePair";
+import { MapFrame } from "@/components/case-study/MapFrame";
+import { MetricBand } from "@/components/case-study/MetricBand";
 import { NextCase } from "@/components/case-study/NextCase";
-import { TrailheadSpread } from "@/components/case-study/TrailheadSpread";
-import { WaypointTrail } from "@/components/case-study/WaypointTrail";
-import { Logbook } from "@/components/logbook/Logbook";
+import { OptionsBand } from "@/components/case-study/OptionsBand";
+import { OutcomeBand } from "@/components/case-study/OutcomeBand";
+import { PinnedDecision } from "@/components/case-study/PinnedDecision";
+import { Reflection } from "@/components/case-study/Reflection";
+import { SummaryBand } from "@/components/case-study/SummaryBand";
 import { caseStudies } from "@/content/case-studies";
 import { caseStudyLabels as L, cardBySlug, cards } from "@/content/cards";
-import { altitudeLabel, ascentOf } from "@/content/geo";
-import { readingMinutes, type CaseStudy as Study, type Evidence } from "@/lib/case-study";
+import { summitOf } from "@/content/geo";
 import { asset } from "@/lib/asset";
+import { readingMinutes } from "@/lib/case-study";
+import { pageNumbers, SECTION_IDS as ID, surveyLayout } from "@/lib/survey-layout";
 import styles from "./page.module.css";
 
 export const dynamicParams = false;
@@ -55,235 +57,120 @@ export async function generateMetadata({ params }: PageProps<"/work/[slug]">): P
   };
 }
 
-/** Every evidence kind the page uses, in a fixed order, for the legend. */
-function evidenceKinds(study: Study): Evidence[] {
-  const used = new Set<Evidence>([...study.summary.outcome.map((o) => o.evidence), ...study.results.rows.map((r) => r.evidence)]);
-  return (["measured", "estimated", "qualitative"] as const).filter((k) => used.has(k));
-}
-
-
-/** Timeline spacing: a node's distance to the next follows the real altitude gain, at least 34 px. */
-const SPACE = { min: 34, total: 420 };
-
+/**
+ * A case study on the Calm Survey template (src/lib/survey-layout.ts), alternating the dark
+ * ground and light sheet bands: the header plate, the summary, chapter 01 (context) beside the
+ * contents trail, the metric band, chapter 02 (findings) with an offset image pair, the pinned
+ * decision, the options, the hero in a map frame, chapter 03 (leading the team) under its pull
+ * statement, the outcome, the reflection and the next case study.
+ */
 export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
   const found = entry((await params).slug);
   if (!found) notFound();
   const { card, study } = found;
-  const { summary } = study;
-  const ascent = ascentOf(card.terrainId);
-  if (!ascent) throw new Error(`Case study "${card.slug}": its card's terrain is not one of the ascents in geo.ts.`);
-  const places = ascent.stages;
-  // The case studies in deck order: the next and previous loop round; the ridge shows all three.
+  const layout = surveyLayout(study, card, L.contents);
+  const numbers = pageNumbers(layout);
+  const summit = summitOf(card.terrainId);
+  // The case studies in card order: the next one loops round.
   const studies = cards.filter((c) => caseStudies[c.slug]);
   const at = studies.indexOf(card);
   const next = studies.length > 1 ? studies[(at + 1) % studies.length] : null;
-  const hero = study.hero ? study.figures?.[study.hero] : undefined;
-  const kinds = evidenceKinds(study);
-  // The timeline: each stage as far from the next as the climb between them, the results at the summit.
-  const heights = [...places.map((p) => p.altitudeM), ascent.summit.altitudeM];
-  const gainTotal = heights[heights.length - 1] - heights[0];
-  const trail = [
-    ...study.stages.map((s, i) => ({
-      id: s.id,
-      nav: s.nav,
-      place: places[i].label,
-      detail: `${places[i].label} · ${altitudeLabel(places[i].altitudeM)}`,
-      space: Math.round(Math.max(SPACE.min, ((heights[i + 1] - heights[i]) / gainTotal) * SPACE.total)),
-    })),
-    {
-      id: "results",
-      nav: L.resultsHeading,
-      detail: `${ascent.summit.label} · ${altitudeLabel(ascent.summit.altitudeM)}`,
-    },
-  ];
+  const chapter = (n: number, name: string) => L.chapter(n, name);
+  const { findings, leading } = layout;
 
   return (
-    <main id="main" className={`${styles.main} container`} data-card={card.slug}>
-      <nav className={styles.crumbs} aria-label={L.back}>
-        {/* No scroll to the top: the deck brings the card back into view itself (Deck). */}
-        <Link href="/#case-studies" className={`${styles.crumb} mono`}>
-          ← {L.back}
-        </Link>
-      </nav>
-
-      <TrailheadSpread
+    <main id="main" className={styles.main} data-card={card.slug}>
+      <HeaderPlate
+        plate={asset(`/plates/${card.terrainId}-level.svg`)}
+        alt={card.artworkAlt}
+        slug={card.slug}
         example={study.example ? L.exampleLine : undefined}
-        artwork={
-          <span className={styles.artSlot}>
-            <img className={styles.art} src={asset(`/plates/${card.terrainId}-level.svg`)} alt={card.artworkAlt} width={400} height={300} />
-          </span>
-        }
-        title={
-          <Title role="h1" text={card.name} className={styles.title} />
-        }
-        typeLine={study.typeLine ?? card.sector}
-        problem={study.problem}
-        impactLine={study.impactLine}
-        climb={{
-          from: {
-            label: places[0].label,
-            altitude: altitudeLabel(places[0].altitudeM),
-          },
-          to: {
-            label: ascent.summit.label,
-            altitude: altitudeLabel(ascent.summit.altitudeM),
-          },
-          gain: `+${altitudeLabel(gainTotal)}`,
-        }}
-        facts={[
-          { label: L.facts.role, value: study.facts.role },
-          { label: L.facts.team, value: study.facts.team },
-          { label: L.facts.time, value: study.facts.time },
-        ]}
-        meta={
-          <p className={`${styles.meta} mono`}>
-            <span>{L.readingTime(readingMinutes(study))}</span>
-            {" · "}
-            <a href="#summary-heading" className={styles.skim}>
-              {L.skim}
-            </a>
+        meta={[L.number(at + 1), study.typeLine ?? card.sector, L.readingTime(readingMinutes(study))].join(" · ")}
+        title={<Title role="h1" text={card.name} />}
+        summit={summit ? [summit.label, summit.altitude, summit.coordinates].filter(Boolean).join(" · ") : null}
+      />
+
+      <SummaryBand id={ID.summary} summary={layout.summary} />
+
+      <ContentsTrail entries={layout.contents} label={L.onThisPage} toggle={L.contentsToggle} />
+
+      <Chapter id={ID.context} line={chapter(1, L.contents.context)} heading={layout.context.stage.finding}>
+        <div data-block="text" data-reveal="">
+          <p className={`${styles.brief} body-copy`}>
+            <strong>{`${L.brief}: `}</strong>
+            {layout.context.brief}
           </p>
-        }
-        labels={{
-          problem: L.problem,
-          result: L.result,
-          gain: L.gain(places[0].label),
-        }}
-      />
-
-      <LegendSheet
-        id="summary-heading"
-        heading={L.summaryHeading}
-        sheet={L.sheet(at + 1, studies.length)}
-        scale={L.scale}
-        note={summary.note}
-        rows={[
-          { symbol: "brief", label: L.brief, value: summary.brief },
-          {
-            symbol: "outcome",
-            label: L.outcome,
-            content: (
-              <ul>
-                {summary.outcome.map((o) => (
-                  <li key={o.text}>
-                    <span>{o.text}</span> <EvidenceBadge kind={o.evidence} />
-                  </li>
-                ))}
-              </ul>
-            ),
-          },
-          { symbol: "role", label: L.role, value: summary.role },
-          { symbol: "team", label: L.teamLed, value: summary.teamLed },
-          {
-            symbol: "putInPlace",
-            label: L.putInPlace,
-            content: (
-              <ul>
-                {summary.putInPlace.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            ),
-          },
-          {
-            symbol: "keyDecision",
-            label: L.keyDecision,
-            value: summary.keyDecision,
-          },
-        ]}
-      />
-
-      {hero && (
-        <div className={styles.hero}>
-          <Figure spec={hero} images={study.images ?? {}} assets={study.assets ?? {}} />
         </div>
-      )}
+        <Blocks blocks={layout.context.stage.blocks} study={study} numbers={numbers} />
+      </Chapter>
 
-      <div className={styles.body}>
-        <nav className={styles.jump} aria-labelledby="jump-heading">
-          <h2 id="jump-heading" className={`${styles.jumpHeading} mono`} data-quiet-zone>
-            {L.jumpTo}
-          </h2>
-          <ul>
-            {trail.map((w) => (
-              <li key={w.id}>
-                <a href={`#${w.id}`} className={styles.chip}>
-                  {w.nav}
-                </a>
+      {layout.metric && <MetricBand value={layout.metric.value} line={layout.metric.line} />}
+
+      <Chapter id={ID.findings} line={chapter(2, L.contents.findings)} heading={findings.discovery.finding}>
+        <Blocks blocks={findings.discovery.blocks} study={study} numbers={numbers} />
+      </Chapter>
+      {findings.pair && <ImagePair ids={findings.pair} study={study} numbers={numbers.figures} />}
+      <section className={`${styles.continued} container grid`} aria-labelledby={`${findings.delivery.id}-heading`}>
+        <SubHeading id={`${findings.delivery.id}-heading`}>{findings.delivery.finding}</SubHeading>
+        <Blocks blocks={findings.delivery.blocks} study={study} numbers={numbers} />
+      </section>
+
+      <PinnedDecision
+        id={ID.decisions}
+        line={L.contents.decisions}
+        finding={layout.decisions.finding}
+        steps={layout.decisions.steps}
+        after={layout.decisions.after}
+        study={study}
+        numbers={numbers}
+      />
+
+      <OptionsBand decisions={layout.decisions.steps.map((s) => ({ decision: s.decision, number: s.number }))} reversed={layout.options.reversed} />
+
+      {layout.map && <MapFrame id={layout.map} study={study} coordinates={summit?.coordinates ?? null} />}
+
+      <Chapter id={ID.leading} line={chapter(3, L.contents.leading)} heading={leading.pull} pull>
+        <Blocks blocks={leading.stage.blocks} study={study} numbers={numbers} />
+        <SubHeading>{L.teamLed}</SubHeading>
+        <div data-block="text" data-reveal="">
+          <p className="body-copy">{leading.teamLed}</p>
+        </div>
+        <SubHeading>{L.putInPlace}</SubHeading>
+        <div data-block="text" data-reveal="">
+          <ul className={`${styles.list} body-copy`}>
+            {leading.putInPlace.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+        <SubHeading>{L.team}</SubHeading>
+        <div data-block="text" data-reveal="">
+          <ul className={`${styles.roster} body-copy`}>
+            {leading.team.map((t) => (
+              <li key={t.role}>
+                <span className="mono">{t.count}</span>
+                <span>
+                  <strong>{t.role}</strong> {t.line}
+                </span>
               </li>
             ))}
           </ul>
-        </nav>
-        <div className={styles.trail}>
-          <WaypointTrail slug={card.slug} label={L.onThisPage} items={trail} />
         </div>
-        <div className={styles.stages}>
-          <Stages study={study} places={places} lastStation={ascent.lastStation} />
+      </Chapter>
 
-          <section className={styles.section} aria-labelledby="reversed-heading">
-            <h2 id="reversed-heading" className={`${styles.sectionHeading} t-h2`}>
-              {L.reversedHeading}
-            </h2>
-            <DecisionFork decision={study.reversedDecision} heading={study.reversedDecision.title} />
-          </section>
+      <OutcomeBand id={ID.outcome} line={L.contents.outcome} outcome={layout.outcome} study={study} numbers={numbers} />
 
-          <section className={styles.section} aria-labelledby="after-launch-heading">
-            <h2 id="after-launch-heading" className={`${styles.sectionHeading} t-h2`}>
-              {L.afterLaunchHeading}
-            </h2>
-            <Logbook caption={study.afterLaunch.caption} columns={L.logColumns} rows={study.afterLaunch.entries.map((e) => [e.date, e.text])} />
-          </section>
+      <Reflection id={ID.reflection} line={L.contents.reflection} reflection={layout.reflection} />
 
-          <section id="results" className={styles.section} aria-labelledby="results-heading" data-waypoint data-route="results" data-route-blaze="">
-            <h2 id="results-heading" className={styles.resultsHeading}>
-              <span className={`${styles.stageLine} mono`} data-quiet-zone>
-                {`${ascent.summit.label} · ${altitudeLabel(ascent.summit.altitudeM)}`}
-              </span>
-              <span className={`${styles.sectionHeading} t-h2`}>{L.resultsHeading}</span>
-            </h2>
-            <ElevationProfile
-              caption={study.results.caption}
-              stages={places.map((p) => ({
-                label: p.label,
-                altitude: altitudeLabel(p.altitudeM),
-                metres: p.altitudeM,
-              }))}
-              summit={{
-                label: ascent.summit.label,
-                altitude: altitudeLabel(ascent.summit.altitudeM),
-                metres: ascent.summit.altitudeM,
-              }}
-              rows={study.results.rows.map((r) => ({
-                metric: r.metric,
-                before: r.before,
-                after: r.after,
-                stage: r.stage,
-                badge: <EvidenceBadge kind={r.evidence} />,
-              }))}
-              labels={{ ...L.resultColumns, stage: L.stage }}
-            />
-            <EvidenceLegend kinds={kinds} notes={study.results.legend} />
-          </section>
-        </div>
+      <div className={`${styles.next} container section`} data-breaker="">
+        <NextCase
+          next={next}
+          outcome={next ? caseStudies[next.slug]!.impactLine : ""}
+          index={next ? studies.indexOf(next) + 1 : 0}
+          total={studies.length}
+          labels={{ next: L.next, backToAll: L.backToAll }}
+        />
       </div>
-
-      <Descent lookingBack={{ heading: L.lookingBack, lessons: study.lookingBack }} team={{ heading: L.team, roles: study.team }} />
-      <div className={`${styles.closing} legend`}>
-        <p className="body-copy">
-          <strong>{L.didNotDo}: </strong>
-          {study.didNotDo}
-        </p>
-        <p className={`${styles.credits} body-copy`}>{study.credits}</p>
-      </div>
-
-      <NextCase
-        next={next}
-        outcome={next ? caseStudies[next.slug]!.impactLine : ""}
-        index={next ? studies.indexOf(next) + 1 : 0}
-        total={studies.length}
-        labels={{ next: L.next, backToAll: L.backToAll }}
-      />
-      <AltimeterBar slug={card.slug} items={trail} labels={{ bar: L.onThisPage, sheet: L.jumpTo, close: L.close }} />
     </main>
   );
 }

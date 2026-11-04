@@ -1,0 +1,72 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+@layer components {
+  .frame {
+    padding-block: clamp(32px, 4vw, 64px);
+    border-block: var(--stroke-hairline) solid var(--color-line);
+    background: var(--color-ground);
+  }
+
+  .sheet {
+    max-width: none;
+  }
+
+  /* A hairline frame with a tick every 48 px along its top and bottom edges. */
+  .border {
+    position: relative;
+    padding: clamp(20px, 3vw, 40px);
+    border: var(--stroke-hairline) solid var(--color-line-index);
+    background:
+      repeating-linear-gradient(to right, var(--color-line-index) 0 1px, transparent 1px 48px) top left / 100% 6px no-repeat,
+      repeating-linear-gradient(to right, var(--color-line-index) 0 1px, transparent 1px 48px) bottom left / 100% 6px no-repeat,
+      repeating-linear-gradient(to bottom, var(--color-line-index) 0 1px, transparent 1px 48px) top left / 6px 100% no-repeat,
+      repeating-linear-gradient(to bottom, var(--color-line-index) 0 1px, transparent 1px 48px) top right / 6px 100% no-repeat;
+  }
+
+  /* Corner crosshairs: 16 px, centred on each corner. */
+  .corner {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background:
+      linear-gradient(var(--color-text-2), var(--color-text-2)) center / 100% 1px no-repeat,
+      linear-gradient(var(--color-text-2), var(--color-text-2)) center / 1px 100% no-repeat;
+  }
+
+  .tl {
+    top: -8px;
+    left: -8px;
+  }
+
+  .tr {
+    top: -8px;
+    right: -8px;
+  }
+
+  .bl {
+    bottom: -8px;
+    left: -8px;
+  }
+
+  .br {
+    right: -8px;
+    bottom: -8px;
+  }
+
+  .coord {
+    position: absolute;
+    color: var(--color-text-2);
+    background: var(--color-ground);
+    padding-inline: 6px;
+  }
+
+  .coordTop {
+    top: -0.75em;
+    left: 24px;
+  }
+
+  .coordBottom {
+    right: 24px;
+    bottom: -0.75em;
+  }
+}

@@ -29,8 +29,8 @@ export function startReveals(root: ParentNode = document): () => void {
   for (const el of root.querySelectorAll("[data-reveal]")) {
     if (el.getAttribute("data-reveal-state")) continue;
     const r = el.getBoundingClientRect();
-    // In the first viewport (or Off): there from the first paint, no animation.
-    if (still || !r.height || r.top < window.innerHeight) {
+    // In the first viewport, on a sheet band (or Off): there from the first paint, no animation.
+    if (still || !r.height || r.top < window.innerHeight || el.closest("[data-band]")) {
       set(el, "shown");
       continue;
     }

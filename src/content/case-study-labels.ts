@@ -4,38 +4,35 @@
  * cards' own labels. cards.ts re-exports them.
  */
 export const caseStudyLabels = {
-  /** The page title's second part: "<name> — Case study · <name source>". */
+  /** The page title's second part: "<name> — Case study". */
   caseStudy: "Case study",
   /** Above the H1 of a flagged example. */
   exampleLine: "Example — fictional case study",
-  problem: "The problem",
-  result: "The result",
-  /** Under the result's climb line: "+3’400 m from Interlaken Ost". */
-  gain: (from: string) => `from ${from}`,
-  facts: { role: "Role", team: "Team", time: "Time" },
+  /** The header plate's meta line: "Case study 01 · <type line>". */
+  number: (n: number) => `Case study ${String(n).padStart(2, "0")}`,
+  /** The contents trail: the page's parts, in order. */
+  contents: {
+    summary: "Summary",
+    context: "Context",
+    findings: "Findings",
+    decisions: "Decisions",
+    leading: "Leading the team",
+    outcome: "Outcome",
+    reflection: "Reflection",
+  },
+  /** The phone's sticky disclosure. */
+  contentsToggle: "Contents",
+  onThisPage: "On this page",
+  /** A chapter's mono line: "01 · Context". */
+  chapter: (n: number, name: string) => `${String(n).padStart(2, "0")} · ${name}`,
   summaryHeading: "Summary",
-  /** The summary's margin: "Sheet 2/3" (this case study among the three). */
-  sheet: (n: number, of: number) => `Sheet ${n}/${of}`,
-  scale: "1 : 25 000",
+  summary: { problem: "Problem", role: "My role", team: "Team · Duration · Reach", keyDecision: "Key decision", outcome: "Outcome" },
   brief: "The brief",
-  outcome: "Outcome",
-  role: "My role",
   teamLed: "Team I led",
   putInPlace: "What I put in place",
-  keyDecision: "Key decision",
   didNotDo: "What I did not do",
-  jumpTo: "On this page",
-  onThisPage: "On this page",
-  /** A stage's mono line: "Stage 3 · Kleine Scheidegg · 2’061 m". */
-  stage: (n: number) => `Stage ${n}`,
-  stageLine: (n: number, place: string, altitude: string) => `Stage ${n} · ${place} · ${altitude}`,
-  /** The phone's reading bar: "Stage 2 of 6 · Grindelwald". */
-  stageOf: (n: number, of: number, place: string) => `Stage ${n} of ${of} · ${place}`,
-  sideNote: (n: number) => `Side note ${n}`,
-  nextWaypoint: "Next stage",
-  backToTop: "Back to top",
   readingTime: (minutes: number) => `${minutes} min read`,
-  skim: "60-second summary below",
+  sideNote: (n: number) => `Side note ${n}`,
   figure: (n: number) => `Fig. ${n}`,
   describe: "Describe this diagram",
   enlarge: "Enlarge",
@@ -57,22 +54,24 @@ export const caseStudyLabels = {
   noteMarker: (n: number, title: string) => `Note ${n}: ${title}`,
   keyInsight: "Key insight",
   decision: (n: number) => `Decision ${n}`,
-  /** The fork diagram's words: status in text, never colour alone. */
-  fork: {
-    options: "Options",
+  /** A decision's options: status in text, never colour alone. */
+  options: {
+    heading: "The options we weighed",
+    columns: { option: "Option", pros: "For", cons: "Against", cost: "Cost" },
     chosen: "Chosen",
     notChosen: "Not chosen",
     reversed: "Reversed",
-    pros: "For",
-    cons: "Against",
-    cost: "Cost",
     turnedBack: (date: string) => `Turned back · ${date}`,
+    /** Under a decision step: the way taken. */
+    taken: "We chose",
   },
   reversedHeading: "A decision we reversed",
   afterLaunchHeading: "What happened after launch",
   logColumns: ["Date", "What we observed"] as const,
   resultsHeading: "Results",
-  resultColumns: { metric: "Metric", before: "Before", after: "After", wonAt: "Won at" },
+  /** A metric tile: "from 18 %", "Won at Discovery". */
+  from: (before: string) => `from ${before}`,
+  wonAt: (stage: string) => `Won at ${stage}`,
   lookingBack: "Looking back",
   team: "Team",
   evidence: {
@@ -83,7 +82,6 @@ export const caseStudyLabels = {
   evidenceLegend: "Evidence",
   credits: "Credits",
   next: "Next case study",
-  back: "Case studies",
   backToAll: "Back to case studies",
   example: "Fictional example",
 };
