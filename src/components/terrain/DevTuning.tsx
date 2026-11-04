@@ -1,61 +1,54 @@
 "use client";
 
-import { Leva, button, folder, monitor, useControls } from "leva";
+import { Leva, button, folder, useControls } from "leva";
 import { useEffect } from "react";
-import { cards } from "@/content/cards";
-import { duration } from "@/styles/tokens";
-import { LINE_COLORS, fieldConfig, type FieldConfig } from "./field-settings";
-import { fieldStore } from "./field-store";
+import { fieldConfig } from "@/field";
 
 /**
- * Dev-only leva panel for the contour field. "Save to config" writes the current values
- * to src/config/contour-field.json through the tuning server started by `npm run dev`.
- * Never shipped: imported behind a NODE_ENV === "development" check.
+ * Dev-only leva panel for the contour field: changes apply live (window.__terrain.retune), and
+ * "Save to config" writes them to src/config/contour-field.json through the tuning server started
+ * by `npm run dev`. Never shipped: imported behind a NODE_ENV === "development" check.
  */
 const TUNING_URL = "http://localhost:4319/contour-field";
-const durationTokens = Object.keys(duration);
-// The morph toggle targets the deck's first card (an example card in npm run dev).
-const morphCard = cards[0];
+type Config = typeof fieldConfig;
 
 export default function DevTuning() {
-  const values = useControls("Contour field", {
-    // Contour interval: the smallest of 50/100/200/250/500 m that keeps lines on the
-    // steepest terrain (gradient percentile) at least minSpacingPx (per device) apart.
-    steepPercentile: { value: fieldConfig.steepPercentile, options: [50, 90, 95, 99] },
-    indexEvery: { value: fieldConfig.indexEvery, min: 2, max: 10, step: 1 },
-    lineWidthPx: { value: fieldConfig.lineWidthPx, min: 0.5, max: 4, step: 0.25 },
-    indexLineWidthPx: { value: fieldConfig.indexLineWidthPx, min: 0.5, max: 5, step: 0.25 },
-    // Per device profile (fieldConfig.desktop / fieldConfig.mobile): spacing and line strengths.
-    "Per device": folder({
-      desktopMinSpacingPx: { value: fieldConfig.desktop.minSpacingPx, min: 1, max: 12, step: 0.25, label: "desktop spacing" },
-      mobileMinSpacingPx: { value: fieldConfig.mobile.minSpacingPx, min: 1, max: 12, step: 0.25, label: "mobile spacing" },
-      desktopLineOpacity: { value: fieldConfig.desktop.lineOpacity, min: 0, max: 1, step: 0.01, label: "desktop lines" },
-      desktopIndexOpacity: { value: fieldConfig.desktop.indexOpacity, min: 0, max: 1, step: 0.01, label: "desktop index" },
-      mobileLineOpacity: { value: fieldConfig.mobile.lineOpacity, min: 0, max: 1, step: 0.01, label: "mobile lines" },
-      mobileIndexOpacity: { value: fieldConfig.mobile.indexOpacity, min: 0, max: 1, step: 0.01, label: "mobile index" },
+  const v = useControls("Contour field", {
+    lineAlpha: { value: fieldConfig.lineAlpha, min: 0, max: 1, step: 0.01 },
+    indexAlpha: { value: fieldConfig.indexAlpha, min: 0, max: 1, step: 0.01 },
+    lineWidthPx: { value: fieldConfig.lineWidthPx, min: 0.5, max: 3, step: 0.25 },
+    indexLineWidthPx: { value: fieldConfig.indexLineWidthPx, min: 0.5, max: 4, step: 0.25 },
+    zoom: { value: fieldConfig.zoom, min: 1, max: 1.3, step: 0.01 },
+    Quiet: folder({
+      quietStrength: { value: fieldConfig.quiet.strength, min: 0, max: 1, step: 0.05 },
+      quietFeatherPx: { value: fieldConfig.quiet.featherPx, min: 0, max: 160, step: 4 },
     }),
-    lineColor: { value: fieldConfig.lineColor, options: LINE_COLORS },
-    indexColor: { value: fieldConfig.indexColor, options: LINE_COLORS },
-    // The draw-on front's lines keep their colour and reach this many times their strength.
-    revealGain: { value: fieldConfig.revealGain, min: 1, max: 3, step: 0.05 },
-    // Quiet zones behind text: line strength inside, feather outside (CSS px).
-    quietStrength: { value: fieldConfig.quietStrength, min: 0, max: 1, step: 0.05 },
-    quietFeatherPx: { value: fieldConfig.quietFeatherPx, min: 0, max: 160, step: 4 },
-    bodyQuietStrength: { value: fieldConfig.bodyQuietStrength, min: 0, max: 1, step: 0.01 },
-    bodyQuietFeatherPx: { value: fieldConfig.bodyQuietFeatherPx, min: 0, max: 160, step: 4 },
-    zoomBase: { value: fieldConfig.zoomBase, min: 1, max: 1.3, step: 0.01 },
-    morphZoom: { value: fieldConfig.morphZoom, min: 0, max: 0.5, step: 0.01 },
-    morph: { value: fieldConfig.morph, options: durationTokens },
-    frameBudgetMs: { value: fieldConfig.frameBudgetMs, min: 12, max: 40, step: 1 },
+    Ambient: folder({
+      driftPx: { value: fieldConfig.ambient.driftPx, min: 0, max: 60, step: 1 },
+      breath: { value: fieldConfig.ambient.breath, min: 0, max: 0.5, step: 0.01 },
+    }),
+    Pointer: folder({
+      radiusPx: { value: fieldConfig.bump.radiusPx, min: 60, max: 400, step: 10 },
+      maxPx: { value: fieldConfig.bump.maxPx, min: 0, max: 6, step: 0.5 },
+      rest: { value: fieldConfig.bump.rest, min: 0, max: 1, step: 0.05 },
+    }),
+  });
+
+  const config = (): Config => ({
+    ...fieldConfig,
+    lineAlpha: v.lineAlpha,
+    indexAlpha: v.indexAlpha,
+    lineWidthPx: v.lineWidthPx,
+    indexLineWidthPx: v.indexLineWidthPx,
+    zoom: v.zoom,
+    quiet: { strength: v.quietStrength, featherPx: v.quietFeatherPx },
+    ambient: { ...fieldConfig.ambient, driftPx: v.driftPx, breath: v.breath },
+    bump: { ...fieldConfig.bump, radiusPx: v.radiusPx, maxPx: v.maxPx, rest: v.rest },
   });
 
   useControls("Contour field", {
-    "Interval (m)": monitor(() => fieldStore.get().intervalM ?? 0, { interval: 250 }),
-    [`Toggle morph (${morphCard?.name ?? "no card"})`]: button(() =>
-      fieldStore.set((s) => ({ morphTarget: s.morphTarget || !morphCard ? null : morphCard.terrainId })),
-    ),
     "Save to config": button(async () => {
-      const body = JSON.stringify(fieldStore.get().config, null, 2);
+      const body = JSON.stringify(config(), null, 2);
       try {
         const res = await fetch(TUNING_URL, { method: "POST", headers: { "content-type": "application/json" }, body });
         if (!res.ok) throw new Error(String(res.status));
@@ -68,24 +61,10 @@ export default function DevTuning() {
   });
 
   useEffect(() => {
-    const {
-      desktopMinSpacingPx,
-      mobileMinSpacingPx,
-      desktopLineOpacity,
-      desktopIndexOpacity,
-      mobileLineOpacity,
-      mobileIndexOpacity,
-      ...rest
-    } = values;
-    const cfg = fieldStore.get().config;
-    const next: FieldConfig = {
-      ...cfg,
-      ...rest,
-      desktop: { ...cfg.desktop, minSpacingPx: desktopMinSpacingPx, lineOpacity: desktopLineOpacity, indexOpacity: desktopIndexOpacity },
-      mobile: { ...cfg.mobile, minSpacingPx: mobileMinSpacingPx, lineOpacity: mobileLineOpacity, indexOpacity: mobileIndexOpacity },
-    };
-    fieldStore.set({ config: next });
-  }, [values]);
+    (window as Window & { __terrain?: { retune?: (c: Config) => void } }).__terrain?.retune?.(config());
+    // config() reads the controls' current values only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [v]);
 
   return <Leva collapsed titleBar={{ title: "Tuning (dev only)" }} />;
 }

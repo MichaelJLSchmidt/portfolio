@@ -46,7 +46,7 @@ export default function nextConfig(phase: string): NextConfig {
           resolveAlias: {
             "@/content/examples": "./src/content/examples/none.ts",
             "@/content/examples/case-studies": "./src/content/examples/none.ts",
-            "@/content/examples/terrains": "./src/content/examples/none.ts",
+            "@terrain/field/examples.json": "./src/content/examples/none-terrains.json",
           },
         },
   };

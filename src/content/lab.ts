@@ -59,29 +59,26 @@ export const lab = {
 export const terrainLab = {
   meta: {
     title: "Terrain lab",
-    description: "The contour field's route morphs, motion modes and device tiers.",
+    description: "The contour field's terrains, motion tiers and device tiers.",
   },
   heading: "Terrain lab",
   intro:
-    "The contour field conducts every route change: the terrain morphs in 700 ms and, in full motion, the destination's lines draw on from the valleys upward. About recentres on Bern, where every Swiss map is measured from. Morph here without navigating, or follow the real routes; the mode and tier switches reload this page.",
+    "The contour field drifts, breathes and bends a little under a fine pointer; a page change dims it to 60 % and crossfades it to the next terrain in 1.6 s. Crossfade here without navigating, or follow the real routes; the tier links reload this page.",
   morphs: {
-    heading: "Route morphs",
-    note: "Each button morphs the field as a route change would.",
-    region: "Home · Jungfrau region",
+    heading: "Terrains",
+    note: "Each button crossfades the field as a page change would.",
+    region: "Home · Interlaken",
     bern: "About · Bern",
-    card: (name: string) => `Card · ${name}`,
+    card: (name: string) => `Case study · ${name}`,
   },
   routes: { heading: "Real routes", home: "Home", about: "About" },
-  readout: { heading: "State" },
   modes: {
-    heading: "Motion mode",
-    note: "Reloads this page in one mode. The OS setting for reduced motion still wins.",
-    options: { full: "Full", calm: "Calm", still: "Still" },
+    heading: "Tiers",
+    note: "Reloads this page in one motion tier or device tier. The OS setting for reduced motion still wins.",
+    options: { full: "Full", calm: "Calm", still: "Off" },
   },
   tiers: {
-    heading: "Device tier",
-    note: "Reloads this page in one tier: A desktop (pre-warm), B mobile (0.75 render scale), C posters only.",
-    options: { auto: "This device", desktop: "A · desktop", mobile: "B · mobile", low: "C · posters" },
+    options: { desktop: "Desktop", mobile: "Mobile", low: "Posters only" },
   },
-  state: { heading: "Field", field: "Field", tier: "Tier", terrain: "Terrain", interval: "Interval", none: "—", metres: "m" },
+  state: { mode: "Tier", terrain: "Terrain", frames: "Frames drawn" },
 };

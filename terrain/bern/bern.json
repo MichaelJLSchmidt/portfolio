@@ -1,7 +1,7 @@
 {
   "id": "bern",
   "label": "Bern",
-  "attribution": "Terrain data © swisstopo",
+  "attribution": "Terrain data \u00a9 swisstopo",
   "placeholder": false,
   "generatedAt": "2026-10-30",
   "source": {
@@ -282,29 +282,11 @@
       "gzipBytes": 241578
     }
   ],
-  "posters": [
-    {
-      "file": "/terrain/bern/contours-10.svg",
-      "intervalM": 10,
-      "width": 800,
-      "height": 600,
-      "bytes": 114614,
-      "gzipBytes": 43115
-    },
-    {
-      "file": "/terrain/bern/contours-20.svg",
-      "intervalM": 20,
-      "width": 800,
-      "height": 600,
-      "bytes": 58637,
-      "gzipBytes": 22537
-    }
-  ],
   "river": {
     "name": "Aare",
     "source": {
       "kind": "official",
-      "dataset": "swissTLM3D Gewässernetz (swisstopo)",
+      "dataset": "swissTLM3D Gew\u00e4ssernetz (swisstopo)",
       "layer": "ch.swisstopo.swisstlm3d-gewaessernetz",
       "api": "https://api3.geo.admin.ch/rest/services/api/MapServer/identify",
       "features": 38
@@ -1336,7 +1318,7 @@
     "highestM": {
       "city": 674,
       "demWindowMax": 946.9,
-      "label": "Könizberg",
+      "label": "K\u00f6nizberg",
       "note": "the window reaches beyond the city (Gurten)"
     },
     "stationM": {

@@ -20,93 +20,55 @@
     height: 100%;
   }
 
-  /* One poster per terrain the backdrop can show: the region, and Basecamp's (Bern, the Aare in
-     ice, the zero-point pin). A route change cross-fades the layers in 200 ms, opacity only: what
-     still mode and tier C see instead of the field's morph. */
+  /* One poster per terrain a route has needed: the route's own shows. A page change crossfades
+     them where the field doesn't run (Off, posters-only devices), opacity only. */
   .layer {
+    opacity: 0;
     transition: opacity var(--dur-still) linear;
   }
 
-  .backdrop[data-poster="bern"] .layer[data-layer="region"],
-  .backdrop[data-poster="region"] .layer[data-layer="bern"] {
-    opacity: 0;
+  .layer[data-shown] {
+    opacity: 1;
   }
 
   .poster {
     object-fit: cover;
-    transition: opacity var(--dur-base) var(--ease-out);
-  }
-
-  /* Bern's poster is framed like the field: on its zero point, from the west edge on portrait
-     screens (BERN_PORTRAIT_U). */
-  .layer[data-layer="bern"] .poster {
-    object-position: var(--focus-u) var(--focus-v);
+    object-position: var(--focus);
   }
 
   @media (orientation: portrait) {
-    .layer[data-layer="bern"] .poster {
-      object-position: var(--focus-u-portrait) var(--focus-v);
+    .poster {
+      object-position: var(--focus-portrait);
     }
   }
 
+  /* The field fades in over the poster's identical frame once it has drawn it. */
   .canvas {
     opacity: 0;
-    transition: opacity var(--dur-base) var(--ease-out);
+    transition: opacity var(--dur-enter) var(--ease-out);
   }
 
   .backdrop[data-field="on"] .canvas {
     opacity: 1;
   }
 
-
-  .backdrop[data-field="on"] .poster {
-    animation: none;
-    opacity: 0;
-    transition-delay: var(--dur-base);
+  /* The context is lost: the poster is back at once. */
+  .backdrop[data-field="lost"] .canvas {
+    display: none;
   }
 
-  /* The WebGL context is lost: the poster is back at once. */
-  .backdrop[data-field="lost"] .layer,
-  .backdrop[data-field="lost"] .poster,
-  .backdrop[data-field="lost"] .canvas,
-  .backdrop[data-field="lost"] .vignette {
-    transition: none;
+  :root[data-motion="still"] .canvas {
+    display: none;
   }
 
-  /* The band under the HUD. */
-  .scrim,
-  .vignette {
-    position: absolute;
-    inset: 0;
-  }
-
-  .scrim {
-    background: linear-gradient(to bottom, rgb(27 28 24 / 0.5), rgb(27 28 24 / 0) 18%);
-  }
-
-  /* Keeps text legible over the static poster. The running field fades its lines behind
-     text instead (quiet zones), so the vignette fades out with the poster. */
-  .vignette {
-    background: linear-gradient(to top, rgb(27 28 24 / 0.75), rgb(27 28 24 / 0) 55%);
-    transition: opacity var(--dur-base) var(--ease-out);
-  }
-
-  @media (min-width: 1280px) {
-    .vignette {
-      background: linear-gradient(to right, rgb(27 28 24 / 0.7), rgb(27 28 24 / 0.15) 60%, rgb(27 28 24 / 0));
+  @media (prefers-reduced-motion: reduce) {
+    .canvas {
+      display: none;
     }
-  }
 
-  .backdrop[data-field="on"] .vignette {
-    opacity: 0;
-  }
-
-
-
-  :root[data-motion="still"] .poster,
-  :root[data-motion="still"] .canvas,
-  :root[data-motion="still"] .vignette {
-    transition: none;
+    .layer {
+      transition-duration: var(--dur-still);
+    }
   }
 
   /* Forced colours: no field and no poster; the page is the system's background. */

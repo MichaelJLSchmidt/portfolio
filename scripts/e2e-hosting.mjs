@@ -108,7 +108,7 @@ async function gatedRun() {
     const chunk = `/_next/static/chunks/${firstFile(join(root, "out/_next/static/chunks"), (f) => f.endsWith(".js"))}`;
     const font = firstFile(join(root, "out", gate.assetsDir), (f) => f.endsWith(".woff2"));
 
-    for (const path of ["/", "/work/test-project/", "/about/", chunk, "/terrain/heightmap-1536.webp", `${gate.assetsDir}${font}`]) {
+    for (const path of ["/", "/work/test-project/", "/about/", chunk, "/terrain/field/region.webp", `${gate.assetsDir}${font}`]) {
       const res = await get(base, path);
       const html = await res.text();
       check(
@@ -152,7 +152,7 @@ async function gatedRun() {
       `${ok.status} ${ok.headers.get("location")} ${setCookie}`,
     );
     const cookie = setCookie.split(";")[0];
-    for (const [path, type] of [["/work/test-project/", "text/html"], [chunk, "javascript"], ["/terrain/heightmap-1536.webp", "image/webp"]]) {
+    for (const [path, type] of [["/work/test-project/", "text/html"], [chunk, "javascript"], ["/terrain/field/region.webp", "image/webp"]]) {
       const res = await get(base, path, { headers: { Cookie: cookie } });
       check(
         `${path} with the cookie: the site, still noindex`,

@@ -1,132 +1,114 @@
 "use client";
 
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { useLabReady } from "@/components/lab/ready";
 import { SurveyButton } from "@/components/ui/SurveyButton";
-import { fieldStore, useFieldStore } from "@/components/terrain/field-store";
-import { BERN } from "@/components/terrain/route-terrain";
 import { cards } from "@/content/cards";
 import { useMotionMode } from "@/lib/motion-mode";
 import { terrainLab as copy } from "@/content/lab";
 import styles from "./TerrainLab.module.css";
 
-/** Morphs the field as a route change to `id` would (the backdrop sets it again on the next real route). */
-const morphTo = (id: string | null) => fieldStore.set((s) => ({ morphTarget: id, routeSeq: s.routeSeq + 1 }));
+type Hook = { route: (id: string | null) => void; frames: () => number; tier: string };
+const hook = () => (window as Window & { __terrain?: Hook }).__terrain;
 
-// The page's own query, so a mode switch keeps the tier and the other way round.
-const subscribe = () => () => {};
-const useSearch = () => useSyncExternalStore(subscribe, () => window.location.search, () => "");
-const withParam = (search: string, key: string, value: string | null) => {
-  const params = new URLSearchParams(search);
-  if (value) params.set(key, value);
-  else params.delete(key);
-  // Headless browsers (SwiftShader) need the field forced on.
-  params.set("field", "force");
-  return `?${params}`;
-};
-
+/**
+ * The terrain lab: crossfade the field to any terrain without navigating, follow the real routes,
+ * and reload in another motion tier or device tier. Shows how many frames the field has drawn,
+ * so its pace (about 30 a second at rest, 60 while something moves) is visible.
+ */
 export function TerrainLab() {
   const { mode } = useMotionMode();
-  const target = useFieldStore((s) => s.morphTarget);
-  const tier = useFieldStore((s) => s.tier);
-  const field = useFieldStore((s) => s.mode);
-  const shown = useFieldStore((s) => s.shownTerrain);
-  const interval = useFieldStore((s) => s.intervalM);
-  const search = useSearch();
+  const [target, setTarget] = useState<string>("region");
+  const [frames, setFrames] = useState(0);
   useLabReady();
+
+  useEffect(() => {
+    const t = window.setInterval(() => setFrames(hook()?.frames() ?? 0), 500);
+    return () => window.clearInterval(t);
+  }, []);
+
   const terrains = [
-    { id: null, label: copy.morphs.region },
+    { id: "region", label: copy.morphs.region },
+    { id: "bern", label: copy.morphs.bern },
     ...cards.map((c) => ({ id: c.terrainId, label: copy.morphs.card(c.name) })),
-    { id: BERN, label: copy.morphs.bern },
   ];
 
   return (
-    <div className={styles.grid}>
-      <section className={styles.panel} aria-labelledby="lab-morphs" data-quiet-zone>
+    <div className={styles.lab}>
+      <section className={styles.block} aria-labelledby="lab-morphs">
         <h2 id="lab-morphs" className="mono">
           {copy.morphs.heading}
         </h2>
         <p className={styles.note}>{copy.morphs.note}</p>
         <div className={styles.row}>
           {terrains.map((t) => (
-            <SurveyButton key={t.id ?? "region"} arrow={null} aria-pressed={target === t.id} data-morph={t.id ?? "region"} onClick={() => morphTo(t.id)}>
+            <SurveyButton
+              key={t.id}
+              arrow={null}
+              aria-pressed={target === t.id}
+              data-morph={t.id}
+              onClick={() => {
+                setTarget(t.id);
+                hook()?.route(t.id === "region" ? null : t.id);
+              }}
+            >
               {t.label}
             </SurveyButton>
           ))}
         </div>
-        <h3 className="mono">{copy.routes.heading}</h3>
-        <div className={styles.row}>
-          <Link href="/" className="mono">
-            {copy.routes.home}
-          </Link>
+      </section>
+
+      <section className={styles.block} aria-labelledby="lab-routes">
+        <h2 id="lab-routes" className="mono">
+          {copy.routes.heading}
+        </h2>
+        <p className={styles.row}>
+          <Link href="/">{copy.routes.home}</Link>
+          <Link href="/about/">{copy.routes.about}</Link>
           {cards.map((c) => (
-            <Link key={c.slug} href={c.href ?? `/work/${c.slug}/`} className="mono">
+            <Link key={c.slug} href={`/work/${c.slug}/`}>
               {c.name}
             </Link>
           ))}
-          <Link href="/about/" className="mono">
-            {copy.routes.about}
-          </Link>
-        </div>
+        </p>
       </section>
 
-      <section className={styles.panel} aria-labelledby="lab-readout" data-quiet-zone>
-        <h2 id="lab-readout" className="mono">
-          {copy.readout.heading}
-        </h2>
-        <dl className={styles.state}>
-          <div>
-            <dt>{copy.state.field}</dt>
-            <dd data-lab-state="field">{field}</dd>
-          </div>
-          <div>
-            <dt>{copy.state.tier}</dt>
-            <dd data-lab-state="tier">{tier ?? copy.state.none}</dd>
-          </div>
-          <div>
-            <dt>{copy.state.terrain}</dt>
-            <dd data-lab-state="terrain">{shown ?? "region"}</dd>
-          </div>
-          <div>
-            <dt>{copy.state.interval}</dt>
-            <dd data-lab-state="interval">{interval ? `${interval} ${copy.state.metres}` : copy.state.none}</dd>
-          </div>
-        </dl>
-      </section>
-
-      <section className={styles.panel} aria-labelledby="lab-modes" data-quiet-zone>
+      <section className={styles.block} aria-labelledby="lab-modes">
         <h2 id="lab-modes" className="mono">
           {copy.modes.heading}
         </h2>
         <p className={styles.note}>{copy.modes.note}</p>
-        <div className={styles.row}>
-          {(Object.keys(copy.modes.options) as (keyof typeof copy.modes.options)[]).map((m) => (
-            <a key={m} href={withParam(search, "motion", m)} className="mono" aria-current={mode === m ? "true" : undefined}>
+        <p className={styles.row}>
+          {(["full", "calm", "still"] as const).map((m) => (
+            <a key={m} href={`?motion=${m}&field=force`} aria-current={mode === m ? "true" : undefined}>
               {copy.modes.options[m]}
             </a>
           ))}
-        </div>
-      </section>
-
-      <section className={styles.panel} aria-labelledby="lab-tiers" data-quiet-zone>
-        <h2 id="lab-tiers" className="mono">
-          {copy.tiers.heading}
-        </h2>
-        <p className={styles.note}>{copy.tiers.note}</p>
-        <div className={styles.row}>
-          {(Object.keys(copy.tiers.options) as (keyof typeof copy.tiers.options)[]).map((t) => (
-            <a
-              key={t}
-              href={withParam(search, "tier", t === "auto" ? null : t)}
-              className="mono"
-              aria-current={(t === "auto" ? !new URLSearchParams(search).get("tier") : tier === t) ? "true" : undefined}
-            >
+        </p>
+        <p className={styles.row}>
+          {(["desktop", "mobile", "low"] as const).map((t) => (
+            <a key={t} href={`?tier=${t}&field=force`}>
               {copy.tiers.options[t]}
             </a>
           ))}
-        </div>
+        </p>
       </section>
+
+      <dl className={`${styles.state} mono`}>
+        <div>
+          <dt>{copy.state.mode}</dt>
+          <dd>{mode}</dd>
+        </div>
+        <div>
+          <dt>{copy.state.terrain}</dt>
+          <dd data-lab-terrain={target}>{target}</dd>
+        </div>
+        <div>
+          <dt>{copy.state.frames}</dt>
+          <dd data-lab-frames={frames}>{frames}</dd>
+        </div>
+      </dl>
     </div>
   );
 }

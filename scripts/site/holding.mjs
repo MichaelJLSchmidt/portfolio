@@ -11,8 +11,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const { about, holding } = await import("../../src/content/about.ts");
 const { site } = await import("../../src/content/site.ts");
 const { tokensToCss } = await import("../../src/styles/tokens.ts");
-const { fieldConfig, posterMedia } = await import("../../src/components/terrain/field-settings.ts");
-const terrain = JSON.parse(readFileSync(join(root, "public/terrain/terrain.json"), "utf8"));
+const field = JSON.parse(readFileSync(join(root, "public/terrain/field/field.json"), "utf8"));
 
 const sha256 = (data) => createHash("sha256").update(data).digest();
 const fontDir = join(root, "src/hosting/fonts");
@@ -29,19 +28,18 @@ export function copyAssets(dir, prefix) {
     copyFileSync(source, join(dir, name));
     return `${prefix}${name}`;
   };
-  const poster = (interval) => terrain.posters.find((p) => p.intervalM === interval) ?? terrain.poster;
-  const fine = poster(100);
+  const poster = field.posters.region;
   return {
     fonts: {
       display: put(join(fontDir, "archivo-display.woff2")),
       text: put(join(fontDir, "archivo-text.woff2")),
       mono: put(join(fontDir, "martian-mono.woff2")),
     },
-    // 200 m contours on small screens, 100 m where the site's field would draw them too.
+    // The field's first frame of the region (npm run posters), framed on Interlaken like the site.
     poster: {
-      coarse: put(join(root, "public", poster(200).file)),
-      fine: put(join(root, "public", fine.file)),
-      fineMedia: posterMedia(terrain.heightmaps, fine.intervalM, fieldConfig),
+      landscape: put(join(root, "public", poster.landscape)),
+      portrait: put(join(root, "public", poster.portrait)),
+      position: `${(poster.focus.u * 100).toFixed(2)}% ${(poster.focus.v * 100).toFixed(2)}%`,
     },
   };
 }
@@ -53,18 +51,16 @@ function css({ fonts, poster }) {
     `@font-face{font-family:"Archivo Display";src:url(${fonts.display}) format("woff2");font-weight:800;font-display:swap}`,
     `@font-face{font-family:"Archivo Text";src:url(${fonts.text}) format("woff2");font-weight:400;font-display:swap}`,
     `@font-face{font-family:"Martian Mono";src:url(${fonts.mono}) format("woff2");font-weight:500;font-display:swap}`,
-    `:root{--poster:url(${poster.coarse});--gutter:16px;color-scheme:dark}`,
-    `@media ${poster.fineMedia}{:root{--poster:url(${poster.fine})}}`,
+    `:root{--poster:url(${poster.landscape});--gutter:16px;color-scheme:dark}`,
+    `@media (orientation:portrait){:root{--poster:url(${poster.portrait})}}`,
     `@media (min-width:48rem){:root{--gutter:40px}}`,
     `*,*::before,*::after{box-sizing:border-box}`,
     `html{-webkit-text-size-adjust:100%;text-size-adjust:100%;background:var(--color-ground)}`,
     `body{margin:0;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;color:var(--color-text);font:400 var(--type-body-size)/var(--type-body-lh) "Archivo Text",system-ui,sans-serif}`,
-    // Terrain: the poster dimmed so its regular lines show at 23% (it draws them at the
-    // field's desktop strength) and a vignette that keeps the text legible. Nothing follows the
-    // pointer.
+    // Terrain: the field's poster at its own line strengths, and a vignette that keeps the text
+    // legible. (The live field and the relief mark arrive in phase 5.)
     `.terrain{position:fixed;inset:0;z-index:-1;overflow:hidden}`,
-    `.poster{position:absolute;inset:0;background:var(--poster) center/cover no-repeat}`,
-    `.poster{opacity:${Math.min(1, 0.23 / fieldConfig.desktop.lineOpacity).toFixed(2)}}`,
+    `.poster{position:absolute;inset:0;background:var(--poster) ${poster.position}/cover no-repeat}`,
     `.terrain::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgb(27 28 24/.9),transparent 18%,transparent 82%,rgb(27 28 24/.9)),radial-gradient(130% 85% at 0% 55%,rgb(27 28 24/.88) 0,rgb(27 28 24/.6) 45%,rgb(27 28 24/0) 80%)}`,
     // The site's cartographic halo (.map-halo): text stays legible over any line, lit or not.
     `.hud,main,footer{text-shadow:0 0 2px var(--color-ground),0 0 6px var(--color-ground),0 0 14px var(--color-ground)}`,

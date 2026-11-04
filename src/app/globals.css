@@ -326,6 +326,16 @@
     }
   }
 
+  /* Over the static poster (Off, posters-only devices, before the field has drawn) there are no
+     quiet zones: text that sits in one gets a soft ground halo instead, so secondary text keeps
+     AA over the strongest line. */
+  :root:not(:has([data-field="on"])) :is([data-quiet-zone], .body-copy) {
+    text-shadow:
+      0 0 2px var(--color-ground),
+      0 0 6px var(--color-ground),
+      0 0 12px var(--color-ground);
+  }
+
   /* The sheet: light bands carry ink, never mint. */
   [data-surface="sheet"] {
     background: var(--color-sheet);

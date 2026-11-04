@@ -77,7 +77,7 @@ const lazy = files
 console.log("\nLargest lazy chunks (loaded on demand):");
 for (const { f, size } of lazy) {
   const src = readFileSync(f, "utf8");
-  const hint = /WebGLRenderer|ShaderMaterial/.test(src) ? "three / R3F" : /lenis/i.test(src) ? "lenis" : "";
+  const hint = /uQuietFeather/.test(src) ? "contour field" : /lenis/i.test(src) ? "lenis" : "";
   console.log(`  ${kb(size).padStart(9)}  ${relative(out, f)} ${hint}`);
 }
 

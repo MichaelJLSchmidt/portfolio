@@ -1,0 +1,443 @@
+{
+  "$comment": "Written by npm run terrain:field (scripts/terrain/field.mjs).",
+  "budgetBytes": 153600,
+  "terrains": {
+    "eiger": {
+      "file": "/terrain/field/eiger.webp",
+      "raw": "/terrain/field/eiger.bin",
+      "width": 448,
+      "height": 299,
+      "bytes": 44234,
+      "sha256": "d14422f44ae506f728da9dc45472288bab5d1486cb0b939b27d8c511b4310312",
+      "encoding": {
+        "channels": "RG",
+        "offset": 1616,
+        "scale": 1
+      },
+      "gradientM": {
+        "p50": 7.76,
+        "p90": 19.01,
+        "p95": 23.88,
+        "p99": 42.57
+      },
+      "probe": [
+        [
+          56,
+          37,
+          1,
+          77
+        ],
+        [
+          168,
+          37,
+          0,
+          190
+        ],
+        [
+          280,
+          37,
+          1,
+          91
+        ],
+        [
+          392,
+          37,
+          3,
+          111
+        ],
+        [
+          56,
+          112,
+          1,
+          230
+        ],
+        [
+          168,
+          112,
+          2,
+          78
+        ],
+        [
+          280,
+          112,
+          4,
+          19
+        ],
+        [
+          392,
+          112,
+          6,
+          110
+        ],
+        [
+          56,
+          186,
+          2,
+          14
+        ],
+        [
+          168,
+          186,
+          3,
+          147
+        ],
+        [
+          280,
+          186,
+          7,
+          222
+        ],
+        [
+          392,
+          186,
+          4,
+          118
+        ],
+        [
+          56,
+          261,
+          2,
+          64
+        ],
+        [
+          168,
+          261,
+          4,
+          223
+        ],
+        [
+          280,
+          261,
+          8,
+          49
+        ],
+        [
+          392,
+          261,
+          6,
+          126
+        ]
+      ],
+      "intervalsM": [
+        50,
+        100,
+        200,
+        250,
+        500
+      ],
+      "focus": {
+        "u": 0.5,
+        "v": 0.5
+      },
+      "label": "eiger"
+    },
+    "moench": {
+      "file": "/terrain/field/moench.webp",
+      "raw": "/terrain/field/moench.bin",
+      "width": 448,
+      "height": 299,
+      "bytes": 43372,
+      "sha256": "65b5ce2284549b245d12ee115a3876f74981e76195cd0ba3de5c28bdcea0780a",
+      "encoding": {
+        "channels": "RG",
+        "offset": 1725.25,
+        "scale": 1
+      },
+      "gradientM": {
+        "p50": 7.5,
+        "p90": 17.36,
+        "p95": 20.89,
+        "p99": 30.07
+      },
+      "probe": [
+        [
+          56,
+          37,
+          1,
+          162
+        ],
+        [
+          168,
+          37,
+          2,
+          178
+        ],
+        [
+          280,
+          37,
+          6,
+          239
+        ],
+        [
+          392,
+          37,
+          4,
+          122
+        ],
+        [
+          56,
+          112,
+          1,
+          207
+        ],
+        [
+          168,
+          112,
+          3,
+          218
+        ],
+        [
+          280,
+          112,
+          6,
+          116
+        ],
+        [
+          392,
+          112,
+          6,
+          167
+        ],
+        [
+          56,
+          186,
+          2,
+          233
+        ],
+        [
+          168,
+          186,
+          4,
+          229
+        ],
+        [
+          280,
+          186,
+          8,
+          168
+        ],
+        [
+          392,
+          186,
+          6,
+          175
+        ],
+        [
+          56,
+          261,
+          6,
+          30
+        ],
+        [
+          168,
+          261,
+          6,
+          119
+        ],
+        [
+          280,
+          261,
+          7,
+          1
+        ],
+        [
+          392,
+          261,
+          7,
+          191
+        ]
+      ],
+      "intervalsM": [
+        50,
+        100,
+        200,
+        250,
+        500
+      ],
+      "focus": {
+        "u": 0.5,
+        "v": 0.5
+      },
+      "label": "moench"
+    },
+    "jungfrau": {
+      "file": "/terrain/field/jungfrau.webp",
+      "raw": "/terrain/field/jungfrau.bin",
+      "width": 448,
+      "height": 299,
+      "bytes": 39848,
+      "sha256": "17a906ebe0c023c421e7db99f69d2d02913f5ac47639082caed343ac82465349",
+      "encoding": {
+        "channels": "RG",
+        "offset": 1918.5,
+        "scale": 1
+      },
+      "gradientM": {
+        "p50": 5.22,
+        "p90": 16.51,
+        "p95": 20.06,
+        "p99": 30.22
+      },
+      "probe": [
+        [
+          56,
+          37,
+          2,
+          152
+        ],
+        [
+          168,
+          37,
+          3,
+          68
+        ],
+        [
+          280,
+          37,
+          7,
+          31
+        ],
+        [
+          392,
+          37,
+          6,
+          137
+        ],
+        [
+          56,
+          112,
+          5,
+          98
+        ],
+        [
+          168,
+          112,
+          6,
+          6
+        ],
+        [
+          280,
+          112,
+          6,
+          11
+        ],
+        [
+          392,
+          112,
+          6,
+          69
+        ],
+        [
+          56,
+          186,
+          7,
+          48
+        ],
+        [
+          168,
+          186,
+          5,
+          243
+        ],
+        [
+          280,
+          186,
+          5,
+          34
+        ],
+        [
+          392,
+          186,
+          5,
+          125
+        ],
+        [
+          56,
+          261,
+          6,
+          129
+        ],
+        [
+          168,
+          261,
+          5,
+          236
+        ],
+        [
+          280,
+          261,
+          4,
+          180
+        ],
+        [
+          392,
+          261,
+          5,
+          11
+        ]
+      ],
+      "intervalsM": [
+        50,
+        100,
+        200,
+        250,
+        500
+      ],
+      "focus": {
+        "u": 0.5,
+        "v": 0.5
+      },
+      "label": "jungfrau"
+    }
+  },
+  "posters": {
+    "eiger": {
+      "landscape": "/terrain/field/posters/eiger-l.avif",
+      "size": [
+        1600,
+        1000
+      ],
+      "portrait": "/terrain/field/posters/eiger-p.avif",
+      "sizePortrait": [
+        900,
+        1600
+      ],
+      "focus": {
+        "u": 0.5,
+        "v": 0.5
+      }
+    },
+    "moench": {
+      "landscape": "/terrain/field/posters/moench-l.avif",
+      "size": [
+        1600,
+        1000
+      ],
+      "portrait": "/terrain/field/posters/moench-p.avif",
+      "sizePortrait": [
+        900,
+        1600
+      ],
+      "focus": {
+        "u": 0.5,
+        "v": 0.5
+      }
+    },
+    "jungfrau": {
+      "landscape": "/terrain/field/posters/jungfrau-l.avif",
+      "size": [
+        1600,
+        1000
+      ],
+      "portrait": "/terrain/field/posters/jungfrau-p.avif",
+      "sizePortrait": [
+        900,
+        1600
+      ],
+      "focus": {
+        "u": 0.5,
+        "v": 0.5
+      }
+    }
+  }
+}

@@ -57,17 +57,17 @@ for (const [fg, bg, why] of [
 }
 
 // Over the field: the strongest line is an index line at its full strength; a quiet zone fades it.
-const lineHex = color[field.indexColor] ?? color.fieldLine;
-const strongest = Math.max(field.desktop.indexOpacity, field.mobile.indexOpacity);
+const lineHex = color[field.lineColor] ?? color.fieldLine;
+const strongest = Math.max(field.lineAlpha, field.indexAlpha);
 const fadedOver = (strength) => {
   const g = rgb(color.ground);
   const c = rgb(lineHex);
   return g.map((v, i) => v + (c[i] - v) * strength);
 };
-console.log(`\nText over the field (index lines at ${Math.round(strongest * 100)}%, quiet zones keep ${Math.round(field.quietStrength * 100)}% of them):`);
+console.log(`\nText over the field (index lines at ${Math.round(strongest * 100)}%, quiet zones keep ${Math.round(field.quiet.strength * 100)}% of them):`);
 report(contrast(lum(color.text), lumRgb(fadedOver(strongest))), 4.5, "text over the strongest line");
-report(contrast(lum(color.text2), lumRgb(fadedOver(strongest * field.quietStrength))), 4.5, "text2 over a line in a quiet zone");
+report(contrast(lum(color.text2), lumRgb(fadedOver(strongest * field.quiet.strength))), 4.5, "text2 over a line in a quiet zone");
 report(contrast(lum(color.glacier), lumRgb(fadedOver(strongest))), 3, "glacier (focus) over the strongest line");
 console.log(`info  ${contrast(lum(color.text2), lumRgb(fadedOver(strongest))).toFixed(2).padStart(5)}:1  text2 over the strongest line outside a quiet zone (so text2 sits in one)`);
-console.log(`info  ${contrast(lum(color.text3), lumRgb(fadedOver(strongest * field.quietStrength))).toFixed(2).padStart(5)}:1  text3 in a quiet zone (so text3 never sits over the field)`);
+console.log(`info  ${contrast(lum(color.text3), lumRgb(fadedOver(strongest * field.quiet.strength))).toFixed(2).padStart(5)}:1  text3 in a quiet zone (so text3 never sits over the field)`);
 process.exit(failed ? 1 : 0);

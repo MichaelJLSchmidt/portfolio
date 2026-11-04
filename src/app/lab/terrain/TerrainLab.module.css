@@ -1,84 +1,38 @@
 @layer reset, tokens, base, layout, components, utilities;
 
-/* The terrain lab (/lab/terrain/): the page sits over the live field, panels on the legend surface. */
-
 @layer components {
-  .main {
+  .lab {
     display: grid;
-    gap: 32px;
-    padding-top: 96px;
-    padding-bottom: 64px;
+    gap: 48px;
+    max-width: 72rem;
   }
 
-  .header {
+  .block {
     display: grid;
     gap: 12px;
-    max-width: 72ch;
-  }
-
-  .title {
-    font-size: clamp(2.75rem, 7vw, 6rem);
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
-    gap: 16px;
-  }
-
-  .panel {
-    display: grid;
-    align-content: start;
-    gap: 12px;
-    padding: 20px;
-    border: 1px solid var(--color-line);
-    border-radius: 8px;
-    background: color-mix(in srgb, var(--color-ground-raised) 88%, transparent);
-    color: var(--color-text);
-  }
-
-  .panel h2,
-  .panel h3 {
-    margin: 0;
-    color: var(--color-glacier);
   }
 
   .note {
-    margin: 0;
-    color: var(--color-text);
-    font-size: 0.875rem;
-    line-height: 1.45;
+    color: var(--color-text-2);
+    max-width: var(--type-body-measure);
   }
 
   .row {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px 16px;
+    gap: 12px 24px;
     align-items: center;
   }
 
-  .row a {
-    color: var(--color-text);
-  }
-
-  .row a[aria-current="true"] {
-    color: var(--color-glacier);
-  }
-
   .state {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 8px 16px;
-    margin: 0;
-  }
-
-  .state dt {
-    color: var(--color-text);
-    font-size: 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 32px;
+    color: var(--color-text-2);
   }
 
   .state dd {
     margin: 0;
-    font-variant-numeric: tabular-nums;
+    color: var(--color-text);
   }
 }

@@ -1,0 +1,296 @@
+{
+  "$comment": "Written by npm run terrain:field (scripts/terrain/field.mjs).",
+  "budgetBytes": 153600,
+  "terrains": {
+    "region": {
+      "file": "/terrain/field/region.webp",
+      "raw": "/terrain/field/region.bin",
+      "width": 864,
+      "height": 594,
+      "bytes": 152294,
+      "sha256": "36c004cbba97a53bc88263052155fe8c422d96079f08d5a058d9084fb2f50785",
+      "encoding": {
+        "offset": 536.25,
+        "scale": 4
+      },
+      "gradientM": {
+        "p50": 26.04,
+        "p90": 54.12,
+        "p95": 63.84,
+        "p99": 86.54
+      },
+      "probe": [
+        [
+          108,
+          74,
+          0,
+          29
+        ],
+        [
+          324,
+          74,
+          0,
+          216
+        ],
+        [
+          540,
+          74,
+          0,
+          114
+        ],
+        [
+          756,
+          74,
+          0,
+          174
+        ],
+        [
+          108,
+          222,
+          0,
+          23
+        ],
+        [
+          324,
+          222,
+          0,
+          5
+        ],
+        [
+          540,
+          222,
+          1,
+          188
+        ],
+        [
+          756,
+          222,
+          1,
+          42
+        ],
+        [
+          108,
+          371,
+          0,
+          110
+        ],
+        [
+          324,
+          371,
+          1,
+          226
+        ],
+        [
+          540,
+          371,
+          1,
+          44
+        ],
+        [
+          756,
+          371,
+          2,
+          50
+        ],
+        [
+          108,
+          519,
+          1,
+          143
+        ],
+        [
+          324,
+          519,
+          1,
+          230
+        ],
+        [
+          540,
+          519,
+          2,
+          149
+        ],
+        [
+          756,
+          519,
+          2,
+          77
+        ]
+      ],
+      "intervalsM": [
+        50,
+        100,
+        200,
+        250,
+        500
+      ],
+      "focus": {
+        "u": 0.4455,
+        "v": 0.348
+      },
+      "label": "Interlaken"
+    },
+    "bern": {
+      "file": "/terrain/field/bern.webp",
+      "raw": "/terrain/field/bern.bin",
+      "width": 960,
+      "height": 720,
+      "bytes": 149352,
+      "sha256": "f3918943cd15be4615af2b444230f3efcda362a77a09c99aa36cab4b040650e9",
+      "encoding": {
+        "offset": 479,
+        "scale": 0.5
+      },
+      "gradientM": {
+        "p50": 0.97,
+        "p90": 4.25,
+        "p95": 5.53,
+        "p99": 7.99
+      },
+      "probe": [
+        [
+          120,
+          90,
+          0,
+          201
+        ],
+        [
+          360,
+          90,
+          0,
+          138
+        ],
+        [
+          600,
+          90,
+          1,
+          97
+        ],
+        [
+          840,
+          90,
+          2,
+          101
+        ],
+        [
+          120,
+          270,
+          0,
+          147
+        ],
+        [
+          360,
+          270,
+          0,
+          146
+        ],
+        [
+          600,
+          270,
+          0,
+          138
+        ],
+        [
+          840,
+          270,
+          2,
+          52
+        ],
+        [
+          120,
+          450,
+          0,
+          124
+        ],
+        [
+          360,
+          450,
+          0,
+          138
+        ],
+        [
+          600,
+          450,
+          1,
+          75
+        ],
+        [
+          840,
+          450,
+          0,
+          242
+        ],
+        [
+          120,
+          630,
+          0,
+          197
+        ],
+        [
+          360,
+          630,
+          0,
+          154
+        ],
+        [
+          600,
+          630,
+          0,
+          171
+        ],
+        [
+          840,
+          630,
+          0,
+          214
+        ]
+      ],
+      "intervalsM": [
+        10,
+        20,
+        50
+      ],
+      "focus": {
+        "u": 0.25,
+        "v": 0.5556,
+        "uPortrait": 0
+      },
+      "label": "Bern"
+    }
+  },
+  "posters": {
+    "region": {
+      "landscape": "/terrain/field/posters/region-l.avif",
+      "size": [
+        1600,
+        1000
+      ],
+      "portrait": "/terrain/field/posters/region-p.avif",
+      "sizePortrait": [
+        900,
+        1600
+      ],
+      "focus": {
+        "u": 0.4455,
+        "v": 0.348
+      }
+    },
+    "bern": {
+      "landscape": "/terrain/field/posters/bern-l.avif",
+      "size": [
+        1600,
+        1000
+      ],
+      "portrait": "/terrain/field/posters/bern-p.avif",
+      "sizePortrait": [
+        900,
+        1600
+      ],
+      "focus": {
+        "u": 0.25,
+        "v": 0.5556,
+        "uPortrait": 0
+      }
+    }
+  }
+}

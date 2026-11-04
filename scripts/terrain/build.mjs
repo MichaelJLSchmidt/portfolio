@@ -1,4 +1,4 @@
-// Terrain pipeline: swisstopo elevation → heightmaps, contour poster and card terrains.
+// Terrain pipeline: swisstopo elevation → heightmaps and card terrains.
 //
 //   npm run terrain              build from the cached download (fetches once if missing)
 //   npm run terrain -- --refresh re-download the elevation window
@@ -6,11 +6,12 @@
 //   npm run terrain -- --png     also write PNG copies of every heightmap (not used by the site)
 //   npm run terrain -- --only=<id>      rebuild only these seeded card terrains (no download)
 //
-// Outputs (public/terrain): heightmap-{1024,1536,2048}.webp (lossless) with .bin raw-height
-// fallbacks, contours*.svg, cards/*.svg, morph/*.webp (+ .bin) and terrain.json (metadata the
-// site imports, including reference texels for the runtime decode check). Cards flagged
-// "example" in the config (fictional examples, never in a live build) are listed in
-// examples.json instead, so live bundles carry nothing of theirs.
+// Outputs (terrain/, committed; the site never loads them): heightmap-{1024,1536,2048}.webp
+// (lossless) with .bin raw-height fallbacks, cards/*.svg, morph/*.webp (+ .bin) and terrain.json.
+// Cards flagged "example" in the config (fictional examples) are listed in examples.json instead.
+// The field's maps (public/terrain/field/, ≤ 150 KB each) and their posters are derived from
+// these at the end (npm run terrain:field, npm run posters).
+import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -27,8 +28,7 @@ import { encodeRgbPng } from "./lib/png.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const cfg = JSON.parse(readFileSync(join(root, "src/content/terrain.config.json"), "utf8"));
-const field = JSON.parse(readFileSync(join(root, "src/config/contour-field.json"), "utf8"));
-const outDir = join(root, "public/terrain");
+const outDir = join(root, "terrain");
 const cacheDir = join(root, "scripts/terrain/.cache");
 const args = new Set(process.argv.slice(2));
 const log = (...m) => console.log(...m);
@@ -42,7 +42,7 @@ function write(rel, data) {
   writeFileSync(file, data);
   const bytes = Buffer.byteLength(data);
   const gz = gzipSync(data, { level: 9 }).length;
-  log(`  wrote public/terrain/${rel}  ${(bytes / 1024).toFixed(1)} KB  (${(gz / 1024).toFixed(1)} KB gz)`);
+  log(`  wrote terrain/${rel}  ${(bytes / 1024).toFixed(1)} KB  (${(gz / 1024).toFixed(1)} KB gz)`);
   return { bytes, gzipBytes: gz };
 }
 
@@ -205,7 +205,7 @@ async function rebuildOnly(cards) {
     const meta = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : { cards: {} };
     meta.cards = { ...meta.cards, [card.id]: await buildCard(card) };
     writeFileSync(file, `${JSON.stringify(meta, null, 2)}\n`);
-    log(`  updated public/terrain/${card.example ? "examples.json" : "terrain.json"} (${card.id})`);
+    log(`  updated terrain/${card.example ? "examples.json" : "terrain.json"} (${card.id})`);
   }
   process.exit(0);
 }
@@ -290,35 +290,7 @@ for (const lake of cfg.lakes) {
 
 if (onlyCards) await rebuildOnly(onlyCards);
 
-// ---------------------------------------------------------------------------
-// 4. Contour posters (first paint, reduced motion, no-WebGL fallback), one per interval
-//    the field uses at page scale: 100 m for the largest screens, 200 m for phones, laptops
-//    and desktops up to ~1920 px.
-// ---------------------------------------------------------------------------
 const { intervalM, indexEvery } = cfg.contours;
-const posters = [];
-{
-  const w = cfg.poster.gridWidth;
-  const h = Math.round(w / aspect);
-  const values = gaussianBlur(resampleArea(grid.data, grid.width, grid.height, w, h), w, h, cfg.poster.blurSigma);
-  for (const interval of cfg.poster.intervalsM) {
-    const thresholds = range(Math.ceil(minElev / interval) * interval, maxElev, interval);
-    const file = interval === intervalM ? "contours.svg" : `contours-${interval}.svg`;
-    const size = write(
-      file,
-      contourSvg(values, w, h, {
-        thresholds,
-        indexOf: (v) => v % (interval * indexEvery) === 0,
-        tolerance: cfg.poster.simplifyTolerance,
-        // The field's monochrome map: neutral lines only (no lakes), at its desktop strengths.
-        lineOpacity: field.desktop.lineOpacity,
-        indexOpacity: field.desktop.indexOpacity,
-      }),
-    );
-    posters.push({ file: `/terrain/${file}`, intervalM: interval, width: w, height: h, ...size });
-  }
-}
-const poster = posters.find((p) => p.intervalM === intervalM) ?? posters[0];
 
 // ---------------------------------------------------------------------------
 // 5. Card terrains (artwork SVG + morph heightmap for the contour field)
@@ -404,13 +376,14 @@ const meta = {
   encoding: { ...encoding, formula: "h = offset + (R * 65280 + G * 255) * scale  (R, G sampled as 0..1)" },
   heightmaps,
   contours: { intervalM, indexEvery },
-  poster,
-  posters,
   lakes,
   cards: Object.fromEntries(Object.entries(cards).filter(([id]) => !exampleIds.has(id))),
 };
 writeFileSync(join(outDir, "terrain.json"), `${JSON.stringify(meta, null, 2)}\n`);
-log("  wrote public/terrain/terrain.json");
+log("  wrote terrain/terrain.json");
 const examples = { cards: Object.fromEntries(Object.entries(cards).filter(([id]) => exampleIds.has(id))) };
 writeFileSync(join(outDir, "examples.json"), `${JSON.stringify(examples, null, 2)}\n`);
-log("  wrote public/terrain/examples.json");
+log("  wrote terrain/examples.json");
+
+// The field's maps follow from the masters (posters: npm run posters, which needs Playwright).
+spawnSync(process.execPath, [join(root, "scripts/terrain/field.mjs")], { stdio: "inherit" });

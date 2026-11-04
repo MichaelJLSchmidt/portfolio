@@ -190,7 +190,7 @@ const cookieFrom = (response: Response) => response.headers.get("Set-Cookie")!.s
 describe("gate handler", () => {
   it("shows the gate page for any path without a valid cookie", async () => {
     const { calls, request } = harness();
-    for (const path of ["/", "/work/test-project/", "/_next/static/chunks/app.js", "/terrain/heightmap-1536.webp", "/index.txt?_rsc=1", "/_basecamp/x.css"]) {
+    for (const path of ["/", "/work/test-project/", "/_next/static/chunks/app.js", "/terrain/field/region.webp", "/index.txt?_rsc=1", "/_basecamp/x.css"]) {
       const res = await request(path);
       assert.equal(res.status, 401, path);
       assert.match(res.headers.get("WWW-Authenticate")!, /^Cookie realm="Basecamp"/);

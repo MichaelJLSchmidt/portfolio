@@ -158,7 +158,7 @@ async function caseStudyCount(examples) {
 
 /** An example's own terrain files: its plates, its morph heightmap and its card artwork. */
 function exampleTerrainFiles(id) {
-  return [`/plates/${id}.svg`, `/plates/${id}-level.svg`, `/terrain/cards/${id}.svg`, `/terrain/morph/${id}.webp`, `/terrain/morph/${id}.bin`];
+  return [`/plates/${id}.svg`, `/plates/${id}-level.svg`, `/terrain/field/${id}.webp`, `/terrain/field/${id}.bin`, `/terrain/field/posters/${id}-l.avif`, `/terrain/field/posters/${id}-p.avif`];
 }
 
 /** Removes the examples' files from out/, then fails if anything of theirs is left there. */
@@ -171,7 +171,7 @@ async function stripExamples() {
       if (path) rmSync(join(out, path), { recursive: true, force: true });
     }
   }
-  rmSync(join(out, "terrain/examples.json"), { force: true });
+  rmSync(join(out, "terrain/field/examples.json"), { force: true });
   // Folders the examples alone filled (e.g. out/media/) go too.
   for (const media of Object.values(exampleMedia)) {
     const parent = join(out, dirname(media.replace(/\/$/, "")));

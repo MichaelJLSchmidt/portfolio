@@ -10,7 +10,7 @@
 // compared too. The browser check uses Playwright if it can be resolved (`npm i -D
 // playwright`, or NODE_PATH pointing at a global install): createImageBitmap with no
 // colour-space conversion, no premultiplied alpha and no flip, uploaded to a WebGL2 texture
-// and read back, which is the path ContourField takes.
+// and read back, which is the path the field (src/field/core.ts) takes.
 import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
@@ -18,14 +18,20 @@ import { fileURLToPath } from "node:url";
 import { decodeRawHeights, decodeRgb, rasterHash } from "./lib/heightmap.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+// The masters live in terrain/ (the repository's; the site never loads them), with the paths
+// their manifests record under /terrain/. The field's own maps live in public/terrain/field/.
+const masterDir = root;
 const publicDir = join(root, "public");
-const meta = JSON.parse(readFileSync(join(publicDir, "terrain/terrain.json"), "utf8"));
+const meta = JSON.parse(readFileSync(join(root, "terrain/terrain.json"), "utf8"));
 // Flagged examples keep their card terrains in examples.json.
-const examples = JSON.parse(readFileSync(join(publicDir, "terrain/examples.json"), "utf8"));
-// The Basecamp terrain (npm run terrain:bern) keeps its own manifest.
-const bernFile = join(publicDir, "terrain/bern/bern.json");
+const examples = JSON.parse(readFileSync(join(root, "terrain/examples.json"), "utf8"));
+// The Bern terrain (npm run terrain:bern) keeps its own manifest.
+const bernFile = join(root, "terrain/bern/bern.json");
 const bern = existsSync(bernFile) ? JSON.parse(readFileSync(bernFile, "utf8")) : { heightmaps: [] };
-const maps = [...meta.heightmaps, ...[...Object.values(meta.cards), ...Object.values(examples.cards)].map((c) => c.morph), ...bern.heightmaps];
+const fieldTerrains = ["field.json", "examples.json"].flatMap((f) => Object.values(JSON.parse(readFileSync(join(publicDir, "terrain/field", f), "utf8")).terrains));
+const masters = [...meta.heightmaps, ...[...Object.values(meta.cards), ...Object.values(examples.cards)].map((c) => c.morph), ...bern.heightmaps].map((m) => ({ ...m, dir: masterDir }));
+const fieldMaps = fieldTerrains.map((t) => ({ ...t, raw: { file: t.raw }, dir: publicDir }));
+const maps = [...masters, ...fieldMaps];
 let failed = 0;
 const fail = (msg) => {
   failed++;
@@ -34,14 +40,14 @@ const fail = (msg) => {
 
 console.log("Heightmaps (libwebp decode):");
 for (const map of maps) {
-  const file = join(publicDir, map.file);
+  const file = join(map.dir, map.file);
   const { rgb, width, height } = await decodeRgb(readFileSync(file));
   if (width !== map.width || height !== map.height) fail(`${map.file}: ${width}×${height}, expected ${map.width}×${map.height}`);
   else if (rasterHash(rgb) !== map.sha256) fail(`${map.file}: decoded raster does not match the recorded SHA-256`);
   else if (rgb.some((v, i) => i % 3 === 2 && v !== 0)) fail(`${map.file}: blue channel is not empty`);
   else console.log(`  ✓ ${map.file}  ${width}×${height}`);
   if (map.raw) {
-    const raw = decodeRawHeights(readFileSync(join(publicDir, map.raw.file)), map.width, map.height);
+    const raw = decodeRawHeights(readFileSync(join(map.dir, map.raw.file)), map.width, map.height);
     if (rasterHash(raw) !== map.sha256) fail(`${map.raw.file}: raw fallback does not match the WebP's heights`);
     else console.log(`  ✓ ${map.raw.file}  raw fallback matches`);
   }
@@ -65,7 +71,7 @@ if (process.argv.includes("--browser")) {
   const browser = await playwright.chromium.launch();
   const page = await browser.newPage();
   for (const map of maps) {
-    const base64 = readFileSync(join(publicDir, map.file)).toString("base64");
+    const base64 = readFileSync(join(map.dir, map.file)).toString("base64");
     const result = await page.evaluate(async ({ base64, width, height }) => {
       const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
       const bitmap = await createImageBitmap(new Blob([bytes], { type: "image/webp" }), {

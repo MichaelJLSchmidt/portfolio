@@ -1,5 +1,5 @@
 {
-  "attribution": "Terrain data © swisstopo",
+  "attribution": "Terrain data \u00a9 swisstopo",
   "generatedAt": "2026-10-25",
   "source": {
     "product": "swissALTIRegio",
@@ -10,7 +10,7 @@
     "placeholder": false
   },
   "region": {
-    "name": "Thun – Interlaken – Grindelwald – Lauterbrunnen – Jungfrau",
+    "name": "Thun \u2013 Interlaken \u2013 Grindelwald \u2013 Lauterbrunnen \u2013 Jungfrau",
     "bboxWgs84": [
       7.55,
       46.47,
@@ -402,32 +402,6 @@
     "intervalM": 100,
     "indexEvery": 5
   },
-  "poster": {
-    "file": "/terrain/contours.svg",
-    "intervalM": 100,
-    "width": 900,
-    "height": 619,
-    "bytes": 185325,
-    "gzipBytes": 68215
-  },
-  "posters": [
-    {
-      "file": "/terrain/contours.svg",
-      "intervalM": 100,
-      "width": 900,
-      "height": 619,
-      "bytes": 185325,
-      "gzipBytes": 68215
-    },
-    {
-      "file": "/terrain/contours-200.svg",
-      "intervalM": 200,
-      "width": 900,
-      "height": 619,
-      "bytes": 92594,
-      "gzipBytes": 34574
-    }
-  ],
   "lakes": [
     {
       "name": "Thunersee",

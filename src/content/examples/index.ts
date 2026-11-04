@@ -17,9 +17,6 @@ import { card as testProject } from "./test-project/card";
 // Eiger (Seilschaft), the Mönch (Test Project), the Jungfrau (Gratweg).
 export const exampleCards: CardData[] = [seilschaft, testProject, gratweg];
 
-/** The examples' card terrains, in their own module (./terrains). */
-export { exampleTerrains } from "./terrains";
-
 /** Each example's encoded images under public/, by slug. */
 export const exampleMedia: Record<string, string> = {
   seilschaft: "/media/seilschaft/",
