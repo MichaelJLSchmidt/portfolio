@@ -28,7 +28,7 @@ export function NextCase({
           <MapSheetCard card={next} outcome={outcome} index={index} total={total} size="mini" headingLevel={2} />
         </div>
       )}
-      <Link href="/#case-studies" className={`${styles.back} cta`}>
+      <Link href="/#case-studies" className={`${styles.back} cta`} data-back="">
         <span data-arrow="back" aria-hidden="true">
           ←
         </span>

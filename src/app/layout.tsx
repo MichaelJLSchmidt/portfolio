@@ -9,9 +9,11 @@ import { Header } from "@/components/header/Header";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { RouteArrival } from "@/components/transition/RouteArrival";
+import { RouteMotion } from "@/components/transition/RouteMotion";
 import { Reveals } from "@/components/motion/Reveals";
 import "./globals.css";
 import "@/styles/motion.css";
+import "@/styles/transitions.css";
 
 const isPreview = process.env.NEXT_PUBLIC_PREVIEW === "1";
 
@@ -53,6 +55,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <TerrainBackdrop />
         <SmoothScroll />
         <RouteArrival />
+        <RouteMotion />
         <Reveals />
         <Header />
         <div className="page">

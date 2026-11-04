@@ -10,7 +10,7 @@ import styles from "./SummaryBand.module.css";
  */
 export function SummaryBand({ id, summary }: { id: string; summary: SurveyLayout["summary"] }) {
   return (
-    <section id={id} className={styles.band} data-surface="sheet" data-band="" data-breaker="" aria-labelledby={`${id}-heading`}>
+    <section id={id} className={styles.band} data-surface="sheet" data-band="" data-breaker="" data-vt-part="summary" aria-labelledby={`${id}-heading`}>
       <div className={`${styles.inner} container grid`}>
         <h2 id={`${id}-heading`} className={`${styles.heading} mono`}>
           {L.summaryHeading}

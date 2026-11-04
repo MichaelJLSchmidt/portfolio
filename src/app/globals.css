@@ -405,41 +405,6 @@
     pointer-events: auto;
   }
 
-  /* ------------------------------------------------------------------------------------
-     View transitions: interaction never waits on them (pointer-events pass through the
-     overlay), and the page's own content crossfades. The shared art morph and its timeline are
-     in the transition layer (phase 6).
-     ------------------------------------------------------------------------------------ */
-  ::view-transition {
-    pointer-events: none;
-  }
-
-  ::view-transition-old(root) {
-    animation: vt-out var(--dur-leave) var(--ease-in) both;
-  }
-
-  ::view-transition-new(root) {
-    animation: vt-in var(--dur-base) var(--ease-out) both;
-  }
-
-  @keyframes vt-out {
-    to {
-      opacity: 0;
-    }
-  }
-
-  @keyframes vt-in {
-    from {
-      opacity: 0;
-    }
-  }
-
-  :root[data-motion="still"]::view-transition-old(root),
-  :root[data-motion="still"]::view-transition-new(root) {
-    animation-duration: var(--dur-still);
-    animation-timing-function: linear;
-  }
-
   /* Lenis (desktop wheel, Full only). */
   html.lenis,
   html.lenis body {

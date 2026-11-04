@@ -2,8 +2,9 @@
 // NEXT_PUBLIC_BASE_PATH=/portfolio NEXT_PUBLIC_PREVIEW=1 npm run build):
 //
 //   npm run test:e2e                  all scenarios
-//   npm run test:e2e -- transitions   aborted view transitions; the calm and still motion modes
-//   npm run test:e2e -- modes         full, calm and still on a card → case study → next round trip
+//   npm run test:e2e -- transitions   card → case study per tier and on a phone (the art's morph, the
+//                                     parts in steps, the header still), next, back, browser back,
+//                                     a plain page change, aborted transitions
 //   npm run test:e2e -- hydration     direct loads of every route: no hydration or console errors
 //   npm run test:e2e -- primitives    the motion lab: layout shift per primitive, focus parity
 //                                     (needs a build with the lab: SITE_MODE=basecamp or a preview)
@@ -97,19 +98,24 @@ const check = (label, ok, detail = "") => {
   console.log(`  ${ok ? "✓" : "✗"} ${label}${detail ? `  (${detail})` : ""}`);
 };
 
-/** A page with the intro marked as played, and hooks to count and sabotage view transitions. */
-async function open({ calm = false, reduced = false, classic = false, init } = {}) {
-  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: reduced ? "reduce" : "no-preference" });
+/**
+ * A page with hooks on view transitions: counts calls that reach the browser's API, records each
+ * transition's pseudo-element animations (name, keyframes, duration, delay) and html[data-route-kind],
+ * and, when armed, aborts the next one: "skip" right after it starts, "timeout" by holding the DOM
+ * update past Chrome's 4 s limit, "fail" by rejecting the update after it ran.
+ */
+async function open({ calm = false, reduced = false, viewport = { width: 1440, height: 900 }, mobile = false, init } = {}) {
+  const context = await browser.newContext({
+    viewport,
+    reducedMotion: reduced ? "reduce" : "no-preference",
+    ...(mobile ? { isMobile: true, hasTouch: true, deviceScaleFactor: 2 } : {}),
+  });
   await context.addInitScript(
-    ({ calm, classic }) => {
+    ({ calm }) => {
       try {
         if (calm) localStorage.setItem("summit:motion", "calm");
-        if (classic) sessionStorage.setItem("summit:vt", "classic");
       } catch {}
-      // Counts calls that reach the browser's API and, when armed, aborts the next one:
-      // "skip" right after it starts, "timeout" by holding the DOM update past Chrome's 4 s
-      // limit, "fail" by rejecting the update after it ran.
-      window.__vt = { native: 0, abort: null, last: null };
+      window.__vt = { native: 0, abort: null, last: null, runs: [] };
       const start = Document.prototype.startViewTransition;
       if (!start) return;
       Document.prototype.startViewTransition = function (arg) {
@@ -133,31 +139,29 @@ async function open({ calm = false, reduced = false, classic = false, init } = {
         }
         const transition = start.call(this, sabotaged);
         const last = (window.__vt.last = { kind, ready: "pending" });
+        const run = { route: null, parts: {} };
+        window.__vt.runs.push(run);
         transition.ready.then(
-          () => (last.ready = "ran"),
+          () => {
+            last.ready = "ran";
+            run.route = document.documentElement.getAttribute("data-route-kind");
+            for (const a of document.getAnimations()) {
+              const pe = a.effect?.pseudoElement ?? "";
+              const m = pe.match(/^::view-transition-(group|old|new)\((.+)\)$/);
+              if (!m || /plus-lighter/.test(a.animationName ?? "")) continue;
+              const t = a.effect.getTiming();
+              const key = `${m[1]}:${m[2].replace(/^_t_\d+_$/, "page")}`;
+              (run.parts[key] ??= []).push({ name: a.animationName, duration: Math.round(t.duration), delay: Math.round(t.delay) });
+            }
+          },
           (e) => (last.ready = e?.name ?? "rejected"),
         );
         if (kind === "skip") transition.skipTransition();
         return transition;
       };
     },
-    { calm, classic },
+    { calm },
   );
-  await context.addInitScript(() => {
-    // The return choreography's traces: html[data-vt], the named exit parts, the card rebuild.
-    window.__return = { vt: 0, exits: 0, reassemble: 0, traverse: 0 };
-    document.addEventListener("DOMContentLoaded", () => {
-      new MutationObserver((records) => {
-        for (const r of records) {
-          const el = r.target;
-          if (r.attributeName === "data-vt" && el.getAttribute("data-vt") === "return") window.__return.vt++;
-          if (r.attributeName === "data-vt" && el.getAttribute("data-vt") === "traverse") window.__return.traverse++;
-          if (r.attributeName === "data-reassemble" && el.hasAttribute("data-reassemble")) window.__return.reassemble++;
-          if (r.attributeName === "style" && el.style?.viewTransitionName?.startsWith("vt-exit")) window.__return.exits++;
-        }
-      }).observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ["data-vt", "data-reassemble", "style"] });
-    });
-  });
   if (init) await context.addInitScript(init);
   const page = await context.newPage();
   const errors = [];
@@ -165,27 +169,19 @@ async function open({ calm = false, reduced = false, classic = false, init } = {
   return { context, page, errors };
 }
 
-/** Waits until the page is settled (route, terrain, heading, no transition), then reports. */
 async function settle(page, { path, terrain }) {
   await page.waitForURL((url) => url.pathname === `${basePath}${path}`, { timeout: 15000 });
   await page
     .waitForFunction(
       ({ terrain }) => {
         const backdrop = document.querySelector("[data-field]");
-        const h1 = [...document.querySelectorAll("main h1")].find((h) => h.getClientRects().length);
         const vt = document.getAnimations().some((a) => a.effect?.pseudoElement?.startsWith("::view-transition"));
-        // Entrances (reveals, settles) still running are not "left hidden": wait for them. A
-        // scroll-driven animation (the career profile, the drawings) runs as long as the page does: not one.
+        // Entrances still running are not "left hidden": wait for them (not for endless or
+        // scroll-driven ones).
         const entering = document
           .getAnimations()
-          .some((a) => a.playState === "running" && a.timeline === document.timeline && a.effect?.getTiming().iterations !== Infinity);
-        return (
-          !vt &&
-          !entering &&
-          !document.documentElement.hasAttribute("data-route-fade") &&
-          (!terrain || backdrop?.dataset.terrain === terrain) &&
-          (!h1 || !["hold", "settle"].includes(h1.getAttribute("data-arrive") ?? ""))
-        );
+          .some((a) => a.playState === "running" && a.timeline === document.timeline && a.effect?.getTiming().iterations !== Infinity && !a.effect?.pseudoElement);
+        return !vt && !entering && !document.documentElement.hasAttribute("data-route-kind") && (!terrain || backdrop?.dataset.terrain === terrain);
       },
       { terrain },
       { timeout: 15000, polling: 100 },
@@ -196,37 +192,21 @@ async function settle(page, { path, terrain }) {
     const main = [...document.querySelectorAll("main")].find(visible);
     const h1 = main?.querySelector("h1");
     const opacity = (el) => Number(getComputedStyle(el).opacity);
-    // Content the transition or its fallbacks could leave hidden.
-    const hidden = [
-      main,
-      h1,
-      ...(h1?.querySelectorAll('[class*="glyph"]') ?? []),
-      // Reveals still waiting below the fold are not hidden: they play when scrolled to.
-      ...[...(main?.querySelectorAll("[data-reveal], [style*='view-transition-name']") ?? [])].filter(
-        (el) => !(el.getAttribute("data-reveal-state") === "wait" && el.getBoundingClientRect().top >= window.innerHeight),
-      ),
-      // The deck cards after a return: every part rebuilt, the name readable.
-      ...(main?.querySelectorAll("article[data-slug] [class*='nameBar'], article[data-slug] [class*='typeLine'], article[data-slug] [class*='rules'], article[data-slug] [class*='stats'], article[data-slug] [class*='collector']") ?? []),
-    ]
+    // Content the transition or its fallbacks could leave hidden (reveals still waiting below the
+    // fold are not hidden: they play when scrolled to).
+    const hidden = [main, h1, ...(main?.querySelectorAll("[data-reveal], [data-vt-part], article[data-slug]") ?? [])]
+      .filter((el) => !(el?.getAttribute("data-reveal-state") === "wait" && el.getBoundingClientRect().top >= window.innerHeight))
       .filter((el) => el && visible(el) && (opacity(el) < 0.99 || getComputedStyle(el).visibility === "hidden"))
       .map((el) => `${el.tagName.toLowerCase()}.${String(el.className).split(" ")[0]}`);
-    const openingCards = [...document.querySelectorAll('article[data-opening="true"]')].filter(visible).length;
-    const nameColours = [...(main?.querySelectorAll("article[data-slug] h2, article[data-slug] h3") ?? [])].map((h) => getComputedStyle(h).color);
-    if (nameColours.some((c) => c === "rgba(0, 0, 0, 0)")) hidden.push("card name (transparent)");
     return {
       path: location.pathname,
-      h1: (h1?.querySelector(".visually-hidden") ?? h1)?.textContent ?? null,
-      arrive: h1?.getAttribute("data-arrive") ?? null,
       hidden: [...new Set(hidden)],
-      openingCards,
       field: document.querySelector("[data-field]")?.dataset.field,
       terrain: document.querySelector("[data-field]")?.dataset.terrain ?? null,
-      focus: document.activeElement?.closest("article")?.dataset.slug ?? document.activeElement?.tagName.toLowerCase(),
+      focus: document.activeElement?.tagName.toLowerCase(),
+      y: Math.round(scrollY),
       native: window.__vt.native,
       last: window.__vt.last,
-      ret: { ...window.__return },
-      rebuilding: document.querySelectorAll("[data-reassemble]").length,
-      vtAttr: document.documentElement.getAttribute("data-vt"),
     };
   });
 }
@@ -241,83 +221,113 @@ const hasFlow = () => {
 };
 
 // --- transitions -------------------------------------------------------------------------------
+// The page changes (src/styles/transitions.css), timed from each transition's own animations:
+// card → case study per tier and on a phone (the art's morph, the old page leaving, the title,
+// meta lines and summary arriving in steps, the header still, the field's crossfade), the next
+// case study (its art morphs, the page opens at the top), the in-app back link and browser back
+// (240 ms, the scroll position restored), a plain page change, and aborted transitions.
+const near = (v, want, tol = 1) => typeof v === "number" && Math.abs(v - want) <= tol;
+const first = (run, key) => run?.parts?.[key]?.[0];
+
 async function transitions() {
+  console.log("\ntransitions: card → case study, per tier");
   if (!hasFlow()) return;
-  const card = FLOW;
-  const modes = [
-    { name: "full motion, transition runs", abort: null },
-    { name: "full motion, previous return (?vt=classic)", abort: null, classic: true },
-    { name: "full motion, transition skipped", abort: "skip" },
-    { name: "full motion, DOM update times out", abort: "timeout" },
-    { name: "full motion, DOM update fails", abort: "fail" },
-    { name: "calm (Calm map switch): view transitions, still field", calm: true },
-    { name: "still (reduced motion emulated): no view transitions", reduced: true },
+  const cases = [
+    { label: "Full", art: 680, leave: 160, title: [360, 280], parts: [560, 620, 680] },
+    { label: "Calm", calm: true, art: 480, leave: 160, title: [360, 280], parts: [560, 560, 560] },
+    { label: "phone", mobile: true, viewport: { width: 390, height: 844 }, art: 560, leave: 120, title: [360, 280], parts: [560, 560, 560] },
+    { label: "Off", reduced: true, art: 0, leave: 160, title: [0, 160], parts: [0, 0, 0] },
   ];
-  for (const mode of modes) {
-    console.log(`\n${mode.name}`);
-    const { context, page, errors } = await open(mode);
-    // Full and calm run the field (calm holds it still); still shows the poster.
-    const fieldOn = !mode.reduced;
-    await page.goto(`${base}/?field=force`, { waitUntil: "networkidle" });
-    if (fieldOn) await page.waitForSelector('[data-field="on"]', { timeout: 20000 }).catch(() => {});
-    const arm = () => page.evaluate((kind) => (window.__vt.abort = kind), mode.abort ?? null);
-    const expectPage = (r, label, want) => {
-      check(`${label}: ${want.title ?? "deck"} at ${want.path}`, r.path === `${basePath}${want.path}` && r.h1 === (want.title ?? r.h1), `${r.path} "${r.h1}"`);
-      if (fieldOn) check(`${label}: field shows ${want.terrain}`, r.terrain === want.terrain, `data-terrain=${r.terrain}`);
-      else check(`${label}: poster, field paused`, r.field === "off", `data-field=${r.field}`);
-      check(`${label}: nothing left hidden`, r.hidden.length === 0 && r.openingCards === 0 && r.arrive !== "hold", JSON.stringify({ hidden: r.hidden, openingCards: r.openingCards, arrive: r.arrive }));
-      if (mode.abort) check(`${label}: transition was aborted`, r.last?.kind === mode.abort && r.last.ready !== "ran", `ready: ${r.last?.ready}`);
-    };
+  for (const c of cases) {
+    const { context, page, errors } = await open(c);
+    await page.goto(`${base}/`, { waitUntil: "networkidle" });
+    const card = page.locator(`#case-studies article[data-slug="${FLOW.slug}"] a`);
+    await card.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(400);
+    if (c.mobile) await card.tap();
+    else await card.click();
+    const r = await settle(page, { path: FLOW.path, terrain: FLOW.terrain });
+    const run = await page.evaluate(() => window.__vt.runs.at(-1));
+    const art = first(run, `group:card-art-${FLOW.slug}`);
+    const old = first(run, "old:page");
+    const title = first(run, "new:cs-title");
+    const parts = ["new:cs-meta", "new:cs-summit", "new:cs-summary"].map((k) => first(run, k)?.delay);
+    check(`${c.label}: the card's art morphs into the header plate (${c.art} ms)`, near(art?.duration, c.art), JSON.stringify(art));
+    check(`${c.label}: the old page fades out in ${c.leave} ms, no movement`, near(old?.duration, c.leave) && old?.name === "vt-fade-out", JSON.stringify(old));
+    check(`${c.label}: the H1 fades in from ${c.title[0]} ms`, near(title?.delay, c.title[0]) && near(title?.duration, c.title[1]), JSON.stringify(title));
+    check(`${c.label}: meta, summit and summary from ${c.parts.join("/")} ms`, parts.every((d, i) => near(d, c.parts[i])), JSON.stringify(parts));
+    check(`${c.label}: the header never moves`, !run?.parts?.["new:site-header"] && !run?.parts?.["group:site-header"], JSON.stringify(Object.keys(run?.parts ?? {})));
+    check(`${c.label}: opened as "open", lands with nothing hidden, the field on the summit`, run?.route === "open" && r.hidden.length === 0 && r.terrain === FLOW.terrain, JSON.stringify(r));
+    check(`${c.label}: focus moves to the H1`, r.focus === "h1", r.focus);
+    check(`${c.label}: no page errors`, errors.length === 0, errors.join("; "));
+    await context.close();
+  }
 
-    await arm();
-    await page.locator(`article[data-slug="${card.slug}"] a`).first().click();
-    expectPage(await settle(page, { path: card.path, terrain: fieldOn ? card.terrain : null }), "open card", card);
+  console.log("\ntransitions: next case study, back, browser back, a plain page change");
+  {
+    const { context, page, errors } = await open();
+    await page.goto(`${base}/`, { waitUntil: "networkidle" });
+    await page.evaluate(() => document.getElementById("case-studies").scrollIntoView({ block: "start" }));
+    await page.waitForTimeout(600);
+    const homeY = await page.evaluate(() => Math.round(scrollY));
+    await page.locator(`#case-studies article[data-slug="${FLOW.slug}"] a`).click();
+    await settle(page, { path: FLOW.path, terrain: FLOW.terrain });
 
-    // The way back: card reassembly in full motion by the back link, the previous morph with
-    // ?vt=classic; browser back cross-fades (a traversal) without the reassembly.
-    const choreography = fieldOn && !mode.abort;
-    const expectReturn = (r, label, before, { traversal = false } = {}) => {
-      check(`${label}: focus on the card`, r.focus === card.slug, `focus=${r.focus}`);
-      check(`${label}: card rebuilt and done`, r.rebuilding === 0 && r.vtAttr === null, `rebuilding=${r.rebuilding} data-vt=${r.vtAttr}`);
-      if (!choreography) return;
-      const ran = r.ret.vt > before.vt && r.ret.exits > before.exits && r.ret.reassemble > before.reassemble;
-      if (traversal) check(`${label}: a traversal cross-fade, no reassembly`, r.ret.traverse > before.traverse && r.ret.reassemble === before.reassemble, JSON.stringify({ before, after: r.ret }));
-      else if (mode.classic) check(`${label}: previous return, no reassembly`, r.ret.vt === before.vt && r.ret.reassemble === before.reassemble, JSON.stringify(r.ret));
-      else check(`${label}: exit, travel and reassembly ran`, ran, JSON.stringify({ before, after: r.ret }));
-    };
-    const returnTrace = () => page.evaluate(() => ({ ...window.__return }));
+    // Next case study: its mini card's art morphs into the next header plate; the page opens at the top.
+    const mini = page.locator('nav[aria-label="Next case study"] article a');
+    await mini.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+    const nextSlug = await mini.evaluate((a) => a.closest("article").dataset.slug);
+    await mini.click();
+    const n = await settle(page, { path: `/work/${nextSlug}/` });
+    const nextRun = await page.evaluate(() => window.__vt.runs.at(-1));
+    check("next: the mini card's art morphs into the next header plate", near(first(nextRun, `group:card-art-${nextSlug}`)?.duration, 680), JSON.stringify(first(nextRun, `group:card-art-${nextSlug}`)));
+    check("next: the page opens at the top", n.y === 0, `y=${n.y}`);
 
-    await arm();
-    let before = await returnTrace();
+    // The in-app back link: a 240 ms crossfade, home back where it was.
+    const back = page.locator('nav[aria-label="Next case study"] a[data-back]');
+    await back.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+    await back.click();
+    const b = await settle(page, { path: "/" });
+    const backRun = await page.evaluate(() => window.__vt.runs.at(-1));
+    check("back link: a 240 ms crossfade", backRun?.route === "back" && near(first(backRun, "old:page")?.duration, 240) && near(first(backRun, "new:page")?.duration, 240), JSON.stringify(first(backRun, "old:page")));
+    check("back link: home where it was", Math.abs(b.y - homeY) <= 4, `${b.y} vs ${homeY}`);
+
+    // Browser back: no view transition of React's; the arriving page fades in over 240 ms, and
+    // the scroll position comes back.
+    const before = await page.evaluate(() => window.__vt.native);
     await page.goBack();
-    const back = await settle(page, { path: "/", terrain: fieldOn ? "region" : null });
-    expectPage(back, "back", { path: "/", terrain: "region" });
-    expectReturn(back, "back", before, { traversal: true });
+    await page.waitForURL((url) => url.pathname === `${basePath}/work/${nextSlug}/`);
+    const fade = await page.evaluate(() => document.getAnimations().find((a) => a.effect?.target?.tagName === "MAIN")?.effect.getTiming().duration ?? null);
+    const t = await settle(page, { path: `/work/${nextSlug}/` });
+    check("browser back: the page fades in over 240 ms", fade === 240 || (await page.evaluate((n) => window.__vt.native > n, before)), String(fade));
+    check("browser back: the scroll position is restored", t.y > 200, `y=${t.y}`);
 
-    await arm();
-    await page.goForward();
-    const again = await settle(page, { path: card.path, terrain: fieldOn ? card.terrain : null });
-    expectPage(again, "forward", card);
+    // A plain page change: old page out (180 ms), new one rises in over 320 ms from 120 ms.
+    await page.locator('header a[href$="/about/"]').click();
+    await settle(page, { path: "/about/" });
+    const pageRun = await page.evaluate(() => window.__vt.runs.at(-1));
+    const out = first(pageRun, "old:page");
+    const inn = first(pageRun, "new:page");
+    check("About: the old page fades out in 180 ms", near(out?.duration, 180), JSON.stringify(out));
+    check("About: the new one rises in over 320 ms from 120 ms", inn?.name === "vt-rise-page" && near(inn?.duration, 320) && near(inn?.delay, 120), JSON.stringify(inn));
+    check("no page errors", errors.length === 0, errors.join("; "));
+    await context.close();
+  }
 
-    // The in-page back link takes the same way back.
-    await arm();
-    before = await returnTrace();
-    await page.locator(`main nav a[href="${basePath}/"]`).first().click();
-    const link = await settle(page, { path: "/", terrain: fieldOn ? "region" : null });
-    expectPage(link, "back link", { path: "/", terrain: "region" });
-    expectReturn(link, "back link", before);
-
-    await arm();
-    await page.locator(`article[data-slug="${card.slug}"] a`).first().click();
-    const reopen = await settle(page, { path: card.path, terrain: fieldOn ? card.terrain : null });
-    expectPage(reopen, "open again", card);
-    if (mode.reduced) check("no View Transition API call", reopen.native === 0, `native calls=${reopen.native}`);
-    else check("View Transition API used", reopen.native >= 5, `native calls=${reopen.native}`);
-    // React reports aborted transitions as recoverable errors (window.reportError): expected
-    // here, since the aborts are simulated. Anything else is a failure.
-    const expected = /simulated update failure|Transition was skipped|timeout in DOM update|ViewTransition (was aborted|timed out)/;
-    const unexpected = errors.filter((e) => !(mode.abort && expected.test(e)));
-    check("no unexpected page errors", unexpected.length === 0, unexpected.join("; "));
+  console.log("\ntransitions: aborted transitions still land");
+  for (const abort of ["skip", "timeout", "fail"]) {
+    const { context, page, errors } = await open();
+    await page.goto(`${base}/`, { waitUntil: "networkidle" });
+    const card = page.locator(`#case-studies article[data-slug="${FLOW.slug}"] a`);
+    await card.scrollIntoViewIfNeeded();
+    await page.evaluate((a) => (window.__vt.abort = a), abort);
+    await card.click();
+    const r = await settle(page, { path: FLOW.path });
+    const expected = /simulated update failure|Transition was (skipped|aborted)|timeout/i;
+    check(`${abort}: the case study lands, nothing hidden`, r.path === `${basePath}${FLOW.path}` && r.hidden.length === 0, JSON.stringify(r.hidden));
+    check(`${abort}: no unexpected page errors`, errors.filter((e) => !expected.test(e)).length === 0, errors.join("; "));
     await context.close();
   }
 }
@@ -356,7 +366,7 @@ async function casestudy() {
         missing: order.filter((_, i) => !els[i]),
         ordered: els.every((el, i) => el && (i === 0 || els[i - 1].compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING)),
         plate: !!document.querySelector("main > header [data-card-art] img[src$='-level.svg']"),
-        legend: text(document.querySelector("main > header .mono:last-of-type")),
+        legend: text(document.querySelector('main > header [data-vt-part="summit"]')),
         summary: [...document.querySelectorAll("#summary dt")].map(text),
         sheets: [...document.querySelectorAll('main [data-band][data-surface="sheet"]')].map((el) => el.id || el.getAttribute("aria-labelledby")),
         chapters: ["#context", "#findings", "#leading"].map((s) => text(document.querySelector(`${s} p.mono`))),
@@ -423,7 +433,14 @@ async function casestudy() {
         }, i);
         await page.waitForTimeout(pause);
       }
-      const ok = await waitFor(page, (i) => document.querySelector(`#decisions [data-step-figure="${i}"]`)?.hasAttribute("data-active"), i);
+      // Read once the scroll has settled; again a second later if smooth scrolling was still gliding.
+      const active = () => page.evaluate((i) => !!document.querySelector(`#decisions [data-step-figure="${i}"]`)?.hasAttribute("data-active"), i);
+      await page.waitForTimeout(500);
+      let ok = await active();
+      if (!ok) {
+        await page.waitForTimeout(1200);
+        ok = await active();
+      }
       if (!ok) seen.push(await page.evaluate(() => ({ y: Math.round(scrollY), tops: [...document.querySelectorAll("#decisions [data-step]")].map((s) => Math.round(s.getBoundingClientRect().top)), active: [...document.querySelectorAll("#decisions [data-step-figure]")].map((f) => f.hasAttribute("data-active")) })));
       follows = ok && follows;
     }
@@ -645,165 +662,6 @@ async function casestudy() {
   }
 }
 
-// --- motion modes ---------------------------------------------------------------------------------
-// Records what moves: CSS animations and transitions by property (with their durations), inline
-// transforms written by script, glint passes, and the field's WebGL draws. Installed before load.
-const motionProbe = () => {
-  window.__motion = { anims: [], transitions: [], styleTransforms: 0, glints: 0, titleGlints: 0, draws: 0, log: [] };
-  // A timeline of what could move the field (for a failure's detail): scrolls, animations, transitions.
-  const note = (what) => window.__motion.log.push(`${Math.round(performance.now())} ${what}`);
-  addEventListener("scroll", () => note(`scroll ${Math.round(scrollY)}`), true);
-  document.addEventListener("animationstart", (e) => note(`anim ${e.animationName}`), true);
-  document.addEventListener("transitionrun", (e) => note(`trans ${e.propertyName} ${String(e.target.className?.baseVal ?? e.target.className).slice(0, 30)}`), true);
-  // Focus moves (a focus ring's transition, a pre-warm on focus) and pointer crossings, by target.
-  document.addEventListener("focusin", (e) => note(`focusin ${e.target.tagName} ${(e.target.getAttribute?.("href") ?? "").slice(0, 30)}`), true);
-  document.addEventListener("focusout", (e) => note(`focusout ${e.target.tagName}`), true);
-
-  document.addEventListener("pointerover", (e) => note(`pointerover ${e.target.tagName}.${String(e.target.className?.baseVal ?? e.target.className).slice(0, 24)}`), true);
-  const positional = /^(transform|translate|scale|rotate|font-stretch|font-weight|font-variation-settings|left|top|right|bottom|width|height|clip-path|background-position)$/;
-  document.addEventListener(
-    "animationstart",
-    (e) => {
-      const anim = e.target.getAnimations?.().find((a) => a.animationName === e.animationName);
-      const frames = anim?.effect?.getKeyframes?.() ?? [];
-      const props = [...new Set(frames.flatMap((f) => Object.keys(f)).filter((k) => !["offset", "easing", "composite", "computedOffset"].includes(k)))];
-      const timing = anim?.effect?.getComputedTiming?.() ?? {};
-      window.__motion.anims.push({ name: e.animationName, props, positional: props.some((p) => positional.test(p.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`))), ms: timing.duration, where: e.target.className?.toString?.().slice(0, 40) ?? e.target.tagName });
-    },
-    true,
-  );
-  document.addEventListener(
-    "transitionrun",
-    (e) => {
-      const ms = parseFloat(getComputedStyle(e.target).transitionDuration) * 1000;
-      window.__motion.transitions.push({ prop: e.propertyName, positional: positional.test(e.propertyName), where: e.target.className?.toString?.().slice(0, 40) ?? e.target.tagName, ms });
-    },
-    true,
-  );
-  document.addEventListener("DOMContentLoaded", () => {
-    new MutationObserver((records) => {
-      for (const r of records) {
-        if (r.attributeName === "data-glint" && r.target.getAttribute("data-glint") === "play") {
-          window.__motion.glints++;
-          if (r.target.closest("[data-title], h1, h2")) window.__motion.titleGlints++;
-        }
-        if (r.attributeName === "style" && /transform|translate/.test(r.target.getAttribute("style") ?? "") && !/view-transition/.test(r.target.getAttribute("style") ?? "")) window.__motion.styleTransforms++;
-      }
-    }).observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ["style", "data-glint"] });
-  });
-  for (const ctx of [window.WebGL2RenderingContext, window.WebGLRenderingContext].filter(Boolean)) {
-    for (const fn of ["drawArrays", "drawElements"]) {
-      const original = ctx.prototype[fn];
-      ctx.prototype[fn] = function (...args) {
-        window.__motion.draws++;
-        window.__motion.log.push(`${Math.round(performance.now())} draw`);
-        return original.apply(this, args);
-      };
-    }
-  }
-};
-
-async function modes() {
-  if (!hasFlow()) return;
-  const card = FLOW;
-  for (const mode of ["full", "calm", "still"]) {
-    console.log(`\nmotion mode: ${mode}`);
-    const { context, page, errors } = await open({ calm: mode === "calm", reduced: mode === "still", init: motionProbe });
-    await page.goto(`${base}/?field=force`, { waitUntil: "networkidle" });
-    if (mode !== "still") await page.waitForSelector('[data-field="on"]', { timeout: 20000 }).catch(() => {});
-    const html = await page.evaluate(() => ({ motion: document.documentElement.dataset.motion, tier: document.documentElement.dataset.tier }));
-    check(`html[data-motion="${mode}"]`, html.motion === mode, JSON.stringify(html));
-    // The switch: its visible label is its name (Label in Name), its state matches, its description
-    // says what it does, and in still also why it cannot turn motion back on.
-    const named = await page.getByRole("switch", { name: "Calm map", exact: true }).count();
-    const sw = await page.evaluate(() => {
-      const input = document.querySelector('header input[role="switch"]');
-      const desc = input?.getAttribute("aria-describedby");
-      const label = input?.closest("label");
-      return { label: (label?.querySelector(".visually-hidden") ?? label)?.textContent.trim(), checked: input?.checked, described: desc ? document.getElementById(desc)?.textContent ?? "" : "" };
-    });
-    check("switch named and labelled “Calm map”, state shown", named === 1 && /^calm map$/i.test(sw.label ?? "") && sw.checked === (mode !== "full"), JSON.stringify(sw));
-    check("switch described “Reduces motion on this site”", sw.described.startsWith("Reduces motion on this site"), sw.described);
-    if (mode === "still") check("still: the switch explains why it is on", /reduced motion/i.test(sw.described), sw.described);
-
-    // Hover and focus the deck heading area, open a card, try the next link, come back.
-    await page.mouse.move(400, 400);
-    await page.mouse.move(700, 450, { steps: 8 });
-    await page.locator(`article[data-slug="${card.slug}"] a`).first().click();
-    await settle(page, { path: card.path, terrain: mode === "still" ? null : card.terrain });
-    const next = page.locator('a[aria-describedby="next-project-label"]').first();
-    await next.scrollIntoViewIfNeeded();
-    await next.hover();
-    await page.waitForTimeout(400);
-    await page.mouse.move(5, 5);
-    await next.focus();
-    await page.keyboard.press("Shift+Tab");
-    await page.keyboard.press("Tab");
-    await page.waitForTimeout(400);
-    // Idle on the case study: the field is still while a page is read (every mode). Wait for a
-    // smooth scroll the focus started (Lenis, full motion) to land first: scrolling moves the
-    // quiet zones, and the field redraws for that.
-    await page.waitForFunction(
-      () =>
-        new Promise((done) => {
-          const y = scrollY;
-          setTimeout(() => done(scrollY === y), 400);
-        }),
-      null,
-      { timeout: 8000, polling: 100 },
-    ).catch(() => {});
-    // Responses to that input (a pre-warm of the next terrain on focus, which waits for its
-    // heightmap) finish first: wait until the field has drawn nothing for 700 ms.
-    // One loop in the page (polls that overlap could start the idle window between two of those
-    // responses): it ends once 1.5 s pass without a draw, or after 8 s. The pre-warm's heightmap
-    // can land well after the focus has left on the software renderer, and its frame is a response.
-    await page.evaluate(() => document.activeElement?.blur());
-    await page.evaluate(
-      () =>
-        new Promise((done) => {
-          const start = performance.now();
-          let n = window.__motion.draws;
-          let quietSince = start;
-          const tick = () => {
-            const now = performance.now();
-            if (window.__motion.draws !== n) [n, quietSince] = [window.__motion.draws, now];
-            if (now - quietSince >= 1500 || now - start > 8000) return done();
-            setTimeout(tick, 50);
-          };
-          tick();
-        }),
-    );
-    const idleStart = await page.evaluate(() => [window.__motion.draws, performance.now()]);
-    await page.waitForTimeout(2500);
-    const idleDraws = (await page.evaluate(() => window.__motion.draws)) - idleStart[0];
-    const idleLog = await page.evaluate((t0) => `idle from ${Math.round(t0)}: ` + window.__motion.log.filter((l) => Number(l.split(" ")[0]) > t0 - 1500).filter((l) => !/ trans /.test(l)).slice(0, 24).join(" | "), idleStart[1]);
-    // Card → case study morphs; case study → case study has no shared element yet (no View
-    // Transition); back to the deck morphs again.
-    await next.click();
-    await page.waitForTimeout(1500);
-    await page.goBack();
-    await page.waitForTimeout(1500);
-    await page.goBack();
-    await settle(page, { path: "/", terrain: mode === "still" ? null : "region" });
-    const m = await page.evaluate(() => ({ ...window.__motion, native: window.__vt.native }));
-    const moved = [...m.anims.filter((a) => a.positional).map((a) => `${a.name}@${a.where}`), ...m.transitions.filter((t) => t.positional).map((t) => `${t.prop}@${t.where}`)];
-    if (mode === "still") {
-      check("still: no transform, width or position animation", moved.length === 0 && m.styleTransforms === 0, [...new Set(moved)].slice(0, 8).join(", ") + ` styleTransforms=${m.styleTransforms}`);
-      const slow = [...m.anims.filter((a) => a.ms > 200).map((a) => `${a.name} ${a.ms}ms`), ...m.transitions.filter((t) => t.ms > 200).map((t) => `${t.prop} ${t.ms}ms`)];
-      check("still: opacity and colour changes within 200 ms", slow.length === 0, [...new Set(slow)].slice(0, 6).join(", "));
-      check("still: no View Transition API call", m.native === 0, `native calls=${m.native}`);
-    } else {
-      check(`${mode}: View Transitions run`, m.native >= 2, `native calls=${m.native}`);
-      check(`${mode}: responses and morphs animate`, moved.length > 0, `${moved.length} positional animations`);
-    }
-    check(`${mode}: no field frames while the page is read`, idleDraws === 0, `${idleDraws} draws in 2.5 s; ${idleLog}`);
-    // Titles never glint: the only glint left is a Mythic card's foil sweep.
-    check(`${mode}: no glint on titles`, m.titleGlints === 0 && (mode === "full" || m.glints === 0), `${m.titleGlints} on titles, ${m.glints} in all`);
-    check("no page errors", errors.length === 0, errors.join("; "));
-    await context.close();
-  }
-}
-
 /**
  * Loads a page. Lab pages signal readiness themselves (html[data-lab-ready], src/components/lab/
  * ready.ts): "networkidle" is unreliable with the lab's three frames.
@@ -963,7 +821,7 @@ async function wording() {
   }
 }
 
-const scenarios = { transitions, modes, hydration, primitives, casestudy, wording };
+const scenarios = { transitions, hydration, primitives, casestudy, wording };
 // The contour field (scripts/e2e-terrain.mjs).
 Object.assign(scenarios, (await import("./e2e-terrain.mjs")).terrainScenarios({ browser, base, root, check, settle }));
 Object.assign(scenarios, Object.fromEntries(Object.entries({ deck, ia, phone, fontswap, toast, arrival, reading, access, pointer, inp, smoke, axe }).map(([name, run]) => [name, () => run({ browser, playwright, base, basePath, root, check, open, settle })])));

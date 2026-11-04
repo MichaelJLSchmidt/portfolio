@@ -46,6 +46,11 @@
     background: var(--color-ground);
   }
 
+  .metaLines {
+    display: grid;
+    gap: 12px;
+  }
+
   .example,
   .meta,
   .summit {

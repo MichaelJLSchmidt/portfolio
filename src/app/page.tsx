@@ -9,6 +9,7 @@ import { caseStudies } from "@/content/case-studies";
 import { home } from "@/content/home";
 import { site } from "@/content/site";
 import styles from "./page.module.css";
+import { PageTransition } from "@/components/transition/PageTransition";
 
 export const metadata: Metadata = { description: home.meta.description };
 
@@ -20,37 +21,39 @@ export const metadata: Metadata = { description: home.meta.description };
 export default function Home() {
   const studies = cards.filter((c) => caseStudies[c.slug]);
   return (
-    <main id="main" className={`${styles.main} container`}>
-      <section className={`${styles.hero} grid`} aria-labelledby="hero-name" data-quiet-zone>
-        <p className={`${styles.role} mono`}>{home.hero.role.join(" · ")}</p>
-        <Title id="hero-name" role="display" text={site.hero.name} className={styles.name} />
-        <p className={`${styles.intro} body-copy`}>
-          {home.intro.text}{" "}
-          <Link href="/about/" className={styles.more}>
-            {home.intro.more}
-          </Link>
-        </p>
-      </section>
+    <PageTransition>
+      <main id="main" className={`${styles.main} container`}>
+        <section className={`${styles.hero} grid`} aria-labelledby="hero-name" data-quiet-zone>
+          <p className={`${styles.role} mono`}>{home.hero.role.join(" · ")}</p>
+          <Title id="hero-name" role="display" text={site.hero.name} className={styles.name} />
+          <p className={`${styles.intro} body-copy`}>
+            {home.intro.text}{" "}
+            <Link href="/about/" className={styles.more}>
+              {home.intro.more}
+            </Link>
+          </p>
+        </section>
 
-      <section id="case-studies" className={`${styles.work} section`} aria-labelledby="case-studies-heading">
-        <h2 id="case-studies-heading" className="t-h2" data-quiet-zone>
-          {home.work.heading}
-        </h2>
-        {studies.length === 0 ? (
-          <p className={`${styles.empty} body-copy`}>{home.work.empty}</p>
-        ) : (
-          <ol className={`${styles.cards} grid`} data-reveal-group="">
-            {studies.map((card, i) => (
-              <li key={card.slug} className={styles.slot} data-reveal="">
-                <MapSheetCard card={card} outcome={caseStudies[card.slug]!.impactLine} index={i + 1} total={studies.length} />
-              </li>
-            ))}
-          </ol>
-        )}
-      </section>
+        <section id="case-studies" className={`${styles.work} section`} aria-labelledby="case-studies-heading">
+          <h2 id="case-studies-heading" className="t-h2" data-quiet-zone>
+            {home.work.heading}
+          </h2>
+          {studies.length === 0 ? (
+            <p className={`${styles.empty} body-copy`}>{home.work.empty}</p>
+          ) : (
+            <ol className={`${styles.cards} grid`} data-reveal-group="">
+              {studies.map((card, i) => (
+                <li key={card.slug} className={styles.slot} data-reveal="">
+                  <MapSheetCard card={card} outcome={caseStudies[card.slug]!.impactLine} index={i + 1} total={studies.length} />
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
 
-      <EarlierProjects copy={home.earlier} className="section" />
-      <ContourDivider className={styles.divider} />
-    </main>
+        <EarlierProjects copy={home.earlier} className="section" />
+        <ContourDivider className={styles.divider} />
+      </main>
+    </PageTransition>
   );
 }

@@ -35,9 +35,19 @@
     animation-delay: calc(var(--i) * var(--stagger-step));
   }
 
+  /* Opening a case study: the H1 fades in from --route-title-at (transitions.css), then arrives
+     on its weight. */
+  :root[data-motion="full"][data-route-kind="open"] .title[data-arrive="arrive"] .live {
+    animation-delay: calc(var(--route-title-at) + var(--i) * var(--stagger-step));
+  }
+
   /* Calm: 600 ms, all words together. */
   :root[data-motion="calm"] .title[data-arrive="arrive"] .live {
     animation: title-weight calc(var(--dur-title) * 2 / 3) var(--ease-out) both;
+  }
+
+  :root[data-motion="calm"][data-route-kind="open"] .title[data-arrive="arrive"] .live {
+    animation-delay: var(--route-title-at);
   }
 
   @media (prefers-reduced-motion: reduce) {

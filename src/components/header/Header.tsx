@@ -39,7 +39,7 @@ export function Header() {
 
   const nav = site.nav;
   return (
-    <header ref={ref} className={styles.header}>
+    <header ref={ref} className={styles.header} data-vt-part="header">
       <div className={`${styles.bar} container`}>
         <Link href="/" className={`${styles.brand} plain`} aria-label={nav.home}>
           {site.brand}

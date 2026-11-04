@@ -1,9 +1,6 @@
 // Page choreography (phase 5), against a build with the examples (SITE_MODE=basecamp):
-//   arrival   deck → case study: focus on the H1, the arrival's parts timed from the commit
-//             (the summary from 380 ms), no glint on the H1 (titles arrive on their weight);
-//             the trailhead band's mini card morphing into the next case study; browser back as a
-//             180 ms traversal; About from the HUD (H1 focused, the facts from 420 ms);
-//             still mode: no view transition, focus still on the H1.
+//   arrival   where focus goes after a page change (About's H1, the cards for Case studies, a
+//             case study's H1), in Full and Off; the timing is the transitions scenario's.
 //   reading   the career line drawn once in Full and Calm, drawn in Off; no endless loop on any
 //             page but the field's.
 import { existsSync } from "node:fs";
@@ -22,35 +19,6 @@ async function newPage(browser, { viewport = { width: 1440, height: 900 }, mobil
       try {
         if (calm) localStorage.setItem("summit:motion", "calm");
       } catch {}
-      // View transitions: how many started, the pairs they drew, the root's timing.
-      window.__vt = [];
-      const start = Document.prototype.startViewTransition;
-      if (start)
-        Document.prototype.startViewTransition = function (...args) {
-          const t = start.apply(this, args);
-          const rec = { groups: [], root: null, vt: null };
-          window.__vt.push(rec);
-          t.ready
-            .then(() => {
-              rec.vt = document.documentElement.getAttribute("data-vt");
-              for (const a of document.getAnimations()) {
-                const pe = a.effect?.pseudoElement ?? "";
-                const name = pe.match(/^::view-transition-group\((.+)\)$/)?.[1];
-                if (name && name !== "root") rec.groups.push(name);
-                if (pe === "::view-transition-old(root)") rec.root = Math.round(a.effect.getTiming().duration);
-              }
-            })
-            .catch(() => {});
-          return t;
-        };
-      // Glints that play, by the text they cross.
-      window.__glints = [];
-      document.addEventListener("DOMContentLoaded", () => {
-        new MutationObserver((records) => {
-          for (const r of records)
-            if (r.target.getAttribute?.("data-glint") === "play") window.__glints.push(r.target.closest("h1, h2, h3, a, article")?.tagName ?? "?");
-        }).observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ["data-glint"] });
-      });
     },
     { calm },
   );
@@ -75,120 +43,29 @@ async function landed(page, basePath, path) {
     .catch(() => {});
 }
 
-const focusInfo = (page) =>
-  page.evaluate(() => {
-    const a = document.activeElement;
-    return { tag: a?.tagName.toLowerCase(), tabindex: a?.getAttribute("tabindex"), text: (a?.querySelector?.(".visually-hidden") ?? a)?.textContent?.trim().slice(0, 40) };
-  });
-
 export async function arrival({ browser, basePath, base, root, check }) {
-  console.log("\narrival: route choreography and focus");
+  console.log("\narrival: where focus goes after a page change");
   if (!hasExamples(root)) return console.log("  skipped: build with SITE_MODE=basecamp");
-
-  // Deck → case study.
-  {
-    const { context, page, errors } = await newPage(browser);
+  for (const mode of ["full", "still"]) {
+    const { context, page, errors } = await newPage(browser, { reduced: mode === "still" });
     await page.goto(`${base}/`, { waitUntil: "load" });
-    await page.locator('article[data-slug="seilschaft"]').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(1500);
-    // The arrival's own timing, read as the new page commits.
-    await page.evaluate(() => {
-      window.__arrival = null;
-      new MutationObserver(() => {
-        const main = [...document.querySelectorAll("main[data-arrival]")].find((m) => m.getClientRects().length);
-        if (!main || window.__arrival) return;
-        const anims = document.getAnimations().filter((a) => main.contains(a.effect?.target ?? null));
-        const delay = (re) => [...new Set(anims.filter((a) => re.test(a.animationName ?? "")).map((a) => Math.round(Number(a.effect.getTiming().delay))))];
-        window.__arrival = { settle: delay(/st-settle/), unfold: delay(/reveal-unfold/) };
-      }).observe(document.body, { attributes: true, subtree: true, attributeFilter: ["data-arrival"] });
-    });
-    await page.locator('article[data-slug="seilschaft"] a').click();
-    await landed(page, basePath, "/work/seilschaft/");
-    await page.waitForTimeout(1500);
-    const t = await page.evaluate(() => ({ vt: window.__vt.at(-1), arrival: window.__arrival, glints: window.__glints }));
-    check("deck → case study: the artwork and the name travel", t.vt?.groups.includes("art-seilschaft") && t.vt?.groups.includes("title-seilschaft"), JSON.stringify(t.vt?.groups));
-    check("the old page leaves over 160 ms", t.vt?.root === 160, String(t.vt?.root));
-    // The summary arrives with the page only where it is on screen as the page lands.
-    const summaryOnScreen = await page.evaluate(() => {
-      const b = document.getElementById("summary-heading")?.closest("section")?.getBoundingClientRect();
-      return !!b && b.top < innerHeight && b.bottom > 0;
-    });
-    check("the summary unfolds from 380 ms (when on screen)", !summaryOnScreen || t.arrival?.unfold.includes(380), JSON.stringify({ summaryOnScreen, arrival: t.arrival }));
-    check("the H1 is a weight title and never glints", (await page.locator("h1[data-title]").count()) === 1 && !t.glints.includes("H1"), JSON.stringify(t.glints));
-    const f = await focusInfo(page);
-    check("focus on the new page's H1", f.tag === "h1" && f.tabindex === "-1", JSON.stringify(f));
-
-    // Case study → next: the trailhead band's mini card morphs into the next header.
-    const nextLink = page.locator('a[aria-describedby="next-project-label"]');
-    await nextLink.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(1500);
-    const next = await nextLink.getAttribute("href");
-    const slug = next.split("/").filter(Boolean).at(-1);
-    await page.evaluate(() => (window.__glints = []));
-    await nextLink.click();
-    await landed(page, basePath, `/work/${slug}/`);
-    await page.waitForTimeout(1500);
-    const n = await page.evaluate(() => ({ vt: window.__vt.at(-1), glints: window.__glints, n: window.__vt.length }));
-    check("case study → next: the mini card's artwork and name morph into the header", n.vt?.groups.includes(`art-${slug}`) && n.vt?.groups.includes(`title-${slug}`), JSON.stringify(n.vt));
-    check("no glint on the destination H1", !n.glints.includes("H1"), JSON.stringify(n.glints));
-    check("focus on the next page's H1", (await focusInfo(page)).tag === "h1");
-    const named = await page.evaluate(() => [...document.querySelectorAll("[data-commit-morph]")].filter((el) => el.style.viewTransitionName).length);
-    check("the mini card is unnamed again afterwards", named === 0, String(named));
-
-    // Browser back between two case studies: a traversal.
-    const before = await page.evaluate(() => window.__vt.length);
-    await page.goBack();
-    // The traversal starts on the next task after popstate: wait for it to draw.
-    await page.waitForFunction((n) => window.__vt.length > n && window.__vt.at(-1).root !== null, before, { timeout: 5000 }).catch(() => {});
-    await landed(page, basePath, "/work/seilschaft/");
-    const b = await page.evaluate(() => window.__vt.at(-1));
-    const count = await page.evaluate(() => window.__vt.length);
-    check("browser back: a traversal cross-fade of 180 ms", count > before && b?.vt === "traverse" && b?.root === 180, JSON.stringify(b));
-    check("no page errors", errors.length === 0, errors.join("; "));
-    await context.close();
-  }
-
-  // About from the HUD: the label morphs into the H1, which takes focus.
-  {
-    const { context, page, errors } = await newPage(browser);
-    await page.goto(`${base}/work/seilschaft/`, { waitUntil: "load" });
-    await page.waitForTimeout(1500);
-    await page.evaluate(() => {
-      window.__arrival = null;
-      new MutationObserver(() => {
-        const main = [...document.querySelectorAll("main[data-arrival]")].find((m) => m.getClientRects().length);
-        if (!main || window.__arrival) return;
-        const anims = document.getAnimations().filter((a) => main.contains(a.effect?.target ?? null));
-        window.__arrival = [...new Set(anims.filter((a) => /st-settle|reveal-unfold/.test(a.animationName ?? "")).map((a) => Math.round(Number(a.effect.getTiming().delay))))];
-      }).observe(document.body, { attributes: true, subtree: true, attributeFilter: ["data-arrival"] });
-    });
-    await page.locator(`header a[href="${basePath}/about/"]`).first().click();
+    await page.waitForTimeout(800);
+    // The header's About: focus on About's H1, announced (tabindex -1, no ring).
+    await page.locator('header a[href$="/about/"]').click();
     await landed(page, basePath, "/about/");
-    const r = await page.evaluate(() => ({ vt: window.__vt.at(-1), arrival: window.__arrival }));
-    check("About: the HUD label morphs into the H1", r.vt?.groups.includes("about-title"), JSON.stringify(r.vt?.groups));
-    // The facts arrive with the page only where they are on screen as it lands.
-    const factsOnScreen = await page.evaluate(() => {
-      const sheet = document.querySelector("main .map-sheet");
-      const b = sheet?.getBoundingClientRect();
-      return !!b && b.top < innerHeight && b.bottom > 0;
-    });
-    check("About: the facts from 420 ms (when on screen)", !factsOnScreen || r.arrival?.includes(420), JSON.stringify({ factsOnScreen, arrival: r.arrival }));
-    const f = await focusInfo(page);
-    check("About: focus on the H1 (not lost with the HUD link)", f.tag === "h1", JSON.stringify(f));
-    check("no page errors", errors.length === 0, errors.join("; "));
-    await context.close();
-  }
-
-  // Still: no view transition at all, and focus still moves.
-  {
-    const { context, page } = await newPage(browser, { reduced: true });
-    await page.goto(`${base}/`, { waitUntil: "load" });
-    await page.locator('article[data-slug="seilschaft"]').scrollIntoViewIfNeeded();
-    await page.locator('article[data-slug="seilschaft"] a').click();
+    const about = await page.evaluate(() => ({ tag: document.activeElement?.tagName, text: document.activeElement?.textContent.trim().slice(0, 20), ring: getComputedStyle(document.activeElement).outlineStyle }));
+    check(`${mode}: About's H1 has focus, no ring`, about.tag === "H1" && /About/.test(about.text) && about.ring === "none", JSON.stringify(about));
+    // The header's Case studies: home at its cards, focus on the section it names.
+    await page.locator('header a[href$="/#case-studies"]').click();
+    await landed(page, basePath, "/");
+    const home = await page.evaluate(() => ({ id: document.activeElement?.id, top: Math.round(document.getElementById("case-studies").getBoundingClientRect().top) }));
+    check(`${mode}: Case studies lands on the cards, focus there`, home.id === "case-studies" && home.top >= 0 && home.top < 200, JSON.stringify(home));
+    // A card: the case study's H1.
+    await page.locator("#case-studies article a").first().click();
     await landed(page, basePath, "/work/seilschaft/");
-    const calls = await page.evaluate(() => window.__vt.length);
-    check("still: no view transition", calls === 0, String(calls));
-    check("still: focus on the H1", (await focusInfo(page)).tag === "h1");
+    const cs = await page.evaluate(() => document.activeElement?.closest("h1")?.textContent.replace(/\s+/g, " ").trim() ?? document.activeElement?.tagName);
+    check(`${mode}: a card opens its case study with focus on the H1`, /Seilschaft/.test(cs ?? ""), cs);
+    check(`${mode}: no page errors`, errors.length === 0, errors.join("; "));
     await context.close();
   }
 }

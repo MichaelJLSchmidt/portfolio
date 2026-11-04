@@ -23,6 +23,7 @@ import { asset } from "@/lib/asset";
 import { readingMinutes } from "@/lib/case-study";
 import { pageNumbers, SECTION_IDS as ID, surveyLayout } from "@/lib/survey-layout";
 import styles from "./page.module.css";
+import { PageTransition } from "@/components/transition/PageTransition";
 
 export const dynamicParams = false;
 
@@ -79,98 +80,100 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
   const { findings, leading } = layout;
 
   return (
-    <main id="main" className={styles.main} data-card={card.slug}>
-      <HeaderPlate
-        plate={asset(`/plates/${card.terrainId}-level.svg`)}
-        alt={card.artworkAlt}
-        slug={card.slug}
-        example={study.example ? L.exampleLine : undefined}
-        meta={[L.number(at + 1), study.typeLine ?? card.sector, L.readingTime(readingMinutes(study))].join(" · ")}
-        title={<Title role="h1" text={card.name} />}
-        summit={summit ? [summit.label, summit.altitude, summit.coordinates].filter(Boolean).join(" · ") : null}
-      />
-
-      <SummaryBand id={ID.summary} summary={layout.summary} />
-
-      <ContentsTrail entries={layout.contents} label={L.onThisPage} toggle={L.contentsToggle} />
-
-      <Chapter id={ID.context} line={chapter(1, L.contents.context)} heading={layout.context.stage.finding}>
-        <div data-block="text" data-reveal="">
-          <p className={`${styles.brief} body-copy`}>
-            <strong>{`${L.brief}: `}</strong>
-            {layout.context.brief}
-          </p>
-        </div>
-        <Blocks blocks={layout.context.stage.blocks} study={study} numbers={numbers} />
-      </Chapter>
-
-      {layout.metric && <MetricBand value={layout.metric.value} line={layout.metric.line} />}
-
-      <Chapter id={ID.findings} line={chapter(2, L.contents.findings)} heading={findings.discovery.finding}>
-        <Blocks blocks={findings.discovery.blocks} study={study} numbers={numbers} />
-      </Chapter>
-      {findings.pair && <ImagePair ids={findings.pair} study={study} numbers={numbers.figures} />}
-      <section className={`${styles.continued} container grid`} aria-labelledby={`${findings.delivery.id}-heading`}>
-        <SubHeading id={`${findings.delivery.id}-heading`}>{findings.delivery.finding}</SubHeading>
-        <Blocks blocks={findings.delivery.blocks} study={study} numbers={numbers} />
-      </section>
-
-      <PinnedDecision
-        id={ID.decisions}
-        line={L.contents.decisions}
-        finding={layout.decisions.finding}
-        steps={layout.decisions.steps}
-        after={layout.decisions.after}
-        study={study}
-        numbers={numbers}
-      />
-
-      <OptionsBand decisions={layout.decisions.steps.map((s) => ({ decision: s.decision, number: s.number }))} reversed={layout.options.reversed} />
-
-      {layout.map && <MapFrame id={layout.map} study={study} coordinates={summit?.coordinates ?? null} />}
-
-      <Chapter id={ID.leading} line={chapter(3, L.contents.leading)} heading={leading.pull} pull>
-        <Blocks blocks={leading.stage.blocks} study={study} numbers={numbers} />
-        <SubHeading>{L.teamLed}</SubHeading>
-        <div data-block="text" data-reveal="">
-          <p className="body-copy">{leading.teamLed}</p>
-        </div>
-        <SubHeading>{L.putInPlace}</SubHeading>
-        <div data-block="text" data-reveal="">
-          <ul className={`${styles.list} body-copy`}>
-            {leading.putInPlace.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
-        <SubHeading>{L.team}</SubHeading>
-        <div data-block="text" data-reveal="">
-          <ul className={`${styles.roster} body-copy`}>
-            {leading.team.map((t) => (
-              <li key={t.role}>
-                <span className="mono">{t.count}</span>
-                <span>
-                  <strong>{t.role}</strong> {t.line}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </Chapter>
-
-      <OutcomeBand id={ID.outcome} line={L.contents.outcome} outcome={layout.outcome} study={study} numbers={numbers} />
-
-      <Reflection id={ID.reflection} line={L.contents.reflection} reflection={layout.reflection} />
-
-      <div className={`${styles.next} container section`} data-breaker="">
-        <NextCase
-          next={next}
-          outcome={next ? caseStudies[next.slug]!.impactLine : ""}
-          index={next ? studies.indexOf(next) + 1 : 0}
-          total={studies.length}
-          labels={{ next: L.next, backToAll: L.backToAll }}
+    <PageTransition kind="case">
+      <main id="main" className={styles.main} data-card={card.slug}>
+        <HeaderPlate
+          plate={asset(`/plates/${card.terrainId}-level.svg`)}
+          alt={card.artworkAlt}
+          slug={card.slug}
+          example={study.example ? L.exampleLine : undefined}
+          meta={[L.number(at + 1), study.typeLine ?? card.sector, L.readingTime(readingMinutes(study))].join(" · ")}
+          title={<Title role="h1" text={card.name} />}
+          summit={summit ? [summit.label, summit.altitude, summit.coordinates].filter(Boolean).join(" · ") : null}
         />
-      </div>
-    </main>
+
+        <SummaryBand id={ID.summary} summary={layout.summary} />
+
+        <ContentsTrail entries={layout.contents} label={L.onThisPage} toggle={L.contentsToggle} />
+
+        <Chapter id={ID.context} line={chapter(1, L.contents.context)} heading={layout.context.stage.finding}>
+          <div data-block="text" data-reveal="">
+            <p className={`${styles.brief} body-copy`}>
+              <strong>{`${L.brief}: `}</strong>
+              {layout.context.brief}
+            </p>
+          </div>
+          <Blocks blocks={layout.context.stage.blocks} study={study} numbers={numbers} />
+        </Chapter>
+
+        {layout.metric && <MetricBand value={layout.metric.value} line={layout.metric.line} />}
+
+        <Chapter id={ID.findings} line={chapter(2, L.contents.findings)} heading={findings.discovery.finding}>
+          <Blocks blocks={findings.discovery.blocks} study={study} numbers={numbers} />
+        </Chapter>
+        {findings.pair && <ImagePair ids={findings.pair} study={study} numbers={numbers.figures} />}
+        <section className={`${styles.continued} container grid`} aria-labelledby={`${findings.delivery.id}-heading`}>
+          <SubHeading id={`${findings.delivery.id}-heading`}>{findings.delivery.finding}</SubHeading>
+          <Blocks blocks={findings.delivery.blocks} study={study} numbers={numbers} />
+        </section>
+
+        <PinnedDecision
+          id={ID.decisions}
+          line={L.contents.decisions}
+          finding={layout.decisions.finding}
+          steps={layout.decisions.steps}
+          after={layout.decisions.after}
+          study={study}
+          numbers={numbers}
+        />
+
+        <OptionsBand decisions={layout.decisions.steps.map((s) => ({ decision: s.decision, number: s.number }))} reversed={layout.options.reversed} />
+
+        {layout.map && <MapFrame id={layout.map} study={study} coordinates={summit?.coordinates ?? null} />}
+
+        <Chapter id={ID.leading} line={chapter(3, L.contents.leading)} heading={leading.pull} pull>
+          <Blocks blocks={leading.stage.blocks} study={study} numbers={numbers} />
+          <SubHeading>{L.teamLed}</SubHeading>
+          <div data-block="text" data-reveal="">
+            <p className="body-copy">{leading.teamLed}</p>
+          </div>
+          <SubHeading>{L.putInPlace}</SubHeading>
+          <div data-block="text" data-reveal="">
+            <ul className={`${styles.list} body-copy`}>
+              {leading.putInPlace.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+          <SubHeading>{L.team}</SubHeading>
+          <div data-block="text" data-reveal="">
+            <ul className={`${styles.roster} body-copy`}>
+              {leading.team.map((t) => (
+                <li key={t.role}>
+                  <span className="mono">{t.count}</span>
+                  <span>
+                    <strong>{t.role}</strong> {t.line}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Chapter>
+
+        <OutcomeBand id={ID.outcome} line={L.contents.outcome} outcome={layout.outcome} study={study} numbers={numbers} />
+
+        <Reflection id={ID.reflection} line={L.contents.reflection} reflection={layout.reflection} />
+
+        <div className={`${styles.next} container section`} data-breaker="">
+          <NextCase
+            next={next}
+            outcome={next ? caseStudies[next.slug]!.impactLine : ""}
+            index={next ? studies.indexOf(next) + 1 : 0}
+            total={studies.length}
+            labels={{ next: L.next, backToAll: L.backToAll }}
+          />
+        </div>
+      </main>
+    </PageTransition>
   );
 }

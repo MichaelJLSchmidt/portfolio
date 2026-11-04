@@ -1,0 +1,272 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+/*
+ * Page changes (React <ViewTransition>: PageTransition, the card's art, the header plate), timed by
+ * the route tokens (--route-*) and docs/motion.md. html[data-route-kind] says what started the
+ * change (RouteMotion.tsx): open, back, page, traverse or ua. The lightbox runs its own transition
+ * (html[data-vt="lightbox"]) and keeps the browser's defaults.
+ *
+ * Card → case study (Full, desktop), from the commit:
+ *   0–160 ms     the old page fades out, no movement (ease-in)
+ *   0–680 ms     the art window morphs from the card into the header plate (in-out)
+ *   0–400 ms     the field dims to 60 %; 400–1600 ms it crossfades to the summit (the field's own)
+ *   from 360 ms  the H1 fades in over 280 ms, then runs its weight arrival
+ *   560–1000 ms  the meta lines and the summary rise 16 px, 60 ms apart
+ * Phones: the morph 560 ms, the old page 120 ms, the parts as one block. Calm: the morph 480 ms,
+ * no stagger. Off: a 160 ms crossfade, no morph. Other pages: the old page fades out (180 ms), the
+ * new one rises 12 px over 320 ms from 120 ms. Back (the in-app link) and forward/back in the
+ * browser: a 240 ms crossfade; after an iOS edge swipe, nothing of ours.
+ */
+@layer components {
+  ::view-transition {
+    pointer-events: none;
+  }
+
+  @keyframes vt-fade-out {
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes vt-fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes vt-rise-page {
+    from {
+      opacity: 0;
+      transform: translateY(var(--dist-rise));
+    }
+  }
+
+  @keyframes vt-rise-part {
+    from {
+      opacity: 0;
+      transform: translateY(var(--dist-arrive));
+    }
+  }
+
+  /* --- pages -------------------------------------------------------------------------------- */
+
+  ::view-transition-old(.page-out) {
+    animation: vt-fade-out var(--route-page-out) var(--ease-in) both;
+  }
+
+  ::view-transition-new(.page-in) {
+    animation: vt-rise-page var(--dur-base) var(--ease-out) var(--route-page-in-at) both;
+  }
+
+  /* A case study arriving: its own content fades in under the morph; the named parts follow. */
+  ::view-transition-new(.case-in) {
+    animation: vt-fade-in var(--dur-leave) var(--ease-out) both;
+  }
+
+  /* Opening a case study: the old page leaves in --dur-leave. */
+  :root[data-route-kind="open"]::view-transition-old(.page-out) {
+    animation-duration: var(--dur-leave);
+  }
+
+  /* --- the shared art window (card ↔ header plate) ------------------------------------------ */
+
+  /* Groups that exist only in the new page are stacked above shared ones, so the order is set:
+     the art over the pages, the title block over the art, its lines over the block, the header
+     over everything. */
+  ::view-transition-group(.art) {
+    z-index: 1;
+    overflow: clip;
+    animation-duration: var(--dur-morph);
+    animation-timing-function: var(--ease-in-out);
+  }
+
+  ::view-transition-old(.art),
+  ::view-transition-new(.art) {
+    height: 100%;
+    object-fit: cover;
+    animation-duration: var(--dur-morph);
+    animation-timing-function: var(--ease-in-out);
+  }
+
+  /* Another card's art, leaving with no partner: it goes with its page (in every tier). */
+  ::view-transition-old(.art):only-child {
+    animation: vt-fade-out var(--dur-leave) var(--ease-in) both !important;
+  }
+
+  /* --- the case study's parts: the H1, the meta lines, the summary --------------------------- */
+
+  /* Their names live here, in plain CSS: a CSS module would hash them. */
+  [data-vt-part="legend"] {
+    view-transition-name: cs-legend;
+  }
+
+  [data-vt-part="title"] {
+    view-transition-name: cs-title;
+  }
+
+  [data-vt-part="meta"] {
+    view-transition-name: cs-meta;
+  }
+
+  [data-vt-part="summit"] {
+    view-transition-name: cs-summit;
+  }
+
+  [data-vt-part="summary"] {
+    view-transition-name: cs-summary;
+  }
+
+  :root:not([data-vt="lightbox"])::view-transition-group(cs-legend),
+  :root:not([data-vt="lightbox"])::view-transition-group(cs-summary) {
+    z-index: 2;
+    animation: none;
+  }
+
+  :root:not([data-vt="lightbox"])::view-transition-group(cs-title),
+  :root:not([data-vt="lightbox"])::view-transition-group(cs-meta),
+  :root:not([data-vt="lightbox"])::view-transition-group(cs-summit) {
+    z-index: 3;
+    animation: none;
+  }
+
+  :root:not([data-vt="lightbox"])::view-transition-old(cs-legend),
+  :root:not([data-vt="lightbox"])::view-transition-old(cs-title),
+  :root:not([data-vt="lightbox"])::view-transition-old(cs-meta),
+  :root:not([data-vt="lightbox"])::view-transition-old(cs-summit),
+  :root:not([data-vt="lightbox"])::view-transition-old(cs-summary) {
+    animation: vt-fade-out var(--dur-leave) var(--ease-in) both;
+  }
+
+  /* The title block (its frame) arrives with the H1. */
+  :root:not([data-vt="lightbox"])::view-transition-new(cs-legend),
+  :root:not([data-vt="lightbox"])::view-transition-new(cs-title) {
+    animation: vt-fade-in var(--route-title-fade) var(--ease-out) var(--route-title-at) both;
+  }
+
+  :root:not([data-vt="lightbox"])::view-transition-new(cs-meta) {
+    animation: vt-rise-part var(--dur-base) var(--ease-out) var(--route-parts-at) both;
+  }
+
+  :root:not([data-vt="lightbox"])::view-transition-new(cs-summit) {
+    animation: vt-rise-part var(--dur-base) var(--ease-out) calc(var(--route-parts-at) + var(--stagger-step)) both;
+  }
+
+  :root:not([data-vt="lightbox"])::view-transition-new(cs-summary) {
+    animation: vt-rise-part var(--dur-base) var(--ease-out) calc(var(--route-parts-at) + 2 * var(--stagger-step)) both;
+  }
+
+  /* Phones: a shorter morph and leave; the parts arrive as one block. */
+  @media (width < 768px) {
+    ::view-transition-group(.art),
+    ::view-transition-old(.art),
+    ::view-transition-new(.art) {
+      animation-duration: var(--route-morph-phone);
+    }
+
+    ::view-transition-old(.page-out),
+    :root[data-route-kind="open"]::view-transition-old(.page-out) {
+      animation-duration: var(--route-leave-phone);
+    }
+
+    :root:not([data-vt="lightbox"])::view-transition-new(cs-meta),
+    :root:not([data-vt="lightbox"])::view-transition-new(cs-summit),
+    :root:not([data-vt="lightbox"])::view-transition-new(cs-summary) {
+      animation-name: vt-fade-in;
+      animation-delay: var(--route-parts-at);
+    }
+  }
+
+  /* Calm: a shorter morph, no stagger. */
+  :root[data-motion="calm"]::view-transition-group(.art),
+  :root[data-motion="calm"]::view-transition-old(.art),
+  :root[data-motion="calm"]::view-transition-new(.art) {
+    animation-duration: var(--route-morph-calm);
+  }
+
+  :root[data-motion="calm"]:not([data-vt="lightbox"])::view-transition-new(cs-summit),
+  :root[data-motion="calm"]:not([data-vt="lightbox"])::view-transition-new(cs-summary) {
+    animation-delay: var(--route-parts-at);
+  }
+
+  /* --- back and forward: a 240 ms crossfade (a morph that still pairs is a bonus) --------------- */
+
+  /* React runs no view transition for a history traversal: the arriving page fades in. */
+  @media (prefers-reduced-motion: no-preference) {
+    :root[data-route-kind="traverse"] main {
+      animation: vt-fade-in var(--dur-crossfade) linear both;
+    }
+
+    :root[data-route-kind="traverse"][data-motion="still"] main {
+      animation-duration: var(--dur-still);
+    }
+  }
+
+  /* The in-app back link does run one: everything crossfades. */
+
+  :root[data-route-kind="traverse"]::view-transition-group(*),
+  :root[data-route-kind="back"]::view-transition-group(*) {
+    animation-duration: var(--dur-crossfade);
+  }
+
+  :root[data-route-kind="traverse"]::view-transition-old(*),
+  :root[data-route-kind="back"]::view-transition-old(*) {
+    animation: vt-fade-out var(--dur-crossfade) linear both;
+  }
+
+  :root[data-route-kind="traverse"]::view-transition-new(*),
+  :root[data-route-kind="back"]::view-transition-new(*) {
+    animation: vt-fade-in var(--dur-crossfade) linear both;
+  }
+
+  /* The browser already animated the swipe (iOS): ours would play twice, so it shows the page. */
+  :root[data-route-kind="ua"]::view-transition-group(*),
+  :root[data-route-kind="ua"]::view-transition-new(*) {
+    animation: none !important;
+  }
+
+  :root[data-route-kind="ua"]::view-transition-old(*) {
+    display: none;
+  }
+
+  /* --- Off: a 160 ms crossfade, nothing moves -------------------------------------------------- */
+
+  :root[data-motion="still"]::view-transition-group(*) {
+    animation-duration: 0s !important;
+  }
+
+  :root[data-motion="still"]::view-transition-old(*) {
+    animation: vt-fade-out var(--dur-still) linear both !important;
+  }
+
+  :root[data-motion="still"]::view-transition-new(*) {
+    animation: vt-fade-in var(--dur-still) linear both !important;
+  }
+
+  /* --- the header: never moves, never fades (it outranks every rule above) --------------------- */
+
+  [data-vt-part="header"] {
+    view-transition-name: site-header;
+  }
+
+  :root:root:root::view-transition-group(site-header),
+  :root:root:root::view-transition-new(site-header) {
+    z-index: 4;
+    animation: none !important;
+  }
+
+  :root:root:root::view-transition-old(site-header) {
+    display: none;
+  }
+
+  /* --- the root: the backdrop (the field, live under the overlay) and the footer --------------- */
+
+  /* No crossfade: the new state shows at once and the field's own dim and crossfade carry the
+     change; the page's content is in its own groups above. */
+  :root:not([data-vt="lightbox"])::view-transition-old(root) {
+    display: none;
+  }
+
+  :root:not([data-vt="lightbox"])::view-transition-new(root) {
+    animation: none !important;
+  }
+}

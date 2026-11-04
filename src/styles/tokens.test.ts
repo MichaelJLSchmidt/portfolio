@@ -11,6 +11,7 @@ import {
   cubicBezier,
   distance,
   duration,
+  route,
   easing,
   layer,
   radius,
@@ -81,6 +82,9 @@ describe("tokens → CSS", () => {
     );
     // UI feedback ≤ 320 ms, entrances ≤ 600 ms, Off's crossfades ≤ 160 ms.
     assert.ok(duration.base <= 320 && duration.enter <= 600 && duration.still <= 160);
+    // A page change: every step lands within the transition ceiling (1000 ms), the field's crossfade aside.
+    assert.ok(route.partsAt + 2 * stagger.step + duration.base <= 1000 && route.titleAt + route.titleFade <= 1000);
+    assert.ok(route.morphPhone < duration.morph && route.morphCalm < route.morphPhone);
   });
 
   it("easings, as cubic-bezier(), none bouncing", () => {
@@ -137,7 +141,7 @@ describe("stylesheets read existing tokens", () => {
         ...[...text.matchAll(/(?:^|[;{\s])(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]),
         ...[...text.matchAll(/var\((--[a-z0-9-]+),/g)].map((m) => m[1]),
       ]);
-      for (const m of text.matchAll(/var\((--(?:dur|ease|stagger|dist|layer|scale|color|type|title|space|radius|stroke)-[a-z0-9-]+)/g)) {
+      for (const m of text.matchAll(/var\((--(?:dur|route|ease|stagger|dist|layer|scale|color|type|title|space|radius|stroke)-[a-z0-9-]+)/g)) {
         if (!css.has(m[1]) && !local.has(m[1]) && !globals.has(m[1])) missing.push(`${file.slice(root.length)}: ${m[1]}`);
       }
     }

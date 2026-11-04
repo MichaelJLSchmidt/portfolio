@@ -119,6 +119,27 @@ export const duration = {
 export type DurationToken = keyof typeof duration;
 
 /**
+ * A page change's timeline, in ms from the commit (docs/motion.md): the card → case study arrival
+ * and the plain page change. Durations not listed here are the duration tokens above.
+ */
+export const route = {
+  /** A plain page change: the old page fades out over this. */
+  pageOut: 180,
+  /** A plain page change: the new page starts to arrive (fade and 12 px rise over --dur-base). */
+  pageInAt: 120,
+  /** The case study's H1 fades in from here, over titleFade, then runs its weight arrival. */
+  titleAt: 360,
+  titleFade: 280,
+  /** The header's meta lines and the summary rise in from here, 60 ms apart. */
+  partsAt: 560,
+  /** Phones: the art morph and the old page's fade. */
+  morphPhone: 560,
+  leavePhone: 120,
+  /** Calm: the art morph. */
+  morphCalm: 480,
+} as const;
+
+/**
  * Cubic-bezier control points (Motion arrays; CSS via `cubicBezier`). Ease-out to appear, ease-in
  * to leave, ease-in-out for travel. No bounce anywhere.
  */
@@ -219,6 +240,7 @@ export function tokensToCss({ motion = true }: { motion?: boolean } = {}): strin
   vars.push(`--type-body-measure:${type.body.measure}ch`, `--type-mono-wdth:${type.mono.wdth}%`, `--title-from-wght:${titleArrival.fromWght}`);
   if (!motion) return `:root{${vars.join(";")}}`;
   for (const [k, v] of Object.entries(duration)) vars.push(`--dur-${kebab(k)}:${v}ms`);
+  for (const [k, v] of Object.entries(route)) vars.push(`--route-${kebab(k)}:${v}ms`);
   for (const k of Object.keys(easing) as EasingToken[]) vars.push(`--ease-${kebab(k)}:${cubicBezier(k)}`);
   vars.push(`--stagger-step:${stagger.step}ms`, `--stagger-max:${stagger.max}`);
   for (const [k, v] of Object.entries(distance)) vars.push(`--dist-${kebab(k)}:${v}px`);

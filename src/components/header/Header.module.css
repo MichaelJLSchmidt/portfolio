@@ -6,7 +6,6 @@
     inset: 0 0 auto;
     z-index: var(--layer-header);
     padding-top: env(safe-area-inset-top);
-    view-transition-name: site-header;
     background: transparent;
     transition: background-color var(--dur-fast) linear;
   }
@@ -105,18 +104,5 @@
     .link {
       transition: none;
     }
-  }
-}
-
-/* The header stays still while pages change. */
-@layer components {
-  ::view-transition-group(site-header),
-  ::view-transition-old(site-header),
-  ::view-transition-new(site-header) {
-    animation: none;
-  }
-
-  ::view-transition-old(site-header) {
-    display: none;
   }
 }

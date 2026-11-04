@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Fragment } from "react";
+import { Fragment, ViewTransition } from "react";
 import { cardHref, cardLabels, typeLine, typeParts, type CardData } from "@/content/cards";
 import { summitOf } from "@/content/geo";
 import { asset } from "@/lib/asset";
@@ -48,19 +48,22 @@ export function MapSheetCard({
           <span>{card.year}</span>
         </span>
         <Heading className={`${styles.title} t-h3`}>{card.name}</Heading>
-        <span className={styles.art} data-card-art={card.slug}>
-          <img className={styles.plate} src={asset(`/plates/${card.terrainId}.svg`)} alt="" width={400} height={300} loading="lazy" decoding="async" />
-          <img
-            className={`${styles.plate} ${styles.level}`}
-            src={asset(`/plates/${card.terrainId}-level.svg`)}
-            alt=""
-            width={400}
-            height={300}
-            loading="lazy"
-            decoding="async"
-            data-plate="level"
-          />
-        </span>
+        {/* The art window travels into the case study's header plate (transitions.css). */}
+        <ViewTransition name={`card-art-${card.slug}`} share="art" default="none">
+          <span className={styles.art} data-card-art={card.slug}>
+            <img className={styles.plate} src={asset(`/plates/${card.terrainId}.svg`)} alt="" width={400} height={300} loading="lazy" decoding="async" />
+            <img
+              className={`${styles.plate} ${styles.level}`}
+              src={asset(`/plates/${card.terrainId}-level.svg`)}
+              alt=""
+              width={400}
+              height={300}
+              loading="lazy"
+              decoding="async"
+              data-plate="level"
+            />
+          </span>
+        </ViewTransition>
         <span className={`${styles.type} mono`}>
           {typeParts(card).map((part, i) => (
             <Fragment key={i}>
