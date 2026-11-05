@@ -62,8 +62,8 @@ Everything comes from `src/styles/tokens.ts`, exposed to CSS as custom propertie
 
 `npm run check:contrast` holds the pairs to WCAG AA: text, text-2 and text-3 on the ground; text and
 text-2 on the raised ground (never text-3 there); ink and ink-2 on the sheet; focus rings at 3:1.
-Over the field, secondary text sits in a quiet zone (6:1); over the static poster it gets a soft
-ground halo.
+Over the field, secondary text sits in a quiet zone (6:1); over the static poster a feathered ground
+wash behind the same zones leaves the lines at the same 25 %.
 
 ## Primitives
 

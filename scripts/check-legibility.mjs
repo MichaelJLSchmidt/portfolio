@@ -17,7 +17,7 @@
 //     of a glacier-bright line (a fixed yardstick: lit lines used to turn glacier; they now stay
 //     neutral and fainter).
 // Pass: WCAG AA, contrast ≥ 4.5:1 for light text over the field (quiet zones fade the lines behind
-// text to a quarter; the poster's text has a ground halo), line strength ≤ 15%; dark text on the
+// text to a quarter, over the poster too), line strength ≤ 15%; dark text on the
 // sheet colour ≥ 4.5:1, and so is light text on an opaque panel, which hides the field.
 //
 //   npm run check:legibility           (a build in out/, Playwright as for npm run test:e2e)

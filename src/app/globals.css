@@ -333,17 +333,33 @@
     }
   }
 
-  /* Over the static poster (Off, posters-only devices, before the field has drawn) there are no
-     quiet zones: text that sits in one gets a soft ground halo instead, so secondary text keeps
-     AA over the strongest line. */
-  :root:not(:has([data-field="on"])) :is([data-quiet-zone], .body-copy):not([data-surface="sheet"] *, [data-surface="sheet"]) {
-    /* Dense near the glyph (two 1 px rings), soft further out. */
-    text-shadow:
-      0 0 1px var(--color-ground),
-      0 0 1px var(--color-ground),
-      0 0 3px var(--color-ground),
-      0 0 6px var(--color-ground),
-      0 0 12px var(--color-ground);
+  /* Over the static poster (Off, posters-only devices, before the field has drawn) the lines don't
+     break for text, so text gets what the field would draw: a ground wash behind each quiet zone
+     that leaves the lines at the field's quiet strength, feathered outwards over the same distance
+     (--quiet-strength, --quiet-feather: contour-field.json). Outermost zones over the backdrop
+     only (the page, not its surfaces), so nothing darkens twice. The wash fades as the field
+     fades in. */
+  .page :is([data-quiet-zone], .body-copy):not(:is([data-quiet-zone], .body-copy, [data-surface="sheet"], [data-band], article, footer, dialog, .surface-copy) *, [data-surface="sheet"], .surface-copy) {
+    position: relative;
+  }
+
+  .page :is([data-quiet-zone], .body-copy):not(:is([data-quiet-zone], .body-copy, [data-surface="sheet"], [data-band], article, footer, dialog, .surface-copy) *, [data-surface="sheet"], .surface-copy)::before {
+    content: "";
+    position: absolute;
+    inset: calc(var(--quiet-feather) * -1);
+    z-index: -1;
+    background: var(--color-ground);
+    opacity: calc(1 - var(--quiet-strength));
+    mask:
+      linear-gradient(to right, transparent, black var(--quiet-feather), black calc(100% - var(--quiet-feather)), transparent),
+      linear-gradient(to bottom, transparent, black var(--quiet-feather), black calc(100% - var(--quiet-feather)), transparent);
+    mask-composite: intersect;
+    pointer-events: none;
+    transition: opacity var(--dur-enter) var(--ease-out);
+  }
+
+  :root:has([data-field="on"]) .page :is([data-quiet-zone], .body-copy)::before {
+    opacity: 0;
   }
 
   /* The sheet: light bands carry ink, never mint. */

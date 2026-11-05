@@ -17,7 +17,8 @@ mounts it once from the root layout.
   200 m on laptops and phones, like the gate.
 - Quiet zones: behind `[data-quiet-zone]` and `.body-copy` the lines fade to 25 % with a 48 px
   feather (`src/field/quiet-zones.ts`), like contours broken under a printed map's labels. Over the
-  static poster there are no quiet zones: those texts get a soft ground halo instead (globals.css).
+  static poster a ground wash behind the same zones does the same (globals.css: `--quiet-strength`
+  and `--quiet-feather` from the field's config); it fades as the field fades in.
 
 ## How it moves
 

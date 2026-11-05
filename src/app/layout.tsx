@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { archivo, archivoItalic, martianMono } from "./fonts";
+import fieldConfig from "@/config/contour-field.json";
 import { cardTerrains } from "@/content/cards";
 import { site } from "@/content/site";
 import { color, gridToCss, tokensToCss } from "@/styles/tokens";
@@ -19,6 +20,9 @@ const isPreview = process.env.NEXT_PUBLIC_PREVIEW === "1";
 
 /** The cascade layers, lowest first; every stylesheet starts with the same statement. */
 const LAYER_ORDER = "@layer reset, tokens, base, layout, components, utilities;";
+
+/** The field's quiet zones (its config), for the poster's ground wash behind text (globals.css). */
+const QUIET = `:root{--quiet-strength:${fieldConfig.quiet.strength};--quiet-feather:${fieldConfig.quiet.featherPx}px}`;
 
 export const metadata: Metadata = {
   title: { default: site.title, template: site.titleTemplate },
@@ -45,7 +49,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     >
       <head>
         {/* The tokens' custom properties, in the tokens layer (globals.css explains the layers). */}
-        <style dangerouslySetInnerHTML={{ __html: `${LAYER_ORDER}@layer tokens{${tokensToCss()}${gridToCss()}}` }} />
+        <style dangerouslySetInnerHTML={{ __html: `${LAYER_ORDER}@layer tokens{${tokensToCss()}${gridToCss()}${QUIET}}` }} />
         <script dangerouslySetInnerHTML={{ __html: motionModeScript }} />
       </head>
       <body>
