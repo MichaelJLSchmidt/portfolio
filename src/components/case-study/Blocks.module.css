@@ -20,9 +20,10 @@
     font-weight: 700;
   }
 
+  /* The note's number in the text: small, so it takes the text colour (AA over the poster too). */
   .noteRef {
     margin-left: 0.15em;
-    color: var(--color-text-2);
+    color: var(--color-text);
     font-family: var(--font-mono);
     font-size: 0.7em;
     font-weight: 600;

@@ -27,7 +27,7 @@ function Paragraph({ block, note }: { block: Extract<Block, { kind: "p" }>; note
         )}
       </p>
       {note && (
-        <aside className={`${styles.note} mono`} aria-label={L.sideNote(note)}>
+        <aside className={`${styles.note} mono`} aria-label={L.sideNote(note)} data-quiet-zone>
           <span aria-hidden="true">{note}</span>
           <span>{block.note}</span>
         </aside>
