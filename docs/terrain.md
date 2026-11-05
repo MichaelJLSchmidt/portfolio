@@ -72,7 +72,8 @@ its terrain.
 `html[data-tier]` (the pre-paint script) is the starting point: "desktop" (a fine pointer and a
 long edge of at least 900 px), "mobile", or "low" (Save-Data, little memory or few cores).
 `field-boot.ts` lowers it to "low" without hardware WebGL2 or after a lost context; "low" shows the
-posters only. `?field=force` skips the low-spec checks (headless browsers); preview builds take
+posters only. The WebGL2 probe runs in a worker (OffscreenCanvas), so creating its context never
+blocks the page; browsers without WebGL2 in workers ask on the page. `?field=force` skips the low-spec checks (headless browsers); preview builds take
 `?tier=desktop|mobile|low`.
 
 ## Checks

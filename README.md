@@ -35,7 +35,7 @@ still to fill.
 | Field                      | A framework-free WebGL2 renderer (`src/field/core.ts`, GLSL strings), shared with the gate; leva for dev-only tuning |
 | Motion                     | React `<ViewTransition>`, CSS (tokens and primitives in `docs/motion.md`), `motion` for the frame loop Lenis runs on |
 | Smooth scroll              | Lenis, fine-pointer desktop in Full only                                            |
-| Fonts                      | Archivo (wdth + wght, italic) and Martian Mono via `next/font/google`, self-hosted; the italic face loads only once italic text nears the screen (`src/lib/italic-face.ts`) |
+| Fonts                      | Archivo (wght only, wdth stays 100; italic) and Martian Mono (wdth + wght) via `next/font/google`, self-hosted; the italic face loads only once italic text nears the screen (`src/lib/italic-face.ts`) |
 | Hosting                    | Netlify: static files, plus one Edge Function (the Basecamp gate) off production   |
 | Terrain                    | Node scripts with geotiff.js and d3-contour; swisstopo services for place data      |
 
