@@ -362,6 +362,13 @@
     opacity: 0;
   }
 
+  /* Without overflow: clip (Safari before 16) the page can't clip the wash: no side feather. */
+  @supports not (overflow-x: clip) {
+    .page :is([data-quiet-zone], .body-copy):not(:is([data-quiet-zone], .body-copy, [data-surface="sheet"], [data-band], article, footer, dialog, .surface-copy) *, [data-surface="sheet"], .surface-copy)::before {
+      inset-inline: 0;
+    }
+  }
+
   /* The sheet: light bands carry ink, never mint. */
   [data-surface="sheet"] {
     background: var(--color-sheet);
@@ -392,6 +399,9 @@
     min-height: 100svh;
     display: flex;
     flex-direction: column;
+    /* The quiet-zone wash (base) reaches past full-width text. Clipped here, not only on the body:
+       the body hands its overflow to the viewport, and phones widen the layout viewport anyway. */
+    overflow-x: clip;
   }
 
   .page > main {
