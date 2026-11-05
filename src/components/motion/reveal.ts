@@ -26,11 +26,14 @@ export function startReveals(root: ParentNode = document): () => void {
     { threshold: 0.15 },
   );
   const still = currentMode() === "still";
-  for (const el of root.querySelectorAll("[data-reveal]")) {
-    if (el.getAttribute("data-reveal-state")) continue;
-    const r = el.getBoundingClientRect();
+  // All reads first, then all writes: one layout for the page, not one per block.
+  const blocks = [...root.querySelectorAll("[data-reveal]")]
+    .filter((el) => !el.getAttribute("data-reveal-state"))
+    .map((el) => ({ el, r: el.getBoundingClientRect() }));
+  const fold = window.innerHeight;
+  for (const { el, r } of blocks) {
     // In the first viewport, on a sheet band (or Off): there from the first paint, no animation.
-    if (still || !r.height || r.top < window.innerHeight || el.closest("[data-band]")) {
+    if (still || !r.height || r.top < fold || el.closest("[data-band]")) {
       set(el, "shown");
       continue;
     }

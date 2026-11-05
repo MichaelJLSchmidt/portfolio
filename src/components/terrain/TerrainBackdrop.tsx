@@ -61,9 +61,10 @@ export function TerrainBackdrop() {
   useEffect(() => {
     if (still || fieldRef.current) return;
     let cancelled = false;
-    whenIdle(() => {
+    whenIdle(async () => {
       if (cancelled || labFrame()) return;
-      const tier = resolveTier();
+      const tier = await resolveTier();
+      if (cancelled) return;
       setState((s) => ({ ...s, tier }));
       if (tier === "low") return;
       import("@/field").then(({ mountField }) => {
