@@ -81,8 +81,10 @@ export async function calm({ browser, base, root, check }) {
     const { context, page } = await newPage();
     await context.addInitScript(() => {
       window.__regions = 0;
-      // A region: the field (its canvas and its backdrop's fades), the page change (the view
-      // transition and the arriving page's parts it choreographs), or a block of the page.
+      // A region: the field (its canvas, its backdrop's fades, and the poster's quiet-zone wash
+      // behind text, which fades as the canvas fades in), the page change (the view transition and
+      // the arriving page's parts it choreographs), or a block of the page.
+      const wash = (a) => a.effect?.pseudoElement === "::before" && a.effect.target?.matches("[data-quiet-zone], .body-copy");
       const region = (el) => (el.closest("[data-field]") ? "field" : el.closest("header, footer, section, article, main > *") ?? el);
       // Colour-only transitions (a header turning solid, a frame's colour) are feedback, not motion.
       const colourOnly = (a) => typeof a.transitionProperty === "string" && /color|background|border|outline|fill|stroke/.test(a.transitionProperty);
@@ -93,6 +95,7 @@ export async function calm({ browser, base, root, check }) {
           if (a.playState !== "running" || a.timeline !== document.timeline || colourOnly(a)) continue;
           const t = a.effect?.target;
           if (a.effect?.pseudoElement?.startsWith("::view-transition")) set.add("page change");
+          else if (wash(a)) set.add("field");
           else if (t && changing && t.closest("main")) set.add("page change");
           else if (t) set.add(region(t));
         }
