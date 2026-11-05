@@ -337,8 +337,11 @@
      quiet zones: text that sits in one gets a soft ground halo instead, so secondary text keeps
      AA over the strongest line. */
   :root:not(:has([data-field="on"])) :is([data-quiet-zone], .body-copy):not([data-surface="sheet"] *, [data-surface="sheet"]) {
+    /* Dense near the glyph (two 1 px rings), soft further out. */
     text-shadow:
-      0 0 2px var(--color-ground),
+      0 0 1px var(--color-ground),
+      0 0 1px var(--color-ground),
+      0 0 3px var(--color-ground),
       0 0 6px var(--color-ground),
       0 0 12px var(--color-ground);
   }
