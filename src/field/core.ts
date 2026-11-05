@@ -229,26 +229,50 @@ function setFilters(gl: WebGL2RenderingContext) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 }
 
-/** Reads the reference texels back from an uploaded texture: they must equal the packed values. */
-function probeOk(gl: WebGL2RenderingContext, tex: WebGLTexture, probe: number[][] | undefined): boolean {
-  if (!probe?.length) return true;
+/**
+ * Reads the reference texels back from an uploaded texture: they must equal the packed values.
+ * The read goes into a pixel buffer and is collected once a fence has passed, so it never stalls
+ * the page (a plain readPixels waits for the GPU to finish everything queued, frames included).
+ */
+function probeOk(gl: WebGL2RenderingContext, tex: WebGLTexture, probe: number[][] | undefined): Promise<boolean> {
+  if (!probe?.length) return Promise.resolve(true);
+  // RGBA8 and RG8 are always colour-renderable in WebGL2, so the framebuffer isn't checked (that
+  // check is a round trip that waits for the GPU too); if a read failed, the buffer stays zero and
+  // the probe fails, which falls back safely.
   const fbo = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
-  let ok = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
-  const px = new Uint8Array(4);
-  if (ok) {
-    for (const [x, y, r, g] of probe) {
-      gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
-      if (px[0] !== r || px[1] !== g) {
-        ok = false;
-        break;
-      }
-    }
-  }
+  const buffer = gl.createBuffer();
+  gl.bindBuffer(gl.PIXEL_PACK_BUFFER, buffer);
+  gl.bufferData(gl.PIXEL_PACK_BUFFER, probe.length * 4, gl.STREAM_READ);
+  probe.forEach(([x, y], i) => gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, i * 4));
+  gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   gl.deleteFramebuffer(fbo);
-  return ok;
+  const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+  if (!sync) {
+    gl.deleteBuffer(buffer);
+    return Promise.resolve(false);
+  }
+  gl.flush();
+  return new Promise((done) => {
+    const poll = () => {
+      const state = gl.isContextLost() ? gl.WAIT_FAILED : gl.clientWaitSync(sync, 0, 0);
+      if (state === gl.TIMEOUT_EXPIRED) return void setTimeout(poll, 8);
+      gl.deleteSync(sync);
+      let ok = state !== gl.WAIT_FAILED;
+      if (ok) {
+        const px = new Uint8Array(probe.length * 4);
+        gl.bindBuffer(gl.PIXEL_PACK_BUFFER, buffer);
+        gl.getBufferSubData(gl.PIXEL_PACK_BUFFER, 0, px);
+        gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
+        ok = probe.every(([, , r, g], i) => px[i * 4] === r && px[i * 4 + 1] === g);
+      }
+      gl.deleteBuffer(buffer);
+      done(ok);
+    };
+    poll();
+  });
 }
 
 /** The raw fallback: gzip(hi bytes, lo bytes) of zigzag residuals against a + b - c, as RG bytes. */
@@ -279,7 +303,7 @@ async function decodeRaw(url: string, width: number, height: number): Promise<Ui
   return rg;
 }
 
-/** A decode that passed its check this session (the read-back stalls the GPU once, not on every page). */
+/** A decode that passed its check this session (checked once per terrain, not on every page). */
 const checked = (src: HeightmapSource, path: string, ok?: boolean): boolean => {
   const key = `summit:hm-ok:${(src.sha ?? src.image).slice(0, 16)}:${path}`;
   try {
@@ -296,11 +320,11 @@ async function loadTexture(gl: WebGL2RenderingContext, src: HeightmapSource): Pr
   const bitmap = await createImageBitmap(await res.blob(), { premultiplyAlpha: "none", colorSpaceConversion: "none" });
   const tex = uploadRGBA(gl, bitmap);
   bitmap.close?.();
-  if (checked(src, "image") || (probeOk(gl, tex, src.probe) && checked(src, "image", true))) return tex;
+  if (checked(src, "image") || ((await probeOk(gl, tex, src.probe)) && checked(src, "image", true))) return tex;
   gl.deleteTexture(tex);
   if (!src.raw || typeof DecompressionStream !== "function") throw new Error(`${src.image}: no exact decode in this browser`);
   const raw = uploadRG(gl, await decodeRaw(src.raw, src.width, src.height), src.width, src.height);
-  if (probeOk(gl, raw, src.probe)) {
+  if (await probeOk(gl, raw, src.probe)) {
     console.warn(`[terrain] ${src.image} decoded to different heights in this browser; using the raw heights.`);
     return raw;
   }
