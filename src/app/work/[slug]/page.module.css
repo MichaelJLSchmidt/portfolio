@@ -75,9 +75,10 @@
     gap: 12px;
   }
 
+  /* The head count: small mono, so it takes the text colour (AA over the poster too). */
   .roster li > span:first-child {
     padding-top: 0.2em;
-    color: var(--color-text-2);
+    color: var(--color-text);
   }
 
   .next {
