@@ -1,7 +1,7 @@
 // What a visit to one page actually transfers, measured in Chromium over the static export (gzip,
 // like the host): on a phone (390×844 at 3x) and a desktop (1440×900), first view (loaded, idle,
 // not scrolled) and after scrolling to the end (every lazy image in), by kind. The contour field
-// (Three.js and the heightmaps, loaded after idle where the device can run it) is listed apart.
+// (its module and the heightmaps, loaded after idle where the device can run it) is listed apart.
 //
 //   npm run report:transfer                       the case-study example (/work/test-project/)
 //   npm run report:transfer -- /work/seilschaft/  any page of the build in out/
@@ -79,7 +79,7 @@ try {
     const requests = new Map();
     const totals = {};
     cdp.on("Network.responseReceived", (e) => requests.set(e.requestId, kind(e.response.url, e.type)));
-    // Three.js arrives as a chunk with a hashed name: scripts are told apart by their content.
+    // The field's module arrives as a chunk with a hashed name: scripts are told apart by their content.
     const pending = new Set();
     cdp.on("Network.loadingFinished", (e) => {
       const k = requests.get(e.requestId) ?? "other";
@@ -87,7 +87,7 @@ try {
       if (k !== "js") return add(k);
       const p = cdp
         .send("Network.getResponseBody", { requestId: e.requestId })
-        .then((r) => add(/WebGLRenderer|ShaderMaterial/.test(r.body) ? "field" : "js"), () => add("js"))
+        .then((r) => add(/uQuietFeather|uHeightA/.test(r.body) ? "field" : "js"), () => add("js"))
         .finally(() => pending.delete(p));
       pending.add(p);
     });

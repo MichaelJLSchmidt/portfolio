@@ -84,7 +84,7 @@ export const keyFigures: { label: string; text: string; in: string[] }[] = [
   { label: "core patterns", text: `${data.inventory.core} of them`, in: ["copy"] },
   { label: "coverage", text: `${data.inventory.coverPct}%`, in: ["copy", "gw-pareto"] },
   { label: "date picker hours", text: `${data.businessCase.datePickerHours} hours`, in: ["copy", "gw-coalition"] },
-  { label: "contributors", text: `${data.team.contributors} contributors`, in: ["copy", "card", "gw-governance"] },
+  { label: "contributors", text: `${data.team.contributors} contributors`, in: ["copy", "gw-governance"] },
   { label: "RFC window", text: `${data.governance.rfcDays}-day`, in: ["copy", "gw-governance"] },
   { label: "products on the system, after", text: `${data.outcomes.products.after} of ${data.landscape.products}`, in: ["copy", "gw-adoption"] },
   { label: "accessibility change", text: `${as(data.audit.changePct)}%`, in: ["copy", "gw-a11y-chart"] },

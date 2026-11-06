@@ -119,18 +119,18 @@ export function Figure({ spec, images, assets, number }: Props) {
     const before = need(assets, spec.before);
     const after = need(assets, spec.after);
     media = (
-      <div className={styles.compare} data-compare data-view="slider" data-reveal="figure" style={{ "--pos": "50%" } as React.CSSProperties}>
+      <div className={styles.compare} data-compare data-view="slider" data-reveal="" style={{ "--pos": "50%" } as React.CSSProperties}>
         {/* Before first: the reading order without JavaScript, and for screen readers. */}
         <div className={styles.compareStage}>
           <div className={styles.compareBefore} data-compare-before>
             <Picture img={before} alt={images[spec.before].alt} sizes={sizes} />
-            <span className={`${styles.compareTag} hud-label`} aria-hidden="true">
+            <span className={`${styles.compareTag} mono`} aria-hidden="true">
               {L.before}
             </span>
           </div>
           <div className={styles.compareAfter}>
             <Picture img={after} alt={images[spec.after].alt} sizes={sizes} />
-            <span className={`${styles.compareTag} hud-label`} aria-hidden="true">
+            <span className={`${styles.compareTag} mono`} aria-hidden="true">
               {L.after}
             </span>
           </div>
@@ -166,7 +166,7 @@ export function Figure({ spec, images, assets, number }: Props) {
     const alt = images[spec.image].alt;
     zoomImage = spec.zoom ? { img, alt } : null;
     media = (
-      <div className={styles.media} data-reveal="figure">
+      <div className={styles.media} data-reveal="">
         <Picture img={img} alt={alt} sizes={sizes} priority={spec.priority} />
         {spec.kind === "hotspots" &&
           spec.notes.map((note, i) => {
@@ -204,10 +204,10 @@ export function Figure({ spec, images, assets, number }: Props) {
       {media}
       {zoomImage && <Zoom {...zoomImage} label={label} caption={spec.caption} />}
       {(spec.caption || spec.long) && (
-        <figcaption className={`${styles.caption} surface-copy`} data-reveal="caption">
+        <figcaption className={`${styles.caption} surface-copy`}>
           {spec.caption && (
             // "FIG. 3 · what it shows · source", in mono.
-            <p id={captionId} className={`${styles.captionText} hud-label`}>
+            <p id={captionId} className={`${styles.captionText} mono`}>
               {label && <span className={styles.figLabel}>{label}</span>}
               {label && <span aria-hidden="true"> · </span>}
               {spec.caption}
@@ -249,10 +249,10 @@ function Zoom({ img, alt, label, caption }: { img: ImageAsset; alt: string; labe
   const avif = largest(img, "avif");
   return (
     <>
-      <a className={`${styles.zoomOpen} hud-label`} href={asset(webp.src)} data-lightbox-fallback>
+      <a className={`${styles.zoomOpen} mono`} href={asset(webp.src)} data-lightbox-fallback>
         {L.openFullSize}
       </a>
-      <button type="button" className={`${styles.zoomOpen} hud-label`} aria-haspopup="dialog" data-lightbox-open hidden>
+      <button type="button" className={`${styles.zoomOpen} mono`} aria-haspopup="dialog" data-lightbox-open hidden>
         <svg viewBox="0 0 16 16" aria-hidden="true">
           <path d="M9.5 1.5h5v5M14.5 1.5 9 7M6.5 14.5h-5v-5M1.5 14.5 7 9" />
         </svg>
@@ -260,24 +260,24 @@ function Zoom({ img, alt, label, caption }: { img: ImageAsset; alt: string; labe
       </button>
       <dialog className={styles.lightbox} aria-labelledby={`${id}title`} data-lightbox data-lenis-prevent>
         <div className={styles.lightboxBar}>
-          <p id={`${id}title`} className="hud-label">
+          <p id={`${id}title`} className="mono">
             {label ?? L.enlarge}
           </p>
           <div className={styles.zoomControls} role="group" aria-label={L.zoomGroup}>
             <button type="button" aria-label={L.zoomOut(100)} data-zoom="out">
               <span aria-hidden="true">−</span>
             </button>
-            <span className={`${styles.zoomLevel} hud-label`} aria-hidden="true" data-zoom-level>
+            <span className={`${styles.zoomLevel} mono`} aria-hidden="true" data-zoom-level>
               100%
             </span>
             <button type="button" aria-label={L.zoomIn(100)} data-zoom="in">
               <span aria-hidden="true">+</span>
             </button>
-            <button type="button" aria-label={L.zoomReset(100)} data-zoom="reset" className="hud-label">
+            <button type="button" aria-label={L.zoomReset(100)} data-zoom="reset" className="mono">
               {L.reset}
             </button>
           </div>
-          <button type="button" className={`${styles.lightboxClose} hud-label`} data-lightbox-close>
+          <button type="button" className={`${styles.lightboxClose} mono`} data-lightbox-close>
             {L.close}
           </button>
         </div>
@@ -287,7 +287,7 @@ function Zoom({ img, alt, label, caption }: { img: ImageAsset; alt: string; labe
             <img alt={alt} width={img.width} height={img.height} data-src={asset(webp.src)} draggable={false} />
           </picture>
         </div>
-        <p className={`${styles.lightboxHint} hud-label`}>{L.zoomHint}</p>
+        <p className={`${styles.lightboxHint} mono`}>{L.zoomHint}</p>
         {caption && (
           <p className={styles.lightboxCaption}>
             {label && <span className={styles.figLabel}>{label} — </span>}

@@ -1,6 +1,6 @@
 // Nothing follows the cursor: no pointermove (or mousemove) listener anywhere in the site but the
-// Summit Card's tilt and foil (TiltDriver) and the lightbox's drag and pinch, which listens only
-// while a pointer is held down. `npm test`.
+// contour field's pointer bump (src/field), the relief-fill wordmark (src/components/relief) and
+// the lightbox's drag and pinch, which listens only while a pointer is held down. `npm test`.
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
@@ -13,15 +13,16 @@ const files = (dir: string): string[] =>
     return statSync(p).isDirectory() ? files(p) : /\.(tsx?|mjs|js)$/.test(p) && !p.endsWith(".test.ts") ? [p] : [];
   });
 
-const ALLOWED = new Set(["components/card/TiltDriver.tsx", "components/case-study/behaviours/lightbox.ts"]);
+/** The background and the wordmark may follow a fine pointer; the lightbox only while one is held down. */
+const ALLOWED = [/^field\//, /^components\/relief\//, /^components\/case-study\/behaviours\/lightbox\.ts$/];
 
 describe("no pointer following", () => {
-  it("pointermove only in the card tilt and the lightbox drag", () => {
+  it("pointermove only in the field, the wordmark and the lightbox drag", () => {
     const found = files(root)
       .map((f) => ({ rel: f.slice(root.length), text: readFileSync(f, "utf8") }))
       .filter(({ text }) => /["'](pointermove|mousemove|pointerrawupdate)["']|on(Pointer|Mouse)Move\b/.test(text))
       .map(({ rel }) => rel)
-      .filter((rel) => !ALLOWED.has(rel));
+      .filter((rel) => !ALLOWED.some((re) => re.test(rel)));
     assert.deepEqual(found, []);
   });
 

@@ -1,10 +1,10 @@
 /**
  * The name source: the only place the display name and the brand are written. Titles, metadata,
- * the manifest, the hero, the HUD, the footer wordmark (generated from `brand` at build time), the
+ * the manifest, the hero, the header, the footer wordmark, the
  * under-construction page and the gate read them from here, so a change of name is one edit.
  */
 const name = "Michael JL Schmidt";
-/** The short brand: the HUD's home link, the footer wordmark, the manifest's short name. */
+/** The short brand: the header's home link, the footer wordmark, the manifest's short name. */
 const brand = "MJLS";
 
 /** Site-wide copy. Components read from here; nothing user-facing is hardcoded in components. */
@@ -19,41 +19,37 @@ export const site = {
   lang: "en",
   /** The home page's own copy is in home.ts. */
   hero: { name },
-  /** Main navigation, the HUD: brand (home) · Work · About, then the switches. */
+  /** The header: brand (home) · Case studies · About · Contact. */
   nav: {
     label: "Main",
     /** The brand link's accessible name; it starts with the visible brand (WCAG 2.5.3). */
     home: `${brand}, home`,
-    work: "Work",
+    caseStudies: "Case studies",
     about: "About",
+    contact: "Contact",
   },
-  hud: {
-    /**
-     * The motion switch. Its visible label is always "Calm map" and is also its name (WCAG 2.5.3
-     * Label in Name); the switch itself shows on or off. The description adds why it is on and
-     * locked when the OS asks for reduced motion.
-     */
-    calm: {
-      label: "Calm map",
-      description: "Reduces motion on this site",
-      forced: "Your device asks for reduced motion, so the map stays still. Change it in your system settings.",
-    },
-    /** Shown only where vibration works (Android); the visible label is its name. */
-    haptics: "Haptics",
+  /** The footer's Motion control: Full · Calm · Off. The OS setting for reduced motion forces Off. */
+  motion: {
+    label: "Motion",
+    options: { full: "Full", calm: "Calm", still: "Off" },
+    forced: "Your device asks for reduced motion, so motion stays off. Change it in your system settings.",
   },
   footer: {
     label: "Site",
+    clock: "Bern",
     credit: "Terrain data © swisstopo",
     creditHref: "https://www.swisstopo.admin.ch/en/terms-of-use-free-geodata-and-geoservices",
-    built: "Built by hand with Next.js, WebGL and Motion",
-    place: "Bern, 2026",
+    copyright: (year: number) => `© ${year} ${name}`,
+    /** The wordmark's survey mark: Interlaken, where the home sheet is centred. */
+    coordinates: "46.686 N 7.863 E",
+    /** The wordmark link's name: it writes an email. */
+    wordmark: (address: string) => `${brand}, write to ${address}`,
   },
   skipLink: "Skip to content",
   notFound: {
-    title: "Page not found",
+    title: "Off the map",
     eyebrow: "404",
-    heading: "Page not found",
-    body: "This page doesn’t exist.",
-    back: "Back to the start page",
+    heading: "Off the map",
+    back: "Back to case studies",
   },
 } as const;

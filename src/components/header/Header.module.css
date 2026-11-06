@@ -1,0 +1,108 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+@layer components {
+  .header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: var(--layer-header);
+    padding-top: env(safe-area-inset-top);
+    background: transparent;
+    transition: background-color var(--dur-fast) linear;
+  }
+
+  /* After 80 px of scroll: the ground at 85 % with a blur behind it. */
+  .header[data-solid] {
+    background: color-mix(in srgb, var(--color-ground) 85%, transparent);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    height: var(--header-h);
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-weight: 800;
+    font-size: 1.125rem;
+    letter-spacing: -0.01em;
+    color: var(--color-text);
+  }
+
+  .links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    list-style: none;
+  }
+
+  .link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    min-width: 44px;
+    justify-content: center;
+    padding-inline: 6px;
+    color: var(--color-text-2);
+    transition: color var(--dur-fast) linear;
+  }
+
+  @media (hover: hover) {
+    .link:hover {
+      color: var(--color-text);
+    }
+  }
+
+  /* The current page: text colour and a 1 px mint underline. */
+  .link[aria-current="page"] {
+    color: var(--color-text);
+  }
+
+  .link[aria-current="page"]::after {
+    content: "";
+    position: absolute;
+    inset: auto 6px 10px;
+    height: var(--stroke-hairline);
+    background: var(--color-glacier);
+  }
+
+  .envelope {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.25;
+  }
+
+  .wide {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .links {
+      gap: 16px;
+    }
+
+    .wide {
+      display: inline;
+    }
+
+    .envelope {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .header,
+    .link {
+      transition: none;
+    }
+  }
+}

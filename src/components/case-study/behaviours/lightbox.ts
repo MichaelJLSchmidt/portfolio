@@ -1,6 +1,9 @@
 import { caseStudyLabels as L } from "@/content/case-study-labels";
 import { haptic } from "@/lib/haptics";
-import { activeViewTransition, stillNavigation } from "@/lib/view-transition";
+import { activeViewTransition } from "@/lib/view-transition";
+
+/** Off: the lightbox opens and closes without a morph. */
+const stillNavigation = () => document.documentElement.getAttribute("data-motion") === "still";
 
 /**
  * Lightbox for a wide figure, on a native <dialog> (Figure.tsx renders the markup):

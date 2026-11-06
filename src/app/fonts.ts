@@ -1,9 +1,9 @@
 import { Archivo, Martian_Mono } from "next/font/google";
 
-// Variable fonts, self-hosted by next/font at build time (latin subset only).
+// Variable fonts, self-hosted by next/font at build time (latin subset only). Archivo stays at
+// wdth 100 (its default), so only its weight axis ships; Martian Mono's labels use wdth 87.5.
 export const archivo = Archivo({
   subsets: ["latin"],
-  axes: ["wdth"],
   display: "swap",
   variable: "--font-archivo",
 });
@@ -11,7 +11,6 @@ export const archivo = Archivo({
 // Italic is only used in card rules text, so it is not preloaded (saves ~100 KB on first paint).
 export const archivoItalic = Archivo({
   subsets: ["latin"],
-  axes: ["wdth"],
   style: "italic",
   display: "swap",
   preload: false,

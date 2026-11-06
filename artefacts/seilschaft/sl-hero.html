@@ -17,7 +17,7 @@
     margin-bottom: 14px;
   }
   .top .title {
-    color: var(--color-paper-dusk);
+    color: var(--color-sheet);
   }
   .panels {
     display: grid;
@@ -27,9 +27,9 @@
   .sheet {
     position: relative;
     padding: 16px 18px 14px;
-    border: 1px solid var(--color-contour);
+    border: 1px solid var(--color-field-line);
     border-radius: 10px;
-    background: var(--color-paper-dusk);
+    background: var(--color-sheet);
     box-shadow: 0 30px 80px -30px rgb(0 0 0 / 0.7);
   }
   .sheet h2 {
@@ -38,7 +38,7 @@
     color: var(--color-ground);
   }
   .sheet h2 span:last-child {
-    color: var(--color-paper-ink-2);
+    color: var(--color-ink-2);
   }
   .sheet svg {
     display: block;
@@ -65,7 +65,7 @@
     font-family: var(--label);
     font-size: 10.5px;
     letter-spacing: 0.08em;
-    fill: var(--color-paper-ink-2);
+    fill: var(--color-ink-2);
   }
 </style>
 <div class="stage contours">
@@ -88,7 +88,7 @@
 </div>
 <script>
   const D = window.DATA;
-  const ink = "#1B1C18", moss = "#2F6B3A", soft = "#5A5C52", glow = "#A33A18";
+  const ink = "#1B1C18", moss = "#1B1C18", soft = "#5A5C52", glow = "#4A4B43";
   const team = (x, y, label) =>
     `<rect x="${x - 26}" y="${y - 14}" width="52" height="28" rx="5" fill="#fff" stroke="${ink}" stroke-width="1.4"/><text class="t" x="${x}" y="${y + 4}" text-anchor="middle">${label}</text>`;
   const person = (x, y, fill, label) =>

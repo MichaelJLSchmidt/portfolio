@@ -2,168 +2,144 @@
 
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { useEffect, useLayoutEffect, useRef, useState, type ComponentType, type CSSProperties } from "react";
-import meta from "@terrain/terrain.json";
-import bern from "@terrain/bern/posters.json";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import fieldMeta from "@terrain/field/field.json";
+import exampleMeta from "@terrain/field/examples.json";
 import { asset } from "@/lib/asset";
 import { whenIdle } from "@/lib/idle";
 import { useMotionMode } from "@/lib/motion-mode";
-import { fieldConfig, posterMedia, type DeviceProfile } from "./field-settings";
-import { fieldStore, useFieldStore } from "./field-store";
-import { BERN, BERN_PORTRAIT_U, routeTerrain } from "./route-terrain";
+import { resolveTier } from "./field-boot";
+import { routeTerrain } from "./route-terrain";
 import styles from "./TerrainBackdrop.module.css";
 
-type FieldComponent = ComponentType<{
-  profile: DeviceProfile;
-  paused: boolean;
-  calm: boolean;
-  onReady: () => void;
-  onContextLost: (final: boolean) => void;
-}>;
+type SiteField = import("@/field").SiteField;
 
-// The motion lab's frames (data-lab-frame) show the primitives alone, without the field. Only
-// builds with the lab carry the check.
+// The motion lab's frames (data-lab-frame) show the primitives alone, without the field.
 const previewable = process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_PREVIEW === "1";
 const labFrame = () => previewable && !!document.querySelector("[data-lab-frame]");
 
 // Dev-only tuning panel: the branch is removed from production builds.
-const DevTuning =
-  process.env.NODE_ENV === "development" ? dynamic(() => import("./DevTuning"), { ssr: false }) : () => null;
+const DevTuning = process.env.NODE_ENV === "development" ? dynamic(() => import("./DevTuning"), { ssr: false }) : () => null;
 
-// Posters at 100 m and 200 m, chosen by the same spacing rule as the field (see posterMedia);
-// Basecamp's at 10 m and 20 m, with the Aare and the zero-point pin.
-const finePoster = meta.posters.find((p) => p.intervalM === 100) ?? meta.poster;
-const coarsePoster = meta.posters.find((p) => p.intervalM === 200) ?? meta.poster;
-const finePosterMedia = posterMedia(meta.heightmaps, finePoster.intervalM, fieldConfig);
-const [bernFine, bernCoarse] = [bern.posters[0], bern.posters[bern.posters.length - 1]];
-const bernFineMedia = posterMedia(bern.heightmaps, bernFine.intervalM, fieldConfig);
+type Poster = { landscape: string; portrait: string; size: [number, number]; sizePortrait: [number, number]; focus: { u: number; v: number; uPortrait?: number } };
+const posters: Record<string, Poster> = {
+  ...((exampleMeta as unknown as { posters?: Record<string, Poster> }).posters ?? {}),
+  ...((fieldMeta as unknown as { posters?: Record<string, Poster> }).posters ?? {}),
+};
+const pct = (n: number) => `${(n * 100).toFixed(2)}%`;
+const terrainIds = Object.keys(posters);
 
 /**
- * Fixed backdrop behind all content. First paint is the static contour poster of the route's
- * terrain (also the still-mode, tier C and no-WebGL fallback, cross-fading in 200 ms on route
- * changes); the WebGL field loads after the page is idle in full and calm (where it holds still
- * and only morphs) and takes over once its first frame is drawn. On a lost WebGL context the
- * poster is back at once. Lives in the root layout: never remounts.
+ * The fixed backdrop behind every page: the living survey. First paint is the poster of the
+ * route's terrain (an AVIF of the field's first frame, so the field can fade in on an identical
+ * frame); the WebGL field (src/field) loads once the page is idle and takes over after its first
+ * frame. A page change crossfades the field to the next terrain (the field's own dim and
+ * crossfade); without the field the posters crossfade. Off shows the poster only: nothing moves,
+ * which is also the pause for WCAG 2.2.2. Lives in the root layout: never remounts.
  */
 export function TerrainBackdrop() {
-  const { mode: motion } = useMotionMode();
-  const still = motion === "still";
+  const { mode } = useMotionMode();
+  const still = mode === "still";
   const pathname = usePathname();
-  const routeId = routeTerrain(pathname);
-  const mode = useFieldStore((s) => s.mode);
-  const shownTerrain = useFieldStore((s) => s.shownTerrain);
-  const tier = useFieldStore((s) => s.tier);
-  const [field, setField] = useState<{ Component: FieldComponent; profile: DeviceProfile } | null>(null);
-  const [lost, setLost] = useState(false);
-  // Basecamp's poster loads once a route needs it, and stays for the cross-fade back.
-  const [bernSeen, setBernSeen] = useState(routeId === BERN);
-  if (routeId === BERN && !bernSeen) setBernSeen(true);
-  const shownPath = useRef(pathname);
+  const terrain = routeTerrain(pathname) ?? "region";
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fieldRef = useRef<SiteField | null>(null);
+  const [state, setState] = useState<{ field: "off" | "on" | "lost"; tier: string | null }>({ field: "off", tier: null });
+  // Posters a route has needed so far stay mounted for the crossfade back.
+  const [seen, setSeen] = useState<string[]>([terrain]);
+  if (!seen.includes(terrain)) setSeen([...seen, terrain]);
 
-  // The route commits: the conductor starts now, alongside the View Transition (layout effects
-  // run inside its update), never holding it.
+  // A route commits: the field starts its dim and crossfade inside the view transition's update.
   useLayoutEffect(() => {
-    const changed = shownPath.current !== pathname;
-    shownPath.current = pathname;
-    fieldStore.set((s) => ({ morphTarget: routeId, routeSeq: s.routeSeq + (changed ? 1 : 0) }));
-  }, [pathname, routeId]);
+    fieldRef.current?.route(terrain);
+  }, [terrain]);
 
   useEffect(() => {
+    fieldRef.current?.setMode(mode);
+  }, [mode]);
+
+  useEffect(() => {
+    if (still || fieldRef.current) return;
     let cancelled = false;
-    // Still mode is tier C on any device: posters, no WebGL at all (the canvas is not rendered;
-    // the field mounts again after).
-    if (still) {
-      fieldStore.set({ mode: "poster", tier: "low" });
-      return;
-    }
-    if (field) {
-      fieldStore.set({ tier: field.profile.tier });
-      return;
-    }
-    whenIdle(() => {
+    whenIdle(async () => {
+      if (cancelled || labFrame()) return;
+      const tier = await resolveTier();
       if (cancelled) return;
-      // The motion lab's frames never show the field: they load nothing for it.
-      if (labFrame()) return;
-      import("./field-boot").then((boot) => {
-        if (cancelled) return;
-        const resolved = boot.resolveTier();
-        fieldStore.set({ tier: resolved });
-        if (resolved === "low") return;
-        const profile = boot.profileFor(resolved);
-        import("./ContourField").then((m) => {
-          if (!cancelled) setField({ Component: m.default, profile });
-        });
+      setState((s) => ({ ...s, tier }));
+      if (tier === "low") return;
+      import("@/field").then(({ mountField }) => {
+        const canvas = canvasRef.current;
+        if (cancelled || !canvas || fieldRef.current) return;
+        try {
+          const mounted = mountField(
+            canvas,
+            { tier, mode, terrain: routeTerrain(window.location.pathname) ?? "region" },
+            {
+              onFirstFrame: () => setState((s) => ({ ...s, field: "on" })),
+              onLost: () => {
+                fieldRef.current?.destroy();
+                fieldRef.current = null;
+                setState((s) => ({ ...s, field: "lost" }));
+              },
+            },
+          );
+          fieldRef.current = mounted;
+          // Preview builds: the hook the e2e scenarios, the legibility check and the dev panel use.
+          if (previewable && mounted) {
+            (window as Window & { __terrain?: unknown }).__terrain = {
+              route: mounted.route,
+              retune: mounted.retune,
+              // A page change pinned half-way (check:legibility's mid-morph pass).
+              freeze: (id: string | null, progress: number) => {
+                mounted.route(id);
+                mounted.field.hold(progress);
+                return true;
+              },
+              frames: () => mounted.field.frames(),
+              state: () => mounted.field.state(),
+              tier,
+            };
+          }
+        } catch {
+          setState((s) => ({ ...s, field: "lost" }));
+        }
       });
     });
     return () => {
       cancelled = true;
     };
-  }, [still, field]);
+    // The field mounts once per visit; later tiers and routes reach it through its own methods.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [still]);
 
-  const showField = mode === "field" && !still && !!field;
-  const focus = meta.region.focus;
+  useEffect(() => () => fieldRef.current?.destroy(), []);
 
+  const fieldOn = state.field === "on" && !still;
   return (
     <>
       <div
         className={styles.backdrop}
         data-chrome=""
-        data-field={lost ? "lost" : showField ? "on" : "off"}
-        data-terrain={showField ? (shownTerrain ?? "region") : undefined}
-        data-poster={routeId === BERN ? "bern" : "region"}
-        data-field-tier={tier ?? undefined}
+        data-field={state.field === "lost" ? "lost" : fieldOn ? "on" : "off"}
+        data-terrain={terrain}
+        data-poster={terrain}
+        data-field-tier={state.tier ?? undefined}
         aria-hidden="true"
       >
-        <div className={styles.layer} data-layer="region">
-          <picture>
-            <source media={finePosterMedia} srcSet={asset(finePoster.file)} />
-            <img
-              className={styles.poster}
-              src={asset(coarsePoster.file)}
-              alt=""
-              width={coarsePoster.width}
-              height={coarsePoster.height}
-              decoding="async"
-              style={{ objectPosition: `${focus.u * 100}% ${focus.v * 100}%` }}
-            />
-          </picture>
-        </div>
-        <div className={styles.layer} data-layer="bern">
-          {bernSeen && (
-            <picture>
-              <source media={bernFineMedia} srcSet={asset(bernFine.file)} />
-              <img
-                className={styles.poster}
-                src={asset(bernCoarse.file)}
-                alt=""
-                width={bernCoarse.width}
-                height={bernCoarse.height}
-                decoding="async"
-                style={{ "--focus-u": `${bern.focus.u * 100}%`, "--focus-u-portrait": `${BERN_PORTRAIT_U * 100}%`, "--focus-v": `${bern.focus.v * 100}%` } as CSSProperties}
-              />
-            </picture>
-          )}
-        </div>
-        {field && !still && (
-          <div className={styles.canvas}>
-            <field.Component
-              profile={field.profile}
-              paused={still}
-              calm={motion === "calm"}
-              onReady={() => {
-                setLost(false);
-                fieldStore.set({ mode: "field" });
-              }}
-              onContextLost={(final) => {
-                setLost(true);
-                fieldStore.set({ mode: "poster", ...(final ? { tier: "low" as const } : {}) });
-                if (final) setField(null);
-              }}
-            />
-          </div>
-        )}
-        <div className={styles.scrim} />
-        <div className={styles.vignette} />
+        {terrainIds
+          .filter((id) => seen.includes(id) && posters[id])
+          .map((id) => {
+            const p = posters[id];
+            // Framed like the field: cover, anchored on the terrain's focus.
+            const position = { "--focus": `${pct(p.focus.u)} ${pct(p.focus.v)}`, "--focus-portrait": `${pct(p.focus.uPortrait ?? p.focus.u)} ${pct(p.focus.v)}` } as CSSProperties;
+            return (
+              <picture key={id} className={styles.layer} data-layer={id} data-shown={id === terrain || undefined} style={position}>
+                <source media="(orientation: portrait)" srcSet={asset(p.portrait)} width={p.sizePortrait[0]} height={p.sizePortrait[1]} />
+                <img className={styles.poster} src={asset(p.landscape)} alt="" width={p.size[0]} height={p.size[1]} decoding="async" fetchPriority={id === terrain ? "high" : "low"} />
+              </picture>
+            );
+          })}
+        {!still && <canvas ref={canvasRef} className={styles.canvas} data-field-canvas="" />}
       </div>
       <DevTuning />
     </>

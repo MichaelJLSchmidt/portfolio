@@ -1,25 +1,15 @@
-// Short review videos of the motion system, recorded in Chromium against the static export in ./out
-// (a build with the motion lab: SITE_MODE=basecamp or a preview):
+// Review videos and screenshots of the motion, recorded in Chromium against the static export in
+// ./out (a build with the examples: SITE_MODE=basecamp or a preview). Five viewports (390×844,
+// 320×568, 768×1024, 1440×900, 2560×1440) × three tiers (Full, Calm, Off), one round trip each:
+// the home page, the cards (a hover on a fine pointer), a card into its case study, a read down
+// the page, the footer wordmark (hovered on a fine pointer), and "Back to case studies".
 //
-//   lab.webm                 the motion lab: the three columns settle, then links, buttons and
-//                            titles are tried in the full column and the frames scroll to the reveals
-//   round-trip-<mode>.webm   in full, calm and still: the deck, a card into its case study, the Next
-//                            project link (hover, keyboard focus, commit) and back to the deck
-//   terrain-card-<mode>.webm, terrain-about-<mode>.webm
-//                            the terrain conductor (docs/terrain.md): home → a card → home and
-//                            home → About (Bern) → home, the link hovered first (pre-warm)
-//   home.webm                the home page from the hero to Get in touch at reading pace: the red
-//                            route, the How I lead drawings, the ridge of cards
-//   about-nav.webm           the HUD's About label morphing into the About H1, the portrait card
-//                            turned over and back, a look down the page, and back
-//   about-<mode>.webm        About in full, calm and still: the career profile, a binder card
-//                            turned over, the field kit
-//   case-study-<mode>.webm   a case study read in full, calm and still: the red route and its blaze,
-//                            the waypoint trail, a decision's fork, the results
-//   case-study-loop.webm     Seilschaft → Test Project → Gratweg → Seilschaft by the Next links
+//   <viewport>-<tier>.webm       the round trip
+//   <viewport>-<tier>-<n>.png    home, cards, the case study, scrolled, the footer, back home
 //
 //   npm run record:motion                       into ./motion-recordings (git-ignored)
 //   npm run record:motion -- --out <folder>
+//   npm run record:motion -- --only 1440x900    one viewport (or tier: --only calm)
 //
 // Playwright as for npm run test:e2e. The field is forced on (?field=force) and drawn by SwiftShader,
 // so its frame rate in the recordings says nothing about real devices.
@@ -31,8 +21,12 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const outArg = process.argv.indexOf("--out");
-const outDir = resolve(root, outArg > -1 ? process.argv[outArg + 1] : "motion-recordings");
+const arg = (name) => {
+  const i = process.argv.indexOf(name);
+  return i > -1 ? process.argv[i + 1] : null;
+};
+const outDir = resolve(root, arg("--out") ?? "motion-recordings");
+const only = arg("--only");
 let playwright;
 try {
   playwright = createRequire(import.meta.url)("playwright");
@@ -40,8 +34,8 @@ try {
   console.error("Playwright is not installed (npm i -D playwright && npx playwright install chromium).");
   process.exit(2);
 }
-if (!existsSync(join(root, "out/lab/index.html"))) {
-  console.error("No motion lab in ./out: build with SITE_MODE=basecamp (or NEXT_PUBLIC_PREVIEW=1) first.");
+if (!existsSync(join(root, "out/work"))) {
+  console.error("No case studies in ./out: build with SITE_MODE=basecamp (or NEXT_PUBLIC_PREVIEW=1) first.");
   process.exit(2);
 }
 mkdirSync(outDir, { recursive: true });
@@ -64,214 +58,94 @@ for (let i = 0; i < 50; i++) {
   await new Promise((r) => setTimeout(r, 100));
 }
 
+const viewports = [
+  { name: "390x844", width: 390, height: 844, mobile: true },
+  { name: "320x568", width: 320, height: 568, mobile: true },
+  { name: "768x1024", width: 768, height: 1024, mobile: true },
+  { name: "1440x900", width: 1440, height: 900 },
+  { name: "2560x1440", width: 2560, height: 1440 },
+];
+const tiers = [
+  { name: "full", motion: "full" },
+  { name: "calm", motion: "calm" },
+  { name: "off", motion: "still" },
+];
+
 const browser = await playwright.chromium.launch({ args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
-const size = { width: 1280, height: 800 };
-
-async function record(name, options, run) {
-  const context = await browser.newContext({ viewport: size, recordVideo: { dir: outDir, size }, ...options });
-  const page = await context.newPage();
-  try {
-    await run(page, context);
-  } finally {
-    const video = page.video();
-    await context.close();
-    if (video) renameSync(await video.path(), join(outDir, `${name}.webm`));
-    console.log(`  ${name}.webm`);
-  }
-}
-
-const pause = (page, ms) => page.waitForTimeout(ms);
-
+let problems = 0;
 try {
-  console.log(`Recording into ${outDir}`);
-  await record("lab", {}, async (page) => {
-    // The lab signals when its three frames have hydrated (networkidle is unreliable there).
-    await page.goto(`${base}/lab/`, { waitUntil: "load" });
-    await page.waitForSelector("html[data-lab-ready]", { state: "attached", timeout: 30000 });
-    await pause(page, 2500);
-    const full = page.frameLocator('iframe[data-lab-column="full"]');
-    await full.locator('[data-primitive="title"] button').first().click();
-    await pause(page, 1200);
-    await full.locator('[data-primitive="link"]').scrollIntoViewIfNeeded();
-    await pause(page, 600);
-    for (const link of await full.locator('a[data-lab-state="rest"]').all()) {
-      await link.hover();
-      await pause(page, 500);
-    }
-    await page.mouse.move(5, 5);
-    await full.locator('[data-primitive="button"] button').first().hover();
-    await pause(page, 400);
-    await page.mouse.down();
-    await pause(page, 300);
-    await page.mouse.up();
-    await pause(page, 600);
-    await full.locator('[data-primitive="reveal"]').scrollIntoViewIfNeeded();
-    await pause(page, 2500);
-  });
-
-  for (const mode of ["full", "calm", "still"]) {
-    const options = { reducedMotion: mode === "still" ? "reduce" : "no-preference" };
-    await record(`round-trip-${mode}`, options, async (page, context) => {
-      await context.addInitScript((calm) => {
-        try {
-          
-          if (calm) localStorage.setItem("summit:calm-map", "1");
-        } catch {}
-      }, mode === "calm");
-      await page.goto(`${base}/?field=force`, { waitUntil: "networkidle" });
-      await pause(page, 2500);
-      await page.mouse.move(640, 300, { steps: 10 });
-      await page.locator("#work-heading").scrollIntoViewIfNeeded();
-      await pause(page, 1200);
-      await page.locator('article[data-slug="test-project"] a').first().click();
-      await pause(page, 3000);
-      const next = page.locator('a[aria-describedby="next-project-label"]').first();
-      await next.scrollIntoViewIfNeeded();
-      await pause(page, 800);
-      await next.hover();
-      await pause(page, 900);
-      await page.mouse.move(5, 5);
-      await pause(page, 600);
-      await next.focus();
-      await page.keyboard.press("Shift+Tab");
-      await page.keyboard.press("Tab");
-      await pause(page, 900);
-      await page.keyboard.press("Enter");
-      await pause(page, 2500);
-      await page.goBack();
-      await pause(page, 1500);
-      await page.goBack();
-      await pause(page, 3000);
-    });
-  }
-
-  for (const mode of ["full", "calm", "still"]) {
-    const options = { reducedMotion: mode === "still" ? "reduce" : "no-preference" };
-    const links = {
-      card: { selector: 'article[data-slug="seilschaft"] a', path: "/work/seilschaft/", terrain: "eiger" },
-      about: { selector: 'header a[href$="/about/"]', path: "/about/", terrain: "bern" },
-    };
-    // SwiftShader and the encoder slow everything down: wait for each arrival (the route, then the
-    // field landing on its terrain) rather than for fixed times, then hold the frame a moment.
-    const arrive = async (page, path, terrain) => {
-      await page.waitForURL((url) => url.pathname.endsWith(path), { timeout: 30000 }).catch(() => {});
-      if (mode !== "still") await page.waitForSelector(`[data-field="on"][data-terrain="${terrain}"]`, { timeout: 30000 }).catch(() => {});
-      await pause(page, 1500);
-    };
-    for (const [name, to] of Object.entries(links)) {
-      await record(`terrain-${name}-${mode}`, options, async (page, context) => {
-        await context.addInitScript((calm) => {
-          try {
-            
-            if (calm) localStorage.setItem("summit:calm-map", "1");
-          } catch {}
-        }, mode === "calm");
-        await page.goto(`${base}/?field=force`, { waitUntil: "networkidle" });
-        await arrive(page, "/", "region");
-        const link = page.locator(to.selector).first();
-        await link.scrollIntoViewIfNeeded();
-        await link.hover();
-        await pause(page, 1200);
-        await link.click();
-        await arrive(page, to.path, to.terrain);
-        await page.goBack();
-        await arrive(page, "/", "region");
-        // The encoder lags behind under SwiftShader: let it catch up before the video closes.
-        await pause(page, 2500);
+  for (const vp of viewports) {
+    for (const tier of tiers) {
+      const tag = `${vp.name}-${tier.name}`;
+      if (only && !tag.includes(only)) continue;
+      // Videos at most 1280 px wide, in the viewport's proportions.
+      const w = Math.min(vp.width, 1280);
+      const size = { width: w, height: Math.round((w * vp.height) / vp.width) };
+      const context = await browser.newContext({
+        viewport: { width: vp.width, height: vp.height },
+        ...(vp.mobile ? { isMobile: true, hasTouch: true, deviceScaleFactor: 2 } : {}),
+        reducedMotion: tier.motion === "still" ? "reduce" : "no-preference",
+        recordVideo: { dir: outDir, size },
       });
-    }
-  }
-  // A visit as a reader takes it: open the site, skim the home page, go to About, follow the work.
-  const visit = async (context) =>
-    context.addInitScript(() => {
-      try {
-        
-      } catch {}
-    });
-  const scrollThrough = async (page, steps, dy, wait) => {
-    for (let i = 0; i < steps; i++) {
-      await page.mouse.wheel(0, dy);
-      await pause(page, wait);
-    }
-  };
-  await record("home", {}, async (page, context) => {
-    await visit(context);
-    await page.goto(`${base}/?field=force`, { waitUntil: "networkidle" });
-    await pause(page, 2500);
-    await scrollThrough(page, 28, 380, 650);
-    await pause(page, 1500);
-  });
-  await record("about-nav", {}, async (page, context) => {
-    await visit(context);
-    await page.goto(`${base}/?field=force`, { waitUntil: "networkidle" });
-    await pause(page, 2000);
-    const hud = page.locator('header a[href$="/about/"]').first();
-    await hud.hover();
-    await pause(page, 700);
-    await hud.click();
-    await pause(page, 3000);
-    const flip = page.locator("#portrait-card").locator("xpath=..").locator("button").first();
-    await flip.click();
-    await pause(page, 1500);
-    await flip.click();
-    await pause(page, 1200);
-    await scrollThrough(page, 8, 420, 600);
-    await page.goBack();
-    await pause(page, 2500);
-    await page.goto(`${base}/work/seilschaft/?field=force`, { waitUntil: "networkidle" });
-    await pause(page, 1500);
-    await hud.click();
-    await pause(page, 3000);
-    await page.goBack();
-    await pause(page, 2500);
-  });
-  for (const mode of ["full", "calm", "still"]) {
-    const options = { reducedMotion: mode === "still" ? "reduce" : "no-preference" };
-    const calmly = async (context) =>
-      context.addInitScript((calm) => {
+      await context.addInitScript((motion) => {
         try {
-          if (calm) localStorage.setItem("summit:calm-map", "1");
+          if (motion === "calm") localStorage.setItem("summit:motion", "calm");
         } catch {}
-      }, mode === "calm");
-    await record(`about-${mode}`, options, async (page, context) => {
-      await calmly(context);
-      await page.goto(`${base}/about/?field=force`, { waitUntil: "networkidle" });
-      await pause(page, 2000);
-      await page.locator("#skills-heading").scrollIntoViewIfNeeded();
-      await pause(page, 1500);
-      await scrollThrough(page, 10, 260, 500);
-      const pocket = page.locator("[data-reveal='turn'] button").first();
-      await pocket.scrollIntoViewIfNeeded();
-      await pause(page, 1200);
-      await pocket.click();
-      await pause(page, 1500);
-      await pocket.click();
-      await pause(page, 1500);
-    });
-    await record(`case-study-${mode}`, options, async (page, context) => {
-      await calmly(context);
-      await page.goto(`${base}/work/seilschaft/?field=force`, { waitUntil: "networkidle" });
-      await pause(page, 2000);
-      await scrollThrough(page, 30, 420, 450);
-      await pause(page, 1500);
-    });
-  }
-  await record("case-study-loop", {}, async (page, context) => {
-    await visit(context);
-    await page.goto(`${base}/work/seilschaft/?field=force`, { waitUntil: "networkidle" });
-    await pause(page, 2500);
-    for (let i = 0; i < 3; i++) {
-      await scrollThrough(page, 4, 600, 450);
-      const next = page.locator('a[aria-describedby="next-project-label"]');
-      await next.scrollIntoViewIfNeeded();
-      await pause(page, 700);
-      await next.hover();
-      await pause(page, 700);
-      await next.click();
-      await pause(page, 3000);
+      }, tier.motion);
+      const page = await context.newPage();
+      const errors = [];
+      page.on("pageerror", (e) => errors.push(e.message));
+      const shot = (n) => page.screenshot({ path: join(outDir, `${tag}-${n}.png`) });
+      const press = (l) => (vp.mobile ? l.tap() : l.click());
+      try {
+        await page.goto(`${base}/?field=force`, { waitUntil: "load" });
+        await page.waitForTimeout(3000);
+        await shot("1-home");
+        await page.evaluate(() => document.getElementById("case-studies").scrollIntoView({ behavior: "smooth" }));
+        await page.waitForTimeout(1800);
+        const card = page.locator("#case-studies article a").nth(1);
+        if (!vp.mobile) {
+          await card.hover();
+          await page.waitForTimeout(1000);
+        }
+        await shot("2-cards");
+        await press(card);
+        await page.waitForURL(/\/work\//);
+        await page.waitForTimeout(2500);
+        await shot("3-case-study");
+        for (let i = 0; i < 6; i++) {
+          await page.mouse.wheel(0, vp.height * 0.8);
+          await page.waitForTimeout(700);
+        }
+        await shot("4-case-study-scrolled");
+        await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" }));
+        await page.waitForTimeout(2000);
+        const mark = page.locator("footer [data-relief-root]");
+        const box = !vp.mobile && (await mark.count()) ? await mark.boundingBox() : null;
+        if (box) {
+          await page.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.5);
+          await page.waitForTimeout(1500);
+        }
+        await shot("5-footer");
+        const back = page.locator('nav[aria-label="Next case study"] a[data-back]');
+        await back.scrollIntoViewIfNeeded();
+        await press(back);
+        await page.waitForURL((u) => u.pathname === `${basePath}/`);
+        await page.waitForTimeout(2000);
+        await shot("6-back-home");
+      } catch (e) {
+        errors.push(`script: ${e.message.split("\n")[0]}`);
+      }
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth).catch(() => -1);
+      const video = page.video();
+      await context.close();
+      if (video) renameSync(await video.path(), join(outDir, `${tag}.webm`));
+      if (errors.length || overflow > 0) problems++;
+      console.log(`  ${tag}.webm  overflow ${overflow} px, ${errors.length ? errors.join(" | ") : "no errors"}`);
     }
-  });
+  }
 } finally {
   await browser.close();
   server.kill();
 }
+process.exit(problems ? 1 : 0);

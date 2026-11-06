@@ -18,8 +18,10 @@ export type PageModel = {
   contact: PageLink[];
   /** Shown instead of a contact link whose URL is still missing (preview builds only). */
   placeholder: (label: string) => string;
-  /** The short brand in the bar at the top (the name source's `brand`). */
+  /** The short brand: the page's mark (the name source's `brand`). */
   brand: string;
+  /** The mark's outline colour (text-3). */
+  outline: string;
   access: {
     heading: string;
     label: string;
@@ -69,30 +71,32 @@ function contactList(page: PageModel): string {
       ? `<li><a href="${escapeHtml(link.href)}"${link.href.startsWith("http") ? ' rel="me"' : ""}>${escapeHtml(link.label)}</a></li>`
       : `<li><span class="pending">${escapeHtml(page.placeholder(link.label))}</span></li>`,
   );
-  return `<ul class="contact">${items.join("")}</ul>`;
+  return `<ul class="contact" data-quiet-zone>${items.join("")}</ul>`;
 }
 
 function accessForm(page: PageModel, form: FormState): string {
   const { access } = page;
   if (form.state === "closed") {
-    return `<section class="access" aria-labelledby="access-title"><h2 id="access-title" class="label">${escapeHtml(access.heading)}</h2><p class="closed">${escapeHtml(access.closed)}</p></section>`;
+    return `<section class="access" aria-labelledby="access-title"><h2 id="access-title" class="visually-hidden">${escapeHtml(access.heading)}</h2><p class="closed">${escapeHtml(access.closed)}</p></section>`;
   }
   const error = form.state === "error";
+  // "Look around →": the arrow steps up and right on hover, like the site's survey button.
+  const [submit, arrow] = access.submit.match(/^(.*?)\s*(→)?$/)!.slice(1);
   return [
-    `<section class="access" aria-labelledby="access-title">`,
-    `<h2 id="access-title" class="label">${escapeHtml(access.heading)}</h2>`,
+    `<section class="access" aria-labelledby="access-title" data-quiet-zone>`,
+    `<h2 id="access-title" class="visually-hidden">${escapeHtml(access.heading)}</h2>`,
     `<form method="post" action="${escapeHtml(form.action)}">`,
     `<input type="hidden" name="next" value="${escapeHtml(form.next)}">`,
     `<input type="text" name="username" value="${escapeHtml(access.username)}" autocomplete="username" hidden>`,
-    `<label for="password">${escapeHtml(access.label)}</label>`,
+    `<label for="password" class="label">${escapeHtml(access.label)}</label>`,
     `<div class="field">`,
-    // The underline draws under the field on focus (.line).
-    `<span class="input"><input id="password" name="password" type="password" autocomplete="current-password" required maxlength="1024"`,
+    `<input id="password" name="password" type="password" autocomplete="current-password" required maxlength="1024"`,
     error ? ` aria-invalid="true" aria-describedby="access-error" autofocus>` : ">",
-    `<span class="line" aria-hidden="true"></span></span>`,
-    `<button type="submit" data-pending="${escapeHtml(access.pending)}">${escapeHtml(access.submit)}</button>`,
+    `<button type="submit" data-pending="${escapeHtml(access.pending)}">${escapeHtml(submit)}${arrow ? `<span data-arrow aria-hidden="true">${arrow}</span>` : ""}</button>`,
     `</div>`,
-    error ? `<p id="access-error" class="error" role="alert">${escapeHtml(access.error)}</p>` : "",
+    error
+      ? `<p id="access-error" class="error" role="alert"><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7.5"/><path d="M9 4.8v5.4M9 12.4v.8"/></svg><span>${escapeHtml(access.error)}</span></p>`
+      : "",
     `</form>`,
     `</section>`,
   ].join("");
@@ -116,17 +120,20 @@ export function renderPage(page: PageModel, form: FormState): string {
   const credit = page.credit.href
     ? `<a href="${escapeHtml(page.credit.href)}">${escapeHtml(page.credit.label)}</a>`
     : escapeHtml(page.credit.label);
+  // The mark is the brand; the H1 names the person (read once, the brand hidden from it).
   const body = [
-    `<div class="terrain" aria-hidden="true"><div class="poster"></div></div>`,
-    `<header class="hud label">`,
-    `<p class="brand">${escapeHtml(page.brand)}</p>`,
-    `</header>`,
+    `<div class="terrain" aria-hidden="true"><div class="poster"></div><canvas data-field-canvas></canvas></div>`,
     `<main>`,
-    `<h1 class="name">${escapeHtml(page.name)}</h1>`,
-    `<p class="role">${escapeHtml(page.role)}</p>`,
-    `<p class="status">${escapeHtml(page.status)}</p>`,
-    contactList(page),
+    // The relief fill's stack (the script adds its canvas and construction layer) and filters.
+    `<h1 class="mark" data-relief-root data-quiet-zone>`,
+    `<span class="relief-stack" data-relief-stack aria-hidden="true"><span class="relief-fill" data-relief-fill>${escapeHtml(page.brand)}</span><span class="relief-text" data-relief-text>${escapeHtml(page.brand)}</span></span>`,
+    `<span class="visually-hidden">${escapeHtml(page.name)}</span>`,
+    `</h1>`,
+    `<svg class="defs" width="0" height="0" aria-hidden="true" focusable="false"><filter id="relief-outline" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB"><feMorphology in="SourceAlpha" operator="dilate" radius="1" result="grown"/><feComposite in="grown" in2="SourceAlpha" operator="out" result="ring"/><feFlood flood-color="${escapeHtml(page.outline)}"/><feComposite in2="ring" operator="in"/></filter></svg>`,
+    `<p class="role label" data-quiet-zone>${escapeHtml(page.role)}</p>`,
+    `<p class="status" data-quiet-zone>${escapeHtml(page.status)}</p>`,
     accessForm(page, form),
+    contactList(page),
     `</main>`,
     `<footer class="label">${credit}</footer>`,
     `<script>${page.script}</script>`,

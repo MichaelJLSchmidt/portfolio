@@ -25,11 +25,11 @@ export function Logbook({ caption, columns, rows, every = 5, className, id }: Lo
   return (
     <div className={className ? `${styles.wrap} ${className}` : styles.wrap}>
       <table className={styles.table} role="table" id={id}>
-        <caption className={`${styles.caption} hud-label`}>{caption}</caption>
+        <caption className={`${styles.caption} mono`}>{caption}</caption>
         <thead role="rowgroup">
           <tr role="row">
             {columns.map((c) => (
-              <th key={c} scope="col" role="columnheader" className="hud-label">
+              <th key={c} scope="col" role="columnheader" className="mono">
                 {c}
               </th>
             ))}
@@ -38,7 +38,7 @@ export function Logbook({ caption, columns, rows, every = 5, className, id }: Lo
         <tbody role="rowgroup">
           {rows.map((cells, i) => (
             <tr key={`${cells[0]}-${i}`} role="row" data-index={(i + 1) % every === 0 ? "" : undefined} style={{ "--i": i } as CSSProperties}>
-              <th scope="row" role="rowheader" className={`${styles.mark} hud-label`}>
+              <th scope="row" role="rowheader" className={`${styles.mark} mono`}>
                 {cells[0]}
               </th>
               {cells.slice(1).map((cell, j) => (

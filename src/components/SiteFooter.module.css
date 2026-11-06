@@ -3,68 +3,161 @@
 @layer components {
   .footer {
     position: relative;
+    margin-top: var(--space-section);
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+    border-top: var(--stroke-hairline) solid var(--color-line);
+    /* Opaque: the desk's edge. The field stops at the footer, so its small meta text (text-2,
+       text-3) always reads on plain ground. */
+    background: var(--color-ground);
+  }
+
+  .inner {
+    display: grid;
+    gap: clamp(48px, 6vw, 96px);
+    padding-top: clamp(48px, 6vw, 96px);
+  }
+
+  .contact {
+    display: grid;
+    gap: 16px;
+    max-width: 52rem;
+  }
+
+  .line {
+    color: var(--color-text-2);
+  }
+
+  .actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px 24px;
-    margin-top: 48px;
-    padding: 40px var(--gutter) max(24px, env(safe-area-inset-bottom));
-    color: var(--color-paper-dusk);
-  }
-
-  /* The top edge: the Interlaken → Jungfrau elevation profile as a contour-coloured line. It
-     traces from the left once as the footer scrolls into view (data-reveal="line"). */
-  .edge {
-    position: absolute;
-    inset: -40px 0 auto;
-    width: 100%;
-    height: 40px;
-    overflow: visible;
-    pointer-events: none;
-  }
-
-  .edge path {
-    fill: none;
-    stroke: var(--color-contour);
-    stroke-width: 1px;
-    vector-effect: non-scaling-stroke;
-  }
-
-  .wordmark {
-    flex: none;
+    gap: 16px 24px;
+    margin-top: 8px;
   }
 
   .email {
-    flex: 0 0 100%;
-    margin: 0 0 8px;
-    font-size: var(--type-body-size);
+    font-size: var(--type-h3-size);
+    font-weight: var(--type-h3-wght);
+    overflow-wrap: anywhere;
   }
 
-  .credits {
+  .linkedin {
+    color: var(--color-text-2);
+  }
+
+  /* The wordmark (ReliefFill): the brand, sized by the screen, never by its length. Room below
+     for the construction layer's coordinates. */
+  .wordmark {
+    justify-self: start;
+    margin-bottom: 24px;
+    font-size: clamp(5rem, 22vw, 20rem);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 0.9;
+    overflow-wrap: anywhere;
+  }
+
+  .meta {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 24px;
+    color: var(--color-text-2);
   }
 
-  .sep {
-    display: none;
+  .metaItem {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
   }
 
-  /* Phones only: from the small breakpoint the haptics switch sits in the HUD. */
-  @media (min-width: 640px) {
-    .credits {
-      flex-direction: row;
-      flex-wrap: wrap;
-      gap: 0 0.6em;
+  /* Copy address: the wider of its two labels reserves the button's width. */
+  .copyLabel {
+    display: inline-grid;
+  }
+
+  .copyLabel > * {
+    grid-area: 1 / 1;
+  }
+
+  .copyLabel > :last-child,
+  .copyLabel[data-copied] > :first-child {
+    visibility: hidden;
+  }
+
+  .copyLabel[data-copied] > :last-child {
+    visibility: visible;
+  }
+
+  /* The toast: a status message at the bottom of the screen, on the raised ground with a hairline.
+     It rises in over --dur-enter (Calm: fades; Off: fades within --dur-still). */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: max(24px, env(safe-area-inset-bottom));
+    z-index: var(--layer-overlay);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: min(32rem, calc(100vw - 32px));
+    padding: 6px 6px 6px 16px;
+    border: var(--stroke-hairline) solid var(--color-line);
+    background: var(--color-ground-raised);
+    translate: -50% 0;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .toast[data-open] {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .toastText {
+    margin: 0;
+    text-transform: none;
+    color: var(--color-text);
+  }
+
+  .toastClose {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: transparent;
+    color: var(--color-text-2);
+    cursor: pointer;
+    font-size: 1.25rem;
+  }
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(var(--dist-rise));
+    }
+  }
+
+  @keyframes toast-fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :root[data-motion="full"] .toast[data-open] {
+      animation: toast-in var(--dur-enter) var(--ease-out);
     }
 
-    .sep {
-      display: inline;
+    :root[data-motion="calm"] .toast[data-open] {
+      animation: toast-fade calc(var(--dur-enter) * 0.7) var(--ease-out);
     }
+  }
 
-    .haptics.haptics {
-      display: none;
-    }
+  :root[data-motion="still"] .toast[data-open] {
+    animation: toast-fade var(--dur-still) linear;
   }
 }

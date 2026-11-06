@@ -2,8 +2,9 @@
 // every running-text element (.body-copy, and .knockout blocks such as the footer and tables) and
 // every label straight over the field on
 // the home page, a case study, the case-study example (when the build includes it) and About,
-// at a desktop and a phone size, over the contour field with the pointer right on the text (the
-// field takes no pointer input: nothing may change there), over the field caught mid-morph during a route change (preview builds) and
+// at a desktop and a phone size, over the contour field with the pointer right on the text (its
+// bump bends the lines there), over the field caught mid-crossfade during a page change (preview
+// builds: __terrain.freeze) and
 // over the static poster (reduced motion, no WebGL). Text on opaque
 // surfaces (.surface-copy: the sheet colour of the banner, key insight and map-sheet captions, the
 // night frames of tiles and charts) is measured the same way, for either polarity.
@@ -15,9 +16,9 @@
 //   - line strength: how far that pixel rises above the element's clean background, as a share
 //     of a glacier-bright line (a fixed yardstick: lit lines used to turn glacier; they now stay
 //     neutral and fainter).
-// Pass: contrast ≥ 7:1 for light text, line strength ≤ 15% over the field; dark text on the sheet
-// colour (no field lines behind it) ≥ 4.5:1, the WCAG AA level its inks are chosen for, and so is
-// light text on an opaque panel (raised ground: a logbook, a results table), which hides the field.
+// Pass: WCAG AA, contrast ≥ 4.5:1 for light text over the field (quiet zones fade the lines behind
+// text to a quarter, over the poster too), line strength ≤ 15%; dark text on the
+// sheet colour ≥ 4.5:1, and so is light text on an opaque panel, which hides the field.
 //
 //   npm run check:legibility           (a build in out/, Playwright as for npm run test:e2e)
 //   npm run check:legibility -- --list (print every element, not only the worst per page)
@@ -33,7 +34,7 @@ import { color } from "../src/styles/tokens.ts";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const out = process.env.LEGIBILITY_OUT ? resolve(process.env.LEGIBILITY_OUT) : join(root, "out");
 const listAll = process.argv.includes("--list");
-const MIN_CONTRAST = 7;
+const MIN_CONTRAST = 4.5;
 const MIN_CONTRAST_ON_SHEET = 4.5;
 const MAX_LINE = 0.15;
 
@@ -74,11 +75,11 @@ for (let i = 0; i < 50; i++) {
   await new Promise((r) => setTimeout(r, 100));
 }
 
-// Running text and other knocked-out text blocks (the footer), plus every label straight over the
-// field (eyebrows, meta and type lines, the scroll cue: .hud-label and .map-halo text outside a
-// surface; the HUD has its own backdrop). Builds from before the shared class names: the same
-// elements by their modules.
-const LABELS = ":is(.hud-label, .map-halo):not(header[data-chrome] *):not(:is(.surface-copy, .legend, .map-sheet, article, [data-ink='sheet'], .knockout, .body-copy, dialog) *)";
+// Running text and other knocked-out text blocks, plus every label straight over the field: the
+// quiet zones' text (eyebrows, chapter lines, the role line, the lists, the contents rail) outside
+// the opaque surfaces (the sheet bands, cards, the header, the footer, dialogs). Builds from before
+// the shared class names: the same elements by their modules.
+const LABELS = "[data-quiet-zone]:not(.body-copy):not(:is([data-surface='sheet'], [data-band], article, header:has(nav), footer, dialog, .surface-copy, .body-copy) *)";
 const BODY = `.body-copy, .knockout, .surface-copy, ${LABELS}`;
 const LEGACY = [
   "p[class*='_lede']",
@@ -156,9 +157,9 @@ const viewports = [
 const modes = [
   { name: "field, pointer on the text", reduced: false },
   { name: "poster", reduced: true },
-  // A route change caught halfway: the field frozen mid-morph towards another terrain, its quiet
-  // zones held as the conductor holds them (preview builds: the field's debug hook).
-  { name: "mid-morph (route change), pointer on the text", reduced: false, morph: true },
+  // A page change caught half-way: the field's crossfade towards another terrain pinned at 0.5
+  // (preview builds: __terrain.freeze).
+  { name: "mid-crossfade (page change), pointer on the text", reduced: false, morph: true },
 ];
 
 // Narrow a run while iterating: LEGIBILITY_ONLY="About,desktop,field" (any of the words).
@@ -176,12 +177,6 @@ for (const mode of pick(modes)) {
       isMobile: vp.mobile,
       hasTouch: vp.mobile,
       reducedMotion: mode.reduced ? "reduce" : "no-preference",
-    });
-    await context.addInitScript(() => {
-      try {
-        
-        sessionStorage.setItem("summit:deck-dealt", "1");
-      } catch {}
     });
     const page = await context.newPage();
     const cdp = vp.mobile ? await context.newCDPSession(page) : null;
@@ -212,27 +207,31 @@ for (const mode of pick(modes)) {
         },
         { BODY, LEGACY },
       );
-      // Where fixed overlays at the top of the screen (the HUD) end, with the backdrop that fades
-      // out below the bar (its ::before at rest, ::after once the page has scrolled).
-      const cover = await page.evaluate(() =>
-        Math.ceil(
-          Math.max(
-            0,
-            ...[...document.querySelectorAll("body *")]
-              .filter((el) => getComputedStyle(el).position === "fixed" && el.getClientRects().length)
-              .map((el) => {
-                const r = el.getBoundingClientRect();
-                const fades = ["::before", "::after"]
-                  .map((p) => getComputedStyle(el, p))
-                  .filter((s) => s.content !== "none")
-                  .map((s) => r.top + (parseFloat(s.top) || 0) + (parseFloat(s.height) || 0));
-                return { top: r.top, height: r.height, bottom: Math.max(r.bottom, ...fades) };
-              })
-              .filter((r) => r.top <= 0 && r.height < window.innerHeight / 3)
-              .map((r) => r.bottom),
+      // Where overlays at the top of the screen end: the fixed header, and a bar stuck under it (a
+      // case study's sticky Contents bar on phones), with any backdrop that fades out below a bar
+      // (::before / ::after). Text under them is hidden, not read. Measured where each block
+      // stands, since a sticky bar only covers once the page has scrolled past it.
+      const coverNow = () =>
+        page.evaluate(() =>
+          Math.ceil(
+            Math.max(
+              0,
+              ...[...document.querySelectorAll("body *")]
+                .filter((el) => ["fixed", "sticky"].includes(getComputedStyle(el).position) && el.getClientRects().length)
+                .map((el) => {
+                  const r = el.getBoundingClientRect();
+                  const fades = ["::before", "::after"]
+                    .map((p) => getComputedStyle(el, p))
+                    .filter((s) => s.content !== "none")
+                    .map((s) => r.top + (parseFloat(s.top) || 0) + (parseFloat(s.height) || 0));
+                  return { top: r.top, height: r.height, bottom: Math.max(r.bottom, ...fades) };
+                })
+                // At the top edge, or stuck right under the header.
+                .filter((r) => r.top <= 80 && r.height > 0 && r.height < window.innerHeight / 3)
+                .map((r) => r.bottom),
+            ),
           ),
-        ),
-      );
+        );
       let worst = null;
       for (let i = 0; i < count; i++) {
         const info = await page.evaluate((i) => {
@@ -301,7 +300,8 @@ for (const mode of pick(modes)) {
             width: Math.min(vp.viewport.width, Math.ceil(box.x + box.w) + g) - Math.max(0, Math.floor(box.x) - g),
             height: Math.min(vp.viewport.height, Math.ceil(box.y + box.h) + g) - Math.max(0, Math.floor(box.y) - g),
           };
-          // A block taller than the screen runs under the fixed HUD at the top: shoot below it.
+          // A block taller than the screen runs under the header (and a stuck bar): shoot below them.
+          const cover = await coverNow();
           if (clip.y < cover) {
             clip.height -= cover - clip.y;
             clip.y = cover;

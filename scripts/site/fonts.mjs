@@ -32,9 +32,11 @@ const LATIN =
   range(0x100, 0x17f) +
   "‐–—‘’‚“”„•…′″‹›€←↑→↓";
 
+// Archivo stays at wdth 100 everywhere (tokens.ts); only the weight differs between roles.
+const ARCHIVO_WDTH = 100;
 const instances = [
-  { file: "archivo-display.woff2", source: "archivo", axes: { wdth: type.display.wdth, wght: type.display.wght } },
-  { file: "archivo-text.woff2", source: "archivo", axes: { wdth: type.body.wdth, wght: type.body.wght } },
+  { file: "archivo-display.woff2", source: "archivo", axes: { wdth: ARCHIVO_WDTH, wght: type.display.wght } },
+  { file: "archivo-text.woff2", source: "archivo", axes: { wdth: ARCHIVO_WDTH, wght: type.body.wght } },
   { file: "martian-mono.woff2", source: "martian", axes: { wdth: type.mono.wdth, wght: type.mono.wght } },
 ];
 

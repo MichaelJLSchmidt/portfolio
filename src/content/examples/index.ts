@@ -1,4 +1,4 @@
-import type { SummitCardData } from "@/content/cards";
+import type { CardData } from "@/content/cards";
 import { card as gratweg } from "./gratweg/card";
 import { card as seilschaft } from "./seilschaft/card";
 import { card as testProject } from "./test-project/card";
@@ -13,12 +13,9 @@ import { card as testProject } from "./test-project/card";
  *
  * This module is small on purpose (the deck imports it); the long-form copy is in ./case-studies.
  */
-// Deck order, and the Next project loop: the panorama seen from Interlaken, left to right: the
+// Card order, and the Next case study loop: the panorama seen from Interlaken, left to right: the
 // Eiger (Seilschaft), the Mönch (Test Project), the Jungfrau (Gratweg).
-export const exampleCards: SummitCardData[] = [seilschaft, testProject, gratweg];
-
-/** The examples' card terrains, in their own module (./terrains). */
-export { exampleTerrains } from "./terrains";
+export const exampleCards: CardData[] = [seilschaft, testProject, gratweg];
 
 /** Each example's encoded images under public/, by slug. */
 export const exampleMedia: Record<string, string> = {

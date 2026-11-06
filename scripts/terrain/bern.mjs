@@ -1,35 +1,33 @@
 // The About terrain: a 12 × 9 km window of swisstopo elevation around the zero point of the Swiss
 // coordinate system (LV95 E 2'600'000 / N 1'200'000, the old observatory in Bern) that also holds
-// the Aare through Bern, Ittigen and the Bantiger (the About climb), and its posters. Configured by
+// the Aare through Bern, Ittigen and the Bantiger (the About climb). Configured by
 // scripts/terrain/bern.config.json; the field frames it on the zero point.
 //
 //   npm run terrain:bern                 build from the cached download (fetches once if missing)
 //   npm run terrain:bern -- --refresh    re-download the elevation window and the river
 //   npm run terrain:bern -- --placeholder  skip the network: seeded noise, flagged as a placeholder
 //
-// Outputs (public/terrain/bern, committed): heightmap-{1536,800}.webp (16-bit heights in R+G,
-// lossless) with .bin raw-height fallbacks, contours-{10,20}.svg posters with the river and the
-// zero-point pin, bern.json (metadata the field imports: encoding, reference texels, interval
-// set, river path in terrain coordinates, the altitude at the zero point and the source), and two
-// small extracts: summary.json (the readout) and posters.json (the backdrop's posters). The
+// Outputs (terrain/bern, committed; the site never loads them): heightmap-{1536,800}.webp
+// (16-bit heights in R+G, lossless) with .bin raw-height fallbacks and bern.json (encoding,
+// reference texels, interval set, the river in terrain coordinates, the altitude at the zero point
+// and the source). The field's own map is derived from them (npm run terrain:field). The
 // window is only ~6 MB of the swissALTIRegio COG; the river comes from swissTLM3D through
 // api3.geo.admin.ch. If that request fails the river is traced along the DEM's valley floor
 // (said so in bern.json), and without elevation data there is no river at all.
+import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
-import { color } from "../../src/styles/tokens.ts";
 import { readWindow, resolveCogUrl } from "./lib/source.mjs";
 import { fillGaps, gaussianBlur, minMax, resampleArea, resampleCubic, sampleBilinear } from "./lib/grid.mjs";
-import { isobands, ringsToLines, simplify, toPathData } from "./lib/contours.mjs";
+import { simplify } from "./lib/contours.mjs";
 import { seededTerrain } from "./lib/noise.mjs";
 import { decodeRawHeights, encodeLosslessWebp, encodeRawHeights, gradientPercentiles, packHeightRgb, probeTexels, rasterHash } from "./lib/heightmap.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const cfg = JSON.parse(readFileSync(join(root, "scripts/terrain/bern.config.json"), "utf8"));
-const field = JSON.parse(readFileSync(join(root, "src/config/contour-field.json"), "utf8"));
-const outDir = join(root, "public/terrain", cfg.id);
+const outDir = join(root, "terrain", cfg.id);
 const cacheDir = join(root, "scripts/terrain/.cache");
 const args = new Set(process.argv.slice(2));
 const log = (...m) => console.log(...m);
@@ -40,7 +38,7 @@ function write(name, data) {
   writeFileSync(join(outDir, name), data);
   const bytes = Buffer.byteLength(data);
   const gzipBytes = gzipSync(data, { level: 9 }).length;
-  log(`  wrote public/terrain/${cfg.id}/${name}  ${(bytes / 1024).toFixed(1)} KB  (${(gzipBytes / 1024).toFixed(1)} KB gz)`);
+  log(`  wrote terrain/${cfg.id}/${name}  ${(bytes / 1024).toFixed(1)} KB  (${(gzipBytes / 1024).toFixed(1)} KB gz)`);
   return { bytes, gzipBytes };
 }
 
@@ -332,52 +330,6 @@ if (!source.placeholder) {
 }
 
 // ---------------------------------------------------------------------------
-// 4. Posters (still mode, tier C): contours, the river in ice, the zero-point pin in glacier
-// ---------------------------------------------------------------------------
-const range = (from, to, step) => {
-  const out = [];
-  for (let v = from; v <= to + 1e-9; v += step) out.push(round(v, 3));
-  return out;
-};
-const posters = [];
-{
-  const p = cfg.poster;
-  const w = p.gridWidth, h = Math.round((w * spanN) / spanE);
-  const values = gaussianBlur(resampleArea(grid.data, grid.width, grid.height, w, h), w, h, p.blurSigmaM / (spanE / w));
-  const riverPath = river
-    ? river.pieces
-        .map((l) => {
-          const pts = l.map(([u, v]) => [round(u * w, 1), round(v * h, 1)]);
-          return `M${pts[0].join(" ")}L${pts.slice(1).map((q) => q.join(" ")).join(" ")}`;
-        })
-        .join("")
-    : "";
-  // The pin: a small crosshair with a gap at the centre, ~1.6% of the frame.
-  const [px, py] = toUv([cfg.zeroPoint.e, cfg.zeroPoint.n]).map((v, i) => v * (i ? h : w));
-  const r = w * 0.016, gap = r * 0.35;
-  const pin = `M${round(px - r, 1)} ${round(py, 1)}H${round(px - gap, 1)}M${round(px + gap, 1)} ${round(py, 1)}H${round(px + r, 1)}M${round(px, 1)} ${round(py - r, 1)}V${round(py - gap, 1)}M${round(px, 1)} ${round(py + gap, 1)}V${round(py + r, 1)}`;
-  const stroke = (d, c, width, opacity) =>
-    d ? `<path d="${d}" fill="none" stroke="${c}" stroke-opacity="${opacity}" stroke-width="${width}" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` : "";
-  for (const interval of p.intervalsM) {
-    let regular = "", index = "";
-    for (const band of isobands(values, w, h, range(Math.ceil(minElev / interval) * interval, maxElev, interval))) {
-      const d = toPathData(ringsToLines(band, w, h), { tolerance: p.simplifyTolerance });
-      if (Math.round(band.value / interval) % cfg.indexEvery === 0) index += d;
-      else regular += d;
-    }
-    const svg =
-      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice">` +
-      stroke(regular, color.contour, 1, field.desktop.lineOpacity) +
-      stroke(index, color.contour, 1.5, field.desktop.indexOpacity) +
-      stroke(riverPath, color.ice, 1.5, 0.9) +
-      stroke(pin, color.glacier, 1.25, 0.9) +
-      `</svg>\n`;
-    const file = `contours-${interval}.svg`;
-    posters.push({ file: `/terrain/${cfg.id}/${file}`, intervalM: interval, width: w, height: h, ...write(file, svg) });
-  }
-}
-
-// ---------------------------------------------------------------------------
 // 5. Metadata
 // ---------------------------------------------------------------------------
 const [zu, zv] = toUv([cfg.zeroPoint.e, cfg.zeroPoint.n]);
@@ -402,26 +354,11 @@ const meta = {
   intervalsM: cfg.intervalsM,
   indexEvery: cfg.indexEvery,
   heightmaps,
-  posters,
   river,
   checks: source.placeholder ? null : checks,
 };
 writeFileSync(join(outDir, `${cfg.id}.json`), `${JSON.stringify(meta, null, 2)}\n`);
-// Small extracts of the manifest, whose river and reference texels only the lazily loaded field
-// reads: what the readout needs (summary.json), and what the backdrop needs on every page for
-// its posters (posters.json: files, and the gradients their media queries are computed from).
-const summary = {
-  id: meta.id,
-  label: meta.label,
-  placeholder: meta.placeholder,
-  zeroPoint: { e: meta.zeroPoint.e, n: meta.zeroPoint.n, altitudeM: meta.zeroPoint.altitudeM },
-  intervalsM: meta.intervalsM,
-};
-writeFileSync(join(outDir, "summary.json"), `${JSON.stringify(summary, null, 2)}\n`);
-const backdrop = {
-  focus: { u: meta.zeroPoint.u, v: meta.zeroPoint.v },
-  heightmaps: heightmaps.map(({ use, width, height, gradientM }) => ({ use, width, height, gradientM })),
-  posters: posters.map(({ file, intervalM, width, height }) => ({ file, intervalM, width, height })),
-};
-writeFileSync(join(outDir, "posters.json"), `${JSON.stringify(backdrop, null, 2)}\n`);
-log(`  wrote public/terrain/${cfg.id}/${cfg.id}.json${source.placeholder ? "  (PLACEHOLDER terrain: replace with npm run terrain:bern -- --refresh)" : ""}`);
+log(`  wrote terrain/${cfg.id}/${cfg.id}.json${source.placeholder ? "  (PLACEHOLDER terrain: replace with npm run terrain:bern -- --refresh)" : ""}`);
+
+// The field's maps and their posters follow from the masters.
+spawnSync(process.execPath, [join(root, "scripts/terrain/field.mjs")], { stdio: "inherit" });

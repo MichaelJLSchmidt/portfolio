@@ -17,9 +17,11 @@ export const emailAddress = (() => {
   return href?.startsWith("mailto:") ? href.slice("mailto:".length) : null;
 })();
 
-/** "Get in touch" on home and About, and the footer. */
+/** "Get in touch": the footer (every page), and About's call to it. */
 export const contact = {
   heading: "Get in touch",
+  /** About's call to the footer's contact. */
+  cta: "Write to me",
   line: "Want to talk about a project, a workshop format, or UX in public administration? Write to me. I read every message.",
 };
 

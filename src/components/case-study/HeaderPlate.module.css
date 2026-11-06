@@ -1,0 +1,65 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+@layer components {
+  /* Full bleed from the top of the page, under the transparent header. */
+  .header {
+    position: relative;
+    display: grid;
+    align-items: end;
+    min-height: 56svh;
+    margin-top: calc(-1 * var(--header-h));
+    padding-block: calc(var(--header-h) + 48px) clamp(24px, 4vw, 56px);
+    overflow: clip;
+    background: var(--color-ground-raised);
+  }
+
+  @media (min-width: 768px) {
+    .header {
+      min-height: 70vh;
+    }
+  }
+
+  .art {
+    position: absolute;
+    inset: 0;
+    background: var(--color-ground-raised);
+  }
+
+  .plate {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .inner {
+    position: relative;
+  }
+
+  /* The title block: ground, a hairline frame, square corners. */
+  .legend {
+    display: grid;
+    gap: 12px;
+    width: fit-content;
+    max-width: min(100%, 52rem);
+    padding: clamp(16px, 2.4vw, 32px);
+    border: var(--stroke-hairline) solid var(--color-line);
+    background: var(--color-ground);
+  }
+
+  .metaLines {
+    display: grid;
+    gap: 12px;
+  }
+
+  .example,
+  .meta,
+  .summit {
+    margin: 0;
+    color: var(--color-text-2);
+  }
+
+  .summit {
+    padding-top: 12px;
+    border-top: var(--stroke-hairline) solid var(--color-line);
+  }
+}

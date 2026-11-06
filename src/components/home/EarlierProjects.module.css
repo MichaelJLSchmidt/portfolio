@@ -1,0 +1,56 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+@layer components {
+  .earlier {
+    display: grid;
+    gap: 24px;
+  }
+
+  .list {
+    list-style: none;
+    border-top: var(--stroke-hairline) solid var(--color-line);
+  }
+
+  .item {
+    border-bottom: var(--stroke-hairline) solid var(--color-line);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    align-items: baseline;
+    column-gap: 16px;
+    row-gap: 2px;
+    min-height: 56px;
+    padding-block: 14px;
+    color: var(--color-text);
+  }
+
+  .year {
+    color: var(--color-text-2);
+  }
+
+  .sector {
+    color: var(--color-text-2);
+  }
+
+  .role {
+    grid-column: 2;
+    color: var(--color-text-2);
+    text-transform: none;
+  }
+
+  .arrow {
+    justify-self: end;
+  }
+
+  @media (min-width: 768px) {
+    .row {
+      grid-template-columns: 6rem minmax(0, 1fr) minmax(0, 14rem) 1.5rem;
+    }
+
+    .role {
+      grid-column: auto;
+    }
+  }
+}

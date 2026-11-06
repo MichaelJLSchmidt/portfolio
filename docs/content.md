@@ -9,40 +9,39 @@ unfinished content is marked and checked, and what the owner still has to supply
 
 | File | Holds |
 | --- | --- |
-| `site.ts` | The name source and the brand (below), the page title and its template, the site description, the HUD's labels (navigation, the Calm map and Haptics switches and their descriptions), the footer, the skip link, the 404 page. |
-| `home.ts` | The home page, top to bottom: the hero's tags and scale bar, the intro and its "At a glance" rows, How I lead (four principles, each with its illustration id and an evidence line), Selected work, Earlier work (a logbook; the first ten entries show). |
-| `about.ts` | About: the portrait card, the lead, Who I am (facts and paragraphs), How I work with people, How I start with a new team, Skills beyond design (the field kit), Career so far (the camps), the card binder, Tools and craft. Also `holding`: the under-construction page and the password gate. |
+| `site.ts` | The name source and the brand (below), the page title and its template, the site description, the header's labels (Case studies, About, Contact), the Motion control, the footer (the clock, the credit, the coordinates, the wordmark's name), the skip link, the 404 page. |
+| `home.ts` | The home page, top to bottom: the role line, the intro sentence and "More about me", Case studies, Earlier projects (newest first; a row links once it has an `href`). |
+| `about.ts` | About: the header and portrait slot, Who I am (facts and paragraphs), Career so far (the camps), How I lead, How I work with people, How I start with a new team, Skills beyond design, Tools and craft, Away from work: cards. Also `holding`: the under-construction page and the password gate. |
 | `contact.ts` | The email and LinkedIn links (the only place they are written; home, About, the footer and the under-construction page read them), Get in touch, Copy address and its toast. |
-| `cards.ts`, `card-labels.ts` | The Summit Cards (`projectCards`, then the flagged examples) and their type; the fixed labels of cards and case studies and the per-card helpers live in `card-labels.ts` (re-exported by `cards.ts`), so client components can use them without bundling every card. |
+| `cards.ts`, `card-labels.ts`, `case-study-labels.ts` | The map-sheet cards (`projectCards`, then the flagged examples): name, year, sector, role, team size, reach, the headline number (`impact`), the terrain; the fixed labels of cards and case studies and the per-card helpers live apart (re-exported by `cards.ts`), so client components can use them without bundling every card. |
 | `case-studies.ts` | Real case studies, keyed by their card's slug (`projectCaseStudies`), then the flagged examples. |
 | `examples/` | Flagged fictional examples (below). |
-| `geo.ts`, `geo-data.json` | Verified places, the three ascents and the About climb (below). |
-| `flood.ts` | Which titles carry the contour flood (below). |
+| `geo.ts`, `geo-data.json` | Verified places: each case study's summit (the header plate's line, the card's set line) and the About climb (below). |
+| `relief.ts` | Which large titles carry the relief fill (the footer wordmark and the gate mark). |
 | `example-values.ts` | `ex()`, the marker for invented values (below). |
 | `lab.ts` | The motion lab's copy (review builds only). |
-| `terrain.config.json` | The input of `npm run terrain`: the region, its posters, lakes and the card terrains (`docs/terrain.md`). |
+| `terrain.config.json` | The input of `npm run terrain`: the region and the card terrains (`docs/terrain.md`). |
 | `portrait.json` | Written by `npm run portrait` (below); absent until the photo is supplied. |
 
 Server pages pass copy to client components as props where importing the content module would put
-it into a client bundle (the deck receives its section copy and captions from the home page).
+it into a client bundle.
 
 ## The name and the brand
 
 `site.name` in `src/content/site.ts` is the name source: the only place the display name is
-written. The hero reads it as `site.hero.name` and sets it on at most two lines
-(`src/lib/name-lines.ts`: a name over twelve characters breaks before its last word); the page
-titles, the Open Graph site name, the web manifest, the portrait's alt text, the
-under-construction page and the gate read it too.
+written. The hero reads it as `site.hero.name` and sets it as written: it wraps between words
+wherever the column ends and is never sized or split by its length. The page titles, the Open
+Graph site name, the web manifest, the portrait's alt text, the motion lab, the under-construction
+page and the gate read it too.
 
-`site.brand` is a separate setting: a short brand of a few capitals. It names the HUD's home link
-(read as "<brand>, home"), the bar of the under-construction page and the gate, the manifest's
-short name, the application name, and the footer wordmark, whose outlines and construction lines `npm run wordmark` (`scripts/wordmark.mjs`)
-generates from it into `src/components/footer/wordmark.json`.
+`site.brand` is a separate setting: a short brand of a few capitals. It names the header's home link
+(read as "<brand>, home"), the footer wordmark and the gate's mark (live text with the relief fill),
+the manifest's short name and the application name.
 
-A change of either is one edit. `npm run build` and `npm run dev` re-run the title measurement
-(`npm run titles`: every display title in `src/lib/display-titles.ts`, the name and the brand
-among them, gets its width knots in `src/lib/title-axes.json`) and the wordmark, so nothing else
-needs touching. Preview builds take `?name=…` to try the hero with another name for one page load.
+A change of either is one edit; nothing else needs touching. `npm run check:name` proves it: it
+builds copies with neutral names of 8, 18 and 32 characters and brands of 2, 4 and 10, checks that
+no file of the export still holds the real ones, and that nothing scrolls sideways or clips at 320,
+390, 768, 1440 and 2560 px.
 
 ## Unfinished content
 
@@ -73,12 +72,12 @@ names, a CV or a `.pdf` link, or job-seeking phrases in any built page.
 
 `src/content/examples` holds three complete, fictional case studies at one fictional employer:
 Seilschaft (people: building a UX practice), Test Project (service: a subsidy form) and Gratweg
-(platform: a design system), in that deck order, the panorama from Interlaken: the Eiger, the
+(platform: a design system), in card order, the panorama from Interlaken: the Eiger, the
 Mönch and the Jungfrau. Test Project uses every block; read it as the reference.
 
 Each card and case study is marked `example: true`. They carry an example line above the H1, a
-"Fictional example" stamp on the card, noindex, and a strip on every image; they sit last in the
-deck. Their values are invented on purpose, so `check:content` skips them and names them once.
+"Fictional example" stamp on the card, noindex, and a strip on every image; they sit last among the
+cards. Their values are invented on purpose, so `check:content` skips them and names them once.
 Where they exist is `includesExamples` in `src/hosting/config.ts`:
 
 | Build | Examples |
@@ -89,8 +88,8 @@ Where they exist is `includesExamples` in `src/hosting/config.ts`:
 
 A live build swaps `@/content/examples` and its case studies for `none.ts` (`next.config.ts`),
 removes their files from `out/` and fails if anything of theirs is left. Their card terrains are
-in `public/terrain/examples.json`, not `terrain.json`. With no real project yet, a live build's
-deck is empty and says so, and `/work/` generates no case study.
+in `terrain/examples.json` and `public/terrain/field/examples.json`, not `terrain.json`. With no real project yet, a live build's
+Case studies section is empty and says so, and `/work/` generates no case study.
 
 ## Case studies
 
@@ -103,7 +102,7 @@ same parts, in this order:
 - **Summary** (the legend sheet): the brief, the outcome (items with their evidence: measured,
   estimated or qualitative), my role, the team I led, what I put in place, the key decision, an
   optional closing note.
-- **Six stages**, one per stage of the ascent: each an id, a short name for the timeline and a
+- **Six stages**, with the ids `context`, `leadership`, `discovery`, `decisions`, `delivery` and `outcome`: each a short name and a
   finding (its heading, a sentence), then blocks: paragraphs (with an optional side note),
   lists, figures, decisions and at most one key insight. No quotes or testimonials.
 - **Decisions:** a question and two or more options, each with what spoke for and against it and
@@ -114,11 +113,39 @@ same parts, in this order:
 - **Looking back:** each lesson with "Next time I would …". **Team:** each role with its count and
   a line on what they did; no names. **What I did not do** and the credits.
 
-`validateCaseStudy` rejects a case study with any part missing or malformed; the unit tests and
-`check:content` run it, so an incomplete case study never builds. The page's ascent comes from its
-card: the card's artwork must be a crop terrain that is one of the ascents in `geo.ts` (`eiger`,
-`moench`, `jungfrau`), or the page refuses to build. A new mountain needs an ascent in `geo.ts`,
-its places in `scripts/geo/geo.config.json` and a crop card in `terrain.config.json`.
+The six stages carry the ids `context`, `leadership`, `discovery`, `decisions`, `delivery` and
+`outcome`, in that order. `validateCaseStudy` rejects a case study with any part missing or
+malformed; the unit tests and `check:content` run it, so an incomplete case study never builds.
+
+### The page: the Calm Survey template
+
+`surveyLayout()` (`src/lib/survey-layout.ts`, unit-tested) lays the content out; nothing is
+invented and every part lands in exactly one place. In page order, alternating the dark ground
+and the light sheet:
+
+1. **Header plate**: the card's level plate full bleed, with the meta line, the H1 and the summit
+   · altitude · coordinates (`geo.ts`).
+2. **Summary** (sheet): the problem, my role, team · duration · reach (`facts` and the card's
+   `reach`), the key decision, the outcome with its evidence.
+3. **01 · Context**: the context stage and the brief, beside the contents trail.
+4. **Metric band**: the card's `impact.after` and the impact line.
+5. **02 · Findings**: the discovery stage, an offset pair of its first two plain images (from
+   discovery and delivery), then the delivery stage.
+6. **Decisions**: the decisions stage's finding, each decision a step beside a sticky figure (the
+   figure that follows it in the stage, or its options set as type).
+7. **Options** (sheet): every decision's options in full, then the decision we reversed.
+8. **Map frame**: the `hero` figure, full bleed in a map-sheet frame.
+9. **03 · Leading the team**: the leadership stage's finding as the page's one pull statement (the
+   owner's own words), its blocks, the team I led, what I put in place, the team by role.
+10. **Outcome** (sheet): the results as tiles (after, from before, evidence, the stage it was won
+    at), the outcome stage, any before/after figure, the after-launch log.
+11. **Reflection**: looking back, what I did not do, the credits.
+12. **Next case study**: the next card, then "Back to case studies".
+
+The header's summit comes from the card's terrain: one of the summits in `geo.ts` (`eiger`,
+`moench`, `jungfrau`). A new mountain needs its summit there, the place in
+`scripts/geo/geo.config.json` and a crop card in `terrain.config.json` (then `npm run terrain`,
+which also writes its plates).
 
 ### Numbers come from a data file
 
@@ -143,9 +170,10 @@ After changing a data file or an artefact, run `npm run images`.
 
 ## Geo data
 
-`src/content/geo.ts` holds the places the site names with their altitudes: the six stages and the
-summit of each ascent (from Interlaken Ost, by the Mittellegi ridge, the Mönch's southeast ridge
-and the Rottalsattel), and the About climb from Ittigen to the Bantiger. The values come from
+`src/content/geo.ts` holds the places the site names with their altitudes: each case study's
+summit (the Eiger, the Mönch, the Jungfrau: the header plate's line and the card's set line) and
+the About climb from Ittigen to the Bantiger. `geo-data.json` also keeps the verified stages of
+each ascent from Interlaken Ost, which the pages no longer print. The values come from
 swisstopo through `npm run geo` (`scripts/geo/build.mjs`, configured in
 `scripts/geo/geo.config.json`), which writes `geo-data.json`; edit the config, never the JSON.
 Every altitude carries its source; where a research value disagreed, swisstopo won and the
@@ -155,24 +183,15 @@ the sources and checks.
 
 Labels format altitudes with `altitudeLabel` ("2’061 m", Swiss thousands separator).
 
-## Flood switches
+## The relief fill
 
-`src/content/flood.ts` says which titles carry the contour flood (a glacier fill that spreads
-through a title on hover, keyboard focus or a tap; `docs/motion.md`). Set any to `false`:
-
-| Switch | Where |
-| --- | --- |
-| `heroName` | the name in the home page's hero |
-| `sections.lead`, `.work`, `.earlier`, `.contact` | the home section titles (Get in touch also on About) |
-| `caseStudyTitle` | each case study's H1 |
-| `footerWordmark` | the outline wordmark in the footer |
-| `buttons` | every `FloodButton` (Copy address, the portrait card's toggle) |
-
-About's own section titles and its H1 carry no flood.
+`src/content/relief.ts` lists the titles that carry the relief fill (`docs/motion.md`): today the
+footer wordmark and the gate's mark. Add a large bold title's id to opt it in; never body text,
+navigation, ordinary links or buttons.
 
 ## The About portrait
 
-Until a photo is supplied, a contour silhouette stands in on the portrait card and
+Until a photo is supplied, a framed "Portrait to come" slot stands in on About and
 `about.portrait.missing` holds the placeholder `[PORTRAIT PHOTO]`, so a live build stops on it.
 To add the photo:
 
@@ -181,32 +200,22 @@ To add the photo:
 2. Run `npm run portrait -- path/to/cutout.png [--duotone=0.2] [--contours]`
    (`scripts/portrait.mjs`). It writes AVIF and WebP with alpha at 480, 800, 1200 and 1600 px
    wide (up to the source's width) into `public/media/portrait/`, stepping the 800 px AVIF's
-   quality down until it is at most 120 KB. `--duotone` lays a ground-to-paper-dusk duotone over
+   quality down until it is at most 120 KB. `--duotone` lays a ground-to-sheet duotone over
    the photo at that strength (default and maximum 0.2), so the portrait sits in the palette
    without losing its own colours; `--contours` adds faint contour rings (8%) that fade out around
    the face. It writes the sizes and sources to `src/content/portrait.json`. The output is the
    same for the same input.
 3. In `src/content/about.ts`, set `portrait.image` to the import of `./portrait.json` and delete
-   `portrait.missing`. The card then shows the photo, and the placeholder is gone from
+   `portrait.missing`. The slot then shows the photo, and the placeholder is gone from
    `check:content`.
 
-`portrait.alt` is the photo's alt text; `rarity` and `collector` set the card frame.
+`portrait.alt` is the photo's alt text.
 
-## The binder pockets and the career camps
+## The career camps
 
-Both are in `src/content/about.ts`.
-
-- **The card binder** (`cards.binder.pockets`): nine pockets, three by three, in order. A pocket
-  is `{ kind: "deck", game, line }` (a deck box for a game), `{ kind: "trainer", line }`,
-  `{ kind: "workshop", line }` or `{ kind: "empty" }` (the first empty one carries the "Still
-  collecting" label). The cards are original drawings: no game's logo, art or card frame. A tap
-  turns a card over to its line; the lines are also listed as text beside the binder, under each
-  card's name ("Deck box · <game>", "Trainer card", "Workshop card").
-- **The career camps** (`camps`): each role with its year and `at`, its position along the
-  Ittigen → Bantiger trail from 0 (Ittigen) to 1 (the summit). The career profile stands each
-  role on the trail at the terrain's real height there (the official spot heights at the two
-  ends); the last camp is the summit and reads "<title> · <year>". Above it a dashed line climbs
-  the transmitter mast to about 1'129 m, with the outlook (`career.outlook`) beside it.
+In `src/content/about.ts`: each role with its year and `at`, its position along the Ittigen →
+Bantiger trail from 0 (Ittigen) to 1 (the summit). The career line places each role on the trail;
+the last camp is today's role. The line is drawn once as it comes into view (`docs/motion.md`).
 
 ## What the owner must supply
 
@@ -217,12 +226,11 @@ Both are in `src/content/about.ts`.
 - **Example values (52)**, each to be replaced by a real one:
   - About: the three earlier camps' years; the lead; the facts (role, team, based, born, trained,
     languages); the two Who I am paragraphs; the critique rule's detail; the six skills' proofs;
-    the four binder lines written with `ex()`.
-  - Home: the intro; the four How I lead evidence lines; the six Earlier work entries (year,
-    type, sector and role each).
+    the card lines written with `ex()`; the four How I lead evidence lines.
+  - Home: the intro; the six Earlier projects entries (year, type, sector and role each).
 - **Real projects:** no real card or case study is written yet (`projectCards` in `cards.ts`,
-  `projectCaseStudies` in `case-studies.ts`). Each needs a card on one of the three ascents'
-  terrains and a complete case study; card stats only where there is a real number. A real case
+  `projectCaseStudies` in `case-studies.ts`). Each needs a card on one of the three summits'
+  terrains and a complete case study; the headline number only where there is a real one. A real case
   study is never flagged `example`, so `check:content` and a live build treat its placeholders
   like any other.
 - **The contact links** are set; a link without a URL would show as `href: null` in the list.

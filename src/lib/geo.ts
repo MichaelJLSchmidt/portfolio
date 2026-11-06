@@ -15,12 +15,15 @@ export function wgs84ToLv95(lon: number, lat: number): [number, number] {
 }
 
 /** Projects a WGS84 point into a viewBox that frames an LV95 bbox. */
-export function projectToViewBox(
-  lon: number,
-  lat: number,
-  [minE, minN, maxE, maxN]: readonly number[],
-  [, , width, height]: readonly number[],
-): [number, number] {
-  const [e, n] = wgs84ToLv95(lon, lat);
-  return [((e - minE) / (maxE - minE)) * width, ((maxN - n) / (maxN - minN)) * height];
+
+/** LV95 → WGS84 (swisstopo's approximate formulas, about 1 m). Returns [lon, lat] in degrees. */
+export function lv95ToWgs84(e: number, n: number): [number, number] {
+  const y = (e - 2_600_000) / 1_000_000;
+  const x = (n - 1_200_000) / 1_000_000;
+  const lon = 2.6779094 + 4.728982 * y + 0.791484 * y * x + 0.1306 * y * x * x - 0.0436 * y * y * y;
+  const lat = 16.9023892 + 3.238272 * x - 0.270978 * y * y - 0.002528 * x * x - 0.0447 * y * y * x - 0.014 * x * x * x;
+  return [(lon * 100) / 36, (lat * 100) / 36];
 }
+
+/** "46.578 N 8.005 E": a survey mark's coordinates, three decimals. */
+export const coordinatesLabel = (lon: number, lat: number) => `${lat.toFixed(3)} N ${lon.toFixed(3)} E`;

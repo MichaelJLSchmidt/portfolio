@@ -1,5 +1,5 @@
 {
-  "$comment": "Input for scripts/terrain. Region and card terrains; generated outputs land in public/terrain.",
+  "$comment": "Input for scripts/terrain. Region and card terrains; the masters land in terrain/, the field maps in public/terrain/field and the card plates in public/plates.",
   "region": {
     "name": "Thun – Interlaken – Grindelwald – Lauterbrunnen – Jungfrau",
     "bboxWgs84": [
@@ -51,18 +51,6 @@
     "blurSigma": 1.1,
     "simplifyTolerance": 0.45
   },
-  "lakes": [
-    {
-      "name": "Thunersee",
-      "lon": 7.705,
-      "lat": 46.705
-    },
-    {
-      "name": "Brienzersee",
-      "lon": 7.96,
-      "lat": 46.725
-    }
-  ],
   "cards": [
     {
       "id": "eiger",
@@ -130,66 +118,5 @@
       ]
     }
   ],
-  "heightmapBlurSigma": 1,
-  "profile": {
-    "id": "interlaken-jungfrau",
-    "trail": [
-      {
-        "lon": 7.8632,
-        "lat": 46.6863
-      },
-      {
-        "lon": 7.8689,
-        "lat": 46.6658
-      },
-      {
-        "lon": 7.902,
-        "lat": 46.6316
-      },
-      {
-        "lon": 7.9089,
-        "lat": 46.5935
-      },
-      {
-        "lon": 7.9216,
-        "lat": 46.605
-      },
-      {
-        "lon": 7.9614,
-        "lat": 46.5853
-      },
-      {
-        "lon": 7.974,
-        "lat": 46.5743
-      },
-      {
-        "lon": 7.985,
-        "lat": 46.5475
-      },
-      {
-        "lon": 7.9625,
-        "lat": 46.5372
-      }
-    ],
-    "waypoints": [
-      {
-        "lon": 7.8632,
-        "lat": 46.6863,
-        "label": "Interlaken"
-      },
-      {
-        "lon": 7.9089,
-        "lat": 46.5935
-      },
-      {
-        "lon": 7.9614,
-        "lat": 46.5853
-      },
-      {
-        "lon": 7.9625,
-        "lat": 46.5372,
-        "label": "Jungfrau"
-      }
-    ]
-  }
+  "heightmapBlurSigma": 1
 }

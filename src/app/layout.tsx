@@ -1,25 +1,28 @@
 import type { Metadata, Viewport } from "next";
 import { archivo, archivoItalic, martianMono } from "./fonts";
+import fieldConfig from "@/config/contour-field.json";
 import { cardTerrains } from "@/content/cards";
 import { site } from "@/content/site";
-import { color, tokensToCss } from "@/styles/tokens";
+import { color, gridToCss, tokensToCss } from "@/styles/tokens";
 import { motionModeScript } from "@/lib/motion-mode";
-import { springsToCss } from "@/styles/motion-css";
 import { TerrainBackdrop } from "@/components/terrain/TerrainBackdrop";
-import { Hud } from "@/components/hud/Hud";
+import { Header } from "@/components/header/Header";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SmoothScroll } from "@/components/SmoothScroll";
-import { RouteFade } from "@/components/transition/RouteFade";
-import { HistoryTransitions } from "@/components/transition/HistoryTransitions";
 import { RouteArrival } from "@/components/transition/RouteArrival";
+import { RouteMotion } from "@/components/transition/RouteMotion";
 import { Reveals } from "@/components/motion/Reveals";
 import "./globals.css";
 import "@/styles/motion.css";
+import "@/styles/transitions.css";
 
 const isPreview = process.env.NEXT_PUBLIC_PREVIEW === "1";
 
 /** The cascade layers, lowest first; every stylesheet starts with the same statement. */
 const LAYER_ORDER = "@layer reset, tokens, base, layout, components, utilities;";
+
+/** The field's quiet zones (its config), for the poster's ground wash behind text (globals.css). */
+const QUIET = `:root{--quiet-strength:${fieldConfig.quiet.strength};--quiet-feather:${fieldConfig.quiet.featherPx}px}`;
 
 export const metadata: Metadata = {
   title: { default: site.title, template: site.titleTemplate },
@@ -33,6 +36,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: color.ground,
   colorScheme: "dark",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -45,20 +49,19 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     >
       <head>
         {/* The tokens' custom properties, in the tokens layer (globals.css explains the layers). */}
-        <style dangerouslySetInnerHTML={{ __html: `${LAYER_ORDER}@layer tokens{${tokensToCss()}${springsToCss()}}` }} />
+        <style dangerouslySetInnerHTML={{ __html: `${LAYER_ORDER}@layer tokens{${tokensToCss()}${gridToCss()}${QUIET}}` }} />
         <script dangerouslySetInnerHTML={{ __html: motionModeScript }} />
       </head>
       <body>
-        <a className="skip-link" href="#main">
+        <a className="skip-link plain" href="#main">
           {site.skipLink}
         </a>
         <TerrainBackdrop />
         <SmoothScroll />
-        <HistoryTransitions />
-        <RouteFade />
         <RouteArrival />
+        <RouteMotion />
         <Reveals />
-        <Hud />
+        <Header />
         <div className="page">
           {children}
           <SiteFooter />

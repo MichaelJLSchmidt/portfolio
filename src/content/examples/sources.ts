@@ -1,4 +1,4 @@
-import type { SummitCardData } from "@/content/cards";
+import type { CardData } from "@/content/cards";
 import type { CaseStudy } from "@/lib/case-study";
 import * as gratwegCard from "./gratweg/card";
 import * as gratwegStudy from "./gratweg/case-study";
@@ -21,7 +21,7 @@ export type DataSource = {
   keyFigures: { label: string; text: string; in: string[] }[];
   /** Relations the data must keep (parts add up, a figure repeated under two names agrees). */
   consistency: [string, boolean][];
-  raw: { caseStudy: CaseStudy; card: SummitCardData };
+  raw: { caseStudy: CaseStudy; card: CardData };
   /** Artefact sources (one HTML or SVG file per image) and their shared stylesheet. */
   artefacts: string;
   /** Encoded images under public/. */

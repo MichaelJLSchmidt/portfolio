@@ -43,8 +43,7 @@ export async function axe({ browser, base, root, check }) {
     });
     await context.addInitScript((calm) => {
       try {
-        sessionStorage.setItem("summit:deck-dealt", "1");
-        if (calm) localStorage.setItem("summit:calm-map", "1");
+        if (calm) localStorage.setItem("summit:motion", "calm");
       } catch {}
     }, !!run.calm);
     const page = await context.newPage();

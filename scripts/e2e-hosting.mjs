@@ -108,7 +108,7 @@ async function gatedRun() {
     const chunk = `/_next/static/chunks/${firstFile(join(root, "out/_next/static/chunks"), (f) => f.endsWith(".js"))}`;
     const font = firstFile(join(root, "out", gate.assetsDir), (f) => f.endsWith(".woff2"));
 
-    for (const path of ["/", "/work/test-project/", "/about/", chunk, "/terrain/heightmap-1536.webp", `${gate.assetsDir}${font}`]) {
+    for (const path of ["/", "/work/test-project/", "/about/", chunk, "/terrain/field/region.webp", `${gate.assetsDir}${font}`]) {
       const res = await get(base, path);
       const html = await res.text();
       check(
@@ -152,7 +152,7 @@ async function gatedRun() {
       `${ok.status} ${ok.headers.get("location")} ${setCookie}`,
     );
     const cookie = setCookie.split(";")[0];
-    for (const [path, type] of [["/work/test-project/", "text/html"], [chunk, "javascript"], ["/terrain/heightmap-1536.webp", "image/webp"]]) {
+    for (const [path, type] of [["/work/test-project/", "text/html"], [chunk, "javascript"], ["/terrain/field/region.webp", "image/webp"]]) {
       const res = await get(base, path, { headers: { Cookie: cookie } });
       check(
         `${path} with the cookie: the site, still noindex`,
@@ -184,7 +184,13 @@ async function browserPass(base) {
   const browser = await playwright.chromium.launch();
   try {
     const page = await browser.newPage();
+    // The gate's inline script (the field and the relief mark) must run under its hash-pinned CSP.
+    const violations = [];
+    page.on("console", (m) => /Content Security Policy|Refused to/i.test(m.text()) && violations.push(m.text().slice(0, 140)));
     await page.goto(`${base}/about/`);
+    await page.waitForFunction(() => document.querySelector("[data-relief-root]")?.hasAttribute("data-relief"), null, { timeout: 10000 }).catch(() => {});
+    const relief = await page.evaluate(() => document.querySelector("[data-relief-root]")?.getAttribute("data-relief") ?? null);
+    check("browser: the gate's inline script runs under its CSP (the relief mark attached)", !!relief && violations.length === 0, `${relief} ${violations.join(" | ")}`);
     await page.fill("#password", "not-it");
     await page.click("button[type=submit]");
     await page.waitForSelector("#access-error");

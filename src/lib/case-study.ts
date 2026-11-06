@@ -17,6 +17,10 @@
  * No quotes or testimonials. `validateCaseStudy` rejects a case study with a part missing.
  */
 
+/** The six stages, by id, in the order a case study writes them (the template places each). */
+export const STAGE_IDS = ["context", "leadership", "discovery", "decisions", "delivery", "outcome"] as const;
+export type StageId = (typeof STAGE_IDS)[number];
+
 /** How a number was obtained. Shown as shape plus text, never colour alone. */
 export type Evidence = "measured" | "estimated" | "qualitative";
 
@@ -196,20 +200,6 @@ export function figureNumbers(study: Pick<CaseStudy, "stages">): Map<string, num
   return numbers;
 }
 
-/** Decision numbers in order of appearance (the reversed decision is not numbered). */
-export function decisionNumbers(study: Pick<CaseStudy, "stages">): Map<string, number> {
-  const numbers = new Map<string, number>();
-  for (const w of study.stages) for (const b of w.blocks) if (b.kind === "decision") numbers.set(b.id, numbers.size + 1);
-  return numbers;
-}
-
-/** Side-note numbers in order of appearance, keyed by "stage-id:block-index". */
-export function noteNumbers(study: Pick<CaseStudy, "stages">): Map<string, number> {
-  const numbers = new Map<string, number>();
-  for (const w of study.stages) w.blocks.forEach((b, i) => b.kind === "p" && b.note && numbers.set(`${w.id}:${i}`, numbers.size + 1));
-  return numbers;
-}
-
 /** The figure an image belongs to. */
 export function figureOfImage(figures: Record<string, FigureSpec>, image: string): string | undefined {
   return Object.keys(figures).find((id) => {
@@ -310,6 +300,7 @@ export function validateCaseStudy(slug: string, s: CaseStudy): string[] {
   const ids = new Set<string>();
   s.stages?.forEach((st, i) => {
     need(filled(st.id) && !ids.has(st.id) && filled(st.nav), `stage ${i + 1}: a unique id and a short name`);
+    need(st.id === STAGE_IDS[i], `stage ${i + 1}: the id "${STAGE_IDS[i]}" (the template places the stages by id)`);
     ids.add(st.id);
     need(filled(st.finding), `stage ${i + 1}: its finding (the heading)`);
     need(st.blocks?.length > 0, `stage ${i + 1}: at least one block`);

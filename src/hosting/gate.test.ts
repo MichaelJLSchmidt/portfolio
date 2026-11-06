@@ -159,6 +159,7 @@ const page: PageModel = {
   contact: [{ label: "Email", href: null }],
   placeholder: (label) => `[${label.toUpperCase()}]`,
   brand: "Brand",
+  outline: "#868980",
   access: { heading: "Under construction", label: "Password", submit: "Look around →", pending: "Checking…", error: "That’s not the password.", closed: "Closed.", username: "preview" },
   credit: { label: "Credit", href: null },
   css: "",
@@ -190,7 +191,7 @@ const cookieFrom = (response: Response) => response.headers.get("Set-Cookie")!.s
 describe("gate handler", () => {
   it("shows the gate page for any path without a valid cookie", async () => {
     const { calls, request } = harness();
-    for (const path of ["/", "/work/test-project/", "/_next/static/chunks/app.js", "/terrain/heightmap-1536.webp", "/index.txt?_rsc=1", "/_basecamp/x.css"]) {
+    for (const path of ["/", "/work/test-project/", "/_next/static/chunks/app.js", "/terrain/field/region.webp", "/index.txt?_rsc=1", "/_basecamp/x.css"]) {
       const res = await request(path);
       assert.equal(res.status, 401, path);
       assert.match(res.headers.get("WWW-Authenticate")!, /^Cookie realm="Basecamp"/);
@@ -248,11 +249,11 @@ describe("gate handler", () => {
     assert.equal(res.headers.get("Set-Cookie"), null);
     assert.equal(res.headers.get("Cache-Control"), "no-store");
     const html = await res.text();
-    assert.match(html, /role="alert">That’s not the password\.</);
-    // The submit button carries its pending label for the inline script ("CHECKING…").
-    assert.match(html, /<button type="submit" data-pending="Checking…">Look around →<\/button>/);
-    // The field's underline, drawn on focus.
-    assert.match(html, /<span class="input"><input id="password"[^>]*><span class="line" aria-hidden="true"><\/span><\/span>/);
+    // The error: an icon and the message in the text colour, announced.
+    assert.match(html, /role="alert"><svg [^>]*aria-hidden="true">.*?<\/svg><span>That’s not the password\.<\/span>/);
+    // The survey button carries its pending label for the inline script ("CHECKING…"), the arrow apart.
+    assert.match(html, /<button type="submit" data-pending="Checking…">Look around<span data-arrow aria-hidden="true">→<\/span><\/button>/);
+    assert.match(html, /<input id="password" name="password" type="password" autocomplete="current-password"/);
     assert.match(html, /aria-invalid="true" aria-describedby="access-error"/);
     assert.match(html, /name="next" value="\/about\/"/);
   });

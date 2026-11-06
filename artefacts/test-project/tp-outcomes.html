@@ -5,15 +5,15 @@
     position: absolute;
     inset: 0;
     padding: 26px 34px 18px;
-    color: var(--color-paper-dusk);
+    color: var(--color-sheet);
   }
   /* Contour grey is 4.4:1 on the raised ground: labels here use the sheet colour. */
   .chart > p {
     margin-top: 6px;
-    color: var(--color-paper-dusk);
+    color: var(--color-sheet);
   }
   .title {
-    color: var(--color-paper-dusk);
+    color: var(--color-sheet);
   }
   .stamp {
     position: absolute;
@@ -29,7 +29,7 @@
   }
   .panel {
     padding: 16px 16px 10px;
-    border: 1px solid var(--color-contour-dim);
+    border: 1px solid var(--color-line);
     border-radius: 10px;
     background: var(--color-ground);
   }
@@ -40,7 +40,7 @@
   }
   .panel p {
     margin-top: 2px;
-    color: var(--color-contour);
+    color: var(--color-field-line);
     font-size: 12px;
   }
   svg {
@@ -51,17 +51,17 @@
     overflow: visible;
   }
   .axis {
-    stroke: var(--color-contour-dim);
+    stroke: var(--color-line);
     stroke-width: 1.5;
   }
   .lbl {
-    fill: var(--color-contour);
+    fill: var(--color-field-line);
     font-family: var(--label);
     font-size: 12px;
     font-stretch: var(--label-wdth);
   }
   .val {
-    fill: var(--color-paper-dusk);
+    fill: var(--color-sheet);
     font-family: var(--label);
     font-size: 19px;
     font-stretch: var(--label-wdth);
@@ -74,7 +74,7 @@
     bottom: 20px;
     display: flex;
     gap: 28px;
-    color: var(--color-paper-dusk);
+    color: var(--color-sheet);
   }
   .key span {
     display: inline-flex;
@@ -93,7 +93,7 @@
   </div>
   <div class="key label">
     <span><svg width="40" height="10" style="height: 10px; margin: 0"><path d="M0 5H40" stroke="#C8F5B0" stroke-width="3" /></svg>measured</span>
-    <span><svg width="40" height="10" style="height: 10px; margin: 0"><path d="M0 5H40" stroke="#FF8A5C" stroke-width="3" stroke-dasharray="7 5" /></svg>estimated</span>
+    <span><svg width="40" height="10" style="height: 10px; margin: 0"><path d="M0 5H40" stroke="#8A8C80" stroke-width="3" stroke-dasharray="7 5" /></svg>estimated</span>
   </div>
 </div>
 <script>
@@ -108,7 +108,7 @@
     const c = charts[svg.dataset.chart];
     const W = svg.clientWidth, H = 250, top = 20, bottom = 212, x0 = 30, x1 = W - 30;
     const y = (v) => bottom - (v / c.max) * (bottom - top);
-    const colour = c.dashed ? "#FF8A5C" : "#C8F5B0";
+    const colour = c.dashed ? "#8A8C80" : "#C8F5B0";
     const up = c.to > c.from;
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
     svg.innerHTML = `

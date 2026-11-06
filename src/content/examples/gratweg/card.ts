@@ -1,40 +1,20 @@
-import type { SummitCardData } from "@/content/cards";
+import type { CardData } from "@/content/cards";
 import { fillDeep } from "@/lib/fill";
 import { data } from "./data";
 
-/** The Summit card as written: numbers are {{tokens}} into data.ts (check:figures reads this). */
-export const rawCard: SummitCardData = {
+/** The card as written: numbers are {{tokens}} into data.ts (check:figures reads this). */
+export const rawCard: CardData = {
   slug: "gratweg",
   name: "Gratweg",
-  rarity: "M",
-  cost: "{{card.cost}}",
-  rarityNote: "started and led a platform across teams",
-  coordinates: "Hochmatt (fictional)",
-  type: "Platform — Design system · Lead (fictional)",
-  set: { code: "LAB", name: "Lab", symbol: "lab" },
-  collector: { number: "098", language: "EN" },
-  keywords: [
-    { term: "Convince", reminder: "a business case built from {{businessCase.teams|word}} teams’ own rebuild hours." },
-    { term: "Govern", reminder: "a core team, {{team.contributors}} contributors and one RFC page per change." },
-    { term: "Adopt", reminder: "“touch it, migrate it”, never a big-bang migration." },
-  ],
-  flavor: "Every app had its own blue, so people took them for {{landscape.products|word}} different authorities.",
-  stats: {
-    teamLed: "{{team.core}} + {{team.contributors}}",
-    time: "{{project.years}} YRS",
-    scope: "{{landscape.products}} products",
-    impact: { before: "{{outcomes.products.before}}", after: "{{outcomes.products.after}}", note: "on system" },
-  },
-  indexLine: {
-    kind: "Platform",
-    summary: "One design system for {{landscape.products}} products",
-    time: "{{project.years}} years",
-  },
-  artwork: { kind: "crop", terrainId: "jungfrau" },
-  artworkAlt: "Contour map of the Jungfrau from swisstopo data, with a dotted trail from the Jungfraujoch by the Mönchsjoch hut and the Rottalsattel to the summit.",
-  summary:
-    "A fictional model case study: one design system for {{landscape.products}} public-sector products, funded by a business case and adopted without a big-bang migration.",
+  year: "{{years.end}}",
+  sector: "Design system",
+  role: "Lead (fictional)",
+  teamSize: "{{team.core}} + {{team.contributors}}",
+  reach: "{{landscape.products}} products",
+  impact: { before: "{{outcomes.products.before}}", after: "{{outcomes.products.after}}" },
+  terrainId: "jungfrau",
+  artworkAlt: "Contour plate of the Jungfrau from swisstopo terrain data.",
   example: true,
 };
 
-export const card: SummitCardData = fillDeep(rawCard, data);
+export const card: CardData = fillDeep(rawCard, data);

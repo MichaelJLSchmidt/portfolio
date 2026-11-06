@@ -1,8 +1,9 @@
 import data from "./geo-data.json";
 import { formatInteger } from "@/lib/format";
+import { coordinatesLabel, lv95ToWgs84 } from "@/lib/geo";
 
 /**
- * Verified place data: the stages of the three ascents (case studies) and the About climb. Every
+ * Verified place data: the summits of the three case studies and the About climb. Every
  * altitude carries its source; the values come from swisstopo through `npm run geo`
  * (scripts/geo/build.mjs, configured in scripts/geo/geo.config.json), which writes geo-data.json.
  *
@@ -47,27 +48,15 @@ export const places = data.places as Record<PlaceId, Place>;
 export const secondary = data.secondary as Record<keyof typeof data.secondary, Place>;
 export const geoSources = data.sources;
 
-/** An ascent: six stages from Interlaken, then the summit (the case study's Results). */
-export type Ascent = {
-  summit: PlaceId;
-  /** The way up, as a mountaineer would name it ("via the Mittellegi ridge"). */
-  via: string;
-  stages: readonly [PlaceId, PlaceId, PlaceId, PlaceId, PlaceId, PlaceId];
-};
-
-export const ascents = {
-  /** Seilschaft climbs the Eiger by the Mittellegi ridge. */
-  eiger: { summit: "eiger", via: "the Mittellegi ridge", stages: ["interlaken-ost", "grindelwald", "kleine-scheidegg", "eismeer", "mittellegi-hut", "mittellegi-ridge"] },
-  /** Test Project climbs the Mönch by its southeast ridge. */
-  moench: { summit: "moench", via: "the southeast ridge", stages: ["interlaken-ost", "kleine-scheidegg", "eigergletscher", "jungfraujoch", "moenchsjoch-hut", "moench-se-ridge"] },
-  /** Gratweg climbs the Jungfrau by the Rottalsattel. */
-  jungfrau: { summit: "jungfrau", via: "the Rottalsattel", stages: ["interlaken-ost", "lauterbrunnen", "kleine-scheidegg", "jungfraujoch", "moenchsjoch-hut", "rottalsattel"] },
-} as const satisfies Record<string, Ascent>;
-
-export type AscentId = keyof typeof ascents;
-
-/** The index of an ascent's last railway station: the stages after it are climbed on foot. */
-export const lastStation = (a: Ascent): number => a.stages.reduce((last, id, i) => (places[id].station ? i : last), -1);
+/** Each case study's summit, by its card's terrain (the mountain the card's plate was cut around). */
+export const summits = {
+  /** Seilschaft: the Eiger. */
+  eiger: "eiger",
+  /** Test Project: the Mönch. */
+  moench: "moench",
+  /** Gratweg: the Jungfrau. */
+  jungfrau: "jungfrau",
+} as const satisfies Record<string, PlaceId>;
 
 /** "2’061 M" (mono labels set it upper case). */
 export const altitudeLabel = (m: number) => `${formatInteger(m)} m`;
@@ -81,22 +70,10 @@ export const aboutClimb = {
   points: data.aboutClimb.points as [number, number][],
 };
 
-/** An ascent's places in order: the trailhead (stage 1), the six stages, the summit. */
-export type AscentPlace = Place & { id: PlaceId };
-
-/**
- * The ascent a case study climbs, from its card's terrain (the mountain the card was cut around):
- * the six stages with their places and altitudes, and the summit (the Results). Null for a terrain
- * that is not one of the three ascents.
- */
-export function ascentOf(terrainId: string | null | undefined): { id: AscentId; via: string; stages: AscentPlace[]; summit: AscentPlace; lastStation: number } | null {
-  if (!terrainId || !(terrainId in ascents)) return null;
-  const a = ascents[terrainId as AscentId];
-  return {
-    id: terrainId as AscentId,
-    via: a.via,
-    stages: a.stages.map((id) => ({ id, ...places[id] })),
-    summit: { id: a.summit, ...places[a.summit] },
-    lastStation: lastStation(a),
-  };
+/** A case study's summit (its card's terrain): name, altitude and coordinates, for the set line and the header plate. */
+export function summitOf(terrainId: string): { label: string; altitude: string; coordinates: string | null } | null {
+  if (!(terrainId in summits)) return null;
+  const summit = places[summits[terrainId as keyof typeof summits]];
+  const coordinates = summit.e && summit.n ? coordinatesLabel(...lv95ToWgs84(summit.e, summit.n)) : null;
+  return { label: summit.label, altitude: altitudeLabel(summit.altitudeM), coordinates };
 }
