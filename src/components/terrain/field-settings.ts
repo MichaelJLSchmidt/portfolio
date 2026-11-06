@@ -10,10 +10,9 @@ export type FieldConfig = typeof config;
 /**
  * The field's device tier, named like html[data-tier] (phase 1, motion-mode.ts):
  * - "desktop" (tier A): a fine pointer and a long edge of at least 900 px. DPR up to 2 (1.5 drew
- *   visibly softer lines on 2× screens), ambient drift at ~30 fps, headlamp, parallax, pre-warm on
- *   hover and focus.
- * - "mobile" (tier B): touch, or a long edge under 900 px. DPR 1 at a 0.75 render scale; no drift,
- *   line flow, headlamp or parallax; frames only during transitions and (throttled) scrolling.
+ *   visibly softer lines on 2× screens), pre-warm on hover and focus.
+ * - "mobile" (tier B): touch, or a long edge under 900 px. DPR 1 at a 0.75 render scale; frames
+ *   only during transitions and (throttled) scrolling.
  * - "low" (tier C): no WebGL2, Save-Data, little memory or few cores, or a context lost twice this
  *   session (and still mode, whatever the device): posters only.
  */
@@ -37,16 +36,12 @@ export type DeviceProfile = {
   /** Strength of regular and index lines (0..1). The field reads them live from the config. */
   lineOpacity: number;
   indexOpacity: number;
-  /** Frame rate for the ambient animation (the slow drift) while the visitor is around. */
-  ambientFps: number;
-  /** Frame rate once nobody has touched the page for `dormantAfterMs`. */
-  idleFps: number;
 };
 
 export const fieldConfig: FieldConfig = config;
 
 /** The field is a monochrome map: its lines take neutral colours only. */
-export const LINE_COLORS = ["contour", "contourDim", "sheet"] as const satisfies readonly ColorToken[];
+export const LINE_COLORS = ["contour", "contourDim", "paperDusk"] as const satisfies readonly ColorToken[];
 
 /** Contour intervals the field may use on alpine terrain (metres). The index line is every `indexEvery`-th. */
 export const CONTOUR_INTERVALS = [50, 100, 200, 250, 500] as const;

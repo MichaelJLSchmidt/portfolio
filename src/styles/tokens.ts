@@ -10,21 +10,29 @@ export const color = {
   groundRaised: "#24251F",
   contourDim: "#3A3C34",
   contour: "#8A8C80",
-  sheet: "#DDE3E3",
+  /** Light text on dark, and the paper of the case-study summary (the only paper surface). */
+  paperDusk: "#C9C5B4",
+  /** Body text on paper. */
+  paperInk: "#24251F",
+  /** Mono labels on paper. */
+  paperInk2: "#4A4B43",
+  /** Light and attention: focus, the flood, tags, the active state. */
   glacier: "#C8F5B0",
-  sheetInk: "#5A5C52",
-  mossInk: "#2F6B3A",
+  mossInk: "#24552D",
   alpenglow: "#FF8A5C",
-  alpenglowInk: "#A33A18",
+  alpenglowInk: "#8A2E12",
+  /** The route on dark: path and progress only (the route, trail links, the trail blaze). */
   signal: "#FF4D45",
+  /** The route where it crosses paper. */
+  routePaper: "#B3261E",
   ice: "#8FC7E8",
   summitGold: "#E8C468",
 } as const;
 
 export type ColorToken = keyof typeof color;
 
-/** Colours allowed for text and lines on the light sheet colour (contrast-safe). */
-export const sheetSafeInk = ["sheetInk", "mossInk", "alpenglowInk", "ground"] as const satisfies readonly ColorToken[];
+/** Colours allowed for text and lines on paper (contrast-safe; the route's own colour is a mark, 3:1). */
+export const paperSafeInk = ["paperInk", "paperInk2", "mossInk", "alpenglowInk"] as const satisfies readonly ColorToken[];
 
 /** Rarity is always shape + letter + colour, never colour alone. */
 export const rarity = {
@@ -36,49 +44,44 @@ export const rarity = {
 
 export type Rarity = keyof typeof rarity;
 
+/**
+ * Type roles. Archivo (wdth 62–125, wght 100–900) for titles, text and buttons; Martian Mono
+ * (wdth 75–112.5) for labels, stats and spot heights.
+ */
 export const type = {
-  display: { wdthMin: 62, wdthMax: 72, wght: 800, lineHeightMin: 0.82, lineHeightMax: 0.9 },
-  body: { size: 17, lineHeight: 28, wdth: 100, wght: 400 },
-  hudLabel: { size: 11, tracking: 0.14, wdth: 87.5, wght: 500 },
-  statValue: { sizeMin: 20, sizeMax: 22, wght: 700 },
-  /** Condensed Archivo for type lines, role lines, insight text and decision titles. */
+  /** Display titles: upper case, wdth 75, wght 800 (WeightTitle). */
+  display: { wdth: 75, wght: 800, lineHeight: 0.86 },
+  /** Body: 17–19 px, line-height 1.55, 60–68 characters a line. */
+  body: { sizeMin: 17, sizeMax: 19, lineHeight: 1.55, wdth: 100, wght: 400, measureMin: 60, measureMax: 68 },
+  /** Button labels: wider and bolder than the titles, upper case, +0.02 em. */
+  button: { wdth: 112, wght: 720, tracking: 0.02 },
+  /** Labels, stats and spot heights. */
+  mono: { size: 11, tracking: 0.14, wdth: 87.5, wght: 500 },
+  /** Display type in small spaces (card names). */
+  compact: { wdth: 72, wght: 800 },
+  /** Condensed Archivo for type lines and insight text. */
   condensed: { wdth: 88 },
-  /** The finding half of a waypoint heading ("Label — finding"). */
-  finding: { wdth: 85 },
+  /** Map labels' hard halo where lines run close: a ground stroke under the glyphs, in px (half each side). */
+  halo: { stroke: 4 },
 } as const;
 
 /**
- * Variable-font axes per text role and state. Display text rests at Archivo's narrowest width,
- * so a settle always comes from wider; press can only change the weight there.
- * Archivo: wdth 62–125; Martian Mono: wdth 75–112.5.
+ * Display titles (WeightTitle): at rest wght 800 at wdth 75. In full motion a title arrives from
+ * wght 200 at a start width solved per title at build time so the line keeps its length
+ * (scripts/measure-titles.mjs → src/lib/title-axes.json).
  */
-export const axes = {
-  display: {
-    rest: { wdth: 62, wght: 800 },
-    reveal: { wdth: 80, wght: 100 },
-    /** Breath on hover or focus: +8 wdth. */
-    hover: { wdth: 70, wght: 800 },
-    press: { wdth: 62, wght: 700 },
-    /** Display type in small spaces (card names, plaque terms). */
-    compact: { wdth: type.display.wdthMax, wght: 800 },
-  },
-  label: {
-    rest: { wdth: 100, wght: 600 },
-    reveal: { wdth: 110, wght: 600 },
-    hover: { wdth: 112, wght: 650 },
-    press: { wdth: 96, wght: 600 },
-  },
-  mono: {
-    rest: { wdth: 87.5, wght: 500 },
-    reveal: { wdth: 112.5, wght: 500 },
-    hover: { wdth: 100, wght: 500 },
-    press: { wdth: 80, wght: 500 },
-    /** The HUD once the page has scrolled: Martian Mono's narrowest width. */
-    condensed: { wdth: 75, wght: 500 },
-  },
+export const titleAxes = {
+  from: { wght: 200 },
+  rest: { wdth: type.display.wdth, wght: type.display.wght },
 } as const;
 
-export type AxisRole = keyof typeof axes;
+/** Layout spacing. */
+export const space = {
+  /** Between a page's sections: roomier on desktop. */
+  section: { mobile: "clamp(4rem, 10vh, 6rem)", desktop: "clamp(6rem, 14vh, 11rem)" },
+  /** How far construction lines run past what they measure (the footer wordmark), in px. */
+  overshoot: 12,
+} as const;
 
 /** Durations in milliseconds: the scale, then semantic durations. */
 export const duration = {
@@ -90,28 +93,40 @@ export const duration = {
   medium: 360,
   long: 560,
   scenic: 900,
-  cinematic: 1400,
   /** Press response. */
   tap: 120,
-  /** One letter breathing wider on hover or focus, or settling back. */
-  breath: 160,
-  /** A whole breath settling back, right to left. */
+  /** A tilted card springs or tweens back flat as the pointer leaves. */
   breathOut: 240,
-  /** An inline link's contour underline draws. */
-  underline: 180,
   /** Still mode: the longest opacity or colour change allowed. */
   still: 200,
   /** One block of a reveal (rise and fade); with the item stagger a group stays within 600 ms. */
   reveal: 350,
-  /** Text and UI settling onto its rest state (labels, links, buttons). */
+  /** A UI part arriving or changing state (a figure's scan line, a caption). */
   settle: 420,
   /** A route change's own motion (field and page). */
   route: 600,
-  /** Display text settling from its reveal axes. */
-  settleDisplay: 640,
+  /** A display title's arrival: wght 200 → 800 at a fixed line length (WeightTitle). */
+  title: 600,
+  /** The home intro's arrival: wght 300 → 400 with a 6 px settle. */
+  intro: 400,
+  /** A trail link's red line draws left to right (TrailLink); calm: `trailCalm`. */
+  trail: 280,
+  trailCalm: 120,
+  /** The contour flood spreading over its twelve frames (Flood), and its slow three-frame tail. */
+  flood: 360,
+  floodTail: 900,
+  /** Calm: the flood cross-fades instead. */
+  floodCalm: 160,
+  /** A touch flood recedes this long after the tap. */
+  floodTouch: 600,
+  /** The portrait card turning over (full); calm cross-fades over `flipCalm`. */
+  flip: 400,
+  flipCalm: 150,
+  /** The case-study summary unfolding, its text present throughout. */
+  legendUnfold: 340,
   /** The terrain morphing between routes. */
   terrain: 700,
-  /** The single mint glint. */
+  /** The foil sweep across a Mythic card's name. */
   glint: 900,
   /** A line or neatline drawing on. */
   draw: 900,
@@ -173,8 +188,6 @@ export type SpringToken = keyof typeof spring;
 
 /** Staggers in ms; `cap` bounds the whole cascade, `max` the number of items that stagger. */
 export const stagger = {
-  char: { step: 14, cap: 240 },
-  word: { step: 40, cap: 320 },
   item: { step: 50, max: 6 },
   card: { step: 70, cap: 420 },
 } as const;
@@ -186,11 +199,9 @@ export const stagger = {
  * parts follow, all landed by `duration.arrival`. Text never waits: it is readable throughout.
  */
 export const arrival = {
-  /** A case study's type and meta lines settle. */
-  lines: 260,
   /** A case study's summary sheet unfolds (to the arrival's end). */
   summary: 380,
-  /** Basecamp: the lead settles and the legend unfolds, the H1 having landed. */
+  /** About: the lead and the facts arrive, the H1 having landed. */
   landed: 420,
 } as const;
 
@@ -200,8 +211,10 @@ export const distance = {
   rise: 8,
   /** Cards rise this far as they reveal. */
   riseCard: 12,
-  /** Arrows and small marks nudge this far on hover or focus. */
-  nudge: 4,
+  /** A trail link's arrow steps forward this far, in two steps. */
+  trailStep: 3,
+  /** The home intro settles this far as its weight eases in. */
+  introSettle: 6,
   /** Lifted surfaces (negative: up). */
   lift: -6,
   /** Largest card tilt. */
@@ -222,7 +235,14 @@ export const scale = {
   cardPress: 0.98,
 } as const;
 
-/** The single mint pass: one band across the text, on dark surfaces only. */
+/**
+ * The contour flood (flood.ts): a sprite of twelve frames spreads the glacier fill from where the
+ * pointer entered (left to right for the keyboard); a fringe one frame ahead shows at 25%, and the
+ * last three frames slow into a tail (--dur-flood-tail) while the pointer rests.
+ */
+export const flood = { frames: 12, tailFrames: 3, fringe: 0.25 } as const;
+
+/** The single mint pass: one band across a card's name as its foil sweeps (Mythic cards). */
 export const glint = {
   /** Band width as a share of the text's width (%). */
   band: 18,
@@ -232,22 +252,6 @@ export const glint = {
   duration: "glint",
   easing: "glint",
 } as const satisfies { duration: DurationToken; easing: EasingToken } & Record<string, unknown>;
-
-/**
- * The pointer "headlamp" shared by the contour field and the display-type shine: one pointer
- * source (src/lib/headlamp.ts), one radius, one falloff, one timing.
- */
-export const headlamp = {
-  radiusPx: 120,
-  /** Large type is lit at least this many em around the pointer, so a lamp covers a few letters. */
-  radiusEm: 1.2,
-  /** Gaussian falloff exp(-k·d²) for a distance d in radii, cut off at d = 1. */
-  falloff: 3,
-  rise: "micro",
-  fadeMs: 600,
-  /** Type is lit at most half way towards glacier (colour only). */
-  shineMax: 0.5,
-} as const satisfies { rise: DurationToken } & Record<string, unknown>;
 
 /**
  * Motion levels and their budgets: every effect belongs to one level, and later phases keep
@@ -286,11 +290,11 @@ export type HapticEvent = keyof typeof haptics.patterns;
  * npm test checks that every width query in a stylesheet uses one of these.
  */
 export const breakpoint = {
-  /** Past phones: the HUD shows the readout and the haptics switch; two-up grids. */
+  /** Past phones: the HUD shows the haptics switch; two-up grids. */
   sm: 640,
   /** The HUD's whole navigation; two-column hero, case-study and Basecamp headers; four-up grids. */
   md: 1024,
-  /** The HUD's Bern time and the readout's coordinates; the trail beside a case study's waypoints. */
+  /** The trail beside a case study's waypoints. */
   lg: 1280,
 } as const;
 
@@ -322,38 +326,53 @@ export const seconds = (d: DurationToken) => duration[d] / 1000;
 export const staggerStep = (s: { step: number; cap: number }, count: number) =>
   count > 1 ? Math.min(s.step, s.cap / (count - 1)) : 0;
 
-const kebab = (s: string) => s.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`);
+const kebab = (s: string) => s.replace(/[A-Z]|\d+/g, (m) => `-${m.toLowerCase()}`);
 
 /**
- * Serialises the tokens into CSS custom properties on :root. `motion: false` leaves out the
- * motion tokens (durations, easings, axes, staggers, distances, glint, headlamp, layers), for
- * pages that only need the palette and type (the artefact images, the under-construction page),
- * so tuning motion never changes them.
+ * Serialises the tokens into CSS custom properties on :root. `motion: false` keeps only the
+ * palette and type, leaving out the layout and motion tokens (spacing, durations, easings,
+ * staggers, distances, glint, layers), for pages that need nothing else (the artefact images), so
+ * tuning spacing or motion never changes them.
  */
 export function tokensToCss({ motion = true }: { motion?: boolean } = {}): string {
   const vars: string[] = [];
   for (const [k, v] of Object.entries(color)) vars.push(`--color-${kebab(k)}:${v}`);
   if (motion) for (const [k, v] of Object.entries(duration)) vars.push(`--dur-${kebab(k)}:${v}ms`);
   if (motion) for (const k of Object.keys(easing) as EasingToken[]) vars.push(`--ease-${k}:${cubicBezier(k)}`);
+  if (motion) {
+    // The flood's frames: all but the tail in --dur-flood, the tail over --dur-flood-tail.
+    const last = flood.frames - 1;
+    const head = (last - flood.tailFrames) / last;
+    const at = duration.flood / (duration.flood + duration.floodTail);
+    vars.push(`--flood-last:${last}`, `--flood-fringe:${flood.fringe}`, `--ease-flood:linear(0, ${+head.toFixed(4)} ${+(at * 100).toFixed(2)}%, 1)`);
+  }
+  // Type roles: font-stretch as a percentage, weight as a number.
+  const rem = (px: number) => `${px / 16}rem`;
   vars.push(
-    `--type-display-wdth:${type.display.wdthMin}`,
+    `--type-display-wdth:${type.display.wdth}%`,
     `--type-display-wght:${type.display.wght}`,
-    `--type-display-lh:${type.display.lineHeightMin}`,
-    `--type-body-size:${type.body.size / 16}rem`,
-    `--type-body-lh:${type.body.lineHeight / type.body.size}`,
-    `--type-hud-size:${type.hudLabel.size / 16}rem`,
-    `--type-hud-tracking:${type.hudLabel.tracking}em`,
-    `--type-hud-wdth:${type.hudLabel.wdth}`,
-    `--type-stat-wght:${type.statValue.wght}`,
+    `--type-display-lh:${type.display.lineHeight}`,
+    `--type-body-size:clamp(${rem(type.body.sizeMin)}, ${rem(type.body.sizeMin - 1)} + 0.3vw, ${rem(type.body.sizeMax)})`,
+    `--type-body-lh:${type.body.lineHeight}`,
+    `--type-body-wght:${type.body.wght}`,
+    `--type-body-measure:${type.body.measureMax}ch`,
+    `--type-button-wdth:${type.button.wdth}%`,
+    `--type-button-wght:${type.button.wght}`,
+    `--type-button-tracking:${type.button.tracking}em`,
+    `--type-mono-size:${rem(type.mono.size)}`,
+    `--type-mono-tracking:${type.mono.tracking}em`,
+    `--type-mono-wdth:${type.mono.wdth}%`,
+    `--type-mono-wght:${type.mono.wght}`,
+    `--type-compact-wdth:${type.compact.wdth}%`,
+    `--type-compact-wght:${type.compact.wght}`,
+    `--type-condensed-wdth:${type.condensed.wdth}%`,
+    `--type-halo-stroke:${type.halo.stroke}px`,
+    `--title-from-wght:${titleAxes.from.wght}`,
+    `--title-rest-wght:${titleAxes.rest.wght}`,
+    `--title-rest-wdth:${titleAxes.rest.wdth}`,
   );
   if (!motion) return `:root{${vars.join(";")}}`;
-  vars.push(`--type-condensed-wdth:${type.condensed.wdth}%`, `--type-finding-wdth:${type.finding.wdth}%`);
-  // Axes: font-stretch as a percentage, weight as a number (--axis-display-rest-wdth: 62%).
-  for (const [role, states] of Object.entries(axes)) {
-    for (const [state, v] of Object.entries(states)) {
-      vars.push(`--axis-${role}-${state}-wdth:${v.wdth}%`, `--axis-${role}-${state}-wght:${v.wght}`);
-    }
-  }
+  vars.push(`--space-section-mobile:${space.section.mobile}`, `--space-section-desktop:${space.section.desktop}`, `--space-overshoot:${space.overshoot}px`);
   for (const [k, s] of Object.entries(stagger)) {
     vars.push(`--stagger-${k}:${s.step}ms`);
     if ("cap" in s) vars.push(`--stagger-${k}-cap:${s.cap}ms`);
@@ -364,9 +383,6 @@ export function tokensToCss({ motion = true }: { motion?: boolean } = {}): strin
     `--glint-band:${glint.band}%`,
     `--glint-angle:${glint.angle}deg`,
     `--glint-color:rgb(${hexChannels(glint.color).join(" ")} / ${glint.alpha})`,
-    `--headlamp-radius:${headlamp.radiusPx}px`,
-    `--headlamp-fade:${headlamp.fadeMs}ms`,
-    `--headlamp-shine:${headlamp.shineMax * 100}%`,
     `--scale-press:${scale.press}`,
     `--scale-card-press:${scale.cardPress}`,
   );

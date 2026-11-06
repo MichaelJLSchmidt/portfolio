@@ -18,6 +18,8 @@ next-env.d.ts
 /artefacts/.masters/
 # review videos (npm run record:motion)
 /motion-recordings/
+# the name-swap test's copy of the project (npm run check:name)
+/.name-swap/
 
 # env files (MOTION_TOKEN and friends never get committed)
 .env

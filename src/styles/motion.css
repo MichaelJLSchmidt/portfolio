@@ -1,11 +1,9 @@
+@layer reset, tokens, base, layout, components, utilities;
+
 /* Reveals (src/components/motion/reveal.ts): blocks below the fold wait, then rise (calm: fade
    only), draw or unfold once as they scroll into view. Nothing in the first viewport ever waits, and still mode never
    hides anything (the waiting states only exist outside still). Durations keep a group within the
    reveal level's 600 ms. */
-
-[data-reveal] {
-  --reveal-rise: var(--dist-rise);
-}
 
 /* A list's ring bullets (data-reveal="list"): each li::before is masked by a conic sweep. */
 @property --ring-sweep {
@@ -14,290 +12,281 @@
   initial-value: 360deg;
 }
 
-[data-reveal="list"] > li::before {
-  -webkit-mask: conic-gradient(#000 var(--ring-sweep), transparent 0);
-  mask: conic-gradient(#000 var(--ring-sweep), transparent 0);
-}
+@layer components {
+  [data-reveal] {
+    --reveal-rise: var(--dist-rise);
+  }
 
-[data-reveal="card"] {
-  --reveal-rise: var(--dist-rise-card);
-}
+  [data-reveal="list"] > li::before {
+    -webkit-mask: conic-gradient(#000 var(--ring-sweep), transparent 0);
+    mask: conic-gradient(#000 var(--ring-sweep), transparent 0);
+  }
 
-@keyframes reveal-rise {
-  from {
+  [data-reveal="card"] {
+    --reveal-rise: var(--dist-rise-card);
+  }
+
+  @keyframes reveal-rise {
+    from {
+      opacity: 0;
+      transform: translateY(var(--reveal-rise));
+    }
+  }
+
+  @keyframes reveal-draw {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
+  @keyframes reveal-unfold-top {
+    from {
+      clip-path: inset(0 0 100% 0);
+    }
+  }
+
+  @keyframes reveal-unfold-left {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+  }
+
+  @keyframes reveal-fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes reveal-trace {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+  }
+
+  @keyframes reveal-ring {
+    from {
+      --ring-sweep: 0deg;
+    }
+  }
+
+  /* A drawn mark (data-reveal="mark"): its paths have pathLength="1" and draw from their start. */
+  @keyframes reveal-stroke {
+    from {
+      stroke-dashoffset: 1;
+    }
+  }
+
+  [data-reveal="mark"] :is(path, circle, rect) {
+    stroke-dasharray: 1;
+  }
+
+  /* A figure (data-reveal="figure"): it unfolds from the top behind a 1 px scan line (its ::after,
+     a box as tall as the figure whose top border travels down with the fold), then its corner ticks
+     (::before) show. The ticks stay: they mark the figure at rest too. */
+  @keyframes reveal-scan {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    85% {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+  }
+
+  [data-reveal="figure"]::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: 1;
+    background:
+      linear-gradient(var(--tick, var(--color-glacier)), var(--tick, var(--color-glacier))) left top / 12px 1px no-repeat,
+      linear-gradient(var(--tick, var(--color-glacier)), var(--tick, var(--color-glacier))) left top / 1px 12px no-repeat,
+      linear-gradient(var(--tick, var(--color-glacier)), var(--tick, var(--color-glacier))) right bottom / 12px 1px no-repeat,
+      linear-gradient(var(--tick, var(--color-glacier)), var(--tick, var(--color-glacier))) right bottom / 1px 12px no-repeat;
+    pointer-events: none;
+  }
+
+  [data-reveal="figure"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-top: 1px solid var(--color-glacier);
     opacity: 0;
-    transform: translateY(var(--reveal-rise));
-  }
-}
-
-@keyframes reveal-draw {
-  from {
-    transform: scaleX(0);
-  }
-}
-
-@keyframes reveal-unfold-top {
-  from {
-    clip-path: inset(0 0 100% 0);
-  }
-}
-
-@keyframes reveal-unfold-left {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-}
-
-@keyframes reveal-fade {
-  from {
-    opacity: 0;
-  }
-}
-
-@keyframes reveal-trace {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-}
-
-@keyframes reveal-ring {
-  from {
-    --ring-sweep: 0deg;
-  }
-}
-
-/* A drawn mark (data-reveal="mark"): its paths have pathLength="1" and draw from their start. */
-@keyframes reveal-stroke {
-  from {
-    stroke-dashoffset: 1;
-  }
-}
-
-[data-reveal="mark"] :is(path, circle, rect) {
-  stroke-dasharray: 1;
-}
-
-/* A figure (data-reveal="figure"): it unfolds from the top behind a 1 px scan line (its ::after,
-   a box as tall as the figure whose top border travels down with the fold), then its corner ticks
-   (::before) show. The ticks stay: they mark the figure at rest too. */
-@keyframes reveal-scan {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  85% {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-    transform: translateY(100%);
-  }
-}
-
-[data-reveal="figure"]::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  z-index: 1;
-  background:
-    linear-gradient(var(--tick, var(--color-glacier)), var(--tick, var(--color-glacier))) left top / 12px 1px no-repeat,
-    linear-gradient(var(--tick, var(--color-glacier)), var(--tick, var(--color-glacier))) left top / 1px 12px no-repeat,
-    linear-gradient(var(--tick, var(--color-glacier)), var(--tick, var(--color-glacier))) right bottom / 12px 1px no-repeat,
-    linear-gradient(var(--tick, var(--color-glacier)), var(--tick, var(--color-glacier))) right bottom / 1px 12px no-repeat;
-  pointer-events: none;
-}
-
-[data-reveal="figure"]::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  border-top: 1px solid var(--color-glacier);
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* While its image decodes (below the fold, reveal.ts): a contour placeholder, then the image
-   cross-fades in. Without JavaScript the image simply loads. */
-[data-decoding] {
-  background: repeating-radial-gradient(circle at 32% 44%, transparent 0 13px, var(--color-contour-dim) 13px 14px);
-}
-
-[data-decoding] img {
-  opacity: 0;
-}
-
-[data-reveal="figure"] img {
-  transition: opacity var(--dur-still) linear;
-}
-
-@keyframes reveal-draw-down {
-  from {
-    transform: scaleY(0);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion="still"]) :is([data-reveal=""], [data-reveal="card"])[data-reveal-state="wait"] {
-    opacity: 0;
-    transform: translateY(var(--reveal-rise));
+    pointer-events: none;
   }
 
-  :root:not([data-motion="still"]) :is([data-reveal=""], [data-reveal="card"])[data-reveal-state="play"] {
-    animation: reveal-rise var(--dur-reveal) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
+  /* While its image decodes (below the fold, reveal.ts): a contour placeholder, then the image
+     cross-fades in. Without JavaScript the image simply loads. */
+  [data-decoding] {
+    background: repeating-radial-gradient(circle at 32% 44%, transparent 0 13px, var(--color-contour-dim) 13px 14px);
   }
 
-  /* Calm: the same reveal without the rise, opacity only. */
-  :root[data-motion="calm"] :is([data-reveal=""], [data-reveal="card"])[data-reveal-state="wait"] {
-    transform: none;
-  }
-
-  :root[data-motion="calm"] :is([data-reveal=""], [data-reveal="card"])[data-reveal-state="play"] {
-    animation-name: reveal-fade;
-  }
-
-  :root:not([data-motion="still"]) [data-reveal="rule"][data-reveal-state="wait"] {
-    transform: scaleX(0);
-  }
-
-  :root:not([data-motion="still"]) [data-reveal="rule"][data-reveal-state="play"] {
-    animation: reveal-draw var(--dur-settle) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
-  }
-
-  /* A drawn line (the footer's elevation profile) traces from its start over the draw token. */
-  :root:not([data-motion="still"]) [data-reveal="line"][data-reveal-state="wait"] {
-    clip-path: inset(0 100% 0 0);
-  }
-
-  :root:not([data-motion="still"]) [data-reveal="line"][data-reveal-state="play"] {
-    animation: reveal-trace var(--dur-draw) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
-  }
-
-  /* Lists: the ring bullets draw, one item after another (the item stagger); the text stays. */
-  :root:not([data-motion="still"]) [data-reveal="list"][data-reveal-state="wait"] > li::before {
-    --ring-sweep: 0deg;
-  }
-
-  :root:not([data-motion="still"]) [data-reveal="list"][data-reveal-state="play"] > li::before {
-    animation: reveal-ring var(--dur-reveal) var(--ease-settle) calc(min(var(--i, 0), var(--stagger-item-max) - 1) * var(--stagger-item)) backwards;
-  }
-
-  /* A mark draws its paths (the decision's chosen option, the evidence swatches). */
-  :root:not([data-motion="still"]) [data-reveal="mark"][data-reveal-state="wait"] :is(path, circle, rect) {
-    stroke-dashoffset: 1;
-  }
-
-  :root:not([data-motion="still"]) [data-reveal="mark"][data-reveal-state="play"] :is(path, circle, rect) {
-    animation: reveal-stroke var(--dur-trace) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
-  }
-
-  /* A figure unfolds over --dur-settle (420 ms) behind its scan line; the ticks follow. */
-  :root:not([data-motion="still"]) [data-reveal="figure"][data-reveal-state="wait"] {
-    clip-path: inset(0 0 100% 0);
-  }
-
-  :root:not([data-motion="still"]) [data-reveal="figure"][data-reveal-state="wait"]::before {
+  [data-decoding] img {
     opacity: 0;
   }
 
-  :root:not([data-motion="still"]) [data-reveal="figure"][data-reveal-state="play"] {
-    animation: reveal-unfold-top var(--dur-settle) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
+  [data-reveal="figure"] img {
+    transition: opacity var(--dur-still) linear;
   }
 
-  :root:not([data-motion="still"]) [data-reveal="figure"][data-reveal-state="play"]::after {
-    animation: reveal-scan var(--dur-settle) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
+  @keyframes reveal-draw-down {
+    from {
+      transform: scaleY(0);
+    }
   }
 
-  :root:not([data-motion="still"]) [data-reveal="figure"][data-reveal-state="play"]::before {
-    animation: reveal-fade var(--dur-short) var(--ease-settle) calc(var(--reveal-delay, 0ms) + var(--dur-settle)) backwards;
+  @media (prefers-reduced-motion: no-preference) {
+    :root:not([data-motion="still"]) :is([data-reveal=""], [data-reveal="card"])[data-reveal-state="wait"] {
+      opacity: 0;
+      transform: translateY(var(--reveal-rise));
+    }
+
+    :root:not([data-motion="still"]) :is([data-reveal=""], [data-reveal="card"])[data-reveal-state="play"] {
+      animation: reveal-rise var(--dur-reveal) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
+    }
+
+    /* Calm: the same reveal without the rise, opacity only. */
+    :root[data-motion="calm"] :is([data-reveal=""], [data-reveal="card"])[data-reveal-state="wait"] {
+      transform: none;
+    }
+
+    :root[data-motion="calm"] :is([data-reveal=""], [data-reveal="card"])[data-reveal-state="play"] {
+      animation-name: reveal-fade;
+    }
+
+    :root:not([data-motion="still"]) [data-reveal="rule"][data-reveal-state="wait"] {
+      transform: scaleX(0);
+    }
+
+    :root:not([data-motion="still"]) [data-reveal="rule"][data-reveal-state="play"] {
+      animation: reveal-draw var(--dur-settle) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
+    }
+
+    /* A drawn line (the footer's elevation profile) traces from its start over the draw token. */
+    :root:not([data-motion="still"]) [data-reveal="line"][data-reveal-state="wait"] {
+      clip-path: inset(0 100% 0 0);
+    }
+
+    :root:not([data-motion="still"]) [data-reveal="line"][data-reveal-state="play"] {
+      animation: reveal-trace var(--dur-draw) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
+    }
+
+    /* Lists: the ring bullets draw, one item after another (the item stagger); the text stays. */
+    :root:not([data-motion="still"]) [data-reveal="list"][data-reveal-state="wait"] > li::before {
+      --ring-sweep: 0deg;
+    }
+
+    :root:not([data-motion="still"]) [data-reveal="list"][data-reveal-state="play"] > li::before {
+      animation: reveal-ring var(--dur-reveal) var(--ease-settle) calc(min(var(--i, 0), var(--stagger-item-max) - 1) * var(--stagger-item)) backwards;
+    }
+
+    /* A mark draws its paths (the decision's chosen option, the evidence swatches). */
+    :root:not([data-motion="still"]) [data-reveal="mark"][data-reveal-state="wait"] :is(path, circle, rect) {
+      stroke-dashoffset: 1;
+    }
+
+    :root:not([data-motion="still"]) [data-reveal="mark"][data-reveal-state="play"] :is(path, circle, rect) {
+      animation: reveal-stroke var(--dur-trace) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
+    }
+
+    /* A figure unfolds over --dur-settle (420 ms) behind its scan line; the ticks follow. */
+    :root:not([data-motion="still"]) [data-reveal="figure"][data-reveal-state="wait"] {
+      clip-path: inset(0 0 100% 0);
+    }
+
+    :root:not([data-motion="still"]) [data-reveal="figure"][data-reveal-state="wait"]::before {
+      opacity: 0;
+    }
+
+    :root:not([data-motion="still"]) [data-reveal="figure"][data-reveal-state="play"] {
+      animation: reveal-unfold-top var(--dur-settle) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
+    }
+
+    :root:not([data-motion="still"]) [data-reveal="figure"][data-reveal-state="play"]::after {
+      animation: reveal-scan var(--dur-settle) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
+    }
+
+    :root:not([data-motion="still"]) [data-reveal="figure"][data-reveal-state="play"]::before {
+      animation: reveal-fade var(--dur-short) var(--ease-settle) calc(var(--reveal-delay, 0ms) + var(--dur-settle)) backwards;
+    }
+
+
+    /* A fade (opacity only, so running text may take it): after --fade-after, set by its block. */
+    :root:not([data-motion="still"]) [data-reveal="fade"][data-reveal-state="wait"] {
+      opacity: 0;
+    }
+
+    :root:not([data-motion="still"]) [data-reveal="fade"][data-reveal-state="play"] {
+      animation: reveal-fade var(--dur-reveal) var(--ease-settle) calc(var(--reveal-delay, 0ms) + var(--fade-after, 0ms)) backwards;
+    }
+
+    /* A caption fades in after its figure. */
+    :root:not([data-motion="still"]) [data-reveal="caption"][data-reveal-state="wait"] {
+      opacity: 0;
+    }
+
+    :root:not([data-motion="still"]) [data-reveal="caption"][data-reveal-state="play"] {
+      animation: reveal-fade var(--dur-short) var(--ease-settle) calc(var(--dur-settle) + var(--dur-short)) backwards;
+    }
+
+    :root:not([data-motion="still"]) [data-reveal="sheet"][data-reveal-state="wait"] {
+      clip-path: inset(0 0 100% 0);
+    }
+
+    :root:not([data-motion="still"]) [data-reveal="sheet"][data-fold="left"][data-reveal-state="wait"] {
+      clip-path: inset(0 100% 0 0);
+    }
+
+    :root:not([data-motion="still"]) [data-reveal="sheet"][data-reveal-state="wait"] > :not([data-sheet-rows]) {
+      opacity: 0;
+    }
+
+    :root:not([data-motion="still"]) [data-reveal="sheet"][data-reveal-state="play"] {
+      animation: reveal-unfold-top var(--reveal-dur, var(--sheet-dur, var(--dur-reveal))) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
+    }
+
+    :root:not([data-motion="still"]) [data-reveal="sheet"][data-fold="left"][data-reveal-state="play"] {
+      animation-name: reveal-unfold-left;
+    }
+
+    /* The content follows once the sheet is open; a sheet with rows (data-sheet-rows) fades them
+       in one after another (the item stagger, --i per row), their values never moving. */
+    :root:not([data-motion="still"]) [data-reveal="sheet"][data-reveal-state="play"] > :not([data-sheet-rows]),
+    :root:not([data-motion="still"]) [data-reveal="sheet"][data-reveal-state="play"] [data-sheet-rows] > * {
+      animation: reveal-fade var(--dur-short) var(--ease-settle) calc(var(--reveal-delay, 0ms) + var(--reveal-dur, var(--sheet-dur, var(--dur-reveal)))) backwards;
+    }
+
+    :root:not([data-motion="still"]) [data-reveal="sheet"][data-reveal-state="play"] [data-sheet-rows] > * {
+      animation-duration: var(--dur-micro);
+      animation-delay: calc(var(--reveal-delay, 0ms) + var(--reveal-dur, var(--sheet-dur, var(--dur-reveal))) * 0.5 + min(var(--i, 0), var(--stagger-item-max) - 1) * var(--stagger-item));
+    }
+
+    :root:not([data-motion="still"]) [data-reveal="sheet"][data-reveal-state="wait"] [data-sheet-rows] > * {
+      opacity: 0;
+    }
   }
 
-  /* A pull quote: its rule (::before) draws down, then the quote fades in; nothing moves. */
-  :root:not([data-motion="still"]) [data-reveal="quote"][data-reveal-state="wait"]::before {
-    transform: scaleY(0);
+  /* Contour rule (ContourRule.tsx): a 1 px contour line, drawn from its start. */
+  .contour-rule {
+    height: 0;
+    margin: 0;
+    border: 0;
+    border-top: 1px solid var(--color-contour-dim);
+    transform-origin: left center;
   }
 
-  :root:not([data-motion="still"]) [data-reveal="quote"][data-reveal-state="wait"] > * {
-    opacity: 0;
+  /* Map sheet (MapSheet.tsx): a raised-ground panel with a hairline (the case-study summary is the
+     only paper surface). */
+  .map-sheet {
+    padding: clamp(20px, 2.6vw, 32px);
+    border: 1px solid var(--color-contour-dim);
+    border-radius: 8px;
+    background: var(--color-ground-raised);
+    color: var(--color-paper-dusk);
   }
-
-  :root:not([data-motion="still"]) [data-reveal="quote"][data-reveal-state="play"]::before {
-    animation: reveal-draw-down var(--dur-reveal) var(--ease-settle) backwards;
-  }
-
-  :root:not([data-motion="still"]) [data-reveal="quote"][data-reveal-state="play"] > * {
-    animation: reveal-fade var(--dur-short) var(--ease-settle) var(--dur-reveal) backwards;
-  }
-
-  /* A fade (opacity only, so running text may take it): after --fade-after, set by its block. */
-  :root:not([data-motion="still"]) [data-reveal="fade"][data-reveal-state="wait"] {
-    opacity: 0;
-  }
-
-  :root:not([data-motion="still"]) [data-reveal="fade"][data-reveal-state="play"] {
-    animation: reveal-fade var(--dur-reveal) var(--ease-settle) calc(var(--reveal-delay, 0ms) + var(--fade-after, 0ms)) backwards;
-  }
-
-  /* A caption fades in after its figure. */
-  :root:not([data-motion="still"]) [data-reveal="caption"][data-reveal-state="wait"] {
-    opacity: 0;
-  }
-
-  :root:not([data-motion="still"]) [data-reveal="caption"][data-reveal-state="play"] {
-    animation: reveal-fade var(--dur-short) var(--ease-settle) calc(var(--dur-settle) + var(--dur-short)) backwards;
-  }
-
-  :root:not([data-motion="still"]) [data-reveal="sheet"][data-reveal-state="wait"] {
-    clip-path: inset(0 0 100% 0);
-  }
-
-  :root:not([data-motion="still"]) [data-reveal="sheet"][data-fold="left"][data-reveal-state="wait"] {
-    clip-path: inset(0 100% 0 0);
-  }
-
-  :root:not([data-motion="still"]) [data-reveal="sheet"][data-reveal-state="wait"] > :not([data-sheet-rows]) {
-    opacity: 0;
-  }
-
-  :root:not([data-motion="still"]) [data-reveal="sheet"][data-reveal-state="play"] {
-    animation: reveal-unfold-top var(--reveal-dur, var(--sheet-dur, var(--dur-reveal))) var(--ease-settle) var(--reveal-delay, 0ms) backwards;
-  }
-
-  :root:not([data-motion="still"]) [data-reveal="sheet"][data-fold="left"][data-reveal-state="play"] {
-    animation-name: reveal-unfold-left;
-  }
-
-  /* The content follows once the sheet is open; a sheet with rows (data-sheet-rows) fades them
-     in one after another (the item stagger, --i per row), their values never moving. */
-  :root:not([data-motion="still"]) [data-reveal="sheet"][data-reveal-state="play"] > :not([data-sheet-rows]),
-  :root:not([data-motion="still"]) [data-reveal="sheet"][data-reveal-state="play"] [data-sheet-rows] > * {
-    animation: reveal-fade var(--dur-short) var(--ease-settle) calc(var(--reveal-delay, 0ms) + var(--reveal-dur, var(--sheet-dur, var(--dur-reveal)))) backwards;
-  }
-
-  :root:not([data-motion="still"]) [data-reveal="sheet"][data-reveal-state="play"] [data-sheet-rows] > * {
-    animation-duration: var(--dur-micro);
-    animation-delay: calc(var(--reveal-delay, 0ms) + var(--reveal-dur, var(--sheet-dur, var(--dur-reveal))) * 0.5 + min(var(--i, 0), var(--stagger-item-max) - 1) * var(--stagger-item));
-  }
-
-  :root:not([data-motion="still"]) [data-reveal="sheet"][data-reveal-state="wait"] [data-sheet-rows] > * {
-    opacity: 0;
-  }
-}
-
-/* Contour rule (ContourRule.tsx): a 1 px contour line, drawn from its start. */
-.contour-rule {
-  height: 0;
-  margin: 0;
-  border: 0;
-  border-top: 1px solid var(--color-contour-dim);
-  transform-origin: left center;
-}
-
-/* Map sheet (MapSheet.tsx): the light sheet with a contour hairline, sheet-safe inks only. */
-.map-sheet {
-  padding: clamp(20px, 2.6vw, 32px);
-  border: 1px solid var(--color-contour);
-  border-radius: 8px;
-  background: var(--color-sheet);
-  color: var(--color-ground);
 }

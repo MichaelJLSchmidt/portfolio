@@ -1,16 +1,15 @@
 "use client";
 
 import { useEffect, useId, useRef } from "react";
-import { SettleText, type SettleHandle } from "@/components/motion/SettleText";
-import { readoutCopy } from "@/content/readout";
+import { caseStudyLabels } from "@/content/case-study-labels";
 import { haptic } from "@/lib/haptics";
 import { meterReading, useReading } from "./reading";
 import styles from "./CaseStudy.module.css";
 
 /**
  * The altimeter bar, below the large breakpoint (where the "On this page" trail has no room): a
- * bar along the bottom of the screen once the reader reaches the first waypoint, "WAYPOINT 2 / 6"
- * and the waypoint's name, which settles on every change of waypoint, over a thin contour that
+ * bar along the bottom of the screen once the reader reaches the first stage, "Stage 2 of 6 ·
+ * Grindelwald" and the stage's name (or "Results" past the last stage), over a thin contour that
  * fills with the reading progress. Tapping it opens the waypoints as a bottom sheet (a modal
  * <dialog>: focus inside, Esc closes, focus returns), rising over --dur-sheet (300 ms; still mode
  * fades it in); a jump ticks the detent haptic, scrolls to the waypoint and moves focus to its
@@ -23,21 +22,17 @@ export function AltimeterBar({
   labels,
 }: {
   slug: string;
-  items: { id: string; nav: string }[];
+  /** The stages (with their place) and the results after them. */
+  items: { id: string; nav: string; place?: string }[];
   labels: { bar: string; sheet: string; close: string };
 }) {
-  const { slug: readingSlug, index, count } = useReading();
+  const { slug: readingSlug, index } = useReading();
   const active = readingSlug === slug ? index : -1;
   const barRef = useRef<HTMLElement>(null);
   const sheetRef = useRef<HTMLDialogElement>(null);
-  const nameRef = useRef<SettleHandle>(null);
   const id = useId();
 
   useEffect(() => (barRef.current ? meterReading(barRef.current) : undefined), []);
-  // The waypoint's name settles in on every change.
-  useEffect(() => {
-    if (active >= 0) nameRef.current?.play();
-  }, [active]);
 
   const open = () => {
     const sheet = sheetRef.current;
@@ -60,15 +55,16 @@ export function AltimeterBar({
   };
 
   const current = items[active];
+  const stages = items.filter((i) => i.place).length;
   return (
     <>
       <nav ref={barRef} className={styles.altimeter} aria-label={labels.bar} data-shown={current ? "" : undefined}>
         <span className={styles.altimeterLine} aria-hidden="true" />
         <button type="button" className={styles.altimeterButton} aria-haspopup="dialog" aria-controls={`${id}sheet`} onClick={open} tabIndex={current ? undefined : -1}>
           <span className={`${styles.altimeterCount} hud-label`}>
-            {readoutCopy.waypoint} {active + 1} / {count || items.length}
+            {(current ?? items[0])?.place ? caseStudyLabels.stageOf(Math.max(1, active + 1), stages, (current ?? items[0]).place!) : (current?.nav ?? "")}
           </span>
-          <SettleText ref={nameRef} text={current?.nav ?? items[0]?.nav ?? ""} mode="block" role="label" trigger="manual" className={styles.altimeterName} />
+          {(current ?? items[0])?.place && <span className={styles.altimeterName}>{(current ?? items[0]).nav}</span>}
           <span className={styles.altimeterArrow} aria-hidden="true">
             ↑
           </span>

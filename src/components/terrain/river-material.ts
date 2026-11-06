@@ -18,7 +18,6 @@ in float aDist;
 
 uniform vec4 uUv;         // the Bern slot's cover mapping (as uUvA/uUvB in the contour shader)
 uniform vec2 uResolution; // device px
-uniform vec2 uPan;
 uniform float uZoom;
 uniform float uHalfWidth; // device px
 
@@ -30,7 +29,7 @@ out float vDist;
 vec2 toScreen(vec2 uv) {
   vec2 st = (uv - uUv.zw) / uUv.xy;
   vec2 p = vec2(st.x, 1.0 - st.y);
-  return ((p - uPan - 0.5) * uZoom + 0.5) * uResolution;
+  return ((p - 0.5) * uZoom + 0.5) * uResolution;
 }
 
 void main() {
@@ -144,7 +143,6 @@ export function createRiverMaterial(field: ContourUniforms): THREE.ShaderMateria
     uOpacity: { value: 0 },
     uDraw: { value: 0 },
     uResolution: field.uResolution,
-    uPan: field.uPan,
     uZoom: field.uZoom,
     uQuiet: field.uQuiet,
     uQuietKind: field.uQuietKind,

@@ -2,16 +2,21 @@
 // (a build with the motion lab: SITE_MODE=basecamp or a preview):
 //
 //   lab.webm                 the motion lab: the three columns settle, then links, buttons and
-//                            glints are tried in the full column and the frames scroll to the reveals
+//                            titles are tried in the full column and the frames scroll to the reveals
 //   round-trip-<mode>.webm   in full, calm and still: the deck, a card into its case study, the Next
-//                            expedition link (hover, keyboard focus, commit) and back to the deck
-//   terrain-card-<mode>.webm, terrain-basecamp-<mode>.webm
+//                            project link (hover, keyboard focus, commit) and back to the deck
+//   terrain-card-<mode>.webm, terrain-about-<mode>.webm
 //                            the terrain conductor (docs/terrain.md): home → a card → home and
-//                            home → Basecamp (Bern) → home, the link hovered first (pre-warm)
-//   home.webm                the home page from the hero to the contact band, at reading pace
-//   basecamp-nav.webm        the HUD's Basecamp label morphing into the Basecamp H1, a look down the
-//                            page, and back (browser back, then the HUD again)
-//   case-study-loop.webm     Seilschaft → Gratweg → Test Project → Seilschaft by the Next links
+//                            home → About (Bern) → home, the link hovered first (pre-warm)
+//   home.webm                the home page from the hero to Get in touch at reading pace: the red
+//                            route, the How I lead drawings, the ridge of cards
+//   about-nav.webm           the HUD's About label morphing into the About H1, the portrait card
+//                            turned over and back, a look down the page, and back
+//   about-<mode>.webm        About in full, calm and still: the career profile, a binder card
+//                            turned over, the field kit
+//   case-study-<mode>.webm   a case study read in full, calm and still: the red route and its blaze,
+//                            the waypoint trail, a decision's fork, the results
+//   case-study-loop.webm     Seilschaft → Test Project → Gratweg → Seilschaft by the Next links
 //
 //   npm run record:motion                       into ./motion-recordings (git-ignored)
 //   npm run record:motion -- --out <folder>
@@ -85,9 +90,7 @@ try {
     await page.waitForSelector("html[data-lab-ready]", { state: "attached", timeout: 30000 });
     await pause(page, 2500);
     const full = page.frameLocator('iframe[data-lab-column="full"]');
-    await full.locator('[data-primitive="settle"] button').first().click();
-    await pause(page, 1200);
-    await full.locator('[data-primitive="glint"] button').first().click();
+    await full.locator('[data-primitive="title"] button').first().click();
     await pause(page, 1200);
     await full.locator('[data-primitive="link"]').scrollIntoViewIfNeeded();
     await pause(page, 600);
@@ -111,18 +114,18 @@ try {
     await record(`round-trip-${mode}`, options, async (page, context) => {
       await context.addInitScript((calm) => {
         try {
-          sessionStorage.setItem("summit:intro-played", "1");
+          
           if (calm) localStorage.setItem("summit:calm-map", "1");
         } catch {}
       }, mode === "calm");
       await page.goto(`${base}/?field=force`, { waitUntil: "networkidle" });
       await pause(page, 2500);
       await page.mouse.move(640, 300, { steps: 10 });
-      await page.locator("#deck-heading").scrollIntoViewIfNeeded();
+      await page.locator("#work-heading").scrollIntoViewIfNeeded();
       await pause(page, 1200);
       await page.locator('article[data-slug="test-project"] a').first().click();
       await pause(page, 3000);
-      const next = page.locator('a[data-variant="display"]').first();
+      const next = page.locator('a[aria-describedby="next-project-label"]').first();
       await next.scrollIntoViewIfNeeded();
       await pause(page, 800);
       await next.hover();
@@ -145,8 +148,8 @@ try {
   for (const mode of ["full", "calm", "still"]) {
     const options = { reducedMotion: mode === "still" ? "reduce" : "no-preference" };
     const links = {
-      card: { selector: 'article[data-slug="seilschaft"] a', path: "/work/seilschaft/", terrain: "lab-097" },
-      basecamp: { selector: 'header a[href$="/about/"]', path: "/about/", terrain: "bern" },
+      card: { selector: 'article[data-slug="seilschaft"] a', path: "/work/seilschaft/", terrain: "eiger" },
+      about: { selector: 'header a[href$="/about/"]', path: "/about/", terrain: "bern" },
     };
     // SwiftShader and the encoder slow everything down: wait for each arrival (the route, then the
     // field landing on its terrain) rather than for fixed times, then hold the frame a moment.
@@ -159,7 +162,7 @@ try {
       await record(`terrain-${name}-${mode}`, options, async (page, context) => {
         await context.addInitScript((calm) => {
           try {
-            sessionStorage.setItem("summit:intro-played", "1");
+            
             if (calm) localStorage.setItem("summit:calm-map", "1");
           } catch {}
         }, mode === "calm");
@@ -178,11 +181,11 @@ try {
       });
     }
   }
-  // A visit as a reader takes it: open the site, skim the home page, go to Basecamp, follow the work.
+  // A visit as a reader takes it: open the site, skim the home page, go to About, follow the work.
   const visit = async (context) =>
     context.addInitScript(() => {
       try {
-        sessionStorage.setItem("summit:intro-played", "1");
+        
       } catch {}
     });
   const scrollThrough = async (page, steps, dy, wait) => {
@@ -198,7 +201,7 @@ try {
     await scrollThrough(page, 28, 380, 650);
     await pause(page, 1500);
   });
-  await record("basecamp-nav", {}, async (page, context) => {
+  await record("about-nav", {}, async (page, context) => {
     await visit(context);
     await page.goto(`${base}/?field=force`, { waitUntil: "networkidle" });
     await pause(page, 2000);
@@ -207,6 +210,11 @@ try {
     await pause(page, 700);
     await hud.click();
     await pause(page, 3000);
+    const flip = page.locator("#portrait-card").locator("xpath=..").locator("button").first();
+    await flip.click();
+    await pause(page, 1500);
+    await flip.click();
+    await pause(page, 1200);
     await scrollThrough(page, 8, 420, 600);
     await page.goBack();
     await pause(page, 2500);
@@ -217,13 +225,44 @@ try {
     await page.goBack();
     await pause(page, 2500);
   });
+  for (const mode of ["full", "calm", "still"]) {
+    const options = { reducedMotion: mode === "still" ? "reduce" : "no-preference" };
+    const calmly = async (context) =>
+      context.addInitScript((calm) => {
+        try {
+          if (calm) localStorage.setItem("summit:calm-map", "1");
+        } catch {}
+      }, mode === "calm");
+    await record(`about-${mode}`, options, async (page, context) => {
+      await calmly(context);
+      await page.goto(`${base}/about/?field=force`, { waitUntil: "networkidle" });
+      await pause(page, 2000);
+      await page.locator("#skills-heading").scrollIntoViewIfNeeded();
+      await pause(page, 1500);
+      await scrollThrough(page, 10, 260, 500);
+      const pocket = page.locator("[data-reveal='turn'] button").first();
+      await pocket.scrollIntoViewIfNeeded();
+      await pause(page, 1200);
+      await pocket.click();
+      await pause(page, 1500);
+      await pocket.click();
+      await pause(page, 1500);
+    });
+    await record(`case-study-${mode}`, options, async (page, context) => {
+      await calmly(context);
+      await page.goto(`${base}/work/seilschaft/?field=force`, { waitUntil: "networkidle" });
+      await pause(page, 2000);
+      await scrollThrough(page, 30, 420, 450);
+      await pause(page, 1500);
+    });
+  }
   await record("case-study-loop", {}, async (page, context) => {
     await visit(context);
     await page.goto(`${base}/work/seilschaft/?field=force`, { waitUntil: "networkidle" });
     await pause(page, 2500);
     for (let i = 0; i < 3; i++) {
       await scrollThrough(page, 4, 600, 450);
-      const next = page.locator('nav[aria-label="Next expedition"] a[data-variant="display"]');
+      const next = page.locator('a[aria-describedby="next-project-label"]');
       await next.scrollIntoViewIfNeeded();
       await pause(page, 700);
       await next.hover();

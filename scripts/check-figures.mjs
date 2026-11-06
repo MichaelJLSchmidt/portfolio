@@ -12,7 +12,7 @@
 //     npm run images), or an encoded file is missing, or the hero is over budget.
 // For every case study:
 //   - a figure block names an unknown figure, an image has no alt text, a caption runs past
-//     about 30 words, or a page has more than one key insight or pull quote.
+//     about 30 words, or a page has more than one key insight.
 //
 //   npm run check:figures       (npm run build runs it whenever the build includes examples)
 import { existsSync, readFileSync, statSync } from "node:fs";
@@ -138,16 +138,13 @@ for (const src of dataSources) {
 for (const [slug, study] of Object.entries(caseStudies)) {
   const figures = study.figures ?? {};
   let insights = 0;
-  let quotes = 0;
-  for (const w of study.waypoints) {
+  for (const w of study.stages) {
     for (const b of w.blocks) {
       if (b.kind === "insight") insights++;
-      if (b.kind === "quote") quotes++;
       if (b.kind === "figure" && !figures[b.id]) fail(`${slug} ${w.id}`, `figure "${b.id}" is not defined`);
     }
   }
   if (insights > 1) fail(slug, `${insights} key insights (at most one per page)`);
-  if (quotes > 1) fail(slug, `${quotes} pull quotes (at most one per page)`);
   if (study.hero && !figures[study.hero]) fail(slug, `hero figure "${study.hero}" is not defined`);
   for (const [id, f] of Object.entries(figures)) {
     const words = f.caption?.split(/\s+/).filter(Boolean).length ?? 0;

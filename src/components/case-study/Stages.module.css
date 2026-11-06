@@ -1,0 +1,229 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+/*
+ * The margin column (Stages.tsx). Each stage is a column of legend panels and figures; inside a
+ * panel every paragraph is a row of two tracks from the md breakpoint: the text at 60–68
+ * characters and a margin of about 22 characters for its side note, which hangs on a hairline
+ * leader from the note mark. On phones the note follows its paragraph as an inline mono block.
+ */
+@layer components {
+  .stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(24px, 3vw, 40px);
+    justify-items: start;
+    scroll-margin-top: 96px;
+  }
+
+  .stage > *,
+  .group,
+  .group > * {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .group {
+    display: grid;
+    gap: clamp(24px, 3vw, 40px);
+  }
+
+  .panel {
+    display: grid;
+    gap: 18px;
+    max-width: calc(var(--type-body-measure) + 22ch + 72px);
+  }
+
+  .panel strong {
+    font-weight: 700;
+  }
+
+  /* "STAGE 3 · KLEINE SCHEIDEGG · 2’061 M", then the finding. */
+  .heading {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 4px;
+    scroll-margin-top: 96px;
+  }
+
+  .stageLine {
+    color: var(--color-glacier);
+  }
+
+  .finding {
+    display: block;
+    max-width: 28ch;
+    color: var(--color-paper-dusk);
+    font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.6rem);
+    font-weight: 760;
+    font-stretch: var(--type-condensed-wdth);
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  /* A paragraph and its margin. */
+  .row {
+    display: grid;
+    gap: 10px;
+  }
+
+  .row :global(.body-copy) {
+    margin: 0;
+  }
+
+  @media (min-width: 1024px) {
+    .row {
+      grid-template-columns: minmax(0, var(--type-body-measure)) 22ch;
+      column-gap: 48px;
+      align-items: start;
+    }
+  }
+
+  .noteRef {
+    margin-left: 0.15em;
+    color: var(--color-glacier);
+    font-family: var(--font-mono);
+    font-size: 0.7em;
+    font-weight: 600;
+    line-height: 0;
+  }
+
+  .note {
+    position: relative;
+    display: flex;
+    gap: 10px;
+    padding: 10px 12px;
+    border-left: 2px solid var(--color-contour);
+    background: color-mix(in srgb, var(--color-ground) 60%, transparent);
+    color: var(--color-paper-dusk);
+    line-height: 1.6;
+    letter-spacing: 0.06em;
+    text-transform: none;
+  }
+
+  .noteNumber {
+    flex: none;
+    color: var(--color-glacier);
+  }
+
+  /* Desktop: the note in the margin, on a hairline leader reaching back to its paragraph. */
+  @media (min-width: 1024px) {
+    .note {
+      padding: 0 0 0 12px;
+      background: none;
+    }
+
+    .note::before {
+      content: "";
+      position: absolute;
+      top: 0.8em;
+      right: 100%;
+      width: 40px;
+      border-top: 1px solid var(--color-contour);
+    }
+  }
+
+  .listBlock {
+    display: grid;
+    gap: 10px;
+  }
+
+  .list {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+  }
+
+  .list:not([data-ordered]) li {
+    position: relative;
+    padding-left: 1.5em;
+  }
+
+  .list:not([data-ordered]) li::before {
+    content: "";
+    position: absolute;
+    top: 0.55em;
+    left: 0.2em;
+    width: 0.55em;
+    height: 0.55em;
+    border: 1.5px solid var(--color-glacier);
+    border-radius: 50%;
+  }
+
+  .list[data-ordered] {
+    counter-reset: item;
+  }
+
+  .list[data-ordered] li {
+    position: relative;
+    padding-left: 44px;
+    counter-increment: item;
+  }
+
+  .list[data-ordered] li::before {
+    content: counter(item);
+    position: absolute;
+    top: 0.1em;
+    left: 0;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border: 1.5px solid var(--color-glacier);
+    border-radius: 50%;
+    color: var(--color-glacier);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .insight {
+    display: grid;
+    gap: 10px;
+    max-width: 46rem;
+    padding: clamp(22px, 3vw, 32px) clamp(22px, 3vw, 36px);
+    border: 1px solid var(--color-contour-dim);
+    border-left: 6px solid var(--color-glacier);
+    border-radius: 12px;
+    background: var(--color-ground-raised);
+    color: var(--color-paper-dusk);
+  }
+
+  .insightLabel {
+    margin: 0;
+    color: var(--color-glacier);
+  }
+
+  .insightText {
+    margin: 0;
+    font-size: clamp(1.4rem, 1.05rem + 1.3vw, 2rem);
+    font-weight: 720;
+    font-stretch: var(--type-condensed-wdth);
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+
+  /* Below 1280 px: "Next stage ↓ / Back to top ↑" at the end of each stage. */
+  .foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 28px;
+    margin: 0;
+  }
+
+  .footLink {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--color-glacier);
+  }
+
+  @media (min-width: 1280px) {
+    .foot {
+      display: none;
+    }
+  }
+}

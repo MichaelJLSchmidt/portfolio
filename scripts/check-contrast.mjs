@@ -1,7 +1,9 @@
-// WCAG contrast check for the colour pairs the design uses, read from src/styles/tokens.ts,
-// plus text inside the field's quiet zones (src/config/contour-field.json): headings, body text
-// (at least 7:1) and legend panels, and display type through its hover shine. Rendered pages
-// are measured by npm run check:legibility.
+// WCAG contrast check for the colour pairs the design uses, read from src/styles/tokens.ts, plus
+// text over the contour field (src/config/contour-field.json). The rules:
+//   text over the field             at least 7:1 (in a quiet zone, on the HUD backdrop, knocked out)
+//   text on paper or raised ground  at least 4.5:1
+//   meaningful non-text marks       at least 3:1 (the route, focus rings, outlines, rarity shapes)
+// Rendered pages are measured by npm run check:legibility.
 //   npm run check:contrast
 import { readFileSync } from "node:fs";
 import { color } from "../src/styles/tokens.ts";
@@ -22,117 +24,83 @@ const lum = (hex) => lumRgb(rgb(hex));
 const contrast = (la, lb) => (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
 const ratio = (a, b) => contrast(lum(color[a]), lum(color[b]));
 
-// [foreground, background, minimum] — 4.5 for text, 3 for large text / UI marks.
+let failed = 0;
+const report = (r, min, what) => {
+  const ok = r >= min;
+  if (!ok) failed++;
+  console.log(`${ok ? "pass" : "FAIL"}  ${r.toFixed(2).padStart(5)}:1  ${what} (min ${min})`);
+};
+
+// [foreground, background, minimum].
+console.log("Opaque surfaces:");
 const required = [
-  ["sheet", "ground", 4.5],
-  ["sheet", "groundRaised", 4.5],
+  // Text on the ground and on raised panels (cards, legend sheets, the HUD).
+  ["paperDusk", "ground", 7],
+  ["paperDusk", "groundRaised", 4.5],
+  ["glacier", "ground", 7],
+  ["glacier", "groundRaised", 4.5],
   ["contour", "ground", 4.5],
-  ["glacier", "ground", 4.5],
+  ["contour", "groundRaised", 4.5],
   ["ice", "ground", 4.5],
   ["alpenglow", "ground", 4.5],
   ["summitGold", "ground", 4.5],
-  ["signal", "ground", 3],
-  ["ground", "sheet", 4.5],
-  ["sheetInk", "sheet", 4.5],
-  ["mossInk", "sheet", 4.5],
-  ["alpenglowInk", "sheet", 4.5],
+  // The flood: ground on glacier.
   ["ground", "glacier", 4.5],
-  // Case-study surfaces: labels on legend panels and night frames, evidence shapes (3:1, graphics).
-  ["glacier", "groundRaised", 4.5],
+  // The case-study summary, the only paper surface.
+  ["paperInk", "paperDusk", 4.5],
+  ["paperInk2", "paperDusk", 4.5],
+  ["mossInk", "paperDusk", 4.5],
+  ["alpenglowInk", "paperDusk", 4.5],
+  ["ground", "paperDusk", 4.5],
+  // Marks: the route, outlines, rarity shapes on the raised ground.
+  ["signal", "ground", 3],
+  ["signal", "groundRaised", 3],
+  ["routePaper", "paperDusk", 3],
+  ["contour", "ground", 3],
   ["alpenglow", "groundRaised", 3],
   ["ice", "groundRaised", 3],
 ];
-// Documented as not allowed on the sheet colour; listed so the rule stays visible.
-const forbidden = [
-  ["contour", "sheet"],
-  ["glacier", "sheet"],
-];
+for (const [fg, bg, min] of required) report(ratio(fg, bg), min, `${fg} on ${bg}`);
 
-let failed = 0;
-for (const [fg, bg, min] of required) {
-  const r = ratio(fg, bg);
-  const ok = r >= min;
-  if (!ok) failed++;
-  console.log(`${ok ? "pass" : "FAIL"}  ${r.toFixed(2).padStart(5)}:1  ${fg} on ${bg} (min ${min})`);
+// Never used for text on paper; listed so the rule stays visible.
+for (const [fg, bg] of [
+  ["contour", "paperDusk"],
+  ["glacier", "paperDusk"],
+  ["signal", "paperDusk"],
+]) {
+  console.log(`info  ${ratio(fg, bg).toFixed(2).padStart(5)}:1  ${fg} on paperDusk (never used on paper)`);
 }
-for (const [fg, bg] of forbidden) console.log(`info  ${ratio(fg, bg).toFixed(2).padStart(5)}:1  ${fg} on ${bg} (never used for text or lines)`);
 
 // Quiet zones: text drawn without a halo over lines faded to `quietStrength`. Worst case is a
-// fully opaque line (alpha 1 before fading; lit lines keep their colour) in any of the field's
-// line colours.
-const s = field.quietStrength;
+// fully opaque line in any of the field's line colours; the HUD's backdrop is ground at 92% over a
+// fully lit line.
 const lineColours = [...new Set([field.lineColor, field.indexColor])];
-const zoneBg = (token) => {
-  const g = rgb(color.ground), c = rgb(color[token]);
-  return g.map((v, i) => v + (c[i] - v) * s);
-};
-const zoneText = [
-  ["sheet", 4.5],
-  ["glacier", 4.5],
-];
-console.log(`\nQuiet zones (lines at ${Math.round(s * 100)}%, no halo):`);
-for (const [fg, min] of zoneText) {
-  for (const line of lineColours) {
-    const r = contrast(lum(color[fg]), lumRgb(zoneBg(line)));
-    const ok = r >= min;
-    if (!ok) failed++;
-    console.log(`${ok ? "pass" : "FAIL"}  ${r.toFixed(2).padStart(5)}:1  ${fg} over ${line} lines (min ${min})`);
-  }
-}
-const worst = Math.min(...lineColours.map((line) => contrast(lum(color.contour), lumRgb(zoneBg(line)))));
-console.log(`info  ${worst.toFixed(2).padStart(5)}:1  contour over the brightest line: contour labels keep their halo (.keep-halo)`);
-
-// Every text over the field reads at 7:1 or more: labels, eyebrows and links sit in a quiet zone
-// (lines at quietStrength) or on the HUD's backdrop (ground at 92% over a fully lit line), so
-// only sheet and glacier qualify; contour text belongs on opaque surfaces (cards, panels).
-console.log(`\nText over the field (minimum 7:1):`);
-const hudBg = (line) => {
-  const g = rgb(color.ground), c = rgb(color[line]);
-  return g.map((v, i) => c[i] + (v - c[i]) * 0.92);
-};
-for (const fg of ["sheet", "glacier"]) {
-  for (const line of lineColours) {
-    for (const [label, backdrop] of [["quiet zone", zoneBg(line)], ["HUD backdrop", hudBg(line)]]) {
-      const r = contrast(lum(color[fg]), lumRgb(backdrop));
-      const ok = r >= 7;
-      if (!ok) failed++;
-      console.log(`${ok ? "pass" : "FAIL"}  ${r.toFixed(2).padStart(5)}:1  ${fg} over ${line} lines, ${label}`);
-    }
-  }
-}
-for (const fg of ["contour", "ice", "alpenglow"]) {
-  const r = Math.min(...lineColours.map((line) => contrast(lum(color[fg]), lumRgb(zoneBg(line)))));
-  console.log(`info  ${r.toFixed(2).padStart(5)}:1  ${fg} in a quiet zone: below 7:1, so never used for text over the field`);
-}
-
-// Body text (.body-copy, .knockout): lines knocked out to bodyQuietStrength, at least 7:1 over a
-// fully lit line; on a legend panel (raised ground at 88%) on top of that.
-const mixRgb = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
-const bodyBg = (line, strength) => {
+const fadedOver = (line, strength) => {
   const g = rgb(color.ground), c = rgb(color[line]);
   return g.map((v, i) => v + (c[i] - v) * strength);
 };
-console.log(`\nBody text (lines at ${Math.round(field.bodyQuietStrength * 100)}%, no halo; minimum 7:1):`);
-for (const line of lineColours) {
-  const bg = bodyBg(line, field.bodyQuietStrength);
-  for (const [label, backdrop] of [["knockout", bg], ["legend panel", mixRgb(bg, rgb(color.groundRaised), 0.88)]]) {
-    const r = contrast(lum(color.sheet), lumRgb(backdrop));
-    const ok = r >= 7;
-    if (!ok) failed++;
-    console.log(`${ok ? "pass" : "FAIL"}  ${r.toFixed(2).padStart(5)}:1  sheet over ${line} lines, ${label}`);
+const hudBg = (line) => fadedOver(line, 0.08);
+console.log(`\nText over the field (quiet zones: lines at ${Math.round(field.quietStrength * 100)}%; minimum 7:1):`);
+for (const fg of ["paperDusk", "glacier"]) {
+  for (const line of lineColours) {
+    report(contrast(lum(color[fg]), lumRgb(fadedOver(line, field.quietStrength))), 7, `${fg} over ${line} lines, quiet zone`);
+    report(contrast(lum(color[fg]), lumRgb(hudBg(line))), 7, `${fg} over ${line} lines, HUD backdrop`);
   }
 }
+for (const fg of ["contour", "ice", "alpenglow", "signal"]) {
+  const r = Math.min(...lineColours.map((line) => contrast(lum(color[fg]), lumRgb(fadedOver(line, field.quietStrength)))));
+  console.log(`info  ${r.toFixed(2).padStart(5)}:1  ${fg} in a quiet zone: below 7:1, so never text over the field`);
+}
+// The route is a mark: 3:1 over a quiet zone.
+for (const line of lineColours) report(contrast(lum(color.signal), lumRgb(fadedOver(line, field.quietStrength))), 3, `signal (the route) over ${line} lines, quiet zone`);
 
-// Display type hover shine: the rest colour mixed at most half way towards glacier (oklab; the
-// luminance stays between the two ends; SettleText.module.css), over a heading zone's
-// brightest line.
-console.log("\nDisplay type hover shine (rest colour → half way to glacier, heading zone):");
-const zoneWorst = Math.max(...lineColours.map((line) => lumRgb(zoneBg(line))));
-for (const t of [0, 0.25, 0.5]) {
-  const l = lum(color.sheet) + (lum(color.glacier) - lum(color.sheet)) * t;
-  const r = contrast(l, zoneWorst);
-  const ok = r >= 4.5;
-  if (!ok) failed++;
-  console.log(`${ok ? "pass" : "FAIL"}  ${r.toFixed(2).padStart(5)}:1  shine at ${Math.round(t * 100)}% over the brightest line`);
+// Body text (.body-copy): lines knocked out to bodyQuietStrength; on a legend panel (raised ground
+// at 88%) on top of that.
+console.log(`\nBody text (lines at ${Math.round(field.bodyQuietStrength * 100)}%; minimum 7:1):`);
+const mixRgb = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
+for (const line of lineColours) {
+  const bg = fadedOver(line, field.bodyQuietStrength);
+  report(contrast(lum(color.paperDusk), lumRgb(bg)), 7, `paperDusk over ${line} lines, knockout`);
+  report(contrast(lum(color.paperDusk), lumRgb(mixRgb(bg, rgb(color.groundRaised), 0.88))), 7, `paperDusk over ${line} lines, legend panel`);
 }
 process.exit(failed ? 1 : 0);

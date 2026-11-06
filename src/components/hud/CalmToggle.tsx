@@ -1,7 +1,6 @@
 "use client";
 
 import { useId } from "react";
-import { SettleText } from "@/components/motion/SettleText";
 import { haptic } from "@/lib/haptics";
 import { useMotionMode } from "@/lib/motion-mode";
 import styles from "./Hud.module.css";
@@ -14,8 +13,7 @@ type Labels = { label: string; description: string; forced: string };
  * Name); the description says what it does, "Reduces motion on this site", and when the OS asks
  * for reduced motion also why it shows on and cannot be switched off. The thumb follows <html>
  * (data-calm, or the still mode), so it is right from first paint and moves on the thumb spring as
- * soon as it is flipped; the mode itself follows a frame later (setCalmMap). The label
- * settles in mono on first load.
+ * soon as it is flipped; the mode itself follows a frame later (setCalmMap).
  */
 export function CalmToggle({ labels }: { labels: Labels }) {
   const { calm, forcedStill, setCalm } = useMotionMode();
@@ -41,7 +39,7 @@ export function CalmToggle({ labels }: { labels: Labels }) {
           />
           <span className={styles.thumb} aria-hidden="true" />
         </span>
-        <SettleText text={labels.label} mode="block" role="mono" id="hud-calm" scope="site" reserve="rest" className={styles.toggleText} />
+        <span className={styles.toggleText}>{labels.label}</span>
       </label>
       <span id={descId} className="visually-hidden">
         {forcedStill ? `${labels.description}. ${labels.forced}` : labels.description}
@@ -73,7 +71,7 @@ export function HapticsToggle({ label, className }: { label: string; className?:
         />
         <span className={styles.thumb} aria-hidden="true" />
       </span>
-      <SettleText text={label} mode="block" role="mono" id="hud-haptics" scope="site" reserve="rest" className={styles.toggleText} />
+      <span className={styles.toggleText}>{label}</span>
     </label>
   );
 }

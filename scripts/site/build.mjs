@@ -43,6 +43,10 @@ const run = (args, env = {}) => {
 rmSync(edgeEntry, { force: true });
 rmSync(out, { recursive: true, force: true });
 run([join(root, "scripts/check-content.mjs"), "--build", `--mode=${mode}`]);
+// Display titles: width compensation for the weight arrival, from the current copy (WeightTitle).
+run([join(root, "scripts/measure-titles.mjs")]);
+// The footer wordmark's outlines, from the brand (scripts/wordmark.mjs).
+run([join(root, "scripts/wordmark.mjs")]);
 const examples = mode !== "construction" && includesExamples(process.env);
 if (mode !== "construction") console.log(`Examples: ${examples ? "included" : "excluded"}`);
 if (examples) run([join(root, "scripts/check-figures.mjs")]);
@@ -145,6 +149,8 @@ if (mode === "construction") {
     console.log(`Basecamp gate: ${relative(root, edgeEntry)}`);
   }
 }
+// Plain wording: no old names, CV or job-seeking phrases in any page (scripts/check-wording.mjs).
+run([join(root, "scripts/check-wording.mjs")]);
 console.log(`Built ${mode} into ${relative(root, out)}/`);
 
 /** Case studies in this build: the real ones, plus the flagged examples where included. */
@@ -170,11 +176,11 @@ async function stripExamples() {
     const parent = join(out, dirname(media.replace(/\/$/, "")));
     if (parent !== out && existsSync(parent) && !readdirSync(parent).length) rmSync(parent, { recursive: true });
   }
-  // The invented testimonials (home field notes written as ex("…")) belong to the examples too.
-  const { home } = await import("../../src/content/home.ts");
-  const { isExample } = await import("../../src/content/example-values.ts");
-  const quotes = home.fieldNotes.notes.map((n) => n.quote).filter(isExample);
-  const needles = [...exampleCards.flatMap((c) => [c.name, `/work/${c.slug}`, c.artwork.terrainId, exampleMedia[c.slug]].filter(Boolean)), ...quotes];
+  // An example's terrain is a real mountain (the Eiger, the Mönch, the Jungfrau), whose name other
+  // data may carry (the footer's Interlaken → Jungfrau trail): what may not remain is the
+  // example's own terrain files and the reference to them.
+  const terrainNeedles = (id) => (id ? [`/terrain/cards/${id}.svg`, `/terrain/morph/${id}.`, `"terrainId":"${id}"`] : []);
+  const needles = exampleCards.flatMap((c) => [c.name, `/work/${c.slug}`, ...terrainNeedles(c.artwork.terrainId), exampleMedia[c.slug]].filter(Boolean));
   const files = (dir) => readdirSync(dir).flatMap((name) => (statSync(join(dir, name)).isDirectory() ? files(join(dir, name)) : [join(dir, name)]));
   const leaks = files(out)
     .filter((f) => /\.(html|txt|js|json|css|xml|svg|map)$/.test(f))
@@ -186,5 +192,5 @@ async function stripExamples() {
     console.error(`Examples are excluded from this build, but out/ still mentions them:\n  ${leaks.join("\n  ")}`);
     process.exit(1);
   }
-  console.log(`Examples: none in out/ (checked for ${needles.length - quotes.length} example names and paths and ${quotes.length} invented testimonials)`);
+  console.log(`Examples: none in out/ (checked for ${needles.length} example names and paths)`);
 }

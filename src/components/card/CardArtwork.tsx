@@ -26,7 +26,7 @@ export function CardArtwork({
   style?: CSSProperties;
   /** A rubber stamp across the map, e.g. "Fictional example" (visual; say it in text nearby too). */
   stamp?: string;
-  /** Optional overlay (e.g. the "Open expedition log" chip). */
+  /** Optional overlay (e.g. the "Open case study" chip). */
   children?: ReactNode;
 }) {
   const terrain = cardTerrain(artwork.terrainId);
@@ -38,14 +38,15 @@ export function CardArtwork({
   let pins: { x: number; y: number; label?: string; elevation?: string; summit: boolean }[] = [];
   let labels: { x: number; y: number; text: string; elevation?: string }[] = [];
 
-  if (artwork.kind === "crop" && terrain.bboxLv95) {
+  if (artwork.kind === "crop" && terrain.bboxLv95 && artwork.trail?.length) {
     const project = (lon: number, lat: number) => projectToViewBox(lon, lat, terrain.bboxLv95!, vb);
+    const waypoints = artwork.waypoints ?? [];
     trail = artwork.trail.map((p) => project(p.lon, p.lat));
-    pins = artwork.waypoints.map((p, i) => {
+    pins = waypoints.map((p, i) => {
       const [x, y] = project(p.lon, p.lat);
-      return { x, y, label: p.label, elevation: p.elevation, summit: i === artwork.waypoints.length - 1 };
+      return { x, y, label: p.label, elevation: p.elevation, summit: i === waypoints.length - 1 };
     });
-    labels = artwork.labels.map((l) => {
+    labels = (artwork.labels ?? []).map((l) => {
       const [x, y] = project(l.lon, l.lat);
       return { x, y, text: l.text, elevation: l.elevation };
     });

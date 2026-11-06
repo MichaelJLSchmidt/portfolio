@@ -1,6 +1,7 @@
-// Basecamp terrain: an 8 × 8 km window of swisstopo elevation centred on the zero point of the
-// Swiss coordinate system (LV95 E 2'600'000 / N 1'200'000, the old observatory in Bern), the
-// Aare through it, and its posters. Configured by scripts/terrain/bern.config.json.
+// The About terrain: a 12 × 9 km window of swisstopo elevation around the zero point of the Swiss
+// coordinate system (LV95 E 2'600'000 / N 1'200'000, the old observatory in Bern) that also holds
+// the Aare through Bern, Ittigen and the Bantiger (the About climb), and its posters. Configured by
+// scripts/terrain/bern.config.json; the field frames it on the zero point.
 //
 //   npm run terrain:bern                 build from the cached download (fetches once if missing)
 //   npm run terrain:bern -- --refresh    re-download the elevation window and the river
@@ -44,6 +45,10 @@ function write(name, data) {
 }
 
 const [minE, minN, maxE, maxN] = cfg.bboxLv95;
+// Everything the window must hold, with at least 1 km to spare.
+for (const p of [{ label: "the zero point", ...cfg.zeroPoint }, ...(cfg.inside ?? [])]) {
+  if (Math.min(p.e - minE, maxE - p.e, p.n - minN, maxN - p.n) < 1000) throw new Error(`${p.label} is less than 1 km inside the window`);
+}
 const spanE = maxE - minE, spanN = maxN - minN;
 /** LV95 → terrain coordinates (0..1, origin top-left, like the heightmap texture). */
 const toUv = ([e, n]) => [(e - minE) / spanE, (maxN - n) / spanN];

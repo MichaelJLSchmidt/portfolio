@@ -1,7 +1,7 @@
 {
   "$comment": "Input for scripts/terrain. Region and card terrains; generated outputs land in public/terrain.",
   "region": {
-    "name": "Thun \u2013 Interlaken \u2013 Grindelwald \u2013 Lauterbrunnen \u2013 Jungfrau",
+    "name": "Thun – Interlaken – Grindelwald – Lauterbrunnen – Jungfrau",
     "bboxWgs84": [
       7.55,
       46.47,
@@ -65,46 +65,69 @@
   ],
   "cards": [
     {
-      "id": "lab-099",
-      "kind": "seeded",
+      "id": "eiger",
+      "kind": "crop",
       "example": true,
-      "seed": 99,
-      "lines": 20,
-      "indexEvery": 4,
-      "aspect": 1.5,
-      "elevationRangeM": [
-        640,
-        2510
+      "$comment": "Seilschaft: the Eiger by the Mittellegi ridge",
+      "centerLv95": [
+        2642500,
+        1158700
       ],
-      "morphWidth": 512
+      "widthKm": 6,
+      "aspect": 1.5,
+      "contourIntervalM": 150,
+      "indexEvery": 5,
+      "morphWidth": 448,
+      "trailPlaces": [
+        "kleine-scheidegg",
+        "eismeer",
+        "mittellegi-hut",
+        "mittellegi-ridge",
+        "eiger"
+      ]
     },
     {
-      "id": "lab-097",
-      "kind": "seeded",
+      "id": "moench",
+      "kind": "crop",
       "example": true,
-      "seed": 97,
-      "lines": 20,
-      "indexEvery": 4,
-      "aspect": 1.5,
-      "elevationRangeM": [
-        560,
-        2280
+      "$comment": "Test Project: the Mönch by its southeast ridge",
+      "centerLv95": [
+        2642300,
+        1156800
       ],
-      "morphWidth": 512
+      "widthKm": 5.5,
+      "aspect": 1.5,
+      "contourIntervalM": 150,
+      "indexEvery": 5,
+      "morphWidth": 448,
+      "trailPlaces": [
+        "eigergletscher",
+        "jungfraujoch",
+        "moenchsjoch-hut",
+        "moench-se-ridge",
+        "moench"
+      ]
     },
     {
-      "id": "lab-098",
-      "kind": "seeded",
+      "id": "jungfrau",
+      "kind": "crop",
       "example": true,
-      "seed": 98,
-      "lines": 20,
-      "indexEvery": 4,
-      "aspect": 1.5,
-      "elevationRangeM": [
-        720,
-        3140
+      "$comment": "Gratweg: the Jungfrau by the Rottalsattel",
+      "centerLv95": [
+        2641800,
+        1154900
       ],
-      "morphWidth": 512
+      "widthKm": 5,
+      "aspect": 1.5,
+      "contourIntervalM": 150,
+      "indexEvery": 5,
+      "morphWidth": 448,
+      "trailPlaces": [
+        "jungfraujoch",
+        "moenchsjoch-hut",
+        "rottalsattel",
+        "jungfrau"
+      ]
     }
   ],
   "heightmapBlurSigma": 1,

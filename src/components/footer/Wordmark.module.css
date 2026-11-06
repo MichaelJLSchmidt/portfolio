@@ -1,0 +1,63 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+/*
+ * The footer wordmark (Wordmark.tsx): an outline drawing of the brand in the box of its own
+ * aspect ratio. The construction lines are spans so they overshoot by exactly --space-overshoot
+ * at any size; strokes keep 1 px whatever the scale. The flood's two filled copies lie over the
+ * outline (globals.css, contour flood).
+ */
+@layer components {
+  .wordmark {
+    position: relative;
+    display: block;
+    width: clamp(10rem, 36vw, 28rem);
+    aspect-ratio: var(--ratio);
+    margin-block: 24px 40px;
+    color: var(--color-paper-dusk);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .lines,
+  .drawing,
+  .fill {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .line {
+    position: absolute;
+    left: calc(var(--space-overshoot) * -1);
+    right: calc(var(--space-overshoot) * -1);
+    border-top: 1px solid var(--color-contour-dim);
+  }
+
+  .drawing path {
+    fill: none;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .outline {
+    stroke: currentColor;
+    stroke-width: 1.25px;
+  }
+
+  .ticks,
+  .counters {
+    stroke: var(--color-contour);
+    stroke-width: 1px;
+  }
+
+  .fill path {
+    fill: var(--color-glacier);
+  }
+
+  @media (forced-colors: active) {
+    .outline {
+      stroke: CanvasText;
+    }
+  }
+}

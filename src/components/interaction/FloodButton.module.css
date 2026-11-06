@@ -1,0 +1,80 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+/*
+ * FloodButton: a 1.5 px contour outline, the label in the button face (Archivo wdth 112, wght 720,
+ * upper case, +0.02 em: wider and bolder than the titles). The flood layer is a copy of the face in
+ * ground on glacier, above it, and the fringe a glacier plate under it; the contour flood
+ * (globals.css) shows them on hover and focus. A press fills the button at once and insets 1 px.
+ * At least 44 × 44 px; nothing changes width. Ground on glacier reads at 14:1.
+ */
+@layer components {
+  .button {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    min-width: 44px;
+    min-height: 44px;
+    margin: 0;
+    padding: 0 20px;
+    border: 1.5px solid var(--color-contour);
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--color-ground) 82%, transparent);
+    color: var(--color-paper-dusk);
+    font-family: var(--font-text-wide);
+    font-size: 0.875rem;
+    font-stretch: var(--type-button-wdth);
+    font-weight: var(--type-button-wght);
+    letter-spacing: var(--type-button-tracking);
+    line-height: 1;
+    text-transform: uppercase;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    isolation: isolate;
+  }
+
+  /* The label's box: every label it can show, stacked, so a change of label moves nothing. */
+  .face {
+    display: inline-grid;
+    padding-top: 0.08em;
+  }
+
+  .face > * {
+    grid-area: 1 / 1;
+  }
+
+  .ghost {
+    visibility: hidden;
+  }
+
+  .flood,
+  .fringe {
+    position: absolute;
+    inset: -1.5px;
+    display: grid;
+    place-items: center;
+    border-radius: inherit;
+    background: var(--color-glacier);
+    color: var(--color-ground);
+  }
+
+  .button:focus-visible {
+    outline: 2px solid var(--color-glacier);
+    outline-offset: 3px;
+  }
+
+  /* A press fills it at once. The motion lab shows each state side by side (data-lab-state). */
+  .button:is(:active, [data-lab-state="on"], [data-lab-state="press"]) .flood {
+    opacity: 1;
+    mask: none;
+  }
+
+  .button:is(:active, [data-lab-state="press"]) .flood {
+    box-shadow: inset 0 0 0 1px var(--color-ground);
+  }
+
+  @media (forced-colors: active) {
+    .button {
+      border-color: ButtonText;
+    }
+  }
+}

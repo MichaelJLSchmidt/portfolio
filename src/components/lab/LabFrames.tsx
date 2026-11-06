@@ -5,7 +5,7 @@ import { lab } from "@/content/lab";
 import { asset } from "@/lib/asset";
 import { SETTLED_STORAGE_KEY } from "@/lib/settled";
 import type { MotionMode } from "@/lib/motion-mode";
-import { MotionButton } from "@/components/motion/MotionButton";
+import { FloodButton } from "@/components/interaction/FloodButton";
 import { LAB_READY, markLabReady } from "./ready";
 import styles from "./Lab.module.css";
 
@@ -46,7 +46,7 @@ export function LabFrames() {
   return (
     <>
       <div>
-        <MotionButton label={lab.replay} onClick={replay} />
+        <FloodButton label={lab.replay} onClick={replay} />
       </div>
       <div className={styles.columns}>
         {MODES.map((mode, i) => (

@@ -1,124 +1,24 @@
+@layer reset, tokens, base, layout, components, utilities;
+
 /* Colour, type and motion custom properties come from src/styles/tokens.ts (injected in the root layout). */
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html {
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  background: var(--color-ground);
-  color: var(--color-sheet);
-  font-family: var(--font-text);
-  font-size: 100%;
-  font-stretch: 100%;
-}
-
-body {
-  margin: 0;
-  overflow-x: clip;
-  min-height: 100svh;
-  font-size: var(--type-body-size);
-  line-height: var(--type-body-lh);
-  font-weight: 400;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-}
-
-h1,
-h2,
-h3,
-h4,
-p,
-figure,
-blockquote,
-dl,
-dd {
-  margin: 0;
-}
-
-img,
-svg,
-canvas {
-  display: block;
-  max-width: 100%;
-}
-
-a {
-  color: inherit;
-}
-
-button {
-  font: inherit;
-  color: inherit;
-}
-
-/* Focus rings, never removed: mint on dark, moss-ink on the light sheet. A ring arrives 6 px out
-   and eases in to 3 px while it fades in (--dur-tap); still mode keeps the fade only. Forced
-   colours draw it in the system's highlight. */
-:focus-visible {
-  outline: 2px solid var(--color-glacier);
-  outline-offset: 3px;
-}
-
-:is(.map-sheet, [data-ink="sheet"], [data-surface="sheet"], .surface-copy) :focus-visible {
-  outline-color: var(--color-moss-ink);
-}
-
-@keyframes focus-ring {
-  from {
-    outline-color: transparent;
-    outline-offset: 6px;
-  }
-}
-
-@keyframes focus-fade {
-  from {
-    outline-color: transparent;
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion="still"]) :focus-visible {
-    animation: focus-ring var(--dur-tap) var(--ease-settle);
-  }
-}
-
-:root[data-motion="still"] :focus-visible {
-  animation: focus-fade var(--dur-tap) linear;
-}
-
-@media (forced-colors: active) {
-  :focus-visible {
-    outline-color: Highlight;
-  }
-
-  /* Forced colours: no glint (the field and the cards' foil leave too, in their own styles). */
-  [data-glint] {
-    display: none;
-  }
-}
-
-/* The H1 focused after a route change (RouteArrival) is announced, not operated: no ring. */
-[data-route-focus]:focus {
-  outline: none;
-  animation: none;
-}
+/* Cascade layers, lowest to highest: reset · tokens (the custom properties) · base (elements and
+   the type roles modules refine: .display, .hud-label, .body-copy, .legend) · layout (page measure)
+   · components (every module, motion.css, view transitions) · utilities (helpers that must win:
+   .visually-hidden, the map halo). Within a layer specificity decides, then source order; between
+   layers the later one wins whatever the order the stylesheets load in. Every stylesheet starts
+   with the same order statement, so whichever loads first sets it. */
 
 /* Fallbacks while the web fonts load. next/font's own are local(Arial), which many phones and
    Linux don't have; these take the first of several common faces and give them the web font's
    metrics (overrides are divided by size-adjust), so the swap moves as little as possible:
    - text: Archivo at wdth 100 (Liberation Sans and Arimo share Arial's widths: next/font's values);
-   - mono: Martian Mono at its rest width (0.65 em a character over a 0.6 em monospace; ascent
-     1 em, descent 0.2 em);
-   - display: Archivo's vertical metrics (ascent 0.878 em, descent 0.21 em) on a face narrowed
-     towards the condensed cut; with every display letter in a box of its measured width
-     (SettleText widths="display") the swap moves nothing;
-   - breath: Archivo at the label's breath axes (wdth 112, wght 650), about 19% wider than at wdth
-     100, for the boxes links and buttons reserve at that state (their ghosts): a fallback can't
-     widen, so without it those boxes grow when the web font arrives and rows rewrap;
+   - mono: Martian Mono at the labels' width (wdth 87.5: 0.65 em a character, measured with
+     HarfBuzz, over a 0.6 em monospace; ascent 1 em, descent 0.2 em);
+   - display: Archivo's vertical metrics (ascent 0.878 em, descent 0.21 em) on a face narrowed to
+     the titles' rest cut (wdth 75, wght 800: 0.83 of the text width in capitals, measured with
+     HarfBuzz), so a title keeps its lines through the swap;
+   - wide: button labels (wdth 112, wght 720), about 16% wider than the text: a fallback can't
+     widen, so without it a button grows when the web font arrives and its row rewraps;
    - condensed: Archivo at wdth 88, wght 600 (the case-study type line, in the first viewport),
      about 5% narrower than at wdth 100, so its line breaks are the web font's. */
 @font-face {
@@ -131,11 +31,11 @@ button {
 }
 
 @font-face {
-  font-family: "Archivo Breath Fallback";
+  font-family: "Archivo Wide Fallback";
   src: local("Arial"), local("Liberation Sans"), local("Arimo"), local("Helvetica Neue"), local("Helvetica"), local("Roboto"), local("Noto Sans");
-  size-adjust: 117.5%;
-  ascent-override: 74.73%;
-  descent-override: 17.88%;
+  size-adjust: 114.8%;
+  ascent-override: 76.48%;
+  descent-override: 18.29%;
   line-gap-override: 0%;
 }
 
@@ -160,417 +60,628 @@ button {
 @font-face {
   font-family: "Archivo Display Fallback";
   src: local("Arial"), local("Helvetica Neue"), local("Helvetica"), local("Roboto"), local("Liberation Sans"), local("Noto Sans"), local("DejaVu Sans"), local("Segoe UI");
-  size-adjust: 70%;
-  ascent-override: 125.43%;
-  descent-override: 30%;
+  size-adjust: 81.6%;
+  ascent-override: 107.6%;
+  descent-override: 25.74%;
   line-gap-override: 0%;
 }
 
-:root {
-  --font-text: "Archivo", "Archivo Text Fallback", var(--font-archivo), system-ui, sans-serif;
-  --font-text-breath: "Archivo", "Archivo Breath Fallback", var(--font-archivo), system-ui, sans-serif;
-  --font-text-condensed: "Archivo", "Archivo Condensed Fallback", var(--font-archivo), system-ui, sans-serif;
-  --font-mono: "Martian Mono", "Martian Mono Local Fallback", var(--font-martian), ui-monospace, monospace;
-  --font-display: "Archivo", "Archivo Display Fallback", var(--font-archivo), system-ui, sans-serif;
+/* The contour flood's frame (flood.ts): an integer, so a transition steps through the sprite. */
+@property --flood-frame {
+  syntax: "<integer>";
+  inherits: true;
+  initial-value: 0;
 }
 
-.display {
-  font-family: var(--font-display);
-  font-weight: var(--axis-display-rest-wght);
-  font-stretch: var(--axis-display-rest-wdth);
-  line-height: var(--type-display-lh);
-  text-transform: uppercase;
-  letter-spacing: -0.01em;
-}
-
-.hud-label {
-  font-family: var(--font-mono);
-  font-size: var(--type-hud-size);
-  letter-spacing: var(--type-hud-tracking);
-  font-stretch: var(--axis-mono-rest-wdth);
-  text-transform: uppercase;
-  line-height: 1.4;
-}
-
-.visually-hidden {
-  position: absolute !important;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* The skip link waits in place, invisible, and appears where it is: a 120 ms fade while its label
-   settles from the label's reveal width (still mode: the fade only). */
-.skip-link {
-  position: fixed;
-  left: var(--gutter);
-  top: 12px;
-  z-index: var(--layer-skip-link);
-  padding: 0.5rem 0.875rem;
-  border-radius: 4px;
-  background: var(--color-sheet);
-  color: var(--color-ground);
-  font-stretch: var(--axis-label-rest-wdth);
-  font-weight: var(--axis-label-rest-wght);
-  text-decoration: none;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.skip-link:focus {
-  opacity: 1;
-  pointer-events: auto;
-  outline-color: var(--color-moss-ink);
-}
-
-@keyframes skip-settle {
-  from {
-    opacity: 0;
-    font-stretch: var(--axis-label-reveal-wdth);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion="still"]) .skip-link:focus {
-    animation:
-      skip-settle var(--dur-tap) var(--ease-settle),
-      focus-ring var(--dur-tap) var(--ease-settle);
-  }
-}
-
-:root[data-motion="still"] .skip-link:focus {
-  animation: focus-fade var(--dur-tap) linear;
-  transition: opacity var(--dur-tap) linear;
-}
-
-@media (prefers-reduced-motion: reduce) {
+@layer reset {
   *,
   *::before,
   *::after {
-    scroll-behavior: auto !important;
+    box-sizing: border-box;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  figure,
+  blockquote,
+  dl,
+  dd {
+    margin: 0;
+  }
+
+  img,
+  svg,
+  canvas {
+    display: block;
+    max-width: 100%;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+    }
   }
 }
 
-/* Italic: the local text fallback until italic text comes near the screen (html[data-italic],
-   src/lib/italic-face.ts), so the italic face is fetched only where italic is read. */
-em,
-i,
-.italic {
-  font-family: "Archivo Text Fallback", system-ui, sans-serif;
-  font-style: italic;
+@layer tokens {
+  :root {
+    --font-text: "Archivo", "Archivo Text Fallback", var(--font-archivo), system-ui, sans-serif;
+    --font-text-wide: "Archivo", "Archivo Wide Fallback", var(--font-archivo), system-ui, sans-serif;
+    --font-text-condensed: "Archivo", "Archivo Condensed Fallback", var(--font-archivo), system-ui, sans-serif;
+    --font-mono: "Martian Mono", "Martian Mono Local Fallback", var(--font-martian), ui-monospace, monospace;
+    --font-display: "Archivo", "Archivo Display Fallback", var(--font-archivo), system-ui, sans-serif;
+  }
+
+  :root {
+    --page-max: 1680px;
+    --gutter: clamp(16px, 4vw, 72px);
+  }
 }
 
-:root[data-italic] :is(em, i, .italic) {
-  font-family: var(--font-archivo-italic), var(--font-archivo), system-ui, sans-serif;
-}
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    background: var(--color-ground);
+    color: var(--color-paper-dusk);
+    font-family: var(--font-text);
+    font-size: 100%;
+    font-stretch: 100%;
+  }
 
-:root {
-  --page-max: 1680px;
-  --gutter: clamp(16px, 4vw, 72px);
-}
+  body {
+    margin: 0;
+    overflow-x: clip;
+    min-height: 100svh;
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-lh);
+    font-weight: 400;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
 
-/* Centred page measure with fluid gutters; content no longer hugs the left edge on wide screens. */
-.container {
-  width: 100%;
-  max-width: calc(var(--page-max) + 2 * var(--gutter));
-  margin-inline: auto;
-  padding-inline: var(--gutter);
-}
+  /* Focus rings, never removed: mint on dark, moss-ink on paper (the case-study summary). A ring arrives 6 px out
+     and eases in to 3 px while it fades in (--dur-tap); still mode keeps the fade only. Forced
+     colours draw it in the system's highlight. */
+  :focus-visible {
+    outline: 2px solid var(--color-glacier);
+    outline-offset: 3px;
+  }
 
-.page {
-  position: relative;
-  z-index: var(--layer-page);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-}
+  [data-ink="sheet"] :focus-visible {
+    outline-color: var(--color-moss-ink);
+  }
 
-.page > main {
-  flex: 1;
-}
+  @keyframes focus-ring {
+    from {
+      outline-color: transparent;
+      outline-offset: 6px;
+    }
+  }
 
-/* Cartographic label halo: keeps small text legible over contour lines. */
-.map-halo {
-  text-shadow:
-    0 0 2px var(--color-ground),
-    0 0 6px var(--color-ground),
-    0 0 14px var(--color-ground);
-}
+  @keyframes focus-fade {
+    from {
+      outline-color: transparent;
+    }
+  }
 
-/* Over the poster (no field, so no quiet zones) a denser halo keeps labels at 7:1 where its
-   lines run close together. */
-:root:not(:has([data-field="on"])) .map-halo {
-  text-shadow:
-    0 0 1px var(--color-ground),
-    0 0 3px var(--color-ground),
-    0 0 6px var(--color-ground),
-    0 0 14px var(--color-ground);
-}
+  @media (prefers-reduced-motion: no-preference) {
+    :root:not([data-motion="still"]) :focus-visible {
+      animation: focus-ring var(--dur-tap) var(--ease-settle);
+    }
+  }
 
-/* Inside a quiet zone ([data-quiet-zone]) the running field fades its lines to ~25%, so
-   sheet and glacier text needs no halo there (checked by npm run check:contrast).
-   Contour-coloured labels (.keep-halo) keep theirs: even faded lines would take them
-   below AA. The poster (reduced motion, no WebGL) has no quiet zones, so halos stay. */
-:root:has([data-field="on"]) [data-quiet-zone].map-halo:not(.keep-halo),
-:root:has([data-field="on"]) [data-quiet-zone] .map-halo:not(.keep-halo) {
-  text-shadow: none;
-}
+  :root[data-motion="still"] :focus-visible {
+    animation: focus-fade var(--dur-tap) linear;
+  }
 
-/* ------------------------------------------------------------------------------------
-   Body text over the map, after cartographic conventions:
-   - knockout: the field interrupts its lines behind running text (quiet zone of "body"
-     strength, ~9% with a 64 px feather; quiet-zones.ts), like contours under a map label;
-   - legend panels: longer reading blocks sit on a map-legend surface.
-   .body-copy is running text (typography and knockout); .knockout gives another text block
-   the knockout alone. npm run check:legibility measures the result on rendered screenshots,
-   over the field and over the poster: at least 7:1, lines under the glyphs at most 15%.
-   ------------------------------------------------------------------------------------ */
-.body-copy {
-  max-width: 62ch;
-  color: var(--color-sheet);
-  /* 17 px on phones, 18 px on desktop; a touch heavier reads better light-on-dark. */
-  font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.125rem);
-  font-weight: 430;
-  line-height: 1.6;
-  text-shadow: none;
-}
+  @media (forced-colors: active) {
+    :focus-visible {
+      outline-color: Highlight;
+    }
 
-/* The static poster (reduced motion, no WebGL) has no quiet zones: there a ground plate with a
-   soft edge sits behind knocked-out text, so the poster's lines break around it the same way. It
-   fades out when the field takes over. */
-:is(.body-copy, .knockout):not(.legend *) {
-  position: relative;
-}
+    /* Forced colours: no glint (the field and the cards' foil leave too, in their own styles). */
+    [data-glint] {
+      display: none;
+    }
+  }
 
-:is(.body-copy, .knockout):not(.legend *)::before {
-  content: "";
-  position: absolute;
-  inset: -0.25em -0.5em;
-  z-index: -1;
-  border-radius: 0.75em;
-  background: var(--color-ground);
-  box-shadow: 0 0 24px 16px var(--color-ground);
-  opacity: 0;
-  transition: opacity var(--dur-medium) var(--ease-trail);
-  pointer-events: none;
-}
+  .display {
+    font-family: var(--font-display);
+    font-weight: var(--type-display-wght);
+    font-stretch: var(--type-display-wdth);
+    line-height: var(--type-display-lh);
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+  }
 
-/* A knockout block is a whole region with its own padding (the full-width footer): its plate
-   keeps to its box, so it never widens the page. */
-.knockout:not(.legend *)::before {
-  inset: 0;
-}
+  .hud-label {
+    font-family: var(--font-mono);
+    font-size: var(--type-mono-size);
+    letter-spacing: var(--type-mono-tracking);
+    font-stretch: var(--type-mono-wdth);
+    text-transform: uppercase;
+    line-height: 1.4;
+  }
 
-:root:not(:has([data-field="on"])) :is(.body-copy, .knockout):not(.legend *)::before {
-  opacity: 0.94;
-}
+  /* Italic: the local text fallback until italic text comes near the screen (html[data-italic],
+     src/lib/italic-face.ts), so the italic face is fetched only where italic is read. */
+  em,
+  i,
+  .italic {
+    font-family: "Archivo Text Fallback", system-ui, sans-serif;
+    font-style: italic;
+  }
 
-/* Map legend: raised ground at 88% with the contour-dim border and corners of the existing
-   panels. No backdrop blur: opacity alone stays cheap on mid-range phones. */
-.legend {
-  padding: clamp(18px, 2.4vw, 28px) clamp(18px, 2.6vw, 32px);
-  border: 1px solid var(--color-contour-dim);
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--color-ground-raised) 88%, transparent);
-}
+  :root[data-italic] :is(em, i, .italic) {
+    font-family: var(--font-archivo-italic), var(--font-archivo), system-ui, sans-serif;
+  }
 
-/* ------------------------------------------------------------------------------------
-   View transitions (React <ViewTransition> on route changes; kinds in src/lib/view-transition.ts)
+  /* ------------------------------------------------------------------------------------
+     Body text over the map, after cartographic conventions:
+     - knockout: the field interrupts its lines behind running text (quiet zone of "body"
+       strength, ~7% with a 64 px feather; quiet-zones.ts), like contours under a map label;
+     - legend panels: longer reading blocks sit on a map-legend surface.
+     .body-copy is running text (typography and knockout); .knockout gives another text block
+     the knockout alone. npm run check:legibility measures the result on rendered screenshots,
+     over the field and over the poster: at least 7:1, lines under the glyphs at most 15%.
+     ------------------------------------------------------------------------------------ */
+  .body-copy {
+    max-width: var(--type-body-measure);
+    color: var(--color-paper-dusk);
+    /* 17 px on phones to 19 px on desktop, line-height 1.55, 60–68 characters a line. */
+    font-size: var(--type-body-size);
+    font-weight: var(--type-body-wght);
+    line-height: var(--type-body-lh);
+    text-shadow: none;
+  }
 
-   A link navigation (the route's arrival, RouteArrival and `arrival` in the tokens):
-   - 0 ms:   the press state and the haptic (the link or card itself);
-   - leave:  the old page's own content fades out over --dur-leave (160 ms) while the new page
-             fades in over the same, a plus-lighter crossfade, so the shared map and HUD keep
-             constant brightness and the new text never waits;
-   - travel: the shared artwork and title (card → header and H1, mini card → next header, HUD
-             label → Basecamp H1) travel on the share spring (420 ms, --spring-share-*);
-   - then:   the new page's parts follow from the commit (data-arrive-at, SettleText `arrive`) and
-             the H1 settles once the morph has landed, its glint after it;
-   - field:  the background terrain morphs over --dur-terrain (700 ms) from the same commit.
-   Browser back and forward (html[data-vt="traverse"]): a --dur-crossfade (180 ms) cross-fade plus
-   the shared elements where both pages have them; no arrival choreography, no glint.
-   ------------------------------------------------------------------------------------ */
-::view-transition {
-  pointer-events: none;
-}
+  /* The static poster (reduced motion, no WebGL) has no quiet zones: there a ground plate with a
+     soft edge sits behind knocked-out text, so the poster's lines break around it the same way. It
+     fades out when the field takes over. */
+  :is(.body-copy, .knockout):not(.legend *) {
+    position: relative;
+  }
 
-::view-transition-old(root),
-::view-transition-new(root) {
-  mix-blend-mode: plus-lighter;
-}
-
-::view-transition-old(root) {
-  animation: vt-exit var(--dur-leave) linear both;
-}
-
-::view-transition-new(root) {
-  animation: vt-enter var(--dur-leave) linear both;
-}
-
-@keyframes vt-exit {
-  to {
+  :is(.body-copy, .knockout):not(.legend *)::before {
+    content: "";
+    position: absolute;
+    inset: -0.25em -0.5em;
+    z-index: -1;
+    border-radius: 0.75em;
+    background: var(--color-ground);
+    box-shadow: 0 0 24px 16px var(--color-ground);
     opacity: 0;
+    transition: opacity var(--dur-medium) var(--ease-trail);
+    pointer-events: none;
   }
-}
 
-@keyframes vt-enter {
-  from {
+  /* A knockout block is a whole region with its own padding (the full-width footer): its plate
+     keeps to its box, so it never widens the page. */
+  .knockout:not(.legend *)::before {
+    inset: 0;
+  }
+
+  :root:not(:has([data-field="on"])) :is(.body-copy, .knockout):not(.legend *)::before {
+    opacity: 0.94;
+  }
+
+  /* Map legend: raised ground at 88% with the contour-dim border and corners of the existing
+     panels. No backdrop blur: opacity alone stays cheap on mid-range phones. */
+  .legend {
+    padding: clamp(18px, 2.4vw, 28px) clamp(18px, 2.6vw, 32px);
+    border: 1px solid var(--color-contour-dim);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--color-ground-raised) 88%, transparent);
+  }
+  /* ------------------------------------------------------------------------------------
+     The contour flood (flood.ts) on every [data-flood] host: a title, a button, the footer
+     wordmark. Its [data-flood-layer] (an aria-hidden copy in glacier) and [data-flood-fringe]
+     (the same at 25%, one frame ahead) are masked by a sprite of twelve frames, stepped by
+     --flood-frame: from where the pointer entered (radial: frames twice the host, the blob
+     centred on --fx/--fy) or left to right for the keyboard (sweep). Leaving runs the frames
+     back in --dur-flood; arriving takes --dur-flood plus a slow three-frame tail. Calm
+     cross-fades the copy in --dur-flood-calm; still shows it at once; without JavaScript hover
+     and focus show it at once. In the base layer, so a component can override any of it (a
+     button's press fills it).
+     ------------------------------------------------------------------------------------ */
+  [data-flood] {
+    --flood-frame: 0;
+  }
+
+  /* An echo: text drawn from its data-echo attribute, so a decorative copy (a flood layer, a
+     button's reserved label) adds nothing to the page's text or to what screen readers read. */
+  [data-echo]::before {
+    content: attr(data-echo);
+    content: attr(data-echo) / "";
+    white-space: pre-line;
+  }
+
+  [data-flood][data-flood-state="in"] {
+    --flood-frame: var(--flood-last, 11);
+  }
+
+  [data-flood-layer],
+  [data-flood-fringe] {
     opacity: 0;
+    pointer-events: none;
+    user-select: none;
   }
-}
 
-/* Shared elements travel on the share spring. */
-::view-transition-group(.morph) {
-  animation-duration: var(--spring-share-dur);
-  animation-timing-function: var(--spring-share-ease);
-}
-
-/* Artwork: same terrain at a similar aspect, so an even crossfade in flight is seamless. */
-::view-transition-old(.morph-art),
-::view-transition-new(.morph-art) {
-  height: 100%;
-  object-fit: cover;
-  animation-duration: var(--spring-share-dur);
-  animation-timing-function: var(--ease-settle);
-}
-
-/* Title: the box travels, the text does not scale. Both snapshots keep their own size,
-   anchored top-left in the moving box, and cross-fade early, so the text stays sharp in
-   flight; the heading then settles on its axes once it has landed (SettleText). */
-::view-transition-old(.morph-title),
-::view-transition-new(.morph-title) {
-  inline-size: auto;
-  block-size: auto;
-  object-fit: none;
-}
-
-::view-transition-old(.morph-title) {
-  animation: vt-title-old var(--spring-share-dur) linear both;
-}
-
-::view-transition-new(.morph-title) {
-  animation: vt-title-new var(--spring-share-dur) linear both;
-}
-
-@keyframes vt-title-old {
-  30%,
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes vt-title-new {
-  from,
-  18% {
-    opacity: 0;
-  }
-  48%,
-  to {
+  :root:not([data-motion]) [data-flood]:is(:hover, :focus-visible) [data-flood-layer],
+  :root:is([data-motion="calm"], [data-motion="still"]) [data-flood-state="in"] [data-flood-layer] {
     opacity: 1;
   }
-}
 
-/* Named parts without a partner (the other cards) leave and arrive with the page. */
-::view-transition-old(.morph):only-child {
-  animation: vt-exit var(--dur-leave) var(--ease-scree) both;
-}
+  :root[data-motion="calm"] [data-flood-layer] {
+    transition: opacity var(--dur-flood-calm) linear;
+  }
 
-::view-transition-new(.morph):only-child {
-  animation: vt-enter var(--dur-long) var(--ease-trail) both;
-}
+  :root[data-motion="full"] [data-flood] {
+    transition: --flood-frame var(--dur-flood) linear;
+  }
 
-/* Browser back and forward: a short cross-fade; the shared elements keep the share spring. */
-:root[data-vt="traverse"]::view-transition-old(root),
-:root[data-vt="traverse"]::view-transition-new(root),
-:root[data-vt="traverse"]::view-transition-old(.morph):only-child,
-:root[data-vt="traverse"]::view-transition-new(.morph):only-child {
-  animation-duration: var(--dur-crossfade);
-  animation-timing-function: linear;
-}
+  :root[data-motion="full"] [data-flood][data-flood-state="in"] {
+    transition: --flood-frame calc(var(--dur-flood) + var(--dur-flood-tail)) var(--ease-flood);
+  }
 
-/* The deck's Cards ⇄ Index switch (html[data-vt="view"], Deck.tsx): each card's name morphs into
-   its row's name, and the page cross-fades, over --dur-medium (360 ms). Calm (data-vt="view-calm")
-   only cross-fades: the shared names are switched off for that transition. */
-:root[data-vt="view"]::view-transition-group(.morph),
-:root[data-vt="view"]::view-transition-old(root),
-:root[data-vt="view"]::view-transition-new(root) {
-  animation-duration: var(--dur-medium);
-  animation-timing-function: var(--ease-settle);
-}
+  :root[data-motion="full"] [data-flood-layer] {
+    --flood-at: var(--flood-frame);
+    opacity: min(var(--flood-frame), 1);
+  }
 
-:root[data-vt="view"]::view-transition-old(.morph-title) {
-  animation: vt-title-old var(--dur-medium) linear both;
-}
+  :root[data-motion="full"] [data-flood-fringe] {
+    --flood-at: min(var(--flood-frame) + 1, var(--flood-last));
+    opacity: calc(min(var(--flood-frame), 1) * var(--flood-fringe));
+  }
 
-:root[data-vt="view"]::view-transition-new(.morph-title) {
-  animation: vt-title-new var(--dur-medium) linear both;
-}
+  :root[data-motion="full"] [data-flood-src="radial"] :is([data-flood-layer], [data-flood-fringe]) {
+    mask-image: url("../components/interaction/flood-radial.webp");
+    mask-repeat: no-repeat;
+    mask-size: calc(var(--ew) * 24) calc(var(--eh) * 2);
+    mask-position: calc(var(--fx) - var(--ew) - var(--flood-at) * var(--ew) * 2) calc(var(--fy) - var(--eh));
+  }
 
-:root[data-vt="view-calm"] [style*="view-transition-name"] {
-  view-transition-name: none !important;
-}
+  :root[data-motion="full"] [data-flood-src="sweep"] :is([data-flood-layer], [data-flood-fringe]) {
+    mask-image: url("../components/interaction/flood-sweep.webp");
+    mask-repeat: no-repeat;
+    mask-size: calc(var(--ew) * 12) var(--eh);
+    mask-position: calc(var(--flood-at) * var(--ew) * -1) 0;
+  }
 
-:root[data-vt="view-calm"]::view-transition-old(root),
-:root[data-vt="view-calm"]::view-transition-new(root) {
-  animation-duration: var(--dur-medium);
-}
-
-/* Back into the deck: "card reassembly" (html[data-vt="return"], return-transition.ts).
-   1. 0–220 ms: the page's own content leaves first, fading and dropping a few pixels (scree);
-   2. 100–800 ms: the artwork travels back into the card's window, cropped and never stretched
-      (object-fit: cover above), and the title flies into the name slot with the sharp
-      cross-fade of the forward direction;
-   3. 450–1080 ms: the card rebuilds itself around them (SummitCard.module.css).
-   The forward direction keeps its timing. */
-:root[data-vt="return"]::view-transition-old(.vt-exit) {
-  animation: vt-exit-drop var(--dur-short) var(--ease-scree) both;
-}
-
-@keyframes vt-exit-drop {
-  to {
-    opacity: 0;
-    transform: translateY(8px);
+  @media (forced-colors: active) {
+    [data-flood-layer],
+    [data-flood-fringe] {
+      display: none;
+    }
   }
 }
 
-:root[data-vt="return"]::view-transition-group(.morph),
-:root[data-vt="return"]::view-transition-old(.morph-art),
-:root[data-vt="return"]::view-transition-new(.morph-art) {
-  animation-delay: 100ms;
-  animation-duration: calc(var(--dur-scenic) - 200ms);
-}
+@layer layout {
+  /* The space between a page's sections (tokens: roomier from the md breakpoint). */
+  :root {
+    --space-section: var(--space-section-mobile);
+  }
 
-:root[data-vt="return"]::view-transition-old(.morph-title) {
-  animation: vt-title-old calc(var(--dur-scenic) - 200ms) linear 100ms both;
-}
+  @media (min-width: 1024px) {
+    :root {
+      --space-section: var(--space-section-desktop);
+    }
+  }
 
-:root[data-vt="return"]::view-transition-new(.morph-title) {
-  animation: vt-title-new calc(var(--dur-scenic) - 200ms) linear 100ms both;
-}
+  /* A page that draws the red route (RouteLayer) holds it behind its content: the main is its
+     containing block and its own stacking context, one level above the footer that follows it,
+     so what main fixes to the screen (the toast, the altimeter bar) still paints over the footer. */
+  main:has(> [data-route-layer]) {
+    position: relative;
+    z-index: var(--layer-page);
+    isolation: isolate;
+  }
 
-/* Still mode: no view transition at all (src/lib/view-transition.ts). The page changes directly
-   and the incoming page fades in, opacity only (RouteFade). Calm morphs like full. */
-@keyframes route-fade-in {
-  from {
-    opacity: 0;
+  /* Centred page measure with fluid gutters; content no longer hugs the left edge on wide screens. */
+  .container {
+    width: 100%;
+    max-width: calc(var(--page-max) + 2 * var(--gutter));
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .page {
+    position: relative;
+    z-index: var(--layer-page);
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .page > main {
+    flex: 1;
   }
 }
 
-:root[data-motion="still"][data-route-fade] main {
-  animation: route-fade-in var(--dur-calm) linear both;
+@layer components {
+  /* The skip link waits in place, invisible, and appears where it is: a 120 ms fade. */
+  .skip-link {
+    position: fixed;
+    left: var(--gutter);
+    top: 12px;
+    z-index: var(--layer-skip-link);
+    padding: 0.5rem 0.875rem;
+    border-radius: 4px;
+    background: var(--color-glacier);
+    color: var(--color-ground);
+    font-weight: 600;
+    text-decoration: none;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .skip-link:focus {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @keyframes skip-settle {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :root:not([data-motion="still"]) .skip-link:focus {
+      animation:
+        skip-settle var(--dur-tap) var(--ease-settle),
+        focus-ring var(--dur-tap) var(--ease-settle);
+    }
+  }
+
+  :root[data-motion="still"] .skip-link:focus {
+    animation: focus-fade var(--dur-tap) linear;
+    transition: opacity var(--dur-tap) linear;
+  }
+
+  /* ------------------------------------------------------------------------------------
+     View transitions (React <ViewTransition> on route changes; kinds in src/lib/view-transition.ts)
+
+     A link navigation (the route's arrival, RouteArrival and `arrival` in the tokens):
+     - 0 ms:   the press state and the haptic (the link or card itself);
+     - leave:  the old page's own content fades out over --dur-leave (160 ms) while the new page
+               fades in over the same, a plus-lighter crossfade, so the shared map and HUD keep
+               constant brightness and the new text never waits;
+     - travel: the shared artwork and title (card → header and H1, mini card → next header, HUD
+               label → About H1) travel on the share spring (420 ms, --spring-share-*);
+     - then:   the new page's parts follow from the commit (data-arrive-at) and the H1 rests on
+               its weight once the morph has landed (the morph is its arrival);
+     - field:  the background terrain morphs over --dur-terrain (700 ms) from the same commit.
+     Browser back and forward (html[data-vt="traverse"]): a --dur-crossfade (180 ms) cross-fade plus
+     the shared elements where both pages have them; no arrival choreography, no glint.
+     ------------------------------------------------------------------------------------ */
+  ::view-transition {
+    pointer-events: none;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    mix-blend-mode: plus-lighter;
+  }
+
+  ::view-transition-old(root) {
+    animation: vt-exit var(--dur-leave) linear both;
+  }
+
+  ::view-transition-new(root) {
+    animation: vt-enter var(--dur-leave) linear both;
+  }
+
+  @keyframes vt-exit {
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes vt-enter {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* Shared elements travel on the share spring. */
+  ::view-transition-group(.morph) {
+    animation-duration: var(--spring-share-dur);
+    animation-timing-function: var(--spring-share-ease);
+  }
+
+  /* Artwork: same terrain at a similar aspect, so an even crossfade in flight is seamless. */
+  ::view-transition-old(.morph-art),
+  ::view-transition-new(.morph-art) {
+    height: 100%;
+    object-fit: cover;
+    animation-duration: var(--spring-share-dur);
+    animation-timing-function: var(--ease-settle);
+  }
+
+  /* Title: the box travels, the text does not scale. Both snapshots keep their own size,
+     anchored top-left in the moving box, and cross-fade early, so the text stays sharp in
+     flight; the heading lands at rest (WeightTitle: a morphed title does not arrive again). */
+  ::view-transition-old(.morph-title),
+  ::view-transition-new(.morph-title) {
+    inline-size: auto;
+    block-size: auto;
+    object-fit: none;
+  }
+
+  ::view-transition-old(.morph-title) {
+    animation: vt-title-old var(--spring-share-dur) linear both;
+  }
+
+  ::view-transition-new(.morph-title) {
+    animation: vt-title-new var(--spring-share-dur) linear both;
+  }
+
+  @keyframes vt-title-old {
+    30%,
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes vt-title-new {
+    from,
+    18% {
+      opacity: 0;
+    }
+    48%,
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Named parts without a partner (the other cards) leave and arrive with the page. */
+  ::view-transition-old(.morph):only-child {
+    animation: vt-exit var(--dur-leave) var(--ease-scree) both;
+  }
+
+  ::view-transition-new(.morph):only-child {
+    animation: vt-enter var(--dur-long) var(--ease-trail) both;
+  }
+
+  /* Browser back and forward: a short cross-fade; the shared elements keep the share spring. */
+  :root[data-vt="traverse"]::view-transition-old(root),
+  :root[data-vt="traverse"]::view-transition-new(root),
+  :root[data-vt="traverse"]::view-transition-old(.morph):only-child,
+  :root[data-vt="traverse"]::view-transition-new(.morph):only-child {
+    animation-duration: var(--dur-crossfade);
+    animation-timing-function: linear;
+  }
+
+  /* Back into the deck: "card reassembly" (html[data-vt="return"], return-transition.ts).
+     1. 0–220 ms: the page's own content leaves first, fading and dropping a few pixels (scree);
+     2. 100–800 ms: the artwork travels back into the card's window, cropped and never stretched
+        (object-fit: cover above), and the title flies into the name slot with the sharp
+        cross-fade of the forward direction;
+     3. 450–1080 ms: the card rebuilds itself around them (SummitCard.module.css).
+     The forward direction keeps its timing. */
+  :root[data-vt="return"]::view-transition-old(.vt-exit) {
+    animation: vt-exit-drop var(--dur-short) var(--ease-scree) both;
+  }
+
+  @keyframes vt-exit-drop {
+    to {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+
+  :root[data-vt="return"]::view-transition-group(.morph),
+  :root[data-vt="return"]::view-transition-old(.morph-art),
+  :root[data-vt="return"]::view-transition-new(.morph-art) {
+    animation-delay: 100ms;
+    animation-duration: calc(var(--dur-scenic) - 200ms);
+  }
+
+  :root[data-vt="return"]::view-transition-old(.morph-title) {
+    animation: vt-title-old calc(var(--dur-scenic) - 200ms) linear 100ms both;
+  }
+
+  :root[data-vt="return"]::view-transition-new(.morph-title) {
+    animation: vt-title-new calc(var(--dur-scenic) - 200ms) linear 100ms both;
+  }
+
+  /* Still mode: no view transition at all (src/lib/view-transition.ts). The page changes directly
+     and the incoming page fades in, opacity only (RouteFade). Calm morphs like full. */
+  @keyframes route-fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  :root[data-motion="still"][data-route-fade] main {
+    animation: route-fade-in var(--dur-calm) linear both;
+  }
+
+  /* Lenis (fine-pointer desktop only). */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+
+  .lenis:not(.lenis-autoToggle).lenis-stopped {
+    overflow: clip;
+  }
 }
 
-/* Lenis (fine-pointer desktop only). */
-html.lenis,
-html.lenis body {
-  height: auto;
-}
+@layer utilities {
+  .visually-hidden {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
 
-.lenis:not(.lenis-autoToggle).lenis-stopped {
-  overflow: clip;
+  /* The H1 focused after a route change (RouteArrival) is announced, not operated: no ring. */
+  [data-route-focus]:focus {
+    outline: none;
+    animation: none;
+  }
+
+  /* Cartographic label halo: keeps small text legible over contour lines. */
+  .map-halo {
+    text-shadow:
+      0 0 2px var(--color-ground),
+      0 0 6px var(--color-ground),
+      0 0 14px var(--color-ground);
+  }
+
+  /* Over the poster (no field, so no quiet zones) a denser halo, and under the glyphs a hard one:
+     a ground stroke painted beneath the fill, so the poster's lines and river break right at the
+     letters and labels keep 7:1 where they run close together. */
+  :root:not(:has([data-field="on"])) .map-halo {
+    text-shadow:
+      0 0 1px var(--color-ground),
+      0 0 3px var(--color-ground),
+      0 0 6px var(--color-ground),
+      0 0 14px var(--color-ground);
+  }
+
+  :root:not(:has([data-field="on"])) .map-halo,
+  .map-halo.keep-halo {
+    -webkit-text-stroke: var(--type-halo-stroke) var(--color-ground);
+    paint-order: stroke fill;
+  }
+
+  /* Forced colours draw no field and no poster; a forced stroke colour would only thicken the text. */
+  @media (forced-colors: active) {
+    :root .map-halo.map-halo {
+      -webkit-text-stroke: 0;
+    }
+  }
+
+  /* Inside a quiet zone ([data-quiet-zone]) the running field fades its lines to ~25%, so
+     sheet and glacier text needs no halo there (checked by npm run check:contrast).
+     Labels on a drawing or where lines crowd (.keep-halo: the career profile's places and
+     caption, the field kit's proof) keep theirs, with the hard halo: even faded lines would take
+     them below 7:1. The poster (reduced motion, no WebGL) has no quiet zones, so halos stay. */
+  :root:has([data-field="on"]) [data-quiet-zone].map-halo:not(.keep-halo),
+  :root:has([data-field="on"]) [data-quiet-zone] .map-halo:not(.keep-halo) {
+    text-shadow: none;
+  }
 }

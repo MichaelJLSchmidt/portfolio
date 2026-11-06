@@ -91,6 +91,30 @@ export const data = {
     baselineFiles: 200,
   },
   reflection: { legalMinutes: 30 },
+  /** Roles held by one person (the team list). */
+  roles: { lead: 1, contentDesigner: 1, productOwner: 1, legalAdviser: 1 },
+  /** Dates after launch: the log and the reversed decision. */
+  log: {
+    launch: "January 2026",
+    firstMonth: "February 2026",
+    adoption: "April 2026",
+    reversed: "June 2026",
+    stallsDown: "August 2026",
+    sms: "October 2026",
+  },
+  /** What the service logs, tickets and trials showed after launch. */
+  afterLaunch: {
+    tickets: 23,
+    ticketsLogin: 14,
+    delegatedPct: 74,
+    firms: 112,
+    stallAtReviewPct: 68,
+    stalledAfterPct: 7,
+    windowWeeks: 6,
+    smsDrafts: 38,
+    smsConfirmed: 17,
+    smsDays: 3,
+  },
   card: { cost: 4, costScale: 5 },
   /** Sample values shown in the fictional product UI (artefacts only). */
   ui: {
@@ -162,5 +186,8 @@ export const consistency: [string, boolean][] = [
   ["the outcome baseline sample is the analysed files", d.outcomes.baselineFiles === d.discovery.filesAnalysed],
   ["design-system reuse after = services reusing the components", d.outcomes.reuse.after === d.decisions.reuseServices],
   ["the stepper's upload step is within the steps", d.ui.stepUpload <= d.product.steps],
-  ["matrix ratings stay within the scale", ["a", "b", "c"].every((k) => Object.values(d.matrix[k as "a"]).every((n) => n >= 0 && n <= d.matrix.scale))],
+  ["stalled drafts fell after the summary page", d.afterLaunch.stalledAfterPct < d.decisions.stalledPct],
+  ["login tickets are within the first month's tickets", d.afterLaunch.ticketsLogin <= d.afterLaunch.tickets],
+  ["SMS confirmations are within the trial's drafts", d.afterLaunch.smsConfirmed <= d.afterLaunch.smsDrafts],
+  ["matrix ratings stay within the scale",["a", "b", "c"].every((k) => Object.values(d.matrix[k as "a"]).every((n) => n >= 0 && n <= d.matrix.scale))],
 ];

@@ -2,14 +2,13 @@
 
 import { useSyncExternalStore } from "react";
 import { device } from "@/styles/tokens";
-import { settledScript } from "./settled";
 
 /**
  * Three motion modes, resolved before first paint and kept in sync (docs/motion.md):
  *
  * - full:  everything (the default);
  * - calm:  the "Calm map" switch: responses, title settles and view-transition morphs stay;
- *          ambient field motion, glints, pointer shine, tilt, loops and Lenis stop;
+ *          card tilt, loops and Lenis stop;
  * - still: the OS asks for reduced motion: no positional or width animation, no view transitions,
  *          opacity and colour changes of 200 ms or less only. Still always wins over the switch.
  *
@@ -23,7 +22,6 @@ export type DeviceTier = "desktop" | "mobile" | "low";
 
 export const CALM_STORAGE_KEY = "summit:calm-map";
 export const HAPTICS_STORAGE_KEY = "summit:haptics";
-export const INTRO_STORAGE_KEY = "summit:intro-played";
 export const REDUCE_QUERY = "(prefers-reduced-motion: reduce)";
 const CHANGE_EVENT = "summit:motion-change";
 const MODES: readonly MotionMode[] = ["full", "calm", "still"];
@@ -39,8 +37,8 @@ const forcedScript = previewable
   ? `try{f=new URLSearchParams(location.search).get("motion");if(!/^(full|calm|still)$/.test(f||""))f=null}catch(e){}`
   : "";
 
-/** Inline in <head>: sets the mode, tier and pending intro, and stops settled animations (settled.ts), before first paint. */
-export const motionModeScript = `(function(){var d=document.documentElement,c=false,p=false,r=false,f=null;try{c=localStorage.getItem("${CALM_STORAGE_KEY}")==="1"}catch(e){}try{p=sessionStorage.getItem("${INTRO_STORAGE_KEY}")==="1"}catch(e){}try{r=matchMedia("${REDUCE_QUERY}").matches}catch(e){}${forcedScript}var m=r?"still":f||(c?"calm":"full");${tierScript}d.setAttribute("data-calm",c?"1":"0");d.setAttribute("data-motion",m);if(f)d.setAttribute("data-motion-forced",f);d.setAttribute("data-tier",t);try{if(typeof navigator.vibrate=="function"&&/Android/i.test(navigator.userAgent))d.setAttribute("data-haptics","")}catch(e){}d.setAttribute("data-intro",m!=="full"||p?"none":"pending");${settledScript}})()`;
+/** Inline in <head>: sets the mode and tier before first paint. */
+export const motionModeScript = `(function(){var d=document.documentElement,c=false,r=false,f=null;try{c=localStorage.getItem("${CALM_STORAGE_KEY}")==="1"}catch(e){}try{r=matchMedia("${REDUCE_QUERY}").matches}catch(e){}${forcedScript}var m=r?"still":f||(c?"calm":"full");${tierScript}d.setAttribute("data-calm",c?"1":"0");d.setAttribute("data-motion",m);if(f)d.setAttribute("data-motion-forced",f);d.setAttribute("data-tier",t);try{if(typeof navigator.vibrate=="function"&&/Android/i.test(navigator.userAgent))d.setAttribute("data-haptics","")}catch(e){}})()`;
 
 const root = () => document.documentElement;
 
@@ -128,11 +126,6 @@ export function hapticsOn(mode: MotionMode = currentMode()): boolean {
   if (!hapticsSupported() || mode === "still") return false;
   const pref = readHaptics();
   return pref ? pref === "on" : mode === "full";
-}
-
-/** Called when the intro will not play after all (no WebGL, low-spec device, not full motion). */
-export function cancelPendingIntro() {
-  root().setAttribute("data-intro", "none");
 }
 
 /** The resolved mode, read from <html> (the pre-paint script's result). Outside React too. */

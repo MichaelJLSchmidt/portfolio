@@ -28,7 +28,7 @@
     width: 54px;
     height: 54px;
     border-radius: 50%;
-    background: var(--color-sheet);
+    background: var(--color-paper-dusk);
   }
   .head h2 {
     font-size: 22px;
@@ -66,20 +66,20 @@
   .no dt {
     color: var(--color-alpenglow-ink);
   }
-  blockquote {
+  .observed {
     margin: 0;
     padding-top: 9px;
     border-top: 1px solid rgb(90 92 82 / 0.4);
     font-size: 15.5px;
-    font-style: italic;
     line-height: 1.3;
   }
-  blockquote span {
+  .observed span {
+    display: block;
     font-family: var(--label);
     font-size: 11px;
     font-stretch: var(--label-wdth);
-    font-style: normal;
-    color: var(--color-sheet-ink);
+    color: var(--color-paper-ink-2);
+    text-transform: uppercase;
   }
 </style>
 <div class="row">
@@ -88,21 +88,21 @@
     <dl><div><dt>Goal</dt><dd>Get the subsidy without becoming a heating expert.</dd></div></dl>
     <dl><div><dt>Key frustration</dt><dd>Asked for technical data only the installer has.</dd></div></dl>
     <dl class="kn"><div><dt>Knows</dt><dd>Owner details, the property, the budget</dd></div><div class="no"><dt>Doesn’t know</dt><dd>Heat-pump model, heated floor area, certificate number</dd></div></dl>
-    <blockquote>“I just forward everything to my installer.” <span>{{"H3"}}</span></blockquote>
+    <p class="observed"><span>Observed</span>Forwards every technical question to the installer.</p>
   </article>
   <article class="card">
     <div class="head"><svg class="avatar" viewBox="0 0 46 46" data-seed="installer"></svg><div><h2>Busy Installer</h2><p class="label muted">Heating installer</p></div></div>
     <dl><div><dt>Goal</dt><dd>Close the job and get the customer’s subsidy approved fast.</dd></div></dl>
     <dl><div><dt>Key frustration</dt><dd>Re-typing the same data into every canton’s PDF.</dd></div></dl>
     <dl class="kn"><div><dt>Knows</dt><dd>Model, output, floor area, the quote</dd></div><div class="no"><dt>Doesn’t know</dt><dd>Ownership details, the owner’s login</dd></div></dl>
-    <blockquote>“I fill these in at night, in the van.” <span>{{"I2"}}</span></blockquote>
+    <p class="observed"><span>Observed</span>Fills in forms after hours, on a phone, between jobs.</p>
   </article>
   <article class="card">
     <div class="head"><svg class="avatar" viewBox="0 0 46 46" data-seed="caseworker"></svg><div><h2>Careful Caseworker</h2><p class="label muted">Energy Office</p></div></div>
     <dl><div><dt>Goal</dt><dd>Decide on complete, legally sound files.</dd></div></dl>
     <dl><div><dt>Key frustration</dt><dd>Chasing missing documents by phone.</dd></div></dl>
     <dl class="kn"><div><dt>Knows</dt><dd>The ordinance, the case system</dd></div><div class="no"><dt>Doesn’t know</dt><dd>Whether a file is complete before opening it</dd></div></dl>
-    <blockquote>“Half my day is calling people back.” <span>{{"C1"}}</span></blockquote>
+    <p class="observed"><span>Observed</span>Spends most of the day phoning applicants for missing documents.</p>
   </article>
 </div>
 <script>

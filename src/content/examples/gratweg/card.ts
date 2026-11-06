@@ -8,7 +8,6 @@ export const rawCard: SummitCardData = {
   name: "Gratweg",
   rarity: "M",
   cost: "{{card.cost}}",
-  costLabel: "Summit cost {{card.cost}} of {{card.costScale}}",
   rarityNote: "started and led a platform across teams",
   coordinates: "Hochmatt (fictional)",
   type: "Platform — Design system · Lead (fictional)",
@@ -19,8 +18,7 @@ export const rawCard: SummitCardData = {
     { term: "Govern", reminder: "a core team, {{team.contributors}} contributors and one RFC page per change." },
     { term: "Adopt", reminder: "“touch it, migrate it”, never a big-bang migration." },
   ],
-  flavor:
-    "“Every app had its own blue. People thought they were dealing with {{landscape.products|word}} different authorities.” — usability test note, {{years.testNote}}",
+  flavor: "Every app had its own blue, so people took them for {{landscape.products|word}} different authorities.",
   stats: {
     teamLed: "{{team.core}} + {{team.contributors}}",
     time: "{{project.years}} YRS",
@@ -32,8 +30,8 @@ export const rawCard: SummitCardData = {
     summary: "One design system for {{landscape.products}} products",
     time: "{{project.years}} years",
   },
-  artwork: { kind: "seeded", terrainId: "lab-098" },
-  artworkAlt: "Contour map of a fictional ridge generated for this example, with a dotted trail along it to the summit.",
+  artwork: { kind: "crop", terrainId: "jungfrau" },
+  artworkAlt: "Contour map of the Jungfrau from swisstopo data, with a dotted trail from the Jungfraujoch by the Mönchsjoch hut and the Rottalsattel to the summit.",
   summary:
     "A fictional model case study: one design system for {{landscape.products}} public-sector products, funded by a business case and adopted without a big-bang migration.",
   example: true,

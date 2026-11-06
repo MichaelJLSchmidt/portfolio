@@ -46,19 +46,20 @@ export const images: Record<string, ImageSpec> = {
     height: 1080,
   },
   "tp-outcomes": {
-    alt: "Slope chart: completeness up from {{outcomes.complete.before}}% to {{outcomes.complete.after}}%, decision time down from {{outcomes.medianDays.before}} to {{outcomes.medianDays.after}} days; details in the table above.",
+    alt: "Slope chart: completeness up from {{outcomes.complete.before}}% to {{outcomes.complete.after}}%, decision time down from {{outcomes.medianDays.before}} to {{outcomes.medianDays.after}} days; details in the results table.",
     width: 1920,
     height: 1080,
   },
 };
 
 export const figures: Record<string, FigureSpec> = {
-  "tp-hero": { kind: "image", image: "tp-hero", surface: "night", size: "wide" },
+  "tp-hero": { kind: "image", image: "tp-hero", surface: "night", size: "wide", source: "Fictional product UI" },
   "tp-landscape": {
     kind: "image",
     image: "tp-landscape",
     surface: "sheet",
     size: "wide",
+    source: "Discovery research (fictional)",
     zoom: true,
     caption:
       "{{landscape.constraints|Word}} constraints and {{landscape.actors|word}} actors framed every decision. The nightly batch import set the limits for status feedback.",
@@ -99,6 +100,7 @@ export const figures: Record<string, FigureSpec> = {
     image: "tp-workshop-board",
     surface: "sheet",
     size: "wide",
+    source: "Decision workshop board (fictional)",
     zoom: true,
     caption: "Decision workshop board. Making the decision rule explicit let legal sign off in the room.",
     long: [
@@ -127,6 +129,7 @@ export const figures: Record<string, FigureSpec> = {
     image: "tp-affinity",
     surface: "sheet",
     size: "wide",
+    source: "Interview notes (fictional)",
     zoom: true,
     caption:
       "{{discovery.interviews}} interviews, about {{discovery.observations}} observations, {{discovery.themes}} themes. {{discovery.insights|Word}} themes changed the brief.",
@@ -136,6 +139,7 @@ export const figures: Record<string, FigureSpec> = {
     image: "tp-archetypes",
     surface: "sheet",
     size: "wide",
+    source: "Interviews and shadowing (fictional)",
     zoom: true,
     caption: "{{discovery.archetypes|Word}} archetypes, built from behaviour rather than demographics.",
     long: [
@@ -145,7 +149,7 @@ export const figures: Record<string, FigureSpec> = {
           "Goal: get the subsidy without becoming a heating expert.",
           "Key frustration: asked for technical data only the installer has.",
           "Knows: owner details, the property, the budget. Doesn’t know: heat-pump model, heated floor area, certificate number.",
-          "Quote: “I just forward everything to my installer.” (homeowner H3)",
+          "Observed: forwards every technical question to the installer.",
         ],
       },
       {
@@ -154,7 +158,7 @@ export const figures: Record<string, FigureSpec> = {
           "Goal: close the job and get the customer’s subsidy approved fast.",
           "Key frustration: re-typing the same data into every canton’s PDF.",
           "Knows: model, output, floor area, the quote. Doesn’t know: ownership details, the owner’s login.",
-          "Quote: “I fill these in at night, in the van.” (installer I2)",
+          "Observed: fills in forms after hours, on a phone, between jobs.",
         ],
       },
       {
@@ -163,7 +167,7 @@ export const figures: Record<string, FigureSpec> = {
           "Goal: decide on complete, legally sound files.",
           "Key frustration: chasing missing documents by phone.",
           "Knows: the ordinance and the case system. Doesn’t know: whether a file is complete before opening it.",
-          "Quote: “Half my day is calling people back.” (caseworker C1)",
+          "Observed: spends most of the day phoning applicants for missing documents.",
         ],
       },
     ],
@@ -173,6 +177,7 @@ export const figures: Record<string, FigureSpec> = {
     image: "tp-blueprint-current",
     surface: "sheet",
     size: "wide",
+    source: "Blueprint workshop with caseworkers (fictional)",
     zoom: true,
     caption: "Current service: {{discovery.handoffs}} hand-offs and {{discovery.gaps}} moments without any feedback to the applicant.",
     long: [
@@ -209,6 +214,7 @@ export const figures: Record<string, FigureSpec> = {
     image: "tp-decision-matrix",
     surface: "sheet",
     size: "column",
+    source: "Decision workshop ratings (fictional)",
     caption: "Option C was the only one that met the ordinance and put the right data in the right hands.",
     long: [
       "Ratings out of {{matrix.scale}} filled dots; more dots are better (for effort: less effort).",
@@ -223,6 +229,7 @@ export const figures: Record<string, FigureSpec> = {
     image: "tp-flow",
     surface: "sheet",
     size: "wide",
+    source: "Service design (fictional)",
     zoom: true,
     caption: "New flow: an eligibility check before login and a delegated hand-off from installer to owner.",
     long: [
@@ -248,6 +255,7 @@ export const figures: Record<string, FigureSpec> = {
     image: "tp-sketch-to-wire",
     surface: "sheet",
     size: "wide",
+    source: "Design studio and coded prototype (fictional)",
     zoom: true,
     caption: "The document-upload step from design-studio sketch to coded prototype in {{delivery.prototypeWeek|word}} weeks.",
   },
@@ -257,6 +265,7 @@ export const figures: Record<string, FigureSpec> = {
     after: "tp-after",
     surface: "sheet",
     size: "wide",
+    source: "PDF form and new service (fictional)",
     caption:
       "Before and after: page {{pdf.comparedPage}} of the PDF versus the new “System details” step. Drag or use the arrow keys to compare.",
   },
@@ -265,6 +274,7 @@ export const figures: Record<string, FigureSpec> = {
     image: "tp-annotated-upload",
     surface: "sheet",
     size: "wide",
+    source: "Coded prototype (fictional)",
     zoom: true,
     caption: "Document upload, annotated. Each marker targets one of the {{discovery.documents|word}} most common reasons for returns.",
     notes: [
@@ -280,6 +290,7 @@ export const figures: Record<string, FigureSpec> = {
     image: "tp-design-system",
     surface: "sheet",
     size: "wide",
+    source: "Design system (fictional)",
     zoom: true,
     caption: "{{decisions.components}} components themed with cantonal tokens. Contrast ratios are documented next to every colour pair.",
     long: [
@@ -293,6 +304,7 @@ export const figures: Record<string, FigureSpec> = {
     image: "tp-test-rounds",
     surface: "night",
     size: "column",
+    source: "Usability test rounds (fictional data)",
     caption:
       "Task success over {{delivery.rounds|word}} rounds of testing (n = {{delivery.perRound}} each). These are small samples, so read them as directional.",
   },
@@ -301,6 +313,7 @@ export const figures: Record<string, FigureSpec> = {
     image: "tp-outcomes",
     surface: "night",
     size: "column",
+    source: "Case-system export (fictional)",
     caption: "Outcomes after {{outcomes.months|word}} months. Solid lines are measured; dashed lines are estimated. All data is fictional.",
   },
 };

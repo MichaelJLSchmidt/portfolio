@@ -1,5 +1,5 @@
 {
-  "$comment": "Input for scripts/terrain/bern.mjs (npm run terrain:bern): the Basecamp terrain, an 8 × 8 km window centred on the zero point of the Swiss coordinate system. Outputs land in public/terrain/bern/.",
+  "$comment": "Input for scripts/terrain/bern.mjs (npm run terrain:bern): the About terrain, a 12 × 9 km window around the zero point of the Swiss coordinate system that also holds the Aare through Bern, Ittigen and the Bantiger (each at least 1 km inside). Outputs land in public/terrain/bern/.",
   "id": "bern",
   "label": "Bern",
   "zeroPoint": {
@@ -7,7 +7,12 @@
     "n": 1200000,
     "label": "Zero point of LV95: the old observatory in Bern (swisstopo)"
   },
-  "bboxLv95": [2596000, 1196000, 2604000, 1204000],
+  "bboxLv95": [2597000, 1196000, 2609000, 1205000],
+  "$focus": "What the field and the posters frame (object-position): the zero point. On a wide screen the whole window shows; on a phone the part around the zero point.",
+  "inside": [
+    { "label": "Ittigen station", "e": 2603456, "n": 1202480 },
+    { "label": "Bantiger", "e": 2606806, "n": 1202973 }
+  ],
   "source": {
     "stacApi": "https://data.geo.admin.ch/api/stac/v1",
     "collection": "ch.swisstopo.swissaltiregio",

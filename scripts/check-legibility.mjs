@@ -1,9 +1,9 @@
 // Text against what is actually behind it, measured on rendered screenshots in Chromium:
 // every running-text element (.body-copy, and .knockout blocks such as the footer and tables) and
 // every label straight over the field on
-// the home page, a case study, the case-study example (when the build includes it) and Basecamp,
-// at a desktop and a phone size, over the moving contour field at its worst (the headlamp lit
-// right on the text), over the field caught mid-morph during a route change (preview builds) and
+// the home page, a case study, the case-study example (when the build includes it) and About,
+// at a desktop and a phone size, over the contour field with the pointer right on the text (the
+// field takes no pointer input: nothing may change there), over the field caught mid-morph during a route change (preview builds) and
 // over the static poster (reduced motion, no WebGL). Text on opaque
 // surfaces (.surface-copy: the sheet colour of the banner, key insight and map-sheet captions, the
 // night frames of tiles and charts) is measured the same way, for either polarity.
@@ -16,7 +16,8 @@
 //     of a glacier-bright line (a fixed yardstick: lit lines used to turn glacier; they now stay
 //     neutral and fainter).
 // Pass: contrast ≥ 7:1 for light text, line strength ≤ 15% over the field; dark text on the sheet
-// colour (no field lines behind it) ≥ 4.5:1, the WCAG AA level its inks are chosen for.
+// colour (no field lines behind it) ≥ 4.5:1, the WCAG AA level its inks are chosen for, and so is
+// light text on an opaque panel (raised ground: a logbook, a results table), which hides the field.
 //
 //   npm run check:legibility           (a build in out/, Playwright as for npm run test:e2e)
 //   npm run check:legibility -- --list (print every element, not only the worst per page)
@@ -146,21 +147,21 @@ const pages = [
   // The examples use every case-study building block; live builds don't include them.
   ...(existsSync(join(out, "work/test-project/index.html")) ? [{ path: "/work/test-project/", name: "case-study example" }] : []),
   ...["seilschaft", "gratweg"].filter((s) => existsSync(join(out, `work/${s}/index.html`))).map((s) => ({ path: `/work/${s}/`, name: `case study ${s}` })),
-  { path: "/about/", name: "Basecamp" },
+  { path: "/about/", name: "About" },
 ];
 const viewports = [
   { name: "desktop 1440×900", viewport: { width: 1440, height: 900 }, mobile: false },
   { name: "phone 390×844", viewport: { width: 390, height: 844 }, mobile: true },
 ];
 const modes = [
-  { name: "field, headlamp on the text", reduced: false },
+  { name: "field, pointer on the text", reduced: false },
   { name: "poster", reduced: true },
   // A route change caught halfway: the field frozen mid-morph towards another terrain, its quiet
   // zones held as the conductor holds them (preview builds: the field's debug hook).
-  { name: "mid-morph (route change), headlamp on the text", reduced: false, morph: true },
+  { name: "mid-morph (route change), pointer on the text", reduced: false, morph: true },
 ];
 
-// Narrow a run while iterating: LEGIBILITY_ONLY="Basecamp,desktop,field" (any of the words).
+// Narrow a run while iterating: LEGIBILITY_ONLY="About,desktop,field" (any of the words).
 const only = (process.env.LEGIBILITY_ONLY ?? "").split(",").filter(Boolean);
 const wanted = (name) => !only.length || only.some((w) => name.includes(w));
 const pick = (list) => (list.some((x) => wanted(x.name)) ? list.filter((x) => wanted(x.name)) : list);
@@ -178,7 +179,7 @@ for (const mode of pick(modes)) {
     });
     await context.addInitScript(() => {
       try {
-        sessionStorage.setItem("summit:intro-played", "1");
+        
         sessionStorage.setItem("summit:deck-dealt", "1");
       } catch {}
     });
@@ -211,14 +212,22 @@ for (const mode of pick(modes)) {
         },
         { BODY, LEGACY },
       );
-      // Where fixed overlays at the top of the screen (the HUD) end.
+      // Where fixed overlays at the top of the screen (the HUD) end, with the backdrop that fades
+      // out below the bar (its ::before at rest, ::after once the page has scrolled).
       const cover = await page.evaluate(() =>
         Math.ceil(
           Math.max(
             0,
             ...[...document.querySelectorAll("body *")]
               .filter((el) => getComputedStyle(el).position === "fixed" && el.getClientRects().length)
-              .map((el) => el.getBoundingClientRect())
+              .map((el) => {
+                const r = el.getBoundingClientRect();
+                const fades = ["::before", "::after"]
+                  .map((p) => getComputedStyle(el, p))
+                  .filter((s) => s.content !== "none")
+                  .map((s) => r.top + (parseFloat(s.top) || 0) + (parseFloat(s.height) || 0));
+                return { top: r.top, height: r.height, bottom: Math.max(r.bottom, ...fades) };
+              })
               .filter((r) => r.top <= 0 && r.height < window.innerHeight / 3)
               .map((r) => r.bottom),
           ),
@@ -255,7 +264,15 @@ for (const mode of pick(modes)) {
             max = Math.max(max, l);
           }
           const dark = max < 0.2;
-          return { textL: dark ? max : min, dark, label: el.textContent.trim().replace(/\s+/g, " ").slice(0, 44) };
+          // An opaque background between the text and the field (up to the body): a panel.
+          let panel = false;
+          for (let n = el; n && n !== document.body; n = n.parentElement) {
+            if (rgba(getComputedStyle(n).backgroundColor)[3] >= 250) {
+              panel = true;
+              break;
+            }
+          }
+          return { textL: dark ? max : min, dark, panel, label: el.textContent.trim().replace(/\s+/g, " ").slice(0, 44) };
         }, i);
         // The box is taken once the element has settled (an entrance or a plaque still rising
         // would shift it under the clip), and checked again after the shots.
@@ -305,7 +322,7 @@ for (const mode of pick(modes)) {
           );
           if (clip.y + clip.height > floor) clip.height = floor - clip.y;
           if (clip.width < 4 || clip.height < 4) break;
-          // The headlamp, right on the text: the pointer, or a finger held down on a phone.
+          // The pointer right on the text, or a finger held down on a phone.
           const cx = clip.x + clip.width / 2;
           const cy = clip.y + clip.height / 2;
           if (!mode.reduced) {
@@ -340,13 +357,14 @@ for (const mode of pick(modes)) {
         }
         const m = measure(b1, t, b2, info.textL, info.dark);
         if (!m) continue;
-        const ok = info.dark ? m.contrast >= MIN_CONTRAST_ON_SHEET : m.contrast >= MIN_CONTRAST && (mode.reduced || m.strength <= MAX_LINE);
+        const onSheet = info.dark || info.panel;
+        const ok = onSheet ? m.contrast >= MIN_CONTRAST_ON_SHEET : m.contrast >= MIN_CONTRAST && (mode.reduced || m.strength <= MAX_LINE);
         if (!ok) failures++;
-        const row = { mode: mode.name, vp: vp.name, page: p.name, label: info.label, dark: info.dark, ...m, ok };
+        const row = { mode: mode.name, vp: vp.name, page: p.name, label: info.label, dark: info.dark, panel: info.panel, ...m, ok };
         rows.push(row);
         if (listAll) print(row);
-        // Worst per page relative to its own threshold (dark text on the sheet has a lower one).
-        const margin = (x) => x.contrast / (x.dark ? MIN_CONTRAST_ON_SHEET : MIN_CONTRAST);
+        // Worst per page relative to its own threshold (the sheet and panels have a lower one).
+        const margin = (x) => x.contrast / (x.dark || x.panel ? MIN_CONTRAST_ON_SHEET : MIN_CONTRAST);
         if (!worst || margin(row) < margin(worst)) worst = row;
       }
       if (!listAll && worst) print(worst, " (worst on the page)");
@@ -356,7 +374,7 @@ for (const mode of pick(modes)) {
 }
 
 function print(r, suffix = "") {
-  const line = r.dark ? "on sheet " : `line ${(r.strength * 100).toFixed(0).padStart(3)}%`;
+  const line = r.dark ? "on sheet " : r.panel ? "on panel " : `line ${(r.strength * 100).toFixed(0).padStart(3)}%`;
   console.log(`${r.ok ? "pass" : "FAIL"}  ${r.contrast.toFixed(2).padStart(6)}:1  ${line}  ${r.mode} · ${r.vp} · ${r.page}: "${r.label}"${suffix}`);
 }
 
@@ -370,5 +388,5 @@ for (const mode of modes) {
 }
 await browser.close();
 server.kill();
-if (failures) console.error(`\n${failures} text block(s) below ${MIN_CONTRAST}:1 (${MIN_CONTRAST_ON_SHEET}:1 for dark text on the sheet) or with lines above ${MAX_LINE * 100}% under the glyphs.`);
+if (failures) console.error(`\n${failures} text block(s) below ${MIN_CONTRAST}:1 (${MIN_CONTRAST_ON_SHEET}:1 on the sheet or a panel) or with lines above ${MAX_LINE * 100}% under the glyphs.`);
 process.exit(failures ? 1 : 0);

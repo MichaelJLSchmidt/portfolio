@@ -1,6 +1,6 @@
 // `npm run dev`: Next.js dev server plus a tiny local endpoint the dev-only tuning panel
 // uses to persist values into src/config/contour-field.json. Works on Windows, macOS, Linux.
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { createRequire } from "node:module";
@@ -37,6 +37,10 @@ createServer((req, res) => {
 })
   .listen(PORT, "127.0.0.1", () => console.log(`[tuning] save endpoint on http://localhost:${PORT}`))
   .on("error", (e) => console.warn(`[tuning] endpoint disabled: ${e.message}`));
+
+// Display titles' width compensation and the footer wordmark, from the current copy (npm run
+// titles, npm run wordmark).
+for (const script of ["measure-titles.mjs", "wordmark.mjs"]) spawnSync(process.execPath, [join(root, "scripts", script)], { stdio: "inherit", cwd: root });
 
 const require = createRequire(import.meta.url);
 const nextBin = require.resolve("next/dist/bin/next");

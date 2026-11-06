@@ -4,7 +4,7 @@ import { useSyncExternalStore } from "react";
 
 /**
  * Case studies the visitor has opened, remembered in localStorage: their cards show a small
- * "SUMMITED" stamp, and screen readers hear "Visited". RememberCard marks a page on arrival.
+ * "Visited" stamp, and screen readers hear "Visited". RememberCard marks a page on arrival.
  */
 const KEY = "summit:visited";
 const EVENT = "summit:visited-change";

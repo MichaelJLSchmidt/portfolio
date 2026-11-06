@@ -1,6 +1,6 @@
 /**
- * The night-summit page: production's under-construction page and, with the same design, the
- * Basecamp gate. One renderer for both, pure string templating so the build (Node) and the
+ * The under-construction page production serves and, with the same design, the password gate
+ * of preview deploys. One renderer for both, pure string templating so the build (Node) and the
  * gate (Deno) share it. The build assembles the model from src/content and the tokens.
  */
 
@@ -18,7 +18,8 @@ export type PageModel = {
   contact: PageLink[];
   /** Shown instead of a contact link whose URL is still missing (preview builds only). */
   placeholder: (label: string) => string;
-  hud: { coordinates: string; altitude: string; clock: string };
+  /** The short brand in the bar at the top (the name source's `brand`). */
+  brand: string;
   access: {
     heading: string;
     label: string;
@@ -116,11 +117,9 @@ export function renderPage(page: PageModel, form: FormState): string {
     ? `<a href="${escapeHtml(page.credit.href)}">${escapeHtml(page.credit.label)}</a>`
     : escapeHtml(page.credit.label);
   const body = [
-    `<div class="terrain" aria-hidden="true"><div class="poster"></div><div class="lamp"></div></div>`,
+    `<div class="terrain" aria-hidden="true"><div class="poster"></div></div>`,
     `<header class="hud label">`,
-    `<p>${escapeHtml(page.hud.coordinates)}</p>`,
-    `<p>${escapeHtml(page.hud.altitude)}</p>`,
-    `<p class="clock" hidden>${escapeHtml(page.hud.clock)} <time data-clock></time></p>`,
+    `<p class="brand">${escapeHtml(page.brand)}</p>`,
     `</header>`,
     `<main>`,
     `<h1 class="name">${escapeHtml(page.name)}</h1>`,

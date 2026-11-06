@@ -1,4 +1,4 @@
-import { caseStudyLabels as L } from "@/content/cards";
+import { caseStudyLabels as L } from "@/content/case-study-labels";
 import { haptic } from "@/lib/haptics";
 import { currentMode } from "@/lib/motion-mode";
 import { isSettled, markSettled, settleKey } from "@/lib/settled";
@@ -10,7 +10,7 @@ import { duration } from "@/styles/tokens";
  * Home/End and dragging come with the input); "Before", "After" and "Side by side" buttons set
  * the view. Without JavaScript both images stack, each with its own alt text.
  *
- * Motion: the "Before" and "After" labels breathe while the slider is hovered, focused or dragged;
+ * Motion: the labels stay put (text never moves);
  * the first time the slider is in view this session (full motion) the divider nudges 50 → 56 → 50%
  * once, a hint that it moves; landing on 0, 50 or 100% ticks the detent haptic.
  */

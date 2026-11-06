@@ -1,429 +1,527 @@
 # Motion
 
-The site's motion language has one verb: **settle**. Text arrives slightly wide and condenses to its
-set width, like contour lines tightening near a summit; interactive text breathes wider on hover or
-focus and settles back; a single mint **glint** marks a first arrival or a committed action. Display
-text rests at wdth 62, Archivo's narrowest, so a settle always comes from wider.
+The site moves the way a map is read: the page is complete and readable from its first frame,
+motion answers the reader (a hover, a press, the scroll, a page change) and then stops, and the
+map holds still while a page is read. Every value comes from `src/styles/tokens.ts`. The motion
+lab (`/lab/`, with `/lab/specimen/` and `/lab/terrain/`; in basecamp builds, local previews and
+`npm run dev`, never in a live build) shows the primitives in the three modes side by side.
 
-Later phases apply the primitives below; they do not invent new motion. Every value comes from
-`src/styles/tokens.ts`. The motion lab (`/lab/`, basecamp and preview builds only) shows every
-primitive in the three modes side by side.
+Four rules hold everywhere:
+
+- **Readable from the first frame.** Body text, table cells and numbers never animate. Titles
+  arrive on their weight only, and a light weight is still the whole word. The reveal controller
+  shows a rising block at once when it is or holds `.body-copy`, `.surface-copy` or a table. The
+  one exception is the home intro's statement: in full motion its weight eases from 300 to 400
+  with a 6 px settle. It is legible throughout.
+- **Every effect has a calm and a still twin.** Calm (the Calm map switch) keeps responses and
+  page morphs and drops ambient motion, loops and flourishes. Still (the OS asks for reduced
+  motion) moves nothing: colour and opacity change at once or within `--dur-still` (200 ms).
+- **Nothing follows the pointer** but the Summit Card's tilt and foil (`TiltDriver`). The
+  lightbox listens for `pointermove` only while a pointer is held down, to drag and pinch.
+  `src/lib/pointer.test.ts` keeps it that way (`npm test`), and so does `npm run test:e2e -- pointer`.
+- **Red is the route's colour.** `signal` (on dark) and `routePaper` (on paper) mark only the red
+  route, the lines that are routes (an ascent's profile, the way a decision took, a drawing's
+  path and blaze, the walked line of the career profile), trail links and their blazes. The
+  "route red" test in `src/styles/tokens.test.ts` lists the files that may use them.
 
 ## Modes
 
-`html[data-motion]` holds one of three modes, set before first paint by the inline script in the root
-layout (`src/lib/motion-mode.ts`) and kept in sync with the OS setting and the switch.
+`html[data-motion]` holds one of three modes. The inline script in the root layout
+(`motionModeScript`, `src/lib/motion-mode.ts`) sets it before first paint; the same module keeps
+it in step with the OS setting, the switch and other tabs. The same script sets `data-calm` (the switch's own state),
+`data-tier` (`desktop`, `mobile` or `low`) and `data-haptics` (vibration works: Android).
 
 | | full | calm | still |
 | --- | --- | --- | --- |
-| Chosen by | default | the "Calm map" switch | the OS (`prefers-reduced-motion: reduce`), also without JavaScript |
-| View Transition morphs (card ⇄ page, mini card → next page, HUD Basecamp label ⇄ Basecamp H1, figure ⇄ lightbox) | yes | yes | no API call; the 150 ms route fade |
-| A route's arrival (parts timed from the commit) | yes | yes (fades without rises) | the page is simply there |
-| Hover, focus, press responses | yes | yes | colour and opacity only, ≤ 200 ms |
-| Title settles | yes | yes (cascade ≤ 240 ms) | rest state |
-| Reveals, contour rules, map sheets | yes | yes; reveals fade without the rise | shown, never hidden |
-| Glint (signature) | yes, at most one per viewport | no | no |
-| Pointer shine (headlamp on type) | yes (mouse and pen) | no | no |
-| Field: drift, line flow, headlamp, parallax, intro sweep | yes | no; the map holds still | poster |
-| Field: terrain morph between routes | yes, with zoom push | yes, no zoom push or draw-on | poster |
-| Card tilt, foil, glare, touch glint, deal-in | yes | no (deal-in and foil off; lift, settles stay) | no |
-| Pings (trail pin, hotspot pins, camp pins), the slider's hint | yes | no | no |
-| Career climb | follows the scroll | draws once on a timer | complete |
-| Loops | the poster's drift only (desktop, field ambient) | no | no |
-| Lenis smooth scroll | yes (fine pointer) | no | no |
-| Haptics | on by default | off by default | off |
+| Chosen by | default | the Calm map switch (`localStorage` `summit:calm-map`) | the OS (`prefers-reduced-motion: reduce`), also without JavaScript |
+| View Transition morphs (deck ⇄ case study, mini card → next case study, HUD About label ⇄ About H1, figure ⇄ lightbox) | yes | yes | no API call; the new page fades in over `--dur-calm` (150 ms) |
+| A route's arrival (parts timed from the commit) | yes | yes | the page is simply there |
+| Responses: flood, trail links, lifts, presses, switches | yes | yes; the flood and the card flips cross-fade, the trail line draws in 120 ms | colour and opacity only, at once or ≤ 200 ms |
+| Title arrival (`WeightTitle`) | once per page view | rest state | rest state |
+| Reveals | rise, draw, unfold, trace | rises become fades; draws, unfolds and traces stay; no page turn | shown, never hidden |
+| Scroll-drawn lines (How I lead, the career profile) | follow the scroll where view timelines exist | the career profile draws once; the drawings are drawn | drawn |
+| The red route | the walked line rides the scroll, a marker on its end | steps from waypoint to waypoint | drawn solid |
+| Pings, the comparison's hint, the Mythic foil sweep | yes | no | no |
+| Card tilt, foil, glare, the card's own rise | yes | no (the lift, the type line's fade, the pips and the rarity trace stay) | no |
+| Field | holds still while read; on a route change morph, draw-on, zoom push, Bern's river and pin | morph only; river and pin fade in | posters only, cross-fading in 200 ms |
+| Lenis smooth scroll | fine-pointer desktop | no | no |
+| Haptics (Android) | on by default | off by default | off |
 
-Precedence: still always wins. When the OS forces still, the switch shows "on" and its accessible
-description says why. The switch is a native `<input type="checkbox" switch role="switch">` whose
-visible label, "Calm map", is also its name (WCAG 2.5.3 Label in Name); its description reads
-"Reduces motion on this site", plus the explanation when the OS forces still. The thumb shows the
-state (html[data-calm], set at once on a flip); the mode itself (html[data-motion], which restyles
-the whole page and re-renders what follows it) changes a frame later, so the switch answers first.
+Precedence: still always wins. When the OS forces still, the switch shows on, is
+`aria-disabled`, and its description says why. The switch is a native
+`<input type="checkbox" switch role="switch">` whose visible label, "Calm map", is its name
+(WCAG 2.5.3); its description reads "Reduces motion on this site". The thumb follows
+`html[data-calm]`, which changes at once on a flip; the mode itself (which restyles the page and
+re-renders whatever follows it) changes a frame later (`setCalmMap`), so the switch answers first.
 
-Preview builds accept `?motion=full|calm|still` for one page load (the lab's frames, tests,
-recordings); the OS setting still wins.
+Dev and preview builds accept `?motion=full|calm|still` for one page load (the lab's frames,
+tests, recordings); the OS setting still wins.
 
 ### Writing CSS for the modes
 
 Motion is opt-in per mode, so a mode switched mid-animation lands the element at once:
 
 ```css
-/* Full only (glint, shine, tilt, loops, ambient): never without JavaScript. */
+/* Full only (title arrival, tilt, pings, the foil sweep, scroll-drawn lines): never without JavaScript. */
 :root[data-motion="full"] .x { animation: … }
 
-/* Full and calm, also without JavaScript (first-paint settles), never in still. */
+/* Full and calm, also before the script has run; never in still. */
 @media (prefers-reduced-motion: no-preference) {
   :root:not([data-motion="still"]) .x { transition: … }
 }
+
+/* Calm's twin of a full effect (a fade for a rise, a cross-fade for a turn). */
+:root[data-motion="calm"] .x { … }
 ```
 
-Colour and opacity transitions of `--dur-still` (200 ms) or less may stay unguarded. Hover styles go
-under `@media (hover: hover)`; `:focus-visible` gets exactly the hover state (one `--on` switch read
-by every declaration, as in `SignatureLink.module.css`).
+`:root:not([data-motion])` is the page without JavaScript (the inline script never ran): the flood
+shows at once on hover and focus, a before/after comparison stacks both images.
 
-In JS: `useMotionMode()` for rendering, `currentMode()` outside React (and in effects that run during
-hydration, when the hook still reports the server snapshot, "still").
+Colour and opacity transitions of `--dur-still` (200 ms) or less may stay unguarded. Hover styles
+go under `@media (hover: hover)`; keyboard focus gets exactly the hover state through one `--on`
+switch that every declaration reads (`TrailLink.module.css`, `SummitCard.module.css`,
+`PortraitCard.module.css`, `BinderPage.module.css`).
+
+In JS: `useMotionMode()` for rendering; `currentMode()` outside React and in effects that run
+during hydration (the hook still reports the server snapshot, "still", so server HTML never
+starts motion); `useModeIf(enabled)` for components with many instances that need the mode for
+one optional feature (no subscription, so no re-render on a flip, while disabled).
 
 ## Tokens
 
-All in `src/styles/tokens.ts`, exposed as CSS custom properties by `tokensToCss()` (springs by
-`springsToCss()` in `src/styles/motion-css.ts`). `npm test` checks that the CSS carries exactly the TS
-values, that every token a stylesheet reads exists, and that no stylesheet adds its own duration,
-`cubic-bezier()` or `font-stretch` (a shrinking allowance lists the older ones).
+All in `src/styles/tokens.ts`, written as custom properties by `tokensToCss()` (springs by
+`springsToCss()` in `src/styles/motion-css.ts`) and inlined in the root layout's tokens layer.
+Names turn camelCase into kebab-case: `breathOut` is `--dur-breath-out`.
 
-- **Durations** (`--dur-*`): the scale `instant 80, micro 140, calm 150, short 220, medium 360, long
-  560, scenic 900, cinematic 1400`, and semantic ones: `tap 120` (press), `breath 160` (one letter's
-  breath), `underline 180` (inline link), `still 200` (still mode's ceiling), `breath-out 240`,
-  `reveal 350`, `settle 420`, `route 600`, `settle-display 640`, `terrain 700`, `glint 900`, `draw 900`,
-  `trace 400` (a small mark tracing itself: the logo's rings, a rarity shape), `leave 160` (unshared
-  content leaving as a route starts), `crossfade 180` (back and forward), `sheet 300` (a bottom
-  sheet), `unfold 240` (a small sheet: the fiction banner, a hotspot's note), `arrival 740` (a
-  route's arrival has landed), `shift 600` (card contours shifting by one interval), `prewarm 400`
-  (the field leaning towards a hovered link's terrain), `toast 4000` (how long a toast stays: a
-  reading time).
-- **Arrival** (`arrival`, ms after a route commits): `lines 260` (a case study's type and meta lines
-  settle), `summary 380` (its summary sheet unfolds, to `duration.arrival`), `landed 420` (Basecamp's
-  lead and legend, the H1 having landed).
-- **Easings** (`--ease-*`): `trail`, `summit`, `drop`, `scree` (content leaving the screen only; never
-  ease in on UI), `settle` (0.16, 1, 0.3, 1), `glint` (0.45, 0, 0.55, 1).
-- **Springs** (Motion, and `--spring-*` as `<duration> linear(…)` sampled from Motion's own spring):
-  `press` {0.16 s, bounce 0}, `card` {0.35, 0.15}, `share` {0.42, 0.1}, `thumb` {0.2, 0.2}, `tilt`
-  {stiffness 220, damping 26, mass 0.6}, `settle` {0.12, 0}. Use as `transition: transform
-  var(--spring-press)`; `--spring-<name>-dur` and `--spring-<name>-ease` give the parts where the
-  duration and the timing function are set apart (view-transition pseudo-elements).
-- **Staggers** (`--stagger-*`): `char` 14 ms (cascade ≤ 240), `word` 40 (≤ 320), `item` 50 (first 6
-  items), `card` 70 (≤ 420). `staggerStep(stagger.char, n)` fits a cascade into its cap.
-- **Distances** (`--dist-*`): `rise` 8 px, `rise-card` 12, `nudge` 4, `lift` −6, `tilt-max` 5°,
-  `tilt-mini` 3° (the trailhead band's mini card), `perspective` 900, `hud-condense` 120 (the HUD
-  condenses past it); `--scale-press` 0.97, `--scale-card-press` 0.98.
-- **Axes** (`--axis-<role>-<state>-wdth|wght`): display rest 62/800, reveal 80/100, hover 70 (+8),
-  press 700 weight, compact 72 (card names); label rest 100/600, reveal 110, hover 112/650, press 96;
-  mono rest 87.5/500, reveal 112.5, hover 100, press 80, condensed 75 (the HUD after scroll).
-  `--type-condensed-wdth` (88) and `--type-finding-wdth` (85) for condensed UI text.
-- **Glint**: band 18% of the text, 100°, glacier at 55%, `--dur-glint`, dark surfaces only.
-- **Headlamp**: radius 120 px (at least 1.2 em of lit type), Gaussian falloff k = 3, rise `micro`,
-  fade 600 ms, type lit at most 50% towards glacier. Shared by the field and the type shine.
-- **Haptics**: `press 6, open 8, commit 10, success [8,60,8], error [12,40,12], detent 4` ms, at most
-  one pulse per 80 ms (the map is under Accessibility and haptics).
+- **Durations** (`--dur-*`, ms). The scale: `instant 80`, `micro 140`, `calm 150` (still mode's
+  page fade), `short 220`, `medium 360`, `long 560`, `scenic 900`. Semantic:
+  `tap 120` (press, focus ring), `breathOut 240` (a tilted card going flat; the field's river and
+  pin leaving), `still 200` (still mode's ceiling), `reveal 350`, `settle 420` (a figure's scan
+  line), `route 600`, `title 600` (`WeightTitle`), `intro 400` (the home intro), `trail 280` and
+  `trailCalm 120` (a trail link's line), `flood 360`, `floodTail 900`, `floodCalm 160`,
+  `floodTouch 600` (the contour flood), `flip 400` and `flipCalm 150` (cards turning over),
+  `legendUnfold 340` (the case-study summary), `terrain 700` (the field's morph), `glint 900`
+  (the foil sweep), `draw 900` (a line drawing on), `trace 400` (a small mark tracing itself),
+  `leave 160` (a page's own content leaving), `crossfade 180` (back and forward), `sheet 300` (a
+  bottom sheet), `unfold 240` (a small sheet), `arrival 740` (a route's arrival has landed),
+  `shift 600` (a card's contours shifting), `prewarm 400` (the field leaning towards a link's
+  terrain), `toast 4000` (a reading time, not motion). `route` is the route change's own
+  budget (the conductor's timings stay within it).
+- **Arrival** (`arrival`, ms after a route commits): `summary 380` (a case study's summary
+  unfolds), `landed 420` (About's facts).
+- **Easings** (`--ease-*`): `trail` (0.22, 1, 0.36, 1), `summit` (0.65, 0, 0.35, 1), `drop`
+  (0.32, 0.72, 0, 1), `scree` (0.7, 0, 0.84, 0; content leaving the screen only, never easing in
+  on UI), `settle` (0.16, 1, 0.3, 1), `glint` (0.45, 0, 0.55, 1). `--ease-flood` is a generated
+  `linear()` that spends `--dur-flood` on the flood's head and the rest on its slow tail.
+- **Springs** (Motion, and `--spring-*` as `<duration> linear(…)` sampled from Motion's own
+  spring): `press` {0.16 s, bounce 0}, `card` {0.35, 0.15}, `share` {0.42, 0.1}, `thumb` {0.2,
+  0.2}, `tilt` {stiffness 220, damping 26, mass 0.6}, `settle` {0.12, 0}. Use as
+  `transition: transform var(--spring-press)`; `--spring-<name>-dur` and `--spring-<name>-ease`
+  give the parts separately (view-transition pseudo-elements).
+- **Staggers** (`--stagger-*`): `item` 50 ms for the first 6 items, `card` 70 ms capped at
+  420 ms. `staggerStep(stagger.card, n)` fits a cascade into its cap.
+- **Distances** (`--dist-*`): `rise` 8 px, `rise-card` 12, `trail-step` 3 (a trail link's arrow,
+  in two steps), `intro-settle` 6, `lift` −6, `tilt-max` 5°, `tilt-mini` 3° (the trailhead band's
+  mini card), `perspective` 900, `hud-condense` 120 (the HUD condenses past it).
+  `--scale-press` 0.97, `--scale-card-press` 0.98.
+- **Flood** (`flood`): 12 frames, the last 3 a tail, the fringe at 25% one frame ahead
+  (`--flood-last`, `--flood-fringe`).
+- **Glint** (`glint`): band 18% of the text, 100°, `--dur-glint` on the glint easing. The token's
+  colour is glacier at 55%, but the only glint left, the Mythic card's foil sweep, sets its own
+  colour in `Glint.module.css` (summit gold at 60%).
+- **Type roles** (`type`, `titleAxes`; `--type-*`, `--title-*`): display wdth 75, wght 800,
+  line-height 0.86 (titles arrive from wght 200); body 17–19 px, line-height 1.55, 60–68
+  characters; button wdth 112, wght 720, +0.02 em; mono 11 px, +0.14 em, wdth 87.5, wght 500;
+  compact (card names) wdth 72, wght 800; condensed wdth 88.
+- **Haptics**: `press 6`, `open 8`, `commit 10`, `success [8, 60, 8]`, `error [12, 40, 12]`,
+  `detent 4` ms, at most one pulse per 80 ms.
 - **Layers** (`--layer-*`): backdrop 0, page 1, hud 30, overlay 40, skip-link 100.
 - **Breakpoints** (`breakpoint`, at most three; media queries write them literally, `(min-width:
-  1024px)` or `(width < 1024px)`, and `npm test` checks every width query): `sm 640` (the HUD's
-  readout and haptics switch, two-up grids), `md 1024` (the HUD's whole navigation, two-column hero,
-  case-study and Basecamp headers), `lg 1280` (the HUD's clock and the readout's coordinates, the
-  case-study trail). `device.desktopMinEdgePx` (900) is the desktop tier's long edge, not a layout
-  breakpoint.
+  1024px)` or `(width < 1024px)`): `sm 640` (the haptics switch joins the HUD, the red route leaves
+  the margin, the career profile runs across, About's two-column title on landscape screens),
+  `md 1024` (desktop section spacing, the How I lead switchback, the deck's ridge three across),
+  `lg 1280` (the waypoint trail beside a case study's stages; the altimeter bar below it).
+  `device.desktopMinEdgePx` (900) is the desktop tier's long edge, not a layout breakpoint.
+
+`npm test` checks that the CSS carries exactly the TS values, that every token a stylesheet reads
+exists, that no stylesheet adds its own duration, `cubic-bezier()` or `font-stretch` (a shrinking
+allowance lists the older ones), that every width query uses a breakpoint, that every rule sits in
+a cascade layer (`layers.test.ts`), the route red and the pointer rule.
 
 ## Levels and budgets
 
 Every effect belongs to one level (`levels` in the tokens):
 
-| Level | Budget |
-| --- | --- |
-| ambient | one channel, desktop, full mode only |
-| reveal | at most 2 groups at once, ≤ 600 ms each, once per session |
-| response | ≤ 300 ms, interruptible |
-| transition | one at a time, readable within 300 ms |
-| signature (glint) | at most one per viewport, once per session |
+| Level | Budget | Now |
+| --- | --- | --- |
+| ambient | one channel, desktop, full mode only | none: the field holds still while a page is read |
+| reveal | at most 2 groups at once, ≤ 600 ms each, once per session; snaps while the page scrolls faster than 2.5 px/ms | reveals and the card arrival; title arrivals belong here too, but the controller does not count them |
+| response | ≤ 300 ms, interruptible | hover, focus, press; the flood (360 ms plus its tail) and the card flips (400 ms) run longer, and both reverse from wherever they are |
+| transition | one at a time, readable within 300 ms | route morphs, the lightbox |
+| signature | at most one per viewport, once per session | the Mythic card's foil sweep only |
 
-Body text, flavour text, table cells and numbers inside prose never move. Animate only transform,
-opacity, clip-path, colour, and font-stretch or font-weight on isolated, size-reserved elements.
+Animate only transform, opacity, clip-path, stroke offsets, colour, and the weight and width of
+isolated, size-reserved elements.
 
 ## Primitives
 
-All in `src/components/motion/`. Each works in full, calm and still with no layout shift
-(`npm run test:e2e -- primitives` sums the shift per primitive: ≤ 0.005).
+Each works in full, calm and still with no layout shift (`npm run test:e2e -- primitives`
+measures the shift per primitive in the lab: ≤ 0.005).
 
-### SettleText
-
-```tsx
-<SettleText as="h1" text={"Two\nlines"} mode="chars" trigger="paint" glint shine quiet settleOnArrival />
-```
-
-- `mode`: `chars` (per-letter cascade, display titles), `words`, `block` (one run in a box reserved at
-  its widest state: labels, buttons, nav). `block` with `wrap` is for text that may wrap
-  (headings): every letter keeps its rest-width box, so line breaks never change, and the whole
-  block settles at once.
-- `role`: `display` (default for chars and words), `label` (default for block), `mono`, or `text`:
-  the className sets the rest axes (`--kt-rest-wdth`, `--kt-rest-wght`, written as
-  `.x[data-role] { … }` to outrank the defaults) and the text settles from the breath above them,
-  a small settle (H3s, waypoint findings).
-- `reserve` (block): `widest` (default) or `rest`, a box at the rest axes (or `--kt-box-wdth`) with
-  the run over it, spilling past it for the moment of the settle (tight rows: the HUD).
-- `widths="display"`: every letter's box takes its measured width at the display rest axes
-  (`src/lib/display-widths.json`, `scripts/measure-display.mjs`), so the web font replacing the
-  fallback moves nothing (display titles in the first viewport). The display cut also has a
-  fallback face with Archivo's vertical metrics (`globals.css`). `widths="condensed"`: the same for
-  the condensed cut at wght 600 (`src/lib/condensed-widths.json`), each word space a measured gap
-  at the end of its word, so wrapping text keeps the web font's line breaks (the case-study type
-  line).
-- Boxes reserved at the label breath axes (SignatureLink and MotionButton ghosts) take the
-  "Archivo Breath Fallback" until the web font arrives: a fallback can't widen, and a narrower
-  box would rewrap a row of links when the font lands.
-- `delay` (ms): the line leads; `channel="heading"`: one heading settle at a time, snapping to rest
-  while the page scrolls fast. `scope="site"`: once per session wherever it appears (the HUD).
-- `trigger`: `paint` (CSS from first paint, before hydration), `inview`, `manual` (`ref.play()`).
-- Plays once per element per session (`src/lib/settled.ts`; the pre-paint script renders settled
-  elements at rest, so reloads and pages Next re-shows never replay).
-- `settleOnArrival`: on a View Transition target it holds at the breath axes during the morph and
-  settles after it lands (browser back and forward show it at rest).
-- `arrive={ms}`: part of a route's arrival (`arrival` in the tokens): on a link navigation it settles
-  that long after the route commits, every time; direct loads settle from first paint as usual.
-- `glint`: one glint after the first settle this session (full only), and again whenever a commit
-  led to the page (`glintOnArrival`). `shine`: the headlamp lights the letters (full only, mouse and
-  pen). `breath`: the letters follow an ancestor's `--on` to the breath axes (a hovered card, the
-  current waypoint).
-- Per-glyph properties are namespaced and registered without inheritance (`--kt-i`, `--kt-shine`).
-- The accessible name is a visually hidden copy of the text; the letters are `aria-hidden`.
-
-### Glint
-
-`<Glint text="…" />` inside a positioned element, then `playGlint(element)`. An aria-hidden copy of
-the text lies over the original with transparent letters; a band clipped to them moves by animating a
-registered gradient position (`--glint-x`). Chosen because it works whatever colour the letters set
-for themselves (rest colour, shine) and repaints one layer only. `surface="sheet"` draws a 1 px
-moss-ink rule instead. Full mode only, one glint at a time. `playGlint(el, { auto: true })` for a
-glint nobody asked for (a first arrival, a Mythic card arriving, a card crossing a phone's middle,
-the contact band): it is skipped within a screen's height of the last one on the page, so there is
-at most one signature per viewport. A commit to another page calls `glintOnArrival(path)`: the
-transition freezes the departing link in its snapshot, so the destination's H1 glints once it has
-landed.
-
-### Headlamp
-
-`watchHeadlamp((lamp) => …)` (`src/lib/headlamp.ts`): one pointermove listener for mouse and pen,
-delivered once per frame on Motion's frame loop; `headlampFalloff(d)` for a distance in radii. The
-contour field and the type shine both use it.
-
-### SignatureLink
+### WeightTitle
 
 ```tsx
-<SignatureLink href="/work/x/" variant="display" label="Seilschaft" arrow="→" before={<span>Next expedition</span>} />
+<WeightTitle as="h1" text={"Two\nlines"} arrive="load" flood />
 ```
 
-- `inline`: a contour underline draws (clip-path, `--dur-underline`) and the colour moves to glacier.
-- `standalone` / `display`: letters breathe wider left to right (14 ms ripple), the arrow nudges 4 px;
-  leaving settles back right to left within 240 ms. The label's box is reserved at the breath axes.
-- `nav`: the breath plus `current` (`true`/`"page"`: aria-current="page"; `"location"`: the place
-  within a section, e.g. Expeditions on a case study; glacier, a drawn rule).
-- `chip`: a pill; the label breathes and the border brightens from contour to glacier; pressed or
-  current, it fills with the sheet colour (ground text).
-- `role`: `label` (default), `mono` (the HUD; a container can narrow `--l-rest-wdth`), `display`.
-  `settle`: the letters settle from the role's reveal axes at first paint, once per session.
-  `arrowAt="start"`: a leading arrow that nudges back (back links). `plain`: an `<a>` instead of
-  `next/link` (files: the CV).
-- Keyboard focus gets exactly the hover motion; press narrows the weight; a commit (click, Enter,
-  tap) ticks the `commit` haptic (a jump within the page: `detent`) and glints: on the destination's
-  H1 for another page, on the link otherwise. Hover only under `(hover: hover)`.
-- Set the label's rest colour with `--l-rest-color` (e.g. in `labelClassName`).
+`src/components/type/WeightTitle.tsx`. A display title is one element holding its text (no letter
+spans). At rest Archivo wght 800 at wdth 75, upper case. In full motion it arrives from wght 200:
+one registered progress value, `--title-t`, runs 0 → 1 over `--dur-title` (600 ms, trail easing)
+and drives both axes. The weight runs linearly; the width follows four knots solved per title at
+build time, so the line keeps its length all the way (drift at most 2%, typically under 0.5%) and
+nothing around it moves. `contain: layout paint` keeps each frame to the title.
 
-### RuledHeading
+- `arrive`: `"load"` (from the first frame, pure CSS: the hero, the 404), `"view"` (the default:
+  when it first comes into view, through one shared IntersectionObserver in `titles.ts`) or
+  `"none"` (always at rest).
+- Once per page view: a title whose arrival ended is marked `data-title-done` and stays at rest, also
+  when Next shows its page again (a reload plays it again); one a page morph brought in is marked
+  `data-title-morphed` by `RouteArrival` and rests at once (the morph is its arrival).
+- Calm and still show the rest state; so does a page without JavaScript.
+- `flood`: adds the contour flood (below), opted in per title from `src/content/flood.ts`.
+- `scripts/measure-titles.mjs` (`npm run titles`; `npm run build` and `npm run dev` run it first)
+  shapes every title listed in `src/lib/display-titles.ts` with HarfBuzz and writes the knots to
+  `src/lib/title-axes.json`. A title not measured, or drifting past 2%, keeps the rest width and
+  animates its weight alone. `titleEm()` gives a title's measured width for sizing it to its column.
 
-`<RuledHeading id="x" text="What changed" className="display" ruleClassName={…} />`: a contour rule
-draws as the heading scrolls into view, then the H2 settles a moment later (`--dur-short`) as one
-block (`SettleText mode="block" wrap`, the heading channel). Section heads (`SectionHead`: the
-eyebrow settles in mono, letter by letter), Basecamp's headings and the ascent; waypoint headings
-build the same order from a rule, a mono label and the finding (role `text`).
+### Contour flood and FloodButton
 
-### RollNumber
+`src/components/interaction/flood.ts`, the rules under "contour flood" in `globals.css`. On every
+element marked `data-flood` (a title, a button, the footer wordmark) an aria-hidden glacier copy
+spreads through it on hover, keyboard focus or a tap. The copies draw their text from
+`data-echo`, so no words are duplicated in the page.
 
-`<RollNumber value={4158} />` (`pad={2} trend={1}` for a clock): a number that rolls digit by digit
-to its new value (Motion+ `AnimateNumber`, one shared lazy chunk loaded the first time a value
-changes, so a page whose numbers never move never fetches it; never in still, where numbers snap).
-If the chunk isn't in within `--dur-tap` of a change, that change snaps instead of showing the old
-number while it loads; later changes roll. Server and hydration render `formatInteger` (or zero-padded), so they
-agree; each thousands group rolls on its own so the digits match. Decorative: give screen readers
-the value as text and hide this. The terrain readout, the Bern clock and the career climb's readout
-use it.
+- One set of delegated listeners (`startFlood`, started by `Reveals`): `pointerover` reads where a
+  mouse or pen came in, once; keyboard focus floods left to right; a tap floods from the finger
+  and recedes after `--dur-flood-touch` (600 ms). It never follows the pointer.
+- The script writes only the host's state and entry point (`data-flood-state`, `data-flood-src`,
+  `--fx --fy --ew --eh`). The stylesheet steps a registered integer, `--flood-frame`, through a
+  twelve-frame alpha sprite: radial from the entry point, or a left-to-right sweep. The fringe
+  (25%) runs one frame ahead. Arriving takes `--dur-flood` plus a slow three-frame tail
+  (`--dur-flood-tail`, `--ease-flood`); leaving runs back over `--dur-flood`.
+- Calm cross-fades the copy over `--dur-flood-calm`; still shows it at once; forced colours hide it.
+- The sprites (`flood-radial.webp`, `flood-sweep.webp`, ≤ 15 KB each) come from
+  `npm run flood` (`scripts/flood/sprites.mjs`, seeded, byte-identical on a re-run).
 
-`<RollValue value="38% → 82%" only="last" />`: a value as written whose numbers roll once, the
-first time it is in view this session, from a nearby value a little below (`only="last"`: a before
-→ after pair rolls its after-value). The box is reserved at the written value and screen readers
-get it as text. The Summit log and the case studies' metric tiles.
+`<FloodButton label="Copy address" labels={["Copy address", "Copied"]} />`: a 1.5 px contour
+outline with the label in the button cut (wdth 112, wght 720). The flood fills it on hover and
+focus and the label turns ground (14:1); a press fills it at once and insets 1 px, with the
+`press` haptic (`pressHaptic={false}` when the action ticks its own). Its box is reserved at the
+widest label it can show, so a change of label moves nothing. `flood.buttons` switches its flood off.
 
-### MotionButton
+### TrailLink
 
-`<MotionButton label="Enable tilt" onClick={…} />`: the label breathes on hover and focus (box
-reserved), press scales to 0.97 on the press spring, a `press` haptic (`pressHaptic={false}` when
-the action ticks its own). `labels={["Copy address", "COPIED"]}` reserves the box at the widest of
-them, and a change of label settles the new one in from the label's reveal width.
+`<TrailLink href="/about/">More about me</TrailLink>`, `variant="inline"` in running text. At
+rest a dotted underline at 40%; on hover (fine pointers) and keyboard focus a solid 2 px
+signal-red line draws left to right under the label over `--dur-trail` (a background, so a
+wrapped phrase draws line by line) and the arrow steps 3 px forward in two steps (`arrowAt="start"`
+steps back, for back links). A committed click ticks `commit` (`detent` for a jump within the
+page) and leaves a small white-red-white blaze beside the link for the rest of the session
+(`sessionStorage` `summit:blazed`, not `:visited`). Calm draws in `--dur-trail-calm` (120 ms);
+still changes at once. The link never changes width. `plain` renders an `<a>` (mail, external).
 
-### Reveal, ContourRule, MapSheet
+### RuledHeading and ContourRule
 
-Mark a block `data-reveal`:
+`<RuledHeading id="x" text="How I lead" flood />`: the line leads. A `<ContourRule />` (a 1 px
+line, `data-reveal="rule"`) draws as the title scrolls into view, and the `WeightTitle` arrives on
+its weight. `SectionHead` wraps it for home and About sections. In the first viewport and in still
+both are simply there.
+
+### Reveals and MapSheet
+
+Mark a block `data-reveal`; one controller (`src/components/motion/reveal.ts`, mounted by
+`Reveals` in the root layout, styles in `src/styles/motion.css`) plays it:
 
 | Kind | What it does |
 | --- | --- |
 | `""` | rises 8 px and fades (calm: fades) |
 | `"card"` | rises 12 px and fades (calm: fades) |
 | `"fade"` | fades only, after its block's `--fade-after` (running text may take it) |
-| `"rule"` | draws (scaleX) |
-| `"line"` | traces a drawn line over the draw token (the footer's elevation profile) |
-| `"list"` | draws a list's ring bullets with the item stagger (`--i` per item) |
-| `"quote"` | draws a pull quote's rule (its `::before`), then fades the quote in |
+| `"rule"` | draws (scaleX) over `--dur-settle` |
+| `"line"` | traces a drawn line from its start over `--dur-draw` (the footer's profile, a case study's elevation profile) |
+| `"list"` | draws a list's ring bullets with the item stagger |
 | `"caption"` | fades in after its figure |
-| `"mark"` | draws a small mark's paths (`pathLength="1"`): the decision's marker, the 90-day trail |
-| `"sheet"` | unfolds from its fold edge (`data-fold="top|left"`, clip-path) over `--sheet-dur` (default `--dur-reveal`), its content fading in after; `data-sheet-rows` on a child fades its rows in turn (`--i`); `data-draws` gives it time for marks that draw after it opens |
-| `"figure"` | unfolds behind a 1 px scan line over `--dur-settle`, then its corner ticks; below the fold its images show a contour placeholder until decoded, then cross-fade in |
+| `"mark"` | draws a small mark's paths (`pathLength="1"`) over `--dur-trace` (About's three-step trail) |
+| `"sheet"` | unfolds from its fold edge (`data-fold="top\|left"`, clip-path) over `--sheet-dur` (default `--dur-reveal`), its content fading in after; `data-sheet-rows` fades rows in turn (`--i`); `data-draws` leaves time for marks that draw after it opens |
+| `"figure"` | unfolds behind a 1 px scan line over `--dur-settle`, then its corner ticks; below the fold a contour placeholder shows until its images decode, then they cross-fade in |
+| `"turn"` | full only: a binder page turning in over `--dur-long` (its own stylesheet animates it) |
+| `"trace"` | a drawing whose route traces in over `--dur-draw` (the career profile; its own stylesheet animates it) |
 
-`<ContourRule />` is a 1 px line that draws and `<MapSheet fold="top|left" arriveAt={…}>` a light
-sheet that unfolds. One controller (`reveal.ts`, mounted in the root layout) runs them: anything in
-the first viewport is visible from first paint and never hidden (so it can be the LCP element);
-below the fold, blocks wait and reveal once per session, at most two groups at once within 600 ms,
-and snap to their end state while the page scrolls fast. Running text, tables and numbers never
-move: a rising block that is or holds `.body-copy`, `.surface-copy` or a table is shown at once, so
-mark labels, eyebrows, actions and panels without prose, not paragraphs.
+The pages use `rule`, `sheet`, `figure`, `caption`, `line`, `mark`, `card` (the trailhead band's
+mini card), `trace` and `turn`; `""`, `fade` and `list` are supported but unused at present.
 
-The one exception to "the first viewport is simply there" is a route's arrival by a link (below):
-a block marked `data-arrive-at="<ms>"` that is on screen when the route commits plays from that many
-milliseconds after the commit, up to the arrival's end (or for `data-arrive-dur`), every time.
+Anything in the first viewport is visible from first paint and never hidden, so it can be the
+LCP element. Below the fold, blocks wait (`data-reveal-state="wait"`) and play once per session
+(`src/lib/settled.ts`): at most two groups at once within 600 ms, snapping to their end while the
+page scrolls fast. Still mode never hides anything. A rising block that is or holds body copy, a
+surface-copy panel or a table is shown at once.
 
-### useMotionMode and haptic
+`<MapSheet fold="top|left" arriveAt={ms}>` is a raised-ground panel with a hairline that unfolds
+(`data-reveal="sheet"`). The one exception to "the first viewport is simply there" is a route's
+arrival by a link: a block marked `data-arrive-at="<ms>"` that is on screen when the route commits
+plays from that many milliseconds after the commit up to the arrival's end (`--dur-arrival`), or
+for `data-arrive-dur`, every time (`playArrival`).
+
+### PortraitCard
+
+`src/components/about/PortraitCard.tsx`. The About portrait on a thin Summit Card frame, turned
+over by its `FloodButton` ("Show facts" / "Show photo", the label says what it will show) or a
+click on the card. Both faces are in the DOM; the one turned away is `inert` and `aria-hidden`.
+Full motion turns the card over (`rotateY` over `--dur-flip`, summit easing); calm stacks the faces
+and cross-fades them over `--dur-flip-calm`; still swaps at once. Hover, and keyboard focus on the
+button, lift it by `--dist-lift`. The binder's pockets on About (`BinderPage`) turn the same way,
+lifting half as far.
+
+### Glint
+
+`<Glint text="…" />` inside a positioned element, then `playGlint(element, { auto: true })`
+(`src/components/motion/glint.ts`). An aria-hidden copy with transparent letters lies over the
+text; a band clipped to them moves by animating a registered gradient position (`--glint-x`), so
+one layer repaints. Kept for one use: a Mythic card's foil sweeps once across its name as the card
+arrives. Full motion only, one at a time; an `auto` glint is skipped within a screen's height of
+the last one on the page. Forced colours hide it.
+
+### RouteLayer (the red route)
+
+`src/components/route/RouteLayer.tsx`, geometry in `src/lib/route-geometry.ts` (pure,
+unit-tested). One red path down the page through its waypoints, the reader's way up the mountain.
+Rendered as the first child of `main` on home and on case studies; `main:has(> [data-route-layer])`
+becomes its containing block and stacking context, and the layer sits behind the content, so
+panels and cards cover it. Decorative (`aria-hidden`).
+
+- **Waypoints** are the elements marked `data-route`: the default anchor passes the element's top
+  in the page's left gutter (half of `main`'s inline padding); `data-route-anchor="center"`
+  enters a drawing at its top centre and leaves at its foot, masked behind it;
+  `data-route-anchor="ridge"` joins the deck's ridgeline at its right end and leaves for the
+  gutter along it, masked across it. `data-route-blaze` marks where the route is climbed on foot:
+  from there it is a blaze, a 6 px paper-dusk casing under the red.
+- **Geometry**: one subpath (a dash pattern restarts at every `M`). Between waypoints the route
+  runs straight down, or, when it changes sides, crosses in the lowest band free of text
+  (`freeBand`, at least 32 px tall) with quarter-circle corners (radius 24). A switchback (a short
+  zig-zag) precedes each gutter waypoint: 40 px tall, swinging 7 px on desktop. Lengths are summed
+  from the segments, so no `getTotalLength()` is needed. The layer measures again whenever the
+  layout changes (a ResizeObserver on `main` and the document, fonts loading, a resize).
+- **Phones** (under 640 px) put every waypoint in the 16 px margin: a 2 px trail with a 28 px
+  switchback swinging 4 px before each.
+- **Progress** follows a reading line 30% down the screen (the same line as the case study's
+  reading spy, so the waypoint trail is a magnified view of the same progress). `routeKeyframes`
+  places each waypoint at the scroll offset where it crosses that line; the route is drawn as far
+  as the line reaches on load and complete at the bottom of the page.
+- **Full**: a dashed base (3/7, 60%) with the walked line solid over it, driven by a
+  `ScrollTimeline` on the document (Lenis scrolls the document, so it follows), and a "you are
+  here" marker (a red dot ringed in ground and paper) riding its end on `offset-path`. Without
+  scroll timelines the same keyframes are painted from the scroll on Motion's frame loop, at most
+  once a frame.
+- **Calm**: the walked line advances a waypoint at a time (`stepAt`), easing over `--dur-medium`;
+  the marker steps with it.
+- **Still**: the whole route drawn solid; no dashed base, no marker, nothing animated.
+- **Pages**: home runs from the title's tags through the four How I lead drawings and along the
+  ridge of cards to Get in touch; a case study from the trailhead through its six stages to the
+  results, blazed after the ascent's last railway station (`lastStation`, from `geo.ts`). About
+  has no route layer: its route is the career profile itself. Forced colours draw it in
+  `CanvasText`; print hides it.
+
+### useMotionMode and haptics
 
 `useMotionMode()` returns `{ mode, tier, calm, forcedStill, haptics, hapticsAvailable, setCalm,
-setHaptics }`; `tier` is `desktop` (fine pointer, long edge ≥ 900 px), `mobile` or `low`
-(`html[data-tier]`). `haptic(event)` vibrates on supporting Android browsers only, for direct user
-actions (transient activation), at most once per 80 ms, never in still, in calm only when switched on.
-The haptics switch (footer) is rendered only where vibration works (`html[data-haptics]`).
+setHaptics }`; `tier` is `desktop` (a fine pointer and a long edge of at least 900 px), `mobile` or
+`low` (Save-Data, under 4 GB of memory or under 4 cores). `haptic(event)` (`src/lib/haptics.ts`)
+vibrates on supporting Android browsers only, for direct user actions (transient activation), at
+most once per 80 ms, never in still and in calm only when switched on. The haptics switch renders
+only where vibration works (`html[data-haptics]`): in the HUD from 640 px, in the footer below.
 
 ## Route transitions
 
-`src/lib/view-transition.ts` wraps `document.startViewTransition` once and gives every transition a
-kind (`transitionKind()`):
+`src/lib/view-transition.ts` wraps `document.startViewTransition` once and gives every transition
+a kind (`transitionKind()`):
 
 | Kind | When | What plays |
 | --- | --- | --- |
-| `route` | a link to another page | the old page's own content leaves over `leave` 160 ms (the new page fades in over the same: plus-lighter, the map and HUD at constant brightness); shared parts travel on the share spring; then the arrival |
-| `return` | a back link into the deck | the card reassembly (`return-transition.ts`): the page's parts drop out, the artwork and title travel back, the card rebuilds and its name glints |
-| `traverse` | browser back and forward (`HistoryTransitions` replays popstate inside a transition) | `html[data-vt="traverse"]`: a `crossfade` 180 ms cross-fade plus the shared elements both pages have; no arrival choreography, no glint |
-| `view` | in the page: the deck's Cards ⇄ Index switch, the lightbox | their own timing |
+| `route` | a link to another page | the old page's own content fades out over `--dur-leave` (160 ms) while the new page fades in over the same (plus-lighter, so the field and the HUD keep their brightness); shared parts travel on the share spring; then the arrival |
+| `return` | a back link from a case study into the deck | the card reassembly (`return-transition.ts`) |
+| `traverse` | browser back and forward (`HistoryTransitions` replays popstate inside a transition) | `html[data-vt="traverse"]`: a `--dur-crossfade` (180 ms) cross-fade plus the shared elements both pages have; no arrival choreography |
+| `view` | in the page: the lightbox (`html[data-vt="lightbox"]`) | its own timing |
 
-Still mode never calls the API (the wrapper throws, React commits directly) and the new page fades
-in over `calm` 150 ms (`RouteFade`).
+Still mode never calls the API (the wrapper throws, React commits directly) and `RouteFade` fades
+the new page in over `--dur-calm` (opacity only). Browsers without the API morph shared elements
+with a Motion `layoutId` instead (`MorphSwitch`, loaded lazily), in full and calm.
 
-**The arrival** (`RouteArrival`, run when the conductor's `fieldStore.routeSeq` moves, the moment the
-field starts): on a `route` or `return` transition the new page's `main` gets `data-arrival`, its
-`data-arrive-at` blocks play (`reveal.ts`) and `SettleText arrive` settles. Text never waits: it is
-readable throughout. Then focus moves to the new page's H1 (`tabindex="-1"`, no ring) so screen
-readers announce it, unless the page placed focus itself (the deck focuses the card the reader came
-from) or the URL has a hash (its target).
+**The arrival** (`RouteArrival`) runs when the conductor's `fieldStore.routeSeq` moves, the
+moment the field starts. On a `route` or `return` transition the new page's `main` gets
+`data-arrival`, titles a morph brought in are put at rest, and the `data-arrive-at` blocks play.
+Text never waits: it is readable throughout. Then, on every kind, focus moves to the new page's
+H1 (`tabindex="-1"`, no ring) so screen readers announce it, unless the page placed focus itself
+(the deck focuses the card the reader came from) or the URL has a hash (its target).
 
-| Route | 0 ms | travel | then |
+| Route | 0 ms | Travel | Then |
 | --- | --- | --- | --- |
-| Deck → case study | press state, `open` haptic | artwork → header, name → H1, share spring | type and meta lines settle from 260 ms; the summary sheet unfolds 380 → 740 ms; the H1 settles once landed, then glints |
-| Case study → next | press state, `commit` haptic | the trailhead band's mini card (named only for this commit, `commit-morph.ts`) → header and H1, inside a transition of the band's own (`route-transition.ts`: React animates nothing between two pages of one template) | as above; the commit's glint on the H1 |
-| → Basecamp (HUD) | press state, `commit` haptic | the HUD label → H1, share spring | the H1 holds just wide through the morph and settles after; the lead settles and the legend unfolds from 420 ms (rows in turn) |
-| Back link → deck | `commit` haptic | the reassembly | the card is focused |
+| Deck → case study | press scale 0.98, `open` haptic; a tilted card springs flat first (≤ 120 ms); the route starts a frame after the press paints | the card's artwork → the header artwork, its name → the H1, on the share spring; the title's two snapshots keep their size and cross-fade early, so the text stays sharp | the summary sheet unfolds 380 → 740 ms; the H1 rests (the morph was its arrival) and takes focus |
+| Case study → next | `commit` haptic | the trailhead band's mini card → the next header and H1, named only for this commit (`commit-morph.ts`), inside a transition of the band's own (`route-transition.ts`: React animates nothing between two pages of one template) | as above |
+| → About (HUD) | `commit` haptic | the HUD's About label grows into the About H1 (`AboutLink` ⇄ `MorphTarget`, share spring) | the facts legend unfolds from its left fold at 420 ms, its rows fading in turn |
+| About → elsewhere | | the H1 shrinks back into the HUD label | the destination's own arrival |
+| Back link → deck | `commit` haptic | the reassembly: 0–220 ms the page's own content (`data-vt-exit`) drops 8 px and fades on scree; from 100 ms the artwork and title travel back over 700 ms | from `--dur-settle` the card rebuilds: its neatline draws in the rarity colour over `--dur-medium` and its parts rise `--stagger-item` apart (`--dur-short`, drop easing); the card is focused |
+
+**The terrain conductor** (`docs/terrain.md`) starts from the same commit: `TerrainBackdrop` sets
+the route's terrain in a layout effect inside the transition's update, and the field morphs over
+`--dur-terrain` (700 ms) alongside the page. Nothing waits for it, and every quiet zone holds the
+strongest knockout until the transition and the field's own motion are over.
 
 ## Catalogue
 
-Every component's motion by mode. "Settle", "breath", "glint", the reveal kinds and the arrival are
-the primitives above; "once" means once per session (`settled.ts`).
+Every effect by mode. "Once" means once per session (`settled.ts`).
 
 ### Chrome
 
-| Component | Full | Calm | Still |
-| --- | --- | --- | --- |
-| HUD bar (`Hud`, `HudFrame`) | condenses past 120 px (mono to wdth 75); labels settle once (site scope); logo rings trace on every route change | same | rest states, colour only |
-| Nav links, CV, Basecamp link | SignatureLink nav: breath, current rule | same | colour |
-| Terrain readout | numbers roll to each terrain (and waypoint) | roll | snap |
-| Bern clock | the minute rolls | roll | snap |
-| Calm map / haptics switches | thumb on the thumb spring, labels settle, `press` haptic | same | colour |
-| Skip link | settles in when focused | same | opacity |
-| Focus rings | arrive 6 px out and ease to 3 px (`tap`) | same | fade only |
-| Footer | elevation line traces (`line`); links underline | same | drawn |
-| Field (`TerrainBackdrop`, `ContourField`) | drift, line flow, headlamp, parallax (desktop), the route conductor (morph, draw-on, Bern's river and pin) | holds still; morphs only | poster, cross-fade 200 ms |
-| Poster (field off) | slow drift on desktop | still | still |
+| Effect | Full | Calm | Still | Tokens |
+| --- | --- | --- | --- | --- |
+| HUD condenses past 120 px (`HudFrame`) | the backdrop cross-fades to solid; the row moves up 6 px | same | backdrop only | `distance.hudCondense`, `--dur-still`, `--dur-settle`, `--ease-settle` |
+| HUD brand rings (`HudMark`) | hover and focus scale each ring one step out, inner first; after a route change they trace again | same | none | `--dur-short`, `--dur-trace`, `--stagger-item` |
+| HUD links (`HudLink`) | colour to glacier; a rule marks the current page or place; `commit` haptic | same | same (colour only) | `--dur-still` |
+| Calm map and Haptics switches | the thumb moves on the thumb spring, the label's colour follows; `press` haptic | same | thumb at once | `--spring-thumb`, `--dur-micro` |
+| Skip link | appears in place, fading in with its ring | same | fades | `--dur-tap` |
+| Focus rings | arrive 6 px out and ease to 3 px as they fade in | same | fade only | `--dur-tap`, `--ease-settle` |
+| Footer elevation profile | traces once from its start | same | drawn | `--dur-draw` (reveal `line`) |
+| Footer wordmark | the contour flood | cross-fade | at once | flood tokens |
+| Toast (Copy address) | rises in; stays 4 s, paused while hovered or focused | fades in | fades within 200 ms | `--dur-reveal`, `--dur-toast`, `--dur-still` |
+| Lenis smooth scroll | fine-pointer desktop | off | off | |
+| Field and posters | holds still while read; on a route change: morph, draw-on, zoom push on card terrains, Bern's river and pin; pre-warm on hovering or focusing a link to another terrain (desktop tier) | morph only; river and pin fade in | posters cross-fade | `--dur-terrain`, `--dur-draw`, `--dur-prewarm`, `--dur-still` |
+| Page change | View Transition (above) | same | page fades in | `--dur-leave`, `--spring-share-*`, `--dur-calm` |
 
 ### Home
 
-| Component | Full | Calm | Still |
-| --- | --- | --- | --- |
-| Hero name, eyebrow | settle from first paint; the name's glint once | settle, no glint | rest |
-| Scroll cue | its line draws down once, then rests | same | drawn |
-| Section heads | rule draws, eyebrow settles (chars), heading settles (block), one heading at a time | same | rest |
-| Summit log | the sheet unfolds; each number rolls once from nearby (pairs: the after-value) | same | as written |
-| Trail rules | titles settle as a group (item stagger); evidence lines fade in `tap` later | same | shown |
-| Field notes | each note's sheet unfolds in turn; quotes never move | same | shown |
-| Workshops | the formats as chips (the chip variant's look, no response: they are not controls) | same | same |
-| Contact band | heading settles and glints once (the page's last signature); Copy address: label settles to COPIED, toast (status) with a glint, `success` haptic | no glint | colour |
+| Effect | Full | Calm | Still | Tokens |
+| --- | --- | --- | --- | --- |
+| Hero name (`HeroName`) | arrives on its weight from the first frame | rest | rest | `--dur-title`, `--ease-trail` |
+| Hero name, hover, focus or tap | the contour flood (`flood.heroName`) | cross-fade | at once | flood tokens |
+| Map sheet furniture (corner ticks, scale bar) | static | static | static | |
+| Intro statement | weight 300 → 400 with a 6 px settle | rest | rest | `--dur-intro`, `--dist-intro-settle` |
+| Section heads (`SectionHead`) | the rule draws, then the title arrives on its weight; the title floods per `flood.sections` | the rule draws, title at rest | there | `--dur-settle`, `--dur-title` |
+| How I lead drawings | each line draws with the scroll (view timeline, entry 10% → cover 40%) where supported; drawn elsewhere | drawn | drawn | |
+| How I lead text, Earlier work's logbook | never move | | | |
+| Trail links ("More about me", Get in touch) | see TrailLink | | | `--dur-trail` |
+| Copy address (`FloodButton`) | flood; the label turns to "Copied" in its reserved box; toast; `success` haptic | cross-fade | at once | flood tokens |
 
 ### Deck and cards
 
-| Component | Full | Calm | Still |
-| --- | --- | --- | --- |
-| Deck view switch | names morph Cards ⇄ Index over 360 ms | cross-fade | at once |
-| Card arrival | rises 12 px in the card stagger, name settles, type line, pips fill, rarity traces; Mythic gold glint | settles, no rise or glint | there |
-| Card hover / focus | lift −6 px, border, name breath, chips breathe in turn, contours shift, stats roll once, tilt ≤ 5° and foil (pointer) | lift, breath, roll | colour |
-| Card press / open | scale 0.98, `open` haptic, the case study's H1 glints after the morph | same, no glint | colour |
-| Touch | stats roll in view; one glint as a card crosses the middle (at most one per viewport) | roll | none |
-| Visited stamp | settles once | same | rest |
-| Index rows | name breath, rule draws, terrain pre-warms | same | colour |
+| Effect | Full | Calm | Still | Tokens |
+| --- | --- | --- | --- | --- |
+| Card arrival (once per card as it enters; cards on screen are there) | rises 12 px and fades in the card stagger; the type line fades `--dur-tap` later; the scope pips fill in turn; the rarity shape traces | no rise or fade; type line, pips and trace stay | there | `--dur-reveal`, `--stagger-card`, `--dist-rise-card`, `--dur-tap`, `--dur-trace` |
+| Mythic foil sweep | once, after the card's arrival | none | none | `--dur-glint` |
+| Hover or focus | lifts −6 px on the card spring; the border brightens, the shadow deepens; the artwork's contours grow by a line around the summit; the open chip slides in; foil (rarity R and M) and glare; the field pre-warms the card's terrain | lift, border, contours, chip | the chip fades; colour only | `--spring-card`, `--dur-still`, `--dur-medium`, `--dur-shift` |
+| Tilt (fine pointer, after the page is idle) | ≤ 5° (mini card 3°) on the tilt spring, foil and glare following the pointer; back flat over 240 ms on leave | flat | flat | `spring.tilt`, `--dur-breath-out`, `--dist-tilt-max` |
+| Press and open | scale 0.98 on the press spring, `open` haptic, the morph | same | colour | `--spring-press`, `--scale-card-press` |
+| Visited stamp, ridge, captions | static | static | static | |
+| Return from a case study | the reassembly (Route transitions) | same | the card is simply there | `--dur-settle`, `--dur-medium`, `--ease-drop` |
 
 ### Case study
 
-| Component | Full | Calm | Still |
-| --- | --- | --- | --- |
-| Fiction banner | unfolds (240 ms) behind its alpenglow-ink rule; never dismissed | same | there |
-| Type and meta lines | settle at 260 ms on arrival (direct load: from first paint) | same | rest |
-| Summit summary | sheet unfolds from its top fold (360 ms), rows fade in turn; values never move | same | there |
-| HUD readout while reading | "WAYPOINT n / N · ALT", the altitude climbing to the summit, numbers roll | roll | snap |
-| Trail ("On this page", ≥ 1280 px) | scroll-linked fill; the pin pings once as a waypoint becomes current; its label breathes +8 | fill, breath | fill, colour |
-| Altimeter bar (< 1280 px) | from the first waypoint: the label settles on every change, a progress contour; the jump sheet rises (300 ms), `press` and `detent` haptics, focus to the heading | same | sheet fades in |
-| Waypoint headings | rule, mono label, then the finding settles; one at a time; snap when scrolling fast | same | rest |
-| Lists, quotes, insight | ring bullets draw; quote rule then fade; insight sheet unfolds | same | shown |
-| Decisions | a contour marker draws beside the chosen option | same | drawn |
-| Figures | unfold behind a scan line (420 ms), corner ticks, caption after; contour placeholder until decoded | same | shown |
-| Lightbox | the figure morphs into the overlay and back (share spring); focus trap, Esc, focus returns; `press` haptics | same | at once |
-| Before/after | labels breathe while held; a one-time hint 50 → 56 → 50%; `detent` at 0/50/100% | no hint | colour |
-| Hotspots | pins ping once in turn (80 ms apart); a pressed pin's title in a mini sheet that unfolds and settles; `detent` | no ping | at once |
-| Evidence legend | unfolds; its swatches draw | same | shown |
-| Metric tiles | numbers roll once from nearby | same | as written |
-| Trailhead band | Next expedition (display link) beside the next card's mini card; the back link's arrow nudges back 4 px | same | colour |
+| Effect | Full | Calm | Still | Tokens |
+| --- | --- | --- | --- | --- |
+| H1 | arrives on its weight on a direct load; rests after a morph; floods (`flood.caseStudyTitle`) | rest; flood cross-fades | rest; flood at once | `--dur-title` |
+| Trailhead spread, stages, side notes, key insight, fork diagrams, logbook, descent | never move | | | |
+| Summary (`LegendSheet`, the paper sheet) | on a link arrival unfolds from its top 380 → 740 ms; below the fold it unfolds as it comes into view; the text fades in after | same | there | `arrival.summary`, `--dur-legend-unfold`, `--dur-short` |
+| Figures | unfold behind a scan line, corner ticks after, the caption last; a contour placeholder until decoded, then the image cross-fades in | same | shown | `--dur-settle`, `--dur-short`, `--dur-still` |
+| Waypoint trail (≥ 1280 px) | the glacier fill follows the scroll; node colours ease; the current pin pings once | fill, colours | fill; colours at once | `--dur-medium`, `--dur-long` |
+| Altimeter bar (< 1280 px) | shown from the first stage; its progress line follows the scroll; the jump sheet rises; `press` and `detent` haptics; a jump focuses the stage's heading | same | the sheet fades | `--dur-sheet`, `--dur-still` |
+| Elevation profile | the line traces once; the table never moves | same | drawn | `--dur-draw` |
+| Evidence legend | unfolds from its left fold; its swatches draw, then fill | same | shown | `--dur-trace`, `--dur-short` |
+| Lightbox | the image morphs into the dialog and back; zoom eases; focus in, Esc, focus back; `press` haptics | same | opens at once | `--spring-share-*`, `--dur-short` |
+| Before/after | a one-time hint, the divider swinging 50 → 56 → 50%; `detent` at 0, 50 and 100%; `press` on its view buttons | no hint | no hint | `duration.long` |
+| Hotspots | pins ping once in turn; a pressed pin's title unfolds beside it; `detent` | no ping; unfold stays | at once | `--dur-instant`, `--dur-long`, `--dur-unfold` |
+| Trail links (back, skim, jump chips, Next stage, Back to top) | see TrailLink | | | `--dur-trail` |
+| Trailhead band | the mini card rises in; Next project as a display trail link; the commit morph | the mini card fades in | there | `--dist-rise-card`, `--dur-reveal` |
 
-### Basecamp
+### About
 
-| Component | Full | Calm | Still |
-| --- | --- | --- | --- |
-| H1 | the HUD label morphs into it, holds, settles, glints | no glint | rest |
-| Lead, legend | lead settles and legend unfolds from 420 ms on arrival; legend rows fade in turn, their labels settling in mono | same | there |
-| Rope rules | leads settle as a group | same | rest |
-| First 90 days | a short contour trail draws between the three steps (across; down on phones) | same | drawn |
-| Career climb | the climbed line follows the scroll (a view timeline where supported, the scroll handler elsewhere) with a climber; camp pins ping once; the readout's altitude rolls camp to camp; upright beside the plaques on phones | draws once on a timer (1.4 s) | complete |
-| Zero point and river | the pin sits at the screen's centre and the Aare's start above it: the header reaches past the middle so both stay clear of text (1440×900, 1280×800, 390×844) | same | poster |
+| Effect | Full | Calm | Still | Tokens |
+| --- | --- | --- | --- | --- |
+| H1 | the HUD label morphs into it and it rests; on a direct load it arrives on its weight, the clipped stem copy hidden meanwhile | morph, rest | rest | `--spring-share-*`, `--dur-title`, `--dur-short` |
+| Portrait card | lifts on hover or focus; turns over to the facts | lifts; cross-fade | swaps at once | `--dist-lift`, `--dur-flip`, `--dur-flip-calm` |
+| Facts legend (`MapSheet`) | on a link arrival unfolds from its left fold at 420 ms, rows fading in turn; below the fold as it comes into view | same | there | `arrival.landed`, `--dur-micro`, `--stagger-item` |
+| Lead, Who I am, How I work with people, Field kit, Tools and craft | never move | | | |
+| How I start | a short trail draws between the three steps (across; down on phones) | same | drawn | `--dur-trace` (reveal `mark`) |
+| Career profile | the walked red line follows the scroll (view timeline `--career-climb`) where supported, else draws once on entry; roles and heights never move | draws once on entry | drawn | `--dur-draw` (reveal `trace`) |
+| Card binder | the page turns in once; a pocket card lifts and turns over to its line | page at rest; cards cross-fade | swaps at once | `--dur-long`, `--dur-flip`, `--dur-flip-calm` |
+| Get in touch | as on home | | | |
+| Field | recentres on Bern: the Aare draws, the zero-point pin pings | river and pin fade in | Bern's poster | `docs/terrain.md` |
+
+### Route
+
+| Effect | Full | Calm | Still | Tokens |
+| --- | --- | --- | --- | --- |
+| Walked line | follows the scroll (scroll timeline; frame-loop fallback) | steps waypoint to waypoint | the whole route solid | `--dur-medium`, `--ease-settle` |
+| Dashed base | shown | shown | hidden | `--color-signal` |
+| "You are here" marker | rides the walked line's end | steps with it | hidden | `--color-signal`, `--color-ground`, `--color-paper-dusk` |
+| Blaze (above the last station) | white-red-white | same | same | `--color-paper-dusk` |
+| Phone margin trail | 2 px in the 16 px margin, switchbacks before each waypoint | same | same | |
 
 ### Gate and holding page
 
-The password field's underline draws on focus, the button reads CHECKING… while it waits, errors
-signal in place; reduced motion turns them off (CSS in `src/hosting`).
+Rendered by `src/hosting/page.ts` with CSS and a tiny script from `scripts/site/holding.mjs`, no
+React. The password field's underline draws on focus over `--dur-trail` (at once with reduced
+motion); the submit button reads "Checking…" while the password is checked; a wrong password shows
+the error in place (border, underline and message), never a shake. Nothing follows the pointer and
+nothing moves on its own; the poster is static.
 
 ## Accessibility and haptics
 
-- **Haptics** (Android only, always through `haptic()`): card open `open` 8 ms; Next and every
-  navigation commit `commit` 10; buttons and switches `press` 6; Copy address `success` [8, 60, 8];
-  jumps (in-page links, the altimeter's sheet), the slider's detents and hotspots `detent` 4.
-  Nothing on scroll, hover or reveals.
-- **Forced colours**: no foil, glare, glint or field (the backdrop is hidden); focus rings in
-  `Highlight`.
-- **Screen readers**: every split text is read once (a visually hidden copy, the letters
-  `aria-hidden`); the toast's text is a status; the readout is plain text; a route change announces
-  the new H1 (focus); the switches' names are their visible labels.
-- **WCAG 2.2.2 / 2.3.3**: nothing moves on its own for more than 5 s but the desktop field's ambient
-  in full motion (and the poster's drift standing in for it), which the Calm map switch stops; calm
-  and still cover every interaction-triggered motion above. The Bern clock updates once a minute
-  (its roll stops in calm and still).
+- **Haptics** (Android only, always through `haptic()`): opening a card `open` (8 ms); a
+  navigation commit (HUD links, trail links, Next project, back links) `commit` (10); buttons and
+  switches (`FloodButton`, the Calm map switch, the altimeter bar and its sheet, lightbox and
+  comparison buttons, the toast's dismiss) `press` (6); Copy address `success`; a jump within the
+  page, the comparison's detents and hotspots `detent` (4). `error` exists but nothing on the site
+  plays it. Nothing on scroll, hover or reveals.
+- **Forced colours**: no foil, glare, glint, flood or field (the backdrop is hidden); the route
+  and the trail links' line in system colours; focus rings in `Highlight`.
+- **Screen readers**: titles are one text node; flood copies, button echoes and drawings are
+  aria-hidden; the toast's text is a status; a route change announces the new H1 (focus); the
+  switches' names are their visible labels; the portrait card's face turned away is inert; the
+  binder's card faces are hidden (each pocket is a toggle named by its card, and the lines are
+  listed as text beside the binder).
+- **WCAG 2.2.2 / 2.3.3**: nothing moves on its own; every motion answers an interaction, the
+  scroll or a page change, and calm and still cover all of it.
+- **Contrast** (`npm run check:contrast`, `scripts/check-contrast.mjs`): text over the field at
+  least 7:1 (in a quiet zone, on the HUD backdrop, knocked out), text on paper or raised ground at
+  least 4.5:1, meaningful non-text marks (the route, focus rings, outlines, rarity shapes) at
+  least 3:1. On the paper of the case-study summary only `paperInk`, `paperInk2`, `mossInk` and
+  `alpenglowInk` carry text (`paperSafeInk`); the route there is `routePaper`.
 
 ## Checks
 
-- `npm test`: tokens ↔ CSS, tokens read by stylesheets exist, no new hard-coded motion values.
+- `npm test`: tokens ↔ CSS, tokens read by stylesheets exist, no new hard-coded motion values,
+  breakpoints, cascade layers, the route red, no pointer following, the red route's geometry
+  (`route-geometry.test.ts`), the terrain conductor (`terrain.test.ts`).
 - `npm run test:e2e -- modes`: still has no transform, width or position animation, nothing over
-  200 ms and no View Transition call; calm runs View Transitions with no ambient field frames and no
-  glint; full keeps both.
-- `npm run test:e2e -- hydration`: direct loads of every route without hydration or console errors,
-  the motion attributes kept.
-- `npm run test:e2e -- primitives`: layout shift per primitive (≤ 0.005) in each mode, focus parity
-  of the signature link, no sticky hover after a tap.
-- `npm run test:e2e -- arrival`: route arrivals' timing, focus on the H1, the trailhead morph,
-  traversals, Basecamp, still. `-- reading`: the waypoint readout, the trail, the altimeter bar,
-  the career climb per mode, no endless loops. `-- cards`, `-- views`, `-- transitions`, `-- modes`.
-- `npm run report:motion`: layout and style time in the first 3.5 s on an emulated phone with the
-  CPU slowed 4× (and Lighthouse mobile with `--lighthouse`).
+  200 ms and no View Transition call; calm and full run View Transitions and animate responses;
+  no field frames while a page is read; no glint on titles.
+- `-- transitions`: aborted, skipped and timed-out View Transitions still navigate cleanly, in
+  every mode. `-- hydration`: direct loads of every route without hydration or console errors.
+- `-- primitives`: layout shift per primitive in the lab (≤ 0.005) per mode, focus parity of
+  trail links, no width change, no sticky hover after a tap.
+- `-- flood`, `-- trail`, `-- portrait`, `-- pointer`, `-- inp`: the interaction primitives by
+  mouse, keyboard and touch in each mode; nothing follows the cursor; the Next project tap on a
+  throttled phone (INP ≤ 200 ms).
+- `-- arrival`: route arrivals' timing, focus on the H1, the trailhead morph, traversals, About,
+  still. `-- reading`: the waypoint trail, the altimeter bar, the career profile per mode, no
+  endless loops. `-- about`: the HUD label ⇄ About H1 morph in each mode.
+- `-- route`: one path through every waypoint, never across a line of text, the phone margin, the
+  blaze; full on a scroll timeline and through Lenis, the fallback, calm, still.
+- `-- terrain`: the conductor's timing, Bern, pre-warm, a still field while reading, calm and
+  still, About's pin and Aare clear of its title and portrait.
+- `-- cards`, `-- deck`, `-- toast`, `-- hud`, `-- fontswap`, `-- access`: the card's responses,
+  the deck loop, the toast, the HUD's condensing, the font swap (CLS ≤ 0.05), forced colours and
+  the haptics map.
+- `npm run report:motion`: layout and style time in a page's first 3.5 s on an emulated phone
+  with the CPU slowed 4× (Lighthouse mobile with `--lighthouse`).
+- `npm run record:motion`: review videos in `motion-recordings/` (the lab, a round trip per mode,
+  the terrain conductor per mode, the home page, About from the HUD, the case-study loop).

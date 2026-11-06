@@ -1,4 +1,5 @@
 import { exampleCards } from "@/content/examples";
+import { cardHref } from "./card-labels";
 import type { Rarity } from "@/styles/tokens";
 
 /**
@@ -18,12 +19,15 @@ export type MapLabel = GeoPoint & { text: string; elevation?: string };
 
 export type Artwork =
   | {
-      /** A crop of the real swisstopo terrain; trail and pins are geographic. */
+      /**
+       * A crop of the real swisstopo terrain. Its trail and pins come from the terrain metadata
+       * (the verified places it was cut around, npm run terrain), or from geographic points here.
+       */
       kind: "crop";
       terrainId: string;
-      trail: GeoPoint[];
-      waypoints: Waypoint[];
-      labels: MapLabel[];
+      trail?: GeoPoint[];
+      waypoints?: Waypoint[];
+      labels?: MapLabel[];
     }
   | {
       /** Seeded terrain; trail and pins come from the generated terrain metadata. */
@@ -50,7 +54,7 @@ export type CardStats = {
   impact?: { before: string; after: string; note?: string };
 };
 
-/** One line for an index of expeditions: "<name> — <kind> · <summary> · <time>". */
+/** One line for an index of projects: "<name> — <kind> · <summary> · <time>". */
 export type IndexLine = { kind: string; summary: string; time: string };
 
 export type SetSymbol = "peak" | "grid" | "lab";
@@ -63,7 +67,6 @@ export type SummitCardData = {
   rarityNote?: string;
   /** Summit cost badge, 1–5. */
   cost: string;
-  costLabel: string;
   coordinates: string;
   type: string;
   set: { code: string; name: string; symbol: SetSymbol };
@@ -85,79 +88,10 @@ export type SummitCardData = {
   example?: true;
 };
 
-export const cardLabels = {
-  openLog: "Open expedition log",
-  /** The card link's accessible name. */
-  open: (name: string, type: string, rarity: string) => `Open expedition: ${name}, ${type}, rarity ${rarity}`,
-  costPrefix: "Summit cost",
-  /** The cost pips, read as the project's scope (the pips are drawn, not read). */
-  scope: (n: number, of: number) => `Scope ${n} of ${of}`,
-  stats: "Card stats",
-  stat: { teamLed: "Team led", time: "Time", impact: "Impact" },
-  /** Under the impact's after-value: where it started. */
-  from: (before: string) => `from ${before}`,
-  /** A card whose case study was visited: the stamp, and what screen readers hear. */
-  visitedStamp: "SUMMITED",
-  visited: "Visited",
-  collector: "Collector line",
-  rarity: (r: string) => `Rarity ${r}`,
-  setSymbol: (set: string) => `Set ${set}`,
-  exampleStamp: "Fictional example",
-};
-
-export const caseStudyLabels = {
-  summaryHeading: "Summit summary",
-  mandate: "Mandate",
-  role: "My role",
-  teamLed: "Team I led",
-  putInPlace: "What I put in place",
-  keyDecision: "Key decision",
-  outcome: "Outcome",
-  didNotDo: "What I did not do",
-  jumpTo: "On this page",
-  onThisPage: "On this page",
-  nextWaypoint: "Next waypoint",
-  backToTop: "Back to top",
-  readingTime: (minutes: number) => `${minutes} min read`,
-  skim: "60-second skim below",
-  figure: (n: number) => `Fig. ${n}`,
-  describe: "Describe this diagram",
-  enlarge: "Enlarge",
-  openFullSize: "Open full-size image",
-  close: "Close",
-  zoomGroup: "Zoom",
-  reset: "Reset",
-  zoomIn: (level: number) => `Zoom in, currently ${level}%`,
-  zoomOut: (level: number) => `Zoom out, currently ${level}%`,
-  zoomReset: (level: number) => `Reset zoom, currently ${level}%`,
-  zoomStatus: (level: number) => `Zoom ${level}%`,
-  zoomHint: "Drag to pan. Pinch, scroll or click to zoom.",
-  compare: "Compare before and after",
-  compareView: "View",
-  before: "Before",
-  after: "After",
-  sideBySide: "Side by side",
-  compareValue: (before: number) => `${before}% before, ${100 - before}% after`,
-  noteMarker: (n: number, title: string) => `Note ${n}: ${title}`,
-  keyInsight: "Key insight",
-  decision: (n: number) => `Decision ${n}`,
-  chose: "Chose",
-  cost: "Cost",
-  mitigation: "Mitigation",
-  chosen: "Chosen",
-  outcomeColumns: ["Metric", "Before", "After", "Evidence"] as const,
-  evidence: {
-    measured: { label: "Measured", text: "counted in system logs or a manual file count" },
-    estimated: { label: "Estimated", text: "extrapolated from a sample" },
-    qualitative: { label: "Qualitative", text: "observed or reported, not counted" },
-  },
-  evidenceLegend: "Evidence",
-  credits: "Credits",
-  next: "Next expedition",
-  back: "All expeditions",
-  backToAll: "All expeditions",
-  example: "Fictional example",
-};
+// The labels and the per-card helpers live apart from the cards' data, so client components that
+// need only them (the case-study bands, the card itself) don't bundle every card.
+export { cardLabels, cardHref, coordinatesLine, cardStats, COST_SCALE } from "./card-labels";
+export { caseStudyLabels } from "./case-study-labels";
 
 /** Real project cards. None is written yet: a live build's deck is empty and says so (Deck). */
 const projectCards: SummitCardData[] = [];
@@ -166,27 +100,6 @@ const projectCards: SummitCardData[] = [];
 export const cards: SummitCardData[] = [...projectCards, ...exampleCards];
 
 export const cardBySlug = (slug: string) => cards.find((c) => c.slug === slug);
-
-export const cardHref = (card: SummitCardData) => card.href ?? `/work/${card.slug}/`;
-
-/** The coordinates line: the place, then the scope. */
-export const coordinatesLine = (card: SummitCardData) => [card.coordinates, card.stats.scope].filter(Boolean).join(" · ");
-
-/**
- * The card's stats as rows, at most three: team led, time and impact. The impact shows its
- * after-value; `note` carries "from <before>" (and what the numbers count) under it.
- */
-export const cardStats = (card: SummitCardData): (Stat & { note?: string })[] => {
-  const { teamLed, time, impact } = card.stats;
-  return [
-    { label: cardLabels.stat.teamLed, value: teamLed },
-    { label: cardLabels.stat.time, value: time },
-    { label: cardLabels.stat.impact, value: impact?.after, note: impact && [cardLabels.from(impact.before), impact.note].filter(Boolean).join(" · ") },
-  ];
-};
-
-/** The cost pips' scale: a card's cost is its scope, 1 to 5. */
-export const COST_SCALE = 5;
 
 const withSlash = (path: string) => (path.endsWith("/") ? path : `${path}/`);
 
@@ -199,3 +112,11 @@ export const terrainIdForPath = (pathname: string | null): string | null => {
   const path = withSlash(pathname);
   return cards.find((c) => withSlash(cardHref(c)) === path)?.artwork.terrainId ?? null;
 };
+
+/**
+ * Every card route with its terrain ("/work/<slug>/" → terrain id): the root layout hands this
+ * small map to the field (html[data-card-terrains], read by route-terrain.ts), so the cards' data
+ * never ships in the shared client bundle.
+ */
+export const cardTerrains = (): Record<string, string> =>
+  Object.fromEntries(cards.flatMap((c) => (c.artwork.terrainId ? [[withSlash(cardHref(c)), c.artwork.terrainId]] : [])));

@@ -1,5 +1,5 @@
 import { useId, type ReactNode } from "react";
-import { caseStudyLabels as L } from "@/content/cards";
+import { caseStudyLabels as L } from "@/content/case-study-labels";
 import { asset } from "@/lib/asset";
 import type { FigureSpec, ImageAsset, ImageSpec, LongDescription } from "@/lib/case-study";
 import { Enhance } from "./Enhance";
@@ -206,9 +206,12 @@ export function Figure({ spec, images, assets, number }: Props) {
       {(spec.caption || spec.long) && (
         <figcaption className={`${styles.caption} surface-copy`} data-reveal="caption">
           {spec.caption && (
-            <p id={captionId} className={styles.captionText}>
-              {label && <span className={styles.figLabel}>{label} — </span>}
+            // "FIG. 3 · what it shows · source", in mono.
+            <p id={captionId} className={`${styles.captionText} hud-label`}>
+              {label && <span className={styles.figLabel}>{label}</span>}
+              {label && <span aria-hidden="true"> · </span>}
               {spec.caption}
+              {spec.source && <span className={styles.source}>{` · ${spec.source}`}</span>}
             </p>
           )}
           {spec.kind === "hotspots" && (
