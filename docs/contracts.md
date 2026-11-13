@@ -884,7 +884,7 @@ once from a visually hidden copy, the rolling letters are aria-hidden), and the 
 
 ## Text links (K1–K4)
 
-One treatment for every text link (`.link`, `src/app/globals.css`), applied by one session.
+One treatment for every text link (`.link`, `src/styles/link.css`, imported by `src/app/globals.css` and inlined into the password gate), applied by one session.
 
 **K1. The marker.** At rest a block sits behind the lower part of the text: as wide as the text,
 shifted 0.4em right (it overhangs the end by 0.4em), from 0.3em above the baseline to 0.5em below

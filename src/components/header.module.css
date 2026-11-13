@@ -96,7 +96,7 @@
 }
 
 /*
- * About: a standalone text link (globals.css .link, on the inner span: its marker block at rest,
+ * About: a standalone text link (styles/link.css .link, on the inner span: its marker block at rest,
  * the line and the triangle on hover and focus; the line alone as the current page). One line
  * of 44 px, so the span stays an inline box on the text's baseline. The triangle's room after
  * the label stands in for most of the right padding.

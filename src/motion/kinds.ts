@@ -242,7 +242,7 @@ export function digits(ctx: JobContext, el: HTMLElement) {
  * rule: a hairline draws from the left, scaleX 0 → 1, 640 ms inOut; with `underline` it draws
  * like a link underline (outSoft, the given duration). A block marked `data-reveal-marker` holds
  * a text link instead (the email on About): its text stays, and its marker block draws in from
- * the left the same way (the inherited --ue, 0 → 1; globals.css .link, reveal.css).
+ * the left the same way (the inherited --ue, 0 → 1; styles/link.css .link, reveal.css).
  */
 export function rule(ctx: JobContext, el: HTMLElement, delay = 0, opts: KindOptions = {}) {
   if (el.hasAttribute('data-reveal-marker')) {

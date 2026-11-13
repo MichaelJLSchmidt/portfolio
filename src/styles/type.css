@@ -12,7 +12,7 @@
   /*
    * Each family's descent (em): how far an inline box's background reaches below the baseline
    * (typo = hhea descender, USE_TYPO_METRICS set in all three files, so every platform agrees).
-   * Text links anchor their marker to the baseline with it (globals.css .link). Declared next to
+   * Text links anchor their marker to the baseline with it (styles/link.css .link). Declared next to
    * every font-family below; Hanken Grotesk 0.303, Martian Mono 0.2, Bricolage Grotesque 0.27.
    */
   --descent-text: 0.303;

@@ -34,7 +34,7 @@ import styles from './header.module.css'
  * which roll on hover, are aria-hidden. Back never leaves the screen: when the
  * header slides away it holds its place on a floating chip (header.module.css).
  *
- * About is a standalone text link (globals.css .link: its marker, line and
+ * About is a standalone text link (styles/link.css .link: its marker, line and
  * triangle). The header is outside the page, so its colour is the identity
  * of the page shown (palette.ts: :root's link colours follow the page's own
  * scope), updated on every navigation, card play, Back and language switch
