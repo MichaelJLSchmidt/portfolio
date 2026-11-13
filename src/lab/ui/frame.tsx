@@ -41,8 +41,8 @@ export async function LabFrame({
                     className="link"
                     aria-current={p.path === path ? 'page' : undefined}
                     transitionTypes={[NAV]}
-                    // The inventory's payload is large: load it only when asked for.
-                    prefetch={p.path === '/lab/inventory' ? false : undefined}
+                    // Lab pages load only when opened (the inventory's payload is large).
+                    prefetch={false}
                   >
                     {p.title}
                   </Link>

@@ -52,7 +52,7 @@ export default async function LabPage({ params }: { params: Promise<{ locale: st
                   href={href(p.path)}
                   className="link link-standalone t-lead"
                   transitionTypes={[NAV]}
-                  prefetch={p.path === '/lab/inventory' ? false : undefined}
+                  prefetch={false}
                 >
                   {p.title}
                 </Link>
