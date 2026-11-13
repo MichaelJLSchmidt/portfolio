@@ -1,0 +1,45 @@
+# Netlify: continuous deployment from this repository, main = production. README → "Hosting on
+# Netlify" lists the settings this file relies on. Domain names live in src/hosting/config.ts only.
+#
+# Every deploy context builds the same static export (dist/). SITE_ACCESS decides who sees it
+# (scripts/hosting/build.mjs):
+#   gated   every request meets the password gate (a Netlify Edge Function) first; noindex
+#   public  no gate, indexable
+# Until launch every context is gated. The launch switch: SITE_ACCESS = "public" under
+# [context.production.environment] below (production opens; Deploy Previews stay gated).
+#
+# Environment variables set in the Netlify UI, never here:
+#   MOTION_TOKEN    Builds scope, all contexts (npm install of Motion+)
+#   SITE_PASSWORD   Functions scope, Production, Deploy Previews and Branch deploys, secret (the gate
+#                   reads it at runtime; variables in this file never reach edge functions). Unset or
+#                   empty: the gate stays closed (503) for everyone.
+
+[build]
+  # SITE_URL (absolute URLs: Open Graph, hreflang) is the deploy's own address: a Deploy Preview's
+  # or branch deploy's URL here, the primary domain in production (below).
+  command = "SITE_URL=$DEPLOY_PRIME_URL npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # Plain static files: Netlify's automatic Next.js runtime would add its own handling of the
+  # export. Every hook of @netlify/plugin-nextjs returns early when this is "true".
+  NETLIFY_NEXT_PLUGIN_SKIP = "true"
+  # Any context not listed below is gated, never open.
+  SITE_ACCESS = "gated"
+
+[context.production]
+  command = "SITE_URL=$URL npm run build"
+
+[context.production.environment]
+  # The launch switch: "public" turns the gate off and indexing on for production.
+  SITE_ACCESS = "gated"
+
+[context.deploy-preview.environment]
+  SITE_ACCESS = "gated"
+
+[context.branch-deploy.environment]
+  SITE_ACCESS = "gated"
+
+# Headers and redirects differ with SITE_ACCESS, so the build writes them into dist/ (_headers,
+# _redirects); [[headers]] and [[redirects]] here would apply to every context alike.

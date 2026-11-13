@@ -8,9 +8,10 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/build-numerals.mjs && next build && node scripts/i18n-pages.mjs",
+    "build": "node scripts/build-numerals.mjs && next build && node scripts/i18n-pages.mjs && node scripts/hosting/build.mjs",
     "preview": "node scripts/serve-static.mjs",
     "typecheck": "tsc --noEmit",
+    "test": "node --test \"src/hosting/*.test.ts\"",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"scripts/**/*.mjs\" \"content/**/*.json\" \"*.{ts,json,md}\""
   },
   "dependencies": {
