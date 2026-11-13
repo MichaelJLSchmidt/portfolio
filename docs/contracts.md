@@ -1030,7 +1030,7 @@ src/components/
   reveals.tsx                  <Reveals/>, <Reveal>, <FirstLoadSequence> (Motion)
   reading-hairline.tsx         <ReadingHairline/> (Motion), mounted in header.tsx
   picture.tsx                  <Picture> (Content & Images)
-  header.tsx                   header: home slot (logo / Back morph, Back stays), the tray (About, language switcher), hairline
+  header.tsx                   header: home slot (logo / Back morph, Back stays), the tray (About, Lab in lab builds, language switcher), hairline
   locale-sync.tsx              <html lang> on the client; settles a language switch (L3, L7)
   router-bridge.tsx            root layout: registerNavigate + the back / forward replay (L2)
   site-footer.tsx, footer-shell.tsx, about-small-print.tsx   footer (none on home; About's small print)
@@ -1690,9 +1690,11 @@ Spread grid (D9).
 | `/<locale>/about/thesis` | `src/app/[locale]/about/thesis/page.tsx` | glacier, over the table field in the glacier tint (not the contour map; R8) | the case-study template: `ThesisHero` (eyebrow, the Master's card grown in the `[data-hero-target]` frame, display h1, subtitle), the one-line answer, five MetaPairs, a four-value Scoreboard; chapters 01–08 (`thesisChapterKeys`) with drawn numerals, leads, five drawings (`src/components/illustrations/thesis/`), three marked screenshot slots (`ImageSlot`), a dealt row of four insights; Q1 / Q2 answers, next steps, reflection; a link back to About's `#timeline`; Minimap |
 | 404 | `src/app/[locale]/404/page.tsx` (`/<locale>/404/`), served for any unknown address by `dist/404.html` (L4) | ink | discard zone, pile and `.lost-card` (DiscardedCard, falls in, I7), title, back link (home in its locale) |
 
-`/more-projects` and `/contact` are gone (A3; the 404 page answers). `/<locale>/logo-lab` is the
-unlinked logo lab (English, `lang="en"`). Header: the home slot (logo, or Back on card
-pages), and the tray with About and the language switcher (L6, T3, T4); it leaves on a scroll down
+`/more-projects` and `/contact` are gone (A3; the 404 page answers). The lab (`src/lab/README.md`):
+`/<locale>/lab` (overview), `/<locale>/lab/inventory` (design inventory) and `/<locale>/logo-lab`,
+English (`lang="en"`), never indexed, and only in builds that are not public (`*.lab.tsx` routes,
+next.config.ts). Header: the home slot (logo, or Back on card pages), and the tray with About,
+the temporary Lab link (lab builds only) and the language switcher (L6, T3, T4); it leaves on a scroll down
 (N1), Back stays (T5). Every page has one `h1` (`PageTitle`,
 `id="page-heading"`, focus target after navigation).
 

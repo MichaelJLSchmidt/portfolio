@@ -1,0 +1,216 @@
+/*
+ * The lab's own pages (overview, design inventory): the site's ink page, type, links and tokens,
+ * set dense and scannable. Scoped to .tool (the logo lab keeps .lab). Like the logo lab, the page
+ * hides the hand of cards (it would cover the tables); every other route keeps it.
+ */
+html:has(.tool) .hand {
+  display: none;
+}
+html:root:has(.tool) {
+  --hand-reserve: var(--space-6);
+}
+
+.tool {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-8);
+  min-width: 0;
+  padding: calc(var(--header-h) + var(--space-6)) max(var(--grid-margin), calc((100% - 1416px) / 2)) var(--space-9);
+  color: var(--text);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+.tool code,
+.tool kbd {
+  font-family: var(--font-mono);
+  --font-descent: var(--descent-mono);
+  font-size: 0.86em;
+  letter-spacing: 0;
+}
+.tool kbd {
+  display: inline-block;
+  min-width: 1.9em;
+  padding: 0.1em 0.45em;
+  border: 1px solid color-mix(in srgb, var(--text) 28%, transparent);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.tool-head {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 72ch;
+}
+.tool-pages ul,
+.tool-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tool-pages {
+  margin-bottom: var(--space-4);
+}
+.tool-kicker {
+  color: var(--muted);
+}
+.tool-title,
+.tool-intro {
+  margin: 0;
+}
+.tool-intro {
+  font-size: var(--text-base);
+}
+
+.tool-section {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.tool-section > h2 {
+  margin: 0;
+}
+.tool-line {
+  max-width: 80ch;
+  margin: 0;
+  color: color-mix(in srgb, var(--text) 82%, transparent);
+}
+.tool-meta,
+.tool-source {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.tool-meta {
+  margin: 0;
+}
+.tool-source-name {
+  color: var(--text);
+}
+.tool-off {
+  color: var(--muted);
+}
+
+.tool-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tool-card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--ink-field) 70%, transparent);
+}
+.tool-card > a {
+  justify-self: start;
+}
+
+.tool-list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tool-usage {
+  display: inline-block;
+  color: var(--muted);
+}
+
+.tool-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.tool-table :is(th, td) {
+  padding: var(--space-2) var(--space-4) var(--space-2) 0;
+  border-top: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+  font-weight: inherit;
+}
+.tool-table thead th {
+  border-top: 0;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--type-label-tracking);
+  text-transform: uppercase;
+}
+.tool-table tbody th {
+  white-space: nowrap;
+}
+/* Phones: each row stacks into a block. */
+@media (max-width: 767.98px) {
+  .tool-table,
+  .tool-table :is(tbody, tr, th, td) {
+    display: block;
+  }
+  .tool-table thead {
+    display: none;
+  }
+  .tool-table tr {
+    padding: var(--space-3) 0;
+    border-top: 1px solid var(--line);
+  }
+  .tool-table :is(th, td) {
+    padding: 0 0 var(--space-1);
+    border: 0;
+  }
+  .tool-table tbody th {
+    white-space: normal;
+  }
+}
+
+.tool-keys {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  gap: var(--space-2) var(--space-5);
+  margin: 0;
+}
+.tool-keys > div {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+}
+.tool-keys dd {
+  margin: 0;
+}
+
+.tool-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--text) 26%, transparent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--type-label-tracking);
+  text-transform: uppercase;
+}
+.tool-button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+.tool-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.tool-stored {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+.tool-tier strong {
+  font-weight: 600;
+}
