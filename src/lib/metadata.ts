@@ -5,8 +5,12 @@
  * Contract: docs/contracts.md#locales.
  */
 import type { Metadata } from 'next'
+import { siteAccess } from '@/hosting/config'
 import { type Locale, localeHref, locales } from './i18n'
 import { absoluteUrl, withBase } from './site'
+
+/** Indexable only once the site is public (SITE_ACCESS, netlify.toml: the launch switch). */
+export const indexable = siteAccess(process.env.SITE_ACCESS) === 'public'
 
 const url = (path: string) => absoluteUrl(path) ?? withBase(path)
 /** Pages end in a slash (trailingSlash), so the alternates do too. */

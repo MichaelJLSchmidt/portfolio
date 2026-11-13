@@ -13,6 +13,7 @@ import { ChromeProvider } from '@/lib/chrome'
 import { contentFor, images, localeParams } from '@/lib/content'
 import { heroImages } from '@/lib/hero-images'
 import { locales, ogLocales } from '@/lib/i18n'
+import { indexable } from '@/lib/metadata'
 import { asLocale, setRequestLocale } from '@/lib/request-locale'
 import { absoluteUrl } from '@/lib/site'
 
@@ -40,7 +41,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: { default: site.name, template: `%s · ${site.name}` },
     description: site.description,
-    robots: { index: false, follow: false },
+    // Noindex until launch (SITE_ACCESS=public, netlify.toml).
+    robots: { index: indexable, follow: indexable },
     openGraph: {
       type: 'website',
       siteName: site.name,

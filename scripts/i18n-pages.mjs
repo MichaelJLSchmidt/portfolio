@@ -31,6 +31,9 @@ import { load, root } from './load-ts.mjs'
 const dist = join(root, 'dist')
 const { defaultLocale, localeNames, locales, pickLocaleScript } = await load('src/lib/i18n.ts')
 const { palette, text } = await load('src/design/palette.ts')
+const { siteAccess } = await load('src/hosting/config.ts')
+// Indexable only once the site is public (SITE_ACCESS, netlify.toml: the launch switch); 404 never.
+const indexable = siteAccess(process.env.SITE_ACCESS) === 'public'
 const copy = Object.fromEntries(
   await Promise.all(
     locales.map(async (locale) => {
@@ -55,10 +58,9 @@ const escape = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', 
 // The favicon as Next emitted it (hashed), so both pages show the same tab icon.
 const icon = /<link rel="icon"[^>]*>/.exec(readFileSync(join(dist, defaultLocale, 'index.html'), 'utf8'))?.[0] ?? ''
 
-const head = (title, extra = '') => `<meta charset="utf-8">
+const head = (title, extra = '', noindex = true) => `<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="${palette.ink.field}">
+${noindex ? '<meta name="robots" content="noindex, nofollow">\n' : ''}<meta name="theme-color" content="${palette.ink.field}">
 <meta name="color-scheme" content="dark">
 <title>${escape(title)}</title>
 ${icon}
@@ -78,7 +80,7 @@ const name = copy[defaultLocale].site.name
 const index = `<!doctype html>
 <html lang="${defaultLocale}">
 <head>
-${head(name, `${alternates}\n`)}
+${head(name, `${alternates}\n`, !indexable)}
 <script>location.replace(${JSON.stringify(base)}+${pickLocaleScript}+"/"+location.search+location.hash)</script>
 </head>
 <body>
