@@ -6,8 +6,8 @@ import { gate } from './config.ts'
  * (Deno) share it. The build assembles the model (scripts/hosting/gate-page.mjs) from the copy in
  * content/ (content/gate.ts, content/<locale>/gate.ts), the site's tokens, fonts and logo, and
  * passes it to the edge function as JSON. Complete without JavaScript: the inline script only
- * shows the pending label while the password is checked and remembers a language switch for the
- * site.
+ * shows the pending label while the password is checked and tells the site which language and
+ * logo gradient the visitor saw last.
  */
 
 /** One language's words on the gate page (content/<locale>/gate.ts). */
@@ -25,9 +25,7 @@ export type GateCopy = {
   error: string
   /** The tab title's prefix after a wrong password. */
   errorTitle: string
-  /** Shown instead of the form while no password is configured. */
-  closed: string
-  /** Leads into the email and LinkedIn links, for visitors without a password. */
+  /** Leads into the email and LinkedIn links. */
   contact: string
   email: string
   linkedin: string
@@ -51,6 +49,8 @@ export type GatePage = {
   themeColor: string
   /** Font URLs to preload. */
   preload: string[]
+  /** The logo gradients' names (src/design/palette.ts logoGradients): one per page load. */
+  gradients: string[]
 }
 
 export type FormState = {
@@ -59,6 +59,8 @@ export type FormState = {
   /** idle: the form; error: the form after a wrong password; closed: no form (no password set). */
   state: 'idle' | 'error' | 'closed'
   locale: Locale
+  /** This page load's logo gradient (html[data-logo-gradient], as on the site). */
+  gradient: string
   /** No ambient motion (the request asked to save data). */
   still?: boolean
 }
@@ -82,7 +84,7 @@ function languageSwitch(page: GatePage, form: FormState): string {
 }
 
 function unlockForm(copy: GateCopy, form: FormState): string {
-  if (form.state === 'closed') return `<p class="closed">${escapeHtml(copy.closed)}</p>`
+  if (form.state === 'closed') return ''
   const error = form.state === 'error'
   return [
     `<form class="unlock" method="post" action="${gate.unlock}">`,
@@ -144,5 +146,5 @@ export function renderPage(page: GatePage, form: FormState): string {
     `<script>${page.script}</script>`,
   ]
   const motion = form.still ? ' data-motion="still"' : ''
-  return `<!doctype html><html lang="${form.locale}"${motion}><head>${head.join('')}</head><body>${body.join('')}</body></html>\n`
+  return `<!doctype html><html lang="${form.locale}" data-logo-gradient="${escapeHtml(form.gradient)}"${motion}><head>${head.join('')}</head><body>${body.join('')}</body></html>\n`
 }

@@ -11,6 +11,7 @@ import {
   base64url,
   originAllowed,
   passwordMatches,
+  pickGradient,
   pickLocale,
   readCookie,
   safeNext,
@@ -205,6 +206,36 @@ describe('language', () => {
   })
 })
 
+describe('logo gradient', () => {
+  const names = ['ember', 'tide', 'grove', 'saffron']
+
+  it('picks one at random, never the one the last page load showed', () => {
+    assert.equal(
+      pickGradient(names, null, () => 0),
+      'ember',
+    )
+    assert.equal(
+      pickGradient(names, null, () => 0.999),
+      'saffron',
+    )
+    assert.equal(
+      pickGradient(names, 'ember', () => 0),
+      'tide',
+    )
+    for (let i = 0; i < 200; i++) assert.notEqual(pickGradient(names, 'grove'), 'grove')
+    const seen = new Set(Array.from({ length: 400 }, () => pickGradient(names, null)))
+    assert.deepEqual([...seen].sort(), [...names].sort())
+  })
+
+  it('ignores a last value that is not a gradient', () => {
+    assert.ok(names.includes(pickGradient(names, 'nope', () => 0.5)))
+    assert.equal(
+      pickGradient(['ember'], 'ember', () => 0.5),
+      'ember',
+    )
+  })
+})
+
 // --- the page ----------------------------------------------------------------------------------
 
 const page: GatePage = {
@@ -216,6 +247,7 @@ const page: GatePage = {
   icon: 'data:,',
   themeColor: '#0E0F11',
   preload: [],
+  gradients: ['ember', 'tide', 'grove', 'saffron'],
 }
 const options = { page, csp: "default-src 'none'" }
 
@@ -224,10 +256,27 @@ describe('the gate page', () => {
     assert.notEqual(identity.name, fictionalSite.name)
     assert.match(identity.email, /^[^@\s]+@[^@\s]+\.[a-z]+$/)
     assert.match(identity.linkedin, /^https:\/\/www\.linkedin\.com\/in\/[^/]+\/$/)
-    const html = renderPage(page, { next: '/', state: 'idle', locale: 'en' })
+    const html = renderPage(page, { next: '/', state: 'idle', locale: 'en', gradient: 'tide' })
     assert.ok(html.includes(`<h1 class="name">${identity.name}</h1>`))
     assert.ok(html.includes(`href="mailto:${identity.email}"`))
     assert.ok(html.includes(`href="${identity.linkedin}" rel="me"`))
+  })
+
+  it('invites contact in both languages, with the email and LinkedIn links', () => {
+    assert.equal(en.contact, 'You can reach out to me:')
+    assert.equal(de.contact, 'Du kannst dich gerne bei mir melden:')
+    for (const [locale, copy] of [
+      ['de', de],
+      ['en', en],
+    ] as const) {
+      const html = renderPage(page, { next: '/', state: 'idle', locale, gradient: 'ember' })
+      assert.ok(
+        html.includes(
+          `<p class="contact">${copy.contact} <span class="ways"><a class="link" href="mailto:${identity.email}">${copy.email}</a>`,
+        ),
+      )
+      assert.ok(html.includes(`<a class="link" href="${identity.linkedin}" rel="me">${copy.linkedin}</a></span></p>`))
+    }
   })
 
   it('has the same words in both languages, and German follows the site rules', () => {
@@ -240,9 +289,9 @@ describe('the gate page', () => {
 
   it('is complete without JavaScript, labelled, noindex, and in the chosen language', () => {
     for (const locale of ['de', 'en'] as const) {
-      const html = renderPage(page, { next: '/en/about/', state: 'idle', locale })
+      const html = renderPage(page, { next: '/en/about/', state: 'idle', locale, gradient: 'grove' })
       const copy = page.copy[locale]
-      assert.match(html, new RegExp(`^<!doctype html><html lang="${locale}">`))
+      assert.match(html, new RegExp(`^<!doctype html><html lang="${locale}" data-logo-gradient="grove">`))
       assert.ok(html.includes('<meta name="robots" content="noindex, nofollow">'))
       assert.ok(html.includes(`<p class="lede">${copy.lede}</p>`))
       assert.ok(html.includes(`<form class="unlock" method="post" action="${gate.unlock}">`))
@@ -263,7 +312,7 @@ describe('the gate page', () => {
   })
 
   it('marks a wrong password in the field, the title and an announced message', () => {
-    const html = renderPage(page, { next: '/', state: 'error', locale: 'de' })
+    const html = renderPage(page, { next: '/', state: 'error', locale: 'de', gradient: 'ember' })
     assert.ok(html.includes(`<title>${de.errorTitle} · ${de.title} · ${identity.name}</title>`))
     assert.ok(html.includes('aria-invalid="true" aria-describedby="gate-error" autofocus>'))
     assert.match(
@@ -275,7 +324,12 @@ describe('the gate page', () => {
   })
 
   it('escapes what it prints', () => {
-    const html = renderPage(page, { next: '/"><script>x</script>', state: 'idle', locale: 'en' })
+    const html = renderPage(page, {
+      next: '/"><script>x</script>',
+      state: 'idle',
+      locale: 'en',
+      gradient: '"><script>x</script>',
+    })
     assert.doesNotMatch(html, /<script>x/)
   })
 })
@@ -293,6 +347,7 @@ function harness({ password }: { password: string | undefined } = { password: PA
     },
     wait: async (ms) => void calls.waits.push(ms),
     log: (message) => void calls.logs.push(message),
+    random: () => 0.5,
   }
   const request = (path: string, init: RequestInit = {}, base: URL = host) =>
     handleGate(new Request(new URL(path, base), init), options, deps)
@@ -302,6 +357,9 @@ function harness({ password }: { password: string | undefined } = { password: PA
 }
 
 const cookieFrom = (response: Response) => response.headers.get('Set-Cookie')!.split(';')[0]
+/** The session cookie a response sets, if any (gate pages also set the logo gradient's). */
+const session = (response: Response) =>
+  response.headers.getSetCookie().find((c) => c.startsWith(`${gate.cookie}=`)) ?? null
 /** Copy as the page prints it (apostrophes escaped). */
 const printed = (text: string) => text.replaceAll("'", '&#39;')
 
@@ -445,7 +503,7 @@ describe('gate handler', () => {
     const res = await unlock({ password: 'wrong', next: '/en/about/' }, { 'Accept-Language': 'en' })
     assert.deepEqual(calls.waits, [gate.failureDelayMs])
     assert.equal(res.status, 401)
-    assert.equal(res.headers.get('Set-Cookie'), null)
+    assert.equal(session(res), null)
     assert.equal(res.headers.get('Cache-Control'), 'no-store')
     const html = await res.text()
     assert.ok(html.includes(`role="alert"`))
@@ -460,7 +518,7 @@ describe('gate handler', () => {
     for (const origin of ['https://evil.example', 'null', `https://www.${PRIMARY_DOMAIN}`]) {
       const res = await unlock({ password: PASSWORD, next: '/' }, { Origin: origin })
       assert.equal(res.status, 403)
-      assert.equal(res.headers.get('Set-Cookie'), null)
+      assert.equal(session(res), null)
     }
     const preview = new URL('https://deploy-preview-7--example.netlify.app/')
     const cross = await request(
@@ -490,7 +548,7 @@ describe('gate handler', () => {
     const cookie = cookieFrom(await unlock({ password: PASSWORD, next: '/' }))
     const res = await request(gate.lock, { headers: { Cookie: cookie } })
     assert.equal(res.status, 200)
-    assert.equal(res.headers.get('Set-Cookie'), `${gate.cookie}=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Lax`)
+    assert.equal(session(res), `${gate.cookie}=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Lax`)
     assert.match(await res.text(), /<form class="unlock" method="post"/)
   })
 
@@ -507,23 +565,47 @@ describe('gate handler', () => {
     const { request } = harness()
     assert.match(
       await (await request('/', { headers: { 'Save-Data': 'on' } })).text(),
-      /<html lang="de" data-motion="still">/,
+      /<html lang="de" data-logo-gradient="\w+" data-motion="still">/,
     )
-    assert.match(await (await request('/')).text(), /<html lang="de">/)
+    assert.match(await (await request('/')).text(), /<html lang="de" data-logo-gradient="\w+">/)
   })
 
-  it('fails closed without a password and says why in one log line', async () => {
+  it('fails closed without a password: the page without the form, 503, one log line', async () => {
     const { calls, request, unlock } = harness({ password: undefined })
-    const res = await request('/')
-    assert.equal(res.status, 503)
-    assert.equal(res.headers.get('Cache-Control'), 'no-store')
-    const html = await res.text()
-    assert.ok(html.includes(`<p class="closed">${de.closed}</p>`))
-    assert.doesNotMatch(html, /<form/)
+    for (const [locale, copy] of [
+      ['de', de],
+      ['en', en],
+    ] as const) {
+      const res = await request('/en/about/', { headers: { 'Accept-Language': locale } })
+      assert.equal(res.status, 503)
+      assert.equal(res.headers.get('Cache-Control'), 'no-store')
+      assert.equal(session(res), null)
+      const html = await res.text()
+      // The same layout: logo, name, the sentence, the way to get in touch; no form, no extra line.
+      assert.ok(html.includes(`<div class="mark">`))
+      assert.ok(html.includes(`<h1 class="name">${identity.name}</h1>`))
+      assert.ok(html.includes(`<p class="lede">${copy.lede}</p><p class="contact">${copy.contact} `))
+      assert.doesNotMatch(html, /<form|class="closed"|<label|type="password"/)
+    }
     assert.equal((await unlock({ password: '', next: '/' })).status, 503)
     assert.equal((await request(gate.lock)).status, 503)
     assert.equal(calls.next, 0)
-    assert.ok(calls.logs.length <= 1)
-    assert.ok(calls.logs.every((line) => line.includes(gate.passwordEnv)))
+    assert.equal(calls.logs.length, 1)
+    assert.ok(calls.logs[0].includes(gate.passwordEnv))
+  })
+
+  it('shows a logo gradient per page load, never the last one, and remembers it in a cookie', async () => {
+    const { request } = harness()
+    const res = await request('/', { headers: { Cookie: `${gate.logoCookie}=grove` } })
+    const html = await res.text()
+    const shown = /<html [^>]*data-logo-gradient="(\w+)"/.exec(html)?.[1]
+    assert.ok(shown && page.gradients.includes(shown) && shown !== 'grove', shown)
+    const cookie = res.headers.getSetCookie().find((c) => c.startsWith(`${gate.logoCookie}=`))!
+    assert.equal(cookie.split(';')[0], `${gate.logoCookie}=${shown}`)
+    for (const attribute of ['Path=/', 'Secure', 'HttpOnly', 'SameSite=Lax'])
+      assert.ok(cookie.split('; ').includes(attribute))
+    // A forged cookie value never reaches the page.
+    const forged = await (await request('/', { headers: { Cookie: `${gate.logoCookie}="><script>` } })).text()
+    assert.match(forged, /<html lang="de" data-logo-gradient="(ember|tide|grove|saffron)">/)
   })
 })
