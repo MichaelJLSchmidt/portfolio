@@ -1,0 +1,36 @@
+# Pull-request checks for production (main): types, the build Netlify runs (gated, with the edge
+# function), and the password gate's unit tests. Netlify itself builds the Deploy Preview.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          MOTION_TOKEN: ${{ secrets.MOTION_TOKEN }}
+
+      - run: npm run typecheck
+
+      # Every deploy is gated until launch: the build must write the gate's edge function.
+      - name: Build
+        run: npm run build && test -f .netlify/v1/edge-functions/site-gate.ts && test -f dist/_redirects
+
+      - name: Gate tests
+        run: npm test
