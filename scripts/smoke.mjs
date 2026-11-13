@@ -1,6 +1,6 @@
 // Quick behaviour check in Chromium at 1440x900 and 390x844 (light, not exhaustive).
 // Usage: node scripts/smoke.mjs <locale-url> [--motion=full|reduced]
-//   e.g. node scripts/smoke.mjs http://localhost:4100/random/de/ --motion=full
+//   e.g. node scripts/smoke.mjs http://localhost:4100/de/ --motion=full
 // Run it once per locale (de, en) and per tier (full; reduced = prefers-reduced-motion): the
 // motion suite checks what each tier must (and must not) do; the locale suite checks the root's
 // language choice, the 404 page and the switcher.
@@ -12,7 +12,7 @@ import { load } from './load-ts.mjs'
 
 const require = createRequire(import.meta.url)
 const { chromium } = require('playwright')
-const [base = 'http://localhost:4100/random/de/', ...flags] = process.argv.slice(2)
+const [base = 'http://localhost:4100/de/', ...flags] = process.argv.slice(2)
 const motion = flags.find((f) => f.startsWith('--motion='))?.slice(9) ?? 'full'
 const root = base.endsWith('/') ? base : `${base}/`
 const locale = new URL(root).pathname.split('/').filter(Boolean).at(-1)

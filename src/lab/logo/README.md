@@ -1,7 +1,7 @@
 # Logo lab (temporary)
 
 A hidden page for comparing monogram concepts (M and F fused into one glyph):
-`/de/logo-lab/` or `/en/logo-lab/` under the base path, e.g. `/random/en/logo-lab/` (the lab
+`/de/logo-lab/` or `/en/logo-lab/` e.g. `/en/logo-lab/` (the lab
 itself is in English in both), and `?c=<id>` for a concept's detail
 view. Round 3 keeps the card fan (3, 3B) and the diagonal cut: 8 and its stemless versions 8B
 (floating arm), 8C (arm cut along the channel) and 8D (a proposal on 8C); 1 and 5 are gone. Ids
@@ -58,7 +58,7 @@ node --import ./src/lab/logo/tools/ts-register.mjs src/lab/logo/tools/render-che
 
 # Every moment ends on the static mark, in every tier (needs the built site served);
 # BROWSER=webkit or firefox runs it in those engines (Playwright's builds)
-node src/lab/logo/tools/motion-check.mjs http://localhost:4100/random/en/logo-lab/
+node src/lab/logo/tools/motion-check.mjs http://localhost:4100/en/logo-lab/
 ```
 
 The Node tools load the Playwright that ships with the machine's Chromium

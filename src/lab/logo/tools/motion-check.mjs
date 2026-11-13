@@ -7,7 +7,7 @@
  * Colour is left out of the comparison for moments that change the identity
  * on purpose (recolour, concept 2's flip).
  *
- *   [BROWSER=webkit|firefox] node src/lab/logo/tools/motion-check.mjs http://localhost:4100/random/en/logo-lab/ [concept ids…]
+ *   [BROWSER=webkit|firefox] node src/lab/logo/tools/motion-check.mjs http://localhost:4100/en/logo-lab/ [concept ids…]
  */
 import { createRequire } from 'node:module'
 
@@ -16,7 +16,7 @@ const playwright = require(process.env.PLAYWRIGHT_MODULE ?? '/opt/node22/lib/nod
 /** BROWSER=chromium (default) | webkit | firefox */
 const engine = process.env.BROWSER ?? 'chromium'
 
-const base = process.argv[2] ?? 'http://localhost:4100/random/en/logo-lab/'
+const base = process.argv[2] ?? 'http://localhost:4100/en/logo-lab/'
 const only = process.argv.slice(3).map((a) => a.toLowerCase())
 const concepts = only.length ? only : ['3', '3b', '8', '8b', '8c', '8d']
 

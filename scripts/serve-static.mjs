@@ -1,5 +1,6 @@
-// Serves dist/ under BASE_PATH like GitHub Pages does (index.html per folder, 404.html).
-// Usage: BASE_PATH=/random/ node scripts/serve-static.mjs [port]
+// Serves dist/ like a static host does (index.html per folder, 404.html), at the root or under
+// BASE_PATH when the build used one. No password gate: that runs on Netlify (src/hosting).
+// Usage: [BASE_PATH=/sub/] node scripts/serve-static.mjs [port]
 import { createReadStream, existsSync, statSync } from 'node:fs'
 import { createServer } from 'node:http'
 import { extname, join, normalize } from 'node:path'

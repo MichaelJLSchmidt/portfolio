@@ -3,8 +3,9 @@ import { join } from 'node:path'
 import type { NextConfig } from 'next'
 
 /*
- * Static export only: `npm run build` writes dist/ for GitHub Pages under
- * BASE_PATH (e.g. /random/). Nothing here needs a server.
+ * Static export only: `npm run build` writes dist/, served from the domain
+ * root (Netlify, netlify.toml). BASE_PATH (e.g. /sub/) is optional and empty by
+ * default. Nothing here needs a server.
  */
 const basePath = (process.env.BASE_PATH ?? '').replace(/\/+$/, '')
 

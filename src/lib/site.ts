@@ -3,8 +3,8 @@ export const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 export const withBase = (path: string) => `${basePath}${path}`
 
 /**
- * The site's origin at build time, from SITE_URL (the deploy workflow passes
- * actions/configure-pages' base_url). Server only; null in local builds, where
+ * The site's origin at build time, from SITE_URL (netlify.toml passes the
+ * deploy's own URL). Server only; null in local builds, where
  * absolute URLs (Open Graph) are left out. Never hard-coded.
  */
 export const siteOrigin = (() => {

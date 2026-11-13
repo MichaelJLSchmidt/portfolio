@@ -7,15 +7,15 @@
 //
 // and writes the two pages that live outside the locales:
 //
-//   dist/index.html  the root (/random/): a tiny inline script picks the language and replaces the
-//                    URL with /random/<locale>/ before anything paints; without JavaScript, plain
+//   dist/index.html  the root (/): a tiny inline script picks the language and replaces the
+//                    URL with /<locale>/ before anything paints; without JavaScript, plain
 //                    links to both languages
-//   dist/404.html    GitHub Pages serves it for every unknown address. The address's own locale
-//                    wins (/random/en/… is English whatever the stored or browser language); only
+//   dist/404.html    the host serves it for every unknown address. The address's own locale
+//                    wins (/en/… is English whatever the stored or browser language); only
 //                    an address without one is decided by the same script as the root. Such an
-//                    address from before the locales (e.g. /random/about/) moves to the same page
+//                    address from before the locales (e.g. /about/) moves to the same page
 //                    in that language when it exists. Otherwise it loads that locale's 404 page
-//                    (/random/<locale>/404/) and writes it into the document, so the address
+//                    (/<locale>/404/) and writes it into the document, so the address
 //                    stays; without JavaScript, or if the page cannot load, a short note in both
 //                    languages with links home
 //

@@ -79,12 +79,12 @@ src/
 | ------------------- | ----------------------------------------------------------------- |
 | `npm run dev`       | Development server                                                |
 | `npm run build`     | `scripts/build-numerals.mjs`, then the static export to `dist/` under `BASE_PATH` (type check, content checks for both languages), then `scripts/i18n-pages.mjs` |
-| `npm run preview`   | Serve `dist/` like GitHub Pages (`BASE_PATH=/random/`, port 4100) |
+| `npm run preview`   | Serve `dist/` like a static host, at the root (port 4100, no gate)  |
 | `npm run typecheck` | TypeScript                                                        |
 | `npm run format`    | Prettier                                                          |
 
 With `npm run preview` running, once per language:
-`node scripts/smoke.mjs http://localhost:4100/random/de/ [--motion=full|reduced]` (behaviour,
+`node scripts/smoke.mjs http://localhost:4100/de/ [--motion=full|reduced]` (behaviour,
 including the root's language choice and the switcher) and `node scripts/budget.mjs <url>`
 (initial JS at most 170 KB gzip). In `npm run dev` the root `/` has no page (it is written at
 build time): open `/de/` or `/en/`.
@@ -93,12 +93,12 @@ build time): open `/de/` or `/en/`.
 
 - Every page exists under `/de/` and `/en/`, with the same card slugs. `<html lang>`, hreflang
   alternates (with `x-default` on the root) and Open Graph locale (`de_CH`, `en_GB`) per page.
-- The root (`/random/`) chooses with an inline script before anything paints and replaces the URL:
+- The root (`/`) chooses with an inline script before anything paints and replaces the URL:
   a stored choice (localStorage `locale`) wins, then the first of `navigator.languages` that
   starts with `de` or `en`; other languages get English, none get German. Without JavaScript it
   shows links to both. On the 404 page the address's own `/de/` or `/en/` decides; only an
   address without one is picked the same way. It keeps the unknown address; an old address
-  without a language (`/random/about/`) moves to the same page in the picked language.
+  without a language (`/about/`) moves to the same page in the picked language.
 - The header's switcher (DE, EN) links each language to the same page in it. Switching stores the choice,
   keeps the page and the reading position, and cross-fades once (never the card transition,
   never the home intro).

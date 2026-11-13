@@ -114,7 +114,7 @@ dividers and illustration strokes.
 
 ## Constraints
 
-- Static export under the GitHub Pages base path (`/random/`): never a hard-coded leading `/`
-  for assets or links (`next/link`, or `withBase()` for raw URLs).
+- Static export, served from the domain root; an optional `BASE_PATH` still works, so never a
+  hard-coded leading `/` for assets or links (`next/link`, or `withBase()` for raw URLs).
 - No new animation or smooth-scroll libraries (no GSAP, no Lenis): Motion, Motion+ and CSS cover
   everything; every extra runtime costs mobile performance. Initial JS budget 170 KB gzip.

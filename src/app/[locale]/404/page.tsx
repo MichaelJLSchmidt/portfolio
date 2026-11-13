@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /**
  * 404, once per locale (/de/404/, /en/404/): a card lies tilted on the discard
  * pile (DiscardedCard, drawn on first), "This card isn't in the deck." and the
- * way back to the table. GitHub Pages serves dist/404.html for any unknown
+ * way back to the table. The host serves dist/404.html for any unknown
  * address: a small page (scripts/i18n-pages.mjs) that picks the language like
  * the root does and shows this page in it, at the unknown address.
  */

@@ -219,8 +219,8 @@ the Wave 1 handoffs. Each one is implemented; `docs/handoff/integration.md` says
 - **I25. Closing contact.** After 09 Next (case studies) and Next (Management), `ClosingContact`
   renders one quiet line: `site.labels.contactTitle` in the index column, `contactText` and a
   `contactLink` mail link. No card.
-- **I26. Open Graph.** The deploy workflow passes `SITE_URL` (the `base_url` output of
-  `actions/configure-pages`) to the build; `about-og` (1280 px JPEG) becomes the default Open
+- **I26. Open Graph.** The Netlify build passes `SITE_URL` (the deploy's own URL, netlify.toml)
+  to the build; `about-og` (1280 px JPEG) becomes the default Open
   Graph image with `metadataBase` only when it is set. Never hard-coded; local builds have none.
 - **I27. Smoke** reads card and page titles from `content/hand.ts` and
   `content/pages/not-found.ts` (Node type stripping) instead of hard-coding them. (Since L5:
@@ -377,7 +377,7 @@ motion and the three tiers are unchanged.
   URL with `/<locale>/`: a stored choice (localStorage `locale`) wins, then the first of
   `navigator.languages` that starts with "de" or "en"; languages but none of them: English; no
   language: German. Without JavaScript: links to both. `dist/404.html` picks the same way; an
-  address from before the locales (no `/de/` or `/en/`: `/random/about/`, old links and bookmarks)
+  address from before the locales (no `/de/` or `/en/`: `/about/`, old links and bookmarks)
   moves to the same page in that language when it exists (a HEAD request); otherwise it fetches
   `/<locale>/404/` (the localized 404 page, `src/app/[locale]/404/page.tsx`) and writes it into
   the document, so the unknown address stays; without JavaScript, a note in both languages.
@@ -1676,7 +1676,7 @@ above for that locale, with `handCards`, `cardById`, `nextCard`, `href` and `get
 
 ## Routes
 
-All static, all under `BASE_PATH` (`/random/` on Pages), trailing slash. Every page exists under
+All static, all under `BASE_PATH` (empty: the domain root), trailing slash. Every page exists under
 `/de/` and `/en/` (`<locale>` below; files under `src/app/[locale]/`, L1). Every page is on the
 Spread grid (D9).
 
@@ -1783,7 +1783,7 @@ with the four-card hand:
   the content checks for both locales included, then `scripts/i18n-pages.mjs`: `<html lang>`, root,
   404). Must pass before every push.
 - `npm run preview` then, once per locale,
-  `node scripts/smoke.mjs http://localhost:4100/random/<locale>/ [--motion=full|reduced]`
+  `node scripts/smoke.mjs http://localhost:4100/<locale>/ [--motion=full|reduced]`
   (behaviour at 1440×900 and 390×844: intro order (from the animations' own start times, F3) and
   length, home on one screen, header links (no pause button, R2), the header leaving and returning
   on a case study with the rail, play / switch / return (the h1 focused after a play and a switch,
@@ -1798,7 +1798,7 @@ with the four-card hand:
   choice, no JavaScript), the 404 page's language (the address's locale wins, F1), `<html lang>` and hreflang, the switcher on
   home, a case study, Management and About, back across a switch; card and page titles and
   labels read from the locale's content modules, I27)
-  and `node scripts/budget.mjs http://localhost:4100/random/` (initial JS, 170 KB gzip target).
+  and `node scripts/budget.mjs http://localhost:4100/` (initial JS, 170 KB gzip target).
   The budget is advisory for this playground (D7): report the number in your handoff; going over
   does not block a push.
 - `node scripts/images/check.mjs` (image registry (13 photos), renditions, content counts per
