@@ -1,19 +1,21 @@
 // The password gate's page model (src/hosting/page.ts): its fonts copied under content-hashed
-// names, CSS from the site's tokens (palette, type scale, grid, motion), the site's logo, the
-// inline script, the copy from content/ (content/gate.ts, content/<locale>/gate.ts), and the
-// page's Content-Security-Policy. Lightweight on purpose: no WebGL, no app bundle; the colour
-// field is three CSS gradients that breathe and drift on the compositor, still under reduced
-// motion (and when the request asks to save data, src/hosting/gate-handler.ts).
+// names, CSS from the site's tokens (palette, type scale, grid, motion), the site's logo with its
+// hover, the site's own text links (src/styles/link.css, inlined), the inline script, the copy
+// from content/ (content/gate.ts, content/<locale>/gate.ts), and the page's
+// Content-Security-Policy. Lightweight on purpose: no WebGL, no app bundle; the colour field is
+// three CSS gradients that breathe and drift on the compositor, still under reduced motion (and
+// when the request asks to save data, src/hosting/gate-handler.ts).
 import { createHash } from 'node:crypto'
 import { copyFileSync, mkdirSync, readFileSync } from 'node:fs'
 import { basename, extname, join } from 'node:path'
 import { load, root } from '../load-ts.mjs'
 
 const { LOCALE_KEY, locales } = await load('src/lib/i18n.ts')
-const { palette, text, muted, logoGradients } = await load('src/design/palette.ts')
+const { palette, text, muted, identityCss, logoGradientCss, logoGradientNames } = await load('src/design/palette.ts')
 const { type } = await load('src/design/type.ts')
 const { grid, breakpoints } = await load('src/design/layout.ts')
-const { duration, ease, field, logo, reducedCrossfade, dur } = await load('src/motion/tokens.ts')
+const { duration, ease, field, logo, reducedCrossfade, dur, motionCss } = await load('src/motion/tokens.ts')
+const { LOGO_GRADIENT_KEY } = await load('src/motion/preferences.ts')
 const { identity } = await load('content/gate.ts')
 const copy = Object.fromEntries(
   await Promise.all(locales.map(async (l) => [l, (await load(`content/${l}/gate.ts`)).gate])),
@@ -66,12 +68,31 @@ const CARD = 'y="9.923" width="20" height="28" rx="2.5"'
 const M =
   'M14.735 30.923V22.181L19.235 25.823L23.735 22.181V30.923H27.235V16.923H25.064L19.235 21.642L13.406 16.923H11.235V30.923Z'
 const F = 'M23.735 16.923H27.235V30.923H23.735ZM23.735 16.923H36.235V20.423H23.735ZM23.735 22.673H33.735V26.173H23.735Z'
+/*
+ * The hover (logo.tsx setFan): the back card's fan group turns out to the left and lifts, the
+ * front card's (and its knock-out in the back card) to the right and higher, `logo.hover.front` s
+ * later; closing, both at once. `logo.hover.dur` s on ease.move, about each group's bottom centre
+ * (header.module.css [data-logo-part]). Nothing moves under reduced motion. Here CSS transitions
+ * on the same groups (no script, nothing in the CSP); the build fails if the site's hover changes
+ * shape, so the two stay the same.
+ */
 {
   const source = readFileSync(join(root, 'src/components/logo.tsx'), 'utf8')
-  for (const part of [BACK, FRONT, M, F]) {
+  const header = readFileSync(join(root, 'src/components/header.module.css'), 'utf8')
+  const hover = [
+    'const opts = { duration: H.dur, ease: bezier(ease.move) }',
+    'const back = open ? pose({ x: -H.spread, y: -H.lift.back, deg: -H.deg }) : IDENTITY',
+    'const front = open ? pose({ x: H.spread, y: -H.lift.front, deg: H.deg }) : IDENTITY',
+    'animate([p.backFan], { transform: back }, opts)',
+    'animate([p.frontFan, p.gapFan], { transform: front }, { ...opts, delay: open ? H.front : 0 })',
+    "if (!p || readTier() === 'reduced') return",
+  ]
+  for (const part of [BACK, FRONT, M, F, ...hover]) {
     if (!source.includes(part))
-      throw new Error(`The gate's logo no longer matches src/components/logo.tsx (${part.slice(0, 24)}…)`)
+      throw new Error(`The gate's logo no longer matches src/components/logo.tsx (${part.slice(0, 40)}…)`)
   }
+  if (!/\.logo \[data-logo-part\] \{\s*transform-box: fill-box;\s*transform-origin: 50% 100%;/.test(header))
+    throw new Error("The gate's logo no longer matches header.module.css [data-logo-part]")
 }
 const area = 'x="-24" y="-24" width="96" height="96"'
 const mask = (id, content) =>
@@ -79,12 +100,15 @@ const mask = (id, content) =>
 const logoSvg = [
   `<svg viewBox="5 8.5 38 31" aria-hidden="true" focusable="false"><defs>`,
   `<linearGradient id="logo-paint" x1="0" y1="0" x2="1" y2="1"><stop offset="0" class="stop-0"/><stop offset=".5" class="stop-1"/><stop offset="1" class="stop-2"/></linearGradient>`,
-  mask('logo-gap', `<g transform="${FRONT}"><rect x="20.235" ${CARD} fill="#000" stroke="#000" stroke-width="3"/></g>`),
+  mask(
+    'logo-gap',
+    `<g transform="${FRONT}"><g class="fan fan-front"><rect x="20.235" ${CARD} fill="#000" stroke="#000" stroke-width="3"/></g></g>`,
+  ),
   mask('logo-m', `<path d="${M}" fill="#000"/>`),
   mask('logo-f', `<path d="${F}" fill="#000"/>`),
   `</defs>`,
-  `<g mask="url(#logo-gap)"><g transform="${BACK}"><rect x="8.235" ${CARD} fill="currentColor" mask="url(#logo-m)"/></g></g>`,
-  `<g transform="${FRONT}"><rect x="20.235" ${CARD} fill="url(#logo-paint)" mask="url(#logo-f)"/></g>`,
+  `<g mask="url(#logo-gap)"><g transform="${BACK}"><g class="fan fan-back"><rect x="8.235" ${CARD} fill="currentColor" mask="url(#logo-m)"/></g></g></g>`,
+  `<g transform="${FRONT}"><g class="fan fan-front"><rect x="20.235" ${CARD} fill="url(#logo-paint)" mask="url(#logo-f)"/></g></g>`,
   `</svg>`,
 ].join('')
 
@@ -92,6 +116,68 @@ const logoSvg = [
 const icon = `data:image/svg+xml,${encodeURIComponent(
   readFileSync(join(root, 'src/app/icon.svg'), 'utf8').replace(/>\s+</g, '><').trim(),
 )}`
+
+// ---------------------------------------------------------------- text links
+// The site's own rules (src/styles/link.css, imported by src/app/globals.css), inlined as they
+// are: the ink-page variant, the logo's colours flowing along the link. The custom properties
+// they read come from the generators the site uses (identityCss, motionCss, type.css), only the
+// ones the file needs; the build fails if one is missing, so the two never drift apart.
+const linkCss = readFileSync(join(root, 'src/styles/link.css'), 'utf8')
+// Its rules without comments: what the file declares and reads (its comments name properties too).
+const linkRules = linkCss.replace(/\/\*[\s\S]*?\*\//g, '')
+const refs = (text) => [...text.matchAll(/var\((--[\w-]+)/g)].map((m) => m[1])
+/** The declarations of the first `selector{…}` block in generated CSS. */
+function block(css, selector) {
+  const start = css.indexOf(`${selector}{`)
+  if (start < 0) throw new Error(`gate page: no "${selector}" block in the token CSS`)
+  const body = css.slice(start + selector.length + 1, css.indexOf('}', start))
+  return new Map(
+    body
+      .split(';')
+      .filter((d) => d.includes(':'))
+      .map((d) => [d.slice(0, d.indexOf(':')).trim(), d.slice(d.indexOf(':') + 1).trim()]),
+  )
+}
+/** A custom property's value in a stylesheet (type.css, tokens.css). */
+function declared(file, name) {
+  const match = new RegExp(`${name}:\\s*([^;]+);`).exec(readFileSync(join(root, file), 'utf8'))
+  if (!match) throw new Error(`gate page: ${file} no longer declares ${name}`)
+  return match[1].trim()
+}
+const motion = { full: block(motionCss(), ':root'), reduced: block(motionCss(), ':root[data-motion="reduced"]') }
+// The gate's text is Hanken Grotesk: its descent anchors the marker, as type.css does for text.
+const tokenVars = new Map([
+  ...block(identityCss(), ':root'),
+  ...motion.full,
+  ['--font-descent', declared('src/styles/type.css', '--descent-text')],
+])
+const gradientVars = new Set(block(logoGradientCss(), ':root').keys())
+const ownVars = new Set([
+  ...[...linkRules.matchAll(/(--[\w-]+)\s*:/g)].map((m) => m[1]),
+  ...[...linkRules.matchAll(/@property\s+(--[\w-]+)/g)].map((m) => m[1]),
+])
+const linkVars = new Set()
+for (const queue = refs(linkRules); queue.length;) {
+  const name = queue.pop()
+  if (ownVars.has(name) || gradientVars.has(name) || linkVars.has(name)) continue
+  if (!tokenVars.has(name))
+    throw new Error(`gate page: src/styles/link.css reads ${name}, which no token source defines`)
+  linkVars.add(name)
+  queue.push(...refs(tokenVars.get(name)))
+}
+const vars = (names, from) => [...names].map((n) => `${n}:${from.get(n)}`).join(';')
+const linkReduced = [...linkVars].filter((n) => motion.reduced.has(n))
+const links = [
+  `:root{${vars(linkVars, tokenVars)}}`,
+  // The page load's logo colours (html[data-logo-gradient], picked by the gate like home does).
+  logoGradientCss(),
+  // The site's reduced tier (motionCss): no durations.
+  `@media (prefers-reduced-motion:reduce){:root{${vars(linkReduced, motion.reduced)}}}`,
+  linkCss,
+  // The site stops the flow under :root[data-motion='reduced'], which its pre-paint script sets;
+  // the gate has no pre-paint script, so the media query stands in for it (after the file's rules).
+  `@media (prefers-reduced-motion:reduce){.link{animation:none}}`,
+].join('\n')
 
 // ---------------------------------------------------------------- CSS
 const px = (n) => `${n}px`
@@ -105,7 +191,8 @@ const fluid = ({ min, max }) => {
 const leading = (style) => (typeof style.leading === 'number' ? String(style.leading) : px(style.leading.px))
 
 function css({ display, text: textFont, mono }) {
-  const [logoA, logoB, logoC] = Object.values(logoGradients)[0]
+  const H = logo.hover
+  const pose = (p) => `translate(${p.x}px,${p.y}px) rotate(${p.deg}deg)`
   // The site's field at rest (field-css.ts, field.css): three pools in low-frequency colour. Here
   // they take three card colours, so the ground reads as the site's without the WebGL field.
   const pools = [
@@ -120,7 +207,7 @@ function css({ display, text: textFont, mono }) {
     `@font-face{font-family:"Martian Mono";src:url(${mono}) format("woff2");font-weight:100 800;font-display:swap}`,
     `:root{color-scheme:dark;--ink:${palette.ink.field};--text:${text};--muted:${muted};--accent:${palette.ink.accent};` +
       `--line:color-mix(in srgb,var(--text) 13%,transparent);--line-strong:color-mix(in srgb,var(--text) 28%,transparent);` +
-      `--fill:color-mix(in srgb,var(--ink) 62%,transparent);--logo-a:${logoA};--logo-b:${logoB};--logo-c:${logoC};` +
+      `--fill:color-mix(in srgb,var(--ink) 62%,transparent);` +
       `--margin:${grid.base.margin};--ease-out:${bezier(ease.outQuint)};--ease-in-out:${bezier(ease.inOut)};--dur-s:${s(dur.s)}}`,
     `@media (min-width:${breakpoints.sm}px){:root{--margin:${px(grid.sm.margin)}}}`,
     `@media (min-width:${breakpoints.md}px){:root{--margin:${px(grid.md.margin)}}}`,
@@ -159,7 +246,7 @@ function css({ display, text: textFont, mono }) {
     `.language a[aria-current]::before{border-color:var(--text);background:var(--text);opacity:1}`,
     `.language a:not([aria-current]):is(:hover,:focus-visible){color:var(--text)}`,
     `.language a:not([aria-current]):is(:hover,:focus-visible)::before{opacity:1}`,
-    `:focus-visible{outline:2px solid var(--accent);outline-offset:3px}`,
+    `:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:${declared('src/styles/tokens.css', '--radius-sm')}}`,
     `.language a:focus-visible{outline-offset:-3px}`,
     // The page: one column, the mark, the name, the sentence, the form, the way to ask.
     `main{flex:1;display:flex;flex-direction:column;justify-content:center;width:100%;max-width:calc(34rem + 2 * var(--margin));margin:0 auto;padding:clamp(24px,6vh,72px) max(var(--margin),env(safe-area-inset-right)) max(clamp(40px,10vh,120px),env(safe-area-inset-bottom)) max(var(--margin),env(safe-area-inset-left))}`,
@@ -168,6 +255,12 @@ function css({ display, text: textFont, mono }) {
     `.mark stop{stop-color:var(--logo-a)}.mark .stop-1{stop-color:var(--logo-b)}.mark .stop-2{stop-color:var(--logo-c)}`,
     `@keyframes logo-flow{0%,100%{stop-color:var(--logo-a)}33.333%{stop-color:var(--logo-b)}66.667%{stop-color:var(--logo-c)}}`,
     `@media (prefers-reduced-motion:no-preference){.mark stop{animation:logo-flow ${logo.flow.dur}s linear infinite}.mark .stop-1{animation-delay:${-logo.flow.dur / 3}s}.mark .stop-2{animation-delay:${-logo.flow.dur / 1.5}s}}`,
+    // The header logo's hover (see the logo section above).
+    // At rest the same function list as open (logo.tsx IDENTITY), so each part interpolates on its own.
+    `.mark .fan{transform-box:fill-box;transform-origin:50% 100%;transform:${pose({ x: 0, y: 0, deg: 0 })};transition:transform ${s(H.dur)} ${bezier(ease.move)}}`,
+    `@media (hover:hover) and (prefers-reduced-motion:no-preference){` +
+      `.mark:hover .fan-back{transform:${pose({ x: -H.spread, y: -H.lift.back, deg: -H.deg })}}` +
+      `.mark:hover .fan-front{transform:${pose({ x: H.spread, y: -H.lift.front, deg: H.deg })};transition-delay:${s(H.front)}}}`,
     `.name{margin:0;font:${type.h2.weight} ${fluid(type.h2.size)}/${leading(type.h2)} "Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;font-variation-settings:"opsz" ${type.h2.opsz};letter-spacing:${type.h2.tracking}em;text-wrap:balance}`,
     `.lede{margin:1rem 0 0;max-width:28em;font-size:${fluid(type.lead.size)};line-height:1.35;text-wrap:pretty}`,
     `.unlock{margin:3rem 0 0}`,
@@ -189,31 +282,23 @@ function css({ display, text: textFont, mono }) {
     // A wrong password: the capsule's line turns full, an icon and the message in the text colour.
     `.error{display:flex;gap:10px;align-items:flex-start;margin:.75rem 0 0;color:var(--text)}`,
     `.error svg{flex:none;width:18px;height:18px;margin-top:.3em;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round}`,
-    `.closed{margin:2.5rem 0 0;color:var(--text)}`,
     `.contact{margin:2rem 0 0;color:var(--muted)}`,
     // The two ways to ask wrap together, never one alone after the dot.
     `.ways{white-space:nowrap}`,
     `.dot{color:var(--muted)}`,
-    // Text links, after the site's (globals.css .link): a marker block in a deeper shade of the
-    // logo's colours behind the text; hover and focus collapse it into the underline at full colour.
-    `.link{--depth-a:color-mix(in oklab,var(--logo-a),var(--ink) 52%);--depth-b:color-mix(in oklab,var(--logo-b),var(--ink) 52%);--depth-c:color-mix(in oklab,var(--logo-c),var(--ink) 52%);` +
-      `padding:0 .15em .05em;margin:0 -.15em;color:var(--text);text-decoration:none;white-space:nowrap;border-radius:2px;` +
-      `background-image:linear-gradient(90deg,var(--logo-a),var(--logo-b),var(--logo-c)),linear-gradient(90deg,var(--depth-a),var(--depth-b),var(--depth-c));` +
-      `background-repeat:no-repeat;background-size:0% 2px,100% .7em;background-position:left bottom,left bottom;` +
-      `transition:background-size var(--dur-s) var(--ease-out)}`,
-    `@supports (color:oklch(from red l c h)){.link{--depth-a:oklch(from var(--logo-a) 0.49 c h);--depth-b:oklch(from var(--logo-b) 0.49 c h);--depth-c:oklch(from var(--logo-c) 0.49 c h)}}`,
-    `@media (hover:hover){.link:hover{background-size:100% 2px,100% 0}}`,
-    `.link:focus-visible{background-size:100% 2px,100% 0;outline-offset:2px}`,
-    // Reduced motion: nothing moves, colour changes become the site's short crossfade.
-    `@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:${s(reducedCrossfade)}!important}.row button,.row button svg,.link{transition:none!important}.row button:active{transform:none}.row button:is(:hover,:focus-visible) svg{translate:none}}`,
+    // Reduced motion: nothing moves, colour changes become the site's short crossfade (the text
+    // links follow the site's own reduced values, above).
+    `@media (prefers-reduced-motion:reduce){:root{--dur-s:${s(reducedCrossfade)}}.row button,.row button svg{transition:none}.row button:active{transform:none}.row button:is(:hover,:focus-visible) svg{translate:none}}`,
   ]
-  return rules.join('')
+  return `${rules.join('')}\n${links}`
 }
 
 // ---------------------------------------------------------------- script
-// The submit button's pending label while the password is checked, and a language switch
-// remembered for the site (its root reads the same key). Without JavaScript the page is complete.
-const script = `(()=>{const b=document.querySelector("button[data-pending]");if(b){const idle=b.innerHTML;b.form.addEventListener("submit",e=>{if(b.getAttribute("aria-disabled")==="true"){e.preventDefault();return}b.textContent=b.dataset.pending;b.setAttribute("aria-disabled","true")});addEventListener("pageshow",e=>{if(e.persisted){b.innerHTML=idle;b.removeAttribute("aria-disabled")}})}for(const a of document.querySelectorAll("a[data-locale]"))a.addEventListener("click",()=>{try{localStorage.setItem(${JSON.stringify(LOCALE_KEY)},a.dataset.locale)}catch(e){}})})();`
+// The submit button's pending label while the password is checked; a language switch remembered
+// for the site (its root reads the same key); and this load's logo gradient, so the site's next
+// page picks another, as it does from one page load to the next. Without JavaScript the page is
+// complete.
+const script = `(()=>{try{localStorage.setItem(${JSON.stringify(LOGO_GRADIENT_KEY)},document.documentElement.dataset.logoGradient)}catch(e){}const b=document.querySelector("button[data-pending]");if(b){const idle=b.innerHTML;b.form.addEventListener("submit",e=>{if(b.getAttribute("aria-disabled")==="true"){e.preventDefault();return}b.textContent=b.dataset.pending;b.setAttribute("aria-disabled","true")});addEventListener("pageshow",e=>{if(e.persisted){b.innerHTML=idle;b.removeAttribute("aria-disabled")}})}for(const a of document.querySelectorAll("a[data-locale]"))a.addEventListener("click",()=>{try{localStorage.setItem(${JSON.stringify(LOCALE_KEY)},a.dataset.locale)}catch(e){}})})();`
 
 /** The page model for fonts copied by `copyAssets`. */
 export function pageModel(assets) {
@@ -226,6 +311,7 @@ export function pageModel(assets) {
     icon,
     themeColor: palette.ink.field,
     preload: [assets.display, assets.text],
+    gradients: logoGradientNames,
   }
 }
 

@@ -30,6 +30,8 @@ export const gate = {
   cookie: '__Host-gate',
   /** The language chosen with the gate page's DE·EN switch (wins over Accept-Language). */
   langCookie: '__Host-gate-lang',
+  /** The logo gradient the last gate page showed: the next one picks another, like home does. */
+  logoCookie: '__Host-gate-logo',
   maxAgeSeconds: 30 * 24 * 60 * 60,
   langMaxAgeSeconds: 365 * 24 * 60 * 60,
   /** Everything under this prefix belongs to the gate itself. */

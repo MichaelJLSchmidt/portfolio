@@ -65,7 +65,7 @@ export function logoGradientCss(): string {
 }
 
 /**
- * Text links (globals.css .link): at rest a marker block in a deeper shade of the page's identity
+ * Text links (styles/link.css .link): at rest a marker block in a deeper shade of the page's identity
  * behind the text, on hover an underline in the identity's accent at full strength. The shade is
  * the identity's glow mixed toward its field in OKLab by `mix`, tuned per identity so the text
  * (`text`) over it keeps at least 4.5:1 and the block still reads as the colour (contrast values:

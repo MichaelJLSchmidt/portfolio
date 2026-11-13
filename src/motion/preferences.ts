@@ -19,7 +19,7 @@
  *                 If the reveal system has not taken over 4 s later, the
  *                 attributes are dropped and every page shows its final state.
  * It also puts every text link's colour flow (the CSS animation LINK_FLOW,
- * globals.css: the logo's colours along a link on ink pages) onto the page
+ * styles/link.css: the logo's colours along a link on ink pages) onto the page
  * clock as it starts, like the logo's own flow (logo.tsx), so links and logo
  * stay in phase whenever a link mounts or a navigation turns its flow on.
  * The script follows the reduced-motion media query, so it is the single
@@ -38,7 +38,7 @@ export const INTRO_KEY = 'table-drawn'
 export const INTRO_DONE = 'table:intro-done'
 /** Fired when the first-visit intro starts revealing the chrome (the header logo deals in then). */
 export const CHROME_IN = 'table:chrome-in'
-/** The text links' colour flow (globals.css @keyframes link-flow). */
+/** The text links' colour flow (styles/link.css @keyframes link-flow). */
 export const LINK_FLOW = 'link-flow'
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 /** The locale prefix of a path ("/de", "/en"), dropped before the path is matched. */

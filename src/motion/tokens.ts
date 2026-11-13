@@ -59,7 +59,7 @@ export const ease = {
   enter: [0.05, 0.7, 0.1, 1],
   move: [0.2, 0, 0, 1],
   exit: [0.3, 0, 0.8, 0.15],
-  /** Text links (globals.css .link): the marker's morph and the triangle's fade, a plain ease-out that settles. */
+  /** Text links (styles/link.css .link): the marker's morph and the triangle's fade, a plain ease-out that settles. */
   link: outCubic,
 } as const
 
@@ -122,7 +122,7 @@ export const duration = {
   /** The next project card's title underline (detail.css). */
   underline: 0.16,
   /**
-   * Text links (globals.css .link): hovering in, the marker block slides left and down and
+   * Text links (styles/link.css .link): hovering in, the marker block slides left and down and
    * collapses into the underline (`linkIn`) while the triangle fades in (`linkMarkIn`); hovering
    * out runs the reverse, faster (`linkOut`, `linkMarkOut`). ease.link. Reduced: instant.
    */

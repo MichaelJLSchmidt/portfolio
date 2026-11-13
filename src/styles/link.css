@@ -1,0 +1,222 @@
+/*
+ * Text links: the site's (imported last by src/app/globals.css) and the password gate's
+ * (scripts/hosting/gate-page.mjs inlines this file into the gate page), so the two never drift
+ * apart. Custom properties come from src/design/palette.ts (identityCss, logoGradientCss),
+ * src/motion/tokens.ts (motionCss) and src/styles/type.css (--font-descent).
+ */
+/*
+ * Text links (.link). At rest a marker block sits behind the lower part of the text: as wide as
+ * the text but shifted right (it starts --lk-shift in and overhangs the end by as much), from
+ * --lk-above over the baseline to --lk-below under it, in a deeper shade of the page's identity
+ * (--link-rest, palette.ts linkMark). Hover (devices that hover, never sticky on touch) and
+ * focus-visible: in one move the block slides left and down and collapses into the underline,
+ * aligned with the text, its top --lk-gap under the baseline and --lk-line thick, in the
+ * identity's accent at full strength (--dur-link-in, ease.link); out again the exact reverse,
+ * faster (--dur-link-out). One registered progress, --lk-p (0 the block, 1 the line), drives the
+ * position, the size and the colour, so it is one move. The text never moves and keeps its colour
+ * (--text: the shades are tuned for it, at least 4.5:1). Every line fragment of a wrapped link
+ * gets its own block and line (box-decoration-break: clone). Sizes are em of the link's own font
+ * size (small print up to the h2 email); the marker is anchored to the baseline through the
+ * font's descent (--font-descent, type.css), the room under the inline box.
+ *
+ * Colour: the scope's --link-a / -b / -c (the line's stops) and --link-rest (the block's shade).
+ * Ink pages (home, 404) follow the logo: the page load's three logo colours as a gradient along
+ * the link, flowing like the logo's front card (--link-flow: link-flow, one --logo-flow loop, its
+ * start set to the page clock by the pre-paint script), the block each colour at the depth
+ * --link-depth. Links outside the page (header, footer) take the page's identity (palette.ts).
+ *
+ * .link-standalone, a link with nothing after it on its line: a small solid triangle after the
+ * text, in the text colour, fades in with the line (--dur-link-mark-in / -out) and never moves;
+ * its room (--lk-reserve) is kept at rest, so nothing shifts. Other links (running text, small
+ * print) keep their spacing: their overhang hangs into what follows (a negative margin).
+ * The current page (aria-current="page"): the line in the accent; no block, triangle or hover.
+ * The class sits on the <a>, or on a span directly inside it (the <a> is the target and carries
+ * the focus ring: the header's About, the timeline's Master's card).
+ * Reduced motion: the durations are 0 (the state changes at once) and the gradient holds still.
+ * --ue (0 -> 1) draws the block in from the left: the email on About as it reveals (reveal.css).
+ */
+@property --lk-p {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+@property --lk-0 {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: transparent;
+}
+@property --lk-1 {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: transparent;
+}
+@property --lk-2 {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: transparent;
+}
+@property --ue {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+
+.link {
+  /* Geometry (em of the link's font size). */
+  --lk-shift: 0.4em;
+  --lk-above: 0.3em;
+  --lk-below: 0.5em;
+  --lk-gap: 0.15em;
+  --lk-line: max(0.12em, 2px);
+  --lk-tri-h: 0.45em;
+  --lk-tri-w: 0.39em;
+  --lk-tri-gap: 0.3em;
+  --lk-reserve: 0.75em;
+  /* The box's room after the text (--lk-end: the padding the block overhangs into; --lk-room: what layout keeps of it). */
+  --lk-end: var(--lk-shift);
+  --lk-room: 0px;
+  /* Colour: the line's stops, the block's shades, mixed by the progress. */
+  --lk-0: var(--link-a);
+  --lk-1: var(--link-b);
+  --lk-2: var(--link-c);
+  --lk-r0: var(--link-rest, oklch(from var(--lk-0) var(--link-depth) c h));
+  --lk-r1: var(--link-rest, oklch(from var(--lk-1) var(--link-depth) c h));
+  --lk-r2: var(--link-rest, oklch(from var(--lk-2) var(--link-depth) c h));
+  --lk-rest: calc((1 - var(--lk-p)) * 100%);
+  --lk-h: calc(var(--lk-above) + var(--lk-below));
+  display: inline;
+  color: var(--text);
+  text-decoration: none;
+  padding: 0 var(--lk-end) max(0px, calc(var(--lk-below) - var(--font-descent) * 1em)) 0;
+  margin-right: calc(var(--lk-room) - var(--lk-end));
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  background-image: linear-gradient(
+    to right,
+    color-mix(in oklab, var(--lk-0), var(--lk-r0) var(--lk-rest)),
+    color-mix(in oklab, var(--lk-1), var(--lk-r1) var(--lk-rest)),
+    color-mix(in oklab, var(--lk-2), var(--lk-r2) var(--lk-rest))
+  );
+  background-repeat: no-repeat;
+  background-size: calc((100% - var(--lk-end)) * max(var(--ue), var(--lk-p)))
+    calc(var(--lk-h) + (var(--lk-line) - var(--lk-h)) * var(--lk-p));
+  background-position: left calc(var(--lk-shift) * (1 - var(--lk-p))) bottom
+    calc((var(--lk-below) - var(--lk-gap) - var(--lk-line)) * var(--lk-p));
+  animation: var(--link-flow) var(--logo-flow) linear infinite;
+  transition: --lk-p var(--dur-link-out) var(--ease-link);
+}
+/* Without relative colours: each flowing colour mixed toward the ink field instead. */
+@supports not (color: oklch(from red l c h)) {
+  .link {
+    --lk-r0: var(--link-rest, color-mix(in oklab, var(--lk-0), var(--ink-field) var(--link-ink-mix)));
+    --lk-r1: var(--link-rest, color-mix(in oklab, var(--lk-1), var(--ink-field) var(--link-ink-mix)));
+    --lk-r2: var(--link-rest, color-mix(in oklab, var(--lk-2), var(--ink-field) var(--link-ink-mix)));
+  }
+}
+/* The logo's colours travel along the link: stop n shows the logo's stop n (header.module.css). */
+@keyframes link-flow {
+  0%,
+  100% {
+    --lk-0: var(--logo-a);
+    --lk-1: var(--logo-b);
+    --lk-2: var(--logo-c);
+  }
+  33.333% {
+    --lk-0: var(--logo-b);
+    --lk-1: var(--logo-c);
+    --lk-2: var(--logo-a);
+  }
+  66.667% {
+    --lk-0: var(--logo-c);
+    --lk-1: var(--logo-a);
+    --lk-2: var(--logo-b);
+  }
+}
+:root[data-motion='reduced'] .link {
+  animation: none;
+}
+
+.link-standalone {
+  --lk-end: var(--lk-reserve);
+  --lk-room: var(--lk-reserve);
+}
+/*
+ * The triangle: an inline box that starts with a word joiner, so it never wraps away from the last
+ * word (an inline-block would be a break opportunity). It takes no room itself (its margin cancels
+ * its padding; the link's padding keeps the room) and paints currentColor through a triangle mask
+ * on its padding, the mask's centre half an x-height above the baseline (the box's bottom is the
+ * font's descent under the baseline).
+ */
+.link-standalone::after {
+  --lk-tri: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 39 45' preserveAspectRatio='none'%3E%3Cpath d='M0 0 39 22.5 0 45z'/%3E%3C/svg%3E");
+  --lk-tri-y: calc(var(--font-descent) * 1em + 0.5ex - var(--lk-tri-h) / 2);
+  content: '\2060';
+  padding-left: calc(var(--lk-tri-gap) + var(--lk-tri-w));
+  margin-right: calc(-1 * (var(--lk-tri-gap) + var(--lk-tri-w)));
+  background: currentColor;
+  -webkit-mask: var(--lk-tri) no-repeat right bottom var(--lk-tri-y) / var(--lk-tri-w) var(--lk-tri-h);
+  mask: var(--lk-tri) no-repeat right bottom var(--lk-tri-y) / var(--lk-tri-w) var(--lk-tri-h);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-link-mark-out) var(--ease-link);
+}
+
+/*
+ * Vertical text (writing-mode: vertical-rl, the terrain credit along About's left edge): the same
+ * marker with the axes swapped. The inline axis runs down and the descent lies to the left, so
+ * the block is anchored to the box's left edge and shifted down the text.
+ */
+.link-vertical {
+  padding: 0 0 var(--lk-end) max(0px, calc(var(--lk-below) - var(--font-descent) * 1em));
+  margin: 0 0 calc(var(--lk-room) - var(--lk-end));
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--lk-0), var(--lk-r0) var(--lk-rest)),
+    color-mix(in oklab, var(--lk-1), var(--lk-r1) var(--lk-rest)),
+    color-mix(in oklab, var(--lk-2), var(--lk-r2) var(--lk-rest))
+  );
+  background-size: calc(var(--lk-h) + (var(--lk-line) - var(--lk-h)) * var(--lk-p))
+    calc((100% - var(--lk-end)) * max(var(--ue), var(--lk-p)));
+  background-position: left calc((var(--lk-below) - var(--lk-gap) - var(--lk-line)) * var(--lk-p)) top
+    calc(var(--lk-shift) * (1 - var(--lk-p)));
+}
+
+/* The line: hover (devices that hover) and keyboard focus. */
+@media (hover: hover) {
+  .link:not([aria-current='page']):hover,
+  a:not([aria-current='page']):hover > .link {
+    --lk-p: 1;
+    transition-duration: var(--dur-link-in);
+  }
+  .link-standalone:not([aria-current='page']):hover::after,
+  a:not([aria-current='page']):hover > .link-standalone::after {
+    opacity: 1;
+    transition-duration: var(--dur-link-mark-in);
+  }
+}
+.link:not([aria-current='page']):focus-visible,
+a:not([aria-current='page']):focus-visible > .link {
+  --lk-p: 1;
+  transition-duration: var(--dur-link-in);
+}
+.link-standalone:not([aria-current='page']):focus-visible::after,
+a:not([aria-current='page']):focus-visible > .link-standalone::after {
+  opacity: 1;
+  transition-duration: var(--dur-link-mark-in);
+}
+/* The current page: the line, still. The triangle's room stays (the header's tray keeps its width). */
+.link[aria-current='page'],
+[aria-current='page'] > .link {
+  --lk-p: 1;
+  transition: none;
+}
+.link-standalone[aria-current='page']::after,
+[aria-current='page'] > .link-standalone::after {
+  visibility: hidden;
+}
+/* Forced colours drop the gradient: links are underlined instead. */
+@media (forced-colors: active) {
+  .link {
+    text-decoration: underline;
+  }
+}

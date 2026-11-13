@@ -162,3 +162,22 @@ export function pickLocale(acceptLanguage: string | null, chosen: string | null)
   }
   return entries.length ? fallbackLocale : defaultLocale
 }
+
+/**
+ * The logo gradient for this page load, like the site's pre-paint script picks it on home
+ * (src/motion/preferences.ts): one of `names` at random, never the one the last load showed
+ * (`last`, from the gate's cookie). Decided on the server, so it holds without JavaScript.
+ */
+export function pickGradient(
+  names: readonly string[],
+  last: string | null,
+  random: () => number = Math.random,
+): string {
+  const options = names.filter((name) => name !== last)
+  const pool = options.length ? options : names
+  return pool[Math.min(pool.length - 1, Math.floor(random() * pool.length))]
+}
+
+export function logoCookie(name: string): string {
+  return `${gate.logoCookie}=${name}; Path=/; Max-Age=${gate.langMaxAgeSeconds}; Secure; HttpOnly; SameSite=Lax`
+}

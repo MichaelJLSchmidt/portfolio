@@ -4,8 +4,10 @@ import {
   MAX_FIELD_LENGTH,
   clearedCookie,
   langCookie,
+  logoCookie,
   originAllowed,
   passwordMatches,
+  pickGradient,
   pickLocale,
   readCookie,
   safeNext,
@@ -25,12 +27,13 @@ import { renderPage, type FormState, type GatePage } from './page.ts'
  * - Every path is protected except the gate's own assets (/.gate/assets/*) and robots.txt, which
  *   the gate answers itself with "Disallow: /".
  * - No valid cookie: the gate page, 401 with a Cookie challenge (no-store), in German or English
- *   (the language switch's cookie, else Accept-Language).
+ *   (the language switch's cookie, else Accept-Language), its logo in one of the logo gradients
+ *   at random, never the one the last gate page showed (a cookie).
  * - POST /.gate/unlock (same origin only): password check, cookie, 303 to `next`; a wrong
  *   password waits, then shows the gate page with an error.
  * - GET /.gate/lock: clears the cookie, shows the gate page.
  * - GET /.gate/lang/<locale>?next=…: remembers the language, 303 back to `next`.
- * - No password configured: fail closed, the page says the site is closed.
+ * - No password configured: fail closed, 503: the page without the form, and one log line.
  * Every response carries X-Robots-Tag: noindex, nofollow.
  */
 
@@ -51,6 +54,8 @@ export type GateDeps = {
   now?: () => number
   wait?: (ms: number) => Promise<void>
   log?: (message: string) => void
+  /** 0 <= n < 1, for the logo gradient (Math.random). */
+  random?: () => number
 }
 
 const ROBOTS = 'noindex, nofollow'
@@ -60,8 +65,7 @@ const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 const aliases: readonly string[] = REDIRECT_DOMAINS
 let warnedClosed = false
 
-function pageResponse(options: GateOptions, form: FormState, status: number, extra: HeadersInit = {}): Response {
-  const headers = new Headers(extra)
+function pageResponse(options: GateOptions, form: FormState, status: number, headers: Headers): Response {
   headers.set('Content-Type', 'text/html; charset=utf-8')
   headers.set('Content-Language', form.locale)
   headers.set('Cache-Control', 'no-store')
@@ -115,8 +119,16 @@ export async function handleGate(request: Request, options: GateOptions, deps: G
   const cookies = request.headers.get('Cookie')
   const locale = pickLocale(request.headers.get('Accept-Language'), readCookie(cookies, gate.langCookie))
   const still = /^on$/i.test(request.headers.get('Save-Data') ?? '')
-  const show = (form: Omit<FormState, 'locale' | 'still'>, status: number, extra: Record<string, string> = {}) =>
-    pageResponse(options, { ...form, locale, still }, status, { Vary: 'Accept-Language, Cookie', ...extra })
+  const show = (
+    form: Omit<FormState, 'locale' | 'still' | 'gradient'>,
+    status: number,
+    extra: Record<string, string> = {},
+  ) => {
+    const gradient = pickGradient(options.page.gradients, readCookie(cookies, gate.logoCookie), deps.random)
+    const headers = new Headers({ Vary: 'Accept-Language, Cookie', ...extra })
+    headers.append('Set-Cookie', logoCookie(gradient))
+    return pageResponse(options, { ...form, locale, still, gradient }, status, headers)
+  }
 
   if (url.pathname.startsWith(gate.assets)) return deps.next()
   if (url.pathname === '/robots.txt') {
