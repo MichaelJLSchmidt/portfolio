@@ -1,314 +1,300 @@
-# Höhenlinie — The Summit Deck
+# Portfolio
 
-Portfolio of a UX Team Lead / Senior UX Designer from Interlaken. Art direction: a night hike across a
-topographic contour map. Projects are presented as original "Summit Cards".
+Portfolio: a table seen from the player's seat. A calm dark
+field breathes behind everything; a hand of four cards (three case studies and Management) is the
+navigation. Playing a card lifts it onto the table, the background blooms from it into the card's
+colour, and the card zooms into its page. Next.js 16 (App Router, TypeScript, React 19.3), Motion +
+Motion+, WebGL2, plain CSS. Built as a static export and deployed on Netlify at the domain root,
+behind a password gate until launch (see [Hosting on Netlify](#hosting-on-netlify)). Not indexed
+until launch (robots meta, a disallow-all robots.txt, `X-Robots-Tag`).
 
-This repository currently holds the foundation plus three technical spikes for the signature effects:
+The site is bilingual: every page exists in German under `/de/` and in English under `/en/`
+(Swiss Standard German, informal "du"). The root picks the language; the header's switcher (DE,
+EN, the active one on a chip) switches it in place. All visible text lives in `/content`, one set per language. The persona,
+names, links, email and case studies there are fictional test content, except `content/gate.ts`:
+the password gate's real name, email and LinkedIn link.
 
-1. **Persistent contour field**: one WebGL canvas behind all routes. It draws real swisstopo contours with:
-   - a pointer "headlamp" and loupe;
-   - a rising alpenglow pulse;
-   - parallax and click pings;
-   - an intro sweep and terrain morphs;
-   - quiet zones: elements marked `data-quiet-zone` (hero text, page headers, Basecamp headings) fade the lines
-     behind them to 25% with a 48 px feather, so that text needs no halo or scrim while the field runs.
-2. **Summit Card**: spring tilt and contour foil. Fully data-driven and accessible; the whole card links to its
-   case study.
-3. **Card → case study transition**: a choreographed view-transition morph from the deck into `/work/[slug]`
-   and back, synchronised with the field. Durations and their reasoning are in `src/app/globals.css`.
+The redesign was built by several sessions in parallel and merged by an integration session. The
+shared contracts (tokens, components, props, data attributes, content schema, ownership and the
+integration decisions) are in `docs/contracts.md`; the brief is `docs/art-direction.md`; each
+session reported in `docs/handoff/`.
 
-Production currently serves a static under-construction page; the full site lives on the `basecamp` branch behind
-a password gate (see "Hosting on Netlify").
+## Structure
 
-Headlines use kinetic variable-font type (`src/components/type/KineticText.tsx`). The About page ("Basecamp",
-`/about/`) opens from the leader card and tells the career as the real climb from Interlaken to the Jungfrau; its
-plan and the content still needed are in `docs/about-plan.md`.
-
-## Stack
-
-| Concern                    | Choice                                                                              |
-| -------------------------- | ----------------------------------------------------------------------------------- |
-| Framework                  | Next.js 16 (App Router), React 19.3, TypeScript, static export (`output: "export"`) |
-| Field                      | three + @react-three/fiber, custom GLSL (WebGL2), leva for dev-only tuning          |
-| Motion                     | `motion` (springs, gestures), Motion+ (`useMagneticPull`), React `<ViewTransition>` |
-| Smooth scroll              | Lenis, fine-pointer desktop only                                                    |
-| Fonts                      | Archivo (wdth + wght, italic) and Martian Mono via `next/font/google`, self-hosted  |
-| Hosting                    | Netlify: static files, plus one Edge Function (the Basecamp gate) off production   |
-| Terrain                    | Node scripts with geotiff.js and d3-contour                                         |
-
-## Local development
-
-Requirements: Node 22.18 or newer (see `.nvmrc`) and npm.
-
-Motion+ is a private package. The committed `.npmrc` points the `@motionplus` scope at
-`https://api.motion.dev/npm/` and reads the token from the `MOTION_TOKEN` environment variable. npm doesn't
-read `.env` files, so export the token in your shell before installing:
-
-```sh
-# macOS / Linux
-export MOTION_TOKEN=your-token
-# Windows PowerShell
-$env:MOTION_TOKEN = "your-token"
-# Windows cmd
-set MOTION_TOKEN=your-token
-
-npm ci
-npm run dev      # http://localhost:3000
+```
+content/                    All editable text. No components.
+  schema.ts                 Types for every page and egg (the content contract, the same for each language)
+  index.ts                  The typed entry point: one content set per language (read through src/lib/content.ts)
+  deck.ts                   The four cards without text: ids, order, colour identities, paths
+  de/, en/                  One content set per language:
+    hand.ts, site.ts        Slim modules the client gets (four cards, Coffee card, chrome labels)
+    cases/*.ts              The three case studies
+    pages/*.ts              Home, Management, workshop methods, About (with projects and contact), 404
+    illustrations.ts        The words inside the drawings (titles, descriptions, labels)
+    images.ts (de)          German alt text (English alt text is the registry's own)
+  images.ts                 Image registry for <Picture>, generated by scripts/images (do not edit)
+  gate.ts                   The password gate's identity (real); its words per language in de/gate.ts, en/gate.ts
+public/images/              13 photos, AVIF / WebP / JPEG at 640, 1280 and 2048 px
+public/contour-bg/          About's background: the old password page's contour SVGs (added by hand, unchanged)
+scripts/
+  images/                   manifest.mjs (photos, alt, credits), fetch-and-build.mjs, check.mjs
+  smoke.mjs                 Behaviour check, 1440x900 and 390x844, per language and motion tier
+  build-numerals.mjs        Before `next build`: the chapter numerals' outlines (fontkit, scripts/assets/)
+  terrain/build-field.py    About's region heightmap (public/terrain/field.webp) from the master in terrain/
+  i18n-pages.mjs            After `next build`: <html lang> per page, the root's language choice, the 404 page
+  load-ts.mjs               Loads content and src/lib TypeScript modules from Node scripts
+  hosting/                  After i18n-pages: build.mjs (_redirects, _headers, the gate's edge function per
+                            SITE_ACCESS), gate-page.mjs (the gate page's model, CSS and CSP)
+  budget.mjs, audit.mjs, vitals.mjs, lighthouse.mjs, serve-static.mjs
+src/
+  app/                      layout.tsx (root: <html>, the field), [locale]/ (layout with the chrome; pages:
+                            home, /work/[slug], /management, /about, /about/thesis, /404, /logo-lab)
+  lib/                      i18n.ts (locales, paths, the language rule), content.ts (server),
+                            chrome.tsx and hand-data.ts (client: the active language's chrome)
+  design/                   palette.ts (colour identities), layout.ts and type.ts (typed token mirrors)
+  motion/
+    tokens.ts               The only source of easings, springs, durations, staggers, distances
+    scenes/                 Scroll scenes (deal-scene.ts: the case-study DealRow)
+    table-store.ts          The table: active / hover / last played card, tier, field target
+    play.ts                 Play / return / switch, stage 1 (lift); view-transition.ts watches stage 2
+    reveal.ts               Reveal engine (kinds.ts, jobs.ts, first-load.ts, split.ts)
+    transitions.ts          Transition types and view-transition class maps
+    preferences.ts          Pre-paint script: tier, intro flag, reveal arming, initial field colour
+    header-scroll.ts        The header leaving on a scroll down and returning on a scroll up
+  components/
+    background/             The field: engine, WebGL2 shader, OKLab, CSS fallback, About's contour morph
+                            (heightmap, SVG layer, its spec in contours.ts)
+    about/                  The two-lane career timeline
+    thesis/                 The thesis overview's hero and screenshot slots
+    hand/                   The hand (fan, rail, sheet) and card faces
+    layout/                 SectionIndex, NumeralBreaker, OffsetImage, MetaPairs, Scoreboard, DealRow,
+                            WorkshopRow, MarginNote, Minimap, Section
+    illustrations/          13 SVG illustrations behind one registry; thesis/ the thesis overview's five
+    picture.tsx             <Picture id sizes priority> from content/images.ts
+    case-hero.tsx           Played card as hero; header.tsx (home slot, About, language), reveals.tsx, ...
+  eggs/                     registry.ts (flags + tier behaviour) and one module per egg
+  styles/                   tokens, layout (Spread grid), type (scale), field, hand, reveal,
+                            view-transitions, eggs, pages/
+  fonts/                    Bricolage Grotesque (opsz + wght), Hanken Grotesk, Martian Mono, Caveat; OFL
+  hosting/                  The password gate: config.ts (domains, SITE_ACCESS, gate constants), gate.ts
+                            (cookie, password, next, origin, language), gate-handler.ts (the edge function),
+                            page.ts (the gate page), gate.test.ts (npm test)
+terrain/                    The region master build-field.py reads (kept from the old site; never deployed)
+netlify.toml                Build and deploy contexts (Netlify)
 ```
 
-Never commit the token. `.env*` files are git-ignored; `.env.example` lists the variables.
+## Commands
 
-| Script                   | What it does                                                                       |
-| ------------------------ | ---------------------------------------------------------------------------------- |
-| `npm run dev`            | Next dev server plus the local save endpoint for the tuning panel (port 4319)     |
-| `npm run build`          | Builds the deploy for `SITE_MODE` into `out/` (see "Hosting on Netlify")          |
-| `npm run preview`        | Serves `out/` like a static host, including the base path and gzip               |
-| `npm run lint`           | ESLint (Next.js core-web-vitals + TypeScript rules)                               |
-| `npm run typecheck`      | Generates route types, then `tsc --noEmit`                                        |
-| `npm run check:contrast` | WCAG contrast of the token colour pairs                                            |
-| `npm run check:content`  | Lists every content placeholder still to fill, with file, line and field          |
-| `npm test`               | Unit tests of the Basecamp gate (`node:test`)                                      |
-| `npm run test:e2e`       | Chromium checks against `out/`: aborted view transitions, calm navigation, decode |
-| `npm run test:hosting`   | Gated and production deploys under netlify-cli (build, edge runtime, redirects)   |
-| `npm run report:size`    | Initial JS/CSS/fonts per route, lazy chunks, terrain assets (gzip)               |
-| `npm run terrain`        | Regenerates `public/terrain` from swisstopo data                                  |
-| `npm run verify:terrain` | Checks that the committed heightmaps decode to the exact source heights          |
-| `npm run fonts:subset`   | Regenerates the under-construction page's WOFF2 subsets in `src/hosting/fonts`    |
+| Command             | What it does                                                      |
+| ------------------- | ----------------------------------------------------------------- |
+| `npm run dev`       | Development server                                                |
+| `npm run build`     | `scripts/build-numerals.mjs`, then the static export to `dist/` (type check, content checks for both languages), then `scripts/i18n-pages.mjs` and `scripts/hosting/build.mjs` (the gate, per `SITE_ACCESS`) |
+| `npm run preview`   | Serve `dist/` like a static host, at the root (port 4100, no gate)  |
+| `npm run typecheck` | TypeScript                                                        |
+| `npm test`          | The password gate's unit tests (Node's test runner)              |
+| `npm run format`    | Prettier                                                          |
 
-Without `SITE_MODE`, `npm run build` builds the full site (`live`). To check that every asset goes through
-`asset()`, build for a sub-path:
+With `npm run preview` running, once per language:
+`node scripts/smoke.mjs http://localhost:4100/de/ [--motion=full|reduced]` (behaviour,
+including the root's language choice and the switcher) and `node scripts/budget.mjs <url>`
+(initial JS at most 170 KB gzip). In `npm run dev` the root `/` has no page (it is written at
+build time): open `/de/` or `/en/`.
 
-```sh
-# macOS / Linux (on Windows set the variables first, as above)
-NEXT_PUBLIC_BASE_PATH=/portfolio NEXT_PUBLIC_PREVIEW=1 npm run build
-NEXT_PUBLIC_BASE_PATH=/portfolio npm run preview   # http://localhost:3000/portfolio/
-```
+## Languages
 
-### Base path
+- Every page exists under `/de/` and `/en/`, with the same card slugs. `<html lang>`, hreflang
+  alternates (with `x-default` on the root) and Open Graph locale (`de_CH`, `en_GB`) per page.
+- The root (`/`) chooses with an inline script before anything paints and replaces the URL:
+  a stored choice (localStorage `locale`) wins, then the first of `navigator.languages` that
+  starts with `de` or `en`; other languages get English, none get German. Without JavaScript it
+  shows links to both. On the 404 page the address's own `/de/` or `/en/` decides; only an
+  address without one is picked the same way. It keeps the unknown address; an old address
+  without a language (`/about/`) moves to the same page in the picked language.
+- The header's switcher (DE, EN) links each language to the same page in it. Switching stores the choice,
+  keeps the page and the reading position, and cross-fades once (never the card transition,
+  never the home intro).
+- German copy: Swiss Standard German ("ss", never "ß"), informal "du", no em-dashes or semicolons
+  (the build checks these three). Method and product names stay as they are.
 
-`next.config.ts` reads `NEXT_PUBLIC_BASE_PATH` (empty by default). `next/link` and `next/image` handle it
-automatically. Every other runtime URL (heightmaps, terrain SVGs, textures, fetch calls) must go through
-`asset()` in `src/lib/asset.ts`.
+## Environment
 
-`NEXT_PUBLIC_PREVIEW=1` adds `<meta name="robots" content="noindex, nofollow">` and a disallow-all
-`robots.txt`. Production builds leave it unset.
+| Variable        | Where                                   | Purpose                                                          |
+| --------------- | --------------------------------------- | ---------------------------------------------------------------- |
+| `MOTION_TOKEN`  | Shell, repository secret, Netlify       | Motion+ registry token read by `.npmrc`. Never commit it.        |
+| `SITE_ACCESS`   | `netlify.toml`, per deploy context      | `gated` (default: the password gate, noindex) or `public`         |
+| `SITE_PASSWORD` | Netlify UI only (Functions scope)       | The gate's password, read at runtime. Never commit it.           |
+| `SITE_URL`      | `netlify.toml` (the deploy's own URL)   | Absolute URLs: Open Graph image, hreflang. Unset locally.        |
+| `BASE_PATH`     | Optional, empty by default              | Sub-path of the export, e.g. `/sub/`; Netlify serves the root.    |
 
-### Content and placeholders
+Motion+ is an optional dependency: without a token `motion-plus` resolves to
+`src/motion/plus-fallback.ts` and the type check uses `tsconfig.fallback.json`.
 
-All copy lives in `src/content`. Facts still to confirm are written as `[PLACEHOLDERS]` (links as `href: null`);
-they stay visible in preview builds so gaps are easy to spot. Stats are optional everywhere (cards, case-study
-summary, Basecamp): a stat row shows only the stats that have a value and disappears when none has one.
-`npm run check:content` lists every remaining placeholder with file, line and field. `npm run build` runs it for
-its `SITE_MODE`:
+## The table
 
-- `construction` requires only what the under-construction page shows: the name and the email and LinkedIn
-  links (`npm run check:content -- --mode=construction` lists those);
-- `basecamp` only warns;
-- `live` fails on any placeholder.
+- **Background field**: one WebGL2 canvas (hand-written shader, half resolution, DPR capped at 1,
+  30 fps, idle when nothing moves). Three soft colour pools in low-frequency noise, 2% static grain,
+  a 9 s breath and a slow drift of the pools (loops of 90 s and more). It never reads the pointer.
+  On About its pools contract and fade into the ground while contour lines rise from a noise
+  relief onto the region's real heights (1.6 s, at the device's resolution only while it runs);
+  in its last 300 ms the old password page's SVG (`public/contour-bg/`) crossfades over it, and
+  from then on the canvas draws nothing and only the SVG drifts, very slowly. Colours are mixed in
+  OKLab. Without WebGL2, or after slow frames (average over 24 ms in two 60-frame windows),
+  registered `@property` colours on stacked gradients take over with the same transitions. It
+  pauses when the tab is hidden, while the mobile sheet is open, and on Save-Data (no breathing).
+- **Hand**: `<nav aria-label="Work">`, exactly four card links. Cards show index, years, title
+  band, a one-line summary and the facts. Desktop: a fan at the bottom centre (176x246 cards, 72%
+  visible on home, 45% elsewhere); hover or focus lifts a card until 90% shows. Mobile: the fan
+  on home, elsewhere a 48px peek rail that opens a bottom sheet (a native popover) with the
+  cards. One tab stop (arrows, Home/End). The header holds the home slot (the logo, its F card
+  in one of four gradients per load, or Back on detail pages) and the tray (About and the
+  language switcher on one capsule). On pages that scroll it leaves on a scroll down and returns
+  on a scroll up (the mobile rail with it); on detail pages Back stays on a floating chip.
+- **Detail pages**: the played card continues as the hero: its media frame slides off the right
+  edge (the hero photo, or Management's drawing), the display H1 runs onto it, then the facts,
+  the Scoreboard and numbered sections on the Spread grid (outlined chapter numerals, sticky
+  index, offset images, Minimap at the right edge, margin notes from 1680 px), ending with the
+  next card.
+- **Play / return / switch**: stage 1 lifts the card to where it will lie while the field blooms;
+  stage 2 is React's view transition (`card-<slug>` and `card-title-<slug>` shared between the hand
+  card and the hero / H1), a same-shape zoom. Return: Back, Escape, the logo, browser back, or
+  leaving a card page. Browser back / forward are replayed as typed navigations, so they morph
+  too.
 
-A local build with `NEXT_PUBLIC_PREVIEW=1` only warns in every mode.
+Two motion tiers: full, and reduced from the system setting (`prefers-reduced-motion`), which also
+stills the background's ambient motion.
 
-### Tuning the contour field
+| Effect                | Full                                                                     | Reduced                 |
+| --------------------- | ------------------------------------------------------------------------ | ----------------------- |
+| Field breath, drift   | 9 s breath, pools drift; About: the contours drift                       | still, 160 ms swaps     |
+| Hover a card          | lift to 90% shown on the hover spring; field blends (80 ms)              | instant                 |
+| Play                  | press, lift, bloom 800 ms, zoom 580 ms                                   | near-instant            |
+| Return / switch       | 520 ms back to the slot / 560 ms in, OKLab crossfade                     | near-instant            |
+| Into / out of About   | pools fade into the ground, lines rise onto the terrain (1.6 s)          | 160 ms crossfade        |
+| Header on scroll      | leaves 200 ms ease-in, returns 240 ms outQuint (translate)               | 160 ms crossfade        |
+| Home first visit      | name, label, intro, divider, items, then the hand dealt, in about 2 s    | fades, 160 ms           |
+| Home title            | words turn up, wght 280 -> 700, opsz 24 -> 96                            | opacity, 160 ms         |
+| Page titles, sections | ten reveal kinds (lines, block, list, image, digits, rule, draw, note, pair, deal) | opacity, 160 ms |
+| Scroll-linked         | reading hairline, hero drift, pinned deal (≥ 1024)                       | hairline (clip)         |
 
-In `npm run dev`, a collapsed "Tuning (dev only)" leva panel controls every uniform: contour spacing, index
-lines, line widths and opacities, colour tokens, headlamp, glow, drift, intro and morph durations.
+## About topography
 
-The contour interval adapts to the screen. It is the smallest of 50, 100, 200, 250 and 500 m that keeps lines on
-steep terrain (the map's 95th-percentile gradient) at least `minSpacingPx` CSS pixels apart at the map's
-on-screen scale; every 5th line is an index line. With the committed `minSpacingPx: 3` phones in portrait get
-200 m (250 m on 320 px wide screens), 1280–1440 px laptops 200 m, tablets and 1920+ px desktops 100 m. The panel
-shows the interval in use; resizes glide to the new interval, and morphs blend between the two terrains'
-intervals. "Save to config"
-writes the values to `src/config/contour-field.json`, which is committed. Colours and durations are stored as
-token names. Leva is never part of the production build. Add `?field=force` to a URL to skip the low-spec check,
-which is useful in headless browsers.
+The old password page's contour background of Interlaken between Lake Thun and Lake Brienz: two
+SVGs (`public/contour-bg/contours.svg` and the lighter `contours-200.svg`, added by hand and used
+unchanged; lakes as an 8% fill, 1 px lines at 0.55 and index lines at 1.5 px at 0.9 in #8A8C80),
+shown as an `<img>` layer at 42% over the page's ground under its vignette. The shader morph
+draws the same picture from a small region heightmap (`public/terrain/field.webp`, built by
+`python3 scripts/terrain/build-field.py .` from the swissALTIRegio master in `terrain/`, kept
+from the old site and never deployed, with the SVG's lakes baked in), so the hand-over to the SVG
+is seamless. No headlamp and no pointer.
+Credit: "Terrain data © swisstopo", linked to swisstopo's terms of use.
+
+## Easter eggs
+
+Registered in `src/eggs/registry.ts` (an `on` flag and the full / reduced behaviour of each). Press `?` on the site for the shortcut sheet.
+
+| Egg                 | Trigger                                                              |
+| ------------------- | -------------------------------------------------------------------- |
+| New hand            | M on the start page, or a long press on the empty table (touch)      |
+| Workshop draw       | "Draw a method" on /management                                       |
+| Rare pull           | 1 in 40 loads (or `?rare`): one card gets a single holographic glint |
+| Turn sideways       | T on a focused card, or a double tap while a card lifts (mobile)     |
+| Look closer         | Hold Space on a focused card, or a long press (mobile)               |
+| Coffee?             | Type "draw" on the start page: a fifth card is dealt (to Contact)    |
+| Idle hint           | 10 s on the start page without input: a handwritten note (`?idle`)   |
+| Shortcut sheet      | `?`                                                                  |
+| What's on the table | About: five face-down mini cards                                     |
+| 404                 | Any unknown address: a card falls into the discard zone              |
+
+## Accessibility
+
+Skip link, landmarks, one `h1` per page, card links named by their visible text, decorative layers
+`aria-hidden`. After every navigation focus moves to the page heading (or back to the card that
+was open), and the title is announced in a polite live region; eggs announce themselves there too.
+Weight-animated text keeps one plain copy for screen readers and reserves every word box at its
+final weight. Without JavaScript every page is complete and shows its final state. The background
+moves on its own, very slowly and at low contrast; it is still when the system asks for reduced
+motion and while the tab is hidden (the header's pause button was removed in round 3). A header
+that has left on a scroll comes back as soon as focus moves into it.
 
 ## Hosting on Netlify
 
-Netlify builds this repository with continuous deployment. The domains are configuration values in
-`src/hosting/config.ts`: `PRIMARY_DOMAIN` (production), `REDIRECT_DOMAINS` (aliases that 301 to
-`https://PRIMARY_DOMAIN`, path kept) and `BASECAMP_HOST` (the branch subdomain of `basecamp`).
+Continuous deployment from this repository. `main` is production and the only long-lived branch;
+pull requests target `main`, get a Deploy Preview from Netlify and CI from
+`.github/workflows/ci.yml` (install, type check, build, gate tests). The domains are named in
+`src/hosting/config.ts` only: `PRIMARY_DOMAIN` and its aliases `REDIRECT_DOMAINS`.
 
-### Deploy model
+### Deploy contexts
 
-| Deploy context  | Branch                     | `SITE_MODE`    | Serves                                                    |
-| --------------- | -------------------------- | -------------- | --------------------------------------------------------- |
-| Production      | `main`                     | `construction` | The under-construction page at `PRIMARY_DOMAIN`           |
-| Branch deploy   | `basecamp`                 | `basecamp`     | The full site behind the password gate at `BASECAMP_HOST` |
-| Deploy Previews | pull requests              | `basecamp`     | The same, gated, at the preview URL                       |
+| Context        | Built from                      | Address                                     | Access until launch |
+| -------------- | ------------------------------- | ------------------------------------------- | ------------------- |
+| Production     | `main`                          | `PRIMARY_DOMAIN`; aliases 301 to it         | gated               |
+| Deploy Preview | each pull request into `main`   | `deploy-preview-<n>--<project>.netlify.app` | gated               |
+| Branch deploy  | none (production branch only)   |                                             | gated               |
 
-`basecamp` is the integration branch: pull requests target it, and `main` is production. `netlify.toml` sets
-`SITE_MODE` per context, and `npm run build` (`scripts/site/build.mjs`) builds accordingly:
+Every deploy is gated, deploy permalinks (`<deploy id>--<project>.netlify.app`) included: the gate is
+part of each deploy, not of a domain. `netlify.toml` builds every context the same way:
+`npm run build` with `SITE_URL` set to the deploy's own URL (`$URL` in production,
+`$DEPLOY_PRIME_URL` elsewhere), publish `dist/`, Node 22, and Netlify's automatic Next.js runtime
+switched off (`NETLIFY_NEXT_PLUGIN_SKIP`): plain static files. `SITE_ACCESS` (per context, default
+`gated`; only the exact value `public` opens) decides the rest; `scripts/hosting/build.mjs` writes
+`dist/_redirects` (aliases, the gate's asset rewrite), `dist/_headers` and, while gated, the gate.
 
-- **construction**: only the under-construction page. A small Node script renders it from the design tokens and
-  `src/content/about.ts` (no Next.js, no Three.js): static HTML with inline CSS, self-hosted WOFF2 subsets of
-  Archivo and Martian Mono, and the contour poster (200 m on small screens, 100 m where the site's field draws
-  100 m too). The only script runs the live Bern clock and the pointer/touch headlamp; both stay off with
-  reduced motion, and the page is complete without JavaScript. Every other path redirects (302) to `/`, and
-  `REDIRECT_DOMAINS` redirect (301) to `PRIMARY_DOMAIN`. A phone visit transfers about 81 KB
-  (`npm run report:size` after a construction build).
-- **basecamp**: the full static export, plus the gate as a Netlify Edge Function. The build writes it to
-  `.netlify/v1/edge-functions/` (Netlify's Frameworks API), so it exists only in these deploys; production has
-  no edge function at all.
-- **live**: the full site, no gate. Prepared for launch, not enabled.
+### The password gate
 
-Netlify's automatic Next.js runtime is switched off (`NETLIFY_NEXT_PLUGIN_SKIP=true` in `netlify.toml`): deploys
-are plain static files. Each mode writes its own `_redirects` and `_headers` into `out/`, because headers and
-redirects in `netlify.toml` would apply to every context alike.
+A Netlify Edge Function (`src/hosting/gate-handler.ts`, its entry generated by the build into
+`.netlify/v1/edge-functions/`) runs in front of every path except the gate page's fonts
+(`/.gate/assets/*`):
 
-### The Basecamp gate
+- **Domain aliases** answer first with a 301 to `https://PRIMARY_DOMAIN` (path and query kept), so
+  the cookie is only ever set on the primary host.
+- **No valid cookie:** the gate page, 401 and `no-store`, for every path: pages, scripts, images,
+  data files, unknown paths (the site's 404) and `robots.txt` (the gate answers `Disallow: /`
+  itself). Nothing of the site leaves the edge.
+- **The page:** the site's logo, the name, one sentence (the portfolio is being reworked and needs
+  a password), the password form and email and LinkedIn for visitors without a password; the
+  site's tokens, fonts and dark ground with a CSS colour field that breathes (still under reduced
+  motion and with Save-Data). No JavaScript needed; inline CSS and script only, pinned by hash in
+  the page's Content-Security-Policy. German or English by the site's language rule, decided on
+  the server from `Accept-Language` (German first, English first, any other language English, none
+  German); the DE·EN switch (`/.gate/lang/<de|en>`) remembers a choice in a cookie, and with
+  JavaScript for the site too.
+- **Unlock:** the form posts to `/.gate/unlock`, same origin only. The right password sets
+  `__Host-gate` (HttpOnly, Secure, SameSite=Lax, host-only, 30 days: an HMAC-SHA-256 of its
+  expiry, keyed from the password by PBKDF2) and returns to the page that was asked for. A wrong
+  one waits 750 ms and shows the form again with the error in the field, the tab title and an
+  announced message. The comparison is constant-time; `next` must be a same-host path.
+- **Lock:** open `/.gate/lock` to clear the cookie.
+- **Fails closed:** without `SITE_PASSWORD` every path shows "closed" (503) and the function logs
+  why once; an error in the function stops the request (`onError: 'fail'`).
+- Every response carries `X-Robots-Tag: noindex, nofollow`; unlocked responses are `private`
+  (content-hashed files under `/_next/static/` stay cacheable for a year, privately).
 
-`src/hosting/gate.ts` (logic) and `src/hosting/gate-handler.ts` (requests) protect every path of a `basecamp`
-deploy: pages, RSC payloads, scripts and terrain data. Only the gate's own assets under `/.basecamp/assets/`
-(styles, fonts, poster) are public, and the gate answers `robots.txt` itself with `Disallow: /`.
-
-- Without a valid cookie the gate page is shown (the under-construction design with the password form):
-  401, `Cache-Control: no-store`.
-- The form posts `password` and `next` to `/.basecamp/unlock`. The password is compared with
-  `BASECAMP_PASSWORD` in constant time (both sides hashed first). The request is accepted only from
-  `https://PRIMARY_DOMAIN` (the production page's "Basecamp access" form), from the gated host itself, or
-  without an Origin header.
-- On success the gate sets `__Host-basecamp` (Secure, HttpOnly, SameSite=Lax, Path=/, 30 days). Its value is
-  an expiry plus an HMAC-SHA-256 signature; the key is derived from the password, so changing the password logs
-  everyone out. Then a 303 to `next` if it is a same-host relative path, else to `/`.
-- A wrong password waits ~750 ms, then shows the gate again with an error announced to screen readers.
-- `/.basecamp/lock` clears the cookie and shows the gate.
-- Without `BASECAMP_PASSWORD` the gate fails closed: the page says Basecamp is closed, and one log line says why.
-- Every gated response carries `X-Robots-Tag: noindex, nofollow`; shared caching is switched to `private`.
-
-`npm test` covers cookie signing, expiry, tampering, `next`, Origin and the constant-time comparison.
-`npm run test:hosting` runs the deploys under netlify-cli (`npm i -g netlify-cli`, or `NETLIFY_CLI=…`):
-`netlify serve --context deploy-preview` exercises the gate in Netlify's edge runtime (plus the form in Chromium
-when Playwright resolves), and `netlify serve --context production` the under-construction page, its redirects
-and the absence of the gate. The production run is skipped while the page's own facts are placeholders.
-
-### Netlify and GitHub settings
-
-Netlify (once, in the UI):
-
-1. **Add new project → Import an existing project →** this GitHub repository. Build settings come from
-   `netlify.toml` (build command `npm run build`, publish directory `out`).
-2. **Project configuration → Developer settings → Continuous deployment → Branches and deploy contexts →
-   Configure:** Production branch `main`; Branch deploys: **Let me add individual branches** → `basecamp`;
-   Deploy Previews on (pull requests into `main` or `basecamp` get one, because `basecamp` has branch
-   deploys).
-3. **Project configuration → Environment variables → Add a variable:**
-   - `MOTION_TOKEN`: scope **Builds**, all deploy contexts.
-   - `BASECAMP_PASSWORD`: scope **Functions**, deploy contexts **Branch deploys** and **Deploy Previews**,
-     marked **Contains secret values**. Edge functions read it at runtime; variables in `netlify.toml` never
-     reach them.
-4. **Domain management → Domains → Add a domain:** `PRIMARY_DOMAIN` as the primary domain, then each of
-   `REDIRECT_DOMAINS` as a domain alias. HTTPS certificates are issued automatically.
-5. **Domain management → Domains → Branch subdomains → New subdomain:** branch `basecamp`, which becomes
-   `BASECAMP_HOST`. Branch subdomains need Netlify DNS for `PRIMARY_DOMAIN` (the domain's **Options → Set up
-   Netlify DNS**, then Netlify's name servers at the registrar), and the branch needs one successful deploy
-   first.
-
-GitHub:
-
-1. **Settings → Secrets and variables → Actions:** `MOTION_TOKEN` (CI installs Motion+ with it).
-2. Create the `basecamp` branch from `main`. Optionally make it the default branch (**Settings → General →
-   Default branch**) so new pull requests target it.
-3. **Settings → Pages:** unpublish the old GitHub Pages preview; its workflow is gone.
-
-`.github/workflows/ci.yml` checks pull requests into `basecamp` and `main`: lint, types, contrast, unit tests,
-the construction build (into `main` with the production content check), the gated build, the size reports, and
-`npm run test:hosting`.
+Copy: `content/gate.ts` (the real name, email and LinkedIn link) and `content/<locale>/gate.ts`
+(German by the site's rules, which the build checks). Tests: `npm test`.
 
 ### Changing the password
 
-Edit `BASECAMP_PASSWORD` under **Project configuration → Environment variables**, then redeploy the `basecamp`
-branch (**Deploys → Trigger deploy → Deploy project**, or push to it). Each deploy keeps the value it was built
-with, so existing Deploy Previews keep the old password until they are rebuilt. Every cookie signed with the old
-password stops working, so everyone has to enter the new one.
+Netlify → the project → **Project configuration → Environment variables** → `SITE_PASSWORD` →
+**Edit** → enter the new value for Production, Deploy Previews and Branch deploys → **Save**. Then
+redeploy, because functions read variables at deploy time: **Deploys → Trigger deploy → Deploy
+project** (and push again to open pull requests for their previews). Every existing cookie stops
+working with the new deploy: the cookie's key is derived from the password. The variable must
+keep the **Functions** scope and be marked secret; variables in `netlify.toml` never reach edge
+functions.
 
 ### Launch
 
-1. Fill every placeholder (`npm run check:content` lists them; live builds fail on any).
-2. In `netlify.toml`, set `SITE_MODE = "live"` under `[context.production.environment]`.
-3. Merge `basecamp` into `main`. Production then serves the full site without a gate; `basecamp` and Deploy
-   Previews stay gated.
+One switch: in `netlify.toml`, under `[context.production.environment]`, set
+`SITE_ACCESS = "public"` and merge into `main`. Production then has no gate and no edge function,
+its pages drop the noindex meta, `robots.txt` allows crawling and no `X-Robots-Tag` is sent.
+Deploy Previews stay gated. Before that: replace the fictional content in `content/`.
 
-## Terrain pipeline
+### Locally
 
-`npm run terrain` (`scripts/terrain/build.mjs`, configured by `src/content/terrain.config.json`):
+`npm run preview` serves `dist/` without the gate. The deploy as Netlify runs it, gate included:
+Netlify CLI, with a password in `.env.development.local` (git-ignored; locally, edge functions read
+variables from `.env` files only, and `DENO_CERT` there for a TLS-intercepting proxy):
 
-- **Area:** Thun – Interlaken – Grindelwald – Lauterbrunnen – Jungfrau, WGS84 bbox 7.55–8.25 E, 46.47–46.80 N,
-  converted to Swiss LV95 (EPSG:2056).
-- **Source:** swisstopo **swissALTIRegio** (10 m DTM), found through the STAC API on `data.geo.admin.ch`. It is
-  published as one cloud-optimised GeoTIFF of all of Switzerland (~10 GB). Its overviews jump from 10 m to
-  40 m, so the pipeline reads only the tiles covering the bbox at 10 m with HTTP range requests (geotiff.js).
-  That is ~100 MB, downloaded once into the git-ignored `scripts/terrain/.cache/`. DHM25 is not in the STAC
-  catalogue; swissALTI3D would mean thousands of 1 km tiles.
-- **Outputs** (`public/terrain`, committed):
-  - `heightmap-1024.webp` (53 m/px, 382 KB), `heightmap-1536.webp` (35 m/px, 710 KB) and
-    `heightmap-2048.webp` (26 m/px, 1.1 MB): elevation packed into R (high byte) and G (low byte), 1 m steps,
-    light σ=1 blur, stored as **lossless WebP** (about 40% smaller than PNG). Decoded in the shader as
-    `h = offset + (R·65280 + G·255)·scale`. Phones and small screens load the 1024 map, desktops the 1536 map.
-    The 2048 map is only used in preview builds with `?hm=2048` (also `?hm=1024` / `?hm=1536`), to compare
-    them side by side.
-  - `terrain.json`: elevation range, LV95/WGS84 bbox, pixel scale, encoding, lakes and card metadata.
-  - `contours.svg` (100 m, 67 KB gzipped) and `contours-200.svg` (200 m, 35 KB gzipped): the first-paint,
-    reduced-motion and no-WebGL posters, every 5th line an index line, lakes as filled shapes found as flat
-    surfaces in the DTM. A media query computed from the same spacing rule as the field picks one, so the
-    poster and the field show the same interval (100 m on large screens and tablets, 200 m on phones and
-    laptops).
-  - `cards/*.svg`: the leader card's Interlaken → Jungfrau crop (200 m lines) and seeded-noise terrains for
-    project cards (seed = collector number, ~20 lines, every 4th an index line).
-  - `morph/*.webp`: per-card heightmaps the field morphs to on case-study pages and Basecamp.
-  - `profile.json`: the elevation profile along the leader trail (240 points, ~1 KB gzipped) for the About
-    page's ascent chart.
-- `npm run terrain -- --refresh` re-downloads; `-- --placeholder` builds from procedural terrain without the
-  network; `-- --png` also writes PNG copies (git-ignored, not used by the site).
-- `*.bin` next to every heightmap: the same heights as raw 16-bit values (gradient-predicted, zigzag-coded,
-  gzipped by the pipeline), about 10% smaller than the WebP. The site only fetches them in a session where a
-  browser decoded a WebP to different values (see "Heightmap decode check").
-- **Exact heights:** every WebP and `.bin` is decoded again right after encoding and must match byte for byte;
-  the raster's SHA-256 and 16 reference texels are recorded in `terrain.json`. `npm run verify:terrain` re-checks the committed files with libwebp;
-  `npm run verify:terrain -- --browser` also decodes them in Chromium the way the site does
-  (`createImageBitmap` without colour-space conversion or premultiplied alpha, no flip, WebGL2 read-back).
-  The browser check needs Playwright.
-
-### Heightmap decode check
-
-The WebPs are decoded as raw data (no colour-space conversion, no premultiplied alpha, no flip), but a browser
-could still alter the values, for example by ignoring `colorSpaceConversion: "none"` for WebP. So the field
-checks every heightmap once per session (`src/components/terrain/heightmap-loader.ts`):
-
-1. After the texture is uploaded, exactly as the shader samples it, its 16 reference texels from `terrain.json`
-   are copied from the texture through a throwaway framebuffer into a pixel-pack buffer and read once a fence
-   says the GPU is done. No shader, no draw, no main-thread wait; it runs after first paint, before the field
-   fades in, and the result is remembered for the session.
-2. On a mismatch the session switches to the raw 16-bit heights (`*.bin`, decoded with `DecompressionStream`
-   into a `DataTexture`, which nothing can colour-manage) and checks those the same way.
-3. If that is unavailable or fails too, the field stays on the SVG poster for the session.
-
-One console warning names the browser and the first differing texel. `npm run test:e2e -- decode` simulates
-a colour-managing browser (a gamma curve on decoded pixels) with and without `DecompressionStream`.
-
-Attribution: "Terrain data © swisstopo" appears in the HUD and the footer.
-
-## Accessibility and motion
-
-- Semantic HTML first. The hero name is server-rendered text, so LCP is text, not the canvas.
-- All interactions work with the keyboard. Each card is a single link, named by the card's title, with the focus
-  ring around the card. Focus returns to the originating card after navigating back.
-- Kinetic headlines keep a hidden rest-state copy of each letter, so the animation never changes layout (no CLS).
-  The accessible name is the plain text.
-- Every effect has a reduced-motion twin, triggered by `prefers-reduced-motion` or the Calm map toggle (stored
-  in localStorage):
-  - the field becomes the static poster;
-  - tilt is off;
-  - the foil is static;
-  - headlines don't animate;
-  - the deck doesn't deal in;
-  - no View Transition runs at all: pages change directly and the incoming page fades in over 150 ms (opacity
-    only); focus return and scroll restoration work as in full motion.
-- Navigation finishes cleanly even when a view transition is skipped, times out or fails: React commits the
-  route change anyway, and the arriving heading settles. `npm run test:e2e -- transitions` simulates all three
-  (forward, back, forward again) plus Calm map and reduced motion, and checks the page, focus, the field's
-  terrain (`data-terrain` on the backdrop) and that nothing is left hidden. It needs Playwright with Chromium
-  and a build in `out/`.
-- WCAG AA contrast is checked by `npm run check:contrast`, including sheet and glacier text over the faded
-  lines of a quiet zone. Contour-coloured labels keep their halo (`.keep-halo`), and the poster fallback keeps
-  all halos and its vignette.
+```bash
+netlify serve --offline --context deploy-preview
+```

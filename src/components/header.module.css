@@ -1,0 +1,510 @@
+/*
+ * On scrolling pages the header leaves after a deliberate scroll down and comes
+ * back on a scroll up (html[data-header="hidden"], src/motion/header-scroll.ts):
+ * translate only, 200 ms ease-in out and 240 ms outQuint back. The reading
+ * hairline stays on screen meanwhile, along the top edge. Reduced: the
+ * header's content and backdrop crossfade (160 ms); nothing slides.
+ */
+.header {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: var(--z-header);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  height: var(--header-h);
+  /* Aligned with the Spread grid: the margin, or the centred 12 x 96 px columns from 1440. */
+  padding: 0 max(var(--grid-margin), calc((100% - 1416px) / 2));
+  transition: translate var(--dur-header-show) var(--ease-out-quint);
+  /* One stable compositor layer: hiding and showing never promotes / demotes (and repaints) it. */
+  will-change: translate;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--ink-field) 70%, transparent), transparent);
+  pointer-events: none;
+}
+:global(:root[data-header='hidden']) .header {
+  translate: 0 -100%;
+  pointer-events: none;
+  transition: translate var(--dur-header-hide) var(--ease-in);
+}
+/* The hairline (the header's last child, on its bottom edge) stays in view along the top edge. */
+.header > :last-child {
+  transition: translate var(--dur-header-show) var(--ease-out-quint);
+  will-change: translate;
+}
+:global(:root[data-header='hidden']) .header > :last-child {
+  translate: 0 100%;
+  transition: translate var(--dur-header-hide) var(--ease-in);
+}
+:global(:root[data-motion='reduced']) .header,
+:global(:root[data-motion='reduced']) .header > :last-child {
+  translate: none;
+  transition: none;
+}
+:global(:root[data-motion='reduced']) .header::before,
+:global(:root[data-motion='reduced']) .header > :not(:last-child) {
+  transition: opacity var(--dur-reduced) linear;
+}
+:global(:root[data-motion='reduced'][data-header='hidden']) .header::before,
+:global(:root[data-motion='reduced'][data-header='hidden']) .header > :not(:last-child) {
+  opacity: 0;
+}
+/* The hairline moves to the top edge at once (no slide). */
+:global(:root[data-motion='reduced'][data-header='hidden']) .header > :last-child {
+  translate: 0 calc(1px - var(--header-h));
+}
+
+/*
+ * The tray (T4): About, a hairline and the language switcher in one capsule,
+ * drawn by .end::before (36 px high inside the 44 px targets, a hairline edge
+ * on a dimmed ink fill). Its chips share the capsule's language: the switcher's
+ * face-up chip and Back's floating chip (below).
+ */
+.header {
+  --chip-line: color-mix(in srgb, var(--text) 13%, transparent);
+  --chip-fill: color-mix(in srgb, var(--ink-field) 62%, transparent);
+}
+.end {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+}
+.end::before {
+  content: '';
+  position: absolute;
+  inset: 4px 0;
+  z-index: -1;
+  border: 1px solid var(--chip-line);
+  border-radius: 999px;
+  background: var(--chip-fill);
+  pointer-events: none;
+}
+
+.nav ul,
+.language ul {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * About: a standalone text link (globals.css .link, on the inner span: its marker block at rest,
+ * the line and the triangle on hover and focus; the line alone as the current page). One line
+ * of 44 px, so the span stays an inline box on the text's baseline. The triangle's room after
+ * the label stands in for most of the right padding.
+ */
+.about {
+  display: block;
+  min-height: 44px;
+  padding: 0 var(--space-1) 0 var(--space-4);
+  color: var(--text);
+  font-size: var(--text-sm);
+  font-weight: var(--wght-label);
+  line-height: 44px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.rule {
+  flex: none;
+  width: 1px;
+  height: 16px;
+  margin-inline: var(--space-1);
+  background: var(--chip-line);
+}
+
+/*
+ * The language switcher (T3): two 44 px segments, the codes in Martian Mono.
+ * The active language sits on a face-up chip (the text colour, ink letters),
+ * the other is muted and shows a hairline chip on hover. The chip is one
+ * element under both, at --active x --seg; a header mounted by a language
+ * switch ([data-arrived], header.tsx) slides it in from the other segment
+ * while the letters trade colours halfway (--dur-chip, outQuint). The switcher
+ * is its own live view-transition group (locale-switcher), so the switch's
+ * cross-fade never shows two chips. Reduced: no slide.
+ */
+.language {
+  --seg: 44px;
+  position: relative;
+  padding-right: 0;
+}
+.chip {
+  position: absolute;
+  top: 8px;
+  left: 4px;
+  width: calc(var(--seg) - 8px);
+  height: 28px;
+  border-radius: 999px;
+  background: var(--text);
+  translate: calc(var(--active) * var(--seg)) 0;
+  pointer-events: none;
+}
+.locale {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--seg);
+  min-height: 44px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  transition: color var(--dur-fast) linear;
+}
+.locale[aria-current='page'] {
+  color: var(--ink-field);
+  font-weight: 600;
+}
+/* The other language: a hairline chip and the text colour on hover and focus. */
+.locale:not([aria-current])::before {
+  content: '';
+  position: absolute;
+  inset: 8px 4px;
+  border: 1px solid color-mix(in srgb, var(--text) 28%, transparent);
+  border-radius: 999px;
+  opacity: 0;
+  transition: opacity var(--dur-fast) linear;
+}
+.locale:not([aria-current]):is(:hover, :focus-visible) {
+  color: var(--text);
+}
+.locale:not([aria-current]):is(:hover, :focus-visible)::before {
+  opacity: 1;
+}
+.locale:focus-visible {
+  outline-offset: -3px;
+  border-radius: 999px;
+}
+
+.language[data-arrived] .chip {
+  animation: chip-arrive var(--dur-chip) var(--ease-out-quint) both;
+}
+.language[data-arrived] .locale[aria-current='page'] {
+  animation: chip-letters-on var(--dur-chip) linear both;
+}
+.language[data-arrived] .locale:not([aria-current]) {
+  animation: chip-letters-off var(--dur-chip) linear both;
+}
+/* Two languages: the chip comes from the other one. */
+@keyframes chip-arrive {
+  from {
+    translate: calc((1 - var(--active)) * var(--seg)) 0;
+  }
+}
+@keyframes chip-letters-on {
+  0%,
+  30% {
+    color: var(--muted);
+  }
+  70%,
+  100% {
+    color: var(--ink-field);
+  }
+}
+@keyframes chip-letters-off {
+  0%,
+  30% {
+    color: var(--ink-field);
+  }
+  70%,
+  100% {
+    color: var(--muted);
+  }
+}
+:root[data-motion='reduced'] .language[data-arrived] :is(.chip, .locale) {
+  animation: none;
+}
+
+/*
+ * The home slot: the logo (.mark) and Back (.back) share one grid cell.
+ * Logo -> Back: the logo's cards play their exit (logo.tsx, Motion, 300 ms:
+ * --dur-logo-exit), then the arrow's shaft draws from the left and the head and
+ * the label follow, the label rising from its mask (--dur-slot-morph, outQuint).
+ * Back -> logo: Back fades (--dur-logo-back-fade) while the cards are dealt
+ * again (logo.tsx). The mark box itself never scales: only its cards move.
+ * Reduced: instant swaps, nothing moves.
+ */
+.slot {
+  display: inline-grid;
+  align-items: center;
+  justify-items: start;
+  min-height: 44px;
+  color: var(--text);
+  text-decoration: none;
+  /* The long press (touch) plays the logo's egg: no callout, no selection. */
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+.mark,
+.back {
+  grid-area: 1 / 1;
+}
+.mark {
+  display: inline-flex;
+  align-items: center;
+}
+.logo {
+  display: block;
+  height: 30px;
+  width: auto;
+  aspect-ratio: 38 / 31;
+  overflow: visible;
+}
+/* The cards turn and fan about their bottom centre (logo.tsx sets the centre for the turn). */
+.logo [data-logo-part] {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+/*
+ * The front card's gradient (T2): the page load's three colours (--logo-a / -b / -c, picked by
+ * the pre-paint script) at the card's corner, middle and far corner. Each stop runs through all
+ * three in one --logo-flow loop, a third of it apart, so the colours travel slowly along the
+ * card; linear, never a jump (the loop ends where it starts). logo.tsx sets the loops onto the
+ * page clock. Reduced: still, in the gradient's own order.
+ */
+.logo [data-logo-stop] {
+  animation: logo-flow var(--logo-flow) linear infinite;
+}
+.logo [data-logo-stop='0'] {
+  stop-color: var(--logo-a);
+}
+.logo [data-logo-stop='1'] {
+  stop-color: var(--logo-b);
+  animation-delay: calc(var(--logo-flow) / -3);
+}
+.logo [data-logo-stop='2'] {
+  stop-color: var(--logo-c);
+  animation-delay: calc(var(--logo-flow) / -1.5);
+}
+@keyframes logo-flow {
+  0%,
+  100% {
+    stop-color: var(--logo-a);
+  }
+  33.333% {
+    stop-color: var(--logo-b);
+  }
+  66.667% {
+    stop-color: var(--logo-c);
+  }
+}
+:root[data-motion='reduced'] .logo [data-logo-stop] {
+  animation: none;
+}
+.back {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--wght-label);
+  transition:
+    opacity var(--dur-logo-back-fade) linear,
+    scale var(--dur-fast) var(--ease-out-quint);
+}
+.arrow {
+  display: block;
+  flex: none;
+  width: 20px;
+  height: 12px;
+  overflow: visible;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* scale and opacity: the morph; transform: the hover's pull (its own timing, never delayed). */
+.shaft {
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+  transition:
+    scale var(--dur-slot-morph) var(--ease-out-quint),
+    transform var(--dur-back-pull) var(--ease-out-quint);
+}
+.head {
+  transition:
+    opacity var(--dur-slot-morph) var(--ease-out-quint),
+    transform var(--dur-back-pull) var(--ease-out-quint);
+}
+.mask {
+  display: block;
+  overflow: clip;
+  overflow-clip-margin: 0.15em;
+}
+.label {
+  display: block;
+  transition:
+    translate var(--dur-slot-morph) var(--ease-out-quint),
+    opacity var(--dur-slot-morph) var(--ease-out-quint);
+}
+/* Each letter over its copy; the copy waits below the mask. */
+.letters {
+  display: inline-flex;
+}
+.letter {
+  display: inline-grid;
+  white-space: pre;
+}
+.letter > span {
+  grid-area: 1 / 1;
+  transition: translate var(--dur-back-pull) var(--ease-out-quint) calc(var(--i) * var(--stagger-letters));
+}
+.letter > span:last-child {
+  translate: 0 110%;
+}
+
+/* Logo showing: Back has faded; its arrow and label reset unseen once it has. */
+.slot[data-slot-mode='mark'] .back {
+  opacity: 0;
+}
+.slot[data-slot-mode='mark'] .shaft {
+  scale: 0 1;
+}
+.slot[data-slot-mode='mark'] .head {
+  opacity: 0;
+}
+.slot[data-slot-mode='mark'] .label {
+  opacity: 0;
+  translate: 0 var(--reveal-mask);
+}
+.slot[data-slot-mode='mark'] :is(.shaft, .head, .label) {
+  transition-duration: 0s;
+  transition-delay: var(--dur-logo-back-fade);
+}
+/* Back showing: the logo's box hides once its cards have left; Back draws after them. */
+.slot[data-slot-mode='back'] .mark {
+  opacity: 0;
+  transition: opacity 0s linear var(--dur-logo-exit);
+}
+.slot[data-slot-mode='back'] .back {
+  transition:
+    opacity 0s,
+    scale var(--dur-fast) var(--ease-out-quint);
+}
+.slot[data-slot-mode='back'] .shaft {
+  transition-delay: var(--dur-logo-exit), 0s;
+}
+.slot[data-slot-mode='back'] .head {
+  transition-delay: calc(var(--dur-logo-exit) + var(--dur-slot-lag)), 0s;
+  transition-duration: calc(var(--dur-slot-morph) - var(--dur-slot-lag)), var(--dur-back-pull);
+}
+.slot[data-slot-mode='back'] .label {
+  transition-delay: calc(var(--dur-logo-exit) + var(--dur-slot-lag));
+  transition-duration: calc(var(--dur-slot-morph) - var(--dur-slot-lag));
+}
+
+/*
+ * Back's hover and focus (T5): the arrow pulls back (the head 3 px left, the
+ * shaft stretching after it), the letters roll up one after another, each
+ * replaced by its copy from below (--dur-back-pull, --stagger-letters apart,
+ * outQuint), and a chip draws in behind the whole slot (a faint fill and the
+ * tray's hairline edge, from 92%). A press gives a little (0.96). Leaving,
+ * everything returns the same way.
+ */
+.back::before {
+  content: '';
+  position: absolute;
+  inset: -8px -14px -8px -12px;
+  z-index: -1;
+  border: 1px solid var(--chip-line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 7%, transparent);
+  opacity: 0;
+  scale: 0.92;
+  pointer-events: none;
+  transition:
+    opacity var(--dur-chip) var(--ease-out-quint),
+    scale var(--dur-chip) var(--ease-out-quint),
+    background-color var(--dur-chip) linear;
+}
+.slot[data-slot-mode='back']:is(:hover, :focus-visible) .back::before {
+  opacity: 1;
+  scale: 1;
+}
+.slot[data-slot-mode='back']:is(:hover, :focus-visible) .head {
+  transform: translateX(-3px);
+}
+.slot[data-slot-mode='back']:is(:hover, :focus-visible) .shaft {
+  transform: translateX(-3px) scaleX(1.18);
+}
+.slot[data-slot-mode='back']:is(:hover, :focus-visible) .letter > span:first-child {
+  translate: 0 -110%;
+}
+.slot[data-slot-mode='back']:is(:hover, :focus-visible) .letter > span:last-child {
+  translate: 0 0;
+}
+.slot[data-slot-mode='back']:active .back {
+  scale: 0.96;
+}
+
+/*
+ * Back stays (T5): on card pages, when the header leaves on a scroll down, the
+ * slot moves down by the header's height in step with it (the same duration and
+ * curve), so it holds its place, and its chip comes up as a floating backdrop
+ * (the tray's ink fill, a little denser) to keep it legible over the page. It
+ * keeps taking clicks while the rest of the header ignores them. Reduced: the
+ * header fades instead of sliding; Back does not fade, its chip does.
+ */
+.slot[data-slot-mode='back'] {
+  will-change: translate;
+  transition: translate var(--dur-header-show) var(--ease-out-quint);
+}
+:global(:root[data-header='hidden']) .slot[data-slot-mode='back'] {
+  translate: 0 var(--header-h);
+  pointer-events: auto;
+  transition: translate var(--dur-header-hide) var(--ease-in);
+}
+:global(:root[data-header='hidden']) .slot[data-slot-mode='back'] .back::before {
+  opacity: 1;
+  scale: 1;
+  background-color: color-mix(in srgb, var(--ink-field) 80%, transparent);
+}
+
+:root[data-motion='reduced'] .slot :is(.mark, .back, .shaft, .head, .label) {
+  transition: none;
+}
+:root[data-motion='reduced'] .slot :is(.shaft, .head, .label) {
+  scale: none;
+  translate: none;
+  transform: none;
+  opacity: 1;
+}
+:root[data-motion='reduced'] .slot[data-slot-mode] .letter > span:is(:first-child, :last-child) {
+  translate: none;
+  transition: none;
+}
+:root[data-motion='reduced'] .slot[data-slot-mode] .letter > span:last-child {
+  visibility: hidden;
+}
+:root[data-motion='reduced'] .slot[data-slot-mode] .back {
+  scale: none;
+}
+:root[data-motion='reduced'] .back::before {
+  scale: none;
+  transition: opacity var(--dur-reduced) linear;
+}
+:root[data-motion='reduced'] .slot[data-slot-mode='back'] {
+  translate: none;
+  transition: none;
+}
+:global(:root[data-motion='reduced'][data-header='hidden']) .header > .slot[data-slot-mode='back'] {
+  opacity: 1;
+}
+
+/* Phones: the tray's About sits a little tighter. */
+@media (max-width: 639.98px) {
+  .about {
+    padding-inline: var(--space-3) 0;
+  }
+}

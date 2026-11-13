@@ -1,0 +1,103 @@
+/*
+ * Base tokens: surfaces, legacy type sizes, the small space scale, radii, hand
+ * geometry and layers. The grid, section spacing, header height and hand
+ * reserve live in layout.css; the type scale in type.css. Colours come from
+ * src/design/palette.ts (identityCss), motion from src/motion/tokens.ts
+ * (motionCss); both are injected in the root layout. Dark mode only.
+ */
+@property --wght {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 400;
+}
+@property --opsz {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 96;
+}
+
+:root {
+  color-scheme: dark;
+
+  /* Surfaces (home identity) and the current page identity (overridden by [data-identity]). */
+  --bg: var(--ink-field);
+  --id-field: var(--ink-field);
+  --id-mid: var(--ink-mid);
+  --id-glow: var(--ink-glow);
+  --id-accent: var(--ink-accent);
+  --id-ink: var(--ink-ink);
+  --accent: var(--id-accent);
+  --line: color-mix(in srgb, var(--text) 14%, transparent);
+
+  /* Type */
+  --font-display: var(--font-display-face), ui-sans-serif, system-ui, sans-serif;
+  --font-text: var(--font-text-face), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-face), ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: var(--type-body-size);
+  --text-lg: clamp(1.125rem, 1.06rem + 0.32vw, 1.3rem);
+  --text-xl: clamp(1.45rem, 1.25rem + 0.9vw, 2rem);
+  --text-2xl: clamp(2rem, 1.5rem + 2.4vw, 3.4rem);
+  --text-display: clamp(2.75rem, 1.6rem + 5.6vw, 6.5rem);
+  --text-hero: clamp(3.4rem, 1.2rem + 6.8vw, 8.25rem);
+  --text-page: clamp(3rem, 1.7rem + 4.2vw, 6rem);
+  --leading-tight: 0.98;
+  --leading-snug: 1.15;
+  --leading-body: 1.6;
+  --tracking-display: -0.025em;
+  --tracking-mono: 0.02em;
+
+  /* Space */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --space-10: 8rem;
+
+  /* Layout */
+  --page-max: 72rem;
+  --measure: 62ch;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Hand (geometry mirrored in src/motion/tokens.ts) */
+  --card-w: 176px;
+  --card-h: 246px;
+  --card-overlap: 28px;
+  --card-w-sm: 100px;
+  --card-h-sm: 140px;
+  --card-ratio: 132 / 184;
+  /* A card lying on the table (the played card, and the frame it grows into on its page). */
+  --table-card-radius: 12px;
+  --rail-h: 48px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /*
+   * Layers. The played card's frame lies over the page (and the hero's image and title over the
+   * frame), the hand over the frame, the header over the hand. While a card flies it is above the
+   * hand; while the page folds back into its card (Back) the frame and the hero rise above the
+   * hand too, as their view-transition groups do (view-transitions.css), so nothing re-stacks.
+   */
+  --z-field: -1;
+  --z-play-frame: 5;
+  --z-hero: 6;
+  --z-hand: 20;
+  --z-table-card: 25;
+  --z-returning: 25;
+  --z-returning-hero: 26;
+  --z-header: 30;
+  --z-skip: 100;
+}
+
+@supports (padding: env(safe-area-max-inset-bottom)) {
+  :root {
+    --safe-bottom: max(env(safe-area-inset-bottom, 0px), env(safe-area-max-inset-bottom, 0px));
+  }
+}

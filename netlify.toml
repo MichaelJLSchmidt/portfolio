@@ -1,47 +1,45 @@
-# Netlify: continuous deployment from this repository. README → "Hosting on Netlify" lists the
-# settings this file relies on. Domain names live in src/hosting/config.ts only.
+# Netlify: continuous deployment from this repository, main = production. README → "Hosting on
+# Netlify" lists the settings this file relies on. Domain names live in src/hosting/config.ts only.
 #
-# What each deploy context builds (SITE_MODE, see scripts/site/build.mjs):
-#   production (main)       construction: the under-construction page only, at PRIMARY_DOMAIN
-#   branch deploys          basecamp: the full site behind the password gate; the basecamp
-#                           branch is served at BASECAMP_HOST
-#   Deploy Previews         basecamp, gated the same way
-# Launch: set SITE_MODE = "live" under [context.production.environment] (full site, no gate),
-# then merge basecamp into main.
+# Every deploy context builds the same static export (dist/). SITE_ACCESS decides who sees it
+# (scripts/hosting/build.mjs):
+#   gated   every request meets the password gate (a Netlify Edge Function) first; noindex
+#   public  no gate, indexable
+# Until launch every context is gated. The launch switch: SITE_ACCESS = "public" under
+# [context.production.environment] below (production opens; Deploy Previews stay gated).
 #
 # Environment variables set in the Netlify UI, never here:
-#   MOTION_TOKEN        Builds scope, all contexts (npm install of Motion+)
-#   BASECAMP_PASSWORD   Functions scope, branch deploys and Deploy Previews (the gate reads it at
-#                       runtime; variables in this file never reach edge functions)
+#   MOTION_TOKEN    Builds scope, all contexts (npm install of Motion+)
+#   SITE_PASSWORD   Functions scope, Production, Deploy Previews and Branch deploys, secret (the gate
+#                   reads it at runtime; variables in this file never reach edge functions). Unset or
+#                   empty: the gate stays closed (503) for everyone.
 
 [build]
-  command = "npm run build"
-  publish = "out"
+  # SITE_URL (absolute URLs: Open Graph, hreflang) is the deploy's own address: a Deploy Preview's
+  # or branch deploy's URL here, the primary domain in production (below).
+  command = "SITE_URL=$DEPLOY_PRIME_URL npm run build"
+  publish = "dist"
 
 [build.environment]
   NODE_VERSION = "22"
-  # Served from the domain root, so no base path.
-  NEXT_PUBLIC_BASE_PATH = ""
   # Plain static files: Netlify's automatic Next.js runtime would add its own handling of the
-  # export (and fail on the construction build, which has no Next.js output). Every hook of
-  # @netlify/plugin-nextjs returns early when this is "true".
+  # export. Every hook of @netlify/plugin-nextjs returns early when this is "true".
   NETLIFY_NEXT_PLUGIN_SKIP = "true"
-  # Any context not listed below builds the gated site, never an open one.
-  SITE_MODE = "basecamp"
-  NEXT_PUBLIC_PREVIEW = "1"
+  # Any context not listed below is gated, never open.
+  SITE_ACCESS = "gated"
+
+[context.production]
+  command = "SITE_URL=$URL npm run build"
 
 [context.production.environment]
-  SITE_MODE = "construction"
-  # Indexable once live; the construction page ignores it.
-  NEXT_PUBLIC_PREVIEW = ""
+  # The launch switch: "public" turns the gate off and indexing on for production.
+  SITE_ACCESS = "gated"
 
 [context.deploy-preview.environment]
-  SITE_MODE = "basecamp"
-  NEXT_PUBLIC_PREVIEW = "1"
+  SITE_ACCESS = "gated"
 
 [context.branch-deploy.environment]
-  SITE_MODE = "basecamp"
-  NEXT_PUBLIC_PREVIEW = "1"
+  SITE_ACCESS = "gated"
 
-# Headers and redirects differ per mode, so the build writes them into out/ (_headers,
+# Headers and redirects differ with SITE_ACCESS, so the build writes them into dist/ (_headers,
 # _redirects); [[headers]] and [[redirects]] here would apply to every context alike.

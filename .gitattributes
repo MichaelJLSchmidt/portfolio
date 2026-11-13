@@ -1,7 +1,0 @@
-# Normalise line endings so scripts behave the same on Windows, macOS and Linux
-* text=auto eol=lf
-*.png binary
-*.tif binary
-*.woff2 binary
-*.webp binary
-*.bin binary

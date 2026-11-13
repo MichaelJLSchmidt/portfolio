@@ -1,0 +1,515 @@
+/*
+ * The hand (src/components/hand). Geometry mirrors `hand` and `angle` in
+ * src/motion/tokens.ts. Only transform properties and opacity animate; hover
+ * and focus use the hover spring (CSS linear() from springCss()).
+ */
+.hand {
+  --cw: var(--card-w);
+  --ch: var(--card-h);
+  --overlap: var(--card-overlap);
+  --visible: 0.45;
+  --rot-k: 1;
+  --arc-k: 1;
+  --card-radius: 10px;
+  position: fixed;
+  inset: auto 0 0;
+  z-index: var(--z-hand);
+  height: 0;
+}
+.hand[data-home] {
+  --visible: 0.72;
+}
+
+/* Content scrolling under the hand fades out into the page colour. */
+@property --page-field {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #0e0f11;
+}
+.hand {
+  transition: --page-field var(--dur-crossfade) var(--ease-bloom);
+}
+.hand-fan::before {
+  content: '';
+  position: fixed;
+  inset: auto 0 0;
+  z-index: -1;
+  height: calc(var(--ch) * var(--visible) + var(--space-7));
+  background: linear-gradient(to top, color-mix(in srgb, var(--page-field) 94%, transparent) 35%, transparent);
+  pointer-events: none;
+}
+
+/* ---------- Fan (desktop, mobile home) ---------- */
+.hand-fan {
+  position: fixed;
+  inset: auto 0 0;
+  display: flex;
+  justify-content: center;
+  perspective: 1200px;
+  perspective-origin: 50% 100%;
+  pointer-events: none;
+  /* Live through navigations (see view-transitions.css). */
+  view-transition-name: hand;
+}
+.hand-row {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  transform-origin: 50% 100%;
+  transform: rotateX(8deg);
+  translate: 0 calc(var(--ch) * (1 - var(--visible)));
+  transition: translate var(--spring-land-dur) var(--spring-land);
+}
+.hand-list {
+  display: flex;
+  align-items: flex-end;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hand-slot {
+  position: relative;
+  flex: none;
+  width: var(--cw);
+  height: var(--ch);
+}
+.hand-slot + .hand-slot {
+  margin-left: calc(var(--overlap) * -1);
+}
+
+.hand-card {
+  display: block;
+  border-radius: var(--card-radius);
+  color: var(--text);
+  text-decoration: none;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  container-type: inline-size;
+}
+.hand-card {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 100%;
+  translate: calc(var(--sx, 0px) + var(--gap, 0px)) calc(var(--dy) * var(--arc-k));
+  rotate: calc(var(--r) * var(--rot-k));
+  transition:
+    translate var(--spring-hover-dur) var(--spring-hover),
+    rotate var(--spring-hover-dur) var(--spring-hover),
+    scale var(--spring-hover-dur) var(--spring-hover);
+}
+.hand-card:focus-visible {
+  outline: 2px solid var(--id-accent);
+  outline-offset: 3px;
+}
+
+/* Play: the siblings close the played card's gap, and open again around its ghost, on the gap spring. */
+.hand-row:is([data-closing], [data-opening]) .hand-card {
+  transition-duration: var(--spring-gap-dur);
+  transition-timing-function: var(--spring-gap);
+}
+/* A card just back from its page lies on top of its neighbours (as it arrived), until the pointer returns. */
+.hand-slot[data-returned] {
+  z-index: 2;
+}
+
+/*
+ * Lift on hover (fine pointers) and keyboard focus: at least 28px, and far
+ * enough that 90% of the card shows, so its summary and facts can be read.
+ * Neighbours spread ±12px.
+ */
+.hand {
+  --lift: max(var(--travel-hover-lift), calc(var(--ch) * (0.9 - var(--visible))));
+}
+.hand-slot:has(:focus-visible) {
+  z-index: 3;
+}
+.hand-slot:has(:focus-visible) .hand-card {
+  translate: 0 calc(var(--dy) * var(--arc-k) - var(--lift));
+  rotate: 0deg;
+  scale: 1.06;
+}
+.hand-slot:has(:focus-visible) ~ .hand-slot .hand-card {
+  --sx: var(--travel-spread);
+}
+.hand-slot:has(~ .hand-slot :focus-visible) .hand-card {
+  --sx: calc(var(--travel-spread) * -1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .hand-slot:hover {
+    z-index: 3;
+  }
+  .hand-slot:hover .hand-card {
+    translate: 0 calc(var(--dy) * var(--arc-k) - var(--lift));
+    rotate: 0deg;
+    scale: 1.06;
+  }
+  .hand-slot:hover ~ .hand-slot .hand-card {
+    --sx: var(--travel-spread);
+  }
+  .hand-slot:has(~ .hand-slot:hover) .hand-card {
+    --sx: calc(var(--travel-spread) * -1);
+  }
+}
+
+/* ---------- Card face (hand, Next project and detail hero share it) ---------- */
+.card-face,
+.card-back,
+.hand-ghost {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--card-radius);
+}
+.card-face {
+  display: flex;
+  flex-direction: column;
+  gap: 4.5cqi;
+  padding: 6cqi;
+  overflow: hidden;
+  color: var(--text);
+  background:
+    radial-gradient(130% 70% at 0% 100%, color-mix(in oklab, var(--id-glow) 42%, transparent), transparent 72%),
+    linear-gradient(to bottom, color-mix(in oklab, var(--id-mid) 38%, var(--id-field)), var(--id-field) 55%);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--id-accent) 30%, transparent),
+    0 18px 40px -18px rgb(0 0 0 / 0.75);
+}
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 2cqi;
+  padding-inline: 1cqi;
+  font-family: var(--font-mono);
+  font-size: clamp(7.5px, 5.4cqi, 14px);
+  letter-spacing: var(--tracking-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--id-accent);
+}
+.card-year {
+  color: color-mix(in srgb, var(--text) 72%, transparent);
+}
+.card-band {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 2.5cqi;
+  padding: 5cqi 5cqi 5.5cqi;
+  border-radius: max(4px, 2.5cqi);
+  background: var(--id-glow);
+  color: var(--id-ink);
+}
+.card-title {
+  font-family: var(--font-display);
+  font-size: clamp(10px, 10.5cqi, 46px);
+  font-weight: var(--wght-card);
+  line-height: 1;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+.card-type {
+  font-family: var(--font-mono);
+  font-size: clamp(6.5px, 4.6cqi, 12px);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+}
+.card-summary {
+  padding-inline: 1cqi;
+  font-size: clamp(8px, 6.2cqi, 19px);
+  line-height: 1.32;
+  text-wrap: pretty;
+}
+.card-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3cqi 4cqi;
+  margin: auto 0 0;
+  padding: 4.5cqi 1cqi 0;
+  border-top: 1px solid color-mix(in srgb, var(--id-accent) 28%, transparent);
+  font-size: clamp(7px, 4.4cqi, 13.5px);
+  line-height: 1.25;
+}
+.card-fact {
+  display: grid;
+  gap: 0.6cqi;
+  min-width: 0;
+}
+.card-fact dd {
+  margin: 0;
+}
+.card-fact-label {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  color: var(--id-accent);
+}
+/* Small cards (mobile hand): index, years and the band only. */
+@container (max-width: 139px) {
+  .card-summary,
+  .card-facts {
+    display: none;
+  }
+  .card-face {
+    gap: 5cqi;
+  }
+}
+
+/* The open card's slot: a dashed "Viewing" ghost in its accent. */
+.hand-ghost {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  padding-top: 12cqi;
+  border: 1px dashed var(--id-accent);
+  background: color-mix(in srgb, var(--id-field) 88%, transparent);
+  font-family: var(--font-mono);
+  font-size: clamp(8px, 7.5cqi, 10px);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  color: var(--id-accent);
+  /* Appears once the page that was left has gone. */
+  animation: ghost-in var(--dur-fast) var(--ease-out-soft) var(--play-exit-dur) both;
+}
+@keyframes ghost-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Two faces for the draw's flip (rotateY 180 -> 0). */
+.hand-card {
+  transform-style: preserve-3d;
+}
+.hand-card > .card-face,
+.hand-card > .card-back {
+  backface-visibility: hidden;
+}
+.hand-card > .card-back {
+  transform: rotateY(180deg);
+}
+
+/* ---------- Card back (seen while a card flips during a deal) ---------- */
+.card-back {
+  background:
+    repeating-linear-gradient(135deg, color-mix(in srgb, var(--text) 6%, transparent) 0 1px, transparent 1px 7px),
+    var(--ink-mid);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--text) 16%, transparent),
+    inset 0 0 0 6px var(--ink-mid),
+    inset 0 0 0 7px color-mix(in srgb, var(--text) 9%, transparent),
+    0 12px 28px -14px rgb(0 0 0 / 0.7);
+}
+.card-back::before,
+.card-back::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20%;
+  aspect-ratio: 132 / 184;
+  border: 1px solid color-mix(in srgb, var(--text) 22%, transparent);
+  border-radius: 2px;
+  background: var(--ink-mid);
+}
+.card-back::before {
+  translate: -70% -50%;
+  rotate: -9deg;
+}
+.card-back::after {
+  translate: -30% -50%;
+  rotate: 6deg;
+}
+
+/*
+ * ---------- The played card on the table (hand/table-card.tsx) ----------
+ * Laid out at the table size where it lands (cardPlay.*.card, .landing); four layers carry x, y,
+ * the pose and the scale, all at identity once it lands. The shadows are opacity layers inside its
+ * named frame (so its snapshot keeps the contact shadow); the face's own shadow stays off.
+ */
+.table-card {
+  --card-radius: var(--table-card-radius);
+  position: fixed;
+  top: calc(var(--table-landing-y) - var(--table-card-h) / 2);
+  left: calc(var(--table-landing-x) - var(--table-card-w) / 2);
+  z-index: var(--z-table-card);
+  width: var(--table-card-w);
+  height: var(--table-card-h);
+  pointer-events: none;
+  container-type: inline-size;
+}
+.table-card-layer {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+.table-card[data-landed] .table-card-layer {
+  will-change: auto;
+}
+/* While it flies a touch on it is the Tap egg's second tap (hand.tsx); at rest it takes none. */
+.table-card:not([data-landed]) {
+  pointer-events: auto;
+}
+.card-body {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--card-radius);
+}
+.table-card .card-face {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--id-accent) 30%, transparent);
+}
+.table-card-shadow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+}
+.table-card-shadow[data-layer='lifted'] {
+  box-shadow: var(--play-shadow-lifted);
+}
+.table-card-shadow[data-layer='contact'] {
+  box-shadow: var(--play-shadow-contact);
+}
+.table-card-shadow[data-layer='spread'] {
+  box-shadow: var(--play-shadow-settled);
+}
+/* At rest on the table: the settled contact shadow only. */
+.table-card[data-landed] .table-card-shadow[data-layer='spread'] {
+  opacity: 1;
+}
+
+/*
+ * ---------- The play's status line (hand/play-status.tsx) ----------
+ * Plain text, no spinner: under the resting card while its page is slow, near the hand when the
+ * card came back offline. It fades (opacity only).
+ */
+.play-status {
+  position: fixed;
+  inset-inline: var(--grid-margin);
+  z-index: var(--z-table-card);
+  margin: 0;
+  color: var(--muted);
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--loading-fade) linear;
+}
+.play-status[data-where='table'] {
+  top: calc(var(--table-landing-y) + var(--table-card-h) / 2 + var(--space-4));
+}
+.play-status[data-where='hand'] {
+  bottom: calc(var(--hand-reserve) + var(--space-4));
+}
+.play-status[data-shown] {
+  opacity: 1;
+}
+
+/*
+ * ---------- Rail (phones, off home): one tap plays a card ----------
+ * Four links, each a quarter of the width and the rail's full 48 px height (the target); the
+ * visible edge is the label inside. The press shows from pointerdown ([data-pressed]); while a
+ * card leaves, the other edges drop and dim ([data-playing]); the open card's edge sits lower,
+ * dimmed, with an accent line (aria-current). The rail leaves and returns with the header.
+ */
+.hand-rail {
+  display: none;
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 1023.98px) {
+  .hand {
+    /* Home fan on phones: four cards across the screen, overlapping 40%. */
+    --cw: min(128px, calc((100vw - 48px) / 2.8));
+    --ch: calc(var(--cw) * 184 / 132);
+    --overlap: calc(var(--cw) * 0.4);
+    --rot-k: 0.7;
+    --visible: 0.85;
+    --card-radius: 8px;
+  }
+  /* Off home the fan does not show: the rail is the hand. */
+  .hand:not([data-home]) .hand-fan {
+    display: none;
+  }
+
+  .hand:not([data-home]) .hand-rail {
+    view-transition-name: hand-rail;
+    position: fixed;
+    inset: auto 0 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    height: calc(var(--rail-h) + var(--safe-bottom));
+    padding: 0 9px var(--safe-bottom);
+    background: linear-gradient(to top, var(--ink-field) 55%, transparent);
+    transition: translate var(--dur-header-show) var(--ease-out-quint);
+  }
+  /* In step with the header (html[data-header], src/motion/header-scroll.ts); reduced: a crossfade. */
+  :root[data-header='hidden'] .hand:not([data-home]) .hand-rail {
+    translate: 0 100%;
+    pointer-events: none;
+    transition: translate var(--dur-header-hide) var(--ease-in);
+  }
+  :root[data-motion='reduced'] .hand:not([data-home]) .hand-rail {
+    translate: none;
+    transition: opacity var(--dur-reduced) linear;
+  }
+  :root[data-motion='reduced'][data-header='hidden'] .hand:not([data-home]) .hand-rail {
+    opacity: 0;
+  }
+  .rail-card {
+    display: flex;
+    align-items: flex-end;
+    min-width: 0;
+    height: var(--rail-h);
+    padding: 0 3px;
+    color: var(--text);
+    text-decoration: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      translate var(--rail-dur) var(--ease-out-soft),
+      opacity var(--rail-dur) var(--ease-out-soft);
+  }
+  .rail-card-label {
+    display: block;
+    width: 100%;
+    height: 40px;
+    padding: 9px 6px 0;
+    border-radius: 8px 8px 0 0;
+    background: linear-gradient(var(--id-glow) 0 3px, var(--id-field) 3px);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--id-accent) 30%, transparent);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: scale var(--play-press-dur) var(--play-press-ease);
+    transform-origin: 50% 100%;
+  }
+  .rail-card[data-pressed] .rail-card-label {
+    scale: var(--play-press-scale);
+  }
+  .hand-rail[data-playing] .rail-card {
+    translate: 0 var(--rail-drop);
+    opacity: var(--rail-dim);
+  }
+  /* The open card: lower, dimmed, an accent line along its top ("in play"). */
+  .rail-card[aria-current='page'] {
+    translate: 0 var(--rail-current-y);
+    opacity: var(--rail-current-opacity);
+  }
+  .rail-card[aria-current='page'] .rail-card-label {
+    background: linear-gradient(var(--id-accent) 0 2px, var(--id-field) 2px);
+    color: var(--id-accent);
+  }
+  .rail-card:focus-visible {
+    outline: none;
+  }
+  .rail-card:focus-visible .rail-card-label {
+    outline: 2px solid var(--id-accent);
+    outline-offset: -2px;
+  }
+  :root[data-motion='reduced'] .rail-card,
+  :root[data-motion='reduced'] .rail-card-label {
+    translate: none;
+    scale: none;
+  }
+}

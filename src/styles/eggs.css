@@ -1,0 +1,374 @@
+/*
+ * Easter eggs (src/eggs). Only transform, opacity and clip-path move; the
+ * holographic foil exists only for the rare pull.
+ */
+
+/* ---------- Hand: tap (turned sideways), inspect (2x), tap line, summary ---------- */
+.card-tapline {
+  position: absolute;
+  font-family: var(--font-mono);
+  letter-spacing: 0;
+  color: var(--text);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out-soft);
+  pointer-events: none;
+}
+/* Along the left long edge, bottom to top: reads left to right once the card turns 90 degrees. */
+.card-tapline {
+  top: 6cqi;
+  bottom: 6cqi;
+  left: 4cqi;
+  width: 16cqi;
+  writing-mode: vertical-rl;
+  rotate: 180deg;
+  font-size: clamp(5px, 5.2cqi, 7px);
+  line-height: 1.25;
+}
+
+.card-band {
+  transition: opacity var(--dur-fast) var(--ease-out-soft);
+}
+
+.hand-slot .hand-card[data-tapped] {
+  z-index: 4;
+  rotate: var(--angle-tap);
+  translate: 0 calc(var(--dy) * var(--arc-k) - var(--ch) * (1 - var(--visible)) - var(--cw) * 0.62);
+}
+.hand-slot:has([data-tapped]) {
+  z-index: 4;
+}
+.hand-card[data-tapped] .card-tapline {
+  opacity: 1;
+}
+.hand-card[data-tapped] .card-band {
+  opacity: 0.25;
+}
+
+.hand-slot:has([data-inspect]) {
+  z-index: 6;
+}
+.hand-slot .hand-card[data-inspect] {
+  rotate: 0deg;
+  scale: var(--inspect-scale, 2);
+  translate: 0 calc(var(--ch) * (var(--visible) - 1));
+}
+.hand-card[data-inspect] :is(.card-summary, .card-facts) {
+  display: revert;
+}
+.hand-card {
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+/* ---------- Rare pull: one holographic glint, 1200 ms, once ---------- */
+.card-band {
+  z-index: 1;
+}
+.hand-card[data-rare] .card-face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+      112deg,
+      transparent 32%,
+      rgb(255 140 210 / 0.38) 41%,
+      rgb(140 220 255 / 0.42) 48%,
+      rgb(255 236 150 / 0.36) 55%,
+      transparent 64%
+    )
+    no-repeat 0 0 / 260% 100%;
+  mix-blend-mode: color-dodge;
+  animation: rare-glint var(--dur-glint) var(--ease-out-soft) both;
+  pointer-events: none;
+}
+@keyframes rare-glint {
+  from {
+    background-position: 120% 0;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  to {
+    background-position: -30% 0;
+    opacity: 0;
+  }
+}
+
+/* ---------- Coffee? (fifth card) ---------- */
+:root:not([data-intro]) .hand-coffee:not([data-drawn]) {
+  opacity: 0;
+}
+/* Full tier: dealt from off screen (drawCards); reduced appears in one crossfade. */
+:root[data-motion='reduced'] .hand-coffee[data-drawn] {
+  animation: vt-fade-in var(--dur-m) var(--ease-out-soft) both;
+}
+
+/* ---------- Shortcut sheet ---------- */
+.shortcuts {
+  width: min(28rem, calc(100vw - 2 * var(--space-4)));
+  padding: var(--space-6);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--ink-mid);
+  color: var(--text);
+}
+.shortcuts::backdrop {
+  background: color-mix(in srgb, var(--ink-field) 60%, transparent);
+}
+.shortcuts-title {
+  min-height: 1.4em;
+  margin: 0 0 var(--space-5);
+  font-size: var(--text-xl);
+}
+.shortcuts-list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-6);
+}
+.shortcuts-list div {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr;
+  gap: var(--space-4);
+  align-items: baseline;
+}
+.shortcuts-list dd {
+  margin: 0;
+}
+.shortcuts kbd {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- Workshop draw (Management) ---------- */
+.workshop {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-5);
+  margin-top: var(--space-8);
+}
+.workshop-card {
+  position: relative;
+  width: min(100%, 20rem);
+  aspect-ratio: 184 / 132;
+  transform-style: preserve-3d;
+}
+.workshop-face {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  backface-visibility: hidden;
+}
+.workshop-front {
+  display: grid;
+  align-content: end;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  background:
+    radial-gradient(120% 90% at 0% 100%, color-mix(in oklab, var(--id-glow) 45%, transparent), transparent 70%),
+    var(--id-field);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--id-accent) 30%, transparent);
+}
+.workshop-card:not([data-drawn]) .workshop-front {
+  visibility: hidden;
+}
+.workshop-card[data-drawn] .workshop-back {
+  visibility: hidden;
+}
+.workshop-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--wght-h2);
+}
+.workshop-howto {
+  margin: 0;
+  color: var(--text);
+}
+
+/*
+ * ---------- About: the card family ----------
+ * "What's on the table" (face down, flipping) sets the look the timeline and
+ * "How I work" share face up (src/styles/pages/pages.css): the back
+ * (.about-card-back), the face with its accent edge (.about-card) and the
+ * mono label (.about-card-label). Proportions 132 × 184, 10 px corners.
+ */
+.on-table-back,
+.about-card-back {
+  background:
+    repeating-linear-gradient(135deg, color-mix(in srgb, var(--text) 6%, transparent) 0 1px, transparent 1px 7px),
+    var(--glacier-mid, var(--ink-mid));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--text) 16%, transparent),
+    inset 0 0 0 6px var(--glacier-mid, var(--ink-mid)),
+    inset 0 0 0 7px color-mix(in srgb, var(--text) 9%, transparent);
+}
+.on-table-front,
+.about-card {
+  border-radius: 10px;
+  background: var(--glacier-field);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--glacier-accent) 45%, transparent);
+}
+.on-table-name,
+.about-card-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  color: var(--glacier-accent);
+}
+
+/* ---------- About: what's on the table ---------- */
+.on-table {
+  margin-top: var(--space-8);
+}
+.on-table-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.on-table-card {
+  position: relative;
+  display: block;
+  width: 9.5rem;
+  aspect-ratio: 132 / 184;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform var(--spring-play-dur) var(--spring-play);
+}
+.on-table-card[data-open] {
+  transform: rotateY(180deg);
+}
+.on-table-back,
+.on-table-front {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  border-radius: inherit;
+  backface-visibility: hidden;
+}
+.on-table-back {
+  place-items: center;
+  padding: var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--wght-card);
+}
+.on-table-front {
+  align-content: end;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  transform: rotateY(180deg);
+  text-align: left;
+}
+.on-table-line {
+  font-size: var(--text-sm);
+  line-height: 1.4;
+}
+/* Reduced: an instant swap instead of the turn. */
+:root[data-motion='reduced'] .on-table-card,
+:root[data-motion='reduced'] .on-table-card[data-open] {
+  transform: none;
+}
+:root[data-motion='reduced'] .on-table-back,
+:root[data-motion='reduced'] .on-table-front {
+  backface-visibility: visible;
+  transform: none;
+  transition: none;
+}
+:root[data-motion='reduced'] .on-table-card:not([data-open]) .on-table-front,
+:root[data-motion='reduced'] .on-table-card[data-open] .on-table-back {
+  opacity: 0;
+}
+
+/*
+ * ---------- Idle hint (home, once per session; src/eggs/idle-hint.tsx) ----------
+ * A handwritten note beside the hand with a curly arrow toward the cards, in
+ * the secondary text colour. Desktop: right of the fan, the arrow curling down
+ * and left onto the last card. Phones: above the right end of the fan, the
+ * arrow pointing down into it; the centred "Pick a card" says the same and
+ * would sit under the note, so it steps back while the note shows. Still once
+ * written; decorative (aria-hidden).
+ */
+.idle-hint {
+  position: fixed;
+  z-index: calc(var(--z-hand) + 1);
+  right: var(--grid-margin);
+  bottom: calc(min(128px, (100vw - 48px) / 2.8) * 184 / 132 * 0.85 + var(--safe-bottom) + var(--space-6));
+  color: var(--muted);
+  pointer-events: none;
+  user-select: none;
+}
+.idle-hint:not([data-ready]) {
+  opacity: 0;
+}
+@media (max-width: 1023.98px) {
+  .home-hint {
+    transition: opacity var(--dur-s) var(--ease-out-soft);
+  }
+  :root:has(.idle-hint[data-ready]) .home-hint {
+    opacity: 0;
+  }
+}
+.idle-hint-text {
+  max-width: 9em;
+  margin: 0;
+  font-family: var(--font-hand-face), cursive;
+  font-size: clamp(1.25rem, 0.5rem + 1.1vw, 1.875rem);
+  font-weight: 500;
+  line-height: 1.05;
+  text-align: right;
+  text-wrap: balance;
+}
+.idle-hint-word {
+  display: inline-block;
+}
+.idle-hint-arrow {
+  position: absolute;
+  top: calc(100% - 0.25rem);
+  right: 45%;
+  width: 52px;
+  height: auto;
+  overflow: visible;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.idle-hint-arrow path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+@media (min-width: 1024px) {
+  .idle-hint {
+    /* Right of the fan (four cards of --card-w, overlapping --card-overlap), far enough that the
+       arrow's head stops just outside the last card's tilted edge. */
+    --idle-left: calc((var(--card-w) * 4 - var(--card-overlap) * 3) / 2 + var(--space-8) + var(--space-5));
+    right: auto;
+    left: calc(50% + var(--idle-left));
+    bottom: calc(var(--card-h) * 0.72 * 0.55);
+    max-width: calc(50vw - var(--idle-left) - var(--space-4));
+  }
+  .idle-hint-text {
+    text-align: left;
+  }
+  .idle-hint-arrow {
+    top: 0.2em;
+    right: calc(100% + 2px);
+    width: 52px;
+  }
+}

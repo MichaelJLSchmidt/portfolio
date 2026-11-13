@@ -1,29 +1,13 @@
-# dependencies
-/node_modules
-
-# build output
-/.next/
-/out/
-/build
-*.tsbuildinfo
+node_modules/
+dist/
+out/
+.next/
+.netlify/
 next-env.d.ts
-
-# terrain pipeline: raw downloads and intermediate rasters
-/scripts/terrain/.cache/
-# font sources for npm run fonts:subset
-/scripts/site/.cache/
-# optional PNG copies of the heightmaps (npm run terrain -- --png)
-/public/terrain/**/*.png
-
-# env files (MOTION_TOKEN and friends never get committed)
-.env
-.env.*
+*.tsbuildinfo
+.env*
 !.env.example
-
-# tooling
-/coverage
-/.netlify
-/.vercel
+*.log
 .DS_Store
-*.pem
-npm-debug.log*
+test-results/
+verify-output/

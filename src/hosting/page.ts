@@ -1,132 +1,148 @@
-/**
- * The night-summit page: production's under-construction page and, with the same design, the
- * Basecamp gate. One renderer for both, pure string templating so the build (Node) and the
- * gate (Deno) share it. The build assembles the model from src/content and the tokens.
+import { locales, type Locale } from '../lib/i18n.ts'
+import { gate } from './config.ts'
+
+/*
+ * The password gate's page: pure string templating, so the build (Node) and the edge function
+ * (Deno) share it. The build assembles the model (scripts/hosting/gate-page.mjs) from the copy in
+ * content/ (content/gate.ts, content/<locale>/gate.ts), the site's tokens, fonts and logo, and
+ * passes it to the edge function as JSON. Complete without JavaScript: the inline script only
+ * shows the pending label while the password is checked and remembers a language switch for the
+ * site.
  */
 
-export type PageLink = { label: string; href: string | null };
+/** One language's words on the gate page (content/<locale>/gate.ts). */
+export type GateCopy = {
+  /** The tab title (the name follows it). */
+  title: string
+  /** One sentence: the portfolio is being reworked and needs a password. */
+  lede: string
+  /** The password field's label. */
+  label: string
+  submit: string
+  /** The submit button's label while the password is checked (inline script). */
+  pending: string
+  /** Shown under the field after a wrong password, and announced. */
+  error: string
+  /** The tab title's prefix after a wrong password. */
+  errorTitle: string
+  /** Shown instead of the form while no password is configured. */
+  closed: string
+  /** Leads into the email and LinkedIn links, for visitors without a password. */
+  contact: string
+  email: string
+  linkedin: string
+  /** The language switch's accessible name. */
+  language: string
+}
 
-export type PageModel = {
-  lang: string;
-  title: string;
-  description: string;
-  /** Absolute URL of the indexable page; null on the gate. */
-  canonical: string | null;
-  name: string;
-  role: string;
-  status: string;
-  contact: PageLink[];
-  /** Shown instead of a contact link whose URL is still missing (preview builds only). */
-  placeholder: (label: string) => string;
-  hud: { coordinates: string; altitude: string; clock: string };
-  access: {
-    heading: string;
-    label: string;
-    submit: string;
-    error: string;
-    closed: string;
-    /** Account name for password managers; the gate ignores it. */
-    username: string;
-  };
-  credit: PageLink;
+/** The real name and links (content/gate.ts), the same in every language. */
+export type GateIdentity = { name: string; email: string; linkedin: string }
+
+export type GatePage = {
+  identity: GateIdentity
+  copy: Record<Locale, GateCopy>
   /** Inline <style> and <script> bodies; the build lists their hashes in the CSP. */
-  css: string;
-  script: string;
+  css: string
+  script: string
+  /** Inline SVG of the site's logo (decorative). */
+  logo: string
+  /** The tab icon as a data: URL. */
+  icon: string
+  themeColor: string
   /** Font URLs to preload. */
-  preload: string[];
-};
-
-/** The model as the gate receives it: JSON, so the placeholder text is precomputed. */
-export type SerializedPageModel = Omit<PageModel, "placeholder"> & { placeholders: Record<string, string> };
+  preload: string[]
+}
 
 export type FormState = {
-  /** Where the password form posts. */
-  action: string;
   /** Path to open after unlocking. */
-  next: string;
+  next: string
   /** idle: the form; error: the form after a wrong password; closed: no form (no password set). */
-  state: "idle" | "error" | "closed";
-};
+  state: 'idle' | 'error' | 'closed'
+  locale: Locale
+  /** No ambient motion (the request asked to save data). */
+  still?: boolean
+}
+
+/** For password managers: the gate has no accounts and ignores it. */
+const USERNAME = 'portfolio'
+/** The submit button's arrow (an SVG: the fonts' Latin subsets have no →). */
+const ARROW = `<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2.5 8h10.5M9 4l4 4-4 4"/></svg>`
 
 const escapeHtml = (text: string) =>
-  text.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+  text.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!)
 
-export function deserialize(model: SerializedPageModel): PageModel {
-  return { ...model, placeholder: (label) => model.placeholders[label] ?? label };
+const switchHref = (locale: Locale, next: string) => `${gate.lang}${locale}?next=${encodeURIComponent(next)}`
+
+function languageSwitch(page: GatePage, form: FormState): string {
+  const items = locales.map((l) => {
+    const current = l === form.locale ? ' aria-current="true"' : ''
+    return `<li><a href="${escapeHtml(switchHref(l, form.next))}" hreflang="${l}" lang="${l}" data-locale="${l}"${current}>${l.toUpperCase()}</a></li>`
+  })
+  return `<nav class="language" aria-label="${escapeHtml(page.copy[form.locale].language)}"><ul>${items.join('')}</ul></nav>`
 }
 
-export function serialize(model: PageModel): SerializedPageModel {
-  const { placeholder, ...rest } = model;
-  return { ...rest, placeholders: Object.fromEntries(model.contact.map((l) => [l.label, placeholder(l.label)])) };
-}
-
-function contactList(page: PageModel): string {
-  const items = page.contact.map((link) =>
-    link.href
-      ? `<li><a href="${escapeHtml(link.href)}"${link.href.startsWith("http") ? ' rel="me"' : ""}>${escapeHtml(link.label)}</a></li>`
-      : `<li><span class="pending">${escapeHtml(page.placeholder(link.label))}</span></li>`,
-  );
-  return `<ul class="contact">${items.join("")}</ul>`;
-}
-
-function accessForm(page: PageModel, form: FormState): string {
-  const { access } = page;
-  if (form.state === "closed") {
-    return `<section class="access" aria-labelledby="access-title"><h2 id="access-title" class="label">${escapeHtml(access.heading)}</h2><p class="closed">${escapeHtml(access.closed)}</p></section>`;
-  }
-  const error = form.state === "error";
+function unlockForm(copy: GateCopy, form: FormState): string {
+  if (form.state === 'closed') return `<p class="closed">${escapeHtml(copy.closed)}</p>`
+  const error = form.state === 'error'
   return [
-    `<section class="access" aria-labelledby="access-title">`,
-    `<h2 id="access-title" class="label">${escapeHtml(access.heading)}</h2>`,
-    `<form method="post" action="${escapeHtml(form.action)}">`,
+    `<form class="unlock" method="post" action="${gate.unlock}">`,
     `<input type="hidden" name="next" value="${escapeHtml(form.next)}">`,
-    `<input type="text" name="username" value="${escapeHtml(access.username)}" autocomplete="username" hidden>`,
-    `<label for="password">${escapeHtml(access.label)}</label>`,
-    `<div class="field">`,
+    `<input type="text" name="username" value="${USERNAME}" autocomplete="username" hidden>`,
+    `<label for="password" class="label">${escapeHtml(copy.label)}</label>`,
+    `<div class="row">`,
     `<input id="password" name="password" type="password" autocomplete="current-password" required maxlength="1024"`,
-    error ? ` aria-invalid="true" aria-describedby="access-error" autofocus>` : ">",
-    `<button type="submit">${escapeHtml(access.submit)}</button>`,
+    error ? ` aria-invalid="true" aria-describedby="gate-error" autofocus>` : '>',
+    `<button type="submit" data-pending="${escapeHtml(copy.pending)}">${escapeHtml(copy.submit)}${ARROW}</button>`,
     `</div>`,
-    error ? `<p id="access-error" class="error" role="alert">${escapeHtml(access.error)}</p>` : "",
+    error
+      ? `<p id="gate-error" class="error" role="alert"><svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><circle cx="9" cy="9" r="7.5"/><path d="M9 4.8v5.4M9 12.4v.8"/></svg><span>${escapeHtml(copy.error)}</span></p>`
+      : '',
     `</form>`,
-    `</section>`,
-  ].join("");
+  ].join('')
 }
 
-export function renderPage(page: PageModel, form: FormState): string {
-  const title = form.state === "error" ? `${page.access.error} · ${page.title}` : page.title;
+function contact(page: GatePage, copy: GateCopy): string {
+  const { email, linkedin } = page.identity
+  return [
+    `<p class="contact">${escapeHtml(copy.contact)} <span class="ways">`,
+    `<a class="link" href="mailto:${escapeHtml(email)}">${escapeHtml(copy.email)}</a>`,
+    `<span class="dot" aria-hidden="true"> · </span>`,
+    `<a class="link" href="${escapeHtml(linkedin)}" rel="me">${escapeHtml(copy.linkedin)}</a></span></p>`,
+  ].join('')
+}
+
+export function renderPage(page: GatePage, form: FormState): string {
+  const copy = page.copy[form.locale]
+  const title = `${copy.title} · ${page.identity.name}`
   const head = [
     `<meta charset="utf-8">`,
     `<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">`,
-    `<title>${escapeHtml(title)}</title>`,
-    `<meta name="description" content="${escapeHtml(page.description)}">`,
-    page.canonical
-      ? `<link rel="canonical" href="${escapeHtml(page.canonical)}"><meta property="og:type" content="website"><meta property="og:url" content="${escapeHtml(page.canonical)}"><meta property="og:title" content="${escapeHtml(page.title)}"><meta property="og:description" content="${escapeHtml(page.description)}">`
-      : `<meta name="robots" content="noindex, nofollow">`,
+    `<title>${escapeHtml(form.state === 'error' ? `${copy.errorTitle} · ${title}` : title)}</title>`,
+    `<meta name="robots" content="noindex, nofollow">`,
     `<meta name="color-scheme" content="dark">`,
-    `<link rel="icon" href="data:,">`,
-    ...page.preload.map((href) => `<link rel="preload" href="${escapeHtml(href)}" as="font" type="font/woff2" crossorigin>`),
+    `<meta name="theme-color" content="${escapeHtml(page.themeColor)}">`,
+    `<link rel="icon" href="${escapeHtml(page.icon)}">`,
+    ...page.preload.map(
+      (href) => `<link rel="preload" href="${escapeHtml(href)}" as="font" type="font/woff2" crossorigin>`,
+    ),
     `<style>${page.css}</style>`,
-  ];
-  const credit = page.credit.href
-    ? `<a href="${escapeHtml(page.credit.href)}">${escapeHtml(page.credit.label)}</a>`
-    : escapeHtml(page.credit.label);
+  ]
+  // The colour field: three pools, each drifting on its own loop, breathing together (CSS only).
+  const field = `<div class="field" aria-hidden="true"><div class="breath">${[1, 2, 3]
+    .map((n) => `<div class="drift drift-${n}"><div class="pool pool-${n}"></div></div>`)
+    .join('')}</div></div>`
   const body = [
-    `<div class="terrain" aria-hidden="true"><div class="poster"></div><div class="lamp"></div></div>`,
-    `<header class="hud label">`,
-    `<p>${escapeHtml(page.hud.coordinates)}</p>`,
-    `<p>${escapeHtml(page.hud.altitude)}</p>`,
-    `<p class="clock" hidden>${escapeHtml(page.hud.clock)} <time data-clock></time></p>`,
-    `</header>`,
-    `<main>`,
-    `<h1 class="name">${escapeHtml(page.name)}</h1>`,
-    `<p class="role">${escapeHtml(page.role)}</p>`,
-    `<p class="status">${escapeHtml(page.status)}</p>`,
-    contactList(page),
-    accessForm(page, form),
+    field,
+    `<header class="top">${languageSwitch(page, form)}</header>`,
+    `<main class="gate">`,
+    `<div class="mark">${page.logo}</div>`,
+    `<h1 class="name">${escapeHtml(page.identity.name)}</h1>`,
+    `<p class="lede">${escapeHtml(copy.lede)}</p>`,
+    unlockForm(copy, form),
+    contact(page, copy),
     `</main>`,
-    `<footer class="label">${credit}</footer>`,
     `<script>${page.script}</script>`,
-  ];
-  return `<!doctype html><html lang="${escapeHtml(page.lang)}"><head>${head.join("")}</head><body>${body.join("")}</body></html>\n`;
+  ]
+  const motion = form.still ? ' data-motion="still"' : ''
+  return `<!doctype html><html lang="${form.locale}"${motion}><head>${head.join('')}</head><body>${body.join('')}</body></html>\n`
 }

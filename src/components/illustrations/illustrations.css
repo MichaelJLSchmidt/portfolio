@@ -1,0 +1,306 @@
+/*
+ * Illustration styles (owned by the Illustrations session). Imported once from
+ * src/app/globals.css. Conventions: src/components/illustrations/README.md.
+ *
+ * Colour: strokes and tints take currentColor = the page's --accent (it follows [data-identity]).
+ * Strokes: 1.5 px on screen (1.25 px below 640 px) at any rendered size. Geometry sits in
+ * nested <svg class="il-plate" viewBox> plates that scale with the drawing; their stroke width is
+ * divided by that scale: --il-vbw (the plate's viewBox width) × 1000 / rendered width, where
+ * --il-inv = 1000 / rendered width comes from the root, a size container. Not
+ * vector-effect: non-scaling-stroke, which breaks pathLength="1" dashes (the draw reveal).
+ */
+.illustration {
+  --illustration-stroke: 1.5px;
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  container-type: inline-size;
+  color: var(--accent);
+  stroke-width: var(--illustration-stroke);
+  stroke-opacity: 0.8;
+}
+@media (max-width: 639.98px) {
+  .illustration {
+    --illustration-stroke: 1.25px;
+  }
+}
+
+.il-plate {
+  stroke-width: calc(var(--illustration-stroke) * var(--il-vbw, 1000) * var(--il-inv, 1) / 1000);
+}
+/* Exact where typed arithmetic exists; stepped (±6%) by container width elsewhere. */
+@supports (width: calc(1px * (2px / 1px))) {
+  .illustration .il-plate {
+    --il-inv: calc(1000px / 100cqw);
+  }
+}
+@container (min-width: 16px) {
+  .il-plate {
+    --il-inv: 59.057;
+  }
+}
+@container (min-width: 18px) {
+  .il-plate {
+    --il-inv: 52.729;
+  }
+}
+@container (min-width: 20px) {
+  .il-plate {
+    --il-inv: 47.08;
+  }
+}
+@container (min-width: 22px) {
+  .il-plate {
+    --il-inv: 42.036;
+  }
+}
+@container (min-width: 25px) {
+  .il-plate {
+    --il-inv: 37.532;
+  }
+}
+@container (min-width: 28px) {
+  .il-plate {
+    --il-inv: 33.51;
+  }
+}
+@container (min-width: 32px) {
+  .il-plate {
+    --il-inv: 29.92;
+  }
+}
+@container (min-width: 35px) {
+  .il-plate {
+    --il-inv: 26.714;
+  }
+}
+@container (min-width: 40px) {
+  .il-plate {
+    --il-inv: 23.852;
+  }
+}
+@container (min-width: 44px) {
+  .il-plate {
+    --il-inv: 21.297;
+  }
+}
+@container (min-width: 50px) {
+  .il-plate {
+    --il-inv: 19.015;
+  }
+}
+@container (min-width: 56px) {
+  .il-plate {
+    --il-inv: 16.977;
+  }
+}
+@container (min-width: 62px) {
+  .il-plate {
+    --il-inv: 15.158;
+  }
+}
+@container (min-width: 70px) {
+  .il-plate {
+    --il-inv: 13.534;
+  }
+}
+@container (min-width: 78px) {
+  .il-plate {
+    --il-inv: 12.084;
+  }
+}
+@container (min-width: 88px) {
+  .il-plate {
+    --il-inv: 10.789;
+  }
+}
+@container (min-width: 98px) {
+  .il-plate {
+    --il-inv: 9.633;
+  }
+}
+@container (min-width: 110px) {
+  .il-plate {
+    --il-inv: 8.601;
+  }
+}
+@container (min-width: 123px) {
+  .il-plate {
+    --il-inv: 7.68;
+  }
+}
+@container (min-width: 138px) {
+  .il-plate {
+    --il-inv: 6.857;
+  }
+}
+@container (min-width: 154px) {
+  .il-plate {
+    --il-inv: 6.122;
+  }
+}
+@container (min-width: 173px) {
+  .il-plate {
+    --il-inv: 5.466;
+  }
+}
+@container (min-width: 194px) {
+  .il-plate {
+    --il-inv: 4.881;
+  }
+}
+@container (min-width: 217px) {
+  .il-plate {
+    --il-inv: 4.358;
+  }
+}
+@container (min-width: 243px) {
+  .il-plate {
+    --il-inv: 3.891;
+  }
+}
+@container (min-width: 272px) {
+  .il-plate {
+    --il-inv: 3.474;
+  }
+}
+@container (min-width: 305px) {
+  .il-plate {
+    --il-inv: 3.102;
+  }
+}
+@container (min-width: 341px) {
+  .il-plate {
+    --il-inv: 2.769;
+  }
+}
+@container (min-width: 382px) {
+  .il-plate {
+    --il-inv: 2.473;
+  }
+}
+@container (min-width: 428px) {
+  .il-plate {
+    --il-inv: 2.208;
+  }
+}
+@container (min-width: 479px) {
+  .il-plate {
+    --il-inv: 1.971;
+  }
+}
+@container (min-width: 537px) {
+  .il-plate {
+    --il-inv: 1.76;
+  }
+}
+@container (min-width: 601px) {
+  .il-plate {
+    --il-inv: 1.571;
+  }
+}
+@container (min-width: 673px) {
+  .il-plate {
+    --il-inv: 1.403;
+  }
+}
+@container (min-width: 754px) {
+  .il-plate {
+    --il-inv: 1.253;
+  }
+}
+@container (min-width: 845px) {
+  .il-plate {
+    --il-inv: 1.119;
+  }
+}
+@container (min-width: 946px) {
+  .il-plate {
+    --il-inv: 0.999;
+  }
+}
+@container (min-width: 1060px) {
+  .il-plate {
+    --il-inv: 0.892;
+  }
+}
+@container (min-width: 1187px) {
+  .il-plate {
+    --il-inv: 0.796;
+  }
+}
+@container (min-width: 1329px) {
+  .il-plate {
+    --il-inv: 0.711;
+  }
+}
+@container (min-width: 1489px) {
+  .il-plate {
+    --il-inv: 0.635;
+  }
+}
+
+/* Layouts: labelled drawings keep their proportions with aspect-ratio (no root viewBox). With a
+   vertical variant (data-layouts="h v"), the vertical layout shows below 640 px. */
+.illustration[data-layouts] {
+  aspect-ratio: var(--il-ratio-h);
+}
+.illustration[data-layouts='v'] {
+  aspect-ratio: var(--il-ratio-v);
+}
+.illustration[data-layouts='h v'] [data-layout='v'] {
+  display: none;
+}
+@media (max-width: 639.98px) {
+  .illustration[data-layouts='h v'] {
+    aspect-ratio: var(--il-ratio-v);
+  }
+  .illustration[data-layouts='h v'] [data-layout='h'] {
+    display: none;
+  }
+  .illustration[data-layouts='h v'] [data-layout='v'] {
+    display: inline;
+  }
+}
+
+/* Two stroke tones: drawing (80%, the default) and guides (lanes, axes, grids). */
+.illustration .il-faint {
+  stroke-opacity: 0.34;
+}
+
+/* Tints: the only fills, 8% of the accent. */
+.illustration [data-draw-fill] {
+  fill: currentColor;
+  fill-opacity: 0.08;
+  stroke: none;
+}
+
+/* Labels: real <text>, Martian Mono 11 px in CSS px at any size. */
+.illustration .il-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text);
+  stroke: none;
+}
+.illustration .il-cat {
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.illustration .il-text {
+  fill: var(--text);
+}
+.illustration .il-muted {
+  fill: var(--muted);
+}
+.illustration .il-accent {
+  fill: currentColor;
+}
+.illustration .il-figure {
+  font-size: 20px;
+  letter-spacing: 0;
+}

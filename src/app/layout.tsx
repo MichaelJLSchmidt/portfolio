@@ -1,51 +1,50 @@
-import type { Metadata, Viewport } from "next";
-import { archivo, archivoItalic, martianMono } from "./fonts";
-import { site } from "@/content/site";
-import { color, tokensToCss } from "@/styles/tokens";
-import { motionPreferenceScript } from "@/lib/motion-preference";
-import { TerrainBackdrop } from "@/components/terrain/TerrainBackdrop";
-import { Hud } from "@/components/hud/Hud";
-import { SiteFooter } from "@/components/SiteFooter";
-import { SmoothScroll } from "@/components/SmoothScroll";
-import { CalmRouteFade } from "@/components/transition/CalmRouteFade";
-import { HistoryTransitions } from "@/components/transition/HistoryTransitions";
-import "./globals.css";
+import type { Viewport } from 'next'
+import { BackgroundField } from '@/components/background/background-field'
+import { fieldInitialCss } from '@/components/background/field-css'
+import { RouterBridge } from '@/components/router-bridge'
+import { identityCss, logoGradientCss, palette } from '@/design/palette'
+import { prefsScript } from '@/motion/preferences'
+import { mapPaths, pathFields } from '@/motion/table-store'
+import { motionCss } from '@/motion/tokens'
+import { display, hand, mono, text } from './fonts'
+import './globals.css'
 
-const isPreview = process.env.NEXT_PUBLIC_PREVIEW === "1";
-
-export const metadata: Metadata = {
-  title: site.title,
-  description: site.description,
-  // Preview builds (Basecamp branch deploys, Deploy Previews) must never be indexed; production must.
-  robots: isPreview ? { index: false, follow: false } : undefined,
-};
-
+/*
+ * The root layout: <html>, the head scripts and the background field, the
+ * same for every locale. It never remounts, so switching the language keeps
+ * the field running and keeps what the pre-paint script wrote on <html>
+ * (motion tier, field, hand reserve). Everything with words is in
+ * app/[locale]/layout.tsx, which does remount on a switch. <html lang> comes
+ * from the locale: written into each page's HTML at build time
+ * (scripts/i18n-pages.mjs) and kept in step on the client (LocaleSync).
+ * Contract: docs/contracts.md#locales.
+ */
 export const viewport: Viewport = {
-  themeColor: color.ground,
-  colorScheme: "dark",
-};
+  themeColor: palette.ink.field,
+  colorScheme: 'dark',
+  viewportFit: 'cover',
+}
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={site.lang} className={`${archivo.variable} ${archivoItalic.variable} ${martianMono.variable}`} suppressHydrationWarning>
+    <html
+      className={`${display.variable} ${text.variable} ${mono.variable} ${hand.variable}`}
+      data-motion="full"
+      suppressHydrationWarning
+    >
       <head>
-        <style dangerouslySetInnerHTML={{ __html: tokensToCss() }} />
-        <script dangerouslySetInnerHTML={{ __html: motionPreferenceScript }} />
+        {/* Motion tier, first-visit flag, the logo's gradient and reveal arming, before first paint. */}
+        <script dangerouslySetInnerHTML={{ __html: prefsScript(pathFields(), mapPaths) }} />
+        <style
+          dangerouslySetInnerHTML={{ __html: identityCss() + logoGradientCss() + fieldInitialCss() + motionCss() }}
+        />
       </head>
       <body>
-        <a className="skip-link" href="#main">
-          {site.skipLink}
-        </a>
-        <TerrainBackdrop />
-        <SmoothScroll />
-        <HistoryTransitions />
-        <CalmRouteFade />
-        <Hud />
-        <div className="page">
-          {children}
-          <SiteFooter />
-        </div>
+        {/* Persistent: never remount, not on navigation and not when the language changes. */}
+        <BackgroundField />
+        <RouterBridge />
+        {children}
       </body>
     </html>
-  );
+  )
 }

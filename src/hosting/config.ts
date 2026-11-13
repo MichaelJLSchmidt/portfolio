@@ -1,51 +1,53 @@
-/**
+/*
  * Hosting configuration: the only module that spells out the domains. The build
- * (scripts/site), the Basecamp gate (edge function) and the docs refer to these constants by
- * name: PRIMARY_DOMAIN, REDIRECT_DOMAINS, BASECAMP_HOST.
+ * (scripts/hosting/build.mjs), the password gate (a Netlify Edge Function, gate-handler.ts) and
+ * the docs refer to these constants by name: PRIMARY_DOMAIN, REDIRECT_DOMAINS.
  *
- * Plain TypeScript with no imports, so Node (type stripping), Deno (Netlify Edge Functions)
- * and the app's type check all read it as is.
+ * Plain TypeScript without imports, so Node (type stripping), Deno (Netlify Edge Functions) and
+ * the app's type check all read it as is.
  */
 
-/** Production. Serves the under-construction page until launch, then the full site. */
-export const PRIMARY_DOMAIN = "michaeljlschmidt.ch";
-
-/** Domain aliases that answer with a 301 to https://PRIMARY_DOMAIN, path kept. */
-export const REDIRECT_DOMAINS = ["mjls.ch", "www.mjls.ch", "www.michaeljlschmidt.ch"] as const;
-
-/** Branch subdomain of BASECAMP_BRANCH: the full work-in-progress site behind the gate. */
-export const BASECAMP_HOST = "basecamp.michaeljlschmidt.ch";
-
-/** The integration branch; pull requests target it, main is production. */
-export const BASECAMP_BRANCH = "basecamp";
+/** Production. Gated until launch, then the open site. */
+export const PRIMARY_DOMAIN = 'michaeljlschmidt.ch'
 
 /**
- * What a build produces (SITE_MODE, set per deploy context in netlify.toml):
- * - construction: only the under-construction page, no Next.js build (production until launch)
- * - basecamp: the full site plus the password gate (branch deploys and Deploy Previews)
- * - live: the full site, no gate (production after launch)
+ * Domain aliases: a 301 to https://PRIMARY_DOMAIN (path and query kept) before anything else, so
+ * the gate's cookie is only ever set on the primary host.
  */
-export const SITE_MODES = ["construction", "basecamp", "live"] as const;
-export type SiteMode = (typeof SITE_MODES)[number];
+export const REDIRECT_DOMAINS = ['mjls.ch', 'www.mjls.ch', 'www.michaeljlschmidt.ch'] as const
+
+/**
+ * Who may see a deploy: SITE_ACCESS, set per deploy context in netlify.toml.
+ * - gated: every request meets the password gate first; nothing is indexed
+ * - public: no gate, indexable (production after launch: the launch switch)
+ * Anything but "public", unset included, is gated: a build never opens by accident.
+ */
+export type SiteAccess = 'gated' | 'public'
+export const siteAccess = (value: string | undefined): SiteAccess => (value === 'public' ? 'public' : 'gated')
 
 export const gate = {
-  /** Host-only cookie: Secure, Path=/ and no Domain attribute are required by the prefix. */
-  cookie: "__Host-basecamp",
+  /** Host-only cookie: the prefix requires Secure, Path=/ and no Domain attribute. */
+  cookie: '__Host-gate',
+  /** The language chosen with the gate page's DE·EN switch (wins over Accept-Language). */
+  langCookie: '__Host-gate-lang',
   maxAgeSeconds: 30 * 24 * 60 * 60,
+  langMaxAgeSeconds: 365 * 24 * 60 * 60,
   /** Everything under this prefix belongs to the gate itself. */
-  prefix: "/.basecamp/",
-  unlock: "/.basecamp/unlock",
-  lock: "/.basecamp/lock",
-  /** The gate page's styles, fonts and poster: the only unprotected paths. */
-  assets: "/.basecamp/assets/",
+  prefix: '/.gate/',
+  unlock: '/.gate/unlock',
+  lock: '/.gate/lock',
+  /** GET /.gate/lang/<locale>?next=<path>: stores the choice, then back to next. */
+  lang: '/.gate/lang/',
+  /** The gate page's fonts: the only paths the edge function never sees. */
+  assets: '/.gate/assets/',
   /**
-   * Where the build stores those assets. Netlify does not reliably deploy dot-directories,
-   * so /.basecamp/assets/* is rewritten here (_redirects). Requests straight to this
-   * directory are gated like any other path.
+   * Where the build stores those assets. Netlify does not reliably deploy dot-directories, so
+   * /.gate/assets/* is rewritten here (_redirects). Requests straight to this directory are gated
+   * like any other path.
    */
-  assetsDir: "/_basecamp/",
+  assetsDir: '/_gate/',
   /** Wrong password: wait this long before answering. */
   failureDelayMs: 750,
   /** Netlify environment variable, Functions scope (netlify.toml values never reach edge functions). */
-  passwordEnv: "BASECAMP_PASSWORD",
-} as const;
+  passwordEnv: 'SITE_PASSWORD',
+} as const
