@@ -1,0 +1,9 @@
+/* <Picture> (Content & Images session). Imported once from src/app/globals.css. */
+picture[data-image] {
+  display: block;
+}
+picture[data-image] img {
+  display: block;
+  width: 100%;
+  height: auto;
+}

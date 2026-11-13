@@ -1,32 +1,28 @@
-import type { NextConfig } from "next";
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
+import type { NextConfig } from 'next'
 
-/**
- * The site is a pure static export, served from the domain root on Netlify. A build for a
- * sub-path still works (NEXT_PUBLIC_BASE_PATH, e.g. "/portfolio" to test asset() locally),
- * so the base path comes from the environment and defaults to empty.
+/*
+ * Static export only: `npm run build` writes dist/ for GitHub Pages under
+ * BASE_PATH (e.g. /random/). Nothing here needs a server.
  */
-function normaliseBasePath(value: string | undefined): string {
-  const trimmed = (value ?? "").trim().replace(/\/+$/, "");
-  if (!trimmed) return "";
-  return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
-}
+const basePath = (process.env.BASE_PATH ?? '').replace(/\/+$/, '')
 
-const basePath = normaliseBasePath(process.env.NEXT_PUBLIC_BASE_PATH);
+// Motion+ comes from a private registry (MOTION_TOKEN). Installs without the
+// token skip it: imports then resolve to a small local fallback, and the type
+// check runs against tsconfig.fallback.json, which maps the same module.
+const hasMotionPlus = existsSync(join(process.cwd(), 'node_modules/motion-plus/package.json'))
 
 const nextConfig: NextConfig = {
-  output: "export",
-  // Every route becomes a folder with index.html, so deep links and reloads work on static hosts.
+  output: 'export',
+  distDir: 'dist',
   trailingSlash: true,
   basePath,
   images: { unoptimized: true },
-  reactStrictMode: true,
   poweredByHeader: false,
-  // CLAUDE.md is the single agent guide for this repo; don't let `next dev` write AGENTS.md.
-  agentRules: false,
-  env: {
-    // Re-export the normalised value so client code and next.config agree.
-    NEXT_PUBLIC_BASE_PATH: basePath,
-  },
-};
+  env: { NEXT_PUBLIC_BASE_PATH: basePath },
+  typescript: hasMotionPlus ? {} : { tsconfigPath: 'tsconfig.fallback.json' },
+  ...(hasMotionPlus ? {} : { turbopack: { resolveAlias: { 'motion-plus': './src/motion/plus-fallback.ts' } } }),
+}
 
-export default nextConfig;
+export default nextConfig

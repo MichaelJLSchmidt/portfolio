@@ -1,0 +1,657 @@
+/*
+ * Layout components (Layout & Pages session). Static, final-state styles on
+ * the Spread grid (src/styles/layout.css) and the type scale
+ * (src/styles/type.css); reveals add motion on top (src/styles/reveal.css)
+ * without changing layout. Vertical rhythm in multiples of the 4 px baseline.
+ * Imported once from src/app/globals.css.
+ */
+
+/* ---------- Column helpers (columns 1–12 from 1024; everything stacks below) ---------- */
+.cols-1-5,
+.cols-4-7,
+.cols-4-8,
+.cols-4-10,
+.cols-4-11,
+.cols-4-12,
+.cols-6-11,
+.cols-7-12,
+.cols-8-11,
+.cols-8-12,
+.cols-9-12 {
+  grid-column: content-start / content-end;
+}
+@media (min-width: 1024px) {
+  /* Column n starts at grid line n + 1 (line 1 is full-start). */
+  .cols-1-5 {
+    grid-column: 2 / 7;
+  }
+  .cols-4-7 {
+    grid-column: 5 / 9;
+  }
+  .cols-4-8 {
+    grid-column: 5 / 10;
+  }
+  .cols-4-10 {
+    grid-column: 5 / 12;
+  }
+  .cols-4-11 {
+    grid-column: 5 / 13;
+  }
+  .cols-4-12 {
+    grid-column: 5 / 14;
+  }
+  .cols-6-11 {
+    grid-column: 7 / 13;
+  }
+  .cols-7-12 {
+    grid-column: 8 / 14;
+  }
+  .cols-8-11 {
+    grid-column: 9 / 13;
+  }
+  .cols-8-12 {
+    grid-column: 9 / 14;
+  }
+  .cols-9-12 {
+    grid-column: 10 / 14;
+  }
+}
+
+/* ---------- Section on the Spread grid ---------- */
+/*
+ * Every child is a grid item placed in source order. Rhythm: the index sits
+ * 16 px above the h2 on phones; the first block follows the h2 at
+ * --title-gap, later blocks at --block-gap. The space above a section is one
+ * of --space-s / -m / -l, chosen per section.
+ */
+.page-section {
+  --title-gap: 32px;
+  --block-gap: 48px;
+  position: relative;
+  align-items: start;
+}
+.page-section.space-s {
+  margin-top: var(--space-s);
+}
+.page-section.space-m {
+  margin-top: var(--space-m);
+}
+.page-section.space-l {
+  margin-top: var(--space-l);
+}
+.page-section > *,
+.section-stage > * {
+  min-width: 0;
+}
+.page-section > :not(.section-index, .section-title, .numeral-breaker),
+.section-stage > :not(.section-index, .section-title, .numeral-breaker) {
+  margin-top: var(--block-gap);
+}
+.page-section > .section-title + *,
+.section-stage > .section-title + * {
+  margin-top: var(--title-gap);
+}
+.page-section.title-hidden > .section-title + * {
+  margin-top: 0;
+}
+.section-title {
+  margin: 0;
+}
+.section-body {
+  display: grid;
+  gap: calc(var(--baseline) * 7);
+}
+.section-body > * {
+  margin: 0;
+}
+
+@media (min-width: 1024px) {
+  .page-section {
+    --title-gap: 40px;
+    --block-gap: 64px;
+  }
+  /* A block that shares its row with the first block after the h2 starts level with it. */
+  .page-section > .section-title + * + .row-mate {
+    margin-top: var(--title-gap);
+  }
+}
+
+/* ---------- SectionIndex: inline label below 1024, sticky in columns 1–3 from 1024 ---------- */
+.section-index {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+  color: var(--muted);
+}
+.section-index-number {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--accent);
+}
+.section-index-number::after {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: color-mix(in srgb, currentColor 60%, transparent);
+}
+@media (min-width: 1024px) {
+  .page-section > .section-index,
+  .section-stage > .section-index {
+    position: sticky;
+    top: calc(var(--header-h) + var(--space-5));
+    z-index: 1;
+    grid-row: span var(--index-rows, 2);
+    align-self: start;
+    /* Level with the middle of the h2's first line. */
+    margin: calc((var(--type-h2-size) * var(--type-h2-leading) - var(--type-label-leading)) / 2) 0 0;
+  }
+  /* A section that opens with a card or a list, not an h2: the index aligns with its top. */
+  .page-section.index-top > .section-index {
+    margin-top: 0;
+  }
+}
+
+/* ---------- NumeralBreaker: overlaps the next block by a third ---------- */
+.numeral-breaker {
+  --numeral-box: calc(var(--type-numeral-size) * var(--type-numeral-leading));
+  position: relative;
+  z-index: 0;
+  grid-column: content-start / full-end;
+  margin-bottom: calc(var(--numeral-box) / -3);
+  color: color-mix(in srgb, var(--accent) 60%, transparent);
+  pointer-events: none;
+  user-select: none;
+}
+/* The drawn numeral (ChapterNumeral): the numeral's size and line box, its outline 1 CSS px. */
+.chapter-numeral {
+  display: block;
+  font-size: var(--type-numeral-size);
+  height: calc(1em * var(--type-numeral-leading));
+  width: auto;
+  overflow: visible;
+  /* Optical: the outlined digits start at the column edge. */
+  margin-left: -0.05em;
+}
+.chapter-numeral path {
+  fill: none;
+  stroke: currentColor;
+  /* User units for one CSS px (src/motion/numeral-stroke.ts); until measured, about right at 240 px. */
+  stroke-width: var(--numeral-stroke, 4.2);
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+/* Undrawn until its chapter reveals (full tier; reduced motion and no script: drawn from the start). */
+:root[data-reveal]:not([data-motion='reduced']) .numeral-breaker:not([data-revealed]) .chapter-numeral path {
+  stroke-dashoffset: 1;
+}
+.numeral-breaker ~ * {
+  position: relative;
+  z-index: 1;
+}
+/* Below 1024 the index label leads, then the numeral with the h2 over its lower third. */
+@media (max-width: 1023.98px) {
+  .page-section > .numeral-breaker + .section-index,
+  .section-stage > .numeral-breaker + .section-index {
+    order: -1;
+  }
+}
+@media (min-width: 1024px) {
+  .page-section > .numeral-breaker,
+  .numeral-breaker {
+    grid-column: 5 / full-end;
+  }
+  .numeral-breaker ~ .section-index {
+    position: sticky;
+  }
+}
+
+/*
+ * ---------- A chapter head riding in a pinned stage (05 Key decisions) ----------
+ * Section's `stage` (section.tsx): the track and the stage are `display: contents` until the
+ * deal scene pins them (src/motion/scenes/deal-scene.ts, [data-pinned]: from 1024 px wide and
+ * deal.minPinnedHeight tall, when the cards fit). Pinned, the track is deal.stage svh tall and the
+ * stage sticks under the header: a subgrid with a fixed head row (--deal-head: the label, the
+ * outlined numeral and the h2 beside it) and a fixed canvas row (--deal-canvas, clear of the hand,
+ * measured once on mount and on width changes, never on scroll) where the cards are dealt,
+ * scaled to fit it (--deal-scale). Head and cards leave together when the track ends.
+ */
+.section-track,
+.section-stage {
+  display: contents;
+}
+.section-track[data-pinned] {
+  display: grid;
+  grid-column: full-start / full-end;
+  grid-template-columns: subgrid;
+  align-content: start;
+}
+.section-track[data-pinned] > .section-stage {
+  --numeral-box: calc(var(--type-numeral-size) * var(--type-numeral-leading));
+  position: sticky;
+  top: var(--header-h);
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  grid-template-rows: var(--deal-head) var(--deal-canvas);
+  row-gap: var(--deal-pad);
+  align-items: start;
+  padding-top: var(--deal-pad);
+}
+.section-track[data-pinned] > .section-stage > * {
+  grid-row: 1;
+  margin: 0;
+}
+/* The head in one row: the label, the numeral, the h2 beside it, centred on the numeral's line box. */
+.section-track[data-pinned] > .section-stage > .numeral-breaker {
+  grid-column: 5 / 8;
+}
+.section-track[data-pinned] > .section-stage > .section-title {
+  grid-column: 8 / content-end;
+  align-self: center;
+}
+.section-track[data-pinned] > .section-stage > .section-index {
+  position: static;
+  align-self: center;
+}
+.section-track[data-pinned] > .section-stage > .deal-row {
+  grid-row: 2;
+}
+.section-track[data-pinned] .deal-row-list {
+  scale: var(--deal-scale, 1);
+  transform-origin: 50% 0;
+}
+
+/*
+ * ---------- OffsetImage: anchored to the content column, toward one edge ----------
+ * Below 1024: edge to edge, 4:3, caption below in the content column.
+ * From 1024: "right" spans the content column's start to the right edge, "left"
+ * the left edge to the content column's end; the frame is 3:2 (cover), at most
+ * 1200 px wide and 72svh tall, kept against its anchor. Its far corners round
+ * only when a cap keeps it off the edge (100cqw of the area > its width).
+ * From 1680 the caption sits in the free space beside it.
+ */
+.offset-image {
+  row-gap: var(--space-4);
+  margin: 0;
+}
+.offset-image-area {
+  grid-column: full-start / full-end;
+  container-type: inline-size;
+}
+.offset-image-frame {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: clip;
+  background: color-mix(in srgb, var(--id-field) 80%, black);
+}
+/* Fill the frame (more specific than picture.css's intrinsic height). */
+.offset-image-frame picture[data-image],
+.offset-image-frame picture[data-image] img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.offset-image-frame picture[data-image] img {
+  object-fit: cover;
+}
+.offset-image-caption {
+  grid-column: content-start / content-end;
+  margin: 0;
+  color: var(--muted);
+}
+.page-section > .section-image {
+  margin-top: var(--space-s);
+}
+@media (min-width: 1024px) {
+  .offset-image {
+    --image-radius: 16px;
+    /* At most 1200 px wide and 72svh tall, always 3:2: the height cap narrows the frame. */
+    --image-max: min(1200px, 72svh * 3 / 2);
+    --image-far: clamp(0px, (100cqw - var(--image-max)) * 1000, var(--image-radius));
+  }
+  .offset-image-frame {
+    width: min(100%, var(--image-max));
+    aspect-ratio: 3 / 2;
+  }
+  .offset-image[data-side='right'] .offset-image-area {
+    grid-column: 5 / full-end;
+  }
+  .offset-image[data-side='right'] .offset-image-frame {
+    border-radius: var(--image-radius) var(--image-far) var(--image-far) var(--image-radius);
+  }
+  .offset-image[data-side='left'] .offset-image-area {
+    grid-column: full-start / 13;
+  }
+  .offset-image[data-side='left'] .offset-image-frame {
+    margin-left: auto;
+    border-radius: var(--image-far) var(--image-radius) var(--image-radius) var(--image-far);
+  }
+  .offset-image-caption {
+    grid-column: 5 / 13;
+  }
+}
+@media (min-width: 1680px) {
+  /* Beside the image, level with its bottom edge: columns 1–3 for "right", column 12 + the outer track for "left". */
+  .offset-image-caption {
+    grid-row: 1;
+    align-self: end;
+  }
+  .offset-image[data-side='right'] .offset-image-caption {
+    grid-column: 2 / 5;
+    padding-right: var(--space-5);
+  }
+  .offset-image[data-side='left'] .offset-image-caption {
+    grid-column: 13 / full-end;
+    margin-right: var(--space-6);
+    padding-left: var(--space-2);
+  }
+}
+
+/* ---------- MetaPairs: ruled row, 5 up from 1024, 2 columns below ---------- */
+.meta-pairs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5) var(--grid-gutter);
+  margin: 0;
+}
+.meta-pair {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+}
+/* The pair's 1 px top rule: an element of its own, so the `pair` reveal can draw it. */
+.meta-pair-rule {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: var(--line);
+}
+.meta-pair-label {
+  color: var(--muted);
+}
+.meta-pair-label > [data-pair-part] {
+  display: block;
+}
+.meta-pair-value {
+  margin: 0;
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-leading);
+}
+@media (min-width: 1024px) {
+  .meta-pairs {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .meta-pairs[data-count='4'] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* ---------- Scoreboard: 5 up / 2 up, mono digits, label under the value ---------- */
+.scoreboard {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-6) var(--grid-gutter);
+  margin: 0;
+}
+.scoreboard-item {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+}
+/* Five on a two-column phone grid: the first one leads, full width. */
+.scoreboard-item:first-child:nth-last-child(odd) {
+  grid-column: 1 / -1;
+}
+.scoreboard-label {
+  max-width: 24ch;
+  color: var(--muted);
+}
+.scoreboard-value {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--type-h2-size);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--accent);
+}
+.scoreboard-digits {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.3em;
+  row-gap: var(--space-1);
+  max-width: 100%;
+}
+.scoreboard-word {
+  display: inline-flex;
+  align-items: baseline;
+}
+.scoreboard-digits [data-digit] {
+  display: inline-block;
+}
+.scoreboard-unit {
+  margin-left: 0.25em;
+  font-size: var(--type-label-size);
+  letter-spacing: var(--type-label-tracking);
+  text-transform: uppercase;
+}
+@media (min-width: 1024px) {
+  .scoreboard {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .scoreboard-item:first-child:nth-last-child(odd) {
+    grid-column: auto;
+  }
+}
+
+/* ---------- DealRow: four cards; a scroll-snap row below 1024, a stage from 1024 ---------- */
+.deal-row {
+  display: grid;
+  gap: var(--space-4);
+}
+.deal-row-list {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: min(80%, 20rem);
+  gap: var(--grid-gutter);
+  /* Full bleed: the row scrolls under the page margins; cards snap to the margin. */
+  margin: 0 calc(var(--grid-margin) * -1);
+  padding: var(--space-1) var(--grid-margin) var(--space-3);
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--grid-margin);
+  scrollbar-width: none;
+}
+.deal-row-list::-webkit-scrollbar {
+  display: none;
+}
+.deal-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  aspect-ratio: var(--card-ratio);
+  padding: calc(var(--baseline) * 5);
+  border-radius: 16px;
+  background:
+    radial-gradient(120% 70% at 0% 100%, color-mix(in oklab, var(--id-glow) 24%, transparent), transparent 70%),
+    color-mix(in srgb, var(--id-field) 92%, black);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--id-accent) 28%, transparent),
+    0 24px 48px -32px rgb(0 0 0 / 0.8);
+  scroll-snap-align: start;
+}
+.deal-card > * {
+  margin: 0;
+}
+.deal-card-index {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  color: var(--accent);
+}
+.deal-card-number {
+  color: var(--muted);
+}
+.deal-card-fields {
+  display: grid;
+  gap: var(--space-3);
+  margin: auto 0 0;
+}
+.deal-card-fields > div {
+  display: grid;
+  gap: var(--space-1);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+}
+.deal-card-fields dt {
+  color: var(--muted);
+}
+.deal-card-fields dd {
+  margin: 0;
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-leading);
+}
+.deal-row-position {
+  margin: 0;
+  color: var(--muted);
+}
+@media (min-width: 1024px) {
+  .deal-row-list {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+  .deal-card {
+    padding: var(--space-5);
+  }
+  .deal-row-position {
+    display: none;
+  }
+}
+
+/* ---------- MarginNote: inline aside with a left rule; margin track from 1680 (D2) ---------- */
+.margin-note {
+  margin: 0;
+  padding-left: var(--space-4);
+  border-left: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
+  color: var(--muted);
+}
+.margin-note-text {
+  max-width: 44ch;
+  margin: 0;
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-leading);
+}
+@media (min-width: 1680px) {
+  /* Column 12 + the outer track runs to the viewport edge: keep a margin on the right. */
+  .page-section > .margin-note {
+    margin-right: var(--space-6);
+  }
+  /* Level with the block it annotates (the row it shares). */
+  .page-section > .section-title + * + .margin-note {
+    margin-top: var(--title-gap);
+  }
+}
+
+/* ---------- Minimap: section ticks at the right edge from 1024; nothing below ---------- */
+.minimap {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .minimap {
+    position: fixed;
+    top: 50%;
+    right: var(--space-2);
+    z-index: var(--z-header);
+    display: block;
+    translate: 0 -50%;
+  }
+  .minimap ol {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .minimap-tick {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 32px;
+    height: 24px;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .minimap-tick::before {
+    content: '';
+    width: 12px;
+    height: 1px;
+    background: color-mix(in srgb, var(--text) 35%, transparent);
+    transition:
+      width var(--dur-s) var(--ease-out-quint),
+      background-color var(--dur-s) var(--ease-out-quint);
+  }
+  .minimap-tick:is(:hover, :focus-visible)::before {
+    width: 20px;
+    background: var(--text);
+  }
+  .minimap-tick[aria-current='location']::before {
+    width: 24px;
+    height: 2px;
+    background: var(--accent);
+  }
+  /* The label shows beside the tick on hover and focus (always the link's name). */
+  .minimap-label {
+    position: absolute;
+    top: 50%;
+    right: calc(100% + var(--space-1));
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--ink-field) 90%, transparent);
+    white-space: nowrap;
+    opacity: 0;
+    translate: 0 -50%;
+    pointer-events: none;
+    transition: opacity var(--dur-xs) var(--ease-out-quint);
+  }
+  .minimap-tick:is(:hover, :focus-visible) .minimap-label {
+    opacity: 1;
+  }
+  .minimap-number {
+    color: var(--accent);
+  }
+}
+
+/* ---------- Ruled lists and section figures (shared by pages) ---------- */
+.ruled-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ruled-list > li {
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--line);
+}
+.ruled-list > li:last-child {
+  border-bottom: 1px solid var(--line);
+}
+.section-figure {
+  margin: 0;
+}
+.section-figure .illustration {
+  width: 100%;
+}

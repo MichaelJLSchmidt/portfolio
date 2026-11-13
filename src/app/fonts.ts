@@ -1,26 +1,44 @@
-import { Archivo, Martian_Mono } from "next/font/google";
+import localFont from 'next/font/local'
 
-// Variable fonts, self-hosted by next/font at build time (latin subset only).
-export const archivo = Archivo({
-  subsets: ["latin"],
-  axes: ["wdth"],
-  display: "swap",
-  variable: "--font-archivo",
-});
+/*
+ * Self-hosted variable fonts (unmodified Latin files from Fontsource, OFL).
+ * Display: Bricolage Grotesque, opsz 12–96 and wght 200–800 only (no width
+ * axis in this file, so width can never animate). Text: Hanken Grotesk.
+ * Mono: Martian Mono (labels, metrics, tabular figures).
+ */
+export const display = localFont({
+  src: '../fonts/BricolageGrotesque-opsz-wght.latin.woff2',
+  variable: '--font-display-face',
+  weight: '200 800',
+  display: 'swap',
+  adjustFontFallback: 'Arial',
+})
 
-// Italic is only used in card rules text, so it is not preloaded (saves ~100 KB on first paint).
-export const archivoItalic = Archivo({
-  subsets: ["latin"],
-  axes: ["wdth"],
-  style: "italic",
-  display: "swap",
+export const text = localFont({
+  src: '../fonts/HankenGrotesk-wght.latin.woff2',
+  variable: '--font-text-face',
+  weight: '100 900',
+  display: 'swap',
+  adjustFontFallback: 'Arial',
+})
+
+export const mono = localFont({
+  src: '../fonts/MartianMono-wght.latin.woff2',
+  variable: '--font-mono-face',
+  weight: '100 800',
+  display: 'swap',
+  adjustFontFallback: false,
+})
+
+/*
+ * Handwriting: Caveat (OFL, latin subset incl. German umlauts), only for the idle hint on home.
+ * Not preloaded: the browser fetches it the first time the note renders.
+ */
+export const hand = localFont({
+  src: '../fonts/Caveat-wght.latin.woff2',
+  variable: '--font-hand-face',
+  weight: '400 700',
+  display: 'swap',
   preload: false,
-  variable: "--font-archivo-italic",
-});
-
-export const martianMono = Martian_Mono({
-  subsets: ["latin"],
-  axes: ["wdth"],
-  display: "swap",
-  variable: "--font-martian",
-});
+  adjustFontFallback: false,
+})

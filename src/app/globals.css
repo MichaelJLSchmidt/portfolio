@@ -1,5 +1,27 @@
-/* Colour, type and motion custom properties come from src/styles/tokens.ts (injected in the root layout). */
+/*
+ * Global stylesheet. Every session's CSS entry point is imported here once, so
+ * Wave 1 sessions edit their own files and never this list:
+ *   Foundation   tokens.css, layout.css, type.css
+ *   Motion       view-transitions.css, reveal.css, field.css, hand.css, eggs.css
+ *   Layout       components/layout/layout.css, styles/pages/*.css, this file's rules
+ *   Illustr.     components/illustrations/illustrations.css
+ *   Content      components/picture.css
+ */
+@import '../styles/tokens.css';
+@import '../styles/layout.css';
+@import '../styles/type.css';
+@import '../styles/view-transitions.css';
+@import '../styles/reveal.css';
+@import '../styles/field.css';
+@import '../styles/hand.css';
+@import '../styles/eggs.css';
+@import '../components/layout/layout.css';
+@import '../components/illustrations/illustrations.css';
+@import '../components/picture.css';
+@import '../styles/pages/detail.css';
+@import '../styles/pages/pages.css';
 
+/* Base */
 *,
 *::before,
 *::after {
@@ -7,43 +29,44 @@
 }
 
 html {
+  background: #000;
+  color: var(--text);
   -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  background: var(--color-ground);
-  color: var(--color-sheet);
-  font-family: var(--font-archivo), system-ui, sans-serif;
-  font-size: 100%;
-  font-stretch: 100%;
+  -webkit-font-smoothing: antialiased;
+  scroll-padding-top: var(--header-h);
 }
 
 body {
   margin: 0;
-  overflow-x: clip;
-  min-height: 100svh;
-  font-size: var(--type-body-size);
-  line-height: var(--type-body-lh);
-  font-weight: 400;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+  background: transparent;
+}
+
+main {
+  flex: 1;
+  min-height: 100dvh;
+  outline: none;
 }
 
 h1,
 h2,
 h3,
-h4,
 p,
-figure,
-blockquote,
-dl,
-dd {
+figure {
   margin: 0;
 }
 
-img,
-svg,
-canvas {
-  display: block;
-  max-width: 100%;
+p {
+  text-wrap: pretty;
+}
+
+h1,
+h2 {
+  text-wrap: balance;
 }
 
 a {
@@ -53,249 +76,296 @@ a {
 button {
   font: inherit;
   color: inherit;
+  cursor: pointer;
 }
 
+/* Focus: 2px accent ring, 3px offset. */
 :focus-visible {
-  outline: 2px solid var(--color-glacier);
-  outline-offset: 4px;
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+[tabindex='-1']:focus {
+  outline: none;
 }
 
-.display {
-  font-family: var(--font-archivo), system-ui, sans-serif;
-  font-weight: var(--type-display-wght);
-  font-stretch: calc(var(--type-display-wdth) * 1%);
-  line-height: var(--type-display-lh);
-  text-transform: uppercase;
-  letter-spacing: -0.01em;
+::selection {
+  background: var(--text);
+  color: var(--ink-field);
 }
 
-.hud-label {
-  font-family: var(--font-martian), ui-monospace, monospace;
-  font-size: var(--type-hud-size);
-  letter-spacing: var(--type-hud-tracking);
-  font-stretch: calc(var(--type-hud-wdth) * 1%);
-  text-transform: uppercase;
-  line-height: 1.4;
-}
-
-.visually-hidden {
-  position: absolute !important;
+/* Utilities */
+.sr-only {
+  position: absolute;
   width: 1px;
   height: 1px;
   margin: -1px;
   padding: 0;
   overflow: hidden;
-  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
 }
 
-.skip-link {
-  position: absolute;
-  left: 1rem;
-  top: 1rem;
-  z-index: 100;
-  padding: 0.5rem 0.875rem;
-  background: var(--color-sheet);
-  color: var(--color-ground);
-  transform: translateY(-200%);
+.skip-link,
+.intro-skip {
+  position: fixed;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: var(--z-skip);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--text);
+  color: var(--ink-field);
+  font-weight: var(--wght-label);
+  text-decoration: none;
+  clip-path: inset(50%);
+}
+.skip-link:focus-visible,
+.intro-skip:focus-visible {
+  clip-path: none;
+}
+:root:not([data-intro='first']) .intro-skip {
+  display: none;
 }
 
-.skip-link:focus-visible {
-  transform: none;
+/*
+ * Text links (.link). At rest a marker block sits behind the lower part of the text: as wide as
+ * the text but shifted right (it starts --lk-shift in and overhangs the end by as much), from
+ * --lk-above over the baseline to --lk-below under it, in a deeper shade of the page's identity
+ * (--link-rest, palette.ts linkMark). Hover (devices that hover, never sticky on touch) and
+ * focus-visible: in one move the block slides left and down and collapses into the underline,
+ * aligned with the text, its top --lk-gap under the baseline and --lk-line thick, in the
+ * identity's accent at full strength (--dur-link-in, ease.link); out again the exact reverse,
+ * faster (--dur-link-out). One registered progress, --lk-p (0 the block, 1 the line), drives the
+ * position, the size and the colour, so it is one move. The text never moves and keeps its colour
+ * (--text: the shades are tuned for it, at least 4.5:1). Every line fragment of a wrapped link
+ * gets its own block and line (box-decoration-break: clone). Sizes are em of the link's own font
+ * size (small print up to the h2 email); the marker is anchored to the baseline through the
+ * font's descent (--font-descent, type.css), the room under the inline box.
+ *
+ * Colour: the scope's --link-a / -b / -c (the line's stops) and --link-rest (the block's shade).
+ * Ink pages (home, 404) follow the logo: the page load's three logo colours as a gradient along
+ * the link, flowing like the logo's front card (--link-flow: link-flow, one --logo-flow loop, its
+ * start set to the page clock by the pre-paint script), the block each colour at the depth
+ * --link-depth. Links outside the page (header, footer) take the page's identity (palette.ts).
+ *
+ * .link-standalone, a link with nothing after it on its line: a small solid triangle after the
+ * text, in the text colour, fades in with the line (--dur-link-mark-in / -out) and never moves;
+ * its room (--lk-reserve) is kept at rest, so nothing shifts. Other links (running text, small
+ * print) keep their spacing: their overhang hangs into what follows (a negative margin).
+ * The current page (aria-current="page"): the line in the accent; no block, triangle or hover.
+ * The class sits on the <a>, or on a span directly inside it (the <a> is the target and carries
+ * the focus ring: the header's About, the timeline's Master's card).
+ * Reduced motion: the durations are 0 (the state changes at once) and the gradient holds still.
+ * --ue (0 -> 1) draws the block in from the left: the email on About as it reveals (reveal.css).
+ */
+@property --lk-p {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+@property --lk-0 {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: transparent;
+}
+@property --lk-1 {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: transparent;
+}
+@property --lk-2 {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: transparent;
+}
+@property --ue {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+/* The next project card's title underline (detail.css). */
+@property --u {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
+.link {
+  /* Geometry (em of the link's font size). */
+  --lk-shift: 0.4em;
+  --lk-above: 0.3em;
+  --lk-below: 0.5em;
+  --lk-gap: 0.15em;
+  --lk-line: max(0.12em, 2px);
+  --lk-tri-h: 0.45em;
+  --lk-tri-w: 0.39em;
+  --lk-tri-gap: 0.3em;
+  --lk-reserve: 0.75em;
+  /* The box's room after the text (--lk-end: the padding the block overhangs into; --lk-room: what layout keeps of it). */
+  --lk-end: var(--lk-shift);
+  --lk-room: 0px;
+  /* Colour: the line's stops, the block's shades, mixed by the progress. */
+  --lk-0: var(--link-a);
+  --lk-1: var(--link-b);
+  --lk-2: var(--link-c);
+  --lk-r0: var(--link-rest, oklch(from var(--lk-0) var(--link-depth) c h));
+  --lk-r1: var(--link-rest, oklch(from var(--lk-1) var(--link-depth) c h));
+  --lk-r2: var(--link-rest, oklch(from var(--lk-2) var(--link-depth) c h));
+  --lk-rest: calc((1 - var(--lk-p)) * 100%);
+  --lk-h: calc(var(--lk-above) + var(--lk-below));
+  display: inline;
+  color: var(--text);
+  text-decoration: none;
+  padding: 0 var(--lk-end) max(0px, calc(var(--lk-below) - var(--font-descent) * 1em)) 0;
+  margin-right: calc(var(--lk-room) - var(--lk-end));
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  background-image: linear-gradient(
+    to right,
+    color-mix(in oklab, var(--lk-0), var(--lk-r0) var(--lk-rest)),
+    color-mix(in oklab, var(--lk-1), var(--lk-r1) var(--lk-rest)),
+    color-mix(in oklab, var(--lk-2), var(--lk-r2) var(--lk-rest))
+  );
+  background-repeat: no-repeat;
+  background-size: calc((100% - var(--lk-end)) * max(var(--ue), var(--lk-p)))
+    calc(var(--lk-h) + (var(--lk-line) - var(--lk-h)) * var(--lk-p));
+  background-position: left calc(var(--lk-shift) * (1 - var(--lk-p))) bottom
+    calc((var(--lk-below) - var(--lk-gap) - var(--lk-line)) * var(--lk-p));
+  animation: var(--link-flow) var(--logo-flow) linear infinite;
+  transition: --lk-p var(--dur-link-out) var(--ease-link);
+}
+/* Without relative colours: each flowing colour mixed toward the ink field instead. */
+@supports not (color: oklch(from red l c h)) {
+  .link {
+    --lk-r0: var(--link-rest, color-mix(in oklab, var(--lk-0), var(--ink-field) var(--link-ink-mix)));
+    --lk-r1: var(--link-rest, color-mix(in oklab, var(--lk-1), var(--ink-field) var(--link-ink-mix)));
+    --lk-r2: var(--link-rest, color-mix(in oklab, var(--lk-2), var(--ink-field) var(--link-ink-mix)));
   }
 }
-
-em,
-i,
-.italic {
-  font-family: var(--font-archivo-italic), var(--font-archivo), system-ui, sans-serif;
-  font-style: italic;
-}
-
-:root {
-  --page-max: 1680px;
-  --gutter: clamp(16px, 4vw, 72px);
-}
-
-/* Centred page measure with fluid gutters; content no longer hugs the left edge on wide screens. */
-.container {
-  width: 100%;
-  max-width: calc(var(--page-max) + 2 * var(--gutter));
-  margin-inline: auto;
-  padding-inline: var(--gutter);
-}
-
-/* Staggered entrance for supporting text (pure CSS; no-op with reduced motion). */
-@keyframes reveal-in {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
+/* The logo's colours travel along the link: stop n shows the logo's stop n (header.module.css). */
+@keyframes link-flow {
+  0%,
+  100% {
+    --lk-0: var(--logo-a);
+    --lk-1: var(--logo-b);
+    --lk-2: var(--logo-c);
+  }
+  33.333% {
+    --lk-0: var(--logo-b);
+    --lk-1: var(--logo-c);
+    --lk-2: var(--logo-a);
+  }
+  66.667% {
+    --lk-0: var(--logo-c);
+    --lk-1: var(--logo-a);
+    --lk-2: var(--logo-b);
   }
 }
-
-:root[data-motion="full"] .reveal {
-  animation: reveal-in var(--dur-long) var(--ease-trail) backwards;
-  animation-delay: calc(var(--reveal-base, 260ms) + var(--reveal-i, 0) * 90ms);
+:root[data-motion='reduced'] .link {
+  animation: none;
 }
 
-.page {
-  position: relative;
-  z-index: 1;
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
+.link-standalone {
+  --lk-end: var(--lk-reserve);
+  --lk-room: var(--lk-reserve);
 }
-
-.page > main {
-  flex: 1;
-}
-
-/* Cartographic label halo: keeps small text legible over contour lines. */
-.map-halo {
-  text-shadow:
-    0 0 2px var(--color-ground),
-    0 0 6px var(--color-ground),
-    0 0 14px var(--color-ground);
-}
-
-/* Inside a quiet zone ([data-quiet-zone]) the running field fades its lines to ~25%, so
-   sheet and glacier text needs no halo there (checked by npm run check:contrast).
-   Contour-coloured labels (.keep-halo) keep theirs: even faded lines would take them
-   below AA. The poster (reduced motion, no WebGL) has no quiet zones, so halos stay. */
-:root:has([data-field="on"]) [data-quiet-zone].map-halo:not(.keep-halo),
-:root:has([data-field="on"]) [data-quiet-zone] .map-halo:not(.keep-halo) {
-  text-shadow: none;
-}
-
-/* ------------------------------------------------------------------------------------
-   View transitions (React <ViewTransition> on route changes)
-
-   Durations follow Material 3's scale (medium 250–400 ms, long 450–600 ms, extra-long
-   700–1000 ms) and the rule that duration grows with travel distance and size change:
-   - exit:   the old page dissolves in --dur-medium (360 ms), a plus-lighter crossfade;
-   - travel: the card artwork and title fly to the header in --dur-scenic (900 ms) with a
-             strong decelerate, the longest move on screen;
-   - enter:  the new page's text reveals over --dur-long (560 ms) in a stagger once the
-             artwork is mid-flight (--reveal-base), so entering takes longer than leaving;
-   - field:  the background terrain morphs over --dur-cinematic (1.4 s) with a camera push.
-   ------------------------------------------------------------------------------------ */
-::view-transition {
+/*
+ * The triangle: an inline box that starts with a word joiner, so it never wraps away from the last
+ * word (an inline-block would be a break opportunity). It takes no room itself (its margin cancels
+ * its padding; the link's padding keeps the room) and paints currentColor through a triangle mask
+ * on its padding, the mask's centre half an x-height above the baseline (the box's bottom is the
+ * font's descent under the baseline).
+ */
+.link-standalone::after {
+  --lk-tri: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 39 45' preserveAspectRatio='none'%3E%3Cpath d='M0 0 39 22.5 0 45z'/%3E%3C/svg%3E");
+  --lk-tri-y: calc(var(--font-descent) * 1em + 0.5ex - var(--lk-tri-h) / 2);
+  content: '\2060';
+  padding-left: calc(var(--lk-tri-gap) + var(--lk-tri-w));
+  margin-right: calc(-1 * (var(--lk-tri-gap) + var(--lk-tri-w)));
+  background: currentColor;
+  -webkit-mask: var(--lk-tri) no-repeat right bottom var(--lk-tri-y) / var(--lk-tri-w) var(--lk-tri-h);
+  mask: var(--lk-tri) no-repeat right bottom var(--lk-tri-y) / var(--lk-tri-w) var(--lk-tri-h);
+  opacity: 0;
   pointer-events: none;
+  transition: opacity var(--dur-link-mark-out) var(--ease-link);
 }
 
-/* Root: a true crossfade (matched linear curves, plus-lighter), so the shared map and
-   HUD keep constant brightness; the new page's text arrives later via its reveals. */
-::view-transition-old(root),
-::view-transition-new(root) {
-  mix-blend-mode: plus-lighter;
+/*
+ * Vertical text (writing-mode: vertical-rl, the terrain credit along About's left edge): the same
+ * marker with the axes swapped. The inline axis runs down and the descent lies to the left, so
+ * the block is anchored to the box's left edge and shifted down the text.
+ */
+.link-vertical {
+  padding: 0 0 var(--lk-end) max(0px, calc(var(--lk-below) - var(--font-descent) * 1em));
+  margin: 0 0 calc(var(--lk-room) - var(--lk-end));
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--lk-0), var(--lk-r0) var(--lk-rest)),
+    color-mix(in oklab, var(--lk-1), var(--lk-r1) var(--lk-rest)),
+    color-mix(in oklab, var(--lk-2), var(--lk-r2) var(--lk-rest))
+  );
+  background-size: calc(var(--lk-h) + (var(--lk-line) - var(--lk-h)) * var(--lk-p))
+    calc((100% - var(--lk-end)) * max(var(--ue), var(--lk-p)));
+  background-position: left calc((var(--lk-below) - var(--lk-gap) - var(--lk-line)) * var(--lk-p)) top
+    calc(var(--lk-shift) * (1 - var(--lk-p)));
 }
 
-::view-transition-old(root) {
-  animation: vt-exit var(--dur-medium) linear both;
-}
-
-::view-transition-new(root) {
-  animation: vt-enter var(--dur-medium) linear both;
-}
-
-@keyframes vt-exit {
-  to {
-    opacity: 0;
+/* The line: hover (devices that hover) and keyboard focus. */
+@media (hover: hover) {
+  .link:not([aria-current='page']):hover,
+  a:not([aria-current='page']):hover > .link {
+    --lk-p: 1;
+    transition-duration: var(--dur-link-in);
   }
-}
-
-@keyframes vt-enter {
-  from {
-    opacity: 0;
-  }
-}
-
-/* Shared elements travel on one curve. */
-::view-transition-group(.morph) {
-  animation-duration: var(--dur-scenic);
-  animation-timing-function: var(--ease-drop);
-}
-
-/* Artwork: same terrain at a similar aspect, so a long, even crossfade is seamless. */
-::view-transition-old(.morph-art),
-::view-transition-new(.morph-art) {
-  height: 100%;
-  object-fit: cover;
-  animation-duration: var(--dur-scenic);
-  animation-timing-function: var(--ease-drop);
-}
-
-/* Title: the box travels, the text does not scale. Both snapshots keep their own size,
-   anchored top-left in the moving box, and cross-fade early, so the text stays sharp in
-   flight; the heading then settles on its axes once it has landed (KineticText). */
-::view-transition-old(.morph-title),
-::view-transition-new(.morph-title) {
-  inline-size: auto;
-  block-size: auto;
-  object-fit: none;
-}
-
-::view-transition-old(.morph-title) {
-  animation: vt-title-old var(--dur-scenic) linear both;
-}
-
-::view-transition-new(.morph-title) {
-  animation: vt-title-new var(--dur-scenic) linear both;
-}
-
-@keyframes vt-title-old {
-  30%,
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes vt-title-new {
-  from,
-  18% {
-    opacity: 0;
-  }
-  48%,
-  to {
+  .link-standalone:not([aria-current='page']):hover::after,
+  a:not([aria-current='page']):hover > .link-standalone::after {
     opacity: 1;
+    transition-duration: var(--dur-link-mark-in);
+  }
+}
+.link:not([aria-current='page']):focus-visible,
+a:not([aria-current='page']):focus-visible > .link {
+  --lk-p: 1;
+  transition-duration: var(--dur-link-in);
+}
+.link-standalone:not([aria-current='page']):focus-visible::after,
+a:not([aria-current='page']):focus-visible > .link-standalone::after {
+  opacity: 1;
+  transition-duration: var(--dur-link-mark-in);
+}
+/* The current page: the line, still. The triangle's room stays (the header's tray keeps its width). */
+.link[aria-current='page'],
+[aria-current='page'] > .link {
+  --lk-p: 1;
+  transition: none;
+}
+.link-standalone[aria-current='page']::after,
+[aria-current='page'] > .link-standalone::after {
+  visibility: hidden;
+}
+/* Forced colours drop the gradient: links are underlined instead. */
+@media (forced-colors: active) {
+  .link {
+    text-decoration: underline;
   }
 }
 
-/* Named parts without a partner (the other cards) leave and arrive with the page. */
-::view-transition-old(.morph):only-child {
-  animation: vt-exit var(--dur-medium) var(--ease-scree) both;
+.button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-5);
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font-weight: var(--wght-label);
+  text-decoration: none;
 }
-
-::view-transition-new(.morph):only-child {
-  animation: vt-enter var(--dur-long) var(--ease-trail) both;
-}
-
-/* Calm map / reduced motion: no view transition at all (src/lib/view-transition.ts). The
-   page changes directly and the incoming page fades in, opacity only (CalmRouteFade). */
-@keyframes route-fade-in {
-  from {
-    opacity: 0;
-  }
-}
-
-:root[data-motion="reduced"][data-route-fade] main {
-  animation: route-fade-in var(--dur-calm) linear both;
-}
-
-/* Lenis (fine-pointer desktop only). */
-html.lenis,
-html.lenis body {
-  height: auto;
-}
-
-.lenis:not(.lenis-autoToggle).lenis-stopped {
-  overflow: clip;
+.button:hover {
+  border-color: var(--accent);
 }

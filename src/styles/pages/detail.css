@@ -1,0 +1,908 @@
+/*
+ * Detail pages: case study and Management (Layout & Pages session).
+ * Hero (the played card, continued), facts, then numbered Spread-grid
+ * sections. Placement helpers and the section rhythm are in
+ * src/components/layout/layout.css.
+ */
+.detail-page {
+  display: grid;
+}
+
+/*
+ * ---------- The played card's frame, grown to the full screen (case-hero.tsx) ----------
+ * The card's body without its details: the face's fill and its 1 px accent edge. Fixed over the
+ * page (the hero's image and title lie over it), under the hand and the header. After a play it
+ * dissolves from opaque (the view transition shows it live); at rest it is transparent. Back:
+ * the hero's details fade out while the frame materialises again (html[data-returning]) and rises
+ * above the hand with the hero, as its view-transition group does. Reduced: not rendered.
+ */
+.play-frame {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-play-frame);
+  border-radius: var(--table-card-radius);
+  background:
+    radial-gradient(130% 70% at 0% 100%, color-mix(in oklab, var(--id-glow) 42%, transparent), transparent 72%),
+    linear-gradient(to bottom, color-mix(in oklab, var(--id-mid) 38%, var(--id-field)), var(--id-field) 55%);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--id-accent) 30%, transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+.play-frame[data-arrival='play'] {
+  animation: play-frame-out var(--play-dissolve-dur) var(--play-dissolve-ease) var(--play-dissolve-at) both;
+}
+:root[data-returning] .play-frame {
+  z-index: var(--z-returning);
+  animation: play-frame-in var(--return-frame-dur) linear var(--return-frame-at) both;
+}
+:root[data-motion='reduced'] .play-frame {
+  display: none;
+}
+@keyframes play-frame-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes play-frame-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+:root[data-returning] :is(.case-hero-meta, .case-hero-summary, .detail-facts, .minimap) {
+  animation: hero-detail-out var(--return-details) linear both;
+}
+@keyframes hero-detail-out {
+  to {
+    opacity: 0;
+  }
+}
+/* A switch: while the other card flies to the table, this page's hero steps back. */
+:root[data-switching] :is(.case-hero-meta, .case-hero-frame, .case-hero-text) {
+  opacity: var(--switch-dim);
+  transition: opacity var(--play-contact) var(--ease-out-soft);
+}
+:root[data-motion='reduced'][data-switching] :is(.case-hero-meta, .case-hero-frame, .case-hero-text) {
+  opacity: 1;
+}
+
+/* ---------- Hero: 64vh on phones, 72vh from 1024 ---------- */
+.case-hero {
+  position: relative;
+  align-content: start;
+  min-height: 64svh;
+  padding-top: calc(var(--header-h) + var(--space-2));
+}
+.case-hero-meta {
+  grid-column: content-start / content-end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0 0 var(--space-4);
+  color: var(--muted);
+}
+.case-hero-counter {
+  font-variant-numeric: tabular-nums;
+}
+.case-hero-index {
+  color: var(--accent);
+}
+/* The card's band, grown and slid off the right edge of the table: over the play frame. */
+.case-hero-frame {
+  position: relative;
+  z-index: var(--z-hero);
+  grid-column: content-start / full-end;
+  height: clamp(208px, 32svh, 400px);
+  /* clip, not hidden: a hidden overflow makes a scroll container, and the .hero-drift view()
+     timeline would follow the frame (which never scrolls) instead of the page. */
+  overflow: clip;
+  border-radius: 16px 0 0 16px;
+  background:
+    radial-gradient(120% 90% at 0% 100%, color-mix(in oklab, var(--id-glow) 45%, transparent), transparent 70%),
+    var(--id-field);
+}
+/* Edge and scrim above the media: the title runs onto the frame and stays readable. */
+.case-hero-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(to top, color-mix(in srgb, var(--id-field) 80%, transparent), transparent 55%);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--id-accent) 30%, transparent);
+  pointer-events: none;
+}
+.case-hero-picture {
+  position: absolute;
+  inset: 0;
+}
+.case-hero-frame .case-hero-picture img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity var(--loading-image) linear;
+}
+/* The image waits on the frame's identity colour until it is decoded, then fades in (case-hero.tsx). */
+:root[data-reveal]:not([data-motion='reduced']) .case-hero-frame img:not([data-loaded]) {
+  opacity: 0;
+}
+.case-hero-art {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-5);
+}
+.case-hero-art .illustration {
+  width: auto;
+  max-width: 100%;
+  height: 100%;
+}
+.case-hero-text {
+  position: relative;
+  z-index: var(--z-hero);
+  grid-column: content-start / content-end;
+  /* The title's first line sits half on the frame. */
+  margin-top: calc(var(--type-display-size) * var(--type-display-leading) * -0.5);
+}
+.case-hero-title {
+  margin: 0;
+}
+.case-hero-summary {
+  max-width: 32ch;
+  margin: var(--space-4) 0 0;
+}
+@media (min-width: 1024px) {
+  .case-hero {
+    grid-template-rows: auto 1fr auto;
+    min-height: 72svh;
+    padding-top: var(--header-h);
+  }
+  .case-hero-meta {
+    grid-column: 2 / 6;
+    grid-row: 1;
+    margin: var(--space-5) 0 0;
+  }
+  .case-hero-frame {
+    grid-column: 7 / full-end;
+    grid-row: 1 / 4;
+    justify-self: start;
+    /* The frame never grows past 1200 px: on very wide screens it stops short of the edge. */
+    width: min(100%, 1200px);
+    height: auto;
+    margin-top: var(--space-4);
+    border-radius: 24px 0 0 24px;
+  }
+  .case-hero-frame::after {
+    background:
+      linear-gradient(to right, color-mix(in srgb, var(--id-field) 78%, transparent), transparent 42%),
+      linear-gradient(to top, color-mix(in srgb, var(--id-field) 60%, transparent), transparent 40%);
+  }
+  .case-hero-art {
+    padding: var(--space-7);
+  }
+  .case-hero-text {
+    grid-column: 2 / 11;
+    grid-row: 3;
+    margin: 0;
+    padding: var(--space-7) 0 calc(var(--baseline) * 10);
+  }
+  .case-hero-summary {
+    max-width: 30ch;
+    margin-top: var(--space-5);
+  }
+}
+
+:root[data-returning] :is(.case-hero-frame, .case-hero-text) {
+  z-index: var(--z-returning-hero);
+}
+
+/* Capped at 1200 px from a 2425 px wide viewport (column 7 to the edge is half the width − 12 px): round its far side too. */
+@media (min-width: 2425px) {
+  .case-hero-frame {
+    border-radius: 24px;
+  }
+}
+
+/* ---------- Facts: MetaPairs, then the Scoreboard ---------- */
+.detail-facts {
+  row-gap: var(--space-7);
+  margin-top: var(--space-s);
+}
+@media (min-width: 1024px) {
+  .detail-facts {
+    row-gap: var(--space-8);
+  }
+}
+
+/* ---------- 02 Problem: the statement at h2 size ---------- */
+.problem-statement {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+/* ---------- 03 Role: owned / not owned ---------- */
+.role-head {
+  margin: 0 0 var(--space-3);
+  color: var(--accent);
+}
+.role-col-not .role-head,
+.role-col-not .ruled-list {
+  color: var(--muted);
+}
+
+/* ---------- 04 Approach: steps left, the illustration pinned right ---------- */
+.approach-steps {
+  display: grid;
+  gap: calc(var(--baseline) * 10);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.approach-step {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line);
+}
+.approach-step > * {
+  margin: 0;
+}
+.approach-step-number {
+  color: var(--accent);
+}
+@media (min-width: 1024px) {
+  .approach-steps {
+    gap: var(--space-8);
+    padding-bottom: var(--space-9);
+  }
+  .approach-figure {
+    position: sticky;
+    top: calc(var(--header-h) + var(--space-7));
+    align-self: start;
+  }
+  /* The narrow sticky column takes the vertical layout; it is tall, so its width follows the
+     viewport height and the whole drawing stays in view while the column is pinned. */
+  .approach-figure .illustration[data-layouts='h v'] {
+    aspect-ratio: var(--il-ratio-v);
+    max-width: calc((100svh - var(--header-h) - var(--space-7) * 2) * (var(--il-ratio-v)));
+    margin-inline: auto;
+  }
+  .approach-figure .illustration[data-layouts='h v'] [data-layout='h'] {
+    display: none;
+  }
+  .approach-figure .illustration[data-layouts='h v'] [data-layout='v'] {
+    display: inline;
+  }
+}
+
+/* ---------- 05 Decisions ---------- */
+@media (min-width: 1024px) {
+  .decisions-figure {
+    align-self: center;
+  }
+}
+
+/* ---------- 06 Artefacts: rows of 7 + 5, then 4 + 8 ---------- */
+.artefacts {
+  display: grid;
+  gap: var(--space-7) var(--grid-gutter);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.artefact-figure {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+}
+.artefact-media {
+  padding: clamp(var(--space-4), 6%, var(--space-7));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--id-field) 80%, black);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.artefact-media .illustration {
+  max-height: 56svh;
+}
+.artefact-media[data-media='image'] {
+  padding: 0;
+  overflow: hidden;
+}
+.artefact-caption {
+  display: grid;
+  gap: var(--space-2);
+}
+/*
+ * Text cards (no image, no drawing, e.g. the intake one-pager): a document of
+ * their own, sized by the text: an accent rule, the number, the title at h3
+ * size and the caption on a quiet panel. Never a frame with nothing in it.
+ */
+.artefact-card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+  padding: var(--space-6) clamp(var(--space-5), 6%, var(--space-7)) var(--space-7);
+  border-radius: 12px;
+  background:
+    linear-gradient(var(--accent), var(--accent)) no-repeat left top / 100% 2px,
+    radial-gradient(120% 80% at 0% 0%, color-mix(in oklab, var(--id-glow) 12%, transparent), transparent 70%),
+    color-mix(in srgb, var(--id-field) 88%, black);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.artefact-card > * {
+  margin: 0;
+}
+.artefact-card-number {
+  color: var(--accent);
+}
+.artefact-card-title {
+  max-width: 18ch;
+}
+.artefact-number {
+  color: var(--accent);
+}
+.artefact-text {
+  color: var(--muted);
+}
+@media (min-width: 1024px) {
+  .artefacts {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    row-gap: var(--space-9);
+    align-items: start;
+  }
+  .artefact[data-slot='a'] {
+    grid-column: 1 / 8;
+  }
+  .artefact[data-slot='b'] {
+    grid-column: 8 / 13;
+    margin-top: var(--space-9);
+  }
+  .artefact[data-slot='c'] {
+    grid-column: 1 / 5;
+    margin-top: var(--space-7);
+  }
+  .artefact[data-slot='d'] {
+    grid-column: 5 / 13;
+  }
+}
+
+/* ---------- 07 Outcomes ---------- */
+.outcome-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.outcome-list > li {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--line);
+}
+.outcome-number {
+  padding-top: 6px;
+  color: var(--accent);
+}
+
+/* ---------- 08 Differently: lead size under a rule in the case accent ---------- */
+.accent-rule {
+  height: 2px;
+  margin-inline: 0;
+  margin-bottom: 0;
+  border: 0;
+  background: var(--accent);
+  transform-origin: 0 50%;
+}
+.page-section > .accent-rule + * {
+  margin-top: var(--space-6);
+}
+.differently-body {
+  display: grid;
+  gap: var(--space-6);
+}
+.differently-body > * {
+  max-width: 40ch;
+  margin: 0;
+}
+
+/* ---------- Next: the next card, face up, title large ---------- */
+.next-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: end;
+  gap: var(--space-5);
+  width: fit-content;
+  color: var(--text);
+  text-decoration: none;
+}
+.next-card-face {
+  position: relative;
+  width: clamp(8rem, 14vw, 12rem);
+  aspect-ratio: var(--card-ratio);
+  container-type: inline-size;
+  --card-radius: 10px;
+  transition:
+    translate var(--spring-hover-dur) var(--spring-hover),
+    rotate var(--spring-hover-dur) var(--spring-hover);
+}
+.next-card:is(:hover, :focus-visible) .next-card-face {
+  translate: 0 calc(var(--travel-hover-lift) * -0.4);
+  rotate: -2deg;
+}
+.next-card-text {
+  display: grid;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
+}
+.next-card-meta {
+  color: var(--muted);
+}
+.next-card-index {
+  color: var(--accent);
+}
+.next-card-title {
+  --u: 0%;
+  padding-bottom: var(--space-1);
+  background: linear-gradient(var(--accent), var(--accent)) no-repeat left bottom / var(--u) 2px;
+  transition: --u var(--dur-underline) var(--ease-out-soft);
+}
+.next-card:is(:hover, :focus-visible) .next-card-title {
+  --u: 100%;
+}
+
+/* ================= Management ================= */
+
+/* 01 Principles: numeral (columns 1–3) | h3 (4–7) | evidence (8–12). */
+.principles {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.principle {
+  display: grid;
+  padding: var(--space-5) 0 var(--space-6);
+  border-top: 1px solid var(--line);
+}
+.principle > * {
+  margin: 0;
+}
+.principle-numeral {
+  /* Phones: the h3 overlaps the numeral's lower third, like the breaker. */
+  margin-bottom: calc(var(--type-numeral-size) * var(--type-numeral-leading) / -3);
+  color: color-mix(in srgb, var(--accent) 65%, transparent);
+}
+.principle-title {
+  position: relative;
+}
+.principle-evidence {
+  margin-top: var(--space-3);
+}
+@media (min-width: 1024px) {
+  .principle {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+    align-items: start;
+    padding: var(--space-6) 0;
+  }
+  .principle-numeral {
+    grid-column: 1 / 4;
+    margin: 0;
+  }
+  .principle-title {
+    grid-column: 4 / 8;
+    padding-top: var(--space-4);
+  }
+  .principle-evidence {
+    grid-column: 8 / 13;
+    margin: 0;
+    padding-top: calc(var(--baseline) * 5);
+  }
+}
+
+/* 02 Team: the structure pinned (CSS sticky) while the member rows scroll. */
+.team-figure {
+  margin: 0;
+}
+.team-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.team-card {
+  display: grid;
+  align-content: space-between;
+  aspect-ratio: var(--card-ratio);
+  padding: var(--space-2);
+  border-radius: 8px;
+  background:
+    radial-gradient(120% 80% at 0% 100%, color-mix(in oklab, var(--id-glow) 40%, transparent), transparent 70%),
+    var(--id-field);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--id-accent) 30%, transparent);
+}
+.team-card-fte {
+  color: var(--accent);
+}
+.team-rows {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.team-row {
+  display: grid;
+  gap: var(--space-2);
+  padding: calc(var(--baseline) * 5) 0;
+  border-top: 1px solid var(--line);
+}
+.team-row:last-child {
+  border-bottom: 1px solid var(--line);
+}
+.team-row-initials {
+  color: var(--accent);
+}
+.team-row-meta {
+  color: var(--muted);
+}
+.page-section > .team-note {
+  margin-top: var(--space-6);
+}
+@media (min-width: 1024px) {
+  .team-figure {
+    position: sticky;
+    top: calc(var(--header-h) + var(--space-7));
+    align-self: start;
+  }
+  .team-rows {
+    padding-bottom: var(--space-7);
+  }
+  .team-row {
+    padding: var(--space-6) 0;
+  }
+}
+
+/* 03 Rituals: the week ring on the left (into the index columns), the list right. */
+.rituals-ring {
+  grid-column: content-start / content-end;
+  max-width: 28rem;
+}
+.rituals-list {
+  grid-column: content-start / content-end;
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ritual {
+  display: grid;
+  gap: var(--space-2);
+  padding: calc(var(--baseline) * 5) 0;
+  border-top: 1px solid var(--line);
+}
+.ritual > * {
+  margin: 0;
+}
+.ritual-cadence {
+  color: var(--accent);
+}
+@media (min-width: 1024px) {
+  /* List in columns 4–8, the ring in 9–12 (mirrors 02 Team); columns 1–3 stay with the index. */
+  .rituals-ring {
+    grid-column: 10 / 14;
+    grid-row: 2;
+    max-width: none;
+  }
+  .rituals-list {
+    grid-column: 5 / 10;
+    grid-row: 2;
+  }
+}
+
+/* 04 Hiring: a path of steps, nodes joined by a drawn connector. */
+.hiring {
+  position: relative;
+}
+.hiring-steps {
+  position: relative;
+  display: grid;
+  gap: calc(var(--baseline) * 10);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hiring-step {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding-left: var(--space-6);
+}
+.hiring-step > * {
+  margin: 0;
+}
+.hiring-node {
+  position: absolute;
+  top: 2px;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  background: var(--id-field);
+}
+.hiring-step-meta {
+  color: var(--muted);
+}
+.hiring-step-number {
+  color: var(--accent);
+}
+.hiring-connector {
+  position: absolute;
+  top: var(--space-2);
+  bottom: var(--space-5);
+  left: 6px;
+  width: 1px;
+  color: color-mix(in srgb, var(--accent) 60%, transparent);
+}
+.hiring-connector svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.hiring-connector .hiring-connector-x {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .hiring-steps {
+    grid-template-columns: repeat(var(--steps, 5), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+  }
+  .hiring-step {
+    padding: calc(var(--baseline) * 10) 0 0;
+  }
+  /* From the first node to the last: (n - 1) column steps. */
+  .hiring-connector {
+    top: var(--space-2);
+    bottom: auto;
+    left: 6px;
+    width: calc((100% + var(--grid-gutter)) * (var(--steps, 5) - 1) / var(--steps, 5));
+    height: 1px;
+  }
+  .hiring-connector .hiring-connector-x {
+    display: block;
+  }
+  .hiring-connector .hiring-connector-y {
+    display: none;
+  }
+}
+
+/*
+ * 05 Growth: dimensions down the side, levels along the bottom, the matrix
+ * between (drawn without its own labels: its rows and columns are equal, so
+ * the HTML labels line up with them at every width).
+ */
+.growth-matrix {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-4) var(--space-3);
+  margin: 0;
+}
+.growth-dimensions,
+.growth-levels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+}
+.growth-dimensions {
+  grid-column: 1;
+  grid-row: 1;
+  flex-direction: column;
+  justify-content: space-around;
+  text-align: right;
+}
+.growth-art {
+  grid-column: 2;
+  grid-row: 1;
+}
+.growth-levels {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: repeat(var(--levels, 4), minmax(0, 1fr));
+  column-gap: var(--space-2);
+  text-align: center;
+}
+@media (min-width: 1024px) {
+  .growth-matrix {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+  }
+  .growth-dimensions {
+    grid-column: 1 / 4;
+  }
+  .growth-art,
+  .growth-levels {
+    grid-column: 4 / 13;
+  }
+}
+
+/* 06 Workshops: the format cards (each with its method's glyph), then the draw. */
+.deal-card-glyph {
+  display: block;
+  width: var(--space-7);
+  color: var(--accent);
+}
+.workshop-glyph {
+  display: block;
+}
+/*
+ * The workshop cards share their rows (subgrid): index, name, then duration,
+ * who and outcome, so the fields stay level across the row when a name wraps
+ * to two lines (desktop row and the mobile scroll row alike).
+ */
+.deal-row-workshops .deal-row-list {
+  grid-template-rows: repeat(5, auto);
+  row-gap: 0;
+}
+.deal-row-workshops .deal-card {
+  display: grid;
+  grid-row: span 5;
+  grid-template-rows: subgrid;
+  row-gap: var(--space-4);
+  aspect-ratio: auto;
+}
+.deal-row-workshops .deal-card-title {
+  align-self: start;
+}
+.deal-row-workshops .deal-card-fields {
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+  row-gap: var(--space-3);
+  margin: 0;
+}
+.deal-row-workshops .deal-card-fields > div {
+  align-content: start;
+}
+.workshop-draw .workshop {
+  margin-top: 0;
+}
+
+/*
+ * ---------- The master's thesis overview (R8): the case-study template in glacier ----------
+ * The hero frame holds About's Master's card grown (its face: years, name, place); the one-line
+ * answer leads the facts; four scoreboard values; chapter leads at lead size; drawings in the
+ * reading column; screenshot slots in the offset images' frames; the conclusions as ruled pairs.
+ */
+/* The card's face at the frame's top (the h1 runs onto its lower edge), above the frame's scrim. */
+.thesis-hero-card {
+  z-index: 1;
+  align-content: start;
+  justify-items: start;
+  gap: var(--space-1);
+}
+.thesis-hero-years {
+  color: var(--accent);
+}
+.thesis-hero-name {
+  font-family: var(--font-display);
+  font-size: var(--type-h2-size);
+  font-weight: var(--type-h2-weight);
+  font-variation-settings: 'opsz' var(--type-h2-opsz);
+  line-height: var(--type-h2-leading);
+  letter-spacing: var(--type-h2-tracking);
+}
+.thesis-hero-place {
+  color: var(--muted);
+}
+@media (min-width: 1024px) {
+  .thesis-hero-card {
+    justify-items: end;
+    text-align: right;
+  }
+}
+.thesis-answer {
+  display: grid;
+  gap: var(--space-3);
+  padding-left: var(--space-4);
+  border-left: 1px solid var(--accent);
+}
+.thesis-answer > * {
+  margin: 0;
+}
+.thesis-answer-label {
+  color: var(--accent);
+}
+.thesis-lead {
+  margin: 0;
+}
+.thesis-questions,
+.thesis-answers {
+  display: grid;
+  gap: var(--space-5);
+  margin: 0;
+}
+.thesis-question {
+  position: relative;
+  display: grid;
+  gap: var(--space-2);
+  padding-top: var(--space-4);
+}
+.thesis-question > dt {
+  color: var(--accent);
+}
+.thesis-question > dd {
+  margin: 0;
+}
+.thesis-rule {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: var(--line);
+  transform-origin: 0 50%;
+}
+.thesis-figure {
+  margin: 0;
+}
+.thesis-insights {
+  margin-top: var(--space-6);
+}
+.thesis-next,
+.thesis-reflection {
+  display: grid;
+  gap: var(--space-3);
+}
+.thesis-next h3,
+.thesis-reflection h3 {
+  margin: 0;
+  color: var(--muted);
+}
+.thesis-next-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: 1.2em;
+}
+.thesis-reflection p {
+  margin: 0;
+}
+.thesis-back {
+  margin: 0;
+}
+@media (min-width: 1024px) {
+  .thesis-scoreboard {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* A screenshot that is not there yet: the offset frame with a faint outline and its label. */
+.image-slot-frame {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  padding: var(--space-5);
+  background: color-mix(in srgb, var(--id-glow, var(--accent)) 10%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.image-slot-label {
+  max-width: 28ch;
+  text-align: center;
+  color: var(--muted);
+}
+@media (min-width: 1024px) {
+  .image-slot-frame {
+    aspect-ratio: 3 / 2;
+  }
+}

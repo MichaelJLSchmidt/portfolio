@@ -1,0 +1,251 @@
+/*
+ * Background field: the WebGL canvas and its CSS fallback (two layers of
+ * stacked radial gradients). The fallback paints first (and is all there is
+ * without JavaScript or WebGL2); the canvas fades in over it once it has drawn.
+ * Colour values are registered so transitions interpolate them (in OKLab: the
+ * engine writes oklab() values).
+ */
+@property --fa-field {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #0e0f11;
+}
+@property --fa-mid {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1a1c20;
+}
+@property --fa-glow {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #2a2d33;
+}
+@property --fb-field {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #0e0f11;
+}
+@property --fb-mid {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1a1c20;
+}
+@property --fb-glow {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #2a2d33;
+}
+@property --fh-mid {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1a1c20;
+}
+@property --fh-glow {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #2a2d33;
+}
+@property --fh {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+@property --fa-i {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0.35;
+}
+@property --fb-i {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0.45;
+}
+@property --fk {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+@property --fs {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+@property --fade {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+
+.field {
+  position: fixed;
+  inset: 0 auto auto 0;
+  z-index: var(--z-field);
+  width: 100vw;
+  /* Large viewport: mobile toolbars showing / hiding never resize the canvas. */
+  height: 100vh;
+  height: 100lvh;
+  overflow: hidden;
+  background: #000;
+  pointer-events: none;
+}
+
+.field-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  visibility: hidden;
+}
+.field[data-mode='gl'] .field-canvas {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--dur-fast) var(--ease-out-soft);
+}
+
+.field-css {
+  /* Initial colours from data-field (set before first paint from the URL). */
+  --fa-field: var(--fi-field);
+  --fa-mid: var(--fi-mid);
+  --fa-glow: var(--fi-glow);
+  --fa-i: var(--fi-i);
+  --fb-field: var(--fi-field);
+  --fb-mid: var(--fi-mid);
+  --fb-glow: var(--fi-glow);
+  position: absolute;
+  inset: 0;
+  opacity: var(--fade);
+}
+:root[data-intro='first'] .field-css {
+  --fade: 0;
+}
+/* Out of rendering under the canvas once it has faded in (hidden, it would still be repainted). */
+.field[data-mode='gl'] .field-css {
+  display: none;
+  visibility: hidden;
+  transition:
+    display 0s linear var(--dur-fast) allow-discrete,
+    visibility 0s linear var(--dur-fast);
+}
+
+.field-layer {
+  --l-i: calc(var(--l-intensity) + var(--fk) * 0.1);
+  position: absolute;
+  inset: 0;
+  background: var(--l-field);
+}
+.field-layer::before {
+  content: '';
+  position: absolute;
+  inset: -6%;
+  background:
+    radial-gradient(
+      42% 48% at 18% 86%,
+      color-mix(in oklab, var(--l-glow) calc(var(--l-i) * 70%), transparent),
+      transparent
+    ),
+    radial-gradient(
+      46% 52% at 84% 16%,
+      color-mix(in oklab, var(--l-mid) calc(var(--l-i) * 100%), transparent),
+      transparent
+    ),
+    radial-gradient(
+      36% 40% at 34% 52%,
+      color-mix(in oklab, var(--l-mid) calc(var(--l-i) * 60%), transparent),
+      transparent
+    );
+}
+.field-layer[data-layer='a'] {
+  --l-field: var(--fa-field);
+  --l-mid: color-mix(in oklab, var(--fa-mid), var(--fh-mid) calc(var(--fh) * 65%));
+  --l-glow: color-mix(in oklab, var(--fa-glow), var(--fh-glow) calc(var(--fh) * 65%));
+  --l-intensity: calc(var(--fa-i) + var(--fh) * 0.2);
+}
+.field-layer[data-layer='b'] {
+  --l-field: var(--fb-field);
+  --l-mid: var(--fb-mid);
+  --l-glow: var(--fb-glow);
+  --l-intensity: var(--fb-i);
+  clip-path: circle(calc(var(--fs) * var(--fr, 150vmax)) at var(--fx, 50%) var(--fy, 100%));
+}
+/* Breathing (full tier only): pool scale 1.00-1.06 on a 9 s sine; half when bloomed. */
+@keyframes field-breath {
+  to {
+    transform: scale(1.06);
+  }
+}
+@keyframes field-breath-half {
+  to {
+    transform: scale(1.03);
+  }
+}
+/* Only while the fallback is the visible renderer: hidden under the WebGL canvas it would still run
+   on the main thread and repaint every frame. */
+:root[data-motion='full'] .field[data-mode='css'] .field-layer::before {
+  animation: field-breath calc(var(--dur-breath) / 2) ease-in-out infinite alternate;
+}
+:root[data-motion='full'] .field[data-mode='css'] .field-layer[data-layer='b']::before {
+  animation-name: field-breath-half;
+}
+
+/*
+ * About: the old password page's contour background (src/components/background:
+ * contour-layer.ts drives it, contours.ts describes it). Two layers above the
+ * canvas, below the content, never reacting to the pointer:
+ *
+ *   .contour-bg        the ground with the SVG <img> (cover, centred: the SVG's
+ *                      own xMidYMid slice; opacity 0.42; a static scale 1.03 so
+ *                      the drift never shows an edge). Its opacity crossfades
+ *                      it over the canvas, whose last morph frame is the same
+ *                      picture; at rest it covers the canvas.
+ *   .contour-vignette  the old page's gradients: a static overlay, present
+ *                      during the morph and at rest, faded with opacity only.
+ *
+ * Both are displayed only on About, during its morph, and once a link to About
+ * is near (data-contours-primed: rasterised at an invisible 0.001 before any crossfade).
+ * Opacity and the drift's translate are the only things that change (WAAPI,
+ * compositor). Before the engine runs (first paint of a direct visit) the
+ * pre-paint data-about-map shows them whole over a covered canvas.
+ */
+.contour-bg,
+.contour-vignette {
+  position: absolute;
+  inset: 0;
+  display: none;
+  opacity: 0;
+  will-change: opacity;
+  pointer-events: none;
+}
+.contour-bg {
+  overflow: hidden;
+  background: var(--contour-ground);
+}
+.contour-bg__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: 50% 50%;
+  opacity: 0.42;
+  transform: scale(var(--contour-drift-scale));
+  will-change: transform;
+}
+.contour-vignette {
+  background:
+    linear-gradient(to bottom, rgb(27 28 24 / 0.9), transparent 18%, transparent 82%, rgb(27 28 24 / 0.9)),
+    radial-gradient(130% 85% at 0% 55%, rgb(27 28 24 / 0.88) 0, rgb(27 28 24 / 0.6) 45%, rgb(27 28 24 / 0) 80%);
+}
+.field:is([data-contours='morph'], [data-contours='shown'], [data-contours-primed]) :is(.contour-bg, .contour-vignette),
+:root[data-about-map] .field:not([data-contours]) :is(.contour-bg, .contour-vignette) {
+  display: block;
+}
+:root[data-about-map] .field:not([data-contours]) :is(.contour-bg, .contour-vignette) {
+  opacity: 1;
+}
+/* At rest on About the SVG layer covers the canvas: it is not composited at all. */
+.field[data-canvas-covered] .field-canvas,
+:root[data-about-map] .field:not([data-contours]) .field-canvas {
+  visibility: hidden;
+}

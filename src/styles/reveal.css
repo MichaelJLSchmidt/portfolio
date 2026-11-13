@@ -1,0 +1,92 @@
+/*
+ * Reveals (Motion session; contract: docs/contracts.md#reveal). CSS only
+ * hides: while the pre-paint script has armed the page (:root[data-reveal]),
+ * a block that is not yet [data-revealed] has opacity 0. Every movement is a
+ * WAAPI animation started by src/motion/reveal.ts, which marks the block
+ * revealed and holds its start pose with a backwards fill, so:
+ *   - without JavaScript the arming is dropped after 4 s: every page is final
+ *   - reduced motion hides nothing but the home intro (one 160 ms crossfade):
+ *     every other block is final at once, without animation
+ *   - nothing here hides the decision cards: the deal scene is JS only
+ * Never hidden: the view-transition hero image (eager, fetchpriority high)
+ * and the digits in reduced motion (static).
+ */
+:root {
+  /* Lines rise from a clip mask; the mask bleeds this far so descenders and accents are not cut. */
+  --rv-mask-bleed: 0.12em;
+}
+
+:root[data-reveal]:not([data-motion='reduced'])
+  main
+  [data-reveal]:not([data-revealed]):not([data-reveal='image']:has(img[fetchpriority='high'])):not(
+    [data-reveal-marker]
+  ) {
+  opacity: 0;
+}
+/*
+ * A rule drawn as a link's marker (the email on About, data-reveal-marker): the text shows from
+ * the start, its block waits at zero width and draws in from the left (--ue, kinds.ts rule).
+ */
+:root[data-reveal]:not([data-motion='reduced']) main [data-reveal-marker]:not([data-revealed]) {
+  --ue: 0;
+}
+/* Reduced: only the home intro waits for its (160 ms) crossfade; every other block is final at once. */
+:root[data-reveal][data-motion='reduced'] [data-first-load] [data-reveal]:not([data-revealed], [data-reveal='digits']) {
+  opacity: 0;
+}
+
+/* Home: the title waits for its turn in the first-load sequence (it may carry no data-reveal). */
+:root[data-reveal] [data-first-load] h1:not([data-revealed]) {
+  opacity: 0;
+}
+
+/* First visit: the hand is dealt from off screen (last but the chrome); the chrome (the header) comes last. */
+:root[data-intro='first'] .hand-card:not([data-drawn]),
+:root[data-intro='first'] [data-chrome]:not([data-revealed]) {
+  opacity: 0;
+}
+
+/* lines: each split line sits in a clip mask while it rises (src/motion/split.ts). */
+.rv-mask {
+  display: block;
+  overflow: clip;
+  overflow-clip-margin: var(--rv-mask-bleed);
+}
+@supports not (overflow-clip-margin: 1px) {
+  .rv-mask {
+    overflow: visible;
+    clip-path: inset(calc(var(--rv-mask-bleed) * -1));
+  }
+}
+
+/*
+ * Case hero image drift: .hero-drift sits on the hero <picture> inside the
+ * clipping [data-hero-target] frame (overflow: clip): translateY
+ * 0 → 6% while the image leaves the viewport at the top (view() range "exit",
+ * so the gap it opens at its top edge is always above the fold). Full tier
+ * only; no fallback where view() is unsupported.
+ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    :root[data-motion='full'] .hero-drift {
+      animation-name: hero-drift;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: exit;
+    }
+  }
+}
+/* A <picture> is inline by default and an inline box cannot be translated. */
+picture.hero-drift {
+  display: block;
+}
+@keyframes hero-drift {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 var(--hero-drift);
+  }
+}

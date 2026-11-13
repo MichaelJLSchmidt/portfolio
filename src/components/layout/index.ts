@@ -1,0 +1,11 @@
+/* Layout components (Layout & Pages session). Contract: docs/contracts.md#layout-components. */
+export { DealRow } from './deal-row'
+export { MarginNote } from './margin-note'
+export { type MetaPair, MetaPairs } from './meta-pairs'
+export { type MinimapSection, Minimap } from './minimap'
+export { NumeralBreaker } from './numeral-breaker'
+export { type ImageSide, OffsetImage, imageSides } from './offset-image'
+export { Scoreboard } from './scoreboard'
+export { Section } from './section'
+export { SectionIndex } from './section-index'
+export { WorkshopRow } from './workshop-row'

@@ -1,0 +1,399 @@
+/*
+ * View transitions for play / return / switch / nav / locale. Classes come from the React
+ * <ViewTransition> maps in src/motion/transitions.ts (CSS targets view-transition classes, not
+ * transition types: Firefox 144+ has the classes, not the types). Every map has a default, so
+ * browser back / forward (no type) gets the shared morph, vt-morph. Every value is a custom
+ * property from src/motion/tokens.ts (cardPlay; desktop on :root, phones under 1024 px). Nothing
+ * here wipes across the page: colour changes happen in the background field.
+ *
+ * The pseudo-tree stays flat. Its stacking, bottom to top: the root (the live field), the page
+ * content, the card's frame, band and title (z 1–3), the hand and the rail (z 10), the card's
+ * parts on their way back into the hand (z 11–13: the card lands on top of its neighbours), the
+ * header (z 20). The DOM keeps the same order (tokens.css), so nothing re-stacks when the
+ * transition ends.
+ */
+
+/* The root holds the live background field: no snapshot, no cross-fade (the bloom keeps moving). */
+::view-transition-old(root) {
+  display: none;
+}
+::view-transition-new(root) {
+  animation: none;
+}
+
+/*
+ * Persistent chrome stays live and still. The language switcher (locale-switcher) is live in
+ * every transition, the language switch included: its chip slides across in the new header
+ * (header.module.css) instead of cross-fading.
+ */
+::view-transition-group(site-header),
+::view-transition-group(home-slot),
+::view-transition-group(locale-switcher),
+::view-transition-group(hand),
+::view-transition-group(hand-rail) {
+  animation: none;
+  z-index: 10;
+}
+::view-transition-group(site-header),
+::view-transition-group(home-slot),
+::view-transition-group(locale-switcher) {
+  z-index: 20;
+}
+::view-transition-old(site-header),
+::view-transition-old(home-slot),
+::view-transition-old(locale-switcher),
+::view-transition-old(hand),
+::view-transition-old(hand-rail) {
+  display: none;
+}
+::view-transition-new(site-header),
+::view-transition-new(home-slot),
+::view-transition-new(locale-switcher),
+::view-transition-new(hand),
+::view-transition-new(hand-rail) {
+  animation: none;
+}
+/* On phones the hand changes form between home (the fan) and other pages (the rail): the one that
+   leaves fades out, the one that arrives fades in, both in the page's exit time. */
+::view-transition-old(hand):only-child,
+::view-transition-old(hand-rail):only-child {
+  display: block;
+  animation: vt-fade-out var(--play-exit-dur) var(--play-exit-ease) both;
+}
+::view-transition-new(hand):only-child,
+::view-transition-new(hand-rail):only-child {
+  animation: vt-fade-in var(--play-exit-dur) linear var(--play-exit-dur) both;
+}
+::view-transition-group(site-footer) {
+  animation: none;
+}
+::view-transition-old(site-footer) {
+  animation: vt-fade-out var(--dur-nav-fade) var(--ease-in) both;
+}
+::view-transition-new(site-footer) {
+  animation: vt-fade-in var(--dur-fast) var(--ease-out-soft) var(--dur-nav-fade) both;
+}
+
+/* ---------- The card's three parts: frame, band, title ---------- */
+::view-transition-group(.vt-frame) {
+  z-index: 1;
+}
+::view-transition-group(.vt-band) {
+  z-index: 2;
+  overflow: clip;
+}
+::view-transition-group(.vt-title) {
+  z-index: 3;
+}
+::view-transition-group(.vt-return.vt-frame),
+::view-transition-group(.vt-out.vt-frame) {
+  z-index: 11;
+}
+::view-transition-group(.vt-return.vt-band),
+::view-transition-group(.vt-out.vt-band) {
+  z-index: 12;
+}
+::view-transition-group(.vt-return.vt-title),
+::view-transition-group(.vt-out.vt-title) {
+  z-index: 13;
+}
+/* Frame and band fill their group: the frame stretches (a fill and an edge), the band covers. */
+::view-transition-old(.vt-frame),
+::view-transition-new(.vt-frame) {
+  block-size: 100%;
+  object-fit: fill;
+}
+::view-transition-old(.vt-band),
+::view-transition-new(.vt-band) {
+  block-size: 100%;
+  object-fit: cover;
+}
+
+/*
+ * ---------- Play (and back / forward into a page): table -> page ----------
+ * A three-part container transform: the frame's group first, the band's and the title's a little
+ * after it. The old card's face (what its snapshot holds: number, year, summary, facts, tap line,
+ * the contact shadow) lies above the new frame and is gone within the first quarter. The new
+ * frame stays opaque: it is a live rendering of .play-frame, whose own dissolve (detail.css, from
+ * mount) shows through; its hold keeps the transition alive until the dissolve has ended. Band and
+ * title hand over in staggered windows, the old one above; the old band and title are never
+ * scaled (they keep their size and fade, the band centred in its growing group), the hero image
+ * and the h1 arrive over them.
+ */
+::view-transition-group(.vt-play),
+::view-transition-group(.vt-in) {
+  animation-duration: var(--play-morph-dur);
+  animation-timing-function: var(--play-morph-ease);
+}
+::view-transition-group(.vt-play.vt-band),
+::view-transition-group(.vt-in.vt-band) {
+  animation-delay: var(--play-band-delay);
+}
+::view-transition-group(.vt-play.vt-title),
+::view-transition-group(.vt-in.vt-title) {
+  animation-delay: var(--play-title-delay);
+}
+::view-transition-old(.vt-play),
+::view-transition-new(.vt-play),
+::view-transition-old(.vt-in),
+::view-transition-new(.vt-in) {
+  mix-blend-mode: normal;
+}
+::view-transition-old(.vt-play),
+::view-transition-old(.vt-in) {
+  z-index: 1;
+}
+::view-transition-old(.vt-play.vt-frame),
+::view-transition-old(.vt-in.vt-frame) {
+  animation: vt-fade-out var(--play-details) linear both;
+}
+::view-transition-new(.vt-play.vt-frame),
+::view-transition-new(.vt-in.vt-frame) {
+  animation: vt-hold var(--play-hold) linear both;
+}
+::view-transition-old(.vt-play.vt-band),
+::view-transition-old(.vt-in.vt-band) {
+  /* Its own size, centred: the band's type is never shown scaled up while it fades. */
+  inset: 0;
+  inline-size: auto;
+  block-size: auto;
+  margin: auto;
+  animation: vt-fade-out var(--play-band-out-dur) linear var(--play-band-out-at) both;
+}
+::view-transition-new(.vt-play.vt-band),
+::view-transition-new(.vt-in.vt-band) {
+  animation: vt-fade-in var(--play-image-in-dur) linear var(--play-image-in-at) both;
+}
+::view-transition-old(.vt-play.vt-title),
+::view-transition-old(.vt-in.vt-title) {
+  inline-size: auto;
+  block-size: auto;
+  animation: vt-fade-out var(--play-title-out-dur) linear var(--play-title-out-at) both;
+}
+::view-transition-new(.vt-play.vt-title),
+::view-transition-new(.vt-in.vt-title) {
+  animation: vt-fade-in var(--play-h1-in-dur) linear var(--play-h1-in-at) both;
+}
+
+/*
+ * ---------- Return (and back / forward into the hand): page -> hand ----------
+ * The frame (materialised again before the navigation) shrinks into the card's slot; the new
+ * hand face fades in late, when it is nearly its own size, over the frame's fill. The hero image
+ * hands over to the band and the h1 to the card's title (the new title arrives late too: it is
+ * small, so it is never shown scaled up).
+ */
+::view-transition-group(.vt-return),
+::view-transition-group(.vt-out) {
+  animation-duration: var(--return-morph-dur);
+  animation-timing-function: var(--return-morph-ease);
+}
+::view-transition-old(.vt-return.vt-frame),
+::view-transition-old(.vt-out.vt-frame) {
+  animation: vt-fade-out var(--return-face-in-dur) linear var(--return-face-in-at) both;
+}
+::view-transition-new(.vt-return.vt-frame),
+::view-transition-new(.vt-out.vt-frame) {
+  animation: vt-fade-in var(--return-face-in-dur) linear var(--return-face-in-at) both;
+}
+/* The hand's face, band and title arrive at their own size (never shown scaled up): the face
+   centred in the shrinking frame, the band in its group, the title at its group's corner. */
+::view-transition-new(.vt-return.vt-frame),
+::view-transition-new(.vt-out.vt-frame),
+::view-transition-new(.vt-return.vt-band),
+::view-transition-new(.vt-out.vt-band) {
+  inset: 0;
+  inline-size: auto;
+  block-size: auto;
+  margin: auto;
+}
+::view-transition-new(.vt-return.vt-title),
+::view-transition-new(.vt-out.vt-title) {
+  inline-size: auto;
+  block-size: auto;
+}
+::view-transition-old(.vt-return.vt-band),
+::view-transition-new(.vt-return.vt-band),
+::view-transition-old(.vt-out.vt-band),
+::view-transition-new(.vt-out.vt-band),
+::view-transition-old(.vt-return.vt-title),
+::view-transition-new(.vt-return.vt-title),
+::view-transition-old(.vt-out.vt-title),
+::view-transition-new(.vt-out.vt-title) {
+  mix-blend-mode: normal;
+}
+::view-transition-old(.vt-return.vt-band),
+::view-transition-old(.vt-out.vt-band) {
+  animation: vt-fade-out var(--return-image-out-dur) linear var(--return-image-out-at) both;
+}
+::view-transition-new(.vt-return.vt-band),
+::view-transition-new(.vt-out.vt-band) {
+  animation: vt-fade-in var(--return-band-in-dur) linear var(--return-band-in-at) both;
+}
+::view-transition-old(.vt-return.vt-title),
+::view-transition-old(.vt-out.vt-title) {
+  animation: vt-fade-out var(--return-h1-out-dur) linear var(--return-h1-out-at) both;
+}
+::view-transition-new(.vt-return.vt-title),
+::view-transition-new(.vt-out.vt-title) {
+  animation: vt-fade-in var(--return-title-in-dur) linear var(--return-title-in-at) both;
+}
+
+/*
+ * ---------- vt-morph alone: a plain shared element (About's Master's card <-> the thesis hero) ----------
+ * The morph's duration and curve; the two images cross-fade in the first 45% (complementary,
+ * plus-lighter: never see-through) and fill the box.
+ */
+::view-transition-group(.vt-morph) {
+  animation-duration: var(--play-morph-dur);
+  animation-timing-function: var(--play-morph-ease);
+}
+::view-transition-old(.vt-morph) {
+  block-size: 100%;
+  object-fit: cover;
+  animation: vt-xout var(--play-morph-dur) linear both;
+}
+::view-transition-new(.vt-morph) {
+  block-size: 100%;
+  object-fit: cover;
+  animation: vt-xin var(--play-morph-dur) linear both;
+}
+
+/* ---------- Page content ---------- */
+/* Play / switch: the page left exits a few px down with opacity; the new page arrives under the frame. */
+::view-transition-old(.page-exit-play) {
+  --vt-dist: var(--play-exit-y);
+  animation: vt-exit-y var(--play-exit-dur) var(--play-exit-ease) both;
+}
+::view-transition-new(.page-enter-play) {
+  animation: vt-fade-in var(--play-exit-dur) linear var(--play-exit-dur) both;
+}
+/* Return: the page is under the frame already; home's content enters as the card shrinks. */
+::view-transition-old(.page-exit-return) {
+  animation: vt-fade-out var(--play-exit-dur) var(--play-exit-ease) both;
+}
+::view-transition-new(.page-enter-return) {
+  animation: vt-fade-in var(--return-home-dur) var(--ease-out-soft) var(--return-home-at) both;
+}
+/* Other links (About, the 404 page's link home): a short cross-fade. */
+::view-transition-old(.page-fade) {
+  animation: vt-fade-out var(--dur-nav-fade) var(--ease-in) both;
+}
+::view-transition-new(.page-fade) {
+  animation: vt-fade-in var(--dur-nav-fade) var(--ease-out-soft) var(--dur-nav-fade) both;
+}
+
+@keyframes vt-hold {
+  from,
+  to {
+    opacity: 1;
+  }
+}
+@keyframes vt-xout {
+  0% {
+    opacity: 1;
+  }
+  45%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes vt-xin {
+  0% {
+    opacity: 0;
+  }
+  45%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes vt-exit-y {
+  to {
+    opacity: 0;
+    translate: 0 var(--vt-dist);
+  }
+}
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/*
+ * ---------- Reduced motion: no shared morph, the page cross-fades as one ----------
+ * The old page fades out (cardPlay.reduced.out) as the new one fades in (.in); the field's colour
+ * fades on its own (.bloom). The card's parts do not move or resize: each group holds its old
+ * place while the old image fades, then takes the new place as the new image fades in. The play
+ * frame does not render (detail.css). The live field and the persistent chrome stay as above.
+ */
+:root[data-motion='reduced']::view-transition-group(.vt-play),
+:root[data-motion='reduced']::view-transition-group(.vt-return),
+:root[data-motion='reduced']::view-transition-group(.vt-morph) {
+  animation-duration: var(--reduced-out);
+  animation-delay: 0s;
+  animation-timing-function: step-end;
+}
+:root[data-motion='reduced']::view-transition-old(.vt-play),
+:root[data-motion='reduced']::view-transition-old(.vt-return),
+:root[data-motion='reduced']::view-transition-old(.vt-morph),
+:root[data-motion='reduced']::view-transition-old(.page-exit-play),
+:root[data-motion='reduced']::view-transition-old(.page-exit-return),
+:root[data-motion='reduced']::view-transition-old(.page-fade),
+:root[data-motion='reduced']::view-transition-old(site-footer) {
+  animation: vt-fade-out var(--reduced-out) linear both;
+}
+:root[data-motion='reduced']::view-transition-new(.vt-play),
+:root[data-motion='reduced']::view-transition-new(.vt-return),
+:root[data-motion='reduced']::view-transition-new(.vt-morph) {
+  animation: vt-fade-in var(--reduced-in) linear var(--reduced-out) both;
+}
+:root[data-motion='reduced']::view-transition-new(.page-enter-play),
+:root[data-motion='reduced']::view-transition-new(.page-enter-return),
+:root[data-motion='reduced']::view-transition-new(.page-fade),
+:root[data-motion='reduced']::view-transition-new(site-footer) {
+  animation: vt-fade-in var(--reduced-in) linear both;
+}
+
+/*
+ * Language switch (type "locale", :root[data-locale-switch] while it runs): the same page in the
+ * other language. Everything with words cross-fades once, in place, over --dur-s (reduced
+ * 160 ms): the page and the card faces (.locale-fade, from the React maps in
+ * transitions.ts), the header, the hand, the rail and the footer. Nothing moves or resizes; the
+ * field (root) stays live. Never the card morph. The switcher's codes are the same in both
+ * languages: it stays live, and only its chip moves (above).
+ */
+::view-transition-group(.locale-fade),
+:root[data-locale-switch]::view-transition-group(site-header),
+:root[data-locale-switch]::view-transition-group(home-slot),
+:root[data-locale-switch]::view-transition-group(hand),
+:root[data-locale-switch]::view-transition-group(hand-rail),
+:root[data-locale-switch]::view-transition-group(site-footer) {
+  animation: none;
+}
+::view-transition-old(.locale-fade),
+:root[data-locale-switch]::view-transition-old(site-header),
+:root[data-locale-switch]::view-transition-old(home-slot),
+:root[data-locale-switch]::view-transition-old(hand),
+:root[data-locale-switch]::view-transition-old(hand-rail),
+:root[data-locale-switch]::view-transition-old(site-footer) {
+  display: block;
+  animation: vt-fade-out var(--dur-s) var(--ease-in-out) both;
+}
+::view-transition-new(.locale-fade),
+:root[data-locale-switch]::view-transition-new(site-header),
+:root[data-locale-switch]::view-transition-new(home-slot),
+:root[data-locale-switch]::view-transition-new(hand),
+:root[data-locale-switch]::view-transition-new(hand-rail),
+:root[data-locale-switch]::view-transition-new(site-footer) {
+  animation: vt-fade-in var(--dur-s) var(--ease-in-out) both;
+}
+:root[data-motion='reduced']::view-transition-old(.locale-fade),
+:root[data-motion='reduced']::view-transition-new(.locale-fade),
+:root[data-motion='reduced'][data-locale-switch]::view-transition-old(*),
+:root[data-motion='reduced'][data-locale-switch]::view-transition-new(*) {
+  animation-timing-function: linear;
+}

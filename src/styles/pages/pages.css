@@ -1,0 +1,885 @@
+/*
+ * Pages other than the detail pages: home, About (with its Projects and
+ * Contact chapters) and 404. Every page is a set of .spread-grid blocks;
+ * placement uses the grid lines (column n starts at line n + 1) and the
+ * helpers in src/components/layout/layout.css. Mobile first.
+ */
+
+/* ================= Home ================= */
+/*
+ * Exactly one screen (min-height 100dvh, no footer): it scrolls only when the
+ * viewport is too small for its content. Label, the name (display, two lines),
+ * role and intro, "What I bring to the table" under a drawn divider (its label
+ * on the items' baseline from 1024, above them below), and the hint at the
+ * bottom, centred just above the hand. The bottom padding is the hand's
+ * visible height plus a margin, so everything clears the fan: checked at
+ * 1024×768, 1280×720, 1440×900, 1920×1080, 2560×1440 and 390×844. From 1024
+ * the name takes columns 1–6 and the role and intro sit beside it in columns
+ * 7–12, level with its last line; on phones the intro is set on the body size.
+ */
+.home {
+  /* The phone fan: four cards across the screen (hand.css), 85% visible, plus the arc. */
+  --home-hand: calc(min(128px, (100vw - 48px) / 2.8) * 184 / 132 * 0.85 + var(--safe-bottom) + var(--space-5));
+  grid-template-rows: repeat(4, auto) minmax(0, 1fr);
+  align-content: stretch;
+  min-height: 100svh;
+  min-height: 100dvh;
+  padding-top: calc(var(--header-h) + var(--space-5));
+  padding-bottom: var(--home-hand);
+}
+:where(.home > *, .home [data-first-load] > *) {
+  grid-column: content-start / content-end;
+}
+.home-label {
+  margin: 0 0 var(--space-4);
+  color: var(--muted);
+}
+.home-title {
+  /* One word per line: the name sits on two lines at any width. */
+  width: min-content;
+  max-width: 100%;
+  margin: 0;
+}
+.home-intro {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.home-intro > * {
+  margin: 0;
+}
+.home-role {
+  color: var(--accent);
+}
+.home-lede {
+  max-width: 40ch;
+}
+@media (max-width: 1023.98px) {
+  .home-lede {
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-leading);
+  }
+}
+.home-bring {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+  margin-top: var(--space-5);
+}
+.home-bring-rule {
+  grid-column: 1 / -1;
+  height: 1px;
+  margin: 0 0 var(--space-3);
+  border: 0;
+  background: var(--line);
+  transform-origin: 0 50%;
+}
+.home-bring-label {
+  grid-column: 1 / -1;
+  margin: 0 0 var(--space-2);
+  color: var(--muted);
+}
+.home-bring-list {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.home-bring-list li {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--space-2);
+}
+.home-bring-number {
+  color: var(--accent);
+}
+/* The hint: at the bottom of the screen, just above the hand, centred over the fan at every width. */
+.home-hint {
+  grid-row: -2;
+  align-self: end;
+  justify-self: center;
+  margin: var(--space-4) 0 0;
+  color: var(--muted);
+  text-align: center;
+}
+@media (min-width: 1024px) {
+  .home {
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+    padding-top: max(calc(var(--header-h) + var(--space-5)), calc(22svh - calc(var(--baseline) * 10)));
+    /* The desktop fan shows 176 px (72%) plus its arc. */
+    padding-bottom: calc(var(--hand-reserve) + var(--space-5));
+  }
+  .home-label {
+    grid-column: 2 / 8;
+    grid-row: 1;
+    margin-bottom: var(--space-5);
+  }
+  .home-title {
+    grid-column: 2 / 8;
+    grid-row: 2;
+  }
+  /* Beside the name, its last line level with the name's baseline. */
+  .home-intro {
+    grid-column: 8 / content-end;
+    grid-row: 2;
+    align-self: end;
+    margin: 0;
+    padding-bottom: calc(var(--type-display-size) * (var(--type-display-leading) - 0.72));
+  }
+  .home-lede {
+    max-width: none;
+  }
+  /* The label and the three items share one baseline (the label is smaller, so it would sit higher). */
+  .home-bring {
+    grid-column: content-start / content-end;
+    grid-row: 3;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: baseline;
+    margin-top: var(--space-6);
+  }
+  .home-bring-label {
+    grid-column: 1 / 4;
+    margin: 0;
+  }
+  .home-bring-list {
+    grid-column: 4 / 13;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+  }
+  .home-bring-list li {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+  .home-hint {
+    grid-row: 4;
+  }
+}
+/*
+ * Short desktop screens (1024×768, 1280×720): the name a little smaller and the
+ * intro on the body size, so the whole screen still clears the hand.
+ */
+@media (min-width: 1024px) and (max-height: 820px) {
+  .home {
+    padding-top: max(calc(var(--header-h) + var(--space-4)), calc(22svh - var(--space-8)));
+  }
+  .home-title {
+    font-size: min(var(--type-display-size), 18svh);
+  }
+  .home-intro {
+    padding-bottom: calc(min(var(--type-display-size), 18svh) * (var(--type-display-leading) - 0.72));
+  }
+  .home-lede {
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-leading);
+  }
+  .home-bring {
+    margin-top: var(--space-5);
+  }
+}
+
+/* ================= About (glacier, over the contour map) ================= */
+.about-hero {
+  align-content: start;
+  padding-top: calc(var(--header-h) + var(--space-8));
+}
+.about-title {
+  grid-column: content-start / content-end;
+  margin: 0;
+}
+.about-lead {
+  grid-column: content-start / content-end;
+  max-width: 34ch;
+  margin: var(--space-5) 0 0;
+}
+/* The portrait: a 4:5 photo (an example for now), right-aligned under the lead on phones. */
+.about-portrait {
+  grid-column: 2 / content-end;
+  justify-self: end;
+  width: min(100%, 15rem);
+  margin-top: var(--space-6);
+}
+.about-portrait img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+@media (min-width: 1024px) {
+  .about-hero {
+    grid-template-rows: auto auto 1fr;
+    min-height: 72svh;
+    padding-top: calc(var(--header-h) + 18svh);
+  }
+  .about-title {
+    grid-column: 2 / 10;
+    grid-row: 1;
+  }
+  .about-lead {
+    grid-column: 5 / 10;
+    grid-row: 2;
+    margin-top: calc(var(--baseline) * 10);
+  }
+  .about-portrait {
+    grid-column: 10 / 14;
+    grid-row: 1 / 4;
+    align-self: start;
+    justify-self: stretch;
+    width: auto;
+    margin: 0;
+  }
+}
+
+/*
+ * 02 Timeline (R7): two lanes, work and education, on one year axis
+ * (src/components/about/career-timeline.tsx). The cards are the card family
+ * (eggs.css) and not interactive, except the Master's card (a link to the
+ * thesis). Every card, band and tick sits on the year tracks through --track
+ * ("<first track> / span <years>", written by the component); the list and the
+ * axis are subgrids of .career, so they share its tracks.
+ *   < 1024   a vertical axis on the left and two narrow lanes, Work | Education;
+ *            a year is a row of at least 28 px, a card at least 72 px tall
+ *   >= 1024  a horizontal axis below two lanes, Work above Education; a year is
+ *            a column (1fr: a card is never narrower than its longest word)
+ * Overlaps: a faint band across both lanes in the glacier tint with a small
+ * "alongside" label. The deal reveal deals the cards from a deck at the axis's
+ * start (--deal-mode: deck). Text is at least 14 px on phones.
+ */
+.career {
+  --deal-mode: deck;
+  --lane-gap: var(--space-2);
+  position: relative;
+  display: grid;
+  grid-template-columns: [axis] auto [work] minmax(0, 1fr) [education] minmax(0, 1fr) [end];
+  grid-template-rows: [head] auto repeat(var(--years), minmax(28px, auto)) [end];
+  column-gap: var(--lane-gap);
+}
+.career-stops,
+.career-axis {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+  grid-template-columns: subgrid;
+  grid-template-rows: subgrid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.career-stops {
+  z-index: 1;
+}
+.career-lane-label {
+  grid-row: head;
+  margin: 0 0 var(--space-3);
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.career-lane-label[data-lane='work'] {
+  grid-column: work;
+}
+.career-lane-label[data-lane='education'] {
+  grid-column: education;
+}
+.career-stop {
+  position: relative;
+  grid-row: var(--track);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  min-height: 72px;
+  margin-bottom: 4px;
+  padding: var(--space-2) var(--space-3);
+  overflow-wrap: break-word;
+}
+/* German compounds in the narrow lanes break at their syllables. */
+.career-stop:lang(de) :is(.career-place, .career-part-title) {
+  hyphens: auto;
+}
+.career-stop[data-lane='work'] {
+  grid-column: work;
+}
+.career-stop[data-lane='education'] {
+  grid-column: education;
+}
+.career-stop[data-lane='both'] {
+  grid-column: work / end;
+}
+.career-stop[data-latest] {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.career-years {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.3;
+  color: var(--glacier-accent);
+  font-variant-numeric: tabular-nums;
+}
+.career-title {
+  font-family: var(--font-display);
+  font-size: 0.9375rem;
+  font-weight: var(--type-h3-weight);
+  font-variation-settings: 'opsz' var(--type-h3-opsz);
+  line-height: 1.2;
+  letter-spacing: var(--type-h3-tracking);
+}
+.career-place,
+.career-part-title {
+  font-size: 0.875rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+.career-part-title {
+  color: var(--text);
+}
+/* The shared card: its two halves side by side, a quiet seam between them. */
+.career-parts {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  margin-top: var(--space-1);
+}
+.career-part {
+  display: flex;
+  flex-direction: column;
+}
+.career-part + .career-part {
+  margin-left: var(--lane-gap);
+  padding-left: var(--space-3);
+  border-left: 1px dashed color-mix(in srgb, var(--glacier-accent) 35%, transparent);
+}
+/*
+ * The Master's card: "Thesis overview" is its link (a standalone text link on the inner span);
+ * the whole card is the target.
+ */
+.career-thesis-link {
+  margin-top: auto;
+  /* The link's triangle room may hang into the card's padding: the label keeps its one line. */
+  margin-right: calc(-1 * var(--space-3));
+  padding-top: var(--space-1);
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+.career-thesis-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.career-stop[data-thesis]:has(.career-thesis-link:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+/* An overlap: a faint band across both lanes, its edges dashed, "alongside" at its start. */
+.career-band {
+  position: relative;
+  z-index: 2;
+  grid-column: work / end;
+  grid-row: var(--track);
+  margin: -2px calc(var(--lane-gap) / -2);
+  background: color-mix(in srgb, var(--glacier-accent) 8%, transparent);
+  border-block: 1px dashed color-mix(in srgb, var(--glacier-accent) 40%, transparent);
+  pointer-events: none;
+}
+/* Phones: the label runs down the band's right edge, in the page margin (the axis keeps its years). */
+.career-band-label {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  width: 1em;
+  margin-left: 2px;
+  overflow: hidden;
+  font-size: 0.875rem;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--glacier-accent);
+  writing-mode: vertical-rl;
+}
+.career-tick {
+  grid-column: axis;
+  grid-row: var(--track);
+  padding-right: var(--space-2);
+  font-size: 0.875rem;
+  line-height: 1;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  padding-top: var(--space-1);
+}
+@media (min-width: 1024px) {
+  .career {
+    --lane-gap: var(--space-3);
+    grid-template-columns: [lanes] auto repeat(var(--years), minmax(0, 1fr)) [end];
+    grid-template-rows: [work] auto [education] auto [axis] auto;
+    column-gap: 0;
+    row-gap: var(--lane-gap);
+  }
+  .career-lane-label {
+    grid-column: lanes;
+    align-self: center;
+    margin: 0 var(--space-4) 0 0;
+    font-size: var(--text-xs);
+  }
+  .career-lane-label[data-lane='work'] {
+    grid-row: work;
+    grid-column: lanes;
+  }
+  .career-lane-label[data-lane='education'] {
+    grid-row: education;
+    grid-column: lanes;
+  }
+  /* As wide as its years, at least as wide as its title's longest word (a short card reaches into
+     the empty years after it; the axis stays even). */
+  .career-stop {
+    grid-column: var(--track);
+    min-width: min-content;
+    min-height: 0;
+    margin: 0 4px 0 0;
+    overflow-wrap: normal;
+  }
+  .career-stop[data-lane='work'] {
+    grid-row: work;
+    grid-column: var(--track);
+  }
+  .career-stop[data-lane='education'] {
+    grid-row: education;
+    grid-column: var(--track);
+  }
+  /* The shared card: across both lanes, its education half at the bottom, the seam the lane line. */
+  .career-stop[data-lane='both'] {
+    grid-row: work / axis;
+    grid-column: var(--track);
+  }
+  .career-stop[data-lane='both'] .career-parts {
+    display: contents;
+  }
+  .career-stop[data-lane='both'] .career-part + .career-part {
+    margin: auto calc(var(--space-3) * -1) 0;
+    padding: var(--space-2) var(--space-3) 0;
+    border-left: 0;
+    border-top: 1px dashed color-mix(in srgb, var(--glacier-accent) 35%, transparent);
+  }
+  .career-title {
+    font-size: 1rem;
+  }
+  .career-years,
+  .career-place,
+  .career-part-title,
+  .career-thesis-link {
+    font-size: 0.8125rem;
+  }
+  .career-band {
+    grid-row: work / axis;
+    grid-column: var(--track);
+    margin: calc(var(--lane-gap) / -2) 0;
+    border-block: 0;
+    border-inline: 1px dashed color-mix(in srgb, var(--glacier-accent) 40%, transparent);
+  }
+  .career-band-label {
+    top: auto;
+    bottom: 100%;
+    left: 0;
+    width: auto;
+    overflow: visible;
+    margin: 0 0 var(--space-1);
+    font-size: var(--text-xs);
+    letter-spacing: var(--type-label-tracking);
+    writing-mode: horizontal-tb;
+  }
+  .career-tick {
+    grid-column: var(--track);
+    grid-row: axis;
+    padding: var(--space-2) 0 0;
+    font-size: var(--text-xs);
+    border-top: 0;
+    border-left: 1px solid var(--line);
+    padding-left: var(--space-1);
+  }
+}
+
+/*
+ * 03 How I work: four face-up cards in the card family (number, title, body
+ * at the body size); not interactive. From 1024 a row of four (dealt in with a
+ * slight fan that settles straight: --deal-mode: fan), 640–1023 a 2×2 grid,
+ * below 640 one column (the cards in turn).
+ */
+.how-cards {
+  --deal-mode: list;
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.how-card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  cursor: default;
+}
+.how-card > * {
+  margin: 0;
+}
+.how-title {
+  font-family: var(--font-display);
+  font-size: var(--type-h3-size);
+  font-weight: var(--type-h3-weight);
+  font-variation-settings: 'opsz' var(--type-h3-opsz);
+  line-height: var(--type-h3-leading);
+  letter-spacing: var(--type-h3-tracking);
+}
+.how-body {
+  max-width: 34ch;
+}
+@media (min-width: 640px) {
+  .how-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--grid-gutter);
+  }
+}
+@media (min-width: 1024px) {
+  /* stretch: grid items with an aspect ratio would otherwise keep their own height (one card taller). */
+  .how-cards {
+    --deal-mode: fan;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: stretch;
+  }
+  /* The card's proportions, growing only when the words need more room. A definite width keeps the
+     ratio from turning the stretched (tallest card's) height into a wider card. */
+  .how-card {
+    width: 100%;
+    min-width: 0;
+    aspect-ratio: 132 / 184;
+    padding: var(--space-5) var(--space-5) var(--space-6);
+  }
+}
+
+/* 04 At the table */
+.tcg-body {
+  max-width: 36ch;
+  margin: 0;
+}
+.tcg-lessons {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tcg-lesson {
+  display: grid;
+  gap: var(--space-2);
+  padding: calc(var(--baseline) * 5) 0;
+  border-top: 1px solid var(--line);
+}
+.tcg-lesson > * {
+  margin: 0;
+}
+.tcg-stats {
+  margin: 0;
+  padding-top: var(--space-4);
+  border-top: 2px solid var(--accent);
+  color: var(--accent);
+}
+@media (min-width: 1024px) {
+  .tcg-lesson {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+    padding: var(--space-5) 0;
+  }
+  .tcg-lesson h3 {
+    grid-column: 1 / 4;
+  }
+  .tcg-lesson p {
+    grid-column: 4 / 9;
+  }
+}
+
+/* 05 Roots: lead size, set to the right. */
+.roots-body {
+  max-width: 36ch;
+  margin: 0;
+}
+
+/* 06 What's on the table: the egg brings its own h2 (set on the h2 token here). */
+.page-section.about-table > .col-content {
+  margin-top: 0;
+}
+.about-table .on-table {
+  margin-top: 0;
+}
+.about-table .on-table h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--type-h2-size);
+  font-weight: var(--type-h2-weight);
+  font-variation-settings: 'opsz' var(--type-h2-opsz);
+  line-height: var(--type-h2-leading);
+  letter-spacing: var(--type-h2-tracking);
+  text-transform: none;
+  color: var(--text);
+}
+.about-table .on-table-list {
+  margin-top: var(--space-6);
+}
+
+/* The contour map's credit: a text link (.link-vertical) along the left edge while the map shows (from 1024). */
+.topo-attribution {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .topo-attribution {
+    position: fixed;
+    bottom: var(--space-5);
+    left: var(--space-3);
+    z-index: var(--z-header);
+    display: block;
+    max-height: calc(100svh - var(--header-h) - 48px);
+    margin: 0;
+    writing-mode: vertical-rl;
+    rotate: 180deg;
+    color: color-mix(in srgb, var(--glacier-text) 60%, transparent);
+  }
+}
+
+/*
+ * 07 Projects: a plain list, not interactive (no hover or focus states, a
+ * default cursor). Each row reveals with its drawn rule (`pair`). From 1024
+ * the row runs across the twelve columns: title 1–4, year 5, client 6–8, what
+ * I did 9–12; on phones title, then year and client, then the role.
+ */
+.projects-count {
+  color: var(--muted);
+}
+.projects {
+  display: grid;
+}
+.projects-head {
+  display: none;
+}
+.projects-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.project {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-1) var(--space-4);
+  align-items: baseline;
+  padding: var(--space-4) 0 calc(var(--baseline) * 5);
+  cursor: default;
+}
+.project-rule {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: var(--line);
+}
+.project-title {
+  grid-column: 1 / -1;
+  font-family: var(--font-display);
+  font-size: var(--type-h3-size);
+  font-weight: var(--type-h3-weight);
+  font-variation-settings: 'opsz' var(--type-h3-opsz);
+  line-height: var(--type-h3-leading);
+  letter-spacing: var(--type-h3-tracking);
+}
+.project-year {
+  color: var(--accent);
+}
+.project-client {
+  color: var(--muted);
+}
+.project-role {
+  grid-column: 1 / -1;
+}
+.projects-end {
+  margin: var(--space-6) 0 0;
+  color: var(--muted);
+}
+/* The one link in the chapter (R8): the thesis overview, below the closing line. */
+.projects-thesis {
+  margin: var(--space-4) 0 0;
+}
+@media (min-width: 1024px) {
+  .projects-head,
+  .project {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+  }
+  .projects-head {
+    display: grid;
+    margin: 0;
+    padding-bottom: var(--space-3);
+    color: var(--muted);
+  }
+  .projects-head > :nth-child(1),
+  .project-title {
+    grid-column: 1 / 5;
+  }
+  .projects-head > :nth-child(2),
+  .project-year {
+    grid-column: 5;
+  }
+  .projects-head > :nth-child(3),
+  .project-client {
+    grid-column: 6 / 9;
+  }
+  .projects-head > :nth-child(4),
+  .project-role {
+    grid-column: 9 / 13;
+  }
+  .project {
+    padding: var(--space-5) 0;
+  }
+  .project-title {
+    padding-right: var(--space-5);
+  }
+  .projects-end {
+    margin-top: var(--space-7);
+  }
+}
+
+/*
+ * 08 Contact: the end point. "Let's talk." is the h2; the body, the email set
+ * large (a standalone text link whose marker block draws in from the left as
+ * it reveals), the LinkedIn and location rows, the note.
+ */
+.about-contact > .col-content {
+  margin-top: var(--space-6);
+}
+.page-section.about-contact > .section-title + * {
+  margin-top: var(--space-5);
+}
+.contact-body {
+  max-width: 48ch;
+}
+/* The block reaches half an em under the baseline: the line's box makes room for it. */
+.contact-email-line {
+  justify-self: start;
+  max-width: 100%;
+  padding-bottom: 0.3em;
+  text-wrap: wrap;
+}
+.contact-email {
+  overflow-wrap: anywhere;
+}
+.contact-pairs {
+  display: grid;
+  margin-bottom: 0;
+}
+.contact-pair {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--line);
+}
+.contact-pair:last-child {
+  border-bottom: 1px solid var(--line);
+}
+.contact-pair dt {
+  grid-column: 1;
+  color: var(--muted);
+}
+.contact-pair dd {
+  grid-column: 2 / -1;
+  margin: 0;
+}
+.contact-note {
+  color: var(--muted);
+}
+@media (min-width: 1024px) {
+  .contact-pair {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+  .contact-pair dt {
+    grid-column: 1 / 3;
+  }
+  .contact-pair dd {
+    grid-column: 3 / -1;
+  }
+}
+
+/* ================= 404: a card on the discard pile ================= */
+.lost {
+  align-content: center;
+  min-height: 100svh;
+  padding: calc(var(--header-h) + var(--space-6)) 0 var(--space-8);
+}
+.lost > * {
+  grid-column: content-start / content-end;
+  margin: 0;
+}
+.lost-discard {
+  position: relative;
+  justify-self: end;
+  width: clamp(112px, 30vw, 132px);
+  aspect-ratio: var(--card-ratio);
+  margin-bottom: var(--space-6);
+}
+.lost-zone {
+  position: absolute;
+  inset: calc(var(--space-3) * -1);
+  border: 1px dashed color-mix(in srgb, var(--text) 28%, transparent);
+  border-radius: 14px;
+}
+/* The discard pile: one face-down card squared on the zone. */
+.lost-pile {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background:
+    repeating-linear-gradient(135deg, color-mix(in srgb, var(--text) 6%, transparent) 0 1px, transparent 1px 7px),
+    var(--ink-mid);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 16%, transparent);
+  rotate: 3deg;
+}
+/* The discarded card lies tilted on top (the drawing is upright; the page tilts it). */
+.lost-card {
+  position: absolute;
+  inset: 0;
+  color: var(--accent);
+  rotate: var(--angle-discard, -12deg);
+  translate: -8% 4%;
+}
+.lost-card .illustration[data-stub] {
+  outline: none;
+}
+.lost-body {
+  max-width: 30ch;
+  margin-top: var(--space-5);
+}
+.lost-back {
+  margin-top: calc(var(--baseline) * 10);
+}
+@media (min-width: 1024px) {
+  .lost {
+    grid-template-rows: auto auto auto;
+    align-content: center;
+  }
+  .lost-title {
+    grid-column: 2 / 9;
+    grid-row: 1;
+  }
+  .lost-body {
+    grid-column: 5 / 9;
+    grid-row: 2;
+  }
+  .lost-back {
+    grid-column: 5 / 9;
+    grid-row: 3;
+  }
+  .lost-discard {
+    grid-column: 10 / 13;
+    grid-row: 1 / 4;
+    align-self: center;
+    justify-self: center;
+    width: 100%;
+    max-width: 240px;
+    margin: 0;
+  }
+}
