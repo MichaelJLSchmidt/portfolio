@@ -233,12 +233,32 @@ async function tableSuite(browser, device) {
   )
   check('home: content clears the hand', screen.hint <= screen.hand, JSON.stringify(screen))
   const links = await page.evaluate(() =>
-    [...document.querySelectorAll('header a:not([data-locale-switcher] a)')].map((a) => a.textContent.trim()),
+    [...document.querySelectorAll('header a:not([data-locale-switcher] a, [data-lab-link] a)')].map((a) =>
+      a.textContent.trim(),
+    ),
   )
   check(
-    `header: home slot and ${site.header.about} only (plus the language switcher)`,
+    `header: home slot and ${site.header.about} only (plus the language switcher and, gated, Lab)`,
     links.length === 2 && links.includes(site.header.about),
     links.join(' | '),
+  )
+  // The temporary Lab link (src/lab/header-link.tsx): in About's style next to it, to the lab
+  // overview, exactly when the build has the lab (SITE_ACCESS not "public"); a public build has none.
+  const labBuild = await fetch(url('/lab/')).then(
+    (r) => r.ok,
+    () => false,
+  )
+  const lab = await page.evaluate(() => {
+    const a = document.querySelector('header [data-lab-link] a')
+    const about = a?.closest('ul')?.querySelector('li:not([data-lab-link]) a')
+    return a && { href: a.getAttribute('href'), sameStyle: a.className === about?.className, label: a.lang }
+  })
+  check(
+    labBuild
+      ? 'header: Lab link next to About, in its style, to the lab overview (gated build)'
+      : 'header: no Lab link (public build)',
+    labBuild ? Boolean(lab?.sameStyle && lab.label === 'en' && lab.href.endsWith(`/${locale}/lab/`)) : lab === null,
+    JSON.stringify(lab),
   )
   // R2: no pause / play button; the background follows prefers-reduced-motion and the tab's
   // visibility only.

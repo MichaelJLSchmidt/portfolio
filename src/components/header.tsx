@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useSelectedLayoutSegment } from 'next/navigation'
 import { type CSSProperties, useEffect, useLayoutEffect, useRef } from 'react'
+import { LabLink } from '@/lab/header-link'
 import { useChrome } from '@/lib/chrome'
 import { cardIdForPath } from '@/lib/hand-data'
 import { localeHref, localeNames, locales, pagePath } from '@/lib/i18n'
@@ -35,10 +36,12 @@ import styles from './header.module.css'
  * header slides away it holds its place on a floating chip (header.module.css).
  *
  * About is a standalone text link (styles/link.css .link: its marker, line and
- * triangle). The header is outside the page, so its colour is the identity
- * of the page shown (palette.ts: :root's link colours follow the page's own
- * scope), updated on every navigation, card play, Back and language switch
- * included; the logo's flowing gradient on home and 404.
+ * triangle). While the site is not public a temporary Lab link follows it, in
+ * About's style (src/lab/header-link.tsx; a public build has none). The header
+ * is outside the page, so its colour is the identity of the page shown
+ * (palette.ts: :root's link colours follow the page's own scope), updated on
+ * every navigation, card play, Back and language switch included; the logo's
+ * flowing gradient on home and 404.
  *
  * The language switcher links each language to the same page in it; the
  * active one carries aria-current and sits on a face-up chip. Choosing the
@@ -125,6 +128,8 @@ export function Header() {
                 <span className="link link-standalone">{site.header.about}</span>
               </Link>
             </li>
+            {/* Temporary: the internal tools, only while the site is not public (src/lab/README.md). */}
+            {LabLink && <LabLink className={styles.about} href={href} current={current} />}
           </ul>
         </nav>
         <span className={styles.rule} aria-hidden="true" />

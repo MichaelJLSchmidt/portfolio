@@ -6,12 +6,13 @@ itself is in English in both), and `?c=<id>` for a concept's detail
 view. Round 3 keeps the card fan (3, 3B) and the diagonal cut: 8 and its stemless versions 8B
 (floating arm), 8C (arm cut along the channel) and 8D (a proposal on 8C); 1 and 5 are gone. Ids
 are stable, so deep links and stored scores survive, and a concept whose geometry changes gets a
-new `scoreKey` (old scores are pruned on load). It is not linked from the header, the hand, the footer or any page, and concept 3 is the site's
+new `scoreKey` (old scores are pruned on load). The lab overview (`/lab/`, src/lab/README.md) links it; nothing else does, and concept 3 is the site's
 logo: a copy of its master lives in `src/components/logo.tsx` (favicon and apple-touch icon in
 `src/app/`), so deleting the lab does not touch it.
 
-**Delete the lab in one step:** remove `src/app/[locale]/logo-lab/` and `src/lab/logo/`. Nothing else
-references them. No shared file was changed for the lab.
+**Delete the logo lab in one step:** remove `src/app/[locale]/(lab)/logo-lab/` and `src/lab/logo/`, and its
+entry in `src/lab/pages.ts` (the overview's list; the build checks the two agree). Like every lab page it
+exists only in builds that are not public (its route file is `page.lab.tsx`: src/lab/README.md).
 
 ## How it is built
 
