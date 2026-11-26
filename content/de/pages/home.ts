@@ -6,7 +6,7 @@ export const home: Home = {
   title: 'Michael Flück',
   role: 'Leiter UX bei DV Bern',
   intro:
-    'Neugier und Eigeninitiative haben mich vom Java-Backend-Entwickler über den UX-Generalisten und Frontend-Entwickler bis zum Abteilungsleiter UX geführt. In über 12 Jahren in der IT habe ich viele Rollen selbst ausgefüllt. Diese Perspektiven bringe ich heute mit Leidenschaft in jedes Projekt ein. Denn die besten Lösungen entstehen dort, wo unterschiedliche Sichtweisen und Erfahrungen zusammenkommen.',
+    'Neugier und Eigeninitiative haben mich vom Java-Backend-Entwickler über den UX-Generalisten und Frontend-Entwickler zum Abteilungsleiter UX geführt. In über 12 Jahren in der IT habe ich diese Rollen selbst ausgefüllt und bringe ihre Perspektiven mit Leidenschaft in jedes Projekt ein. Denn die besten Lösungen entstehen, wo unterschiedliche Sichtweisen zusammenkommen.',
   hint: 'Zieh eine Karte',
   bring: {
     label: 'Was ich mitbringe',
