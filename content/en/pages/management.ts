@@ -43,7 +43,7 @@ export const management: Management = {
     label: 'Team',
     title: "Who's on the team",
     members: [
-      { initials: 'ML', role: 'Lead', fte: '100%', focus: 'People, priorities and practice; still about 20% hands-on' },
+      { initials: 'MF', role: 'Lead', fte: '100%', focus: 'People, priorities and practice; still about 20% hands-on' },
       { initials: 'AK', role: 'Senior UX designer', fte: '100%', focus: 'Embedded in the tax domain' },
       { initials: 'RB', role: 'UX researcher', fte: '80%', focus: 'Research operations and studies across domains' },
       { initials: 'SO', role: 'UX designer & front-end', fte: '100%', focus: 'Allmend core team' },

@@ -46,7 +46,7 @@ export const management: Management = {
     title: 'Wer im Team ist',
     members: [
       {
-        initials: 'ML',
+        initials: 'MF',
         role: 'Lead',
         fte: '100%',
         focus: 'Menschen, Prioritäten und Praxis, weiterhin rund 20% eigene Projektarbeit',

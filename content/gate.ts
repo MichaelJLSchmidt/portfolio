@@ -7,7 +7,7 @@
 import type { GateIdentity } from '@/hosting/page'
 
 export const identity: GateIdentity = {
-  name: 'Michael JL Schmidt',
+  name: 'Michael Flück',
   email: 'michael.jl.schmidt@bluewin.ch',
   linkedin: 'https://www.linkedin.com/in/michaeljlschmidt/',
 }

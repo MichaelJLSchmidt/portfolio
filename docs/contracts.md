@@ -27,8 +27,7 @@ below were written for Wave 1 and apply again only if a future wave runs in para
 - Respect `BASE_PATH`: links through `next/link` (it adds the base path); raw URLs (`<img>`,
   `fetch`, `<a>` to files) through `withBase()` from `src/lib/site.ts`. Never a hard-coded
   leading `/` for assets.
-- No personal names in code, comments, docs or commits (the fictional "Moritz Lauber" in test
-  content is fine). Plain labels; no job-seeking language, CV download or testimonials.
+- No personal names in code, comments, docs or commits (the name in `content/` is fine). Plain labels; no job-seeking language, CV download or testimonials.
 - Calm by default: only the background field (and, since T2, the very slow flow of the header
   logo's gradient, which text links on home and 404 share since K2) moves at rest. Everything else is still until the visitor scrolls or
   interacts, and every stub already renders its final, readable state.
