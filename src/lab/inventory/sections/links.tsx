@@ -166,9 +166,9 @@ export function linksSection(): SectionData {
   const header: ItemData[] = [
     {
       id: 'header.about',
-      title: 'Header: About (in the tray)',
+      title: 'Header: About',
       render: clone('tray', 'about', ['rest', 'hover', 'focus', 'current']),
-      values: [['style', 'a standalone text link in the tray capsule, in the page’s identity']],
+      values: [['style', 'a standalone text link beside the language capsule, in the page’s identity']],
       source: [
         {
           file: 'src/components/header.tsx',

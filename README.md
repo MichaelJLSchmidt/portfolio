@@ -149,8 +149,8 @@ Motion+ is an optional dependency: without a token `motion-plus` resolves to
   visible on home, 45% elsewhere); hover or focus lifts a card until 90% shows. Mobile: the fan
   on home, elsewhere a 48px peek rail that opens a bottom sheet (a native popover) with the
   cards. One tab stop (arrows, Home/End). The header holds the home slot (the logo, its F card
-  in one of four gradients per load, or Back on detail pages) and the tray (About and the
-  language switcher on one capsule). On pages that scroll it leaves on a scroll down and returns
+  in one of four gradients per load, or Back on detail pages) and About beside the language
+  switcher's capsule. On pages that scroll it leaves on a scroll down and returns
   on a scroll up (the mobile rail with it); on detail pages Back stays on a floating chip.
 - **Detail pages**: the played card continues as the hero: its media frame slides off the right
   edge (the hero photo, or Management's drawing), the display H1 runs onto it, then the facts,
