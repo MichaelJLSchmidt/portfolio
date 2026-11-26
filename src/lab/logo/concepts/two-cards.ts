@@ -57,15 +57,17 @@ const frontPivot: Pt = [fx + W / 2, by + H]
 const rot = (deg: number, [x, y]: Pt) => `rotate(${deg} ${num(x)} ${num(y)})`
 
 /**
- * M cut: 3.5 monoline, cap 14 (card y 7–21), valley tip at 60 % (+0.5). Its
- * right stem (card x 15.5–19) lies under the F's stem. Card-local → absolute.
+ * M cut: 3.5 monoline, cap 14 (card y 7–21), valley tip at 60 % (+0.5),
+ * centred in its card (card x 2–18: 2 units each side, 7 above and below).
+ * Its right stem (card x 14.5–18) lies under the front card, the F's stem
+ * standing in for it. Card-local → absolute.
  */
 function mCut(): string {
   const sw = 3.5
   const top = by + 7
   const base = by + 21
-  const l = bx + 4.75
-  const r = bx + 17.25
+  const l = bx + 3.75
+  const r = bx + 16.25
   const apexL: Pt = [l, top + sw / 2]
   const apexR: Pt = [r, top + sw / 2]
   const v = valleyFor(apexL, apexR, (l + r) / 2, top + 0.6 * 14 + 0.5, 3.25 / 2)
@@ -300,7 +302,7 @@ export const twoCards = makeTwoCards(
   {
     id: '3',
     label: '3',
-    scoreKey: 'score-3',
+    scoreKey: 'score-3-m2',
     slug: 'two-cards',
     name: 'Two Cards',
     idea: 'Two fanned cards: an M cut out of the back one, an F out of the front one, sharing the stem where they overlap.',
@@ -313,7 +315,7 @@ export const twoCardsDynamic = makeTwoCards(
   {
     id: '3b',
     label: '3B',
-    scoreKey: 'score-3b',
+    scoreKey: 'score-3b-m2',
     slug: 'two-cards-dynamic-f',
     name: 'Two Cards, dynamic F',
     idea: 'Concept 3 with a faster F: arm ends cut at a slant, a short middle arm set a touch high.',
