@@ -10,7 +10,7 @@ import type { Site } from '../schema'
 
 export const site: Site = {
   name: 'Michael Flück',
-  description: 'Leiter UX bei DV Bern in Bern.',
+  description: 'Leiter UX bei DV Bern.',
   wordmark: 'MJLS',
   skipLink: 'Zum Inhalt springen',
   introSkip: 'Intro überspringen',

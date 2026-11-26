@@ -8,7 +8,7 @@ import type { Site } from '../schema'
 
 export const site: Site = {
   name: 'Michael Flück',
-  description: 'Head of UX at DV Bern in Bern, Switzerland.',
+  description: 'Head of UX at DV Bern.',
   wordmark: 'MJLS',
   skipLink: 'Skip to main content',
   introSkip: 'Skip intro',
