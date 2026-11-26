@@ -168,7 +168,7 @@ export type CoffeeEgg = {
 // Pages
 
 export type Home = {
-  /** Above the title, e.g. "Bern, Switzerland — UX Team Lead". */
+  /** Above the title, e.g. "Bern, Switzerland". */
   label: string
   title: string
   role: string
