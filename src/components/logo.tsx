@@ -11,7 +11,9 @@ import { readTier } from '@/motion/use-tier'
 /*
  * The logo: two fanned cards in the hand's card ratio, an M cut out of the back
  * card and an F out of the front one; the front card covers the M's right stem,
- * so the two letters share it. The back card is the text colour, the front card
+ * so the two letters share it. The M is centred in its card (2 units each side,
+ * 7 above and below, on the F's cap line and baseline), so the back card reads
+ * right when the hover fans it open. The back card is the text colour, the front card
  * a gradient from the cards' colours: one of four per page load (palette.ts
  * logoGradients, picked by the pre-paint script, --logo-a / -b / -c), whose
  * colours flow along the card very slowly (header.module.css, `logo.flow`;
@@ -45,7 +47,7 @@ const BACK = 'rotate(-6 18.235 37.923)'
 const FRONT = 'rotate(5 30.235 37.923)'
 const CARD = { y: 9.923, width: 20, height: 28, rx: 2.5 }
 const M =
-  'M14.735 30.923V22.181L19.235 25.823L23.735 22.181V30.923H27.235V16.923H25.064L19.235 21.642L13.406 16.923H11.235V30.923Z'
+  'M13.735 30.923V22.181L18.235 25.823L22.735 22.181V30.923H26.235V16.923H24.064L18.235 21.642L12.406 16.923H10.235V30.923Z'
 const F = 'M23.735 16.923H27.235V30.923H23.735ZM23.735 16.923H36.235V20.423H23.735ZM23.735 22.673H33.735V26.173H23.735Z'
 const AREA = { x: -24, y: -24, width: 96, height: 96 }
 const DEALT_KEY = 'table:logo-dealt'

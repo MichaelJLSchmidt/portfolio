@@ -2,11 +2,11 @@
 import type { Home } from '../../schema'
 
 export const home: Home = {
-  label: 'Bern, Schweiz · UX Team Lead',
-  title: 'Moritz Lauber',
-  role: 'UX Team Lead und Senior UX Designer bei Lindengrund Informatik',
+  label: 'Bern, Schweiz',
+  title: 'Michael Flück',
+  role: 'Leiter UX bei DV Bern',
   intro:
-    'Ich leite ein sechsköpfiges Team aus Design und Research, das digitale Behördendienste verständlicher macht. Für die Menschen, die sie nutzen, und für die, die sie betreiben. Meine Arbeit liegt zwischen UX-Design, Produktstrategie und Frontend-Code. Die meisten Wochen beginnen mit einem Workshop.',
+    'Neugier und Eigeninitiative haben mich vom Java-Backend-Entwickler über den UX-Generalisten und Frontend-Entwickler zum Abteilungsleiter UX geführt. In über 12 Jahren in der IT habe ich diese Rollen selbst ausgefüllt und bringe ihre Perspektiven mit Leidenschaft in jedes Projekt ein. Denn die besten Lösungen entstehen, wo unterschiedliche Sichtweisen zusammenkommen.',
   hint: 'Zieh eine Karte',
   bring: {
     label: 'Was ich mitbringe',

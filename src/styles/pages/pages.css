@@ -18,8 +18,9 @@
  * 7–12, level with its last line; on phones the intro is set on the body size.
  */
 .home {
-  /* The phone fan: four cards across the screen (hand.css), 85% visible, plus the arc. */
-  --home-hand: calc(min(128px, (100vw - 48px) / 2.8) * 184 / 132 * 0.85 + var(--safe-bottom) + var(--space-5));
+  /* The phone fan: four cards across the screen (hand.css), 85% visible, plus the arc and a gap. */
+  --home-hand-gap: var(--space-5);
+  --home-hand: calc(min(128px, (100vw - 48px) / 2.8) * 184 / 132 * 0.85 + var(--safe-bottom) + var(--home-hand-gap));
   grid-template-rows: repeat(4, auto) minmax(0, 1fr);
   align-content: stretch;
   min-height: 100svh;
@@ -53,6 +54,13 @@
 }
 .home-lede {
   max-width: 40ch;
+}
+/*
+ * The role line and the intro break only between words (German compounds at their own hyphens).
+ * Scoped to .home: type.css's hyphenation rule weighs (0,2,1) through its :is() list.
+ */
+.home :is(.home-role, .home-lede):lang(de) {
+  hyphens: manual;
 }
 @media (max-width: 1023.98px) {
   .home-lede {
@@ -104,6 +112,36 @@
   margin: var(--space-4) 0 0;
   color: var(--muted);
   text-align: center;
+}
+/*
+ * Phones: the screen's gaps tighten on the spacing scale, so the name, the intro and the items
+ * still fit one screen (checked at 360×800, 375×812 and 390×844). The fan's gap shrinks the most:
+ * its arc already keeps the hint about as far above the cards as on desktop.
+ */
+@media (max-width: 639.98px) {
+  .home {
+    --home-hand-gap: var(--space-1);
+    padding-top: calc(var(--header-h) + var(--space-2));
+  }
+  .home-label {
+    margin-bottom: var(--space-2);
+  }
+  .home-intro {
+    gap: var(--space-1);
+    margin-top: var(--space-2);
+  }
+  .home-bring {
+    margin-top: var(--space-3);
+  }
+  .home-bring-rule {
+    margin-bottom: var(--space-2);
+  }
+  .home-bring-label {
+    margin-bottom: var(--space-1);
+  }
+  .home-hint {
+    margin-top: var(--space-2);
+  }
 }
 @media (min-width: 1024px) {
   .home {

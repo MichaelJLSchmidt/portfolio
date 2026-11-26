@@ -2,11 +2,11 @@
 import type { Home } from '../../schema'
 
 export const home: Home = {
-  label: 'Bern, Switzerland — UX Team Lead',
-  title: 'Moritz Lauber',
-  role: 'UX Team Lead and Senior UX Designer at Lindengrund Informatik',
+  label: 'Bern, Switzerland',
+  title: 'Michael Flück',
+  role: 'Head of UX at DV Bern',
   intro:
-    'I lead a team of five designers and a researcher who make digital public services clearer — for the people who use them and the people who run them. My work sits between UX design, product strategy and front-end code. Most weeks, it starts with a workshop.',
+    'Curiosity and initiative have taken me from Java backend developer to UX generalist, frontend developer and head of the UX department. Over more than 12 years in IT, I have held each of these roles myself, and I am passionate about bringing their perspectives to every project. After all, the best solutions emerge where different viewpoints come together.',
   hint: 'Pick a card',
   bring: {
     label: 'What I bring to the table',

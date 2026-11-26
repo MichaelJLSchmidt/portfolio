@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import type { CSSProperties } from 'react'
+import { type CSSProperties, Fragment } from 'react'
 import { CareerTimeline } from '@/components/about/career-timeline'
 import { OffsetImage, Section, SectionIndex, imageSides } from '@/components/layout'
 import { PageTitle } from '@/components/page-title'
@@ -14,6 +14,19 @@ import { asLocale, setRequestLocale } from '@/lib/request-locale'
 import { NAV } from '@/motion/transitions'
 
 type Props = { params: Promise<{ locale: string }> }
+
+/** A contact value with a line-break opportunity after each "/": an address breaks between its parts on phones. */
+const breakAfterSlashes = (value: string) =>
+  value.split('/').map((part, i, parts) => (
+    <Fragment key={i}>
+      {part}
+      {i < parts.length - 1 && (
+        <>
+          /<wbr />
+        </>
+      )}
+    </Fragment>
+  ))
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = asLocale((await params).locale)
@@ -211,7 +224,7 @@ export default async function AboutPage({ params }: Props) {
                 <dd className="t-label">
                   {l.href ? (
                     <a className="link link-standalone" href={l.href}>
-                      {l.value}
+                      {breakAfterSlashes(l.value)}
                     </a>
                   ) : (
                     l.value

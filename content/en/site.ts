@@ -7,8 +7,8 @@
 import type { Site } from '../schema'
 
 export const site: Site = {
-  name: 'Moritz Lauber',
-  description: 'UX Team Lead and Senior UX Designer in Bern, Switzerland.',
+  name: 'Michael Flück',
+  description: 'Head of UX at DV Bern.',
   wordmark: 'MJLS',
   skipLink: 'Skip to main content',
   introSkip: 'Skip intro',
@@ -19,7 +19,7 @@ export const site: Site = {
     nav: 'Site',
     language: 'Language',
   },
-  footer: { note: 'Moritz Lauber · Bern, Switzerland · Last updated November 2026' },
+  footer: { note: 'Michael Flück · Bern, Switzerland · Last updated November 2026' },
   shortcuts: {
     title: 'Keyboard shortcuts',
     close: 'Close',

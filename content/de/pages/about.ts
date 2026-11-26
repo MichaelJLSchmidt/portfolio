@@ -4,6 +4,7 @@
  * and the topography's label and attribution.
  * about-og (the Open Graph image) has no slot on the page.
  */
+import { contactEmail, linkedinLabel, linkedinUrl } from '../../contact'
 import type { About } from '../../schema'
 
 export const about: About = {
@@ -206,10 +207,9 @@ export const about: About = {
     label: 'Kontakt',
     title: 'Lass uns reden.',
     body: 'Wenn du an Behördendiensten, Design-Systemen oder Designführung arbeitest und dich austauschen möchtest, freue ich mich auf deine Nachricht. Ich antworte meist innert weniger Tage. Wenn du in Bern bist, geht auch ein Kaffee.',
-    email: 'moritz@mjls.example',
+    email: contactEmail,
     links: [
-      // Placeholder profile: shown as text, deliberately without a link.
-      { label: 'LinkedIn', value: 'linkedin.com/in/example' },
+      { label: 'LinkedIn', value: linkedinLabel, href: linkedinUrl },
       { label: 'Ort', value: 'Bern, Schweiz' },
     ],
     note: 'Kein Newsletter, kein Tracking. Nur E-Mail.',

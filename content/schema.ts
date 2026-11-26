@@ -7,11 +7,11 @@
  * the hand) from the layout through src/lib/chrome.tsx. Never import JSON or
  * MDX content directly. Foundation-owned. Contract: docs/contracts.md#content-schema.
  *
- * Shapes fit the final persona content (a fictional UX team lead). Counts
- * that the contract fixes (four decisions, five metrics, seven timeline
- * stops, ...) are checked at build time for every locale in src/lib/content.ts.
- * Copy rules: plain labels, no personal names (the fictional persona is
- * fine), no job-seeking language, no CV, no testimonials.
+ * Shapes fit the site's real content. Counts that the contract fixes (four
+ * decisions, five metrics, seven timeline stops, ...) are checked at build
+ * time for every locale in src/lib/content.ts. Copy rules: plain labels, no
+ * personal names other than the site's own (site.name), no job-seeking
+ * language, no CV, no testimonials.
  */
 import type { ContentIllustration, ProjectType, WorkshopMethod } from '@/components/illustrations/types'
 import type { Identity } from '@/design/palette'
@@ -168,7 +168,7 @@ export type CoffeeEgg = {
 // Pages
 
 export type Home = {
-  /** Above the title, e.g. "Bern, Switzerland — UX Team Lead". */
+  /** Above the title, e.g. "Bern, Switzerland". */
   label: string
   title: string
   role: string

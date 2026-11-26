@@ -27,8 +27,7 @@ below were written for Wave 1 and apply again only if a future wave runs in para
 - Respect `BASE_PATH`: links through `next/link` (it adds the base path); raw URLs (`<img>`,
   `fetch`, `<a>` to files) through `withBase()` from `src/lib/site.ts`. Never a hard-coded
   leading `/` for assets.
-- No personal names in code, comments, docs or commits (the fictional "Moritz Lauber" in test
-  content is fine). Plain labels; no job-seeking language, CV download or testimonials.
+- No personal names in code, comments, docs or commits (the name in `content/` is fine). Plain labels; no job-seeking language, CV download or testimonials.
 - Calm by default: only the background field (and, since T2, the very slow flow of the header
   logo's gradient, which text links on home and 404 share since K2) moves at rest. Everything else is still until the visitor scrolls or
   interacts, and every stub already renders its final, readable state.
@@ -862,12 +861,12 @@ two codes trade colours between 30% and 70% of it. The switcher has its own view
 `locale-switcher`, live and not animated in every transition (like `home-slot`), so the switch's
 cross-fade never shows two chips. Reduced: no slide. The "·" between the codes is gone.
 
-**T4. The tray.** The header's right side is one capsule (`.end::before`: 36 px high inside the
-44 px targets, a 1 px edge in `--chip-line` (text 13%) on `--chip-fill` (ink field 62%), fully
-rounded): About (no resting underline inside the tray; it draws on hover and stays drawn as the
-current page; superseded by K1–K2: a standalone text link in the page's colour), a 16 px hairline, then the switcher, whose chip sits 4 px inside the capsule's
-end. Back's chip (T5) speaks the same language. The tray's width follows About's label, so during
-a language switch its edge cross-fades with the header.
+**T4. The tray.** The header's right side: About (and the temporary Lab link in lab builds) as
+standalone text links (K1–K2, in the page's colour; the line, still, as the current page), then
+the switcher alone in its capsule (`.language::before`: 36 px high inside the 44 px targets, a
+1 px edge in `--chip-line` (text 13%) on `--chip-fill` (ink field 62%), fully rounded), its chip
+4 px inside the capsule's ends. Back's chip (T5) speaks the same language. Since the capsule
+holds only the switcher, its width no longer follows About's label.
 
 **T5. Back stays, and its hover.** On card pages (`a[data-slot-mode="back"]`), when the header
 leaves on a scroll down the slot moves down by `--header-h` in step with it (the same duration and
@@ -1030,7 +1029,7 @@ src/components/
   reveals.tsx                  <Reveals/>, <Reveal>, <FirstLoadSequence> (Motion)
   reading-hairline.tsx         <ReadingHairline/> (Motion), mounted in header.tsx
   picture.tsx                  <Picture> (Content & Images)
-  header.tsx                   header: home slot (logo / Back morph, Back stays), the tray (About, Lab in lab builds, language switcher), hairline
+  header.tsx                   header: home slot (logo / Back morph, Back stays), About (Lab in lab builds), the language switcher in its capsule, hairline
   locale-sync.tsx              <html lang> on the client; settles a language switch (L3, L7)
   router-bridge.tsx            root layout: registerNavigate + the back / forward replay (L2)
   site-footer.tsx, footer-shell.tsx, about-small-print.tsx   footer (none on home; About's small print)
@@ -1693,8 +1692,8 @@ Spread grid (D9).
 `/more-projects` and `/contact` are gone (A3; the 404 page answers). The lab (`src/lab/README.md`):
 `/<locale>/lab` (overview), `/<locale>/lab/inventory` (design inventory) and `/<locale>/logo-lab`,
 English (`lang="en"`), never indexed, and only in builds that are not public (`*.lab.tsx` routes,
-next.config.ts). Header: the home slot (logo, or Back on card pages), and the tray with About,
-the temporary Lab link (lab builds only) and the language switcher (L6, T3, T4); it leaves on a scroll down
+next.config.ts). Header: the home slot (logo, or Back on card pages), About, the
+temporary Lab link (lab builds only) and the language switcher in its capsule (L6, T3, T4); it leaves on a scroll down
 (N1), Back stays (T5). Every page has one `h1` (`PageTitle`,
 `id="page-heading"`, focus target after navigation).
 

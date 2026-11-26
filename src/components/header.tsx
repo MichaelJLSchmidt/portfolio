@@ -17,9 +17,10 @@ import { ReadingHairline } from './reading-hairline'
 import styles from './header.module.css'
 
 /*
- * Persistent header: the home slot at the top left; at the right the tray, one
- * capsule with About, a hairline and the language switcher; the reading
- * hairline on its bottom edge. 64 px high (--header-h).
+ * Persistent header: the home slot at the top left; at the right About (and,
+ * while the site is not public, Lab) as standalone text links, then the
+ * language switcher in its capsule; the reading hairline on its bottom edge.
+ * 64 px high (--header-h).
  *
  * The home slot is one link to the table. On detail pages (the three case
  * studies and Management) it shows a back arrow and "Back" (the card returns
@@ -35,8 +36,9 @@ import styles from './header.module.css'
  * which roll on hover, are aria-hidden. Back never leaves the screen: when the
  * header slides away it holds its place on a floating chip (header.module.css).
  *
- * About is a standalone text link (styles/link.css .link: its marker, line and
- * triangle). While the site is not public a temporary Lab link follows it, in
+ * About is a standalone text link outside the capsule (styles/link.css .link:
+ * its marker, line and triangle; the line, still, as the current page). While
+ * the site is not public a temporary Lab link follows it, in
  * About's style (src/lab/header-link.tsx; a public build has none). The header
  * is outside the page, so its colour is the identity of the page shown
  * (palette.ts: :root's link colours follow the page's own scope), updated on
@@ -132,7 +134,6 @@ export function Header() {
             {LabLink && <LabLink className={styles.about} href={href} current={current} />}
           </ul>
         </nav>
-        <span className={styles.rule} aria-hidden="true" />
         <nav
           ref={switcher}
           aria-label={site.header.language}

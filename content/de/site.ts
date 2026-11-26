@@ -9,8 +9,8 @@
 import type { Site } from '../schema'
 
 export const site: Site = {
-  name: 'Moritz Lauber',
-  description: 'UX Team Lead und Senior UX Designer in Bern.',
+  name: 'Michael Flück',
+  description: 'Leiter UX bei DV Bern.',
   wordmark: 'MJLS',
   skipLink: 'Zum Inhalt springen',
   introSkip: 'Intro überspringen',
@@ -21,7 +21,7 @@ export const site: Site = {
     nav: 'Website',
     language: 'Sprache',
   },
-  footer: { note: 'Moritz Lauber · Bern, Schweiz · Zuletzt aktualisiert im November 2026' },
+  footer: { note: 'Michael Flück · Bern, Schweiz · Zuletzt aktualisiert im November 2026' },
   shortcuts: {
     title: 'Tastenkürzel',
     close: 'Schliessen',

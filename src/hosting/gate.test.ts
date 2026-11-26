@@ -2,8 +2,9 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import { gate as de } from '../../content/de/gate.ts'
-import { site as fictionalSite } from '../../content/de/site.ts'
+import { site as siteDe } from '../../content/de/site.ts'
 import { gate as en } from '../../content/en/gate.ts'
+import { site as siteEn } from '../../content/en/site.ts'
 import { identity } from '../../content/gate.ts'
 import { PRIMARY_DOMAIN, REDIRECT_DOMAINS, gate, siteAccess } from './config.ts'
 import { handleGate, type GateDeps } from './gate-handler.ts'
@@ -252,8 +253,9 @@ const page: GatePage = {
 const options = { page, csp: "default-src 'none'" }
 
 describe('the gate page', () => {
-  it('shows the real name and links, not the fictional site persona', () => {
-    assert.notEqual(identity.name, fictionalSite.name)
+  it('shows the same name as the site, and the real links', () => {
+    assert.equal(identity.name, siteDe.name)
+    assert.equal(identity.name, siteEn.name)
     assert.match(identity.email, /^[^@\s]+@[^@\s]+\.[a-z]+$/)
     assert.match(identity.linkedin, /^https:\/\/www\.linkedin\.com\/in\/[^/]+\/$/)
     const html = renderPage(page, { next: '/', state: 'idle', locale: 'en', gradient: 'tide' })
