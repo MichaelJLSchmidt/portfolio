@@ -4,7 +4,7 @@
  * own), the credits heading and the topography's label and attribution.
  * about-og (the Open Graph image) has no slot on the page.
  */
-import { contactEmail } from '../../contact'
+import { contactEmail, linkedinLabel, linkedinUrl } from '../../contact'
 import type { About } from '../../schema'
 
 export const about: About = {
@@ -209,8 +209,7 @@ export const about: About = {
     body: "If you're working on public services, design systems or design leadership and want to compare notes, I'd like to hear from you. I usually reply within a few days. If you're in Bern, coffee works too.",
     email: contactEmail,
     links: [
-      // Placeholder profile: shown as text, deliberately without a link.
-      { label: 'LinkedIn', value: 'linkedin.com/in/example' },
+      { label: 'LinkedIn', value: linkedinLabel, href: linkedinUrl },
       { label: 'Location', value: 'Bern, Switzerland' },
     ],
     note: 'No newsletter, no tracking. Just email.',
