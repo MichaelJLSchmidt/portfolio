@@ -55,6 +55,13 @@
 .home-lede {
   max-width: 40ch;
 }
+/*
+ * The role line and the intro break only between words (German compounds at their own hyphens).
+ * Scoped to .home: type.css's hyphenation rule weighs (0,2,1) through its :is() list.
+ */
+.home :is(.home-role, .home-lede):lang(de) {
+  hyphens: manual;
+}
 @media (max-width: 1023.98px) {
   .home-lede {
     font-size: var(--type-body-size);
