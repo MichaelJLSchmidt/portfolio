@@ -100,6 +100,8 @@ export const duration = {
   hoverOut: 1.1,
   hoverIntent: 0.08,
   breath: 9,
+  /** The field's blob moving to another variant on a card's hover or focus (reduced: a crossfade). */
+  blobMove: 1.6,
   fieldIn: 1.2,
   /**
    * About: the gradient's pools contract and fade into the contour field's ground while the
@@ -331,13 +333,15 @@ export const field = {
   play: { dprMax: 1.5 },
   /**
    * Pool drift (full tier, on top of the breath): a slow Lissajous offset of each pool's centre,
-   * `poolDrift` of the viewport, one pair of loop lengths (s) per pool, all of them >= 90 s.
+   * `poolDrift` of the viewport (of its width across, its height down), one pair of loop lengths
+   * (s) per pool, none shorter than 23 s: visible after a few seconds of looking, never quick. The
+   * hover tint drifts as much (the offset applies after the pools lean toward the hovered card).
    */
-  poolDrift: 0.025,
+  poolDrift: 0.06,
   poolDriftPeriods: [
-    [97, 131],
-    [113, 151],
-    [127, 103],
+    [29, 37],
+    [33, 41],
+    [39, 23],
   ],
   /**
    * Height-only changes of the canvas box smaller than this (CSS px) are ignored: a mobile toolbar

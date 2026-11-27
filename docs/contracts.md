@@ -237,9 +237,22 @@ feedback's numbers (G, H, D, A); its D1–D8 are not the Wave 1 decisions D1–D
 **General**
 
 - **G1. Pool drift.** On top of the breath, the field's three colour pools drift on slow
-  Lissajous loops: 2.5% of the viewport (`field.poolDrift`), loops of 97–151 s
-  (`field.poolDriftPeriods`), full tier only (scaled by the `motion` track; calm and reduced keep
-  the pools still). Uniform `uDrift[3]` in `shader.ts`.
+  Lissajous loops: 6% of the viewport (`field.poolDrift`; across of its width, down of its
+  height), loops of 23–41 s (`field.poolDriftPeriods`): visible after a few seconds of looking,
+  never quick. Full tier only (scaled by the `motion` track; reduced keeps the pools still). The
+  offset applies after the pools lean toward a hovered card, so the hover tint drifts as much.
+  Uniform `uDrift[3]` in `shader.ts`; the CSS twin drifts by `translate` keyframes (33 s and 39 s
+  loops, `field.css`), compositor only.
+- **G1a. The blob.** The field's brightest pool has six variants (`src/components/background/
+  blobs.ts`, `blobVariants`: centre, radii along its own axes, rotation), one visual language
+  (Gaussian softness, radii 0.34–0.52 of the viewport height). Variant 1 is the original round
+  pool centre left, the resting field. Each card hover or keyboard focus moves it to another at
+  random, never the same twice in a row (`nextBlob`): full tier, a move of position, rotation and
+  radii over `duration.blobMove` (1.6 s, inOut), retargeted from where it is by any switch on the
+  way; reduced, a crossfade through nothing (80 ms out, the new shape unseen, 80 ms in). Shader
+  uniforms `uBlob`, `uBlobR`; the CSS twin's `.field-layer::before` moves by `transform` and fades
+  by `opacity` only (`blobCss()` in `field-css.ts`). The lab's inventory lists each as
+  `background.blob.<id>`.
 - **G2. Calm switch** (superseded by M1 and M2: the calm tier and its switch are gone). The footer's DisplaySettings is gone. `CalmSwitch`
   (`src/components/calm-switch.tsx`, `button[role="switch"][data-calm-switch]`) sits in the
   header. One source of truth: the stored preference that the pre-paint script applies as
@@ -1198,7 +1211,8 @@ G4), `duration.logoExit` / `logoBackFade` and `logo.*` (the header logo, R3; `ea
 `duration.linkIn` / `linkOut` / `linkMarkIn` / `linkMarkOut` and `ease.link` (text links, K1),
 `duration.chip` (the switcher's chip and Back's chip, 360 ms) and `duration.backPull` (Back's
 hover, 420 ms) with `stagger.letters` (25 ms; T3, T5), `duration.topo` (About's morph, 1.6 s) and
-`duration.contourHandoff` (the SVG's crossfade, 0.3 s; R1);
+`duration.contourHandoff` (the SVG's crossfade, 0.3 s; R1), `duration.blobMove` (the blob's move,
+1.6 s; G1a);
 `angle.*` (`--angle-discard`, `--angle-tap`), `weight.*`
 (`--wght-<kebab>`), `opsz`, `field.*` (incl. `ignoreHeight` (R4), `poolDrift`, `poolDriftPeriods`
 (G1), `contourDrift` (R1: `x` 8 px, `y` 5 px, one `period` 120 s loop from the identity
