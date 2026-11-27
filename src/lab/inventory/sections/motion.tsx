@@ -237,7 +237,7 @@ function titleFoil(): ItemData {
     values: [
       ['on', 'home’s title and each card page’s title, after its reveal; hover with a fine pointer only'],
       ['colours', 'the page’s active gradient, as the header reads it (html[data-header-gradient], logo gradients)'],
-      ['motion', 'a spring (stiffness 120, damping 19): foil angle and glint across, a little angle down, a 3.5° tilt'],
+      ['motion', 'a spring (stiffness 120, damping 19) blends 5 × 2 still foils by opacity (angle and glint across, a little angle down) and tilts the title up to 3.5°: no repaint while the pointer moves'],
       ['reduced', 'off (nothing attached); touch: off'],
       ['switch', code('<TitleFoil enabled /> in src/app/[locale]/layout.tsx')],
     ],
