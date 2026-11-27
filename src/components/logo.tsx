@@ -42,6 +42,12 @@ import { readTier } from '@/motion/use-tier'
  *           header.module.css); Back -> logo: the cards are dealt again
  * Nothing moves at rest. Reduced motion: no movement, instant state changes;
  * the egg swaps the letters' opacity.
+ *
+ * Following a card (src/motion/header-gradient.ts): the front card's stops ease to the header's
+ * gradient (--hg-a / -b / -c, header.module.css), one after another along the card's diagonal,
+ * while a sheen (data-sheen, a skewed band in the new gradient's colours with a light core)
+ * crosses the M card first, then the F card. Each band is clipped to its card and its letter, and
+ * rests outside it; the M card's own colour never changes.
  */
 const BACK = 'rotate(-6 18.235 37.923)'
 const FRONT = 'rotate(5 30.235 37.923)'
@@ -375,6 +381,20 @@ export function Logo({ className, mode, slot, ref }: Props) {
           <stop offset="0.5" data-logo-stop="1" />
           <stop offset="1" data-logo-stop="2" />
         </linearGradient>
+        {/* The sheen: the new gradient's colours either side of a light core (header.module.css). */}
+        <linearGradient id={mask('sheen')}>
+          <stop offset="0" data-sheen-stop="edge-a" />
+          <stop offset="0.32" data-sheen-stop="a" />
+          <stop offset="0.5" data-sheen-stop="core" />
+          <stop offset="0.68" data-sheen-stop="c" />
+          <stop offset="1" data-sheen-stop="edge-c" />
+        </linearGradient>
+        <clipPath id={mask('clip-back')}>
+          <rect x="8.235" {...CARD} />
+        </clipPath>
+        <clipPath id={mask('clip-front')}>
+          <rect x="20.235" {...CARD} />
+        </clipPath>
         <mask id={mask('gap')} {...props}>
           <rect {...AREA} fill="white" />
           <g transform={FRONT}>
@@ -399,6 +419,20 @@ export function Logo({ className, mode, slot, ref }: Props) {
           <g ref={refs.backMove} data-logo-part="">
             <g ref={refs.backFan} data-logo-part="">
               <rect x="8.235" {...CARD} fill="currentColor" mask={`url(#${mask('m')})`} />
+              <g clipPath={`url(#${mask('clip-back')})`} mask={`url(#${mask('m')})`}>
+                <g transform="skewX(-22)">
+                  <rect
+                    data-sheen="m"
+                    data-sheen-from="4px"
+                    data-sheen-to="54px"
+                    x="-5"
+                    y="0"
+                    width="10"
+                    height="48"
+                    fill={`url(#${mask('sheen')})`}
+                  />
+                </g>
+              </g>
             </g>
           </g>
         </g>
@@ -407,6 +441,20 @@ export function Logo({ className, mode, slot, ref }: Props) {
         <g ref={refs.frontMove} data-logo-part="">
           <g ref={refs.frontFan} data-logo-part="">
             <rect x="20.235" {...CARD} fill={`url(#${mask('paint')})`} mask={`url(#${mask('f')})`} />
+            <g clipPath={`url(#${mask('clip-front')})`} mask={`url(#${mask('f')})`}>
+              <g transform="skewX(-22)">
+                <rect
+                  data-sheen="f"
+                  data-sheen-from="16px"
+                  data-sheen-to="66px"
+                  x="-5"
+                  y="0"
+                  width="10"
+                  height="48"
+                  fill={`url(#${mask('sheen')})`}
+                />
+              </g>
+            </g>
           </g>
         </g>
       </g>

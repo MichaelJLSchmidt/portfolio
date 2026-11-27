@@ -143,6 +143,12 @@ export const duration = {
    * Back's chip drawing in on hover (or coming up while the header is away).
    */
   chip: 0.36,
+  /**
+   * The header following a card (headerSweep): the sheen crossing one element, and the colour
+   * change that rides under it.
+   */
+  headerSheen: 0.72,
+  headerColour: 0.56,
   /** Back's hover: the arrow pulling back and each letter's roll (stagger.letters apart). */
   backPull: 0.42,
   /** The header (and the mobile rail with it) leaving on a scroll down (ease.in) and returning (outQuint). */
@@ -253,6 +259,19 @@ export const logo = {
   exit: { dur: duration.logoExit, sink: 3, close: 6 },
   longPress: 0.5,
 } as const
+
+/**
+ * The header following a card (src/motion/header-gradient.ts, header.module.css): a card's hover or
+ * keyboard focus, or its play (touch), turns the header's gradient (the logo's F card, the About and
+ * Lab markers on ink pages, the language capsule's edge) to that card's logo gradient; leaving it, or
+ * coming home, turns it back to the page load's. A foil sweep carries it: a diagonal sheen crosses
+ * the M card at `m`, the F card at `f`, the language capsule at `capsule` (s after the change), each
+ * crossing duration.headerSheen long; the colours under it change over duration.headerColour from the
+ * same moments (the F card's three stops `stops` apart along its diagonal, the links at `links`). The
+ * way back runs the same sweep at `back` of the times. Colour changes retarget from where they are;
+ * a sheen already crossing an element is left to finish. Reduced: no sheen, a short crossfade.
+ */
+export const headerSweep = { m: 0, f: 0.12, links: 0.22, capsule: 0.3, stops: 0.07, back: 0.8 } as const
 
 /** Pixels unless noted. */
 export const distance = {
@@ -816,6 +835,9 @@ export function motionCss(): string {
     `--deal-pad:${deal.pinned.pad}px`,
     // The header logo's gradient loop (reduced: no animation, header.module.css).
     `--logo-flow:${ms(logo.flow.dur)}`,
+    // The header following a card: each element's moment in the sweep (header.module.css).
+    ...(['f', 'links', 'capsule', 'stops'] as const).map((k) => `--sweep-${k}:${ms(headerSweep[k])}`),
+    `--sweep-back:${headerSweep.back}`,
     ...cardPlayConstants(),
   ]
   return [

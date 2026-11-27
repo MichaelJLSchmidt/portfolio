@@ -174,6 +174,7 @@ stills the background's ambient motion.
 | --------------------- | ------------------------------------------------------------------------ | ----------------------- |
 | Field breath, drift   | 9 s breath, pools drift (6%, 23–41 s loops); About: the contours drift   | still, 160 ms swaps     |
 | Blob variant          | a card's hover or focus moves the blob to another variant (1.6 s)        | crossfade, 160 ms       |
+| Header follows a card | a sheen carries the card's gradient across the M card, the F card, the capsule | crossfade, 160 ms |
 | Hover a card          | lift to 90% shown on the hover spring; field blends (80 ms)              | instant                 |
 | Play                  | press, lift, bloom 800 ms, zoom 580 ms                                   | near-instant            |
 | Return / switch       | 520 ms back to the slot / 560 ms in, OKLab crossfade                     | near-instant            |

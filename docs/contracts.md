@@ -863,6 +863,23 @@ stops a third of the loop apart, so the colours travel slowly along the card (CS
 mount, so a remounted logo carries on in phase. Reduced: no animation, the gradient in its own
 order. This is the one thing besides the field that moves at rest.
 
+**T2a. The header follows the card.** While a card is hovered or keyboard-focused, the header's
+gradient (the logo's F card, the About and Lab markers on ink pages, and the language capsule's 1 px
+gradient edge, new with it) turns to that card's own logo gradient; while one is played or open, to
+the played card's (on touch, where nothing hovers, the play is the moment); otherwise, and as soon
+as a return home starts, back to the page load's (`src/motion/header-gradient.ts` reads the table:
+the hovered card, else the field's card identity). `html[data-header-gradient]` names it
+(`headerGradientCss()` in `palette.ts` gives `--hg-a-to / -b-to / -c-to`; the pre-paint script sets
+it on a card page's first load). Each element eases its own registered `--hg-a / -b / -c` to them
+(`header.module.css`), so every change retargets from where it is: the F card's stops at
+`headerSweep.f` plus `stops` apart along its diagonal, the links at `links`, the capsule at
+`capsule`, over `duration.headerColour`. A foil sweep carries it: a skewed band in the new
+gradient's colours with a light core (`data-sheen`, WAAPI transform and opacity) crosses the M card
+at `m`, the F card at `f` and the capsule at `capsule`, each `duration.headerSheen` long, clipped to
+its element; one already crossing is left to finish. The M card's own colour never changes. The way
+back runs at `headerSweep.back` (0.8) of the times. Reduced: no sheen; the colours crossfade in
+160 ms.
+
 **T3. The switcher's chip.** The codes (`DE`, `EN`) in Martian Mono, 0.75 rem, in two 44 px
 segments; the active one (`aria-current="page"`) sits on a face-up chip (36 × 28 px, the text
 colour, ink letters), the other is muted and shows a hairline chip and the text colour on hover
@@ -1212,7 +1229,8 @@ G4), `duration.logoExit` / `logoBackFade` and `logo.*` (the header logo, R3; `ea
 `duration.chip` (the switcher's chip and Back's chip, 360 ms) and `duration.backPull` (Back's
 hover, 420 ms) with `stagger.letters` (25 ms; T3, T5), `duration.topo` (About's morph, 1.6 s) and
 `duration.contourHandoff` (the SVG's crossfade, 0.3 s; R1), `duration.blobMove` (the blob's move,
-1.6 s; G1a);
+1.6 s; G1a), `duration.headerSheen` / `headerColour` (0.72 s / 0.56 s) with `headerSweep`
+(`m` 0, `f` 0.12, `links` 0.22, `capsule` 0.3, `stops` 0.07 s, `back` 0.8; T2a; CSS `--sweep-*`);
 `angle.*` (`--angle-discard`, `--angle-tap`), `weight.*`
 (`--wght-<kebab>`), `opsz`, `field.*` (incl. `ignoreHeight` (R4), `poolDrift`, `poolDriftPeriods`
 (G1), `contourDrift` (R1: `x` 8 px, `y` 5 px, one `period` 120 s loop from the identity
@@ -1728,6 +1746,9 @@ temporary Lab link (lab builds only) and the language switcher in its capsule (L
 | `data-logo-part` | the logo's card groups (move and fan, and the front card's knock-out) | animated by logo.tsx; turn and fan about their bottom centre (R3) |
 | `data-logo-stop="0\|1\|2"` | the front card's gradient stops | their colours flow (T2) |
 | `data-logo-gradient="ember\|tide\|grove\|saffron"` | `<html>` | this page load's logo gradient, from the pre-paint script (T2) |
+| `data-header-gradient="ember\|tide\|grove\|saffron"` | `<html>` | the card the header follows (hovered, focused, played or open; T2a); none: the page load's |
+| `data-header-sweep="in\|out"` | `<html>` | the last follow's direction; "out" runs the sweep at `headerSweep.back` of the times (T2a) |
+| `data-sheen="m\|f\|capsule"` | the header's sheen bands | crossed by a sheen on every follow (T2a) |
 | `data-locale-switcher`, `data-locale="de\|en"` | the header's language nav and its links | the switcher (L6, T3) |
 | `data-arrived` | the language nav | mounted by a language switch: its chip slides in (T3) |
 | `data-locale-switch` | `<html>` | while a language switch runs: the chrome cross-fades (L7, L8) |
