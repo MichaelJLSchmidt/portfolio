@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react'
+import { WeightText } from '@/components/weight-text'
+import { TitleFoilDemo } from '@/experiments/title-foil'
 import * as tokens from '@/motion/tokens'
 import { motionCss, springCss } from '@/motion/tokens'
 import { lineIn, readSource, usages } from '../../source'
@@ -219,6 +221,32 @@ function reveals(): ItemData[] {
   }))
 }
 
+/** Experiment: the title gradient foil (src/experiments/title-foil.tsx); remove with it. */
+const FOIL = 'src/experiments/title-foil.tsx'
+function titleFoil(): ItemData {
+  return {
+    id: 'experiment.title-foil',
+    title: 'Title gradient foil',
+    render: (
+      <TitleFoilDemo>
+        <span className="t-display" style={{ display: 'block', fontSize: '4rem' }}>
+          <WeightText text="Title foil" final="h1" />
+        </span>
+      </TitleFoilDemo>
+    ),
+    values: [
+      ['on', 'home’s title and each card page’s title, after its reveal; hover with a fine pointer only'],
+      ['colours', 'the page’s active gradient, as the header reads it (html[data-header-gradient], logo gradients)'],
+      ['motion', 'a spring (stiffness 120, damping 19) blends 5 × 2 still foils by opacity (angle and glint across, a little angle down) and tilts the title up to 3.5°: no repaint while the pointer moves'],
+      ['reduced', 'off (nothing attached); touch: off'],
+      ['switch', code('<TitleFoil enabled /> in src/app/[locale]/layout.tsx')],
+    ],
+    note: 'An experiment: hover the title (hover and a fine pointer, full motion). The site’s titles get it on home and on card pages.',
+    source: { file: FOIL, line: lineIn(FOIL, 'export function TitleFoil('), name: 'TitleFoil, attachTitleFoil' },
+    usage: usages({ exports: [{ module: 'src/experiments/title-foil', name: 'TitleFoil' }] }),
+  }
+}
+
 export function motionSection(): SectionData {
   const rest = choreography()
   return {
@@ -241,6 +269,7 @@ export function motionSection(): SectionData {
       { title: 'Staggers (stagger)', items: staggers(), play: true },
       { title: 'Reveal kinds', items: reveals(), layout: 'wide', play: true },
       ...rest.map((r) => ({ title: `${r.group}`, items: r.items, layout: 'row' as const })),
+      { title: 'Experiments', items: [titleFoil()], layout: 'wide' },
     ],
   }
 }
