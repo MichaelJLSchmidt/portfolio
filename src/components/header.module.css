@@ -508,7 +508,7 @@
 /*
  * The header follows the card (src/motion/header-gradient.ts, tokens.ts headerSweep): the logo's
  * front card, the About and Lab markers on ink pages and the capsule's gradient edge each ease their
- * own --hg-a / -b / -c to the header's gradient (--hg-*-to on :root: the page load's, or a card's
+ * own --hg-a / -b / -c to the header's gradient (--hg-*-to on the header: the page load's, or a card's
  * while html[data-header-gradient] names it; palette.ts headerGradientCss()). Registered colours on
  * these small elements, so a change retargets from where it is; each starts at its moment in the
  * sweep: the F card's stops one after another along its diagonal, the links, the capsule last. The
@@ -613,6 +613,8 @@
 .sheen {
   position: absolute;
   inset: 0;
+  /* Kept on its own layer, so a sweep starts without painting it again. */
+  will-change: transform, opacity;
   background: linear-gradient(
     105deg,
     transparent 26%,

@@ -869,8 +869,8 @@ gradient edge, new with it) turns to that card's own logo gradient; while one is
 the played card's (on touch, where nothing hovers, the play is the moment); otherwise, and as soon
 as a return home starts, back to the page load's (`src/motion/header-gradient.ts` reads the table:
 the hovered card, else the field's card identity). `html[data-header-gradient]` names it
-(`headerGradientCss()` in `palette.ts` gives `--hg-a-to / -b-to / -c-to`; the pre-paint script sets
-it on a card page's first load). Each element eases its own registered `--hg-a / -b / -c` to them
+(`headerGradientCss()` in `palette.ts` gives the header, `[data-chrome]`, `--hg-a-to / -b-to / -c-to`,
+so a change restyles the header only; the pre-paint script sets it on a card page's first load). Each element eases its own registered `--hg-a / -b / -c` to them
 (`header.module.css`), so every change retargets from where it is: the F card's stops at
 `headerSweep.f` plus `stops` apart along its diagonal, the links at `links`, the capsule at
 `capsule`, over `duration.headerColour`. A foil sweep carries it: a skewed band in the new
