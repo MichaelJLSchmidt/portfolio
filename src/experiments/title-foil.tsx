@@ -24,14 +24,16 @@ import { onTierChange, readTier } from '@/motion/use-tier'
  * with hover and a fine pointer, never under reduced motion; touch and reduced motion keep the
  * titles as they are (nothing is attached at all).
  *
- * How: the title gets [data-title-foil] (position: relative, and a ::before ring as the hit area) and,
- * after its reveal, an overlay holding a copy of its words (the same classes, so the same glyphs in
- * the same places) whose background, the foil, is clipped to the text. The overlay reads the
- * header's gradient on its own (the same html[data-header-gradient] and logo gradients the header
- * reads, palette.ts), with the header's timing, so it changes in step with the logo; the header's
- * variables stay on the header. One rAF loop runs while the foil is active or settling and stops at
- * rest; per frame it writes a few custom properties on the overlay and a transform on the title,
- * so only the title restyles and repaints. The title's box is read on hover start and on resize.
+ * How: the title gets [data-title-foil] (position: relative, an identity transform, and a ::before
+ * ring as the hit area) and, after its reveal, an overlay of COLS x ROWS still foils: each a copy of
+ * its words (the same classes, so the same glyphs in the same places) with the foil, set for one
+ * point of the tilt, clipped to the text. The pointer never repaints them: one rAF loop, running
+ * while the foil is active or settling, blends the (at most four) foils around the spring's point
+ * by their opacity, fades the overlay by its opacity and turns the title by its transform, all of
+ * it compositor work on layers the foils get for the hover. The overlay reads the header's gradient
+ * on its own (the same html[data-header-gradient] and logo gradients the header reads, palette.ts),
+ * with the header's timing, so it changes in step with the logo; the header's variables stay on
+ * the header. The title's box is read on hover start and on resize.
  */
 
 /** The spring the foil and the tilt follow (gentle: it trails the pointer a little). */
@@ -44,6 +46,15 @@ const TILT = { y: 3.5, x: 2.2, perspective: 1100 }
 const ANGLE = { base: 115, across: 16, down: 6 }
 /** The hit area around the title (px). */
 const MARGIN = 14
+/** The still foils the tilt blends: across (x -1..1) and down (y -1, 1). */
+const COLS = 5
+const ROWS = 2
+/** The glint: where it sits across (50% +- this per unit x) and its half width (%). */
+const GLINT = { across: 38, width: 20 }
+/** One still foil, for the tilt point (x, y). */
+const foilAt = (x: number, y: number) =>
+  `--tf-angle:${ANGLE.base + x * ANGLE.across + y * ANGLE.down}deg;--tf-glint:${50 + x * GLINT.across}%;` +
+  `--tf-px:${50 - x * 30}%;--tf-py:${50 - y * 14}%`
 
 const css = () => {
   const target = (cs: readonly string[]) => cs.map((c, i) => `--tf-${'abc'[i]}-to:${c}`).join(';')
@@ -53,18 +64,25 @@ const css = () => {
         `--tf-${k} calc(var(--dur-header-colour) * var(--tf-k)) var(--ease-in-out) calc((var(--sweep-f) + var(--sweep-stops)) * var(--tf-k))`,
     )
     .join(',')
+  const g = `var(--tf-glint)`
   return [
-    ...['a', 'b', 'c'].map((k) => `@property --tf-${k}{syntax:'<color>';inherits:true;initial-value:transparent}`),
-    `[data-title-foil]{position:relative}`,
+    // Registered and not inherited: a change restyles the foils alone, never the words inside them.
+    ...['a', 'b', 'c'].map((k) => `@property --tf-${k}{syntax:'<color>';inherits:false;initial-value:transparent}`),
+    // position: the overlay's box. transform: an identity, so the tilt only ever changes a transform's
+    // value (a transform appearing or going would lay the title out again).
+    `[data-title-foil]{position:relative;transform:translate(0,0)}`,
     // The hit area: a ring MARGIN wide around the title (its own box left out, so the text behaves as before).
     `[data-title-foil]::before{content:'';position:absolute;inset:-${MARGIN}px;clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,${MARGIN}px ${MARGIN}px,${MARGIN}px calc(100% - ${MARGIN}px),calc(100% - ${MARGIN}px) calc(100% - ${MARGIN}px),calc(100% - ${MARGIN}px) ${MARGIN}px,${MARGIN}px ${MARGIN}px)}`,
-    // The overlay: the copy of the words, transparent, the foil clipped to them.
-    `.title-foil{position:absolute;inset:0;pointer-events:none;user-select:none;visibility:hidden;opacity:0;` +
-      `color:transparent;-webkit-text-fill-color:transparent;` +
-      `--tf-k:1;--tf-a:var(--tf-a-to);--tf-b:var(--tf-b-to);--tf-c:var(--tf-c-to);transition:${colours};` +
-      `background:linear-gradient(calc(var(--tf-angle,${ANGLE.base}deg) + 8deg),transparent calc(var(--tf-glint,50%) - 18%),rgb(255 255 255 / 0.4) var(--tf-glint,50%),transparent calc(var(--tf-glint,50%) + 18%)),` +
-      `linear-gradient(var(--tf-angle,${ANGLE.base}deg),var(--tf-a) 6%,color-mix(in oklab,var(--tf-b),#fff 36%) 50%,var(--tf-c) 94%);` +
-      `background-size:100% 100%,170% 170%;background-position:0 0,var(--tf-px,50%) var(--tf-py,50%);` +
+    // The overlay, and in it the still foils: each a transparent copy of the words, its foil clipped to them.
+    `.title-foil{position:absolute;inset:0;pointer-events:none;user-select:none;opacity:0;--tf-k:1}`,
+    // Each still foil: a plain box that only fades (so its per-frame opacity restyles nothing else),
+    // and in it the transparent copy of the words with the foil clipped to them.
+    `.title-foil>span{position:absolute;inset:0;opacity:0}`,
+    `.title-foil>span>span{position:absolute;inset:0;color:transparent;-webkit-text-fill-color:transparent;` +
+      `--tf-a:var(--tf-a-to);--tf-b:var(--tf-b-to);--tf-c:var(--tf-c-to);transition:${colours};` +
+      `background:linear-gradient(calc(var(--tf-angle) + 8deg),transparent calc(${g} - ${GLINT.width}%),rgb(255 255 255 / 0.4) ${g},transparent calc(${g} + ${GLINT.width}%)),` +
+      `linear-gradient(var(--tf-angle),var(--tf-a) 6%,color-mix(in oklab,var(--tf-b),#fff 36%) 50%,var(--tf-c) 94%);` +
+      `background-size:100% 100%,170% 170%;background-position:0 0,var(--tf-px) var(--tf-py);` +
       `-webkit-background-clip:text;background-clip:text}`,
     `:root[data-header-sweep="out"] .title-foil{--tf-k:var(--sweep-back)}`,
     // The page's active gradient, as the header reads it (palette.ts headerGradientCss), on the overlay only.
@@ -119,36 +137,72 @@ export function attachTitleFoil(title: HTMLElement): () => void {
   const inlineTransform = title.style.transform
   const inlineWillChange = title.style.willChange
   title.setAttribute('data-title-foil', '')
-  let layer: HTMLElement | null = null
+  let overlay: HTMLElement | null = null
+  let foils: HTMLElement[] = []
   let ready = false
   let hovering = false
   let rect = title.getBoundingClientRect()
   let raf = 0
   let last = 0
-  // Targets and springs: x, y across and down (-1..1), o the foil's opacity.
+  // Targets and springs: x, y across and down (-1..1), o the overlay's opacity.
   const to = { x: 0, y: 0, o: 0 }
   const at = { x: 0, y: 0, o: 0 }
   const v = { x: 0, y: 0, o: 0 }
+  // Each foil's opacity as written (the stylesheet's 0 to begin with), and whether it is a layer.
+  const shown: string[] = []
+  const layered: boolean[] = []
+  const weights = new Array<number>(COLS * ROWS).fill(0)
 
+  /** Writes a foil's opacity if it changed; a foil that shows gets a layer, kept until rest. */
+  const show = (i: number, a: number) => {
+    const el = foils[i]!
+    // Never quite 1, like the overlay (below).
+    const value = a > 0 ? Math.min(a, 0.999).toFixed(3) : '0'
+    if (shown[i] !== value) el.style.opacity = shown[i] = value
+    if (a > 0 && !layered[i]) {
+      el.style.willChange = 'opacity'
+      layered[i] = true
+    }
+  }
+  /**
+   * One frame, all of it compositor work: the foils around the spring's point blended by opacity
+   * (bilinear; stacked in document order, so each one's opacity is its weight over what the foils
+   * above it leave), the overlay's fade, the title's tilt.
+   */
   const write = () => {
-    if (!layer) return
+    if (!overlay) return
     const { x, y, o } = at
-    layer.style.setProperty('--tf-angle', `${(ANGLE.base + x * ANGLE.across + y * ANGLE.down).toFixed(2)}deg`)
-    layer.style.setProperty('--tf-glint', `${(50 + x * 38).toFixed(2)}%`)
-    layer.style.setProperty('--tf-px', `${(50 - x * 30).toFixed(2)}%`)
-    layer.style.setProperty('--tf-py', `${(50 - y * 14).toFixed(2)}%`)
-    layer.style.opacity = o.toFixed(3)
-    layer.style.visibility = o > 0.002 ? 'visible' : ''
+    const u = ((x + 1) / 2) * (COLS - 1)
+    const col = Math.max(0, Math.min(COLS - 2, Math.floor(u)))
+    const s = Math.max(0, Math.min(1, u - col))
+    const t = Math.max(0, Math.min(1, ((y + 1) / 2) * (ROWS - 1)))
+    weights.fill(0)
+    weights[col] = (1 - s) * (1 - t)
+    weights[col + 1] = s * (1 - t)
+    weights[COLS + col] = (1 - s) * t
+    weights[COLS + col + 1] = s * t
+    let above = 0
+    for (let i = weights.length - 1; i >= 0; i--) {
+      const w = weights[i]!
+      show(i, w > 1e-4 ? Math.min(1, w / Math.max(1e-6, 1 - above)) : 0)
+      above += w
+    }
+    // Never quite 1: at 1 the overlay would stop being a stacking context, and lose and regain its
+    // layer (a layout) as the fade settles and leaves.
+    overlay.style.opacity = Math.min(o, 0.999).toFixed(3)
     title.style.transform = `perspective(${TILT.perspective}px) rotateX(${(-y * TILT.x).toFixed(3)}deg) rotateY(${(x * TILT.y).toFixed(3)}deg)`
   }
-  /** At rest: everything as it was (no transform, no layer, the foil hidden). */
+  /** At rest: as before the hover (the identity transform, no layers, the overlay transparent). */
   const rest = () => {
     title.style.transform = inlineTransform
     title.style.willChange = inlineWillChange
-    if (layer) {
-      layer.style.opacity = ''
-      layer.style.visibility = ''
-    }
+    if (!overlay) return
+    overlay.style.opacity = ''
+    overlay.style.willChange = ''
+    foils.forEach((el, i) => {
+      el.style.willChange = ''
+      layered[i] = false
+    })
   }
   const step = (s: Spring, key: 'x' | 'y' | 'o', dt: number) => {
     const force = -s.k * (at[key] - to[key]) - s.c * v[key]
@@ -186,6 +240,7 @@ export function attachTitleFoil(title: HTMLElement): () => void {
   const activate = () => {
     if (!ready || !hovering) return
     title.style.willChange = 'transform'
+    if (overlay) overlay.style.willChange = 'opacity'
     to.o = 1
     run()
   }
@@ -221,18 +276,30 @@ export function attachTitleFoil(title: HTMLElement): () => void {
   title.addEventListener('pointerleave', onLeave, { signal })
   addEventListener('resize', onResize, { passive: true, signal })
 
-  // The overlay waits for the reveal: a copy of the words in their final state.
+  // The overlay waits for the reveal: the still foils, each a copy of the words in their final state.
   void revealed(title, signal).then((ok) => {
     const words = title.querySelector('.wt')
     if (!ok || !words) return
-    layer = document.createElement('span')
-    layer.className = 'title-foil'
-    layer.setAttribute('aria-hidden', 'true')
-    const copy = words.cloneNode(true) as HTMLElement
-    for (const el of [copy, ...copy.querySelectorAll<HTMLElement>('[style]')]) el.style.removeProperty('contain')
-    for (const el of copy.querySelectorAll('[id]')) el.removeAttribute('id')
-    layer.append(copy)
-    title.append(layer)
+    overlay = document.createElement('span')
+    overlay.className = 'title-foil'
+    overlay.setAttribute('aria-hidden', 'true')
+    for (let row = 0; row < ROWS; row++) {
+      for (let col = 0; col < COLS; col++) {
+        const foil = document.createElement('span')
+        const paint = document.createElement('span')
+        paint.style.cssText = foilAt((col / (COLS - 1)) * 2 - 1, ROWS > 1 ? (row / (ROWS - 1)) * 2 - 1 : 0)
+        const copy = words.cloneNode(true) as HTMLElement
+        for (const el of [copy, ...copy.querySelectorAll<HTMLElement>('[style]')]) el.style.removeProperty('contain')
+        for (const el of copy.querySelectorAll('[id]')) el.removeAttribute('id')
+        paint.append(copy)
+        foil.append(paint)
+        overlay.append(foil)
+        foils.push(foil)
+        shown.push('0')
+        layered.push(false)
+      }
+    }
+    title.append(overlay)
     ready = true
     activate()
   })
@@ -242,7 +309,8 @@ export function attachTitleFoil(title: HTMLElement): () => void {
     cancelAnimationFrame(raf)
     raf = 0
     rest()
-    layer?.remove()
+    overlay?.remove()
+    foils = []
     title.removeAttribute('data-title-foil')
   }
 }
