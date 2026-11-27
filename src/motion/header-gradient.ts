@@ -16,10 +16,9 @@ import { readTier } from './use-tier'
  * script sets it on a card page's first load), html[data-header-sweep] its direction ("in" toward a
  * card, "out" back, which runs headerSweep.back of the times). The colours ease in CSS (registered
  * properties, header.module.css), so every change retargets from where they are. The sheens
- * ([data-sheen] in the header: the M card, the F card, the capsule) are WAAPI transforms and
- * opacity (a band that crosses its element from data-sheen-from to data-sheen-to); one
- * already crossing its element is left to finish, so a quick pass over the cards never restarts or
- * queues them. Reduced motion: no sheen, and the colours crossfade briefly (header.module.css).
+ * ([data-sheen] in the header: the M card, the F card, the capsule) each cross their element once
+ * per change; one already crossing is left to finish, so a quick pass over the cards never
+ * restarts or queues them. Reduced motion: no sheen, and the colours crossfade briefly (header.module.css).
  */
 type SheenName = 'm' | 'f' | 'capsule'
 
@@ -31,23 +30,30 @@ export function headerGradientFor(s: TableState): LogoGradient | null {
   return id && (logoGradientNames as readonly string[]).includes(id) ? (id as LogoGradient) : null
 }
 
-/** Runs the sheens across the header, M card first, the capsule last. */
+/** When each sheen ends (ms, performance.now()): one still crossing its element is left to finish. */
+const ends = new WeakMap<Element, number>()
+
+/**
+ * Runs the sheens across the header, M card first, the capsule last: each a band moved by WAAPI
+ * transform and opacity (compositor only) inside its element's mask or clip (header.tsx).
+ */
 function sweep(header: HTMLElement, back: boolean) {
   const k = back ? S.back : 1
-  for (const el of header.querySelectorAll<HTMLElement | SVGElement>('[data-sheen]')) {
-    if (el.getAnimations().some((a) => a.playState === 'running')) continue
-    const at = S[el.dataset.sheen as SheenName] ?? 0
-    // Each sheen crosses from data-sheen-from to data-sheen-to (in its own units: SVG user units or %).
-    const from = el.dataset.sheenFrom ?? '-100%'
-    const to = el.dataset.sheenTo ?? '100%'
+  const now = performance.now()
+  for (const el of header.querySelectorAll<HTMLElement>('[data-sheen]')) {
+    if ((ends.get(el) ?? 0) > now) continue
+    const at = (S[el.dataset.sheen as SheenName] ?? 0) * k
+    const dur = D.headerSheen * k
+    ends.set(el, now + (at + dur) * 1000)
+    // The band crosses from data-sheen-from to data-sheen-to (% of its own width).
     el.animate(
       [
-        { transform: `translateX(${from})`, opacity: 0 },
+        { transform: `translateX(${el.dataset.sheenFrom ?? '-100%'})`, opacity: 0 },
         { opacity: 1, offset: 0.15 },
         { opacity: 1, offset: 0.85 },
-        { transform: `translateX(${to})`, opacity: 0 },
+        { transform: `translateX(${el.dataset.sheenTo ?? '100%'})`, opacity: 0 },
       ],
-      { duration: D.headerSheen * k * 1000, delay: at * k * 1000, easing: bezier(ease.inOut) },
+      { duration: dur * 1000, delay: at * 1000, easing: bezier(ease.inOut) },
     )
   }
 }

@@ -874,9 +874,11 @@ it on a card page's first load). Each element eases its own registered `--hg-a /
 (`header.module.css`), so every change retargets from where it is: the F card's stops at
 `headerSweep.f` plus `stops` apart along its diagonal, the links at `links`, the capsule at
 `capsule`, over `duration.headerColour`. A foil sweep carries it: a skewed band in the new
-gradient's colours with a light core (`data-sheen`, WAAPI transform and opacity) crosses the M card
-at `m`, the F card at `f` and the capsule at `capsule`, each `duration.headerSheen` long, clipped to
-its element; one already crossing is left to finish. The M card's own colour never changes. The way
+gradient's colours with a light core (`data-sheen`) crosses the M card at `m`, the F card at `f`
+and the capsule at `capsule`, each `duration.headerSheen` long: a band moved by WAAPI transform and
+opacity (compositor only), on the logo inside an overlay masked to one card and its letter
+(`logoSheenMask` in `logo.tsx`, the cards at rest), on the capsule inside a clip of its shape; one
+already crossing is left to finish. The M card's own colour never changes. The way
 back runs at `headerSweep.back` (0.8) of the times. Reduced: no sheen; the colours crossfade in
 160 ms.
 

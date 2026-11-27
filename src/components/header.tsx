@@ -13,7 +13,7 @@ import { watchHeaderGradient } from '@/motion/header-gradient'
 import { beginLocaleSwitch, rememberLocale } from '@/motion/locale-switch'
 import { returnHome } from '@/motion/play'
 import { LOCALE, NAV, RETURN } from '@/motion/transitions'
-import { Logo, type LogoHandle } from './logo'
+import { Logo, type LogoHandle, logoSheenMask } from './logo'
 import { ReadingHairline } from './reading-hairline'
 import styles from './header.module.css'
 
@@ -102,6 +102,17 @@ export function Header() {
       >
         <span className={styles.mark} aria-hidden={back || undefined}>
           <Logo ref={logo} className={styles.logo} mode={back ? 'back' : 'mark'} slot={slot} />
+          {/* The sheens over the M and F cards when the header follows a card (header-gradient.ts). */}
+          {(['m', 'f'] as const).map((card) => (
+            <span
+              key={card}
+              className={styles.logoSheen}
+              style={{ maskImage: logoSheenMask[card], WebkitMaskImage: logoSheenMask[card] }}
+              aria-hidden="true"
+            >
+              <span className={styles.sheen} data-sheen={card} data-sheen-from="-100%" data-sheen-to="100%" />
+            </span>
+          ))}
         </span>
         <span className={styles.back} aria-hidden={!back || undefined}>
           <svg className={styles.arrow} viewBox="0 0 20 12" fill="none" stroke="currentColor" aria-hidden="true">

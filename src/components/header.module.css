@@ -576,31 +576,32 @@
 }
 
 /*
- * The sheens: a band in the new gradient's colours with a light core, skewed into a diagonal, that
- * crosses its element (header-gradient.ts animates its transform and opacity; at rest it lies
- * outside, unseen). On the logo, one per card, clipped to the card and its letter (logo.tsx); on the
- * capsule, a band the capsule's size inside a clip of its shape, under the chip and the codes.
+ * The sheens: a band in the new gradient's colours with a light core, at a diagonal, that crosses
+ * its element by transform and opacity (header-gradient.ts; compositor only; at rest it lies
+ * outside, unseen). On the logo, one per card in an overlay masked to that card and its letter
+ * (logo.tsx logoSheenMask, the cards at rest); on the capsule, inside a clip of its shape, under the
+ * chip and the codes.
  */
-.logo [data-sheen] {
-  opacity: 0;
+.mark {
+  position: relative;
 }
-.logo [data-sheen-stop] {
-  stop-color: var(--hg-a-to);
-  stop-opacity: 0;
+.logoSheen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
 }
-.logo [data-sheen-stop='a'] {
-  stop-opacity: 0.42;
-}
-.logo [data-sheen-stop='core'] {
-  stop-color: #fff;
-  stop-opacity: 0.5;
-}
-.logo [data-sheen-stop='c'] {
-  stop-color: var(--hg-c-to);
-  stop-opacity: 0.42;
-}
-.logo [data-sheen-stop='edge-c'] {
-  stop-color: var(--hg-c-to);
+.logoSheen .sheen {
+  background: linear-gradient(
+    105deg,
+    transparent 28%,
+    color-mix(in oklab, var(--hg-a-to) 46%, transparent) 42%,
+    rgb(255 255 255 / 0.5) 50%,
+    color-mix(in oklab, var(--hg-c-to) 46%, transparent) 58%,
+    transparent 72%
+  );
 }
 .sheenClip {
   position: absolute;

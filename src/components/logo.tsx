@@ -45,9 +45,9 @@ import { readTier } from '@/motion/use-tier'
  *
  * Following a card (src/motion/header-gradient.ts): the front card's stops ease to the header's
  * gradient (--hg-a / -b / -c, header.module.css), one after another along the card's diagonal,
- * while a sheen (data-sheen, a skewed band in the new gradient's colours with a light core)
- * crosses the M card first, then the F card. Each band is clipped to its card and its letter, and
- * rests outside it; the M card's own colour never changes.
+ * while a sheen (header.tsx: a band in the new gradient's colours with a light core, in an overlay
+ * masked to one card and its letter, logoSheenMask) crosses the M card first, then the F card. The
+ * M card's own colour never changes.
  */
 const BACK = 'rotate(-6 18.235 37.923)'
 const FRONT = 'rotate(5 30.235 37.923)'
@@ -56,6 +56,26 @@ const M =
   'M13.735 30.923V22.181L18.235 25.823L22.735 22.181V30.923H26.235V16.923H24.064L18.235 21.642L12.406 16.923H10.235V30.923Z'
 const F = 'M23.735 16.923H27.235V30.923H23.735ZM23.735 16.923H36.235V20.423H23.735ZM23.735 22.673H33.735V26.173H23.735Z'
 const AREA = { x: -24, y: -24, width: 96, height: 96 }
+
+/**
+ * The sheens' masks (header.tsx, header.module.css .logoSheen): each card's shape at rest, its letter
+ * cut out (the M card also loses the front card's outline, as above), as an SVG image in the logo's
+ * own viewBox. A sheen is an HTML band moved by transform inside one of these, so it crosses the
+ * card on the compositor and nothing in the logo is laid out or repainted.
+ */
+function sheenMask(card: 'm' | 'f') {
+  const area = 'x="-24" y="-24" width="96" height="96"'
+  const rect = (x: string, extra = '') =>
+    `<rect x="${x}" y="${CARD.y}" width="${CARD.width}" height="${CARD.height}" rx="${CARD.rx}"${extra}/>`
+  const letter = (d: string) =>
+    `<mask id="l" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" ${area}><rect ${area} fill="#fff"/><path d="${d}"/></mask>`
+  const svg =
+    card === 'm'
+      ? `<mask id="g" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" ${area}><rect ${area} fill="#fff"/><g transform="${FRONT}">${rect('20.235', ' stroke="#000" stroke-width="3"')}</g></mask>${letter(M)}<g mask="url(#g)"><g transform="${BACK}">${rect('8.235', ' fill="#fff" mask="url(#l)"')}</g></g>`
+      : `${letter(F)}<g transform="${FRONT}">${rect('20.235', ' fill="#fff" mask="url(#l)"')}</g>`
+  return `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="5 8.5 38 31">${svg}</svg>`)}")`
+}
+export const logoSheenMask = { m: sheenMask('m'), f: sheenMask('f') } as const
 const DEALT_KEY = 'table:logo-dealt'
 
 export type LogoHandle = {
@@ -381,20 +401,6 @@ export function Logo({ className, mode, slot, ref }: Props) {
           <stop offset="0.5" data-logo-stop="1" />
           <stop offset="1" data-logo-stop="2" />
         </linearGradient>
-        {/* The sheen: the new gradient's colours either side of a light core (header.module.css). */}
-        <linearGradient id={mask('sheen')}>
-          <stop offset="0" data-sheen-stop="edge-a" />
-          <stop offset="0.32" data-sheen-stop="a" />
-          <stop offset="0.5" data-sheen-stop="core" />
-          <stop offset="0.68" data-sheen-stop="c" />
-          <stop offset="1" data-sheen-stop="edge-c" />
-        </linearGradient>
-        <clipPath id={mask('clip-back')}>
-          <rect x="8.235" {...CARD} />
-        </clipPath>
-        <clipPath id={mask('clip-front')}>
-          <rect x="20.235" {...CARD} />
-        </clipPath>
         <mask id={mask('gap')} {...props}>
           <rect {...AREA} fill="white" />
           <g transform={FRONT}>
@@ -419,20 +425,6 @@ export function Logo({ className, mode, slot, ref }: Props) {
           <g ref={refs.backMove} data-logo-part="">
             <g ref={refs.backFan} data-logo-part="">
               <rect x="8.235" {...CARD} fill="currentColor" mask={`url(#${mask('m')})`} />
-              <g clipPath={`url(#${mask('clip-back')})`} mask={`url(#${mask('m')})`}>
-                <g transform="skewX(-22)">
-                  <rect
-                    data-sheen="m"
-                    data-sheen-from="4px"
-                    data-sheen-to="54px"
-                    x="-5"
-                    y="0"
-                    width="10"
-                    height="48"
-                    fill={`url(#${mask('sheen')})`}
-                  />
-                </g>
-              </g>
             </g>
           </g>
         </g>
@@ -441,20 +433,6 @@ export function Logo({ className, mode, slot, ref }: Props) {
         <g ref={refs.frontMove} data-logo-part="">
           <g ref={refs.frontFan} data-logo-part="">
             <rect x="20.235" {...CARD} fill={`url(#${mask('paint')})`} mask={`url(#${mask('f')})`} />
-            <g clipPath={`url(#${mask('clip-front')})`} mask={`url(#${mask('f')})`}>
-              <g transform="skewX(-22)">
-                <rect
-                  data-sheen="f"
-                  data-sheen-from="16px"
-                  data-sheen-to="66px"
-                  x="-5"
-                  y="0"
-                  width="10"
-                  height="48"
-                  fill={`url(#${mask('sheen')})`}
-                />
-              </g>
-            </g>
           </g>
         </g>
       </g>
