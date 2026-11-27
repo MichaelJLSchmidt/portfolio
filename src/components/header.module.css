@@ -646,7 +646,7 @@
       linear-gradient(#000 0 0) content-box,
       linear-gradient(#000 0 0);
     mask-composite: exclude;
-    opacity: 0.62;
+    opacity: 0.42;
     pointer-events: none;
   }
 }
