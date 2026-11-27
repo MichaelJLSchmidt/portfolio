@@ -16,6 +16,10 @@ export type FieldFrame = {
   pullAmt: number
   /** Each pool's drift offset (x already scaled by the aspect), 3 x vec2. */
   drift: Float32Array
+  /** The blob (blobs.ts): centre x, y (viewport fractions, y down), rotation (rad), opacity. */
+  blob: [number, number, number, number]
+  /** The blob's radii along its own axes (viewport heights). */
+  blobR: [number, number]
   breath: [number, number]
   lum: number
   fade: number
@@ -61,6 +65,8 @@ const UNIFORMS = [
   'uPull',
   'uPullAmt',
   'uDrift',
+  'uBlob',
+  'uBlobR',
   'uBreath',
   'uLum',
   'uFade',
@@ -285,6 +291,8 @@ export class GlField {
     gl.uniform2f(u.uPull, f.pull[0], f.pull[1])
     gl.uniform1f(u.uPullAmt, f.pullAmt)
     gl.uniform2fv(u.uDrift, f.drift)
+    gl.uniform4f(u.uBlob, ...f.blob)
+    gl.uniform2f(u.uBlobR, ...f.blobR)
     gl.uniform2f(u.uBreath, f.breath[0], f.breath[1])
     gl.uniform1f(u.uLum, f.lum)
     gl.uniform1f(u.uFade, f.fade)

@@ -65,6 +65,22 @@ export function logoGradientCss(): string {
 }
 
 /**
+ * The header's gradient (src/motion/header-gradient.ts): the page load's logo gradient, or, while a
+ * card is hovered, focused, played or open, that card's own (html[data-header-gradient], one of
+ * logoGradients). Its three colours as --hg-a-to / -b-to / -c-to on the header ([data-chrome]) only,
+ * so a change restyles the header and nothing else; its elements (the logo's F card, the About and
+ * Lab markers on ink pages, the language capsule's edge) ease their own --hg-a / -b / -c to them,
+ * each at its moment in the sweep (header.module.css).
+ */
+export function headerGradientCss(): string {
+  const vars = (cs: readonly string[]) => cs.map((c, i) => `--hg-${'abc'[i]}-to:${c}`).join(';')
+  return (
+    `[data-chrome]{${vars(['var(--logo-a)', 'var(--logo-b)', 'var(--logo-c)'])}}` +
+    logoGradientNames.map((n) => `:root[data-header-gradient="${n}"] [data-chrome]{${vars(logoGradients[n])}}`).join('')
+  )
+}
+
+/**
  * Text links (styles/link.css .link): at rest a marker block in a deeper shade of the page's identity
  * behind the text, on hover an underline in the identity's accent at full strength. The shade is
  * the identity's glow mixed toward its field in OKLab by `mix`, tuned per identity so the text

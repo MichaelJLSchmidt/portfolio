@@ -237,9 +237,22 @@ feedback's numbers (G, H, D, A); its D1–D8 are not the Wave 1 decisions D1–D
 **General**
 
 - **G1. Pool drift.** On top of the breath, the field's three colour pools drift on slow
-  Lissajous loops: 2.5% of the viewport (`field.poolDrift`), loops of 97–151 s
-  (`field.poolDriftPeriods`), full tier only (scaled by the `motion` track; calm and reduced keep
-  the pools still). Uniform `uDrift[3]` in `shader.ts`.
+  Lissajous loops: 6% of the viewport (`field.poolDrift`; across of its width, down of its
+  height), loops of 23–41 s (`field.poolDriftPeriods`): visible after a few seconds of looking,
+  never quick. Full tier only (scaled by the `motion` track; reduced keeps the pools still). The
+  offset applies after the pools lean toward a hovered card, so the hover tint drifts as much.
+  Uniform `uDrift[3]` in `shader.ts`; the CSS twin drifts by `translate` keyframes (33 s and 39 s
+  loops, `field.css`), compositor only.
+- **G1a. The blob.** The field's brightest pool has six variants (`src/components/background/
+  blobs.ts`, `blobVariants`: centre, radii along its own axes, rotation), one visual language
+  (Gaussian softness, radii 0.34–0.52 of the viewport height). Variant 1 is the original round
+  pool centre left, the resting field. Each card hover or keyboard focus moves it to another at
+  random, never the same twice in a row (`nextBlob`): full tier, a move of position, rotation and
+  radii over `duration.blobMove` (1.6 s, inOut), retargeted from where it is by any switch on the
+  way; reduced, a crossfade through nothing (80 ms out, the new shape unseen, 80 ms in). Shader
+  uniforms `uBlob`, `uBlobR`; the CSS twin's `.field-layer::before` moves by `transform` and fades
+  by `opacity` only (`blobCss()` in `field-css.ts`). The lab's inventory lists each as
+  `background.blob.<id>`.
 - **G2. Calm switch** (superseded by M1 and M2: the calm tier and its switch are gone). The footer's DisplaySettings is gone. `CalmSwitch`
   (`src/components/calm-switch.tsx`, `button[role="switch"][data-calm-switch]`) sits in the
   header. One source of truth: the stored preference that the pre-paint script applies as
@@ -850,6 +863,25 @@ stops a third of the loop apart, so the colours travel slowly along the card (CS
 mount, so a remounted logo carries on in phase. Reduced: no animation, the gradient in its own
 order. This is the one thing besides the field that moves at rest.
 
+**T2a. The header follows the card.** While a card is hovered or keyboard-focused, the header's
+gradient (the logo's F card, the About and Lab markers on ink pages, and the language capsule's 1 px
+gradient edge, new with it) turns to that card's own logo gradient; while one is played or open, to
+the played card's (on touch, where nothing hovers, the play is the moment); otherwise, and as soon
+as a return home starts, back to the page load's (`src/motion/header-gradient.ts` reads the table:
+the hovered card, else the field's card identity). `html[data-header-gradient]` names it
+(`headerGradientCss()` in `palette.ts` gives the header, `[data-chrome]`, `--hg-a-to / -b-to / -c-to`,
+so a change restyles the header only; the pre-paint script sets it on a card page's first load). Each element eases its own registered `--hg-a / -b / -c` to them
+(`header.module.css`), so every change retargets from where it is: the F card's stops at
+`headerSweep.f` plus `stops` apart along its diagonal, the links at `links`, the capsule at
+`capsule`, over `duration.headerColour`. A foil sweep carries it: a skewed band in the new
+gradient's colours with a light core (`data-sheen`) crosses the M card at `m`, the F card at `f`
+and the capsule at `capsule`, each `duration.headerSheen` long: a band moved by WAAPI transform and
+opacity (compositor only), on the logo inside an overlay masked to one card and its letter
+(`logoSheenMask` in `logo.tsx`, the cards at rest), on the capsule inside a clip of its shape; one
+already crossing is left to finish. The M card's own colour never changes. The way
+back runs at `headerSweep.back` (0.8) of the times. Reduced: no sheen; the colours crossfade in
+160 ms.
+
 **T3. The switcher's chip.** The codes (`DE`, `EN`) in Martian Mono, 0.75 rem, in two 44 px
 segments; the active one (`aria-current="page"`) sits on a face-up chip (36 × 28 px, the text
 colour, ink letters), the other is muted and shows a hairline chip and the text colour on hover
@@ -1198,7 +1230,9 @@ G4), `duration.logoExit` / `logoBackFade` and `logo.*` (the header logo, R3; `ea
 `duration.linkIn` / `linkOut` / `linkMarkIn` / `linkMarkOut` and `ease.link` (text links, K1),
 `duration.chip` (the switcher's chip and Back's chip, 360 ms) and `duration.backPull` (Back's
 hover, 420 ms) with `stagger.letters` (25 ms; T3, T5), `duration.topo` (About's morph, 1.6 s) and
-`duration.contourHandoff` (the SVG's crossfade, 0.3 s; R1);
+`duration.contourHandoff` (the SVG's crossfade, 0.3 s; R1), `duration.blobMove` (the blob's move,
+1.6 s; G1a), `duration.headerSheen` / `headerColour` (0.72 s / 0.56 s) with `headerSweep`
+(`m` 0, `f` 0.12, `links` 0.22, `capsule` 0.3, `stops` 0.07 s, `back` 0.8; T2a; CSS `--sweep-*`);
 `angle.*` (`--angle-discard`, `--angle-tap`), `weight.*`
 (`--wght-<kebab>`), `opsz`, `field.*` (incl. `ignoreHeight` (R4), `poolDrift`, `poolDriftPeriods`
 (G1), `contourDrift` (R1: `x` 8 px, `y` 5 px, one `period` 120 s loop from the identity
@@ -1714,6 +1748,9 @@ temporary Lab link (lab builds only) and the language switcher in its capsule (L
 | `data-logo-part` | the logo's card groups (move and fan, and the front card's knock-out) | animated by logo.tsx; turn and fan about their bottom centre (R3) |
 | `data-logo-stop="0\|1\|2"` | the front card's gradient stops | their colours flow (T2) |
 | `data-logo-gradient="ember\|tide\|grove\|saffron"` | `<html>` | this page load's logo gradient, from the pre-paint script (T2) |
+| `data-header-gradient="ember\|tide\|grove\|saffron"` | `<html>` | the card the header follows (hovered, focused, played or open; T2a); none: the page load's |
+| `data-header-sweep="in\|out"` | `<html>` | the last follow's direction; "out" runs the sweep at `headerSweep.back` of the times (T2a) |
+| `data-sheen="m\|f\|capsule"` | the header's sheen bands | crossed by a sheen on every follow (T2a) |
 | `data-locale-switcher`, `data-locale="de\|en"` | the header's language nav and its links | the switcher (L6, T3) |
 | `data-arrived` | the language nav | mounted by a language switch: its chip slides in (T3) |
 | `data-locale-switch` | `<html>` | while a language switch runs: the chrome cross-fades (L7, L8) |

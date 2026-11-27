@@ -504,3 +504,149 @@
     padding-inline: var(--space-3) 0;
   }
 }
+
+/*
+ * The header follows the card (src/motion/header-gradient.ts, tokens.ts headerSweep): the logo's
+ * front card, the About and Lab markers on ink pages and the capsule's gradient edge each ease their
+ * own --hg-a / -b / -c to the header's gradient (--hg-*-to on the header: the page load's, or a card's
+ * while html[data-header-gradient] names it; palette.ts headerGradientCss()). Registered colours on
+ * these small elements, so a change retargets from where it is; each starts at its moment in the
+ * sweep: the F card's stops one after another along its diagonal, the links, the capsule last. The
+ * way back (data-header-sweep="out") runs at --sweep-back of the times. Reduced: one short crossfade.
+ */
+@property --hg-a {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+@property --hg-b {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+@property --hg-c {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+.header {
+  --sweep-k: 1;
+}
+:global(:root[data-header-sweep='out']) .header {
+  --sweep-k: var(--sweep-back);
+}
+.logo [data-logo-stop],
+.nav,
+.language {
+  --hg-a: var(--hg-a-to);
+  --hg-b: var(--hg-b-to);
+  --hg-c: var(--hg-c-to);
+  /* The logo's flow (header.module.css logo-flow) and the links' flow (link.css) read these. */
+  --logo-a: var(--hg-a);
+  --logo-b: var(--hg-b);
+  --logo-c: var(--hg-c);
+  transition-property: --hg-a, --hg-b, --hg-c;
+  transition-duration: calc(var(--dur-header-colour) * var(--sweep-k));
+  transition-timing-function: var(--ease-in-out);
+}
+.logo [data-logo-stop='0'] {
+  transition-delay: calc(var(--sweep-f) * var(--sweep-k));
+}
+.logo [data-logo-stop='1'] {
+  transition-delay: calc((var(--sweep-f) + var(--sweep-stops)) * var(--sweep-k));
+}
+.logo [data-logo-stop='2'] {
+  transition-delay: calc((var(--sweep-f) + 2 * var(--sweep-stops)) * var(--sweep-k));
+}
+.nav {
+  transition-delay: calc(var(--sweep-links) * var(--sweep-k));
+}
+.language {
+  transition-delay: calc(var(--sweep-capsule) * var(--sweep-k));
+}
+/* On ink pages the header's links take the header's gradient at rest too (no flow under reduced motion). */
+:global(:root:has(#main > [data-identity='ink'])) .nav {
+  --link-a: var(--hg-a);
+  --link-b: var(--hg-b);
+  --link-c: var(--hg-c);
+}
+:root[data-motion='reduced'] :is(.logo [data-logo-stop], .nav, .language) {
+  transition-duration: var(--dur-reduced);
+  transition-delay: 0s;
+}
+
+/*
+ * The sheens: a band in the new gradient's colours with a light core, at a diagonal, that crosses
+ * its element by transform and opacity (header-gradient.ts; compositor only; at rest it lies
+ * outside, unseen). On the logo, one per card in an overlay masked to that card and its letter
+ * (logo.tsx logoSheenMask, the cards at rest); on the capsule, inside a clip of its shape, under the
+ * chip and the codes.
+ */
+.mark {
+  position: relative;
+}
+.logoSheen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+}
+.logoSheen .sheen {
+  background: linear-gradient(
+    105deg,
+    transparent 28%,
+    color-mix(in oklab, var(--hg-a-to) 46%, transparent) 42%,
+    rgb(255 255 255 / 0.5) 50%,
+    color-mix(in oklab, var(--hg-c-to) 46%, transparent) 58%,
+    transparent 72%
+  );
+}
+.sheenClip {
+  position: absolute;
+  inset: 4px 0;
+  overflow: hidden;
+  border-radius: 999px;
+  pointer-events: none;
+}
+.sheen {
+  position: absolute;
+  inset: 0;
+  /* Kept on its own layer, so a sweep starts without painting it again. */
+  will-change: transform, opacity;
+  background: linear-gradient(
+    105deg,
+    transparent 26%,
+    color-mix(in oklab, var(--hg-a-to) 26%, transparent) 42%,
+    rgb(255 255 255 / 0.2) 50%,
+    color-mix(in oklab, var(--hg-c-to) 26%, transparent) 58%,
+    transparent 74%
+  );
+  opacity: 0;
+  transform: translateX(-100%);
+}
+
+/*
+ * The capsule's gradient edge: the header's gradient as a 1 px ring over the capsule's hairline, so
+ * a played card's page keeps its gradient in the header (the logo is Back there).
+ */
+@supports (mask-composite: exclude) {
+  .language::before {
+    border-color: transparent;
+  }
+  .language::after {
+    content: '';
+    position: absolute;
+    inset: 4px 0;
+    padding: 1px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--hg-a), var(--hg-b), var(--hg-c));
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    opacity: 0.62;
+    pointer-events: none;
+  }
+}

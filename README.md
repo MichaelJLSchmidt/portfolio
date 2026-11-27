@@ -138,7 +138,9 @@ Motion+ is an optional dependency: without a token `motion-plus` resolves to
 
 - **Background field**: one WebGL2 canvas (hand-written shader, half resolution, DPR capped at 1,
   30 fps, idle when nothing moves). Three soft colour pools in low-frequency noise, 2% static grain,
-  a 9 s breath and a slow drift of the pools (loops of 90 s and more). It never reads the pointer.
+  a 9 s breath and a slow drift of the pools (6% of the viewport on loops of 23–41 s: visible after a
+  few seconds of looking). Its brightest pool, the blob, has six variants (`blobs.ts`): variant 1 at
+  rest, and each card hover or focus moves it to another at random. It never reads the pointer.
   On About its pools contract and fade into the ground while contour lines rise from a noise
   relief onto the region's real heights (1.6 s, at the device's resolution only while it runs);
   in its last 300 ms the old password page's SVG (`public/contour-bg/`) crossfades over it, and
@@ -170,7 +172,9 @@ stills the background's ambient motion.
 
 | Effect                | Full                                                                     | Reduced                 |
 | --------------------- | ------------------------------------------------------------------------ | ----------------------- |
-| Field breath, drift   | 9 s breath, pools drift; About: the contours drift                       | still, 160 ms swaps     |
+| Field breath, drift   | 9 s breath, pools drift (6%, 23–41 s loops); About: the contours drift   | still, 160 ms swaps     |
+| Blob variant          | a card's hover or focus moves the blob to another variant (1.6 s)        | crossfade, 160 ms       |
+| Header follows a card | a sheen carries the card's gradient across the M card, the F card, the capsule | crossfade, 160 ms |
 | Hover a card          | lift to 90% shown on the hover spring; field blends (80 ms)              | instant                 |
 | Play                  | press, lift, bloom 800 ms, zoom 580 ms                                   | near-instant            |
 | Return / switch       | 520 ms back to the slot / 560 ms in, OKLab crossfade                     | near-instant            |

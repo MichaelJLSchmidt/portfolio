@@ -7,7 +7,7 @@ The brief every session designs to. Tokens and components that implement it are 
 
 A card table seen from the player's seat. A dark neutral field (ink `#0E0F11`, text `#ECEAE4`)
 with a slowly breathing WebGL gradient behind everything; its colour pools drift on slow loops
-(90 s and longer, 2–3% of the viewport), noticeable only when you look closely. A persistent
+(23–41 s, 6% of the viewport), visible after a few seconds of looking, never quick. A persistent
 **hand of four cards** is the main navigation: three case studies (`/work/[slug]`) and Management
 (`/management`). About is the one plain link; it holds the project list and the contact chapter.
 

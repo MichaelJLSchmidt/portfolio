@@ -6,6 +6,7 @@ import { playTokens } from '@/motion/play'
 import { type FieldTarget, type TableState, table } from '@/motion/table-store'
 import { type MotionTier, cardPlay, duration as D, field as F, reducedCrossfade } from '@/motion/tokens'
 import { getPending, onPending } from '@/motion/use-play-pending'
+import { blobVariants, nearestTurn, nextBlob } from './blobs'
 import { ContourLayer, PRIMED } from './contour-layer'
 import { contourLevels, contourQuery, contourStyle } from './contours'
 import { CssField } from './field-css'
@@ -22,9 +23,10 @@ import { type EaseName, Track, easeCss } from './tracks'
  * any of it.
  *
  *   rest     ink pools breathing on a 9 s sine, their centres drifting on slow
- *            Lissajous loops (90 s and longer, 2.5% of the viewport; full tier,
- *            no data saver). The loop stops while the tab is hidden.
+ *            Lissajous loops (23 s and longer, F.poolDrift of the viewport; full
+ *            tier, no data saver). The loop stops while the tab is hidden.
  *   hover    A's mid/glow blend to the card's, intensity up, pools lean to its slot
+ *            (still drifting); the blob moves to another variant (blobs.ts)
  *   bloom    B (the card's identity) spreads from the played card to fill the page
  *   unbloom  B contracts into the slot, then the residual tint settles to ink
  *   switch   B crossfades in OKLab with a 6% luminance dip at the midpoint
@@ -59,6 +61,8 @@ type Name =
   | 'lines'
   | 'ring'
   | 'wait'
+  | 'blob'
+  | 'blobW'
 
 const swatch = (id: Identity) => [
   ...hexToLab(palette[id].field),
@@ -71,6 +75,11 @@ const srgb = (hex: string): [number, number, number] => {
   return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]
 }
 const hoverSwatch = (id: Identity) => [...hexToLab(palette[id].mid), ...hexToLab(palette[id].glow)]
+/** A blob variant as the blob track's value: x, y, rx, ry, deg. */
+const blobGeometry = (i: number, nearDeg?: number) => {
+  const v = blobVariants[i]
+  return [v.x, v.y, v.rx, v.ry, nearDeg === undefined ? v.deg : nearestTurn(v.deg, nearDeg)]
+}
 const mixArr = (a: number[], b: number[], t: number) => a.map((v, i) => v + (b[i] - v) * t)
 
 /** CSS fallback properties for each channel that has one. */
@@ -147,6 +156,9 @@ export class FieldEngine {
       lines: new Track([0]),
       ring: new Track([1]),
       wait: new Track([0]),
+      // The blob (blobs.ts): x, y, rx, ry, deg (variant 1 at rest), and its opacity.
+      blob: new Track(blobGeometry(0)),
+      blobW: new Track([1]),
     }
     this.frame = {
       time: 0,
@@ -159,6 +171,8 @@ export class FieldEngine {
       pull: [0.5, 1],
       pullAmt: 0,
       drift: new Float32Array(6),
+      blob: [blobVariants[0].x, blobVariants[0].y, 0, 1],
+      blobR: [blobVariants[0].rx, blobVariants[0].ry],
       breath: [1, 1],
       lum: 1,
       fade: 1,
@@ -255,6 +269,7 @@ export class FieldEngine {
     cancelAnimationFrame(this.raf)
     clearTimeout(this.waitTimer)
     clearTimeout(this.outTimer)
+    clearTimeout(this.blobTimer)
     this.contours.stopDrift()
     for (const off of this.offs) off()
     this.gl?.destroy()
@@ -663,6 +678,7 @@ export class FieldEngine {
     if (id && identity) {
       const now = performance.now()
       this.sampleAll(now)
+      this.switchBlob()
       const target = hoverSwatch(identity)
       if (this.tracks.hover.value[0] < 0.02 && this.tracks.hover.remaining(now) === 0) this.jump('h', target)
       else this.go('h', target, this.dur(D.hoverIn), 'outSoft')
@@ -671,6 +687,40 @@ export class FieldEngine {
     } else {
       this.go('hover', [0], this.dur(D.hoverOut), 'outSoft')
     }
+  }
+
+  /** The blob's variant (blobs.ts) and, under reduced motion, the one waiting for the blob to fade out. */
+  private blobIndex = 0
+  private blobNext = 0
+  private blobTimer = 0
+
+  /**
+   * A card's hover or focus moves the blob to another variant, never the one it shows. Full tier:
+   * it moves there (position, rotation and axes) over duration.blobMove, and a new switch on the way
+   * retargets from where it is. Reduced: no movement; it fades out, takes the new shape unseen and
+   * fades back in (half the crossfade each way). A switch while it is out only changes which shape
+   * comes back; one while it comes back fades it out again from where it is.
+   */
+  private switchBlob() {
+    const next = nextBlob(this.blobIndex)
+    this.blobIndex = next
+    if (this.tier !== 'reduced') {
+      clearTimeout(this.blobTimer)
+      this.blobTimer = 0
+      this.go('blob', blobGeometry(next, this.tracks.blob.value[4]), D.blobMove, 'inOut')
+      if (this.tracks.blobW.to[0] !== 1) this.go('blobW', [1], reducedCrossfade / 2, 'linear')
+      return
+    }
+    this.blobNext = next
+    if (this.blobTimer) return
+    const half = reducedCrossfade / 2
+    const out = half * this.tracks.blobW.value[0]
+    this.go('blobW', [0], out, 'linear')
+    this.blobTimer = window.setTimeout(() => {
+      this.blobTimer = 0
+      this.jump('blob', blobGeometry(this.blobNext))
+      this.go('blobW', [1], half, 'linear')
+    }, out * 1000)
   }
 
   // ---------------------------------------------------------------- tracks
@@ -691,6 +741,8 @@ export class FieldEngine {
   }
 
   private writeCss(name: Name, to: number[], dur: number, ease: EaseName, delay: number) {
+    if (name === 'blob') return this.css.blob(to, dur, easeCss(ease), delay)
+    if (name === 'blobW') return this.css.blobOpacity(to[0], dur, easeCss(ease), delay)
     const props = CSS[name]?.(to)
     if (!props) return
     for (const [prop, value] of props) this.css.write(prop, value, dur, easeCss(ease), delay)
@@ -946,14 +998,22 @@ export class FieldEngine {
     f.maxD = this.maxD
     f.pull = t.pull.value as [number, number]
     f.pullAmt = hover * 0.5 * motion
-    // Drift: each pool's centre loops a slow Lissajous figure, 2.5% of the viewport (full tier;
-    // the clock stops in reduced, where `motion` eases the offset back to 0, and while paused).
+    // Drift: each pool's centre loops a slow Lissajous figure, F.poolDrift of the viewport (full
+    // tier; the clock stops in reduced, where `motion` eases the offset back to 0, and while paused).
     const aspect = innerWidth / Math.max(1, innerHeight)
     const reach = F.poolDrift * motion
     F.poolDriftPeriods.forEach(([px, py], i) => {
       f.drift[i * 2] = reach * aspect * Math.sin((2 * Math.PI * this.time) / px + i * 2.1)
       f.drift[i * 2 + 1] = reach * Math.sin((2 * Math.PI * this.time) / py + i * 1.3)
     })
+    // The blob: its variant, or a moment between two as it moves; its opacity (a reduced crossfade).
+    const bl = t.blob.value
+    f.blob[0] = bl[0]
+    f.blob[1] = bl[1]
+    f.blob[2] = (bl[4] * Math.PI) / 180
+    f.blob[3] = t.blobW.value[0]
+    f.blobR[0] = bl[2]
+    f.blobR[1] = bl[3]
     // Breath: a 9 s sine in-out; pool scale 1.00-1.06, luminance ±4%.
     const amp = t.breath.value[0] * motion
     const b = (1 - Math.cos((2 * Math.PI * this.time) / D.breath)) / 2

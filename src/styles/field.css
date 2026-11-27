@@ -134,7 +134,14 @@
   inset: 0;
   background: var(--l-field);
 }
-.field-layer::before {
+/*
+ * The pools: ::after the glow bottom-left and the mid top-right over a box overhanging the layer
+ * by 6%; ::before, under them, the blob (blobs.ts): the original third pool's ellipse as its own
+ * box, moved, turned and scaled to a variant by --btx / --bty / --bdeg / --bsx / --bsy
+ * (field-css.ts blobCss(); variant 1 from :root), faded by --bw. A switch transitions `transform`
+ * (and, reduced, `opacity`) only: the pools are painted once and moved on the compositor.
+ */
+.field-layer::after {
   content: '';
   position: absolute;
   inset: -6%;
@@ -148,12 +155,25 @@
       46% 52% at 84% 16%,
       color-mix(in oklab, var(--l-mid) calc(var(--l-i) * 100%), transparent),
       transparent
-    ),
-    radial-gradient(
-      36% 40% at 34% 52%,
-      color-mix(in oklab, var(--l-mid) calc(var(--l-i) * 60%), transparent),
-      transparent
     );
+}
+.field-layer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 80.64%;
+  height: 89.6%;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklab, var(--l-mid) calc(var(--l-i) * 60%), transparent),
+    transparent
+  );
+  opacity: var(--bw, 1);
+  transform: translate(var(--btx), var(--bty)) rotate(var(--bdeg)) scale(var(--bsx), var(--bsy));
+  transition:
+    transform var(--blob-t, 0s),
+    opacity var(--blob-o, 0s);
 }
 .field-layer[data-layer='a'] {
   --l-field: var(--fa-field);
@@ -171,21 +191,119 @@
 /* Breathing (full tier only): pool scale 1.00-1.06 on a 9 s sine; half when bloomed. */
 @keyframes field-breath {
   to {
-    transform: scale(1.06);
+    scale: 1.06;
   }
 }
 @keyframes field-breath-half {
   to {
-    transform: scale(1.03);
+    scale: 1.03;
+  }
+}
+/*
+ * Drift (full tier only), as the WebGL field's (field.poolDrift, 6% of the layer each way) on loops
+ * of 33 s (the glow and mid pools) and 39 s (the blob): `translate` round an ellipse at an even pace.
+ */
+@keyframes field-drift-pools {
+  0.0% {
+    translate: 0% 5.36%;
+  }
+  8.333% {
+    translate: 2.68% 4.64%;
+  }
+  16.667% {
+    translate: 4.64% 2.68%;
+  }
+  25.0% {
+    translate: 5.36% 0%;
+  }
+  33.333% {
+    translate: 4.64% -2.68%;
+  }
+  41.667% {
+    translate: 2.68% -4.64%;
+  }
+  50.0% {
+    translate: 0% -5.36%;
+  }
+  58.333% {
+    translate: -2.68% -4.64%;
+  }
+  66.667% {
+    translate: -4.64% -2.68%;
+  }
+  75.0% {
+    translate: -5.36% 0%;
+  }
+  83.333% {
+    translate: -4.64% 2.68%;
+  }
+  91.667% {
+    translate: -2.68% 4.64%;
+  }
+  100.0% {
+    translate: 0% 5.36%;
+  }
+}
+@keyframes field-drift-blob {
+  0.0% {
+    translate: 6.42% -3.38%;
+  }
+  8.333% {
+    translate: 3.68% -5.82%;
+  }
+  16.667% {
+    translate: -0.04% -6.7%;
+  }
+  25.0% {
+    translate: -3.76% -5.78%;
+  }
+  33.333% {
+    translate: -6.46% -3.32%;
+  }
+  41.667% {
+    translate: -7.44% 0.04%;
+  }
+  50.0% {
+    translate: -6.42% 3.38%;
+  }
+  58.333% {
+    translate: -3.68% 5.82%;
+  }
+  66.667% {
+    translate: 0.04% 6.7%;
+  }
+  75.0% {
+    translate: 3.76% 5.78%;
+  }
+  83.333% {
+    translate: 6.46% 3.32%;
+  }
+  91.667% {
+    translate: 7.44% -0.04%;
+  }
+  100.0% {
+    translate: 6.42% -3.38%;
   }
 }
 /* Only while the fallback is the visible renderer: hidden under the WebGL canvas it would still run
-   on the main thread and repaint every frame. */
+   on the main thread and repaint every frame. Breath and drift: `scale` and `translate`, compositor
+   only; the blob's variant keeps `transform`. */
+:root[data-motion='full'] .field[data-mode='css'] .field-layer::after {
+  animation:
+    field-breath calc(var(--dur-breath) / 2) ease-in-out infinite alternate,
+    field-drift-pools 33s linear infinite;
+}
 :root[data-motion='full'] .field[data-mode='css'] .field-layer::before {
-  animation: field-breath calc(var(--dur-breath) / 2) ease-in-out infinite alternate;
+  animation:
+    field-breath calc(var(--dur-breath) / 2) ease-in-out infinite alternate,
+    field-drift-blob 39s linear infinite;
+  will-change: transform;
+}
+:root[data-motion='full'] .field[data-mode='css'] .field-layer[data-layer='b']::after {
+  animation-name: field-breath-half, field-drift-pools;
 }
 :root[data-motion='full'] .field[data-mode='css'] .field-layer[data-layer='b']::before {
-  animation-name: field-breath-half;
+  animation-name: field-breath-half, field-drift-blob;
 }
 
 /*

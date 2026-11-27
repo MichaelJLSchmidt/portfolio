@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react'
+import { blobVariants } from '@/components/background/blobs'
 import { contourStyle, contourSvg } from '@/components/background/contours'
-import { fieldInitialCss } from '@/components/background/field-css'
+import { blobCss, fieldInitialCss } from '@/components/background/field-css'
 import { terrain } from '@/components/background/terrain'
 import { identities, palette } from '@/design/palette'
 import { withBase } from '@/lib/site'
@@ -36,6 +37,10 @@ export function backgroundsSection(): SectionData {
         ['pools', `${palette[id].field} ground, ${palette[id].mid} and ${palette[id].glow} pools`],
         ['strength', code(i)],
         ['breath', `${duration.breath} s, scale ${1 + field.breathScale} (full tier; still here)`],
+        [
+          'drift',
+          `${field.poolDrift * 100}% of the viewport, loops of ${Math.min(...field.poolDriftPeriods.flat())}–${Math.max(...field.poolDriftPeriods.flat())} s (full tier; still here)`,
+        ],
         ['grain', `${field.grain * 100}% (WebGL only)`],
       ],
       note: 'Rendered with the field’s CSS twin (the fallback renderer, the same pools without noise and grain): the WebGL field is one canvas for the whole page (this page’s background is it, in ink).',
@@ -46,6 +51,32 @@ export function backgroundsSection(): SectionData {
       usage: fieldUse,
     }
   })
+  // The blob's six variants (blobs.ts), each on the ink field as the CSS twin draws it.
+  const BLOBS = 'src/components/background/blobs.ts'
+  const ink = {
+    '--fi-field': 'var(--ink-field)',
+    '--fi-mid': 'var(--ink-mid)',
+    '--fi-glow': 'var(--ink-glow)',
+    '--fi-i': declarations(initial, ':root').get('--fi-i') ?? '',
+  }
+  const blobs: ItemData[] = blobVariants.map((v) => ({
+    id: `background.blob.${v.id}`,
+    title: v.name,
+    render: (
+      <span className="inv-field" data-blob={v.id} style={{ ...ink, ...blobCss(v) } as CSSProperties}>
+        <span className="field-css">
+          <span className="field-layer" data-layer="a" />
+        </span>
+      </span>
+    ),
+    values: [
+      ['centre', `${Math.round(v.x * 100)}% across, ${Math.round(v.y * 100)}% down`],
+      ['radii', `${v.rx} × ${v.ry} of the viewport height`],
+      ['rotation', `${v.deg}°`],
+    ],
+    source: { file: BLOBS, line: lineIn(BLOBS, `id: '${v.id}'`), name: `blobVariants[${blobVariants.indexOf(v)}]` },
+    usage: usages({ exports: [{ module: 'src/components/background/blobs', name: 'blobVariants' }] }),
+  }))
   const [vw, vh] = contourStyle.viewBox
   const contours: ItemData[] = (Object.keys(contourSvg) as (keyof typeof contourSvg)[]).map((key) => ({
     id: `background.contours.${key}`,
@@ -112,6 +143,12 @@ export function backgroundsSection(): SectionData {
     intro: 'The background field per identity, About’s contour layers and the heightmap behind its morph.',
     groups: [
       { title: 'The field, per identity', items: fields, layout: 'tile' },
+      {
+        title: 'The blob, six variants',
+        intro: `The field's brightest pool. Variant 1 at rest; each card hover or focus moves it to another at random, never the same twice in a row (${duration.blobMove} s, transform only; reduced motion: a crossfade). The WebGL field draws each as a Gaussian ellipse; the tiles show the CSS twin.`,
+        items: blobs,
+        layout: 'tile',
+      },
       { title: 'About’s contours', items: [...contours, heightmap], layout: 'tile' },
     ],
     unrendered: [

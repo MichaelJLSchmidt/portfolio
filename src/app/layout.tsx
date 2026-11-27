@@ -2,7 +2,7 @@ import type { Viewport } from 'next'
 import { BackgroundField } from '@/components/background/background-field'
 import { fieldInitialCss } from '@/components/background/field-css'
 import { RouterBridge } from '@/components/router-bridge'
-import { identityCss, logoGradientCss, palette } from '@/design/palette'
+import { headerGradientCss, identityCss, logoGradientCss, palette } from '@/design/palette'
 import { prefsScript } from '@/motion/preferences'
 import { mapPaths, pathFields } from '@/motion/table-store'
 import { motionCss } from '@/motion/tokens'
@@ -36,7 +36,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Motion tier, first-visit flag, the logo's gradient and reveal arming, before first paint. */}
         <script dangerouslySetInnerHTML={{ __html: prefsScript(pathFields(), mapPaths) }} />
         <style
-          dangerouslySetInnerHTML={{ __html: identityCss() + logoGradientCss() + fieldInitialCss() + motionCss() }}
+          dangerouslySetInnerHTML={{
+            __html: identityCss() + logoGradientCss() + headerGradientCss() + fieldInitialCss() + motionCss(),
+          }}
         />
       </head>
       <body>

@@ -42,6 +42,12 @@ import { readTier } from '@/motion/use-tier'
  *           header.module.css); Back -> logo: the cards are dealt again
  * Nothing moves at rest. Reduced motion: no movement, instant state changes;
  * the egg swaps the letters' opacity.
+ *
+ * Following a card (src/motion/header-gradient.ts): the front card's stops ease to the header's
+ * gradient (--hg-a / -b / -c, header.module.css), one after another along the card's diagonal,
+ * while a sheen (header.tsx: a band in the new gradient's colours with a light core, in an overlay
+ * masked to one card and its letter, logoSheenMask) crosses the M card first, then the F card. The
+ * M card's own colour never changes.
  */
 const BACK = 'rotate(-6 18.235 37.923)'
 const FRONT = 'rotate(5 30.235 37.923)'
@@ -50,6 +56,26 @@ const M =
   'M13.735 30.923V22.181L18.235 25.823L22.735 22.181V30.923H26.235V16.923H24.064L18.235 21.642L12.406 16.923H10.235V30.923Z'
 const F = 'M23.735 16.923H27.235V30.923H23.735ZM23.735 16.923H36.235V20.423H23.735ZM23.735 22.673H33.735V26.173H23.735Z'
 const AREA = { x: -24, y: -24, width: 96, height: 96 }
+
+/**
+ * The sheens' masks (header.tsx, header.module.css .logoSheen): each card's shape at rest, its letter
+ * cut out (the M card also loses the front card's outline, as above), as an SVG image in the logo's
+ * own viewBox. A sheen is an HTML band moved by transform inside one of these, so it crosses the
+ * card on the compositor and nothing in the logo is laid out or repainted.
+ */
+function sheenMask(card: 'm' | 'f') {
+  const area = 'x="-24" y="-24" width="96" height="96"'
+  const rect = (x: string, extra = '') =>
+    `<rect x="${x}" y="${CARD.y}" width="${CARD.width}" height="${CARD.height}" rx="${CARD.rx}"${extra}/>`
+  const letter = (d: string) =>
+    `<mask id="l" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" ${area}><rect ${area} fill="#fff"/><path d="${d}"/></mask>`
+  const svg =
+    card === 'm'
+      ? `<mask id="g" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" ${area}><rect ${area} fill="#fff"/><g transform="${FRONT}">${rect('20.235', ' stroke="#000" stroke-width="3"')}</g></mask>${letter(M)}<g mask="url(#g)"><g transform="${BACK}">${rect('8.235', ' fill="#fff" mask="url(#l)"')}</g></g>`
+      : `${letter(F)}<g transform="${FRONT}">${rect('20.235', ' fill="#fff" mask="url(#l)"')}</g>`
+  return `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="5 8.5 38 31">${svg}</svg>`)}")`
+}
+export const logoSheenMask = { m: sheenMask('m'), f: sheenMask('f') } as const
 const DEALT_KEY = 'table:logo-dealt'
 
 export type LogoHandle = {
