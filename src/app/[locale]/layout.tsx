@@ -9,6 +9,7 @@ import { Reveals } from '@/components/reveals'
 import { RouteFocus } from '@/components/route-focus'
 import { SiteFooter } from '@/components/site-footer'
 import { Eggs } from '@/eggs/eggs'
+import { TitleFoil } from '@/experiments/title-foil'
 import { ChromeProvider } from '@/lib/chrome'
 import { contentFor, images, localeParams } from '@/lib/content'
 import { heroImages } from '@/lib/hero-images'
@@ -87,6 +88,8 @@ export default async function LocaleLayout({ children, params }: Props & { child
       <LocaleSync />
       <Reveals />
       <Eggs />
+      {/* Experiment, the title gradient foil: enabled={false} turns it off; src/experiments/title-foil.tsx says how to remove it. */}
+      <TitleFoil enabled />
     </ChromeProvider>
   )
 }
